@@ -585,7 +585,8 @@ as taking the derivative and then applying the Lorentz transformation to the res
 lemma deriv_equivariant {d} {x : SpaceTime d} (A : ElectromagneticPotential d)
     (Λ : LorentzGroup d)
     (hf : Differentiable ℝ A) : deriv (Λ • A) x = Λ • (deriv A (Λ⁻¹ • x)) := by
-  rw [deriv_eq_tensorDeriv, deriv_eq_tensorDeriv, action_val, tensorDeriv_equivariant]
+  rw [deriv_eq_tensorDeriv (Λ • A) (differentiable_action Λ A hf), deriv_eq_tensorDeriv _ hf,
+    action_val, tensorDeriv_equivariant]
   all_goals fun_prop
 
 /-!

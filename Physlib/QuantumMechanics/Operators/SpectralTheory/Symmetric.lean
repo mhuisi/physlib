@@ -50,6 +50,7 @@ namespace IsSymmetric
 open InnerProductSpace
 open Complex
 open Set
+open Pointwise
 
 variable {H : Type*} [NormedAddCommGroup H] [InnerProductSpace ℂ H]
 
@@ -172,7 +173,7 @@ lemma regularityDomain_isConnected_iff :
             by_cases! ht : ∃ n : ℤ, n = (t : ℝ)
             · obtain ⟨n, htn⟩ := ht
               have hexp : cexp (Real.pi * t * I) = (-1) ^ n := by
-                rw [← exp_pi_mul_I, ← exp_int_mul, ← htn]
+                rw [← exp_pi_mul_I, ← exp_intCast_mul, ← htn]
                 exact congrArg cexp (by push_cast; ring)
               rcases Int.even_or_odd n with he | ho
               · simp [path, hexp, he.neg_one_zpow, hz]

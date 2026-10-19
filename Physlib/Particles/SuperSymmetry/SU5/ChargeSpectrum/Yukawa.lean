@@ -175,7 +175,7 @@ lemma yukawaGeneratesDangerousAtLevel_iff_toFinset (x : ChargeSpectrum 𝓩) (n 
     (x.ofYukawaTermsNSum n).toFinset ∩ x.phenoConstrainingChargesSP.toFinset ≠ ∅ := by
   simp [YukawaGeneratesDangerousAtLevel]
   constructor
-  · intro h hn
+  · refine fun h => Finset.nonempty_of_ne_empty fun hn => ?_
     apply h
     ext i
     simp only [Multiset.count_inter, Multiset.notMem_zero, not_false_eq_true,
@@ -186,7 +186,7 @@ lemma yukawaGeneratesDangerousAtLevel_iff_toFinset (x : ChargeSpectrum 𝓩) (n 
       simpa using h0
     simp_all
   · intro h hn
-    apply h
+    apply h.ne_empty
     ext i
     simp only [Finset.mem_inter, Multiset.mem_toFinset, Finset.notMem_empty, iff_false, not_and]
     intro h1 h2
@@ -227,11 +227,7 @@ lemma yukawaGeneratesDangerousAtLevel_of_subset {x y : ChargeSpectrum 𝓩} {n :
     · apply Finset.inter_subset_inter_right
       simp only [Multiset.toFinset_subset]
       exact ofYukawaTermsNSum_subset_of_subset h n
-  by_contra hn
-  rw [hn] at h1
-  simp at h1
-  rw [h1] at hx
-  simp at hx
+  exact hx.mono h1
 
 /-!
 
@@ -248,10 +244,7 @@ lemma yukawaGeneratesDangerousAtLevel_succ {x : ChargeSpectrum 𝓩} {n : ℕ}
   simp [yukawaGeneratesDangerousAtLevel_iff_toFinset] at *
   simp [ofYukawaTermsNSum]
   rw [Finset.union_inter_distrib_right]
-  rw [Finset.union_eq_empty]
-  rw [not_and_or]
-  left
-  exact hx
+  exact hx.inl
 
 lemma yukawaGeneratesDangerousAtLevel_add_of_left {x : ChargeSpectrum 𝓩} {n k : ℕ}
     (hx : x.YukawaGeneratesDangerousAtLevel n) :

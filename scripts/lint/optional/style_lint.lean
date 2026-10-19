@@ -6,6 +6,7 @@ Authors: Joseph Tooby-Smith
 import Lean
 import Mathlib.Tactic.Linter.TextBased
 import Batteries.Data.Array.Merge
+import Batteries.Data.String.Matcher
 /-!
 
 # Physlib style linter

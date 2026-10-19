@@ -82,7 +82,11 @@ lemma bracket_openHamiltonian_position_eq_zero_iff (T : TightBindingChain) :
     push Not at hc
     have h0 := T.expectation_bracket_maxCurrentState
     rw [h] at h0
-    exact T.bound_ne_zero hc.1 hc.2 (by simpa using h0.symm)
+    -- `map_zero` needs `Module ℝ (Observable _)`, found only by a nested instance search.
+    exact T.bound_ne_zero hc.1 hc.2 (by
+      set_option maxSynthPendingDepth 2 in
+      set_option synthInstance.maxHeartbeats 40000 in
+      simpa using h0.symm)
   · apply Subtype.ext
     rw [T.coe_bracket_openHamiltonian_position]
     refine ContinuousLinearMap.ext fun ψ => ?_
@@ -114,7 +118,11 @@ lemma axisBracket_maxCurrentCubeVectorState_ne_zero (hx : Tx.t ≠ 0) (hy : Ty.t
 lemma bracket_cubePairs_pair_ne_zero (hx : Tx.t ≠ 0) (hy : Ty.t ≠ 0) (hz : Tz.t ≠ 0)
     (hNx : 2 ≤ Tx.N) (hNy : 2 ≤ Ty.N) (hNz : 2 ≤ Tz.N) (k : Fin 3) :
     ⁅Tx.cubePairs Ty Tz (0, k), Tx.cubePairs Ty Tz (1, k)⁆ ≠ 0 := fun h =>
-  axisBracket_maxCurrentCubeVectorState_ne_zero hx hy hz hNx hNy hNz k (by simp [axisBracket, h])
+  axisBracket_maxCurrentCubeVectorState_ne_zero hx hy hz hNx hNy hNz k <| by
+    -- `map_zero` needs `Module ℝ (Observable _)`, found only by a nested instance search.
+    set_option maxSynthPendingDepth 2 in
+    set_option synthInstance.maxHeartbeats 40000 in
+    simp [axisBracket, h]
 
 /-- In the maximal current state of the cube, the variances of `H` and `X` of each axis have a
 positive product. -/

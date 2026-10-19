@@ -543,7 +543,7 @@ lemma finrank_ker_transpose (G : Matrix n n ℂ) :
   have h1 := LinearMap.finrank_range_add_finrank_ker G.mulVecLin
   have h2 := LinearMap.finrank_range_add_finrank_ker Gᵀ.mulVecLin
   have h3 : Gᵀ.rank = G.rank := rank_transpose G
-  rw [rank, rank] at h3
+  rw [← finrank_range_mulVecLin, ← finrank_range_mulVecLin] at h3
   omega
 
 /-- **Equality in Robertson's determinant relation.** Let `G = S + iW` be positive semidefinite
@@ -564,7 +564,7 @@ lemma card_le_two_mul_finrank_ker {G : Matrix n n ℂ} {S W : Matrix n n ℝ} (h
       have h := (h₁.add h₂).smul (Complex.zero_le_real.mpr (by norm_num : (0 : ℝ) ≤ 1 / 2))
       convert h using 1
       ext i j
-      simp only [smul_apply, add_apply, sub_apply, smul_eq_mul]
+      simp only [Matrix.smul_apply, Matrix.add_apply, Matrix.sub_apply, smul_eq_mul]
       push_cast
       ring
     rw [PosSemidef.posDef_iff_det_ne_zero (show A.PosSemidef from hS), hdetA,

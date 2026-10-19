@@ -176,7 +176,7 @@ lemma completions_nodup (S5 S10 : Finset 𝓩) (x : ChargeSpectrum 𝓩) :
     refine Multiset.Nodup.map toProd.symm.injective ?_
     refine Multiset.Nodup.product ?_ (Multiset.Nodup.product ?_ (Multiset.Nodup.product ?_ ?_))
   any_goals exact Multiset.nodup_singleton _
-  any_goals exact Finset.nodup_map_iff_injOn.mpr (by simp)
+  all_goals exact Finset.nodup_map_iff_injOn.mpr (by simp)
 
 /-!
 
@@ -313,7 +313,6 @@ lemma exist_completions_subset_of_complete (S5 S10 : Finset 𝓩) (x y : ChargeS
   rw [Option.isSome_iff_exists, Option.isSome_iff_exists] at hycomplete
   obtain ⟨y1, rfl⟩ := hycomplete.1
   obtain ⟨y2, rfl⟩ := hycomplete.2.1
-  rw [Finset.eq_empty_iff_forall_notMem, Finset.eq_empty_iff_forall_notMem] at hycomplete
   simp at hycomplete
   obtain ⟨z3, hz3⟩ := hycomplete.1
   obtain ⟨z4, hz4⟩ := hycomplete.2

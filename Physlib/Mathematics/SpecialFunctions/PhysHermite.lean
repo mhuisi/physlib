@@ -48,7 +48,7 @@ and, up to numerical factors, satisfy all of the same properties.
 
 namespace Polynomial
 
-open Function Nat
+open AddMonoidAlgebra Function Nat
 
 /-!
 ## A. Recursive definition
@@ -113,7 +113,7 @@ lemma coeff_physHermite_succ_zero (n : ℕ) :
 
 lemma coeff_physHermite_succ_succ (n k : ℕ) : coeff (physHermite (n + 1)) (k + 1) =
     2 * coeff (physHermite n) k - (k + 2) * coeff (physHermite n) (k + 2) := by
-  rw [physHermite_succ, coeff_sub, smul_mul_assoc, coeff_smul, coeff_X_mul, coeff_derivative,
+  rw [physHermite_succ, coeff_sub, smul_mul_assoc, coeff_smul_apply, coeff_X_mul, coeff_derivative,
     mul_comm]
   norm_cast
 
@@ -467,7 +467,7 @@ decreasing_by
     intro m hm'
     simp only [coeff_physHermite_self, coeff_sub]
     change n + 1 ≤ m at hm'
-    rw [coeff_smul, coeff_smul]
+    rw [coeff_smul_apply, coeff_smul_apply]
     by_cases hm : m = n + 1
     · subst hm
       simp only [smul_eq_mul, coeff_physHermite_self]

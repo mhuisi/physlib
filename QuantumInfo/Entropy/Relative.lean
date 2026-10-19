@@ -522,7 +522,7 @@ private lemma inner_cfc_eq_sum_eigenWeight (ρ σ : MState d) (f : ℝ → ℝ) 
     rw [ Matrix.trace ];
     have h_cfc_def : (σ.M.cfc f).mat = ∑ i, (f (Matrix.IsHermitian.eigenvalues σ.M.H i)) • Matrix.of (fun x y => (σ.M.H.eigenvectorBasis i x) * (star (σ.M.H.eigenvectorBasis i y))) := by
       convert σ.M.cfc_toMat_eq_sum_smul_proj f using 1;
-      ext i j; simp [ Matrix.single ] ; ring_nf
+      ext i j; simp [ Matrix.single, -Matrix.sum_apply ] ; ring_nf
       simp [ Matrix.sum_apply, Matrix.mul_apply, Matrix.conjTranspose_apply, Matrix.of_apply ];
       refine' Finset.sum_congr rfl fun x _ => _ ; simp [ Finset.sum_ite, Finset.filter_eq, Finset.filter_and ] ; ring_nf
       rw [ Finset.sum_eq_single x ] <;> aesop;

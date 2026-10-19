@@ -174,7 +174,8 @@ lemma ofList_singleton (s : 𝓕 → FieldStatistic) (φ : 𝓕) : ofList s [φ]
   rw [eq_self_if_eq_bosonic]
 
 @[simp]
-lemma ofList_freeMonoid (s : 𝓕 → FieldStatistic) (φ : 𝓕) : ofList s (FreeMonoid.of φ) = s φ :=
+lemma ofList_freeMonoid (s : 𝓕 → FieldStatistic) (φ : 𝓕) :
+    ofList s (FreeMonoid.of φ).toList = s φ :=
   ofList_singleton s φ
 
 @[simp]

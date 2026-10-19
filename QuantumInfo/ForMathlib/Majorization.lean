@@ -868,7 +868,7 @@ lemma sum_mul_log_nonneg_of_weak_log_maj {n : ℕ}
       intro m
       induction' m using Fin.inductionOn with m ih
       · simp +zetaDelta at *
-        rw [Finset.sum_eq_single 0, Finset.sum_eq_single 0] <;> aesop
+        exact Finset.sum_eq_zero fun i hi => by simp at hi
       · rw [show (Finset.Iic (Fin.succ m) : Finset (Fin (n + 1))) = Finset.Iic (Fin.castSucc m) ∪ { Fin.succ m } from ?_, Finset.sum_union] <;> norm_num [Finset.sum_singleton, Finset.sum_union, Finset.sum_Ioc_succ_top, (Nat.succ_eq_succ ▸ Finset.Icc_succ_left_eq_Ioc)] at *
         · rw [show (Finset.Iio (Fin.succ m) : Finset (Fin (n + 1))) = Finset.Iio (Fin.castSucc m) ∪ { Fin.castSucc m } from ?_, Finset.sum_union] <;> norm_num [Finset.sum_singleton, Finset.sum_union, Finset.sum_Ioc_succ_top, (Nat.succ_eq_succ ▸ Finset.Icc_succ_left_eq_Ioc)] at *
           · rw [ih]

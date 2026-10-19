@@ -542,7 +542,7 @@ theorem isLocalMin_of_posDef_of_littleo {V : Type*} [NormedAddCommGroup V]
     (hf : (iteratedFDerivQuadraticMap f x₀).PosDef) : IsLocalMin f x₀ := by
   have ⟨C,hC⟩ := coercive_of_posdef hf
   have ⟨C,hC⟩ := coercive_of_posdef_of_contdiff hcd hf
-  simp only [Asymptotics.IsLittleO, Asymptotics.IsBigOWith] at h
+  rw [Asymptotics.isLittleO_iff] at h
   apply (h (half_pos hC.1)).mono
   intro x
   have hx := hC.2 (x - x₀)

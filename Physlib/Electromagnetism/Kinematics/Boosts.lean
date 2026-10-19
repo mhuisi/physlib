@@ -90,7 +90,7 @@ lemma electricField_apply_x_boost_zero {d : ℕ} {c : SpeedOfLight} (β : ℝ) (
   rw [SpaceTime.boost_zero_apply_time_space]
   field_simp
   rfl
-  · fun_prop
+  · exact differentiable_action _ A hA
 
 /-!
 
@@ -120,7 +120,7 @@ lemma electricField_apply_x_boost_succ {d : ℕ} {c : SpeedOfLight} (β : ℝ) (
   field_simp
   ring_nf
   rfl
-  · fun_prop
+  · exact differentiable_action _ A hA
 
 /-!
 

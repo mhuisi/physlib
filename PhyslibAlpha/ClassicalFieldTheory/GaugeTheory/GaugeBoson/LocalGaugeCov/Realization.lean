@@ -161,10 +161,10 @@ lemma lorentz_F (Λ : SL(2,ℂ)) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3)) (μ
             k.F (List.ofFn p) a b φ := by
   rw [F_apply, ← k.map_repLorentz, repLorentzGroup_covF, map_sum]
   refine Finset.sum_congr rfl fun p _ => ?_
-  rw [map_smul, map_sum]
+  rw [AlgHom.map_smul_of_tower, map_sum]
   refine congrArg _ (Finset.sum_congr rfl fun a _ => ?_)
-  rw [map_smul, map_sum]
-  exact congrArg _ (Finset.sum_congr rfl fun b _ => map_smul k.toAlgHom _ _)
+  rw [AlgHom.map_smul_of_tower, map_sum]
+  exact congrArg _ (Finset.sum_congr rfl fun b _ => k.toAlgHom.map_smul_of_tower _ _)
 
 /-- A covariant realization intertwines the jet action with the `G₀` action at the value
   of the jet. -/

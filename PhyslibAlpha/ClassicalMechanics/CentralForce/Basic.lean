@@ -67,8 +67,10 @@ open scoped ContDiff
 
 -/
 
-/-- A particle in three-dimensional space under a conservative central force centred at the origin,
-specified by its mass `m` and a radial potential `V` smooth at positive radii. -/
+/--
+A particle in three-dimensional space under a conservative central force centred at the origin,
+specified by its mass `m` and a radial potential `V` smooth at positive radii.
+-/
 structure CentralForce where
   /-- The mass of the particle. -/
   m : ℝ
@@ -84,8 +86,7 @@ namespace CentralForce
 variable (S : CentralForce)
 
 /-- The mass of the particle is non-zero. -/
-@[simp]
-lemma m_ne_zero : S.m ≠ 0 := S.m_pos.ne'
+@[simp] lemma m_ne_zero : S.m ≠ 0 := S.m_pos.ne'
 
 /-!
 
@@ -93,8 +94,10 @@ lemma m_ne_zero : S.m ≠ 0 := S.m_pos.ne'
 
 -/
 
-/-- The Hamiltonian `H(p, q) = ⟪p, p⟫ / (2 m) + V ‖q‖` of a central-force system, as a function of
-the momentum `p` and the position `q`. -/
+/--
+The Hamiltonian `H(p, q) = ⟪p, p⟫ / (2 m) + V ‖q‖` of a central-force system, as a function of
+the momentum `p` and the position `q`.
+-/
 noncomputable def hamiltonian (p q : EuclideanSpace ℝ (Fin 3)) : ℝ :=
   (1 / (2 * S.m)) * ⟪p, p⟫_ℝ + S.V ‖q‖
 
@@ -105,18 +108,20 @@ noncomputable def hamiltonian (p q : EuclideanSpace ℝ (Fin 3)) : ℝ :=
 -/
 
 /-- The momentum gradient of the Hamiltonian of a central-force system is the velocity `p / m`. -/
-lemma hasGradientAt_hamiltonian_momentum (p q : EuclideanSpace ℝ (Fin 3)) :
-    HasGradientAt (fun p' => S.hamiltonian p' q) (S.m⁻¹ • p) p := by
+lemma hasGradientAt_hamiltonian_momentum (p q : EuclideanSpace ℝ (Fin 3))
+    : HasGradientAt (fun p' => S.hamiltonian p' q) (S.m⁻¹ • p) p := by
   show HasGradientAt (fun p' => (1 / (2 * S.m)) * ⟪p', p'⟫_ℝ + S.V ‖q‖) _ p
   convert ((hasGradientAt_inner_self p).const_mul (1 / (2 * S.m))).add
     (hasGradientAt_const p (S.V ‖q‖)) using 1
   module
 
-/-- Away from the centre of force, the position gradient of the Hamiltonian of a central-force
-system is `V'(‖q‖) q / ‖q‖`, which is parallel to the position. -/
-lemma hasGradientAt_hamiltonian_position (p : EuclideanSpace ℝ (Fin 3))
-    {q : EuclideanSpace ℝ (Fin 3)} (hq : q ≠ 0) :
-    HasGradientAt (fun q' => S.hamiltonian p q') ((deriv S.V ‖q‖ / ‖q‖) • q) q := by
+/--
+Away from the centre of force, the position gradient of the Hamiltonian of a central-force
+system is `V'(‖q‖) q / ‖q‖`, which is parallel to the position.
+-/
+lemma hasGradientAt_hamiltonian_position
+    (p : EuclideanSpace ℝ (Fin 3)) {q : EuclideanSpace ℝ (Fin 3)} (hq : q ≠ 0)
+    : HasGradientAt (fun q' => S.hamiltonian p q') ((deriv S.V ‖q‖ / ‖q‖) • q) q := by
   have hV : HasDerivAt S.V (deriv S.V ‖q‖) ‖q‖ :=
     ((S.contDiffOn_V.differentiableOn (by simp)).differentiableAt
       (Ioi_mem_nhds (norm_pos_iff.mpr hq))).hasDerivAt
@@ -132,11 +137,11 @@ lemma hasGradientAt_hamiltonian_position (p : EuclideanSpace ℝ (Fin 3))
 -/
 
 /-- The Hamiltonian of a central-force system is smooth away from the centre of force. -/
-lemma contDiffOn_hamiltonian :
-    ContDiffOn ℝ ∞ (Function.uncurry S.hamiltonian) {x | x.2 ≠ 0} := by
+lemma contDiffOn_hamiltonian : ContDiffOn ℝ ∞ (Function.uncurry S.hamiltonian) {x | x.2 ≠ 0} := by
   have hnorm : ContDiffOn ℝ ∞
-      (fun x : EuclideanSpace ℝ (Fin 3) × EuclideanSpace ℝ (Fin 3) => ‖x.2‖) {x | x.2 ≠ 0} :=
-    fun x hx => ((contDiffAt_norm ℝ hx).comp x contDiffAt_snd).contDiffWithinAt
+      (fun x : EuclideanSpace ℝ (Fin 3) × EuclideanSpace ℝ (Fin 3) => ‖x.2‖)
+      {x | x.2 ≠ 0} := fun x hx =>
+    ((contDiffAt_norm ℝ hx).comp x contDiffAt_snd).contDiffWithinAt
   have hkin : ContDiff ℝ ∞ (fun x : EuclideanSpace ℝ (Fin 3) × EuclideanSpace ℝ (Fin 3) =>
       (1 / (2 * S.m)) * ⟪x.1, x.1⟫_ℝ) :=
     contDiff_const.mul (contDiff_fst.inner ℝ contDiff_fst)

@@ -50,15 +50,11 @@ variable {E : Type*} [OrderUnitSpace E]
 -/
 
 /-- The complementary effect. -/
-def complement (e : Effect E) : Effect E :=
-  ⟨1 - e.1, sub_nonneg.mpr e.2.2, sub_le_self 1 e.2.1⟩
+def complement (e : Effect E) : Effect E := ⟨1 - e.1, sub_nonneg.mpr e.2.2, sub_le_self 1 e.2.1⟩
 
-@[simp]
-lemma coe_complement (e : Effect E) : ((complement e : Effect E) : E) = 1 - e := rfl
+@[simp] lemma coe_complement (e : Effect E) : ((complement e : Effect E) : E) = 1 - e := rfl
 
-@[simp]
-lemma complement_complement (e : Effect E) : complement (complement e) = e := by
-  ext; simp
+@[simp] lemma complement_complement (e : Effect E) : complement (complement e) = e := by ext; simp
 
 /-!
 
@@ -67,14 +63,12 @@ lemma complement_complement (e : Effect E) : complement (complement e) = e := by
 -/
 
 /-- The complement reverses order: a more certain test's complement is a less certain one. -/
-lemma complement_antitone : Antitone (complement (E := E)) :=
-  fun _ _ h => sub_le_sub_left (show (_ : E) ≤ _ from h) 1
+lemma complement_antitone : Antitone (complement (E := E)) := fun _ _ h =>
+  sub_le_sub_left (show (_ : E) ≤ _ from h) 1
 
-@[simp]
-lemma complement_zero : complement (0 : Effect E) = 1 := by ext; simp
+@[simp] lemma complement_zero : complement (0 : Effect E) = 1 := by ext; simp
 
-@[simp]
-lemma complement_one : complement (1 : Effect E) = 0 := by ext; simp
+@[simp] lemma complement_one : complement (1 : Effect E) = 0 := by ext; simp
 
 /-!
 
@@ -83,8 +77,8 @@ lemma complement_one : complement (1 : Effect E) = 0 := by ext; simp
 -/
 
 /-- Mixing commutes with taking the complement. -/
-lemma complement_mix (e f : Effect E) (t : unitInterval) :
-    complement (mix e f t) = mix (complement e) (complement f) t := by
+lemma complement_mix (e f : Effect E) (t : unitInterval)
+    : complement (mix e f t) = mix (complement e) (complement f) t := by
   ext; simp; module
 
 end Effect

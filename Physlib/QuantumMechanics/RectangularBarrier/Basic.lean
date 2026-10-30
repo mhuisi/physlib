@@ -43,9 +43,11 @@ namespace QuantumMechanics
 
 open Set MeasureTheory SpaceDHilbertSpace
 
-/-- A quantum particle with mass `m > 0` on `Space 1` subject to a rectangular potential barrier.
+/--
+A quantum particle with mass `m > 0` on `Space 1` subject to a rectangular potential barrier.
 
-  The potential is `V₀` on the interval `Icc lower upper` and zero elsewhere. -/
+The potential is `V₀` on the interval `Icc lower upper` and zero elsewhere.
+-/
 structure RectangularBarrier where
   /-- The mass (positive). -/
   m : ℝ
@@ -66,29 +68,29 @@ namespace RectangularBarrier
 ## A. Basic properties
 -/
 
-@[simp]
-lemma m_pos : 0 < Q.m := Q.hm
+@[simp] lemma m_pos : 0 < Q.m := Q.hm
 
-@[simp]
-lemma m_nonneg : 0 ≤ Q.m := Q.hm.le
+@[simp] lemma m_nonneg : 0 ≤ Q.m := Q.hm.le
 
-@[simp]
-lemma m_ne_zero : Q.m ≠ 0 := Q.hm.ne'
+@[simp] lemma m_ne_zero : Q.m ≠ 0 := Q.hm.ne'
 
 /-!
 ## B. Potential function
 -/
 
-/-- The piece-wise constant potential, equal to `Q.V₀` for `x.val 0 ∈ Icc Q.lower Q.upper`
-  and zero otherwise. -/
+/--
+The piece-wise constant potential, equal to `Q.V₀` for `x.val 0 ∈ Icc Q.lower Q.upper`
+and zero otherwise.
+-/
 def potentialFunction : Space 1 → ℝ := fun x ↦ (Icc Q.lower Q.upper).indicator (fun _ ↦ Q.V₀) (x 0)
 
-lemma potentialFunction_eq :
-    Q.potentialFunction = fun x ↦ (Icc Q.lower Q.upper).indicator (fun _ ↦ Q.V₀) (x 0) := rfl
+lemma potentialFunction_eq
+    : Q.potentialFunction = fun x ↦ (Icc Q.lower Q.upper).indicator (fun _ ↦ Q.V₀) (x 0) :=
+  rfl
 
 /-- The piecewise-constant potential of the rectangular barrier is a.e. strongly measurable. -/
 -- This relies on `Space.val` being measure-preserving.
-lemma potentialFunction_aestronglyMeasurable: AEStronglyMeasurable Q.potentialFunction volume := by
+lemma potentialFunction_aestronglyMeasurable : AEStronglyMeasurable Q.potentialFunction volume := by
   unfold potentialFunction
   have hf : Measurable ((fun x => x.val 0) : Space 1 → ℝ) := by measurability
   exact ((measurable_const.indicator measurableSet_Icc).comp hf).aestronglyMeasurable
@@ -120,8 +122,8 @@ def kineticOperator : Q.HS →ₗ.[ℂ] Q.HS := (2 * Q.m)⁻¹ • momentumSqOpe
 def potentialOperator : Q.HS →ₗ.[ℂ] Q.HS := 𝓜 volume (Complex.ofReal ∘ Q.potentialFunction)
 
 /-- The potential operator for the rectangular barrier is self-adjoint. -/
-lemma potentialOperator_isSelfAdjoint (Q : RectangularBarrier) :
-    IsSelfAdjoint Q.potentialOperator := by
+lemma potentialOperator_isSelfAdjoint (Q : RectangularBarrier)
+    : IsSelfAdjoint Q.potentialOperator := by
   unfold IsSelfAdjoint
   unfold potentialOperator
   rw [mulOperator_isSelfAdjoint_ofReal]

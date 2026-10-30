@@ -44,45 +44,60 @@ lemma SU3Sol (S : (SMNoGrav n).LinSols) : accSU3 S.val = 0 := S.linearSol ⟨1, 
 
 lemma cubeSol (S : (SMNoGrav n).Sols) : accCube S.val = 0 := S.cubicSol
 
-/-- An element of `charges` which satisfies the linear ACCs
-  gives us a element of `LinSols`. -/
-def chargeToLinear (S : (SMNoGrav n).Charges) (hSU2 : accSU2 S = 0) (hSU3 : accSU3 S = 0) :
-    (SMNoGrav n).LinSols :=
-  ⟨S, by
+/--
+An element of `charges` which satisfies the linear ACCs
+gives us a element of `LinSols`.
+-/
+def chargeToLinear (S : (SMNoGrav n).Charges) (hSU2 : accSU2 S = 0) (hSU3 : accSU3 S = 0)
+    : (SMNoGrav n).LinSols := ⟨
+  S,
+  by
     intro i
     match i with
     | ⟨0, _⟩ => exact hSU2
-    | ⟨1, _⟩ => exact hSU3⟩
+    | ⟨1, _⟩ => exact hSU3
+⟩
 
-/-- An element of `LinSols` which satisfies the quadratic ACCs
-  gives us a element of `QuadSols`. -/
+/--
+An element of `LinSols` which satisfies the quadratic ACCs
+gives us a element of `QuadSols`.
+-/
 def linearToQuad (S : (SMNoGrav n).LinSols) : (SMNoGrav n).QuadSols := ⟨S, fun i ↦ Fin.elim0 i⟩
 
-/-- An element of `QuadSols` which satisfies the quadratic ACCs
-  gives us a element of `LinSols`. -/
-def quadToAF (S : (SMNoGrav n).QuadSols) (hc : accCube S.val = 0) :
-    (SMNoGrav n).Sols := ⟨S, hc⟩
+/--
+An element of `QuadSols` which satisfies the quadratic ACCs
+gives us a element of `LinSols`.
+-/
+def quadToAF (S : (SMNoGrav n).QuadSols) (hc : accCube S.val = 0) : (SMNoGrav n).Sols := ⟨S, hc⟩
 
-/-- An element of `charges` which satisfies the linear and quadratic ACCs
-  gives us a element of `QuadSols`. -/
-def chargeToQuad (S : (SMNoGrav n).Charges) (hSU2 : accSU2 S = 0) (hSU3 : accSU3 S = 0) :
-    (SMNoGrav n).QuadSols :=
+/--
+An element of `charges` which satisfies the linear and quadratic ACCs
+gives us a element of `QuadSols`.
+-/
+def chargeToQuad (S : (SMNoGrav n).Charges) (hSU2 : accSU2 S = 0) (hSU3 : accSU3 S = 0)
+    : (SMNoGrav n).QuadSols :=
   linearToQuad $ chargeToLinear S hSU2 hSU3
 
-/-- An element of `charges` which satisfies the linear, quadratic and cubic ACCs
-  gives us a element of `Sols`. -/
-def chargeToAF (S : (SMNoGrav n).Charges) (hSU2 : accSU2 S = 0) (hSU3 : accSU3 S = 0)
-    (hc : accCube S = 0) : (SMNoGrav n).Sols :=
+/--
+An element of `charges` which satisfies the linear, quadratic and cubic ACCs
+gives us a element of `Sols`.
+-/
+def chargeToAF
+    (S : (SMNoGrav n).Charges) (hSU2 : accSU2 S = 0) (hSU3 : accSU3 S = 0) (hc : accCube S = 0)
+    : (SMNoGrav n).Sols :=
   quadToAF (chargeToQuad S hSU2 hSU3) hc
 
-/-- An element of `LinSols` which satisfies the quadratic and cubic ACCs
-  gives us a element of `Sols`. -/
-def linearToAF (S : (SMNoGrav n).LinSols)
-    (hc : accCube S.val = 0) : (SMNoGrav n).Sols :=
+/--
+An element of `LinSols` which satisfies the quadratic and cubic ACCs
+gives us a element of `Sols`.
+-/
+def linearToAF (S : (SMNoGrav n).LinSols) (hc : accCube S.val = 0) : (SMNoGrav n).Sols :=
   quadToAF (linearToQuad S) hc
 
-/-- The permutations acting on the ACC system corresponding to the SM with RHN,
-and no gravitational anomaly. -/
+/--
+The permutations acting on the ACC system corresponding to the SM with RHN,
+and no gravitational anomaly.
+-/
 def perm (n : ℕ) : ACCSystemGroupAction (SMNoGrav n) where
   group := PermGroup n
   groupInst := inferInstance

@@ -146,7 +146,7 @@ def viableCompletions (I : CodimensionOneConfig) : Multiset (ChargeSpectrum ℤ)
     ⟨some (-3), some (-2), {3}, {-2, 0}⟩, ⟨some (-1), some (-2), {3}, {-2, 0}⟩,
     ⟨some 3, some (-2), {-3}, {-2, 0}⟩,
     /- qHu = -2, and Q10 = {-3, 1} -/
-    ⟨some (-1), some (-2), {0}, {-3, 1}⟩,⟨some 0, some (-2), {-1}, {-3, 1}⟩,
+    ⟨some (-1), some (-2), {0}, {-3, 1}⟩, ⟨some 0, some (-2), {-1}, {-3, 1}⟩,
     ⟨some 0, some (-2), {3}, {-3, 1}⟩, ⟨some 3, some (-2), {0}, {-3, 1}⟩,
     /- qHu = 0, and Q10 = {-3, 3} -/
     ⟨some (-2), some 0, {-1}, {-3, 3}⟩, ⟨some (-2), some 0, {1}, {-3, 3}⟩,
@@ -169,7 +169,8 @@ def viableCompletions (I : CodimensionOneConfig) : Multiset (ChargeSpectrum ℤ)
     /- qHu = 3, and Q10 = {0, 3} -/
     ⟨some (-2), some 3, {-1}, {0, 3}⟩, ⟨some (-2), some 3, {2}, {0, 3}⟩,
     ⟨some (-1), some 3, {-2}, {0, 3}⟩, ⟨some (-1), some 3, {1}, {0, 3}⟩,
-    ⟨some 1, some 3, {-1}, {0, 3}⟩, ⟨some 2, some 3, {-2}, {0, 3}⟩}
+    ⟨some 1, some 3, {-1}, {0, 3}⟩, ⟨some 2, some 3, {-2}, {0, 3}⟩
+  }
   | nearestNeighbor => {
     /- qHu = -14, and Q10 = {-7} -/
     ⟨some (-9), some (-14), {-4}, {-7}⟩, ⟨some (-9), some (-14), {1}, {-7}⟩,
@@ -202,7 +203,8 @@ def viableCompletions (I : CodimensionOneConfig) : Multiset (ChargeSpectrum ℤ)
     ⟨some 11, some 6, {-14}, {3}⟩, ⟨some 11, some 6, {-4}, {3}⟩,
     /- qHu = 6, and Q10 = {-7, 13} -/
     ⟨some (-9), some 6, {-4}, {-7, 13}⟩, ⟨some (-4), some 6, {-9}, {-7, 13}⟩,
-    ⟨some (-4), some 6, {11}, {-7, 13}⟩, ⟨some 11, some 6, {-4}, {-7, 13}⟩}
+    ⟨some (-4), some 6, {11}, {-7, 13}⟩, ⟨some 11, some 6, {-4}, {-7, 13}⟩
+  }
   | nextToNearestNeighbor => {
     /- qHu = -8, and Q10 = {-4} -/
     ⟨some (-13), some (-8), {7}, {-4}⟩, ⟨some (-3), some (-8), {7}, {-4}⟩,
@@ -225,7 +227,8 @@ def viableCompletions (I : CodimensionOneConfig) : Multiset (ChargeSpectrum ℤ)
     ⟨some (-3), some 12, {2}, {6}⟩, ⟨some (-3), some 12, {7}, {6}⟩,
     ⟨some 2, some 12, {-13}, {6}⟩, ⟨some 2, some 12, {-8}, {6}⟩,
     ⟨some 2, some 12, {7}, {6}⟩, ⟨some 7, some 12, {-13}, {6}⟩,
-    ⟨some 7, some 12, {-8}, {6}⟩, ⟨some 7, some 12, {2}, {6}⟩}
+    ⟨some 7, some 12, {-8}, {6}⟩, ⟨some 7, some 12, {2}, {6}⟩
+  }
 
 /-!
 
@@ -233,9 +236,14 @@ def viableCompletions (I : CodimensionOneConfig) : Multiset (ChargeSpectrum ℤ)
 
 -/
 
-lemma viableCompletions_card (I : CodimensionOneConfig) :
-    (viableCompletions I).card = if I = same then 70 else
-      if I = nearestNeighbor then 48 else 37 := by
+lemma viableCompletions_card (I : CodimensionOneConfig)
+    : (viableCompletions I).card
+      = if I = same then
+          70
+        else if I = nearestNeighbor then
+          48
+        else
+          37 := by
   cases I <;> rfl
 
 /-!
@@ -244,8 +252,7 @@ lemma viableCompletions_card (I : CodimensionOneConfig) :
 
 -/
 
-lemma viableCompletions_nodup (I : CodimensionOneConfig) :
-    (viableCompletions I).Nodup := by
+lemma viableCompletions_nodup (I : CodimensionOneConfig) : (viableCompletions I).Nodup := by
   cases I <;> decide +kernel
 
 /-!
@@ -254,8 +261,8 @@ lemma viableCompletions_nodup (I : CodimensionOneConfig) :
 
 -/
 
-lemma viableCompletions_isPhenoConstrained (I : CodimensionOneConfig) :
-    ∀ x ∈ viableCompletions I, ¬ IsPhenoConstrained x := by
+lemma viableCompletions_isPhenoConstrained (I : CodimensionOneConfig)
+    : ∀ x ∈ viableCompletions I, ¬ IsPhenoConstrained x := by
   cases I <;> decide +kernel
 
 /-!
@@ -264,8 +271,8 @@ lemma viableCompletions_isPhenoConstrained (I : CodimensionOneConfig) :
 
 -/
 
-lemma viableCompletions_yukawaGeneratesDangerousAtLevel_one (I : CodimensionOneConfig) :
-    ∀ x ∈ viableCompletions I, ¬ YukawaGeneratesDangerousAtLevel x 1 := by
+lemma viableCompletions_yukawaGeneratesDangerousAtLevel_one (I : CodimensionOneConfig)
+    : ∀ x ∈ viableCompletions I, ¬ YukawaGeneratesDangerousAtLevel x 1 := by
   cases I <;> decide +kernel
 
 /-!
@@ -274,10 +281,10 @@ lemma viableCompletions_yukawaGeneratesDangerousAtLevel_one (I : CodimensionOneC
 
 -/
 
-lemma containsPhenoCompletionsOfMinimallyAllows_viableCompletions :
-    (I : CodimensionOneConfig) →
-    ContainsPhenoCompletionsOfMinimallyAllows I.allowedBarFiveCharges
-      I.allowedTenCharges (viableCompletions I) := by
+lemma containsPhenoCompletionsOfMinimallyAllows_viableCompletions
+    : (I : CodimensionOneConfig)
+      → ContainsPhenoCompletionsOfMinimallyAllows I.allowedBarFiveCharges I.allowedTenCharges
+        (viableCompletions I) := by
   decide +kernel
 
 /-!
@@ -292,54 +299,58 @@ lemma containsPhenoCompletionsOfMinimallyAllows_viableCompletions :
 
 -/
 
-/-- The charges in addition to `viableCompletions` which which permit a top Yukawa coupling,
-  are not phenomenologically constrained,
-  and do not regenerate dangerous couplings with one insertion of a Yukawa coupling.
+/--
+The charges in addition to `viableCompletions` which which permit a top Yukawa coupling,
+are not phenomenologically constrained,
+and do not regenerate dangerous couplings with one insertion of a Yukawa coupling.
 
-  These can be found with e.g.
-  - #eval (viableChargesMultiset same.allowedBarFiveCharges same.allowedTenCharges).toFinset \
-    (completeMinSubset same.allowedBarFiveCharges
-      same.allowedTenCharges).toFinset
+These can be found with e.g.
+- #eval (viableChargesMultiset same.allowedBarFiveCharges same.allowedTenCharges).toFinset \
+  (completeMinSubset same.allowedBarFiveCharges
+    same.allowedTenCharges).toFinset
 -/
 def viableChargesAdditional : CodimensionOneConfig → Multiset (ChargeSpectrum ℤ)
-  | .same =>
-    {⟨some 1, some (-3), {-1, 2}, {-3, 0}⟩, ⟨some 2, some (-3), {-2, 1}, {-3, 0}⟩,
-      ⟨some (-3), some (-2), {0}, {3, -1}⟩, ⟨some (-3), some (-2), {0, 2}, {-1}⟩,
-      ⟨some (-3), some (-2), {2}, {-3, -1}⟩, ⟨some (-1), some (-2), {0, 2}, {-1}⟩,
-      ⟨some 0, some (-2), {-3}, {3, -1}⟩, ⟨some 0, some (-2), {-3, 1}, {-1}⟩,
-      ⟨some 0, some (-2), {1}, {3, -1}⟩, ⟨some 1, some (-2), {0}, {3, -1}⟩,
-      ⟨some 2, some (-2), {-3}, {-3, -1}⟩, ⟨some 2, some (-2), {-3, -1}, {-1}⟩,
-      ⟨some 2, some (-2), {-3, 0}, {-1}⟩, ⟨some 2, some (-2), {-1, 1}, {-1}⟩,
-      ⟨some 0, some (-2), {-1, 3}, {-3, 1}⟩, ⟨some (-2), some 2, {-1, 1}, {1}⟩,
-      ⟨some (-2), some 2, {0, 3}, {1}⟩, ⟨some (-2), some 2, {1, 3}, {1}⟩,
-      ⟨some (-2), some 2, {3}, {3, 1}⟩, ⟨some (-1), some 2, {0}, {-3, 1}⟩,
-      ⟨some 0, some 2, {-1}, {-3, 1}⟩, ⟨some 0, some 2, {-1, 3}, {1}⟩,
-      ⟨some 0, some 2, {3}, {-3, 1}⟩, ⟨some 1, some 2, {-2, 0}, {1}⟩,
-      ⟨some 3, some 2, {-2}, {3, 1}⟩, ⟨some 3, some 2, {-2, 0}, {1}⟩,
-      ⟨some 3, some 2, {0}, {-3, 1}⟩, ⟨some 0, some 2, {-3, 1}, {-1, 3}⟩,
-      ⟨some (-2), some 3, {-1, 2}, {0, 3}⟩, ⟨some (-1), some 3, {-2, 1}, {0, 3}⟩,
-      ⟨some 0, some (-2), {-3, 1}, {3, -1}⟩, ⟨some 0, some 2, {-1, 3}, {-3, 1}⟩}
-  | .nearestNeighbor =>
-      {⟨some (-9), some (-14), {-4}, {13, -7}⟩, ⟨some (-9), some (-14), {-4, 6}, {-7}⟩,
-      ⟨some (-4), some (-14), {-9}, {13, -7}⟩, ⟨some (-4), some (-14), {-9, 6}, {-7}⟩,
-      ⟨some (-4), some (-14), {-9, 11}, {-7}⟩, ⟨some (-4), some (-14), {6, 11}, {-7}⟩,
-      ⟨some (-4), some (-14), {11}, {13, -7}⟩, ⟨some 1, some (-14), {-4, 6}, {-7}⟩,
-      ⟨some 6, some (-14), {-9, -4}, {-7}⟩, ⟨some 6, some (-14), {-4}, {-12, -7}⟩,
-      ⟨some 6, some (-14), {-9, 1}, {-7}⟩, ⟨some 6, some (-14), {1, 11}, {-7}⟩,
-      ⟨some 11, some (-14), {-9, -4}, {-7}⟩, ⟨some 11, some (-14), {-4}, {13, -7}⟩,
-      ⟨some 11, some (-14), {-4, 1}, {-7}⟩, ⟨some 11, some (-14), {-9, 6}, {-7}⟩,
-      ⟨some (-9), some (-4), {-14, 11}, {-2}⟩, ⟨some (-9), some (-4), {11}, {-12, -2}⟩,
-      ⟨some 1, some (-4), {-14, 11}, {-2}⟩, ⟨some (-14), some 6, {1, 11}, {3}⟩,
-      ⟨some 11, some 6, {-14, -4}, {3}⟩, ⟨some (-4), some 6, {-9, 11}, {-7, 13}⟩,
-      ⟨some (-4), some (-14), {-9, 11}, {13, -7}⟩}
-  | .nextToNearestNeighbor =>
-      {⟨some (-13), some 2, {-8, 12}, {1}⟩, ⟨some (-8), some 2, {-13, 7}, {1}⟩,
-      ⟨some 7, some 2, {-8, 12}, {1}⟩, ⟨some 12, some 2, {-13, 7}, {1}⟩,
-      ⟨some (-3), some 2, {-8, 12}, {-9, 11}⟩, ⟨some (-13), some 12, {-8}, {-9, 6}⟩,
-      ⟨some (-13), some 12, {-8, 7}, {6}⟩, ⟨some (-13), some 12, {7}, {-4, 6}⟩,
-      ⟨some (-8), some 12, {-13}, {-9, 6}⟩, ⟨some (-8), some 12, {-13, 2}, {6}⟩,
-      ⟨some (-8), some 12, {2, 7}, {6}⟩, ⟨some 2, some 12, {-13, -8}, {6}⟩,
-      ⟨some 2, some 12, {-8, 7}, {6}⟩, ⟨some 7, some 12, {-13, 2}, {6}⟩}
+  | .same => {
+    ⟨some 1, some (-3), {-1, 2}, {-3, 0}⟩, ⟨some 2, some (-3), {-2, 1}, {-3, 0}⟩,
+    ⟨some (-3), some (-2), {0}, {3, -1}⟩, ⟨some (-3), some (-2), {0, 2}, {-1}⟩,
+    ⟨some (-3), some (-2), {2}, {-3, -1}⟩, ⟨some (-1), some (-2), {0, 2}, {-1}⟩,
+    ⟨some 0, some (-2), {-3}, {3, -1}⟩, ⟨some 0, some (-2), {-3, 1}, {-1}⟩,
+    ⟨some 0, some (-2), {1}, {3, -1}⟩, ⟨some 1, some (-2), {0}, {3, -1}⟩,
+    ⟨some 2, some (-2), {-3}, {-3, -1}⟩, ⟨some 2, some (-2), {-3, -1}, {-1}⟩,
+    ⟨some 2, some (-2), {-3, 0}, {-1}⟩, ⟨some 2, some (-2), {-1, 1}, {-1}⟩,
+    ⟨some 0, some (-2), {-1, 3}, {-3, 1}⟩, ⟨some (-2), some 2, {-1, 1}, {1}⟩,
+    ⟨some (-2), some 2, {0, 3}, {1}⟩, ⟨some (-2), some 2, {1, 3}, {1}⟩,
+    ⟨some (-2), some 2, {3}, {3, 1}⟩, ⟨some (-1), some 2, {0}, {-3, 1}⟩,
+    ⟨some 0, some 2, {-1}, {-3, 1}⟩, ⟨some 0, some 2, {-1, 3}, {1}⟩,
+    ⟨some 0, some 2, {3}, {-3, 1}⟩, ⟨some 1, some 2, {-2, 0}, {1}⟩,
+    ⟨some 3, some 2, {-2}, {3, 1}⟩, ⟨some 3, some 2, {-2, 0}, {1}⟩,
+    ⟨some 3, some 2, {0}, {-3, 1}⟩, ⟨some 0, some 2, {-3, 1}, {-1, 3}⟩,
+    ⟨some (-2), some 3, {-1, 2}, {0, 3}⟩, ⟨some (-1), some 3, {-2, 1}, {0, 3}⟩,
+    ⟨some 0, some (-2), {-3, 1}, {3, -1}⟩, ⟨some 0, some 2, {-1, 3}, {-3, 1}⟩
+  }
+  | .nearestNeighbor => {
+    ⟨some (-9), some (-14), {-4}, {13, -7}⟩, ⟨some (-9), some (-14), {-4, 6}, {-7}⟩,
+    ⟨some (-4), some (-14), {-9}, {13, -7}⟩, ⟨some (-4), some (-14), {-9, 6}, {-7}⟩,
+    ⟨some (-4), some (-14), {-9, 11}, {-7}⟩, ⟨some (-4), some (-14), {6, 11}, {-7}⟩,
+    ⟨some (-4), some (-14), {11}, {13, -7}⟩, ⟨some 1, some (-14), {-4, 6}, {-7}⟩,
+    ⟨some 6, some (-14), {-9, -4}, {-7}⟩, ⟨some 6, some (-14), {-4}, {-12, -7}⟩,
+    ⟨some 6, some (-14), {-9, 1}, {-7}⟩, ⟨some 6, some (-14), {1, 11}, {-7}⟩,
+    ⟨some 11, some (-14), {-9, -4}, {-7}⟩, ⟨some 11, some (-14), {-4}, {13, -7}⟩,
+    ⟨some 11, some (-14), {-4, 1}, {-7}⟩, ⟨some 11, some (-14), {-9, 6}, {-7}⟩,
+    ⟨some (-9), some (-4), {-14, 11}, {-2}⟩, ⟨some (-9), some (-4), {11}, {-12, -2}⟩,
+    ⟨some 1, some (-4), {-14, 11}, {-2}⟩, ⟨some (-14), some 6, {1, 11}, {3}⟩,
+    ⟨some 11, some 6, {-14, -4}, {3}⟩, ⟨some (-4), some 6, {-9, 11}, {-7, 13}⟩,
+    ⟨some (-4), some (-14), {-9, 11}, {13, -7}⟩
+  }
+  | .nextToNearestNeighbor => {
+    ⟨some (-13), some 2, {-8, 12}, {1}⟩, ⟨some (-8), some 2, {-13, 7}, {1}⟩,
+    ⟨some 7, some 2, {-8, 12}, {1}⟩, ⟨some 12, some 2, {-13, 7}, {1}⟩,
+    ⟨some (-3), some 2, {-8, 12}, {-9, 11}⟩, ⟨some (-13), some 12, {-8}, {-9, 6}⟩,
+    ⟨some (-13), some 12, {-8, 7}, {6}⟩, ⟨some (-13), some 12, {7}, {-4, 6}⟩,
+    ⟨some (-8), some 12, {-13}, {-9, 6}⟩, ⟨some (-8), some 12, {-13, 2}, {6}⟩,
+    ⟨some (-8), some 12, {2, 7}, {6}⟩, ⟨some 2, some 12, {-13, -8}, {6}⟩,
+    ⟨some 2, some 12, {-8, 7}, {6}⟩, ⟨some 7, some 12, {-13, 2}, {6}⟩
+  }
 
 /-!
 
@@ -347,8 +358,8 @@ def viableChargesAdditional : CodimensionOneConfig → Multiset (ChargeSpectrum 
 
 -/
 
-lemma viableChargesAdditional_nodup (I : CodimensionOneConfig) :
-    (viableChargesAdditional I).Nodup := by
+lemma viableChargesAdditional_nodup (I : CodimensionOneConfig)
+    : (viableChargesAdditional I).Nodup := by
   cases I <;> decide +kernel
 
 /-!
@@ -357,8 +368,8 @@ lemma viableChargesAdditional_nodup (I : CodimensionOneConfig) :
 
 -/
 
-lemma not_isPhenoConstrained_of_mem_viableChargesAdditional (I : CodimensionOneConfig) :
-    ∀ x ∈ (viableChargesAdditional I), ¬ IsPhenoConstrained x := by
+lemma not_isPhenoConstrained_of_mem_viableChargesAdditional (I : CodimensionOneConfig)
+    : ∀ x ∈ (viableChargesAdditional I), ¬ IsPhenoConstrained x := by
   cases I <;> decide +kernel
 
 /-!
@@ -367,9 +378,8 @@ lemma not_isPhenoConstrained_of_mem_viableChargesAdditional (I : CodimensionOneC
 
 -/
 
-lemma yukawaGeneratesDangerousAtLevel_one_of_mem_viableChargesAdditional
-    (I : CodimensionOneConfig) :
-    ∀ x ∈ (viableChargesAdditional I), ¬ YukawaGeneratesDangerousAtLevel x 1 := by
+lemma yukawaGeneratesDangerousAtLevel_one_of_mem_viableChargesAdditional (I : CodimensionOneConfig)
+    : ∀ x ∈ (viableChargesAdditional I), ¬ YukawaGeneratesDangerousAtLevel x 1 := by
   cases I <;> decide +kernel
 
 /-!
@@ -378,11 +388,10 @@ lemma yukawaGeneratesDangerousAtLevel_one_of_mem_viableChargesAdditional
 
 -/
 
-lemma viableCompletions_disjiont_viableChargesAdditional (I : CodimensionOneConfig) :
-    Disjoint (viableCompletions I) (viableChargesAdditional I) := by
+lemma viableCompletions_disjiont_viableChargesAdditional (I : CodimensionOneConfig)
+    : Disjoint (viableCompletions I) (viableChargesAdditional I) := by
   refine Multiset.inter_eq_zero_iff_disjoint.mp ?_
-  cases I
-  <;> decide +kernel
+  cases I <;> decide +kernel
 
 /-!
 
@@ -396,12 +405,14 @@ lemma viableCompletions_disjiont_viableChargesAdditional (I : CodimensionOneConf
 
 -/
 
-/-- All charges, for a given `CodimensionOneConfig`, `I`,
-  which permit a top Yukawa coupling, are not phenomenologically constrained,
-  and do not regenerate dangerous couplings with one insertion of a Yukawa coupling.
+/--
+All charges, for a given `CodimensionOneConfig`, `I`,
+which permit a top Yukawa coupling, are not phenomenologically constrained,
+and do not regenerate dangerous couplings with one insertion of a Yukawa coupling.
 
-  These trees can be found with e.g.
-  `#eval viableChargesExt nextToNearestNeighbor`. -/
+These trees can be found with e.g.
+`#eval viableChargesExt nextToNearestNeighbor`.
+-/
 def viableCharges (I : CodimensionOneConfig) : Multiset (ChargeSpectrum ℤ) :=
   viableCompletions I + viableChargesAdditional I
 
@@ -411,9 +422,9 @@ def viableCharges (I : CodimensionOneConfig) : Multiset (ChargeSpectrum ℤ) :=
 
 -/
 
-lemma viableCharges_nodup (I : CodimensionOneConfig) :
-    (viableCharges I).Nodup := (Multiset.Nodup.add_iff (viableCompletions_nodup I)
-    (viableChargesAdditional_nodup I)).mpr (viableCompletions_disjiont_viableChargesAdditional I)
+lemma viableCharges_nodup (I : CodimensionOneConfig) : (viableCharges I).Nodup :=
+  (Multiset.Nodup.add_iff (viableCompletions_nodup I) (viableChargesAdditional_nodup I)).mpr
+    (viableCompletions_disjiont_viableChargesAdditional I)
 
 /-!
 
@@ -421,10 +432,14 @@ lemma viableCharges_nodup (I : CodimensionOneConfig) :
 
 -/
 
-lemma viableCharges_card (I : CodimensionOneConfig) :
-    (viableCharges I).card =
-    if I = .same then 102 else
-    if I = .nearestNeighbor then 71 else 51 := by
+lemma viableCharges_card (I : CodimensionOneConfig)
+    : (viableCharges I).card
+      = if I = .same then
+          102
+        else if I = .nearestNeighbor then
+          71
+        else
+          51 := by
   decide +revert
 
 /-!
@@ -433,8 +448,8 @@ lemma viableCharges_card (I : CodimensionOneConfig) :
 
 -/
 
-lemma viableCharges_mem_ofFinset (I : CodimensionOneConfig) :
-    ∀ x ∈ (viableCharges I), x ∈ ofFinset I.allowedBarFiveCharges I.allowedTenCharges := by
+lemma viableCharges_mem_ofFinset (I : CodimensionOneConfig)
+    : ∀ x ∈ (viableCharges I), x ∈ ofFinset I.allowedBarFiveCharges I.allowedTenCharges := by
   revert I
   simp [mem_ofFinset_iff]
   decide +kernel
@@ -444,8 +459,8 @@ lemma viableCharges_mem_ofFinset (I : CodimensionOneConfig) :
 ### C.5. Elements of `viableCharges` are complete
 
 -/
-lemma isComplete_of_mem_viableCharges (I : CodimensionOneConfig) :
-    ∀ x ∈ (viableCharges I), IsComplete x := by
+lemma isComplete_of_mem_viableCharges (I : CodimensionOneConfig)
+    : ∀ x ∈ (viableCharges I), IsComplete x := by
   decide +revert
 
 /-!
@@ -454,8 +469,8 @@ lemma isComplete_of_mem_viableCharges (I : CodimensionOneConfig) :
 
 -/
 
-lemma allowsTerm_topYukawa_of_mem_viableCharges (I : CodimensionOneConfig) :
-    ∀ x ∈ (viableCharges I), x.AllowsTerm topYukawa := by
+lemma allowsTerm_topYukawa_of_mem_viableCharges (I : CodimensionOneConfig)
+    : ∀ x ∈ (viableCharges I), x.AllowsTerm topYukawa := by
   decide +revert
 
 /-!
@@ -464,8 +479,8 @@ lemma allowsTerm_topYukawa_of_mem_viableCharges (I : CodimensionOneConfig) :
 
 -/
 
-lemma not_isPhenoConstrained_of_mem_viableCharges (I : CodimensionOneConfig) :
-    ∀ x ∈ (viableCharges I), ¬ IsPhenoConstrained x := by
+lemma not_isPhenoConstrained_of_mem_viableCharges (I : CodimensionOneConfig)
+    : ∀ x ∈ (viableCharges I), ¬ IsPhenoConstrained x := by
   intro x hx
   rw [viableCharges, Multiset.mem_add] at hx
   exact hx.elim (viableCompletions_isPhenoConstrained I x)
@@ -477,9 +492,8 @@ lemma not_isPhenoConstrained_of_mem_viableCharges (I : CodimensionOneConfig) :
 
 -/
 
-lemma not_yukawaGeneratesDangerousAtLevel_one_of_mem_viableCharges
-    (I : CodimensionOneConfig) :
-    ∀ x ∈ (viableCharges I), ¬ YukawaGeneratesDangerousAtLevel x 1 := by
+lemma not_yukawaGeneratesDangerousAtLevel_one_of_mem_viableCharges (I : CodimensionOneConfig)
+    : ∀ x ∈ (viableCharges I), ¬ YukawaGeneratesDangerousAtLevel x 1 := by
   intro x hx
   rw [viableCharges, Multiset.mem_add] at hx
   exact hx.elim (viableCompletions_yukawaGeneratesDangerousAtLevel_one I x)
@@ -491,8 +505,8 @@ lemma not_yukawaGeneratesDangerousAtLevel_one_of_mem_viableCharges
 
 -/
 
-lemma card_five_bar_le_of_mem_viableCharges (I : CodimensionOneConfig) :
-    ∀ x ∈ (viableCharges I), x.Q5.card ≤ 2 := by
+lemma card_five_bar_le_of_mem_viableCharges (I : CodimensionOneConfig)
+    : ∀ x ∈ (viableCharges I), x.Q5.card ≤ 2 := by
   decide +revert
 
 /-!
@@ -501,8 +515,8 @@ lemma card_five_bar_le_of_mem_viableCharges (I : CodimensionOneConfig) :
 
 -/
 
-lemma card_ten_le_of_mem_viableCharges (I : CodimensionOneConfig) :
-    ∀ x ∈ (viableCharges I), x.Q10.card ≤ 2 := by
+lemma card_ten_le_of_mem_viableCharges (I : CodimensionOneConfig)
+    : ∀ x ∈ (viableCharges I), x.Q10.card ≤ 2 := by
   decide +revert
 
 /-!
@@ -515,12 +529,14 @@ couplings, or is already in `viableCharges I`.
 
 -/
 
-/-- Inserting a `q5` charge into an element of `viableCharges I` either
+/--
+Inserting a `q5` charge into an element of `viableCharges I` either
 1. produces another element of `viableCharges I`, or
 2. produce a charge which is phenomenologically constrained or regenerates dangerous couplings
-  with the Yukawas. -/
-lemma isPhenoClosedQ5_viableCharges : (I : CodimensionOneConfig) →
-    IsPhenoClosedQ5 I.allowedBarFiveCharges (viableCharges I) := by
+  with the Yukawas.
+-/
+lemma isPhenoClosedQ5_viableCharges
+    : (I : CodimensionOneConfig) → IsPhenoClosedQ5 I.allowedBarFiveCharges (viableCharges I) := by
   refine fun I => isPhenClosedQ5_of_isPhenoConstrainedQ5 ?_
   revert I
   decide +kernel
@@ -531,12 +547,14 @@ lemma isPhenoClosedQ5_viableCharges : (I : CodimensionOneConfig) →
 
 -/
 
-/-- Inserting a `q10` charge into an element of `viableCharges I` either
+/--
+Inserting a `q10` charge into an element of `viableCharges I` either
 1. produces another element of `viableCharges I`, or
 2. produce a charge which is phenomenologically constrained or regenerates dangerous couplings
-  with the Yukawas. -/
-lemma isPhenoClosedQ10_viableCharges : (I : CodimensionOneConfig) →
-    IsPhenoClosedQ10 I.allowedTenCharges (viableCharges I) := by
+  with the Yukawas.
+-/
+lemma isPhenoClosedQ10_viableCharges
+    : (I : CodimensionOneConfig) → IsPhenoClosedQ10 I.allowedTenCharges (viableCharges I) := by
   refine fun I => isPhenClosedQ10_of_isPhenoConstrainedQ10 ?_
   revert I
   decide +kernel
@@ -547,8 +565,8 @@ lemma isPhenoClosedQ10_viableCharges : (I : CodimensionOneConfig) →
 
 -/
 
-lemma viableCompletions_subset_viableCharges (I : CodimensionOneConfig) :
-    ∀ x ∈ (viableCompletions I), x ∈ viableCharges I := by
+lemma viableCompletions_subset_viableCharges (I : CodimensionOneConfig)
+    : ∀ x ∈ (viableCompletions I), x ∈ viableCharges I := by
   intro x hx
   rw [viableCharges, Multiset.mem_add]
   exact Or.inl hx
@@ -559,27 +577,25 @@ lemma viableCompletions_subset_viableCharges (I : CodimensionOneConfig) :
 
 -/
 
-lemma mem_viableCharges_iff {I} {x : ChargeSpectrum}
-    (hsub : x ∈ ofFinset I.allowedBarFiveCharges I.allowedTenCharges) :
-    x ∈ viableCharges I ↔ AllowsTerm x topYukawa ∧
-    ¬ IsPhenoConstrained x ∧ ¬ YukawaGeneratesDangerousAtLevel x 1 ∧ IsComplete x :=
-  completeness_of_isPhenoClosedQ5_isPhenoClosedQ10
-    (allowsTerm_topYukawa_of_mem_viableCharges I)
+lemma mem_viableCharges_iff
+    {I} {x : ChargeSpectrum} (hsub : x ∈ ofFinset I.allowedBarFiveCharges I.allowedTenCharges)
+    : x ∈ viableCharges I
+      ↔ AllowsTerm x topYukawa ∧ ¬ IsPhenoConstrained x ∧ ¬ YukawaGeneratesDangerousAtLevel x 1
+        ∧ IsComplete x :=
+  completeness_of_isPhenoClosedQ5_isPhenoClosedQ10 (allowsTerm_topYukawa_of_mem_viableCharges I)
     (not_isPhenoConstrained_of_mem_viableCharges I)
     (not_yukawaGeneratesDangerousAtLevel_one_of_mem_viableCharges I)
-    (isComplete_of_mem_viableCharges I)
-    (isPhenoClosedQ5_viableCharges I)
+    (isComplete_of_mem_viableCharges I) (isPhenoClosedQ5_viableCharges I)
     (isPhenoClosedQ10_viableCharges I)
     (containsPhenoCompletionsOfMinimallyAllows_of_subset
       (containsPhenoCompletionsOfMinimallyAllows_viableCompletions I)
       (viableCompletions_subset_viableCharges I))
     hsub
 
-lemma mem_viableCharges_iff' {I} {x : ChargeSpectrum} :
-    x ∈ viableCharges I ↔
-    x ∈ ofFinset I.allowedBarFiveCharges I.allowedTenCharges ∧
-    AllowsTerm x topYukawa ∧
-    ¬ IsPhenoConstrained x ∧ ¬ YukawaGeneratesDangerousAtLevel x 1 ∧ IsComplete x := by
+lemma mem_viableCharges_iff' {I} {x : ChargeSpectrum}
+    : x ∈ viableCharges I
+      ↔ x ∈ ofFinset I.allowedBarFiveCharges I.allowedTenCharges ∧ AllowsTerm x topYukawa
+        ∧ ¬ IsPhenoConstrained x ∧ ¬ YukawaGeneratesDangerousAtLevel x 1 ∧ IsComplete x := by
   constructor
   · intro h
     have h1 := viableCharges_mem_ofFinset I x h

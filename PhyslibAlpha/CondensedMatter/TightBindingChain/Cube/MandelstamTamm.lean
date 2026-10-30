@@ -47,46 +47,55 @@ open QuantumMechanics FiniteHilbertSpace UnitalPositiveLinearMap
 variable (Tx Ty Tz : TightBindingChain)
 
 /-- Along `x`, the maximal current state of the cube has the ratio `1 / C²` of `Tx`. -/
-lemma mandelstamTammRatio_alongX :
-    (Tx.maxCurrentCubeVectorState Ty Tz)⟨Tx.alongX Ty Tz Tx.currentObservable⟩ ^ 2 /
-      (4 * (variance (Tx.maxCurrentCubeVectorState Ty Tz)
-          (Tx.alongX Ty Tz Tx.openHamiltonianObservable) *
-        variance (Tx.maxCurrentCubeVectorState Ty Tz)
-          (Tx.alongX Ty Tz Tx.positionObservable))) = 1 / Tx.uncertaintyRatio ^ 2 := by
-  have h : (Tx.maxCurrentCubeVectorState Ty Tz)⟨Tx.alongX Ty Tz Tx.currentObservable⟩ =
-      Tx.maxCurrentVectorState⟨Tx.currentObservable⟩ :=
+lemma mandelstamTammRatio_alongX
+    : (Tx.maxCurrentCubeVectorState Ty Tz)⟨Tx.alongX Ty Tz Tx.currentObservable⟩ ^ 2
+        / (4
+          * (variance (Tx.maxCurrentCubeVectorState Ty Tz)
+              (Tx.alongX Ty Tz Tx.openHamiltonianObservable)
+            * variance (Tx.maxCurrentCubeVectorState Ty Tz)
+              (Tx.alongX Ty Tz Tx.positionObservable)))
+      = 1 / Tx.uncertaintyRatio ^ 2 := by
+  have h
+      : (Tx.maxCurrentCubeVectorState Ty Tz)⟨Tx.alongX Ty Tz Tx.currentObservable⟩
+        = Tx.maxCurrentVectorState⟨Tx.currentObservable⟩ :=
     expectation_onFstObservable Tx.norm_maxCurrentState
       (norm_prodVec_eq_one Ty.norm_maxCurrentState Tz.norm_maxCurrentState) _
   rw [h, variance_alongX, variance_alongX]
   exact Tx.mandelstamTammRatio_maxCurrentState
 
 /-- Along `y`, the maximal current state of the cube has the ratio `1 / C²` of `Ty`. -/
-lemma mandelstamTammRatio_alongY :
-    (Tx.maxCurrentCubeVectorState Ty Tz)⟨Tx.alongY Ty Tz Ty.currentObservable⟩ ^ 2 /
-      (4 * (variance (Tx.maxCurrentCubeVectorState Ty Tz)
-          (Tx.alongY Ty Tz Ty.openHamiltonianObservable) *
-        variance (Tx.maxCurrentCubeVectorState Ty Tz)
-          (Tx.alongY Ty Tz Ty.positionObservable))) = 1 / Ty.uncertaintyRatio ^ 2 := by
-  have h : (Tx.maxCurrentCubeVectorState Ty Tz)⟨Tx.alongY Ty Tz Ty.currentObservable⟩ =
-      Ty.maxCurrentVectorState⟨Ty.currentObservable⟩ :=
+lemma mandelstamTammRatio_alongY
+    : (Tx.maxCurrentCubeVectorState Ty Tz)⟨Tx.alongY Ty Tz Ty.currentObservable⟩ ^ 2
+        / (4
+          * (variance (Tx.maxCurrentCubeVectorState Ty Tz)
+              (Tx.alongY Ty Tz Ty.openHamiltonianObservable)
+            * variance (Tx.maxCurrentCubeVectorState Ty Tz)
+              (Tx.alongY Ty Tz Ty.positionObservable)))
+      = 1 / Ty.uncertaintyRatio ^ 2 := by
+  have h
+      : (Tx.maxCurrentCubeVectorState Ty Tz)⟨Tx.alongY Ty Tz Ty.currentObservable⟩
+        = Ty.maxCurrentVectorState⟨Ty.currentObservable⟩ :=
     (expectation_onSndObservable Tx.norm_maxCurrentState
-      (norm_prodVec_eq_one Ty.norm_maxCurrentState Tz.norm_maxCurrentState) _).trans
-    (expectation_onFstObservable Ty.norm_maxCurrentState Tz.norm_maxCurrentState _)
+        (norm_prodVec_eq_one Ty.norm_maxCurrentState Tz.norm_maxCurrentState) _).trans
+      (expectation_onFstObservable Ty.norm_maxCurrentState Tz.norm_maxCurrentState _)
   rw [h, variance_alongY, variance_alongY]
   exact Ty.mandelstamTammRatio_maxCurrentState
 
 /-- Along `z`, the maximal current state of the cube has the ratio `1 / C²` of `Tz`. -/
-lemma mandelstamTammRatio_alongZ :
-    (Tx.maxCurrentCubeVectorState Ty Tz)⟨Tx.alongZ Ty Tz Tz.currentObservable⟩ ^ 2 /
-      (4 * (variance (Tx.maxCurrentCubeVectorState Ty Tz)
-          (Tx.alongZ Ty Tz Tz.openHamiltonianObservable) *
-        variance (Tx.maxCurrentCubeVectorState Ty Tz)
-          (Tx.alongZ Ty Tz Tz.positionObservable))) = 1 / Tz.uncertaintyRatio ^ 2 := by
-  have h : (Tx.maxCurrentCubeVectorState Ty Tz)⟨Tx.alongZ Ty Tz Tz.currentObservable⟩ =
-      Tz.maxCurrentVectorState⟨Tz.currentObservable⟩ :=
+lemma mandelstamTammRatio_alongZ
+    : (Tx.maxCurrentCubeVectorState Ty Tz)⟨Tx.alongZ Ty Tz Tz.currentObservable⟩ ^ 2
+        / (4
+          * (variance (Tx.maxCurrentCubeVectorState Ty Tz)
+              (Tx.alongZ Ty Tz Tz.openHamiltonianObservable)
+            * variance (Tx.maxCurrentCubeVectorState Ty Tz)
+              (Tx.alongZ Ty Tz Tz.positionObservable)))
+      = 1 / Tz.uncertaintyRatio ^ 2 := by
+  have h
+      : (Tx.maxCurrentCubeVectorState Ty Tz)⟨Tx.alongZ Ty Tz Tz.currentObservable⟩
+        = Tz.maxCurrentVectorState⟨Tz.currentObservable⟩ :=
     (expectation_onSndObservable Tx.norm_maxCurrentState
-      (norm_prodVec_eq_one Ty.norm_maxCurrentState Tz.norm_maxCurrentState) _).trans
-    (expectation_onSndObservable Ty.norm_maxCurrentState Tz.norm_maxCurrentState _)
+        (norm_prodVec_eq_one Ty.norm_maxCurrentState Tz.norm_maxCurrentState) _).trans
+      (expectation_onSndObservable Ty.norm_maxCurrentState Tz.norm_maxCurrentState _)
   rw [h, variance_alongZ, variance_alongZ]
   exact Tz.mandelstamTammRatio_maxCurrentState
 

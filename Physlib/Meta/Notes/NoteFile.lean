@@ -35,7 +35,7 @@ namespace NoteFile
 variable (N : NoteFile)
 
 /-- All imports associated to a note. -/
-def imports : Array Import := (N.files.map fun f => {module := f}).toArray
+def imports : Array Import := (N.files.map fun f => { module := f }).toArray
 
 end NoteFile
 

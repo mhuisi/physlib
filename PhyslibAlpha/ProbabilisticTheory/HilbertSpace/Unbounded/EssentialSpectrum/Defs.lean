@@ -54,23 +54,28 @@ variable {H : Type*} [NormedAddCommGroup H] [InnerProductSpace ℂ H] [CompleteS
 
 -/
 
-/-- The **essential spectrum** of a self-adjoint operator `A`, defined by singular (Weyl)
+/--
+The **essential spectrum** of a self-adjoint operator `A`, defined by singular (Weyl)
 sequences: `λ ∈ essSpectrum hA` iff there is `ψ : ℕ → A.domain` with `‖ψ n‖ → 1`, `ψ` weakly null,
-and `‖A ψ n − λ ψ n‖ → 0`. (`hA` is carried for discoverability; the set depends only on `A`.) -/
+and `‖A ψ n − λ ψ n‖ → 0`. (`hA` is carried for discoverability; the set depends only on `A`.)
+-/
 def essSpectrum {A : H →ₗ.[ℂ] H} (_hA : IsSelfAdjoint A) : Set ℝ :=
   { lam | ∃ ψ : ℕ → A.domain,
       Tendsto (fun n => ‖(ψ n : H)‖) atTop (𝓝 1) ∧
       (∀ g : H, Tendsto (fun n => ⟪g, (ψ n : H)⟫_ℂ) atTop (𝓝 0)) ∧
       Tendsto (fun n => ‖A (ψ n) - (lam : ℂ) • (ψ n : H)‖) atTop (𝓝 0) }
 
-/-- Membership in `essSpectrum` from an `H`-valued Weyl sequence together with a domain-membership
-witness. This packages the `ℕ → A.domain` data so callers can work with plain vectors. -/
-lemma mem_essSpectrum_of_seq {A : H →ₗ.[ℂ] H} (hA : IsSelfAdjoint A) (lam : ℝ)
-    (φ : ℕ → H) (hmem : ∀ n, φ n ∈ A.domain)
+/--
+Membership in `essSpectrum` from an `H`-valued Weyl sequence together with a domain-membership
+witness. This packages the `ℕ → A.domain` data so callers can work with plain vectors.
+-/
+lemma mem_essSpectrum_of_seq
+    {A : H →ₗ.[ℂ] H} (hA : IsSelfAdjoint A)
+    (lam : ℝ) (φ : ℕ → H) (hmem : ∀ n, φ n ∈ A.domain)
     (hnorm : Tendsto (fun n => ‖φ n‖) atTop (𝓝 1))
     (hweak : ∀ g : H, Tendsto (fun n => ⟪g, φ n⟫_ℂ) atTop (𝓝 0))
-    (heig : Tendsto (fun n => ‖A ⟨φ n, hmem n⟩ - (lam : ℂ) • φ n‖) atTop (𝓝 0)) :
-    lam ∈ essSpectrum hA :=
+    (heig : Tendsto (fun n => ‖A ⟨φ n, hmem n⟩ - (lam : ℂ) • φ n‖) atTop (𝓝 0))
+    : lam ∈ essSpectrum hA :=
   ⟨fun n => ⟨φ n, hmem n⟩, hnorm, hweak, heig⟩
 
 end QuantumMechanics.Essential

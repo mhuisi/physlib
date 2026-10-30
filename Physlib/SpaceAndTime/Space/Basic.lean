@@ -74,26 +74,26 @@ the `VAdd (EuclideanSpace ℝ (Fin d)) (Space d)` instance instead.
 
 -/
 
-/-- The type `Space d` is the world-volume which corresponds to
+/--
+The type `Space d` is the world-volume which corresponds to
 `d` dimensional (flat) Euclidean space with a given (but arbitrary)
 choice of length unit, and a given (but arbitrary) choice of zero.
 
-The default value of `d` is `3`. Thus `Space = Space 3`-/
+The default value of `d` is `3`. Thus `Space = Space 3`
+-/
 structure Space (d : ℕ := 3) where
   /-- The underlying map `Fin d → ℝ` associated with a point in `Space`. -/
   val : Fin d → ℝ
 
 namespace Space
 
-lemma eq_of_val {d} {p q : Space d} (h : p.val = q.val) :
-    p = q := by
+lemma eq_of_val {d} {p q : Space d} (h : p.val = q.val) : p = q := by
   cases p
   cases q
   congr
 
 @[simp]
-lemma val_eq_iff {d} {p q : Space d} :
-    p.val = q.val ↔ p = q := by
+lemma val_eq_iff {d} {p q : Space d} : p.val = q.val ↔ p = q := by
   apply Iff.intro
   · exact eq_of_val
   · intro h
@@ -115,8 +115,7 @@ instance {d} : CoeFun (Space d) (fun _ => Fin d → ℝ) where
   coe p := p.val
 
 @[ext]
-lemma eq_of_apply {d} {p q : Space d}
-    (h : ∀ i : Fin d, p i = q i) : p = q := by
+lemma eq_of_apply {d} {p q : Space d} (h : ∀ i : Fin d, p i = q i) : p = q := by
   apply eq_of_val
   funext i
   exact h i
@@ -127,11 +126,11 @@ lemma eq_of_apply {d} {p q : Space d}
 
 -/
 
-instance {d} : Nonempty (Space d) := Nonempty.intro
-  ⟨fun _ => Classical.choice instNonemptyOfInhabited⟩
+instance {d} : Nonempty (Space d) :=
+  Nonempty.intro ⟨fun _ => Classical.choice instNonemptyOfInhabited⟩
 
-instance : Subsingleton (Space 0) := Subsingleton.intro <| fun _ _ =>
-  eq_of_apply <| fun i => Fin.elim0 i
+instance : Subsingleton (Space 0) :=
+  Subsingleton.intro <| fun _ _ => eq_of_apply <| fun i => Fin.elim0 i
 
 /-!
 
@@ -143,16 +142,16 @@ noncomputable instance : VAdd (EuclideanSpace ℝ (Fin d)) (Space d) where
   vadd v s := ⟨fun i => v i + s.val i⟩
 
 @[simp]
-lemma vadd_val {d} (v : EuclideanSpace ℝ (Fin d)) (s : Space d) :
-    (v +ᵥ s).val = fun i => v i + s.val i := rfl
+lemma vadd_val {d} (v : EuclideanSpace ℝ (Fin d)) (s : Space d)
+    : (v +ᵥ s).val = fun i => v i + s.val i :=
+  rfl
 
 @[simp]
-lemma vadd_apply {d} (v : EuclideanSpace ℝ (Fin d))
-    (s : Space d) (i : Fin d) :
-    (v +ᵥ s) i = v i + s i := by rfl
+lemma vadd_apply {d} (v : EuclideanSpace ℝ (Fin d)) (s : Space d) (i : Fin d)
+    : (v +ᵥ s) i = v i + s i := by
+  rfl
 
-lemma vadd_transitive {d} (s1 s2 : Space d) :
-    ∃ v : EuclideanSpace ℝ (Fin d), v +ᵥ s1 = s2 := by
+lemma vadd_transitive {d} (s1 s2 : Space d) : ∃ v : EuclideanSpace ℝ (Fin d), v +ᵥ s1 = s2 := by
   use WithLp.toLp 2 fun i => s2 i - s1 i
   ext i
   simp
@@ -175,9 +174,7 @@ noncomputable instance : AddAction (EuclideanSpace ℝ (Fin d)) (Space d) where
 noncomputable instance {d} : VSub (EuclideanSpace ℝ (Fin d)) (Space d) where
   vsub s1 s2 := WithLp.toLp 2 <| fun i => s1 i - s2 i
 
-@[simp]
-lemma vsub_apply {d} (s1 s2 : Space d) (i : Fin d) :
-    (s1 -ᵥ s2) i = s1 i - s2 i := rfl
+@[simp] lemma vsub_apply {d} (s1 s2 : Space d) (i : Fin d) : (s1 -ᵥ s2) i = s1 i - s2 i := rfl
 
 /-!
 
@@ -200,9 +197,9 @@ noncomputable instance {d} : AddTorsor (EuclideanSpace ℝ (Fin d)) (Space d) wh
 -/
 
 noncomputable instance {d} : Dist (Space d) where
-  dist p q := √ (∑ i, (p i - q i) ^ 2)
+  dist p q := √(∑ i, (p i - q i) ^ 2)
 
-lemma dist_eq {d} (p q : Space d) : dist p q = √ (∑ i, (p i - q i) ^ 2) := rfl
+lemma dist_eq {d} (p q : Space d) : dist p q = √(∑ i, (p i - q i) ^ 2) := rfl
 
 noncomputable instance {d} : PseudoMetricSpace (Space d) where
   dist_self x := by simp [dist_eq]
@@ -259,7 +256,7 @@ instance on `Space d`.
 -/
 noncomputable def homEuclideanSpaceSpace (d : ℕ) : EuclideanSpace ℝ (Fin d) ≃ₜ Space d where
   toFun v := ⟨EuclideanSpace.equiv (Fin d) ℝ v⟩
-  invFun s := EuclideanSpace.equiv (Fin d) ℝ|>.symm s.val
+  invFun s := EuclideanSpace.equiv (Fin d) ℝ |>.symm s.val
   continuous_toFun := by
     rw [Metric.continuous_iff]
     intro b ε hε
@@ -272,14 +269,14 @@ noncomputable def homEuclideanSpaceSpace (d : ℕ) : EuclideanSpace ℝ (Fin d) 
     simp_all [dist, Real.sqrt_eq_rpow]
 
 noncomputable instance (d : ℕ) : ChartedSpace (EuclideanSpace ℝ (Fin d)) (Space d) :=
-    (homEuclideanSpaceSpace d).symm.toOpenPartialHomeomorph.singletonChartedSpace (by simp)
+  (homEuclideanSpaceSpace d).symm.toOpenPartialHomeomorph.singletonChartedSpace (by simp)
 
 instance (d : ℕ) : IsManifold (𝓡 d) ⊤ (Space d) :=
   (homEuclideanSpaceSpace d).symm.toOpenPartialHomeomorph.isManifold_singleton (by simp)
 
-lemma chartAt_eq (d : ℕ) (p : Space d) :
-    chartAt (EuclideanSpace ℝ (Fin d)) p =
-    (homEuclideanSpaceSpace d).symm.toOpenPartialHomeomorph :=
+lemma chartAt_eq (d : ℕ) (p : Space d)
+    : chartAt (EuclideanSpace ℝ (Fin d)) p
+      = (homEuclideanSpaceSpace d).symm.toOpenPartialHomeomorph :=
   rfl
 
 end Space

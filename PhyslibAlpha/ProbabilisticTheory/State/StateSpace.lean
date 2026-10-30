@@ -72,8 +72,7 @@ noncomputable def toStrongDual (ω : 𝓢[ℝ, E]) : StrongDual ℝ E :=
     rw [one_mul]
     exact ω.abs_apply_le_orderUnitNorm A
 
-@[simp]
-lemma toStrongDual_apply (ω : 𝓢[ℝ, E]) (A : E) : ω.toStrongDual A = ω A := rfl
+@[simp] lemma toStrongDual_apply (ω : 𝓢[ℝ, E]) (A : E) : ω.toStrongDual A = ω A := rfl
 
 lemma toStrongDual_injective : Function.Injective (toStrongDual : 𝓢[ℝ, E] → StrongDual ℝ E) :=
   fun _ _ h => ext fun A => DFunLike.congr_fun h A
@@ -86,11 +85,11 @@ lemma norm_toStrongDual_le (ω : 𝓢[ℝ, E]) : ‖ω.toStrongDual‖ ≤ 1 :=
 lemma norm_toStrongDual [Nontrivial E] (ω : 𝓢[ℝ, E]) : ‖ω.toStrongDual‖ = 1 := by
   refine le_antisymm (norm_toStrongDual_le ω) ?_
   have h := ω.toStrongDual.le_opNorm 1
-  rwa [toStrongDual_apply, map_one, norm_one, show ‖(1 : E)‖ = 1 from orderUnitNorm_one,
-    mul_one] at h
+  rwa [toStrongDual_apply, map_one, norm_one, show ‖(1 : E)‖ = 1 from orderUnitNorm_one, mul_one] at
+    h
 
-lemma toStrongDual_mix (ω φ : 𝓢[ℝ, E]) (t : unitInterval) :
-    (mix ω φ t).toStrongDual = (t : ℝ) • ω.toStrongDual + (1 - (t : ℝ)) • φ.toStrongDual := by
+lemma toStrongDual_mix (ω φ : 𝓢[ℝ, E]) (t : unitInterval)
+    : (mix ω φ t).toStrongDual = (t : ℝ) • ω.toStrongDual + (1 - (t : ℝ)) • φ.toStrongDual := by
   ext A
   simp
 
@@ -103,8 +102,10 @@ end UnitalPositiveLinearMap
 -/
 
 variable (E) in
-/-- The state space: the functionals in the weak dual sending `1` to `1` and positive observables
-to nonnegative numbers. -/
+/--
+The state space: the functionals in the weak dual sending `1` to `1` and positive observables
+to nonnegative numbers.
+-/
 def stateSpace : Set (WeakDual ℝ E) := {f | f 1 = 1 ∧ ∀ A : E, 0 ≤ A → 0 ≤ f A}
 
 namespace StateSpace
@@ -146,9 +147,9 @@ lemma continuous_apply (A : E) : Continuous fun ω : stateSpace E => toState ω 
   (WeakDual.eval_continuous A).comp continuous_subtype_val
 
 /-- States converge weak-star exactly when every expectation value converges. -/
-lemma tendsto_iff_forall_apply_tendsto {ι : Type*} {f : ι → stateSpace E} {l : Filter ι}
-    {ω : stateSpace E} :
-    Tendsto f l (𝓝 ω) ↔ ∀ A : E, Tendsto (fun i => toState (f i) A) l (𝓝 (toState ω A)) := by
+lemma tendsto_iff_forall_apply_tendsto
+    {ι : Type*} {f : ι → stateSpace E} {l : Filter ι} {ω : stateSpace E}
+    : Tendsto f l (𝓝 ω) ↔ ∀ A : E, Tendsto (fun i => toState (f i) A) l (𝓝 (toState ω A)) := by
   rw [Topology.IsEmbedding.subtypeVal.tendsto_nhds_iff,
     tendsto_iff_forall_eval_tendsto_topDualPairing]
   rfl
@@ -165,12 +166,11 @@ lemma isClosed_stateSpace : IsClosed (stateSpace E) := by
   have h : stateSpace E = {f | f 1 = 1} ∩ ⋂ A : E, ⋂ _ : 0 ≤ A, {f | 0 ≤ f A} := by
     ext; simp [stateSpace]
   rw [h]
-  exact (isClosed_eq (WeakDual.eval_continuous _) continuous_const).inter <|
-    isClosed_iInter fun A => isClosed_iInter fun _ =>
-      isClosed_le continuous_const (WeakDual.eval_continuous _)
+  exact (isClosed_eq (WeakDual.eval_continuous _) continuous_const).inter <| isClosed_iInter
+    fun A => isClosed_iInter fun _ => isClosed_le continuous_const (WeakDual.eval_continuous _)
 
-lemma stateSpace_subset_closedBall :
-    stateSpace E ⊆ WeakDual.toStrongDual ⁻¹' Metric.closedBall 0 1 := fun f hf =>
+lemma stateSpace_subset_closedBall
+    : stateSpace E ⊆ WeakDual.toStrongDual ⁻¹' Metric.closedBall 0 1 := fun f hf =>
   mem_closedBall_zero_iff.2 (StateSpace.toState ⟨f, hf⟩).norm_toStrongDual_le
 
 /-- **Banach–Alaoglu** for states: the state space is weak-star compact. -/
@@ -191,10 +191,12 @@ instance [TopologicalSpace.SeparableSpace E] : TopologicalSpace.MetrizableSpace 
 -/
 
 /-- A mixture of states is a state. -/
-lemma convex_stateSpace : Convex ℝ (stateSpace E) := fun f hf g hg a b ha hb hab =>
-  ⟨show a * f 1 + b * g 1 = 1 by rw [hf.1, hg.1, mul_one, mul_one, hab],
-    fun A hA => show 0 ≤ a * f A + b * g A from
-      add_nonneg (mul_nonneg ha (hf.2 A hA)) (mul_nonneg hb (hg.2 A hA))⟩
+lemma convex_stateSpace : Convex ℝ (stateSpace E) := fun f hf g hg a b ha hb hab => ⟨
+  show a * f 1 + b * g 1 = 1 by rw [hf.1, hg.1, mul_one, mul_one, hab],
+  fun A hA =>
+    show 0 ≤ a * f A + b * g A from
+      add_nonneg (mul_nonneg ha (hf.2 A hA)) (mul_nonneg hb (hg.2 A hA))
+⟩
 
 namespace StateSpace
 
@@ -202,12 +204,16 @@ lemma range_ofState : Set.range (fun ω : 𝓢[ℝ, E] => (ofState ω : WeakDual
   Set.ext fun f => ⟨by rintro ⟨ω, rfl⟩; exact (ofState ω).2, fun hf => ⟨toState ⟨f, hf⟩, rfl⟩⟩
 
 /-- A state is pure exactly when it is an extreme point of the state space. -/
-lemma isPure_iff_mem_extremePoints (ω : stateSpace E) :
-    (toState ω).IsPure ↔ (ω : WeakDual ℝ E) ∈ (stateSpace E).extremePoints ℝ := by
-  have := UnitalPositiveLinearMap.isPure_iff_mem_extremePoints
-    (F := fun ω : 𝓢[ℝ, E] => (ofState ω : WeakDual ℝ E))
-    (fun φ ψ h => (toState_ofState φ).symm.trans ((congrArg toState (Subtype.ext h)).trans
-      (toState_ofState ψ))) (fun _ _ _ => DFunLike.ext _ _ fun _ => by simp; rfl) (toState ω)
+lemma isPure_iff_mem_extremePoints (ω : stateSpace E)
+    : (toState ω).IsPure ↔ (ω : WeakDual ℝ E) ∈ (stateSpace E).extremePoints ℝ := by
+  have :=
+    UnitalPositiveLinearMap.isPure_iff_mem_extremePoints
+      (F := fun ω : 𝓢[ℝ, E] => (ofState ω : WeakDual ℝ E))
+      (fun φ ψ h =>
+        (toState_ofState φ).symm.trans
+          ((congrArg toState (Subtype.ext h)).trans (toState_ofState ψ)))
+      (fun _ _ _ => DFunLike.ext _ _ fun _ => by simp; rfl)
+      (toState ω)
   rwa [range_ofState] at this
 
 end StateSpace

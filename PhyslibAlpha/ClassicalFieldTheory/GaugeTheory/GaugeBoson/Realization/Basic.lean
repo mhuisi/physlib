@@ -102,48 +102,60 @@ variable {jets : LocalGaugeData G₀ 𝔤 GJ 𝔤J}
 
 open TensorProduct Matrix MatrixGroups Lorentz
 
-/-- An algebra `B` carrying the gauge bosons of the package `jets`: an algebra map out of
-  the complexified gauge-boson jet algebra, equivariant for the jet gauge group and the
-  Lorentz group, with both groups acting on the whole of `B` by algebra endomorphisms.
-  The gauge-field symbols of `B` are the images of the jet algebra's symbols,
-  `GaugeAlgebraRealization.A`, and they satisfy the jet algebra's laws by transport. -/
-structure GaugeAlgebraRealization (jets : LocalGaugeData G₀ 𝔤 GJ 𝔤J) (B : Type) [Ring B]
-    [Algebra ℂ B] (repJet : Representation ℂ GJ B) (repLorentz : Representation ℂ SL(2,ℂ) B)
-    where
-  /-- The algebra map out of the gauge-boson jet algebra: it places the gauge-boson
-    symbols, and every polynomial expression in them, inside `B`. -/
+/--
+An algebra `B` carrying the gauge bosons of the package `jets`: an algebra map out of
+the complexified gauge-boson jet algebra, equivariant for the jet gauge group and the
+Lorentz group, with both groups acting on the whole of `B` by algebra endomorphisms.
+The gauge-field symbols of `B` are the images of the jet algebra's symbols,
+`GaugeAlgebraRealization.A`, and they satisfy the jet algebra's laws by transport.
+-/
+structure GaugeAlgebraRealization
+    (jets : LocalGaugeData G₀ 𝔤 GJ 𝔤J)
+    (B : Type) [Ring B] [Algebra ℂ B]
+    (repJet : Representation ℂ GJ B) (repLorentz : Representation ℂ (SL(2,ℂ)) B) where
+  /--
+  The algebra map out of the gauge-boson jet algebra: it places the gauge-boson
+  symbols, and every polynomial expression in them, inside `B`.
+  -/
   toAlgHom : ℂ ⊗[ℝ] LocalGaugeFieldAlgebra 𝔤 →ₐ[ℂ] B
-  /-- The gauge-field symbols `∂_s A_μ^φ` of `B`. They are determined by the map, as the
-    images of the jet algebra's symbols (`A_eq`), and are recorded as data so that the
-    theory can treat them as opaque symbols and a concrete realization can present the
-    symbols it already has. -/
+  /--
+  The gauge-field symbols `∂_s A_μ^φ` of `B`. They are determined by the map, as the
+  images of the jet algebra's symbols (`A_eq`), and are recorded as data so that the
+  theory can treat them as opaque symbols and a concrete realization can present the
+  symbols it already has.
+  -/
   A : Multiset (Fin 1 ⊕ Fin 3) → (Fin 1 ⊕ Fin 3) → Module.Dual ℝ 𝔤 →ₗ[ℝ] B
   /-- The symbols are the images of the jet algebra's symbols. -/
-  A_eq : ∀ (s : Multiset (Fin 1 ⊕ Fin 3)) (μ : Fin 1 ⊕ Fin 3) (φ : Module.Dual ℝ 𝔤),
-    A s μ φ = toAlgHom (LocalGaugeFieldAlgebra.gaugeField 𝔤 s μ φ)
+  A_eq
+    : ∀ (s : Multiset (Fin 1 ⊕ Fin 3)) (μ : Fin 1 ⊕ Fin 3) (φ : Module.Dual ℝ 𝔤),
+      A s μ φ = toAlgHom (LocalGaugeFieldAlgebra.gaugeField 𝔤 s μ φ)
   /-- The map is equivariant for the jet gauge group. -/
-  map_repJet : ∀ (U : GJ) (x : ℂ ⊗[ℝ] LocalGaugeFieldAlgebra 𝔤),
-    toAlgHom (LocalGaugeFieldAlgebra.complexRepJet jets U x) = repJet U (toAlgHom x)
+  map_repJet
+    : ∀ (U : GJ) (x : ℂ ⊗[ℝ] LocalGaugeFieldAlgebra 𝔤),
+      toAlgHom (LocalGaugeFieldAlgebra.complexRepJet jets U x) = repJet U (toAlgHom x)
   /-- The map is equivariant for the Lorentz group. -/
-  map_repLorentz : ∀ (Λ : SL(2,ℂ)) (x : ℂ ⊗[ℝ] LocalGaugeFieldAlgebra 𝔤),
-    toAlgHom (LocalGaugeFieldAlgebra.complexRepLorentzGroup 𝔤 Λ x) = repLorentz Λ (toAlgHom x)
+  map_repLorentz
+    : ∀ (Λ : SL(2,ℂ)) (x : ℂ ⊗[ℝ] LocalGaugeFieldAlgebra 𝔤),
+      toAlgHom (LocalGaugeFieldAlgebra.complexRepLorentzGroup 𝔤 Λ x) = repLorentz Λ (toAlgHom x)
   /-- The jet gauge group acts on the whole of `B` by algebra endomorphisms. -/
   repJet_mul : ∀ (U : GJ) (b₁ b₂ : B), repJet U (b₁ * b₂) = repJet U b₁ * repJet U b₂
   /-- The Lorentz group acts on the whole of `B` by algebra endomorphisms. -/
-  repLorentz_mul : ∀ (Λ : SL(2,ℂ)) (b₁ b₂ : B),
-    repLorentz Λ (b₁ * b₂) = repLorentz Λ b₁ * repLorentz Λ b₂
+  repLorentz_mul
+    : ∀ (Λ : SL(2,ℂ)) (b₁ b₂ : B), repLorentz Λ (b₁ * b₂) = repLorentz Λ b₁ * repLorentz Λ b₂
 
 namespace GaugeAlgebraRealization
 
 open LocalGaugeFieldAlgebra
 
-variable {B : Type} [Ring B] [Algebra ℂ B] {repJet : Representation ℂ GJ B}
-  {repLorentz : Representation ℂ SL(2,ℂ) B}
+variable
+  {B : Type} [Ring B] [Algebra ℂ B]
+  {repJet : Representation ℂ GJ B} {repLorentz : Representation ℂ (SL(2,ℂ)) B}
 
 variable (jets) in
 /-- The gauge-boson jet algebra realized in itself, by the identity. -/
-noncomputable def id : GaugeAlgebraRealization jets (ℂ ⊗[ℝ] LocalGaugeFieldAlgebra 𝔤)
-    (complexRepJet jets) (complexRepLorentzGroup 𝔤) where
+noncomputable def id
+    : GaugeAlgebraRealization jets (ℂ ⊗[ℝ] LocalGaugeFieldAlgebra 𝔤) (complexRepJet jets)
+      (complexRepLorentzGroup 𝔤) where
   toAlgHom := AlgHom.id ℂ _
   A := gaugeField 𝔤
   A_eq _ _ _ := rfl
@@ -155,44 +167,47 @@ noncomputable def id : GaugeAlgebraRealization jets (ℂ ⊗[ℝ] LocalGaugeFiel
 variable (h : GaugeAlgebraRealization jets B repJet repLorentz)
 
 omit [Module.Finite ℝ 𝔤] in
-lemma A_apply (s : Multiset (Fin 1 ⊕ Fin 3)) (μ : Fin 1 ⊕ Fin 3) (φ : Module.Dual ℝ 𝔤) :
-    h.A s μ φ = h.toAlgHom (gaugeField 𝔤 s μ φ) :=
+lemma A_apply (s : Multiset (Fin 1 ⊕ Fin 3)) (μ : Fin 1 ⊕ Fin 3) (φ : Module.Dual ℝ 𝔤)
+    : h.A s μ φ = h.toAlgHom (gaugeField 𝔤 s μ φ) :=
   h.A_eq s μ φ
 
 omit [Module.Finite ℝ 𝔤] in
-@[simp]
-lemma id_A : (GaugeAlgebraRealization.id jets).A = gaugeField 𝔤 := rfl
+@[simp] lemma id_A : (GaugeAlgebraRealization.id jets).A = gaugeField 𝔤 := rfl
 
 omit [Module.Finite ℝ 𝔤] in
 /-- A realization is determined by its algebra map. -/
-lemma ext {h₁ h₂ : GaugeAlgebraRealization jets B repJet repLorentz}
-    (h : h₁.toAlgHom = h₂.toAlgHom) : h₁ = h₂ := by
+lemma ext {h₁ h₂ : GaugeAlgebraRealization jets B repJet repLorentz} (h : h₁.toAlgHom = h₂.toAlgHom)
+    : h₁ = h₂ := by
   obtain ⟨f₁, A₁, hA₁, _, _, _, _⟩ := h₁
   obtain ⟨f₂, A₂, hA₂, _, _, _, _⟩ := h₂
   dsimp only at h
   subst h
-  have hA : A₁ = A₂ := funext fun s => funext fun μ => LinearMap.ext fun φ =>
-    (hA₁ s μ φ).trans (hA₂ s μ φ).symm
+  have hA : A₁ = A₂ :=
+    funext fun s => funext fun μ => LinearMap.ext fun φ => (hA₁ s μ φ).trans (hA₂ s μ φ).symm
   subst hA
   rfl
 
 omit [Module.Finite ℝ 𝔤] in
-/-- The gauge-field symbols of a realization commute, being images of a commutative
-  algebra. -/
-lemma commute_A (p q : Multiset (Fin 1 ⊕ Fin 3)) (μ ν : Fin 1 ⊕ Fin 3)
-    (φ ψ : Module.Dual ℝ 𝔤) : Commute (h.A p μ φ) (h.A q ν ψ) := by
+/--
+The gauge-field symbols of a realization commute, being images of a commutative
+algebra.
+-/
+lemma commute_A (p q : Multiset (Fin 1 ⊕ Fin 3)) (μ ν : Fin 1 ⊕ Fin 3) (φ ψ : Module.Dual ℝ 𝔤)
+    : Commute (h.A p μ φ) (h.A q ν ψ) := by
   rw [A_apply, A_apply]
   exact (Commute.all _ _).map h.toAlgHom
 
 omit [Module.Finite ℝ 𝔤] in
-/-- The Lorentz law: the gauge-field symbol carries one covector index, and each derivative
-  slot transforms as a covector. -/
-lemma lorentz_apply (Λ : SL(2,ℂ)) (n : ℕ) (l : Fin n → (Fin 1 ⊕ Fin 3)) (μ : Fin 1 ⊕ Fin 3)
-    (φ : Module.Dual ℝ 𝔤) :
-    repLorentz Λ (h.A (List.ofFn l) μ φ) =
-      ∑ (p : Fin n → (Fin 1 ⊕ Fin 3)),
-        (∏ (i : Fin n), (((SL2C.toLorentzGroup Λ).1 (p i) (l i) : ℝ) : ℂ)) •
-      ∑ a, (((Lorentz.SL2C.toLorentzGroup Λ).1 a μ : ℝ) : ℂ) • h.A (List.ofFn p) a φ := by
+/--
+The Lorentz law: the gauge-field symbol carries one covector index, and each derivative
+slot transforms as a covector.
+-/
+lemma lorentz_apply
+    (Λ : SL(2,ℂ)) (n : ℕ) (l : Fin n → (Fin 1 ⊕ Fin 3)) (μ : Fin 1 ⊕ Fin 3) (φ : Module.Dual ℝ 𝔤)
+    : repLorentz Λ (h.A (List.ofFn l) μ φ)
+      = ∑ (p : Fin n → (Fin 1 ⊕ Fin 3)),
+          (∏ (i : Fin n), (((SL2C.toLorentzGroup Λ).1 (p i) (l i) : ℝ) : ℂ)) •
+        ∑ a, (((Lorentz.SL2C.toLorentzGroup Λ).1 a μ : ℝ) : ℂ) • h.A (List.ofFn p) a φ := by
   have key := congrArg h.toAlgHom (repLorentz_gaugeField (𝔤 := 𝔤) Λ l μ φ)
   rw [h.map_repLorentz] at key
   simp only [A_apply]
@@ -203,15 +218,17 @@ lemma lorentz_apply (Λ : SL(2,ℂ)) (n : ℕ) (l : Fin n → (Fin 1 ⊕ Fin 3))
   exact congrArg _ (Finset.sum_congr rfl fun a _ => map_smul h.toAlgHom _ _)
 
 omit [Module.Finite ℝ 𝔤] in
-/-- The gauge law: a jet `U` acts on the derivative symbol `∂_s A_μ^φ` by the Leibniz
-  convolution of the dual adjoint Taylor coefficients of `U⁻¹` against lower symbols (the
-  multiset antidiagonal carrying the multinomial coefficients), plus the base-point value of
-  the `s`-th derivative of the Maurer–Cartan form of `U⁻¹`. -/
-lemma gauge_apply_deriv (U : GJ) (s : Multiset (Fin 1 ⊕ Fin 3)) (μ : Fin 1 ⊕ Fin 3)
-    (φ : Module.Dual ℝ 𝔤) :
-    repJet U (h.A s μ φ) =
-      (s.antidiagonal.map fun p => h.A p.2 μ (jets.adjointDualCoeff U⁻¹ p.1 φ)).sum
-      + algebraMap ℂ B (φ (jets.evalLie (jets.iteratedDeriv s (jets.maurerCartan U⁻¹ μ)))) := by
+/--
+The gauge law: a jet `U` acts on the derivative symbol `∂_s A_μ^φ` by the Leibniz
+convolution of the dual adjoint Taylor coefficients of `U⁻¹` against lower symbols (the
+multiset antidiagonal carrying the multinomial coefficients), plus the base-point value of
+the `s`-th derivative of the Maurer–Cartan form of `U⁻¹`.
+-/
+lemma gauge_apply_deriv
+    (U : GJ) (s : Multiset (Fin 1 ⊕ Fin 3)) (μ : Fin 1 ⊕ Fin 3) (φ : Module.Dual ℝ 𝔤)
+    : repJet U (h.A s μ φ)
+      = (s.antidiagonal.map fun p => h.A p.2 μ (jets.adjointDualCoeff U⁻¹ p.1 φ)).sum
+        + algebraMap ℂ B (φ (jets.evalLie (jets.iteratedDeriv s (jets.maurerCartan U⁻¹ μ)))) := by
   have key := congrArg h.toAlgHom (repJet_gaugeField jets U s μ φ)
   rw [h.map_repJet] at key
   simp only [A_apply]
@@ -221,8 +238,10 @@ lemma gauge_apply_deriv (U : GJ) (s : Multiset (Fin 1 ⊕ Fin 3)) (μ : Fin 1 �
 
 include h in
 omit [Module.Finite ℝ 𝔤] in
-/-- The gauge action preserves products: gauge transformations act on the algebra of local
-  expressions as algebra homomorphisms. -/
+/--
+The gauge action preserves products: gauge transformations act on the algebra of local
+expressions as algebra homomorphisms.
+-/
 lemma gauge_mul (U : GJ) (b₁ b₂ : B) : repJet U (b₁ * b₂) = repJet U b₁ * repJet U b₂ :=
   h.repJet_mul U b₁ b₂
 

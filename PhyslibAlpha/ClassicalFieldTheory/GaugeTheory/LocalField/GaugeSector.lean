@@ -55,8 +55,11 @@ open TensorProduct Matrix MatrixGroups
 
 namespace GaugeFieldData
 
-variable {G₀ : Type} [Group G₀] {𝔤 : Type} [LieRing 𝔤] [LieAlgebra ℝ 𝔤] [Module.Finite ℝ 𝔤]
-  {GJ : Type} [Group GJ] {𝔤J : Type} [LieRing 𝔤J] [LieAlgebra ℝ 𝔤J]
+variable
+  {G₀ : Type} [Group G₀]
+  {𝔤 : Type} [LieRing 𝔤] [LieAlgebra ℝ 𝔤] [Module.Finite ℝ 𝔤]
+  {GJ : Type} [Group GJ]
+  {𝔤J : Type} [LieRing 𝔤J] [LieAlgebra ℝ 𝔤J]
   {jets : LocalGaugeData G₀ 𝔤 GJ 𝔤J} (T : GaugeFieldData jets)
 
 /-!
@@ -65,16 +68,17 @@ variable {G₀ : Type} [Group G₀] {𝔤 : Type} [LieRing 𝔤] [LieAlgebra ℝ
 
 -/
 
-/-- The assignment sending every matter generator to zero and keeping the connection
-  generators. Its relations hold in the commutative target. -/
-noncomputable def connectionAssignment :
-    T.Assignment (ℂ ⊗[ℝ] LocalGaugeFieldAlgebra 𝔤) where
+/--
+The assignment sending every matter generator to zero and keeping the connection
+generators. Its relations hold in the commutative target.
+-/
+noncomputable def connectionAssignment : T.Assignment (ℂ ⊗[ℝ] LocalGaugeFieldAlgebra 𝔤) where
   fermion _ := 0
   boson _ := 0
   connection :=
     (Algebra.TensorProduct.includeRight (R := ℝ) (A := ℂ)
-      (B := SymmetricAlgebra ℝ (GaugeBoson.JetComponentSpace 𝔤))).toLinearMap ∘ₗ
-      SymmetricAlgebra.ι ℝ (GaugeBoson.JetComponentSpace 𝔤)
+        (B := SymmetricAlgebra ℝ (GaugeBoson.JetComponentSpace 𝔤))).toLinearMap
+      ∘ₗ SymmetricAlgebra.ι ℝ (GaugeBoson.JetComponentSpace 𝔤)
   fermion_mul_self _ _ := by simp
   fermion_mul_swap _ _ _ _ := by simp
   boson_commute _ _ _ _ := Commute.all _ _
@@ -83,17 +87,19 @@ noncomputable def connectionAssignment :
   boson_commute_fermion _ _ _ _ := Commute.all _ _
   connection_commute_fermion _ _ _ := Commute.all _ _
 
-/-- The retraction of the local field algebra onto the complexified gauge-only algebra: it
-  forgets the matter symbols. -/
-noncomputable def connectionRetraction :
-    T.LocalFieldAlgebra →ₐ[ℂ] ℂ ⊗[ℝ] LocalGaugeFieldAlgebra 𝔤 :=
+/--
+The retraction of the local field algebra onto the complexified gauge-only algebra: it
+forgets the matter symbols.
+-/
+noncomputable def connectionRetraction
+    : T.LocalFieldAlgebra →ₐ[ℂ] ℂ ⊗[ℝ] LocalGaugeFieldAlgebra 𝔤 :=
   T.connectionAssignment.lift
 
 variable {T}
 
 @[simp]
-lemma connectionRetraction_ιConnection (v : GaugeBoson.JetComponentSpace 𝔤) :
-    T.connectionRetraction (T.ιConnection v)
+lemma connectionRetraction_ιConnection (v : GaugeBoson.JetComponentSpace 𝔤)
+    : T.connectionRetraction (T.ιConnection v)
       = (1 : ℂ) ⊗ₜ[ℝ] SymmetricAlgebra.ι ℝ (GaugeBoson.JetComponentSpace 𝔤) v :=
   T.connectionAssignment.lift_ιConnection v
 
@@ -104,16 +110,16 @@ lemma connectionRetraction_ιConnection (v : GaugeBoson.JetComponentSpace 𝔤) 
 -/
 
 /-- The retraction is a left inverse of the connection inclusion. -/
-lemma connectionRetraction_comp_includeConnection :
-    T.connectionRetraction.comp T.includeConnection
+lemma connectionRetraction_comp_includeConnection
+    : T.connectionRetraction.comp T.includeConnection
       = AlgHom.id ℂ (ℂ ⊗[ℝ] LocalGaugeFieldAlgebra 𝔤) := by
   refine Algebra.TensorProduct.ext (Subsingleton.elim _ _) ?_
   refine AlgHom.ext_of_adjoin_eq_top SymmetricAlgebra.adjoin_range_ι ?_
   rintro _ ⟨v, rfl⟩
   exact connectionRetraction_ιConnection v
 
-lemma connectionRetraction_includeConnection (y : ℂ ⊗[ℝ] LocalGaugeFieldAlgebra 𝔤) :
-    T.connectionRetraction (T.includeConnection y) = y :=
+lemma connectionRetraction_includeConnection (y : ℂ ⊗[ℝ] LocalGaugeFieldAlgebra 𝔤)
+    : T.connectionRetraction (T.includeConnection y) = y :=
   AlgHom.congr_fun connectionRetraction_comp_includeConnection y
 
 /-- The complexified gauge-only algebra embeds in the local field algebra. -/
@@ -129,22 +135,26 @@ lemma includeConnection_injective : Function.Injective T.includeConnection :=
 variable (T)
 
 /-- The range of the connection inclusion is the gauge sector. -/
-lemma range_includeConnection :
-    T.includeConnection.range = T.SectorAlgebra {FieldCategory.gauge} := by
+lemma range_includeConnection
+    : T.includeConnection.range = T.SectorAlgebra {FieldCategory.gauge} := by
   refine le_antisymm ?_ (Algebra.adjoin_le ?_)
   · refine Algebra.range_le_of_adjoin_eq_top
       (Algebra.TensorProduct.adjoin_one_tmul_eq_top ℂ
         (Set.range (SymmetricAlgebra.ι ℝ (GaugeBoson.JetComponentSpace 𝔤)))
-        SymmetricAlgebra.adjoin_range_ι) T.includeConnection ?_
+        SymmetricAlgebra.adjoin_range_ι)
+      T.includeConnection ?_
     rintro _ ⟨_, ⟨v, rfl⟩, rfl⟩
     exact SectorAlgebra.ιConnection_mem (Finset.mem_singleton_self _) v
   · intro b hb
-    refine SectorAlgebra.sectorGenerators_cases (P := fun b => b ∈ T.includeConnection.range)
-      hb (fun hS => absurd hS (by decide)) (fun hS => absurd hS (by decide))
+    refine SectorAlgebra.sectorGenerators_cases
+      (P := fun b => b ∈ T.includeConnection.range)
+      hb
+      (fun hS => absurd hS (by decide))
+      (fun hS => absurd hS (by decide))
       (fun _ v => ⟨(1 : ℂ) ⊗ₜ[ℝ] SymmetricAlgebra.ι ℝ (GaugeBoson.JetComponentSpace 𝔤) v, rfl⟩)
 
-lemma includeConnection_mem_gaugeSector (y : ℂ ⊗[ℝ] LocalGaugeFieldAlgebra 𝔤) :
-    T.includeConnection y ∈ T.SectorAlgebra {FieldCategory.gauge} := by
+lemma includeConnection_mem_gaugeSector (y : ℂ ⊗[ℝ] LocalGaugeFieldAlgebra 𝔤)
+    : T.includeConnection y ∈ T.SectorAlgebra {FieldCategory.gauge} := by
   rw [← range_includeConnection T]
   exact ⟨y, rfl⟩
 
@@ -154,11 +164,13 @@ lemma includeConnection_mem_gaugeSector (y : ℂ ⊗[ℝ] LocalGaugeFieldAlgebra
 
 -/
 
-/-- The gauge sector is the complexification of the gauge-only algebra: the connection
-  inclusion, corestricted to its range. The source is complexified because the gauge-only
-  algebra is real while the sector is a complex subalgebra. -/
-noncomputable def gaugeSectorEquiv :
-    (ℂ ⊗[ℝ] LocalGaugeFieldAlgebra 𝔤) ≃ₐ[ℂ] ↥(T.SectorAlgebra {FieldCategory.gauge}) :=
+/--
+The gauge sector is the complexification of the gauge-only algebra: the connection
+inclusion, corestricted to its range. The source is complexified because the gauge-only
+algebra is real while the sector is a complex subalgebra.
+-/
+noncomputable def gaugeSectorEquiv
+    : (ℂ ⊗[ℝ] LocalGaugeFieldAlgebra 𝔤) ≃ₐ[ℂ] ↥(T.SectorAlgebra {FieldCategory.gauge}) :=
   (AlgEquiv.ofInjective T.includeConnection includeConnection_injective).trans
     (Subalgebra.equivOfEq _ _ (range_includeConnection T))
 
@@ -166,15 +178,19 @@ variable {T}
 
 /-- In the local field algebra the equivalence is the canonical inclusion. -/
 @[simp]
-lemma coe_gaugeSectorEquiv (y : ℂ ⊗[ℝ] LocalGaugeFieldAlgebra 𝔤) :
-    (T.gaugeSectorEquiv y : T.LocalFieldAlgebra) = T.includeConnection y := rfl
+lemma coe_gaugeSectorEquiv (y : ℂ ⊗[ℝ] LocalGaugeFieldAlgebra 𝔤)
+    : (T.gaugeSectorEquiv y : T.LocalFieldAlgebra) = T.includeConnection y :=
+  rfl
 
 /-- The inverse recovers an element from its inclusion. -/
-lemma gaugeSectorEquiv_symm_includeConnection (y : ℂ ⊗[ℝ] LocalGaugeFieldAlgebra 𝔤)
-    (hy : T.includeConnection y ∈ T.SectorAlgebra {FieldCategory.gauge}) :
-    T.gaugeSectorEquiv.symm ⟨T.includeConnection y, hy⟩ = y := by
+lemma gaugeSectorEquiv_symm_includeConnection
+    (y : ℂ ⊗[ℝ] LocalGaugeFieldAlgebra 𝔤)
+    (hy : T.includeConnection y ∈ T.SectorAlgebra {FieldCategory.gauge})
+    : T.gaugeSectorEquiv.symm ⟨T.includeConnection y, hy⟩ = y := by
   rw [show (⟨T.includeConnection y, hy⟩ : ↥(T.SectorAlgebra {FieldCategory.gauge}))
-      = T.gaugeSectorEquiv y from Subtype.ext rfl, AlgEquiv.symm_apply_apply]
+        = T.gaugeSectorEquiv y from
+      Subtype.ext rfl,
+    AlgEquiv.symm_apply_apply]
 
 /-!
 
@@ -182,16 +198,20 @@ lemma gaugeSectorEquiv_symm_includeConnection (y : ℂ ⊗[ℝ] LocalGaugeFieldA
 
 -/
 
-/-- A real gauge-only generator, embedded with the scalar `1`, is the corresponding
-  connection symbol. -/
-lemma coe_gaugeSectorEquiv_one_tmul_ι (v : GaugeBoson.JetComponentSpace 𝔤) :
-    (T.gaugeSectorEquiv ((1 : ℂ) ⊗ₜ[ℝ]
-        SymmetricAlgebra.ι ℝ (GaugeBoson.JetComponentSpace 𝔤) v) : T.LocalFieldAlgebra)
-      = T.ιConnection v := rfl
+/--
+A real gauge-only generator, embedded with the scalar `1`, is the corresponding
+connection symbol.
+-/
+lemma coe_gaugeSectorEquiv_one_tmul_ι (v : GaugeBoson.JetComponentSpace 𝔤)
+    : (T.gaugeSectorEquiv ((1 : ℂ) ⊗ₜ[ℝ]
+          SymmetricAlgebra.ι ℝ (GaugeBoson.JetComponentSpace 𝔤) v)
+        : T.LocalFieldAlgebra)
+      = T.ιConnection v :=
+  rfl
 
 /-- `z ⊗ₜ x` maps to `z` times the image of `1 ⊗ₜ x`. -/
-lemma coe_gaugeSectorEquiv_tmul (z : ℂ) (x : LocalGaugeFieldAlgebra 𝔤) :
-    (T.gaugeSectorEquiv (z ⊗ₜ[ℝ] x) : T.LocalFieldAlgebra)
+lemma coe_gaugeSectorEquiv_tmul (z : ℂ) (x : LocalGaugeFieldAlgebra 𝔤)
+    : (T.gaugeSectorEquiv (z ⊗ₜ[ℝ] x) : T.LocalFieldAlgebra)
       = z • (T.gaugeSectorEquiv ((1 : ℂ) ⊗ₜ[ℝ] x) : T.LocalFieldAlgebra) := by
   have h : z ⊗ₜ[ℝ] x = z • ((1 : ℂ) ⊗ₜ[ℝ] x) := by
     rw [TensorProduct.smul_tmul', smul_eq_mul, mul_one]
@@ -199,12 +219,15 @@ lemma coe_gaugeSectorEquiv_tmul (z : ℂ) (x : LocalGaugeFieldAlgebra 𝔤) :
   rw [h]
   exact T.includeConnection.toLinearMap.map_smul z ((1 : ℂ) ⊗ₜ[ℝ] x)
 
-/-- The gauge-field symbol `∂_s A_μ^φ`, for any derivative multiset, spacetime index and
-  adjoint covector, is the connection symbol with the same labels. -/
-lemma coe_gaugeSectorEquiv_gaugeField (s : Multiset (Fin 1 ⊕ Fin 3)) (μ : Fin 1 ⊕ Fin 3)
-    (φ : Module.Dual ℝ 𝔤) :
-    (T.gaugeSectorEquiv (LocalGaugeFieldAlgebra.gaugeField 𝔤 s μ φ) : T.LocalFieldAlgebra)
-      = T.gaugeRealization.A s μ φ := rfl
+/--
+The gauge-field symbol `∂_s A_μ^φ`, for any derivative multiset, spacetime index and
+adjoint covector, is the connection symbol with the same labels.
+-/
+lemma coe_gaugeSectorEquiv_gaugeField
+    (s : Multiset (Fin 1 ⊕ Fin 3)) (μ : Fin 1 ⊕ Fin 3) (φ : Module.Dual ℝ 𝔤)
+    : (T.gaugeSectorEquiv (LocalGaugeFieldAlgebra.gaugeField 𝔤 s μ φ) : T.LocalFieldAlgebra)
+      = T.gaugeRealization.A s μ φ :=
+  rfl
 
 /-!
 
@@ -212,18 +235,21 @@ lemma coe_gaugeSectorEquiv_gaugeField (s : Multiset (Fin 1 ⊕ Fin 3)) (μ : Fin
 
 -/
 
-/-- The equivalence intertwines the complexified gauge-only jet action with the restricted
-  jet action of the gauge sector. -/
-lemma gaugeSectorEquiv_complexRepJet (U : GJ) (y : ℂ ⊗[ℝ] LocalGaugeFieldAlgebra 𝔤) :
-    T.gaugeSectorEquiv (LocalGaugeFieldAlgebra.complexRepJet jets U y)
+/--
+The equivalence intertwines the complexified gauge-only jet action with the restricted
+jet action of the gauge sector.
+-/
+lemma gaugeSectorEquiv_complexRepJet (U : GJ) (y : ℂ ⊗[ℝ] LocalGaugeFieldAlgebra 𝔤)
+    : T.gaugeSectorEquiv (LocalGaugeFieldAlgebra.complexRepJet jets U y)
       = SectorAlgebra.repJet T {FieldCategory.gauge} U (T.gaugeSectorEquiv y) :=
   Subtype.ext (repJet_includeConnection U y).symm
 
-/-- The equivalence intertwines the complexified gauge-only Lorentz action with the
-  restricted Lorentz action of the gauge sector. -/
-lemma gaugeSectorEquiv_complexRepLorentzGroup (Λ : SL(2,ℂ))
-    (y : ℂ ⊗[ℝ] LocalGaugeFieldAlgebra 𝔤) :
-    T.gaugeSectorEquiv (LocalGaugeFieldAlgebra.complexRepLorentzGroup 𝔤 Λ y)
+/--
+The equivalence intertwines the complexified gauge-only Lorentz action with the
+restricted Lorentz action of the gauge sector.
+-/
+lemma gaugeSectorEquiv_complexRepLorentzGroup (Λ : SL(2,ℂ)) (y : ℂ ⊗[ℝ] LocalGaugeFieldAlgebra 𝔤)
+    : T.gaugeSectorEquiv (LocalGaugeFieldAlgebra.complexRepLorentzGroup 𝔤 Λ y)
       = SectorAlgebra.repLorentzGroup T {FieldCategory.gauge} Λ (T.gaugeSectorEquiv y) :=
   Subtype.ext (repLorentzGroup_includeConnection Λ y).symm
 

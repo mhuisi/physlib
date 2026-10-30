@@ -41,19 +41,23 @@ namespace Physlib
 -/
 
 /-- The multi-indices on `d` coordinates of order at most `k`. -/
-abbrev DerivativeIndex (d k : ℕ) := { I : MultiIndex d // I.order ≤ k }
+abbrev DerivativeIndex (d k : ℕ) := {I : MultiIndex d // I.order ≤ k}
 
 noncomputable instance (d k : ℕ) : Fintype (DerivativeIndex d k) :=
   Fintype.ofInjective
     (fun I : DerivativeIndex d k => fun i : Fin d =>
-      ((⟨I.1 i, by
-        have hle_order : I.1 i ≤ I.1.order := by
-          classical
-          unfold Physlib.MultiIndex.order
-          simpa using
-            (Finset.single_le_sum (fun j _ => Nat.zero_le (I.1 j)) (by simp : i ∈ Finset.univ) :
-              I.1 i ≤ ∑ j : Fin d, I.1 j)
-        exact Nat.lt_succ_of_le (le_trans hle_order I.2)⟩) : Fin (k + 1)))
+      ((⟨
+          I.1 i,
+          by
+            have hle_order : I.1 i ≤ I.1.order := by
+              classical
+              unfold Physlib.MultiIndex.order
+              simpa using
+                (Finset.single_le_sum (fun j _ => Nat.zero_le (I.1 j)) (by simp : i ∈ Finset.univ)
+                  : I.1 i ≤ ∑ j : Fin d, I.1 j)
+            exact Nat.lt_succ_of_le (le_trans hle_order I.2)
+        ⟩)
+        : Fin (k + 1)))
     (by
       intro I J h
       apply Subtype.ext
@@ -68,13 +72,10 @@ instance (d k : ℕ) : Zero (DerivativeIndex d k) where
 
 namespace DerivativeIndex
 
-@[simp]
-lemma coe_zero (d k : ℕ) :
-    ((0 : DerivativeIndex d k) : MultiIndex d) = 0 := rfl
+@[simp] lemma coe_zero (d k : ℕ) : ((0 : DerivativeIndex d k) : MultiIndex d) = 0 := rfl
 
 @[simp]
-lemma zero_apply (d k : ℕ) (i : Fin d) :
-    ((0 : DerivativeIndex d k) : MultiIndex d) i = 0 := rfl
+lemma zero_apply (d k : ℕ) (i : Fin d) : ((0 : DerivativeIndex d k) : MultiIndex d) i = 0 := rfl
 
 end DerivativeIndex
 

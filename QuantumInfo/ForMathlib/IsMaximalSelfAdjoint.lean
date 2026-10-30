@@ -20,12 +20,15 @@ self-adjoint and take real expectation values.
 
 @[expose] public section
 
-/-- `IsMaximalSelfAdjoint R α` witnesses that `R` is the maximal `TrivialStar` subring of the
+/--
+`IsMaximalSelfAdjoint R α` witnesses that `R` is the maximal `TrivialStar` subring of the
 star ring `α`, via an additive map `selfadjMap : α →+ R` collecting the self-adjoint part of
 each element. This lets `HermitianMat.trace` return `𝕜` when `𝕜` already has a trivial star,
-and the "clean" underlying type otherwise, e.g. `ℝ` when the input field is `ℂ`. -/
-class IsMaximalSelfAdjoint (R : outParam Type*) (α : Type*) [Star α] [Star R] [CommSemiring R]
-    [Semiring α] [TrivialStar R] [Algebra R α] where
+and the "clean" underlying type otherwise, e.g. `ℝ` when the input field is `ℂ`.
+-/
+class IsMaximalSelfAdjoint
+    (R : outParam Type*) (α : Type*)
+    [Star α] [Star R] [CommSemiring R] [Semiring α] [TrivialStar R] [Algebra R α] where
   /-- The additive map sending an element of `α` to its self-adjoint part in `R`. -/
   selfadjMap : α →+ R
   /-- `selfadjMap` pulls scalar multiplication by `R` out of its argument. -/
@@ -34,8 +37,8 @@ class IsMaximalSelfAdjoint (R : outParam Type*) (α : Type*) [Star α] [Star R] 
   selfadj_algebra : ∀ {a : α}, IsSelfAdjoint a → algebraMap _ _ (selfadjMap a) = a
 
 /-- Every `TrivialStar` `CommSemiring` is its own maximal self adjoints. -/
-instance instTrivialStarIsMaximalSelfAdjoint {R} [Star R] [TrivialStar R] [CommSemiring R] :
-    IsMaximalSelfAdjoint R R where
+instance instTrivialStarIsMaximalSelfAdjoint {R} [Star R] [TrivialStar R] [CommSemiring R]
+    : IsMaximalSelfAdjoint R R where
   selfadjMap := AddMonoidHom.id R
   selfadj_smul _ __ := rfl
   selfadj_algebra {_} _ := rfl
@@ -53,12 +56,10 @@ namespace IsMaximalSelfAdjoint
 -- take care of proving that anyway.
 
 @[simp]
-lemma trivial_selfadjMap {R} [Star R] [TrivialStar R] [CommSemiring R] :
-    (selfadjMap : R →+ R) = .id R := by
+lemma trivial_selfadjMap {R} [Star R] [TrivialStar R] [CommSemiring R]
+    : (selfadjMap : R →+ R) = .id R := by
   rfl
 
-@[simp]
-lemma RCLike_selfadjMap {α} [RCLike α] : (selfadjMap : α →+ ℝ) = RCLike.re := by
-  rfl
+@[simp] lemma RCLike_selfadjMap {α} [RCLike α] : (selfadjMap : α →+ ℝ) = RCLike.re := by rfl
 
 end IsMaximalSelfAdjoint

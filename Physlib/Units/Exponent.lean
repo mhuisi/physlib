@@ -52,33 +52,30 @@ instance : Repr Exponent where
 namespace Exponent
 
 /-- The equivalence between `Exponent` and the rational numbers. -/
-def equivRat : Exponent ≃ ℚ :=
-  Equiv.mk Exponent.toRat Exponent.mk Eq.refl Eq.refl
+def equivRat : Exponent ≃ ℚ := Equiv.mk Exponent.toRat Exponent.mk Eq.refl Eq.refl
 
 /-- Regard a rational number as a dimension exponent. -/
 def ofRat (q : ℚ) : Exponent := ⟨q⟩
 
-@[simp]
-lemma ofRat_toRat (q : ℚ) : (ofRat q).toRat = q := rfl
+@[simp] lemma ofRat_toRat (q : ℚ) : (ofRat q).toRat = q := rfl
 
 /-- Fuel-bounded Euclidean algorithm used to make exponent normalization reducible. -/
 def gcdAux : Nat → Nat → Nat → Nat
   | 0, _, n => n
   | fuel + 1, m, n => if m = 0 then n else gcdAux fuel (n % m) m
 
-private lemma gcdAux_eq_nat_gcd (fuel m n : Nat) (m_lt_fuel : m < fuel) :
-    gcdAux fuel m n = Nat.gcd m n := by
+private lemma gcdAux_eq_nat_gcd (fuel m n : Nat) (m_lt_fuel : m < fuel)
+    : gcdAux fuel m n = Nat.gcd m n := by
   induction fuel generalizing m n with
   | zero => omega
   | succ fuel ih =>
-      rw [gcdAux, Nat.gcd_def]
-      split
-      · rfl
-      · apply ih; have := Nat.mod_lt n (Nat.zero_lt_of_ne_zero ‹m ≠ 0›); omega
+    rw [gcdAux, Nat.gcd_def]
+    split
+    · rfl
+    · apply ih; have := Nat.mod_lt n (Nat.zero_lt_of_ne_zero ‹m ≠ 0›); omega
 
 /-- Reducible greatest common divisor used when normalizing an exponent. -/
-def gcd (m n : Nat) : Nat :=
-  gcdAux (m + 1) m n
+def gcd (m n : Nat) : Nat := gcdAux (m + 1) m n
 
 /-- The reducible exponent GCD agrees with `Nat.gcd`. -/
 lemma gcd_eq_nat_gcd (m n : Nat) : gcd m n = Nat.gcd m n := by
@@ -88,24 +85,19 @@ lemma gcd_eq_nat_gcd (m n : Nat) : gcd m n = Nat.gcd m n := by
 def normalize (num : Int) (den : Nat) (den_ne_zero : den ≠ 0) : Exponent :=
   let g := gcd num.natAbs den
   let g_eq : g = num.natAbs.gcd den := gcd_eq_nat_gcd num.natAbs den
-  ⟨Rat.maybeNormalize num den g
-    (Rat.normalize.dvd_num g_eq)
-    (Rat.normalize.dvd_den g_eq)
-    (Rat.normalize.den_nz den_ne_zero g_eq)
-    (Rat.normalize.reduced den_ne_zero g_eq)⟩
+  ⟨Rat.maybeNormalize num den g (Rat.normalize.dvd_num g_eq) (Rat.normalize.dvd_den g_eq)
+    (Rat.normalize.den_nz den_ne_zero g_eq) (Rat.normalize.reduced den_ne_zero g_eq)⟩
 
-lemma normalize_toRat (num : Int) (den : Nat) (den_ne_zero : den ≠ 0) :
-    (normalize num den den_ne_zero).toRat = Rat.normalize num den den_ne_zero := by
+lemma normalize_toRat (num : Int) (den : Nat) (den_ne_zero : den ≠ 0)
+    : (normalize num den den_ne_zero).toRat = Rat.normalize num den den_ne_zero := by
   unfold normalize Rat.normalize
   simp only [gcd_eq_nat_gcd]
 
 /-- The normalized numerator of an exponent. -/
-@[reducible] def num (x : Exponent) : Int :=
-  x.toRat.num
+@[reducible] def num (x : Exponent) : Int := x.toRat.num
 
 /-- The normalized denominator of an exponent. -/
-@[reducible] def den (x : Exponent) : Nat :=
-  x.toRat.den
+@[reducible] def den (x : Exponent) : Nat := x.toRat.den
 
 /-!
 
@@ -125,8 +117,7 @@ lemma add_equiv (a b : Exponent) : equivRat (add a b) = equivRat a + equivRat b 
   exact normalize_toRat _ _ _
 
 /-- Reducible subtraction of dimension exponents. -/
-def sub (a b : Exponent) : Exponent :=
-  add a ⟨-b.toRat⟩
+def sub (a b : Exponent) : Exponent := add a ⟨-b.toRat⟩
 
 instance : Sub Exponent := Sub.mk sub
 
@@ -136,8 +127,7 @@ lemma sub_equiv (a b : Exponent) : equivRat (sub a b) = equivRat a - equivRat b 
 
 /-- Reducible multiplication of dimension exponents. -/
 def mul (a b : Exponent) : Exponent :=
-  normalize (a.num * b.num) (a.den * b.den)
-    (Nat.mul_ne_zero a.toRat.den_nz b.toRat.den_nz)
+  normalize (a.num * b.num) (a.den * b.den) (Nat.mul_ne_zero a.toRat.den_nz b.toRat.den_nz)
 
 instance : Mul Exponent := Mul.mk mul
 
@@ -149,12 +139,15 @@ lemma mul_equiv (a b : Exponent) : equivRat (mul a b) = equivRat a * equivRat b 
 def inv (a : Exponent) : Exponent :=
   if ne_zero : a.toRat ≠ 0 then
     have num_ne_zero : a.num ≠ 0 := ne_zero ∘ Rat.num_eq_zero.mp
-    ⟨{ num := a.num.sign * a.den
-       den := a.num.natAbs
-       den_nz := by exact Nat.ne_of_gt (Int.natAbs_pos.mpr num_ne_zero)
-       reduced := by simpa [Int.natAbs_mul, Int.natAbs_sign_of_ne_zero num_ne_zero]
-         using a.toRat.reduced.symm }⟩
-  else a
+    ⟨{
+      num := a.num.sign * a.den
+      den := a.num.natAbs
+      den_nz := by exact Nat.ne_of_gt (Int.natAbs_pos.mpr num_ne_zero)
+      reduced := by
+        simpa [Int.natAbs_mul, Int.natAbs_sign_of_ne_zero num_ne_zero] using a.toRat.reduced.symm
+    }⟩
+  else
+    a
 
 instance : Inv Exponent := Inv.mk inv
 
@@ -165,8 +158,7 @@ lemma inv_equiv (a : Exponent) : equivRat (inv a) = (equivRat a)⁻¹ := by
     apply Rat.ext <;> simp [inv, ne_zero, equivRat]
 
 /-- Reducible division of dimension exponents. -/
-def div (a b : Exponent) : Exponent :=
-  mul a (inv b)
+def div (a b : Exponent) : Exponent := mul a (inv b)
 
 instance : Div Exponent := Div.mk div
 
@@ -202,55 +194,42 @@ def ringEquivRat : Exponent ≃+* ℚ where
 instance : Coe Exponent ℚ := ⟨Exponent.toRat⟩
 
 @[simp, norm_cast]
-lemma coe_inj {a b : Exponent} : (a : ℚ) = b ↔ a = b :=
-  ringEquivRat.injective.eq_iff
+lemma coe_inj {a b : Exponent} : (a : ℚ) = b ↔ a = b := ringEquivRat.injective.eq_iff
 
-@[simp, norm_cast]
-lemma coe_zero : ((0 : Exponent) : ℚ) = 0 := map_zero ringEquivRat
+@[simp, norm_cast] lemma coe_zero : ((0 : Exponent) : ℚ) = 0 := map_zero ringEquivRat
 
-@[simp, norm_cast]
-lemma coe_one : ((1 : Exponent) : ℚ) = 1 := map_one ringEquivRat
+@[simp, norm_cast] lemma coe_one : ((1 : Exponent) : ℚ) = 1 := map_one ringEquivRat
 
 @[simp, norm_cast]
 lemma coe_ofNat (n : ℕ) [n.AtLeastTwo] : ((ofNat(n) : Exponent) : ℚ) = ofNat(n) :=
   map_ofNat ringEquivRat n
 
 @[simp, norm_cast]
-lemma coe_add (a b : Exponent) : ((a + b : Exponent) : ℚ) = a + b :=
-  map_add ringEquivRat a b
+lemma coe_add (a b : Exponent) : ((a + b : Exponent) : ℚ) = a + b := map_add ringEquivRat a b
 
 @[simp, norm_cast]
-lemma coe_sub (a b : Exponent) : ((a - b : Exponent) : ℚ) = a - b :=
-  map_sub ringEquivRat a b
+lemma coe_sub (a b : Exponent) : ((a - b : Exponent) : ℚ) = a - b := map_sub ringEquivRat a b
 
 @[simp, norm_cast]
-lemma coe_neg (a : Exponent) : ((-a : Exponent) : ℚ) = -a :=
-  map_neg ringEquivRat a
+lemma coe_neg (a : Exponent) : ((-a : Exponent) : ℚ) = -a := map_neg ringEquivRat a
 
 @[simp, norm_cast]
-lemma coe_mul (a b : Exponent) : ((a * b : Exponent) : ℚ) = a * b :=
-  map_mul ringEquivRat a b
+lemma coe_mul (a b : Exponent) : ((a * b : Exponent) : ℚ) = a * b := map_mul ringEquivRat a b
+
+@[simp, norm_cast] lemma coe_inv (a : Exponent) : ((a⁻¹ : Exponent) : ℚ) = (a : ℚ)⁻¹ := inv_equiv a
 
 @[simp, norm_cast]
-lemma coe_inv (a : Exponent) : ((a⁻¹ : Exponent) : ℚ) = (a : ℚ)⁻¹ :=
-  inv_equiv a
-
-@[simp, norm_cast]
-lemma coe_div (a b : Exponent) : ((a / b : Exponent) : ℚ) = (a : ℚ) / b :=
-  div_equiv a b
+lemma coe_div (a b : Exponent) : ((a / b : Exponent) : ℚ) = (a : ℚ) / b := div_equiv a b
 
 instance : LinearOrder Exponent := equivRat.linearOrder
 
-@[simp, norm_cast]
-lemma coe_le_coe {a b : Exponent} : (a : ℚ) ≤ b ↔ a ≤ b := Iff.rfl
+@[simp, norm_cast] lemma coe_le_coe {a b : Exponent} : (a : ℚ) ≤ b ↔ a ≤ b := Iff.rfl
 
-@[simp, norm_cast]
-lemma coe_lt_coe {a b : Exponent} : (a : ℚ) < b ↔ a < b := Iff.rfl
+@[simp, norm_cast] lemma coe_lt_coe {a b : Exponent} : (a : ℚ) < b ↔ a < b := Iff.rfl
 
 instance : IsStrictOrderedRing Exponent :=
-  Function.Injective.isStrictOrderedRing ringEquivRat
-    (map_zero ringEquivRat) (map_one ringEquivRat) (map_add ringEquivRat) (map_mul ringEquivRat)
-    coe_le_coe coe_lt_coe
+  Function.Injective.isStrictOrderedRing ringEquivRat (map_zero ringEquivRat) (map_one ringEquivRat)
+    (map_add ringEquivRat) (map_mul ringEquivRat) coe_le_coe coe_lt_coe
 
 instance : CharZero Exponent where
   cast_injective _ _ equality := Nat.cast_injective <| congrArg equivRat equality
@@ -268,14 +247,14 @@ lemma div_eq_instField_div : div = instField.div := rfl
 
 -/
 
-lemma tuple_arithmetic_defeq :
-    let Length : Exponent × Exponent := (1, 0)
-    let Time : Exponent × Exponent := (0, 1)
-    let Speed := Length - Time
-    Length = Time + Speed := rfl
+lemma tuple_arithmetic_defeq
+    : let Length : Exponent × Exponent := (1, 0)
+      let Time : Exponent × Exponent := (0, 1)
+      let Speed := Length - Time
+      Length = Time + Speed :=
+  rfl
 
-lemma rational_arithmetic_defeq :
-    ((2 / 3 + 5 / 7) * (11 / 13 - 1 / 2) : Exponent) = 87 / 182 := rfl
+lemma rational_arithmetic_defeq : ((2 / 3 + 5 / 7) * (11 / 13 - 1 / 2) : Exponent) = 87 / 182 := rfl
 
 lemma inverse_arithmetic_defeq : ((-3 / 4 : Exponent)⁻¹ + 5 / 6) = -1 / 2 := rfl
 

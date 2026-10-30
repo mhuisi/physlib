@@ -54,10 +54,12 @@ see `Physlib.SpaceAndTime.Space.Basic` for a discussion of the (dis)advantages o
 ## A. The `WaveVectorSpace` type
 -/
 
-/-- The type `WaveVectorSpace d` is the real vector space which corresponds to `d`-dimensional
+/--
+The type `WaveVectorSpace d` is the real vector space which corresponds to `d`-dimensional
 (angular) wave vectors in `Space d` with a given (but arbitrary) choice of inverse length unit.
 
-The default value of `d` is `3`. Thus `WaveVectorSpace = WaveVectorSpace 3`-/
+The default value of `d` is `3`. Thus `WaveVectorSpace = WaveVectorSpace 3`
+-/
 structure WaveVectorSpace (d : ℕ := 3) where
   /-- The underlying map `Fin d → ℝ` associated with a vector in `WaveVectorSpace`. -/
   val : Fin d → ℝ
@@ -70,8 +72,7 @@ lemma eq_of_val (h : k₁.val = k₂.val) : k₁ = k₂ := by
   cases k₁
   congr
 
-@[simp]
-lemma val_eq_iff : k₁.val = k₂.val ↔ k₁ = k₂ := ⟨eq_of_val, congrArg val⟩
+@[simp] lemma val_eq_iff : k₁.val = k₂.val ↔ k₁ = k₂ := ⟨eq_of_val, congrArg val⟩
 
 /-!
 ## B. Instances on `WaveVectorSpace`
@@ -104,8 +105,7 @@ instance : Subsingleton (WaveVectorSpace 0) where
 instance : Zero (WaveVectorSpace d) where
   zero := ⟨0⟩
 
-@[simp]
-lemma zero_val : (0 : WaveVectorSpace d).val = 0 := rfl
+@[simp] lemma zero_val : (0 : WaveVectorSpace d).val = 0 := rfl
 
 /-!
 ### B.4. Additive commutative group
@@ -116,20 +116,17 @@ variable (k k₁ k₂)
 instance : Add (WaveVectorSpace d) where
   add k₁ k₂ := ⟨k₁.val + k₂.val⟩
 
-@[simp]
-lemma add_val : (k₁ + k₂).val = k₁.val + k₂.val := rfl
+@[simp] lemma add_val : (k₁ + k₂).val = k₁.val + k₂.val := rfl
 
 instance : Sub (WaveVectorSpace d) where
   sub k₁ k₂ := ⟨k₁.val - k₂.val⟩
 
-@[simp]
-lemma sub_val : (k₁ - k₂).val = k₁.val - k₂.val := rfl
+@[simp] lemma sub_val : (k₁ - k₂).val = k₁.val - k₂.val := rfl
 
 instance : Neg (WaveVectorSpace d) where
   neg k := ⟨-k.val⟩
 
-@[simp]
-lemma neg_val : (-k).val = -k.val := rfl
+@[simp] lemma neg_val : (-k).val = -k.val := rfl
 
 instance : AddCommGroup (WaveVectorSpace d) where
   add_assoc _ _ _ := by ext; simp [add_assoc]
@@ -147,8 +144,7 @@ instance : AddCommGroup (WaveVectorSpace d) where
 instance : SMul ℝ (WaveVectorSpace d) where
   smul c k := ⟨c • k.val⟩
 
-@[simp]
-lemma smul_val : (c • k).val = c • k.val := rfl
+@[simp] lemma smul_val : (c • k).val = c • k.val := rfl
 
 instance instModuleReal : Module ℝ (WaveVectorSpace d) where
   mul_smul _ _ _ := by ext; simp [mul_assoc]
@@ -187,8 +183,7 @@ noncomputable instance instNormedAddCommGroup : NormedAddCommGroup (WaveVectorSp
 noncomputable instance instInnerProductSpaceReal : InnerProductSpace ℝ (WaveVectorSpace d) :=
   InnerProductSpace.ofCore instCoreReal.toCore
 
-lemma norm_eq : ‖k‖ = √(∑ i, k i ^ 2) := by
-  simp_rw [norm_eq_sqrt_real_inner, inner_apply, pow_two]
+lemma norm_eq : ‖k‖ = √(∑ i, k i ^ 2) := by simp_rw [norm_eq_sqrt_real_inner, inner_apply, pow_two]
 
 lemma norm_sq_eq : ‖k‖ ^ 2 = ∑ i, k i ^ 2 := by
   simp_rw [← real_inner_self_eq_norm_sq, inner_apply, pow_two]

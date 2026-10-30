@@ -59,14 +59,17 @@ open minkowskiMatrix SpaceTime SchwartzMap Lorentz
 attribute [-simp] Fintype.sum_sum_type
 attribute [-simp] Nat.succ_eq_add_one
 
-/-- The gradient of the kinetic term for an Electromagnetic potential which
-  is a distribution. -/
-noncomputable def gradKineticTerm {d} (𝓕 : FreeSpace) :
-    TempDistElectromagneticPotential d →ₗ[ℝ] (SpaceTime d) →d[ℝ] Lorentz.Vector d where
+/--
+The gradient of the kinetic term for an Electromagnetic potential which
+is a distribution.
+-/
+noncomputable def gradKineticTerm {d} (𝓕 : FreeSpace)
+    : TempDistElectromagneticPotential d →ₗ[ℝ] (SpaceTime d) →d[ℝ] Lorentz.Vector d where
   toFun A := {
-    toFun ε := ∑ ν, ∑ μ,
-      (1 / (𝓕.μ₀) * (η μ μ * η ν ν * distDeriv μ (distDeriv μ A) ε ν -
-      distDeriv μ (distDeriv ν A) ε μ)) • Lorentz.Vector.basis ν
+    toFun ε :=
+      ∑ ν, ∑ μ,
+        (1 / (𝓕.μ₀) * (η μ μ * η ν ν * distDeriv μ (distDeriv μ A) ε ν -
+        distDeriv μ (distDeriv ν A) ε μ)) • Lorentz.Vector.basis ν
     map_add' ε1 ε2 := by
       simp only [← Finset.sum_add_distrib]
       refine Finset.sum_congr rfl fun ν _ => Finset.sum_congr rfl fun μ _ => ?_
@@ -76,11 +79,12 @@ noncomputable def gradKineticTerm {d} (𝓕 : FreeSpace) :
       simp [Finset.smul_sum, smul_smul]
       refine Finset.sum_congr rfl fun ν _ => Finset.sum_congr rfl fun μ _ => ?_
       ring_nf
-    cont := by fun_prop}
+    cont := by fun_prop
+  }
   map_add' A1 A2 := by
     ext1 ε
-    simp only [one_div, map_add, add_apply, Lorentz.Vector.apply_add,
-      ContinuousLinearMap.coe_mk', LinearMap.coe_mk, AddHom.coe_mk, ← Finset.sum_add_distrib]
+    simp only [one_div, map_add, add_apply, Lorentz.Vector.apply_add, ContinuousLinearMap.coe_mk',
+      LinearMap.coe_mk, AddHom.coe_mk, ← Finset.sum_add_distrib]
     refine Finset.sum_congr rfl fun ν _ => Finset.sum_congr rfl fun μ _ => ?_
     simp only [← add_smul]
     ring_nf
@@ -92,17 +96,20 @@ noncomputable def gradKineticTerm {d} (𝓕 : FreeSpace) :
     refine Finset.sum_congr rfl fun ν _ => Finset.sum_congr rfl fun μ _ => ?_
     ring_nf
 
-lemma gradKineticTerm_eq_sum_sum {d} {𝓕 : FreeSpace}
-    (A : TempDistElectromagneticPotential d) (ε : 𝓢(SpaceTime d, ℝ)) :
-    A.gradKineticTerm 𝓕 ε = ∑ ν, ∑ μ,
+lemma gradKineticTerm_eq_sum_sum
+    {d} {𝓕 : FreeSpace} (A : TempDistElectromagneticPotential d) (ε : 𝓢(SpaceTime d, ℝ))
+    : A.gradKineticTerm 𝓕 ε
+      = ∑ ν, ∑ μ,
         (1 / (𝓕.μ₀) * (η μ μ * η ν ν * distDeriv μ (distDeriv μ A) ε ν -
-        distDeriv μ (distDeriv ν A) ε μ)) • Lorentz.Vector.basis ν := rfl
+        distDeriv μ (distDeriv ν A) ε μ)) • Lorentz.Vector.basis ν :=
+  rfl
 
-lemma gradKineticTerm_eq_fieldStrength {d} {𝓕 : FreeSpace} (A : TempDistElectromagneticPotential d)
-    (ε : 𝓢(SpaceTime d, ℝ)) :
-    A.gradKineticTerm 𝓕 ε = ∑ ν, (1/𝓕.μ₀ * η ν ν) •
-    (∑ μ, ((Vector.basis.tensorProduct Vector.basis).repr
-      (distDeriv μ (A.fieldStrength) ε) (μ, ν))) • Lorentz.Vector.basis ν := by
+lemma gradKineticTerm_eq_fieldStrength
+    {d} {𝓕 : FreeSpace} (A : TempDistElectromagneticPotential d) (ε : 𝓢(SpaceTime d, ℝ))
+    : A.gradKineticTerm 𝓕 ε
+      = ∑ ν, (1/𝓕.μ₀ * η ν ν) •
+        (∑ μ, ((Vector.basis.tensorProduct Vector.basis).repr
+          (distDeriv μ (A.fieldStrength) ε) (μ, ν))) • Lorentz.Vector.basis ν := by
   rw [gradKineticTerm_eq_sum_sum A]
   apply Finset.sum_congr rfl (fun ν _ => ?_)
   rw [smul_smul, ← Finset.sum_smul, ← Finset.mul_sum, mul_assoc]
@@ -119,10 +126,11 @@ lemma gradKineticTerm_eq_fieldStrength {d} {𝓕 : FreeSpace} (A : TempDistElect
   ring_nf
   simp
 
-lemma gradKineticTerm_sum_inl_eq {d} {𝓕 : FreeSpace}
-    (A : TempDistElectromagneticPotential d) (ε : 𝓢(SpaceTime d, ℝ)) :
-    A.gradKineticTerm 𝓕 ε (Sum.inl 0) =
-    (1/(𝓕.μ₀ * 𝓕.c) * (distTimeSlice 𝓕.c).symm (Space.distSpaceDiv (A.electricField 𝓕.c)) ε) := by
+lemma gradKineticTerm_sum_inl_eq
+    {d} {𝓕 : FreeSpace} (A : TempDistElectromagneticPotential d) (ε : 𝓢(SpaceTime d, ℝ))
+    : A.gradKineticTerm 𝓕 ε (Sum.inl 0)
+      = (1 / (𝓕.μ₀ * 𝓕.c)
+        * (distTimeSlice 𝓕.c).symm (Space.distSpaceDiv (A.electricField 𝓕.c)) ε) := by
   rw [gradKineticTerm_eq_fieldStrength A ε, Lorentz.Vector.apply_sum, distTimeSlice_symm_apply,
     Space.distSpaceDiv_apply_eq_sum_distSpaceDeriv, Finset.mul_sum]
   simp [Fintype.sum_sum_type, Finset.mul_sum]
@@ -140,16 +148,16 @@ lemma gradKineticTerm_sum_inl_eq {d} {𝓕 : FreeSpace}
     simp
   field_simp
 
-lemma gradKineticTerm_sum_inr_eq {d} {𝓕 : FreeSpace}
-    (A : TempDistElectromagneticPotential d) (ε : 𝓢(SpaceTime d, ℝ)) (i : Fin d) :
-    A.gradKineticTerm 𝓕 ε (Sum.inr i) =
-    (𝓕.μ₀⁻¹ * (1 / 𝓕.c ^ 2 * (distTimeSlice 𝓕.c).symm
-      (Space.distTimeDeriv (A.electricField 𝓕.c)) ε i -
-      ∑ j, ((PiLp.basisFun 2 ℝ (Fin d)).tensorProduct (PiLp.basisFun 2 ℝ (Fin d))).repr
-        ((distTimeSlice 𝓕.c).symm (Space.distSpaceDeriv j
-          (A.magneticFieldMatrix 𝓕.c)) ε) (j, i))) := by
-  simp [gradKineticTerm_eq_fieldStrength A ε, Lorentz.Vector.apply_sum,
-    Fintype.sum_sum_type, mul_add, sub_eq_add_neg]
+lemma gradKineticTerm_sum_inr_eq
+    {d} {𝓕 : FreeSpace} (A : TempDistElectromagneticPotential d) (ε : 𝓢(SpaceTime d, ℝ)) (i : Fin d)
+    : A.gradKineticTerm 𝓕 ε (Sum.inr i)
+      = (𝓕.μ₀⁻¹
+        * (1 / 𝓕.c ^ 2 * (distTimeSlice 𝓕.c).symm (Space.distTimeDeriv (A.electricField 𝓕.c)) ε i
+          - ∑ j, ((PiLp.basisFun 2 ℝ (Fin d)).tensorProduct (PiLp.basisFun 2 ℝ (Fin d))).repr
+              ((distTimeSlice 𝓕.c).symm (Space.distSpaceDeriv j
+                (A.magneticFieldMatrix 𝓕.c)) ε) (j, i))) := by
+  simp [gradKineticTerm_eq_fieldStrength A ε, Lorentz.Vector.apply_sum, Fintype.sum_sum_type,
+    mul_add, sub_eq_add_neg]
   congr
   · conv_rhs =>
       enter [2, 2]
@@ -174,11 +182,15 @@ lemma gradKineticTerm_sum_inr_eq {d} {𝓕 : FreeSpace}
 -/
 
 attribute [-simp] Nat.reduceAdd Nat.reduceSucc Fin.isValue in
-lemma gradKineticTerm_eq_distTensorDeriv {d} {𝓕 : FreeSpace}
-    (A : TempDistElectromagneticPotential d) (ε : 𝓢(SpaceTime d, ℝ)) (ν : Fin 1 ⊕ Fin d) :
-    A.gradKineticTerm 𝓕 ε ν = η ν ν * ((Tensorial.toTensor (M := Lorentz.Vector d)).symm
-    (permT id (IsReindexing.auto) {(1/ 𝓕.μ₀ : ℝ) •
-    distTensorDeriv A.fieldStrength ε | κ κ ν'}ᵀ)) ν := by
+lemma gradKineticTerm_eq_distTensorDeriv
+    {d} {𝓕 : FreeSpace}
+    (A : TempDistElectromagneticPotential d) (ε : 𝓢(SpaceTime d, ℝ)) (ν : Fin 1 ⊕ Fin d)
+    : A.gradKineticTerm 𝓕 ε ν
+      = η ν ν * ((Tensorial.toTensor (M := Lorentz.Vector d)).symm
+          (permT id (IsReindexing.auto)
+            {(1/ 𝓕.μ₀ : ℝ) •
+              distTensorDeriv A.fieldStrength ε | κ κ ν'}ᵀ))
+        ν := by
   trans η ν ν * (Lorentz.Vector.basis.repr
     ((Tensorial.toTensor (M := Lorentz.Vector d)).symm
     (permT id (IsReindexing.auto) {(1/ 𝓕.μ₀ : ℝ) • distTensorDeriv A.fieldStrength ε | κ κ ν'}ᵀ))) ν
@@ -199,11 +211,11 @@ lemma gradKineticTerm_eq_distTensorDeriv {d} {𝓕 : FreeSpace}
     rw [Tensorial.basis_toTensor_apply, Tensorial.basis_map_prod]
     simp only [Basis.repr_reindex]
     rw [Lorentz.Vector.tensor_basis_map_eq_basis_reindex]
-    have hb : (((Lorentz.Vector.basis (d := d)).reindex
-        Lorentz.Vector.indexEquiv.symm).tensorProduct
-        (Lorentz.Vector.basis.reindex Lorentz.Vector.indexEquiv.symm)) =
-        ((Lorentz.Vector.basis (d := d)).tensorProduct (Lorentz.Vector.basis (d := d))).reindex
-        (Lorentz.Vector.indexEquiv.symm.prodCongr Lorentz.Vector.indexEquiv.symm) := by
+    have hb
+        : (((Lorentz.Vector.basis (d := d)).reindex Lorentz.Vector.indexEquiv.symm).tensorProduct
+            (Lorentz.Vector.basis.reindex Lorentz.Vector.indexEquiv.symm))
+          = ((Lorentz.Vector.basis (d := d)).tensorProduct (Lorentz.Vector.basis (d := d))).reindex
+            (Lorentz.Vector.indexEquiv.symm.prodCongr Lorentz.Vector.indexEquiv.symm) := by
       ext ⟨i, j⟩
       simp
     rw [hb, Finsupp.equivMapDomain_apply, Module.Basis.repr_reindex_apply]
@@ -212,9 +224,8 @@ lemma gradKineticTerm_eq_distTensorDeriv {d} {𝓕 : FreeSpace}
   · simp
     rfl
   funext x
-  fin_cases x <;>
-    simp [Function.comp_apply, ComponentIdx.prod, ComponentIdx.DropPairSection.ofFinEquiv,
-      ComponentIdx.DropPairSection.ofFin]
+  fin_cases x <;> simp [Function.comp_apply, ComponentIdx.prod,
+    ComponentIdx.DropPairSection.ofFinEquiv, ComponentIdx.DropPairSection.ofFin]
   · intro _ h
     exact absurd (by decide) h
   · split_ifs with h1 h2

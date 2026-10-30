@@ -48,8 +48,10 @@ open scoped JordanAlgebra
 
 /-! ## A. Jordan-closed submodules and generation -/
 
-/-- A real submodule is Jordan-closed when it contains the unit and is closed under the Jordan
-product.  This is the closure notion used for arbitrary generated Jordan fragments. -/
+/--
+A real submodule is Jordan-closed when it contains the unit and is closed under the Jordan
+product.  This is the closure notion used for arbitrary generated Jordan fragments.
+-/
 def IsJordanSubmodule (J : Submodule ℝ E) : Prop :=
   (1 : E) ∈ J ∧ ∀ ⦃x y : E⦄, x ∈ J → y ∈ J → x * y ∈ J
 
@@ -73,8 +75,9 @@ lemma one_mem_generatedBySet (s : Set E) : (1 : E) ∈ generatedBySet s := by
   exact hJ.2.1
 
 /-- The generated Jordan submodule is closed under the Jordan product. -/
-lemma mul_mem_generatedBySet (s : Set E) {x y : E} (hx : x ∈ generatedBySet s)
-    (hy : y ∈ generatedBySet s) : x * y ∈ generatedBySet s := by
+lemma mul_mem_generatedBySet
+    (s : Set E) {x y : E} (hx : x ∈ generatedBySet s) (hy : y ∈ generatedBySet s)
+    : x * y ∈ generatedBySet s := by
   change x ∈ sInf {J : Submodule ℝ E | s ⊆ J ∧ IsJordanSubmodule J} at hx
   change y ∈ sInf {J : Submodule ℝ E | s ⊆ J ∧ IsJordanSubmodule J} at hy
   change x * y ∈ sInf {J : Submodule ℝ E | s ⊆ J ∧ IsJordanSubmodule J}
@@ -86,17 +89,19 @@ lemma mul_mem_generatedBySet (s : Set E) {x y : E} (hx : x ∈ generatedBySet s)
 lemma isJordanSubmodule_generatedBySet (s : Set E) : IsJordanSubmodule (generatedBySet s) :=
   ⟨one_mem_generatedBySet s, fun _ _ hx hy => mul_mem_generatedBySet s hx hy⟩
 
-/-- Universal property of arbitrary Jordan generation: every unital Jordan submodule containing
-the generators contains `generatedBySet s`. -/
-lemma generatedBySet_le {s : Set E} {J : Submodule ℝ E} (hs : s ⊆ J)
-    (hJ : IsJordanSubmodule J) : generatedBySet s ≤ J := by
+/--
+Universal property of arbitrary Jordan generation: every unital Jordan submodule containing
+the generators contains `generatedBySet s`.
+-/
+lemma generatedBySet_le {s : Set E} {J : Submodule ℝ E} (hs : s ⊆ J) (hJ : IsJordanSubmodule J)
+    : generatedBySet s ≤ J := by
   rw [generatedBySet]
   exact sInf_le ⟨hs, hJ⟩
 
 /-- Enlarging the generating set can only enlarge its generated Jordan fragment. -/
-lemma generatedBySet_mono {s t : Set E} (hst : s ⊆ t) :
-    generatedBySet s ≤ generatedBySet t :=
-  generatedBySet_le (fun _ hx => subset_generatedBySet t (hst hx))
+lemma generatedBySet_mono {s t : Set E} (hst : s ⊆ t) : generatedBySet s ≤ generatedBySet t :=
+  generatedBySet_le
+    (fun _ hx => subset_generatedBySet t (hst hx))
     (isJordanSubmodule_generatedBySet t)
 
 /-! ## B. The generated subalgebra as a type -/
@@ -112,24 +117,23 @@ instance : Mul (GeneratedBySet s) where
   mul x y := ⟨(x : E) * (y : E), mul_mem_generatedBySet s x.2 y.2⟩
 
 @[simp]
-lemma val_mul (x y : GeneratedBySet s) : ((x * y : GeneratedBySet s) : E) = (x : E) * (y : E) :=
-  rfl
+lemma val_mul (x y : GeneratedBySet s) : ((x * y : GeneratedBySet s) : E) = (x : E) * (y : E) := rfl
 
 instance : One (GeneratedBySet s) := ⟨⟨1, one_mem_generatedBySet s⟩⟩
 
-@[simp]
-lemma val_one : ((1 : GeneratedBySet s) : E) = 1 := rfl
+@[simp] lemma val_one : ((1 : GeneratedBySet s) : E) = 1 := rfl
 
 /-- The canonical inclusion of a generated Jordan fragment into its ambient algebra. -/
 def inclusion : GeneratedBySet s →ₗ[ℝ] E := (generatedBySet s).subtype
 
-@[simp]
-lemma inclusion_apply (x : GeneratedBySet s) : inclusion s x = (x : E) := rfl
+@[simp] lemma inclusion_apply (x : GeneratedBySet s) : inclusion s x = (x : E) := rfl
 
 lemma inclusion_injective : Function.Injective (inclusion s) := Subtype.val_injective
 
-/-- Every generated Jordan fragment inherits the ambient unital commutative nonassociative ring.
-Associativity is intentionally absent: it is exceptional extra structure, not part of closure. -/
+/--
+Every generated Jordan fragment inherits the ambient unital commutative nonassociative ring.
+Associativity is intentionally absent: it is exceptional extra structure, not part of closure.
+-/
 instance instNonAssocCommRing : NonAssocCommRing (GeneratedBySet s) where
   __ := (inferInstance : AddCommGroup (GeneratedBySet s))
   mul := (· * ·)
@@ -167,27 +171,26 @@ instance : IsScalarTower ℝ (GeneratedBySet s) (GeneratedBySet s) where
 
 /-- The Jordan identity restricts to every generated Jordan fragment. -/
 instance : IsCommJordan (GeneratedBySet s) where
-  lmul_comm_rmul_rmul x y :=
-    Subtype.ext (IsCommJordan.lmul_comm_rmul_rmul (x : E) (y : E))
+  lmul_comm_rmul_rmul x y := Subtype.ext (IsCommJordan.lmul_comm_rmul_rmul (x : E) (y : E))
 
 omit [SMulCommClass ℝ E E] [IsScalarTower ℝ E E] [IsCommJordan E] in
 /-- The canonical inclusion preserves the order unit. -/
-@[simp]
-lemma inclusion_one : inclusion s (1 : GeneratedBySet s) = 1 := rfl
+@[simp] lemma inclusion_one : inclusion s (1 : GeneratedBySet s) = 1 := rfl
 
 omit [SMulCommClass ℝ E E] [IsScalarTower ℝ E E] [IsCommJordan E] in
 /-- The canonical inclusion preserves the Jordan product. -/
 @[simp]
-lemma inclusion_mul (x y : GeneratedBySet s) :
-    inclusion s (x * y) = inclusion s x * inclusion s y := rfl
+lemma inclusion_mul (x y : GeneratedBySet s)
+    : inclusion s (x * y) = inclusion s x * inclusion s y :=
+  rfl
 
 end GeneratedBySet
 
 /-! ## C. Generation by one observable -/
 
 /-- The subalgebra generated by one observable is the span of its powers. -/
-lemma generatedBySet_singleton_eq_generatedByOne (a : E) :
-    generatedBySet ({a} : Set E) = generatedByOne a := by
+lemma generatedBySet_singleton_eq_generatedByOne (a : E)
+    : generatedBySet ({a} : Set E) = generatedByOne a := by
   apply le_antisymm
   · apply generatedBySet_le
     · intro x hx
@@ -203,10 +206,10 @@ lemma generatedBySet_singleton_eq_generatedByOne (a : E) :
     induction n with
     | zero => simpa using one_mem_generatedBySet ({a} : Set E)
     | succ n ih =>
-        rw [jpow_succ]
-        apply mul_mem_generatedBySet ({a} : Set E)
-        · exact subset_generatedBySet ({a} : Set E) (by simp)
-        · exact ih
+      rw [jpow_succ]
+      apply mul_mem_generatedBySet ({a} : Set E)
+      · exact subset_generatedBySet ({a} : Set E) (by simp)
+      · exact ih
 
 end JordanAlgebra
 

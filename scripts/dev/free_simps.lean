@@ -31,8 +31,10 @@ def name? (t : TacticInfo) : Option Name :=
   | Syntax.node _ n _ => some n
   | _ => none
 
-/-- Decide whether a tactic is "substantive",
-or is merely a tactic combinator (e.g. `by`, `;`, multiline tactics, parenthesized tactics). -/
+/--
+Decide whether a tactic is "substantive",
+or is merely a tactic combinator (e.g. `by`, `;`, multiline tactics, parenthesized tactics).
+-/
 def isSimp (t : TacticInfo) : Bool :=
   match t.name? with
   | some ``Lean.Parser.Tactic.simp => true
@@ -47,29 +49,35 @@ def visitTacticInfo (file : FilePath) (ci : ContextInfo) (ti : TacticInfo) : Met
   let stx := ti.stx
   match stx.getHeadInfo? with
   | .some (.synthetic ..) =>
-     -- Not actual concrete syntax the user wrote. Ignore.
+    -- Not actual concrete syntax the user wrote. Ignore.
     return ()
-  | _ =>  pure ()
-  let some sp := stx.getPos? | return ()
+  | _ => pure ()
+  let some sp := stx.getPos?
+    | return ()
   let startPosition := ci.fileMap.toPosition sp
-  let some ep := stx.getTailPos? | return ()
+  let some ep := stx.getTailPos?
+    | return ()
   let s := Substring.mk ci.fileMap.source sp ep
-  if ti.goalsAfter.length ≠ 0  ∧ ¬ String.containsSubstr s.toString  "only" then
+  if ti.goalsAfter.length ≠ 0 ∧ ¬ String.containsSubstr s.toString "only" then
     println! "./{file}:{startPosition.line}"
 
-/- See conversation here: https://leanprover.zulipchat.com/#narrow/stream/270676-lean4/topic/Memory.20increase.20in.20loops.2E -/
+/-
+See conversation here: https://leanprover.zulipchat.com/#narrow/stream/270676-lean4/topic/Memory.20increase.20in.20loops.2E
+-/
 unsafe def processAllFiles : IO Unit := do
   let files ← allFilePaths
-  let tasks := files.map fun f =>
-    ((IO.asTask $ IO.Process.run
-    {cmd := "lake", args := #["exe", "free_simps", f.toString]}), f)
+  let tasks :=
+    files.map fun f => (
+      (IO.asTask $ IO.Process.run { cmd := "lake", args := #["exe", "free_simps", f.toString] }),
+      f
+    )
   tasks.toList.zipIdx.forM fun ((t, path), n) => do
     let tn ← IO.wait (← t)
     match tn with
     | .ok x =>
       if x ≠ "" then
-      println! "{n} of {tasks.toList.length}: {path}"
-      println! x
+        println! "{n} of {tasks.toList.length}: {path}"
+        println! x
     | .error _ => println! "Error"
 
 unsafe def processFileArray (files : Array FilePath) : IO Unit := do
@@ -81,18 +89,20 @@ unsafe def processFileArray (files : Array FilePath) : IO Unit := do
     | some path =>
       transverseTactics path visitTacticInfo
       return ()
-    | none =>
-      return ()
-  let tasks := files.map fun f =>
-    ((IO.asTask $ IO.Process.run
-    {cmd := "lake", args := #["exe", "free_simps","-file", f.toString]}), f)
+    | none => return ()
+  let tasks :=
+    files.map fun f => (
+      (IO.asTask $
+        IO.Process.run { cmd := "lake", args := #["exe", "free_simps", "-file", f.toString] }),
+      f
+    )
   tasks.toList.zipIdx.forM fun ((t, path), n) => do
     let tn ← IO.wait (← t)
     match tn with
     | .ok x =>
       if x ≠ "" then
-      println! "{n} of {tasks.toList.length}: {path}"
-      println! x
+        println! "{n} of {tasks.toList.length}: {path}"
+        println! x
     | .error _ => println! "Error"
   IO.println "Finished!"
 
@@ -105,8 +115,7 @@ unsafe def argToArrayFilePath (args : List String) : IO (Array FilePath) := do
   | [] => do
     let files ← allFilePaths
     return files
-  | _ => do
-    panic! "Invalid arguments"
+  | _ => do panic! "Invalid arguments"
 
 unsafe def main (args : List String) : IO Unit := do
   let files ← argToArrayFilePath args

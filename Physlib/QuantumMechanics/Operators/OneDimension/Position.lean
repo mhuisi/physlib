@@ -37,8 +37,10 @@ open _root_.QuantumMechanics.OneDimension.HilbertSpace
 
 -/
 
-/-- The position operator is defined as the linear map from `ℝ → ℂ` to `ℝ → ℂ` taking
-  `ψ` to `x * ψ`. -/
+/--
+The position operator is defined as the linear map from `ℝ → ℂ` to `ℝ → ℂ` taking
+`ψ` to `x * ψ`.
+-/
 def positionOperator : (ℝ → ℂ) →ₗ[ℂ] ℝ → ℂ where
   toFun ψ := fun x ↦ x * ψ x
   map_add' ψ1 ψ2 := by
@@ -59,18 +61,20 @@ open ContDiff
 
 open SchwartzMap
 
-/-- The position operator on the Schwartz maps is defined as the linear map from
-  `𝓢(ℝ, ℂ)` to itself, such that `ψ` is taken to `fun x => x * ψ x`. -/
+/--
+The position operator on the Schwartz maps is defined as the linear map from
+`𝓢(ℝ, ℂ)` to itself, such that `ψ` is taken to `fun x => x * ψ x`.
+-/
 def positionOperatorSchwartz : 𝓢(ℝ, ℂ) →L[ℂ] 𝓢(ℝ, ℂ) := Distribution.powOneMul ℂ
 
-lemma positionOperatorSchwartz_apply_fun (ψ : 𝓢(ℝ, ℂ)) :
-    (positionOperatorSchwartz ψ) = fun x => x * ψ x := by
+lemma positionOperatorSchwartz_apply_fun (ψ : 𝓢(ℝ, ℂ))
+    : (positionOperatorSchwartz ψ) = fun x => x * ψ x := by
   simp [positionOperatorSchwartz]
   rfl
 
 @[simp]
-lemma positionOperatorSchwartz_apply (ψ : 𝓢(ℝ, ℂ)) (x : ℝ) :
-    (positionOperatorSchwartz ψ) x = x * ψ x := by
+lemma positionOperatorSchwartz_apply (ψ : 𝓢(ℝ, ℂ)) (x : ℝ)
+    : (positionOperatorSchwartz ψ) x = x * ψ x := by
   simp [positionOperatorSchwartz]
   rfl
 
@@ -84,8 +88,8 @@ def positionOperatorUnbounded : UnboundedOperator schwartzIncl schwartzIncl_inje
 
 -/
 
-lemma positionStates_generalized_eigenvector_positionOperatorUnbounded (x : ℝ) :
-    positionOperatorUnbounded.IsGeneralizedEigenvector (positionState x) x := by
+lemma positionStates_generalized_eigenvector_positionOperatorUnbounded (x : ℝ)
+    : positionOperatorUnbounded.IsGeneralizedEigenvector (positionState x) x := by
   dsimp [positionOperatorUnbounded]
   rw [UnboundedOperator.isGeneralizedEigenvector_ofSelfCLM_iff]
   intro ψ
@@ -97,8 +101,7 @@ lemma positionStates_generalized_eigenvector_positionOperatorUnbounded (x : ℝ)
 
 -/
 
-lemma positionOperatorUnbounded_isSymmetric :
-    positionOperatorUnbounded.IsSymmetric := by
+lemma positionOperatorUnbounded_isSymmetric : positionOperatorUnbounded.IsSymmetric := by
   intro ψ1 ψ2
   dsimp [positionOperatorUnbounded]
   rw [schwartzIncl_inner, schwartzIncl_inner]

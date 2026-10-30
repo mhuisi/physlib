@@ -49,9 +49,7 @@ References for the classical harmonic oscillator include:
 * Landau & Lifshitz, Mechanics, page 58, section 21. [ref: landau_mechanics]
 -/
 
-@[expose] public
-
-noncomputable section
+@[expose] public noncomputable section
 
 namespace ClassicalMechanics.HarmonicOscillator
 
@@ -69,7 +67,7 @@ namespace InitialConditions
 
 /-- Given initial conditions, the solution to the classical harmonic oscillator. -/
 noncomputable def trajectory (IC : InitialConditions) : Time → EuclideanSpace ℝ (Fin 1) := fun t =>
-  cos (S.ω * t) • IC.x₀ + (sin (S.ω * t)/S.ω) • IC.v₀
+  cos (S.ω * t) • IC.x₀ + (sin (S.ω * t) / S.ω) • IC.v₀
 
 /-!
 
@@ -78,8 +76,9 @@ noncomputable def trajectory (IC : InitialConditions) : Time → EuclideanSpace 
 We show a basic definitional equality for the trajectory.
 
 -/
-lemma trajectory_eq (IC : InitialConditions) :
-    IC.trajectory S = fun t : Time => cos (S.ω * t) • IC.x₀ + (sin (S.ω * t)/S.ω) • IC.v₀ := rfl
+lemma trajectory_eq (IC : InitialConditions)
+    : IC.trajectory S = fun t : Time => cos (S.ω * t) • IC.x₀ + (sin (S.ω * t) / S.ω) • IC.v₀ :=
+  rfl
 
 /-!
 
@@ -90,9 +89,7 @@ The trajectory for zero initial conditions is the zero function.
 -/
 
 /-- For zero initial conditions, the trajectory is zero. -/
-@[simp]
-lemma trajectory_zero : trajectory S 0 = fun _ => 0 := by
-  simp [trajectory_eq]
+@[simp] lemma trajectory_zero : trajectory S 0 = fun _ => 0 := by simp [trajectory_eq]
 
 /-!
 
@@ -103,8 +100,8 @@ The trajectories for any initial conditions are smooth functions of time.
 -/
 
 @[fun_prop]
-lemma trajectory_contDiff (S : HarmonicOscillator) (IC : InitialConditions) {n : WithTop ℕ∞} :
-    ContDiff ℝ n (IC.trajectory S) := by
+lemma trajectory_contDiff (S : HarmonicOscillator) (IC : InitialConditions) {n : WithTop ℕ∞}
+    : ContDiff ℝ n (IC.trajectory S) := by
   rw [trajectory_eq]
   have h : ContDiff ℝ n (Time.val : Time → ℝ) := Time.toRealCLM.contDiff
   fun_prop
@@ -117,13 +114,15 @@ We give a simplification of the velocity of the trajectory.
 
 -/
 
-lemma trajectory_velocity (IC : InitialConditions) : ∂ₜ (IC.trajectory S) =
-    fun t : Time => - S.ω • sin (S.ω * t.val) • IC.x₀ + cos (S.ω * t.val) • IC.v₀ := by
+lemma trajectory_velocity (IC : InitialConditions)
+    : ∂ₜ (IC.trajectory S)
+      = fun t : Time => -S.ω • sin (S.ω * t.val) • IC.x₀ + cos (S.ω * t.val) • IC.v₀ := by
   funext t
   rw [trajectory_eq, Time.deriv, fderiv_fun_add (by fun_prop) (by fun_prop)]
   rw [fderiv_smul_const (by fun_prop), fderiv_smul_const (by fun_prop)]
-  have h1 : (fderiv ℝ (fun t => sin (S.ω * t.val) / S.ω) t) =
-    (1/ S.ω) • (fderiv ℝ (fun t => sin (S.ω * t.val)) t) := by
+  have h1
+      : (fderiv ℝ (fun t => sin (S.ω * t.val) / S.ω) t)
+        = (1 / S.ω) • (fderiv ℝ (fun t => sin (S.ω * t.val)) t) := by
     rw [← fderiv_mul_const]
     congr
     funext t
@@ -132,9 +131,8 @@ lemma trajectory_velocity (IC : InitialConditions) : ∂ₜ (IC.trajectory S) =
   simp [h1]
   rw [fderiv_cos (by fun_prop), fderiv_sin (by fun_prop),
     fderiv_fun_mul (by fun_prop) (by fun_prop)]
-  simp only [fderiv_fun_const, Pi.zero_apply, smul_zero, add_zero, neg_smul,
-    _root_.neg_apply, FunLike.coe_smul, Pi.smul_apply, fderiv_val,
-    smul_eq_mul, mul_one]
+  simp only [fderiv_fun_const, Pi.zero_apply, smul_zero, add_zero, neg_smul, _root_.neg_apply,
+    FunLike.coe_smul, Pi.smul_apply, fderiv_val, smul_eq_mul, mul_one]
   field_simp [S.ω_ne_zero]
   module
 
@@ -146,8 +144,10 @@ We give a simplification of the acceleration of the trajectory.
 
 -/
 
-lemma trajectory_acceleration (IC : InitialConditions) : ∂ₜ (∂ₜ (IC.trajectory S)) =
-    fun t : Time => - S.ω^2 • cos (S.ω * t.val) • IC.x₀ - S.ω • sin (S.ω * t.val) • IC.v₀ := by
+lemma trajectory_acceleration (IC : InitialConditions)
+    : ∂ₜ (∂ₜ (IC.trajectory S))
+      = fun t : Time =>
+        - S.ω ^ 2 • cos (S.ω * t.val) • IC.x₀ - S.ω • sin (S.ω * t.val) • IC.v₀ := by
   funext t
   rw [trajectory_velocity, Time.deriv, fderiv_fun_add (by fun_prop) (by fun_prop)]
   rw [fderiv_smul_const (by fun_prop), fderiv_fun_const_smul (by fun_prop),
@@ -157,8 +157,8 @@ lemma trajectory_acceleration (IC : InitialConditions) : ∂ₜ (∂ₜ (IC.traj
     fderiv_fun_mul (by fun_prop) (by fun_prop)]
   field_simp [smul_smul]
   simp only [fderiv_fun_const, Pi.ofNat_apply, smul_zero, add_zero, _root_.neg_apply,
-    FunLike.coe_smul, Pi.smul_apply, ContinuousLinearMap.smulRight_apply, fderiv_val,
-    smul_eq_mul, mul_one, neg_smul]
+    FunLike.coe_smul, Pi.smul_apply, ContinuousLinearMap.smulRight_apply, fderiv_val, smul_eq_mul,
+    mul_one, neg_smul]
   module
 
 /-!
@@ -170,8 +170,10 @@ used to define them.
 
 -/
 
-/-- For a set of initial conditions `IC` the position of the solution at time `0` is
-  `IC.x₀`. -/
+/--
+For a set of initial conditions `IC` the position of the solution at time `0` is
+`IC.x₀`.
+-/
 @[simp]
 lemma trajectory_position_at_zero (IC : InitialConditions) : IC.trajectory S 0 = IC.x₀ := by
   simp [trajectory]
@@ -188,10 +190,10 @@ The trajectories satisfy the equation of motion for the harmonic oscillator.
 
 -/
 
-lemma trajectory_equationOfMotion (IC : InitialConditions) :
-    EquationOfMotion S (IC.trajectory S) := by
-  rw [EquationOfMotion, gradLagrangian_eq_force (S := S) (xₜ := IC.trajectory S)
-    (trajectory_contDiff S IC)]
+lemma trajectory_equationOfMotion (IC : InitialConditions)
+    : EquationOfMotion S (IC.trajectory S) := by
+  rw [EquationOfMotion,
+    gradLagrangian_eq_force (S := S) (xₜ := IC.trajectory S) (trajectory_contDiff S IC)]
   funext t
   simp only [Pi.zero_apply]
   rw [trajectory_acceleration, force_eq_linear]

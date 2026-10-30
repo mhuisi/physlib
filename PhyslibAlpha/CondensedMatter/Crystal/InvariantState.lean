@@ -63,39 +63,45 @@ def cubeUltrafilter : Ultrafilter ℕ := Ultrafilter.of atTop
 
 lemma cubeUltrafilter_le : (cubeUltrafilter : Filter ℕ) ≤ atTop := Ultrafilter.of_le _
 
-/-- **The translation invariant limit of a state of the crystal `ℤ^d`**: the limit of its
-averages over the translations by the points of the cubes. -/
-def translationInvariantLimit (φ : AlgState (crystalAlgebra Ω₀ (Fin d → ℤ) F)) :
-    AlgState (crystalAlgebra Ω₀ (Fin d → ℤ) F) :=
+/--
+**The translation invariant limit of a state of the crystal `ℤ^d`**: the limit of its
+averages over the translations by the points of the cubes.
+-/
+def translationInvariantLimit (φ : AlgState (crystalAlgebra Ω₀ (Fin d → ℤ) F))
+    : AlgState (crystalAlgebra Ω₀ (Fin d → ℤ) F) :=
   AlgState.invariantLimit (translationAction Ω₀) (boxes d)
-    (fun n => ⟨1, by simp [boxes, box]⟩) φ
-    (AlgebraNet.isBounded_of_isLocallyBounded quantumNet_isLocallyBounded) cubeUltrafilter
+    (fun n => ⟨1, by simp [boxes, box]⟩)
+    φ (AlgebraNet.isBounded_of_isLocallyBounded quantumNet_isLocallyBounded) cubeUltrafilter
 
 omit [Fintype F] in
 /-- **The translation invariant limit of a state is invariant under the translations.** -/
-lemma translationInvariantLimit_invariant (φ : AlgState (crystalAlgebra Ω₀ (Fin d → ℤ) F))
-    (a : Fin d → ℤ) (x : crystalAlgebra Ω₀ (Fin d → ℤ) F) :
-    translationInvariantLimit Ω₀ φ (translationAction Ω₀ (Multiplicative.ofAdd a) x) =
-      translationInvariantLimit Ω₀ φ x :=
+lemma translationInvariantLimit_invariant
+    (φ : AlgState (crystalAlgebra Ω₀ (Fin d → ℤ) F)) (a : Fin d → ℤ)
+    (x : crystalAlgebra Ω₀ (Fin d → ℤ) F)
+    : translationInvariantLimit Ω₀ φ (translationAction Ω₀ (Multiplicative.ofAdd a) x)
+      = translationInvariantLimit Ω₀ φ x :=
   AlgState.invariantLimit_invariant _ _ _ φ _ _ (isRightFolner_boxes d _ cubeUltrafilter_le) _ x
 
 variable {Ω₀}
 
-/-- **The translation invariant state of the canonical ensemble** of an interaction on the crystal
-`ℤ^d`: the translation average of a thermodynamic limit state of the finite boxes. -/
-def _root_.CondensedMatter.QuasiLocal.Interaction.translationInvariantState [Nonempty Ω₀]
-    (I : Interaction (fun _ : CellSite (Fin d → ℤ) F => Ω₀)) (β : ℝ) :
-    AlgState (crystalAlgebra Ω₀ (Fin d → ℤ) F) :=
+/--
+**The translation invariant state of the canonical ensemble** of an interaction on the crystal
+`ℤ^d`: the translation average of a thermodynamic limit state of the finite boxes.
+-/
+def _root_.CondensedMatter.QuasiLocal.Interaction.translationInvariantState
+    [Nonempty Ω₀] (I : Interaction (fun _ : CellSite (Fin d → ℤ) F => Ω₀)) (β : ℝ)
+    : AlgState (crystalAlgebra Ω₀ (Fin d → ℤ) F) :=
   translationInvariantLimit Ω₀
     (I.canonicalLimitState β (Ultrafilter.of atTop) (Ultrafilter.of_le _))
 
 omit [Fintype F] in
 /-- The translation invariant state of an interaction is invariant under the translations. -/
-lemma translationInvariantState_invariant [Nonempty Ω₀]
+lemma translationInvariantState_invariant
+    [Nonempty Ω₀]
     (I : Interaction (fun _ : CellSite (Fin d → ℤ) F => Ω₀)) (β : ℝ) (a : Fin d → ℤ)
-    (x : crystalAlgebra Ω₀ (Fin d → ℤ) F) :
-    I.translationInvariantState β (translationAction Ω₀ (Multiplicative.ofAdd a) x) =
-      I.translationInvariantState β x :=
+    (x : crystalAlgebra Ω₀ (Fin d → ℤ) F)
+    : I.translationInvariantState β (translationAction Ω₀ (Multiplicative.ofAdd a) x)
+      = I.translationInvariantState β x :=
   translationInvariantLimit_invariant Ω₀ _ a x
 
 end Crystal

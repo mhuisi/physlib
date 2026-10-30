@@ -76,46 +76,47 @@ coordinates. Its positivity, boundedness, and smoothness properties are establis
 before assembling the Riemannian metric.
 -/
 
-/-- The value of the oscillator mass metric at `q`. It is the mass-scaled pullback of the
+/--
+The value of the oscillator mass metric at `q`. It is the mass-scaled pullback of the
 Euclidean inner product along `tangentCoord q`, so
-`massMetricVal S q v w = S.m * ⟪tangentCoord q v, tangentCoord q w⟫_ℝ`. -/
-noncomputable def massMetricVal (S : HarmonicOscillator) (q : ConfigurationSpace) :
-    TangentSpace 𝓘(ℝ, EuclideanSpace ℝ (Fin 1)) q →L[ℝ]
-      TangentSpace 𝓘(ℝ, EuclideanSpace ℝ (Fin 1)) q →L[ℝ] ℝ :=
-  S.m • (innerSL ℝ :
-    EuclideanSpace ℝ (Fin 1) →L[ℝ] EuclideanSpace ℝ (Fin 1) →L[ℝ] ℝ)
+`massMetricVal S q v w = S.m * ⟪tangentCoord q v, tangentCoord q w⟫_ℝ`.
+-/
+noncomputable def massMetricVal (S : HarmonicOscillator) (q : ConfigurationSpace)
+    : TangentSpace 𝓘(ℝ, EuclideanSpace ℝ (Fin 1)) q →L[ℝ]
+        TangentSpace 𝓘(ℝ, EuclideanSpace ℝ (Fin 1)) q →L[ℝ] ℝ :=
+  S.m • (innerSL ℝ : EuclideanSpace ℝ (Fin 1) →L[ℝ] EuclideanSpace ℝ (Fin 1) →L[ℝ] ℝ)
 
-/-- Applying the mass metric value to two tangent vectors gives the mass-scaled Euclidean
-inner product of their coordinate representatives. -/
+/--
+Applying the mass metric value to two tangent vectors gives the mass-scaled Euclidean
+inner product of their coordinate representatives.
+-/
 lemma massMetricVal_apply
-    (S : HarmonicOscillator) (q : ConfigurationSpace)
-    (v w : TangentSpace 𝓘(ℝ, EuclideanSpace ℝ (Fin 1)) q) :
-    massMetricVal S q v w = S.m * ⟪tangentCoord q v, tangentCoord q w⟫_ℝ := by
+    (S : HarmonicOscillator)
+    (q : ConfigurationSpace) (v w : TangentSpace (𝓘(ℝ, EuclideanSpace ℝ (Fin 1))) q)
+    : massMetricVal S q v w = S.m * ⟪tangentCoord q v, tangentCoord q w⟫_ℝ := by
   rfl
 
 /-- A nonzero tangent vector has nonzero coordinate representative under `tangentCoord`. -/
-lemma tangentCoord_ne_zero {q : ConfigurationSpace}
-    {v : TangentSpace 𝓘(ℝ, EuclideanSpace ℝ (Fin 1)) q}
-    (hv : v ≠ 0) : tangentCoord q v ≠ 0 := by
+lemma tangentCoord_ne_zero
+    {q : ConfigurationSpace} {v : TangentSpace (𝓘(ℝ, EuclideanSpace ℝ (Fin 1))) q} (hv : v ≠ 0)
+    : tangentCoord q v ≠ 0 := by
   intro h
   apply hv
   exact (tangentCoord q).injective (by simpa using h)
 
 /-- The oscillator mass metric is positive on nonzero tangent vectors. -/
 lemma massMetricVal_pos
-    (S : HarmonicOscillator) (q : ConfigurationSpace)
-    (v : TangentSpace 𝓘(ℝ, EuclideanSpace ℝ (Fin 1)) q) (hv : v ≠ 0) :
-    0 < massMetricVal S q v v := by
+    (S : HarmonicOscillator)
+    (q : ConfigurationSpace) (v : TangentSpace (𝓘(ℝ, EuclideanSpace ℝ (Fin 1))) q) (hv : v ≠ 0)
+    : 0 < massMetricVal S q v v := by
   rw [massMetricVal_apply]
   exact mul_pos S.m_pos (real_inner_self_pos.mpr (tangentCoord_ne_zero hv))
 
 /-- The mass metric unit ball is bounded in the model norm. -/
-lemma massMetricVal_isVonNBounded
-    (S : HarmonicOscillator) (q : ConfigurationSpace) :
-    IsVonNBounded ℝ
+lemma massMetricVal_isVonNBounded (S : HarmonicOscillator) (q : ConfigurationSpace)
+    : IsVonNBounded ℝ
       {v : TangentSpace 𝓘(ℝ, EuclideanSpace ℝ (Fin 1)) q | massMetricVal S q v v < 1} := by
-  change IsVonNBounded ℝ
-    {v : EuclideanSpace ℝ (Fin 1) | S.m * ⟪v, v⟫_ℝ < 1}
+  change IsVonNBounded ℝ {v : EuclideanSpace ℝ (Fin 1) | S.m * ⟪v, v⟫_ℝ < 1}
   rw [NormedSpace.isVonNBounded_iff']
   refine ⟨Real.sqrt (1 / S.m), ?_⟩
   intro v hv
@@ -130,14 +131,14 @@ lemma massMetricVal_isVonNBounded
   exact Real.le_sqrt_of_sq_le hsq_le
 
 /-- The oscillator mass metric is constant in the global tangent-bundle chart. -/
-lemma massMetricVal_contMDiff (S : HarmonicOscillator) :
-    ContMDiff 𝓘(ℝ, EuclideanSpace ℝ (Fin 1))
+lemma massMetricVal_contMDiff (S : HarmonicOscillator)
+    : ContMDiff (𝓘(ℝ, EuclideanSpace ℝ (Fin 1)))
       (𝓘(ℝ, EuclideanSpace ℝ (Fin 1)).prod
         𝓘(ℝ, EuclideanSpace ℝ (Fin 1) →L[ℝ]
-          EuclideanSpace ℝ (Fin 1) →L[ℝ] ℝ)) ω
+          EuclideanSpace ℝ (Fin 1) →L[ℝ] ℝ))
+      ω
       (fun q : ConfigurationSpace =>
-        TotalSpace.mk'
-          (EuclideanSpace ℝ (Fin 1) →L[ℝ] EuclideanSpace ℝ (Fin 1) →L[ℝ] ℝ)
+        TotalSpace.mk' (EuclideanSpace ℝ (Fin 1) →L[ℝ] EuclideanSpace ℝ (Fin 1) →L[ℝ] ℝ)
           (E := fun q : ConfigurationSpace =>
             TangentSpace 𝓘(ℝ, EuclideanSpace ℝ (Fin 1)) q →L[ℝ]
               TangentSpace 𝓘(ℝ, EuclideanSpace ℝ (Fin 1)) q →L[ℝ] ℝ)
@@ -156,15 +157,15 @@ The pointwise bilinear forms assemble into a `ContMDiffRiemannianMetric` on the 
 configuration space.
 -/
 
-/-- The mass-scaled Euclidean inner product as a Riemannian metric on the oscillator
-configuration space. -/
-noncomputable def massRiemannianMetric (S : HarmonicOscillator) :
-    ContMDiffRiemannianMetric 𝓘(ℝ, EuclideanSpace ℝ (Fin 1)) ω
-      (EuclideanSpace ℝ (Fin 1))
+/--
+The mass-scaled Euclidean inner product as a Riemannian metric on the oscillator
+configuration space.
+-/
+noncomputable def massRiemannianMetric (S : HarmonicOscillator)
+    : ContMDiffRiemannianMetric (𝓘(ℝ, EuclideanSpace ℝ (Fin 1))) ω (EuclideanSpace ℝ (Fin 1))
       (TangentSpace 𝓘(ℝ, EuclideanSpace ℝ (Fin 1)) : ConfigurationSpace → Type _) where
   inner q := massMetricVal S q
-  symm q v w := by
-    rw [massMetricVal_apply, massMetricVal_apply, real_inner_comm]
+  symm q v w := by rw [massMetricVal_apply, massMetricVal_apply, real_inner_comm]
   pos q v hv := massMetricVal_pos S q v hv
   isVonNBounded q := massMetricVal_isVonNBounded S q
   contMDiff := massMetricVal_contMDiff S
@@ -178,17 +179,19 @@ metric.
 
 /-- The defining formula for the oscillator geometric kinetic energy. -/
 noncomputable def geometricKineticEnergy
-    (S : HarmonicOscillator) (q : ConfigurationSpace)
-    (v : TangentSpace 𝓘(ℝ, EuclideanSpace ℝ (Fin 1)) q) : ℝ :=
+    (S : HarmonicOscillator)
+    (q : ConfigurationSpace) (v : TangentSpace (𝓘(ℝ, EuclideanSpace ℝ (Fin 1))) q)
+    : ℝ :=
   (1 / 2 : ℝ) * S.massRiemannianMetric.inner q v v
 
-/-- The geometric kinetic energy is one half the mass Riemannian metric applied to `v`
-twice. -/
+/--
+The geometric kinetic energy is one half the mass Riemannian metric applied to `v`
+twice.
+-/
 lemma geometricKineticEnergy_eq
-    (S : HarmonicOscillator) (q : ConfigurationSpace)
-    (v : TangentSpace 𝓘(ℝ, EuclideanSpace ℝ (Fin 1)) q) :
-    geometricKineticEnergy S q v =
-      (1 / 2 : ℝ) * S.massRiemannianMetric.inner q v v := by
+    (S : HarmonicOscillator)
+    (q : ConfigurationSpace) (v : TangentSpace (𝓘(ℝ, EuclideanSpace ℝ (Fin 1))) q)
+    : geometricKineticEnergy S q v = (1 / 2 : ℝ) * S.massRiemannianMetric.inner q v v := by
   rfl
 
 /-!
@@ -199,28 +202,30 @@ The coordinate identities below recover the usual mass-scaled formula for kineti
 
 /-- The oscillator mass Riemannian metric is positive definite. -/
 lemma massRiemannianMetric_pos
-    (S : HarmonicOscillator) (q : ConfigurationSpace)
-    (v : TangentSpace 𝓘(ℝ, EuclideanSpace ℝ (Fin 1)) q)
-    (hv : v ≠ 0) :
-    0 < S.massRiemannianMetric.inner q v v :=
+    (S : HarmonicOscillator)
+    (q : ConfigurationSpace) (v : TangentSpace (𝓘(ℝ, EuclideanSpace ℝ (Fin 1))) q) (hv : v ≠ 0)
+    : 0 < S.massRiemannianMetric.inner q v v :=
   massMetricVal_pos S q v hv
 
-/-- In the global coordinate, the oscillator mass metric is the mass-scaled Euclidean inner
-product of coordinate representatives. -/
+/--
+In the global coordinate, the oscillator mass metric is the mass-scaled Euclidean inner
+product of coordinate representatives.
+-/
 lemma massRiemannianMetric_inner_apply
-    (S : HarmonicOscillator) (q : ConfigurationSpace)
-    (v w : TangentSpace 𝓘(ℝ, EuclideanSpace ℝ (Fin 1)) q) :
-    S.massRiemannianMetric.inner q v w =
-      S.m * ⟪tangentCoord q v, tangentCoord q w⟫_ℝ := by
+    (S : HarmonicOscillator)
+    (q : ConfigurationSpace) (v w : TangentSpace (𝓘(ℝ, EuclideanSpace ℝ (Fin 1))) q)
+    : S.massRiemannianMetric.inner q v w = S.m * ⟪tangentCoord q v, tangentCoord q w⟫_ℝ := by
   exact massMetricVal_apply S q v w
 
-/-- The metric-induced kinetic energy for the mass metric has the standard
-harmonic-oscillator coordinate form. -/
+/--
+The metric-induced kinetic energy for the mass metric has the standard
+harmonic-oscillator coordinate form.
+-/
 lemma geometricKineticEnergy_massMetric_eq
-    (S : HarmonicOscillator) (q : ConfigurationSpace)
-    (v : TangentSpace 𝓘(ℝ, EuclideanSpace ℝ (Fin 1)) q) :
-    geometricKineticEnergy S q v =
-      (1 / 2 : ℝ) * S.m * ⟪tangentCoord q v, tangentCoord q v⟫_ℝ := by
+    (S : HarmonicOscillator)
+    (q : ConfigurationSpace) (v : TangentSpace (𝓘(ℝ, EuclideanSpace ℝ (Fin 1))) q)
+    : geometricKineticEnergy S q v
+      = (1 / 2 : ℝ) * S.m * ⟪tangentCoord q v, tangentCoord q v⟫_ℝ := by
   rw [geometricKineticEnergy_eq, massRiemannianMetric_inner_apply]
   ring
 

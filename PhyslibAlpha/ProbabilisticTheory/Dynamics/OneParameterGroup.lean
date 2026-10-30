@@ -39,9 +39,11 @@ namespace ProbabilisticTheory
 
 /-! ## A. The group law -/
 
-/-- `α : ℝ → E → E` is a one-parameter group of (not-yet-specified-as-anything) transformations of
+/--
+`α : ℝ → E → E` is a one-parameter group of (not-yet-specified-as-anything) transformations of
 `E`: `α 0 = id` and `α (s + t) = α s ∘ α t`. Nothing about linearity, order, a product, or
-continuity is assumed — those are independent, composable hypotheses to add at the point of use. -/
+continuity is assumed — those are independent, composable hypotheses to add at the point of use.
+-/
 structure IsOneParameterGroup {E : Type*} (α : ℝ → E → E) : Prop where
   /-- Evolving for zero time does nothing. -/
   map_zero : ∀ a : E, α 0 a = a
@@ -53,8 +55,10 @@ namespace IsOneParameterGroup
 variable {E : Type*} {α : ℝ → E → E} (h : IsOneParameterGroup α)
 include h
 
-/-- Every time-`t` map has a two-sided inverse, `α (-t)`: an immediate consequence of the group
-law, recorded once here rather than re-derived at each point of use. -/
+/--
+Every time-`t` map has a two-sided inverse, `α (-t)`: an immediate consequence of the group
+law, recorded once here rather than re-derived at each point of use.
+-/
 lemma left_inv (t : ℝ) (a : E) : α (-t) (α t a) = a := by
   have := h.map_add (-t) t a
   simpa [h.map_zero] using this.symm

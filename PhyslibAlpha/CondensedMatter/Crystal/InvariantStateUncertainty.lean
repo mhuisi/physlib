@@ -62,31 +62,36 @@ variable (I : Interaction (fun _ : CellSite (Fin d → ℤ) F => Ω₀)) (β : �
 
 /-! ## A. Uncertainty relations in the invariant state -/
 
-/-- **Robertson's relation for several observables in the translation invariant state** of an
-interaction on the crystal `ℤ^d`. -/
-lemma robertson_det_translationInvariantState {ι : Type*} [Fintype ι] [DecidableEq ι]
-    (a : ι → selfAdjoint (crystalAlgebra Ω₀ (Fin d → ℤ) F)) :
-    |((I.translationInvariantState β).bracketMatrix a).det| ≤
-      ((I.translationInvariantState β).covarianceMatrix a).det :=
+/--
+**Robertson's relation for several observables in the translation invariant state** of an
+interaction on the crystal `ℤ^d`.
+-/
+lemma robertson_det_translationInvariantState
+    {ι : Type*} [Fintype ι] [DecidableEq ι] (a : ι → selfAdjoint (crystalAlgebra Ω₀ (Fin d → ℤ) F))
+    : |((I.translationInvariantState β).bracketMatrix a).det|
+      ≤ ((I.translationInvariantState β).covarianceMatrix a).det :=
   (I.translationInvariantState β).robertson_det a
 
-variable {I β} {a : Fin d → ℤ} {A B : selfAdjoint (crystalAlgebra Ω₀ (Fin d → ℤ) F)}
-  (hA : translationAction Ω₀ (Multiplicative.ofAdd a) (A : crystalAlgebra Ω₀ (Fin d → ℤ) F) =
-    A)
-  (hB : translationAction Ω₀ (Multiplicative.ofAdd a) (B : crystalAlgebra Ω₀ (Fin d → ℤ) F) =
-    -(B : crystalAlgebra Ω₀ (Fin d → ℤ) F))
+variable
+  {I β} {a : Fin d → ℤ} {A B : selfAdjoint (crystalAlgebra Ω₀ (Fin d → ℤ) F)}
+  (hA : translationAction Ω₀ (Multiplicative.ofAdd a) (A : crystalAlgebra Ω₀ (Fin d → ℤ) F) = A)
+  (hB : translationAction Ω₀ (Multiplicative.ofAdd a) (B : crystalAlgebra Ω₀ (Fin d → ℤ) F)
+    = -(B : crystalAlgebra Ω₀ (Fin d → ℤ) F))
 include hA hB
 
-/-- In the translation invariant state, an observable fixed and one reversed by a translation
-are uncorrelated. -/
-lemma covariance_translationInvariantState_eq_zero :
-    (I.translationInvariantState β).covariance A B = 0 :=
+/--
+In the translation invariant state, an observable fixed and one reversed by a translation
+are uncorrelated.
+-/
+lemma covariance_translationInvariantState_eq_zero
+    : (I.translationInvariantState β).covariance A B = 0 :=
   AlgState.covariance_eq_zero_of_symm _ _ (translationInvariantState_invariant I β a) hA hB
 
-/-- In the translation invariant state, an observable fixed and one reversed by a translation
-have a bracket of expectation zero. -/
-lemma bracket_translationInvariantState_eq_zero :
-    (I.translationInvariantState β).bracket A B = 0 :=
+/--
+In the translation invariant state, an observable fixed and one reversed by a translation
+have a bracket of expectation zero.
+-/
+lemma bracket_translationInvariantState_eq_zero : (I.translationInvariantState β).bracket A B = 0 :=
   AlgState.bracket_eq_zero_of_symm _ _ (translationInvariantState_invariant I β a) hA hB
 
 end Crystal

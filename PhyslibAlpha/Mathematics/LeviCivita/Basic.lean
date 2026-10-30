@@ -58,42 +58,47 @@ being the matrix of Kronecker deltas of `a`.
 
 variable {R : Type*} [CommRing R]
 
-/-- The symbol as a determinant over any commutative ring, the integer determinant carried
-along the ring map from `ℤ`. -/
-lemma cast_leviCivitaSymbol (g : ι → ι) :
-    ((leviCivitaSymbol g : ℤ) : R)
+/--
+The symbol as a determinant over any commutative ring, the integer determinant carried
+along the ring map from `ℤ`.
+-/
+lemma cast_leviCivitaSymbol (g : ι → ι)
+    : ((leviCivitaSymbol g : ℤ) : R)
       = (Matrix.of fun i j : ι => if g i = j then (1 : R) else 0).det := by
-  have h := RingHom.map_det (Int.castRingHom R)
-    (Matrix.of fun i j : ι => if g i = j then (1 : ℤ) else 0)
+  have h :=
+    RingHom.map_det (Int.castRingHom R) (Matrix.of fun i j : ι => if g i = j then (1 : ℤ) else 0)
   simp only [Int.coe_castRingHom, RingHom.mapMatrix_apply] at h
-  rw [leviCivitaSymbol_eq_det, show (fun (i j : ι) => ((kroneckerDelta (g i) j : ℕ) : ℤ))
-      = (Matrix.of fun i j : ι => if g i = j then (1 : ℤ) else 0) from by
-        ext i j
-        by_cases hij : g i = j <;> simp [kroneckerDelta, hij], h]
+  rw [leviCivitaSymbol_eq_det,
+    show (fun (i j : ι) => ((kroneckerDelta (g i) j : ℕ) : ℤ))
+        = (Matrix.of fun i j : ι => if g i = j then (1 : ℤ) else 0) from by
+      ext i j
+      by_cases hij : g i = j <;> simp [kroneckerDelta, hij],
+    h]
   congr 1
   ext i j
   by_cases hij : g i = j <;> simp [Matrix.map_apply, hij]
 
 /-- The Leibniz formula with the permutation moving the column index. -/
-private lemma det_eq_sum_perm_prod (X : Matrix ι ι R) :
-    X.det = ∑ σ : Equiv.Perm ι, ((Equiv.Perm.sign σ : ℤ) : R) * ∏ i, X i (σ i) := by
+private lemma det_eq_sum_perm_prod (X : Matrix ι ι R)
+    : X.det = ∑ σ : Equiv.Perm ι, ((Equiv.Perm.sign σ : ℤ) : R) * ∏ i, X i (σ i) := by
   rw [← Matrix.det_transpose X, Matrix.det_apply']
   rfl
 
-/-- Contracted against the rows of `M` selected by `a`, the symbol gives `det M` times the
-symbol of `a`. -/
-lemma sum_leviCivitaSymbol_mul_prod (M : Matrix ι ι R) (a : ι → ι) :
-    ∑ g : ι → ι, ((leviCivitaSymbol g : ℤ) : R) * ∏ i, M (a i) (g i)
+/--
+Contracted against the rows of `M` selected by `a`, the symbol gives `det M` times the
+symbol of `a`.
+-/
+lemma sum_leviCivitaSymbol_mul_prod (M : Matrix ι ι R) (a : ι → ι)
+    : ∑ g : ι → ι, ((leviCivitaSymbol g : ℤ) : R) * ∏ i, M (a i) (g i)
       = M.det * ((leviCivitaSymbol a : ℤ) : R) := by
   classical
-  have hrows : (Matrix.of fun i j => M (a i) j).det
-      = ((leviCivitaSymbol a : ℤ) : R) * M.det := by
+  have hrows : (Matrix.of fun i j => M (a i) j).det = ((leviCivitaSymbol a : ℤ) : R) * M.det := by
     rw [cast_leviCivitaSymbol, ← Matrix.det_mul]
     congr 1
     ext i j
     simp [Matrix.mul_apply]
-  have hfun : ∀ (σ : Equiv.Perm ι) (g : ι → ι), (∀ i, g i = σ i) ↔ g = ⇑σ :=
-    fun σ g => ⟨fun h => funext h, fun h i => by rw [h]⟩
+  have hfun : ∀ (σ : Equiv.Perm ι) (g : ι → ι), (∀ i, g i = σ i) ↔ g = ⇑σ := fun σ g =>
+    ⟨fun h => funext h, fun h i => by rw [h]⟩
   rw [mul_comm, ← hrows, det_eq_sum_perm_prod]
   simp only [cast_leviCivitaSymbol, det_eq_sum_perm_prod, Matrix.of_apply, Finset.sum_mul,
     Fintype.prod_boole, hfun, mul_ite, mul_one, mul_zero, ite_mul, zero_mul]

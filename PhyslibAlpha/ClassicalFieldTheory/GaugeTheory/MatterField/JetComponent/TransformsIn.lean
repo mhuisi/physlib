@@ -78,10 +78,12 @@ variable {G : Type} [Group G]
 
 -/
 
-/-- The iterated formal derivative of a `V`-valued jet acts on the jet-ring factor of a
-  pure tensor: the value factor carries no spacetime dependence. -/
-lemma jetIteratedDeriv_tmul (x : Multiset (Fin 1 ⊕ Fin 3)) (f : SpaceTimeAlgebra) (v : V) :
-    jetIteratedDeriv x (f ⊗ₜ[ℂ] v) = SpaceTimeAlgebra.iteratedPDeriv x f ⊗ₜ[ℂ] v := by
+/--
+The iterated formal derivative of a `V`-valued jet acts on the jet-ring factor of a
+pure tensor: the value factor carries no spacetime dependence.
+-/
+lemma jetIteratedDeriv_tmul (x : Multiset (Fin 1 ⊕ Fin 3)) (f : SpaceTimeAlgebra) (v : V)
+    : jetIteratedDeriv x (f ⊗ₜ[ℂ] v) = SpaceTimeAlgebra.iteratedPDeriv x f ⊗ₜ[ℂ] v := by
   induction x using Multiset.induction_on generalizing f with
   | empty => rw [jetIteratedDeriv_zero]; rfl
   | cons μ t ih =>
@@ -96,46 +98,59 @@ namespace JetComponentSpace
 
 -/
 
-/-- The base-point Taylor coefficient at `x` derivatives of a jet of endomorphisms of `V`:
-  differentiate `x` times and evaluate at the base point. It is the `V`-valued jet toolkit
-  applied to the value space `Module.End ℂ V`, and it is what a coefficient in
-  `SpaceTimeAlgebra ⊗ End V` contributes to the derivative symbol `∂_x`. -/
-noncomputable def jetCoeffAt (x : Multiset (Fin 1 ⊕ Fin 3)) :
-    SpaceTimeAlgebra ⊗[ℂ] Module.End ℂ V →ₗ[ℂ] Module.End ℂ V :=
+/--
+The base-point Taylor coefficient at `x` derivatives of a jet of endomorphisms of `V`:
+differentiate `x` times and evaluate at the base point. It is the `V`-valued jet toolkit
+applied to the value space `Module.End ℂ V`, and it is what a coefficient in
+`SpaceTimeAlgebra ⊗ End V` contributes to the derivative symbol `∂_x`.
+-/
+noncomputable def jetCoeffAt (x : Multiset (Fin 1 ⊕ Fin 3))
+    : SpaceTimeAlgebra ⊗[ℂ] Module.End ℂ V →ₗ[ℂ] Module.End ℂ V :=
   jetEval ∘ₗ jetIteratedDeriv x
 
-/-- On a pure coefficient `f ⊗ T` the Taylor coefficient is the base-point Taylor
-  coefficient of `f` times `T`. -/
+/--
+On a pure coefficient `f ⊗ T` the Taylor coefficient is the base-point Taylor
+coefficient of `f` times `T`.
+-/
 @[simp]
-lemma jetCoeffAt_tmul (x : Multiset (Fin 1 ⊕ Fin 3)) (f : SpaceTimeAlgebra) (T : Module.End ℂ V) :
-    jetCoeffAt x (f ⊗ₜ[ℂ] T)
-      = constantCoeff (SpaceTimeAlgebra.iteratedPDeriv x f) • T := by
+lemma jetCoeffAt_tmul (x : Multiset (Fin 1 ⊕ Fin 3)) (f : SpaceTimeAlgebra) (T : Module.End ℂ V)
+    : jetCoeffAt x (f ⊗ₜ[ℂ] T) = constantCoeff (SpaceTimeAlgebra.iteratedPDeriv x f) • T := by
   rw [jetCoeffAt, LinearMap.comp_apply, jetIteratedDeriv_tmul, jetEval_tmul]
 
-/-- The Taylor coefficient of a jet of endomorphisms, evaluated at a vector, is the Taylor
-  coefficient of the `V`-valued jet obtained by feeding that vector to the coefficient. -/
-lemma jetCoeffAt_apply (x : Multiset (Fin 1 ⊕ Fin 3))
-    (c : SpaceTimeAlgebra ⊗[ℂ] Module.End ℂ V) (v : V) :
-    jetCoeffAt x c v = jetEval (jetIteratedDeriv x (TensorProduct.lift
-      ((LinearMap.llcomp ℂ V V (SpaceTimeAlgebra ⊗[ℂ] V)).comp
-        (TensorProduct.mk ℂ SpaceTimeAlgebra V)) c v)) := by
+/--
+The Taylor coefficient of a jet of endomorphisms, evaluated at a vector, is the Taylor
+coefficient of the `V`-valued jet obtained by feeding that vector to the coefficient.
+-/
+lemma jetCoeffAt_apply
+    (x : Multiset (Fin 1 ⊕ Fin 3)) (c : SpaceTimeAlgebra ⊗[ℂ] Module.End ℂ V) (v : V)
+    : jetCoeffAt x c v
+      = jetEval (jetIteratedDeriv x
+        (TensorProduct.lift
+          ((LinearMap.llcomp ℂ V V (SpaceTimeAlgebra ⊗[ℂ] V)).comp
+            (TensorProduct.mk ℂ SpaceTimeAlgebra V))
+          c v)) := by
   induction c using TensorProduct.inductionOn with
   | add c₁ c₂ h₁ h₂ =>
-    rw [map_add, LinearMap.add_apply, h₁, h₂, map_add, LinearMap.add_apply, map_add,
-      map_add]
+    rw [map_add, LinearMap.add_apply, h₁, h₂, map_add, LinearMap.add_apply, map_add, map_add]
   | tmul f T =>
     rw [jetCoeffAt_tmul, LinearMap.smul_apply,
-      show TensorProduct.lift ((LinearMap.llcomp ℂ V V (SpaceTimeAlgebra ⊗[ℂ] V)).comp
-        (TensorProduct.mk ℂ SpaceTimeAlgebra V)) (f ⊗ₜ[ℂ] T) v = f ⊗ₜ[ℂ] T v from rfl,
+      show TensorProduct.lift
+            ((LinearMap.llcomp ℂ V V (SpaceTimeAlgebra ⊗[ℂ] V)).comp
+              (TensorProduct.mk ℂ SpaceTimeAlgebra V))
+            (f ⊗ₜ[ℂ] T) v
+          = f ⊗ₜ[ℂ] T v from
+        rfl,
       jetIteratedDeriv_tmul, jetEval_tmul]
 
-/-- The Taylor coefficients of the gauge coefficient are the Taylor coefficients of the
-  representation: `jetCoeff rep U` reproduces `rep U` on constant jets, and both sides of
-  this identity read off the same derivative of that. -/
-lemma jetCoeffAt_jetCoeff [Module.Free ℂ V] [Module.Finite ℂ V]
-    (rep : Representation ℂ G (SpaceTimeAlgebra ⊗[ℂ] V)) (U : G)
-    (x : Multiset (Fin 1 ⊕ Fin 3)) :
-    jetCoeffAt x (jetCoeff rep U) = GaugeAlgebraRealization.repCoeff rep U x := by
+/--
+The Taylor coefficients of the gauge coefficient are the Taylor coefficients of the
+representation: `jetCoeff rep U` reproduces `rep U` on constant jets, and both sides of
+this identity read off the same derivative of that.
+-/
+lemma jetCoeffAt_jetCoeff
+    [Module.Free ℂ V] [Module.Finite ℂ V]
+    (rep : Representation ℂ G (SpaceTimeAlgebra ⊗[ℂ] V)) (U : G) (x : Multiset (Fin 1 ⊕ Fin 3))
+    : jetCoeffAt x (jetCoeff rep U) = GaugeAlgebraRealization.repCoeff rep U x := by
   refine LinearMap.ext fun v => ?_
   rw [jetCoeffAt_apply, jetCoeff_spec]
   rfl
@@ -153,22 +168,23 @@ lemma jetCoeffAt_jetCoeff [Module.Free ℂ V] [Module.Finite ℂ V]
 -/
 
 /-- The transpose is additive in the endomorphism. -/
-private lemma dualMap_add_apply (A B : Module.End ℂ V) (φ : Module.Dual ℂ V) :
-    (A + B).dualMap φ = A.dualMap φ + B.dualMap φ := by
+private lemma dualMap_add_apply (A B : Module.End ℂ V) (φ : Module.Dual ℂ V)
+    : (A + B).dualMap φ = A.dualMap φ + B.dualMap φ := by
   ext v
   simp
 
 /-- The transpose is homogeneous in the endomorphism. -/
-private lemma dualMap_smul_apply (c : ℂ) (T : Module.End ℂ V) (φ : Module.Dual ℂ V) :
-    (c • T).dualMap φ = c • T.dualMap φ := by
+private lemma dualMap_smul_apply (c : ℂ) (T : Module.End ℂ V) (φ : Module.Dual ℂ V)
+    : (c • T).dualMap φ = c • T.dualMap φ := by
   ext v
   simp
 
 /-- A multiset sum in the derivative label distributes out of a pure symbol. -/
-private lemma sum_tmul_right (m : Multiset SpaceTimeDerivAlgebraℂ) (w : Module.Dual ℂ V) :
-    m.sum ⊗ₜ[ℂ] w = (m.map fun a => a ⊗ₜ[ℂ] w).sum := by
+private lemma sum_tmul_right (m : Multiset SpaceTimeDerivAlgebraℂ) (w : Module.Dual ℂ V)
+    : m.sum ⊗ₜ[ℂ] w = (m.map fun a => a ⊗ₜ[ℂ] w).sum := by
   rw [show m.sum ⊗ₜ[ℂ] w
-      = ((TensorProduct.mk ℂ SpaceTimeDerivAlgebraℂ (Module.Dual ℂ V)).flip w) m.sum from rfl,
+        = ((TensorProduct.mk ℂ SpaceTimeDerivAlgebraℂ (Module.Dual ℂ V)).flip w) m.sum from
+      rfl,
     map_multiset_sum]
   rfl
 
@@ -178,19 +194,21 @@ private lemma sum_tmul_right (m : Multiset SpaceTimeDerivAlgebraℂ) (w : Module
 
 -/
 
-/-- A coefficient acts on the derivative symbol `∂_s ψ_φ` by the all-orders Leibniz
-  convolution of its base-point Taylor coefficients: each splitting `s = s₁ + s₂` of the
-  derivative multiset contributes the Taylor coefficient at `s₁` acting on the target index
-  of the lower symbol `∂_{s₂} ψ_φ`.
+/--
+A coefficient acts on the derivative symbol `∂_s ψ_φ` by the all-orders Leibniz
+convolution of its base-point Taylor coefficients: each splitting `s = s₁ + s₂` of the
+derivative multiset contributes the Taylor coefficient at `s₁` acting on the target index
+of the lower symbol `∂_{s₂} ψ_φ`.
 
-  This is `SpaceTimeDerivAlgebraℂ.jetRingAction_basis_multiset` in the derivative label,
-  together with the identification of the scalars it produces as `jetCoeffAt`; both sides
-  are additive in the coefficient, so it suffices to check it on a pure tensor. -/
-lemma symbolAction_basis_tmul (c : SpaceTimeAlgebra ⊗[ℂ] Module.End ℂ V)
-    (s : Multiset (Fin 1 ⊕ Fin 3)) (φ : Module.Dual ℂ V) :
-    symbolAction c (SpaceTimeDerivAlgebraℂ.basis s ⊗ₜ[ℂ] φ)
+This is `SpaceTimeDerivAlgebraℂ.jetRingAction_basis_multiset` in the derivative label,
+together with the identification of the scalars it produces as `jetCoeffAt`; both sides
+are additive in the coefficient, so it suffices to check it on a pure tensor.
+-/
+lemma symbolAction_basis_tmul
+    (c : SpaceTimeAlgebra ⊗[ℂ] Module.End ℂ V) (s : Multiset (Fin 1 ⊕ Fin 3)) (φ : Module.Dual ℂ V)
+    : symbolAction c (SpaceTimeDerivAlgebraℂ.basis s ⊗ₜ[ℂ] φ)
       = (s.antidiagonal.map fun p =>
-          SpaceTimeDerivAlgebraℂ.basis p.2 ⊗ₜ[ℂ] (jetCoeffAt p.1 c).dualMap φ).sum := by
+        SpaceTimeDerivAlgebraℂ.basis p.2 ⊗ₜ[ℂ] (jetCoeffAt p.1 c).dualMap φ).sum := by
   induction c using TensorProduct.inductionOn with
   | add c₁ c₂ h₁ h₂ =>
     rw [map_add, LinearMap.add_apply, h₁, h₂, ← Multiset.sum_map_add]
@@ -209,25 +227,28 @@ lemma symbolAction_basis_tmul (c : SpaceTimeAlgebra ⊗[ℂ] Module.End ℂ V)
 
 -/
 
-/-- The transformation law of the derivative symbol `∂_s ψ_φ` under the jet gauge group:
-  the all-orders Leibniz convolution of the dual representation coefficients
-  `GaugeAlgebraRealization.repDualCoeff` against lower symbols, with no inhomogeneous term. This is
-  the identity the `LocalGaugeData.TransformsIn` obligations of a matter field rest on.
+/--
+The transformation law of the derivative symbol `∂_s ψ_φ` under the jet gauge group:
+the all-orders Leibniz convolution of the dual representation coefficients
+`GaugeAlgebraRealization.repDualCoeff` against lower symbols, with no inhomogeneous term. This is
+the identity the `LocalGaugeData.TransformsIn` obligations of a matter field rest on.
 
-  Nothing here is special to the unconjugated half of the component space: the conjugate
-  half is this lemma at `repConj rep`. -/
-lemma repDual_basis_tmul [Module.Free ℂ V] [Module.Finite ℂ V]
+Nothing here is special to the unconjugated half of the component space: the conjugate
+half is this lemma at `repConj rep`.
+-/
+lemma repDual_basis_tmul
+    [Module.Free ℂ V] [Module.Finite ℂ V]
     (rep : Representation ℂ G (SpaceTimeAlgebra ⊗[ℂ] V))
-    (hlin : ∀ (U : G) (χ : SpaceTimeAlgebra) (z : SpaceTimeAlgebra ⊗[ℂ] V),
-      rep U (χ • z) = χ • rep U z)
-    (U : G) (s : Multiset (Fin 1 ⊕ Fin 3)) (φ : Module.Dual ℂ V) :
-    repDual rep hlin U (SpaceTimeDerivAlgebraℂ.basis s ⊗ₜ[ℂ] φ)
+    (hlin
+      : ∀ (U : G) (χ : SpaceTimeAlgebra) (z : SpaceTimeAlgebra ⊗[ℂ] V), rep U (χ • z) = χ • rep U z)
+    (U : G) (s : Multiset (Fin 1 ⊕ Fin 3)) (φ : Module.Dual ℂ V)
+    : repDual rep hlin U (SpaceTimeDerivAlgebraℂ.basis s ⊗ₜ[ℂ] φ)
       = (s.antidiagonal.map fun p =>
-          SpaceTimeDerivAlgebraℂ.basis p.2 ⊗ₜ[ℂ]
-            GaugeAlgebraRealization.repDualCoeff rep U⁻¹ p.1 φ).sum := by
-  rw [show repDual rep hlin U = symbolAction (jetCoeff rep U⁻¹) from rfl,
-    symbolAction_basis_tmul]
-  exact congrArg Multiset.sum (Multiset.map_congr rfl fun p _ => by
-    rw [jetCoeffAt_jetCoeff, GaugeAlgebraRealization.repDualCoeff])
+        SpaceTimeDerivAlgebraℂ.basis p.2 ⊗ₜ[ℂ]
+          GaugeAlgebraRealization.repDualCoeff rep U⁻¹ p.1 φ).sum := by
+  rw [show repDual rep hlin U = symbolAction (jetCoeff rep U⁻¹) from rfl, symbolAction_basis_tmul]
+  exact congrArg Multiset.sum
+    (Multiset.map_congr rfl fun p _ => by
+      rw [jetCoeffAt_jetCoeff, GaugeAlgebraRealization.repDualCoeff])
 
 end JetComponentSpace

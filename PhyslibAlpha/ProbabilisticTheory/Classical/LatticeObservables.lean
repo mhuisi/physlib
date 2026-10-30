@@ -81,8 +81,7 @@ variable {ω u}
 lemma bddAbove_band (h : E) : BddAbove (range fun a : ℝ≥0 => ω (h ⊓ (a : ℝ) • u)) :=
   ⟨ω h, forall_mem_range.2 fun _ => OrderHomClass.mono ω inf_le_left⟩
 
-lemma le_band (h : E) (a : ℝ≥0) : ω (h ⊓ (a : ℝ) • u) ≤ band ω u h :=
-  le_ciSup (bddAbove_band h) a
+lemma le_band (h : E) (a : ℝ≥0) : ω (h ⊓ (a : ℝ) • u) ≤ band ω u h := le_ciSup (bddAbove_band h) a
 
 lemma band_le {h : E} {r : ℝ} (hr : ∀ a : ℝ≥0, ω (h ⊓ (a : ℝ) • u) ≤ r) : band ω u h ≤ r :=
   ciSup_le hr
@@ -90,8 +89,8 @@ lemma band_le {h : E} {r : ℝ} (hr : ∀ a : ℝ≥0, ω (h ⊓ (a : ℝ) • u
 lemma band_nonneg {h : E} (hh : 0 ≤ h) : 0 ≤ band ω u h :=
   (le_band h 0).trans' (by simp [inf_eq_right.2 hh])
 
-lemma band_add (hu : 0 ≤ u) {h₁ h₂ : E} (h₁0 : 0 ≤ h₁) (h₂0 : 0 ≤ h₂) :
-    band ω u (h₁ + h₂) = band ω u h₁ + band ω u h₂ := by
+lemma band_add (hu : 0 ≤ u) {h₁ h₂ : E} (h₁0 : 0 ≤ h₁) (h₂0 : 0 ≤ h₂)
+    : band ω u (h₁ + h₂) = band ω u h₁ + band ω u h₂ := by
   refine le_antisymm (band_le fun a => ?_) ?_
   · refine (OrderHomClass.mono ω (add_inf_le h₁0 h₂0 (smul_nonneg a.coe_nonneg hu))).trans ?_
     rw [map_add]
@@ -104,12 +103,11 @@ lemma band_add (hu : 0 ≤ u) {h₁ h₂ : E} (h₁0 : 0 ≤ h₁) (h₂0 : 0 �
       exact add_le_add inf_le_right inf_le_right
     exact ciSup_add_ciSup_le key
 
-lemma apply_smul_inf_smul {c : ℝ} (hc : 0 ≤ c) (h : E) (a : ℝ) :
-    ω (c • h ⊓ (c * a) • u) = c * ω (h ⊓ a • u) := by
+lemma apply_smul_inf_smul {c : ℝ} (hc : 0 ≤ c) (h : E) (a : ℝ)
+    : ω (c • h ⊓ (c * a) • u) = c * ω (h ⊓ a • u) := by
   rw [mul_smul, ← smul_inf hc, map_smul, smul_eq_mul]
 
-lemma band_smul {c : ℝ} (hc : 0 < c) {h : E} :
-    band ω u (c • h) = c * band ω u h := by
+lemma band_smul {c : ℝ} (hc : 0 < c) {h : E} : band ω u (c • h) = c * band ω u h := by
   refine le_antisymm (band_le fun a => ?_) ?_
   · have := apply_smul_inf_smul (ω := ω) (u := u) hc.le h (c⁻¹ * a)
     rw [← mul_assoc, mul_inv_cancel₀ hc.ne', one_mul] at this
@@ -123,8 +121,10 @@ lemma band_smul {c : ℝ} (hc : 0 < c) {h : E} :
 variable (ω) in
 /-- The part of `ω` carried by a positive element `u`, as a positive functional. -/
 noncomputable def bandMap (hu : 0 ≤ u) : E →ₚ[ℝ] ℝ :=
-  PositiveLinearMap.ofCone (band ω u) (fun _ hh => band_nonneg hh)
-    (fun _ _ h₁ h₂ => band_add hu h₁ h₂) (fun _ _ hc _ => band_smul hc)
+  PositiveLinearMap.ofCone (band ω u)
+    (fun _ hh => band_nonneg hh)
+    (fun _ _ h₁ h₂ => band_add hu h₁ h₂)
+    (fun _ _ hc _ => band_smul hc)
 
 lemma bandMap_apply (hu : 0 ≤ u) {h : E} (hh : 0 ≤ h) : bandMap ω hu h = band ω u h :=
   PositiveLinearMap.ofCone_apply _ _ _ _ hh
@@ -150,8 +150,9 @@ lemma bandMap_eq_zero (hu : 0 ≤ u) {g : E} (hg : 0 ≤ g) (h : g ⊓ u = 0) : 
 -/
 
 /-- A pure state vanishes on one of any two disjoint positive elements. -/
-lemma IsPure.apply_eq_zero_of_inf_eq_zero {ω : 𝓢[ℝ, E]} (hω : ω.IsPure) {g u : E} (hg : 0 ≤ g)
-    (hu : 0 ≤ u) (h : g ⊓ u = 0) : ω g = 0 ∨ ω u = 0 := by
+lemma IsPure.apply_eq_zero_of_inf_eq_zero
+    {ω : 𝓢[ℝ, E]} (hω : ω.IsPure) {g u : E} (hg : 0 ≤ g) (hu : 0 ≤ u) (h : g ⊓ u = 0)
+    : ω g = 0 ∨ ω u = 0 := by
   rcases (map_nonneg ω hu).eq_or_lt with hu0 | hu0
   · exact .inr hu0.symm
   have hle := bandMap_le (ω := ω.toPositiveLinearMap) hu
@@ -165,12 +166,12 @@ lemma IsPure.apply_eq_zero_of_inf_eq_zero {ω : 𝓢[ℝ, E]} (hω : ω.IsPure) 
   exact .inl h2.symm
 
 /-- Pure states preserve infima. -/
-lemma IsPure.map_inf {ω : 𝓢[ℝ, E]} (hω : ω.IsPure) (f g : E) :
-    ω (f ⊓ g) = min (ω f) (ω g) := by
-  have h := hω.apply_eq_zero_of_inf_eq_zero (sub_nonneg.2 (inf_le_left : f ⊓ g ≤ f))
-    (sub_nonneg.2 (inf_le_right : f ⊓ g ≤ g)) (by rw [← inf_sub, sub_self])
-  refine le_antisymm
-    (le_min (OrderHomClass.mono ω inf_le_left) (OrderHomClass.mono ω inf_le_right)) ?_
+lemma IsPure.map_inf {ω : 𝓢[ℝ, E]} (hω : ω.IsPure) (f g : E) : ω (f ⊓ g) = min (ω f) (ω g) := by
+  have h :=
+    hω.apply_eq_zero_of_inf_eq_zero (sub_nonneg.2 (inf_le_left : f ⊓ g ≤ f))
+      (sub_nonneg.2 (inf_le_right : f ⊓ g ≤ g)) (by rw [← inf_sub, sub_self])
+  refine le_antisymm (le_min (OrderHomClass.mono ω inf_le_left) (OrderHomClass.mono ω inf_le_right))
+    ?_
   rcases h with h | h <;> rw [map_sub, sub_eq_zero] at h
   · exact (min_le_left _ _).trans h.le
   · exact (min_le_right _ _).trans h.le
@@ -182,8 +183,8 @@ lemma IsPure.map_inf {ω : 𝓢[ℝ, E]} (hω : ω.IsPure) (f g : E) :
 -/
 
 /-- An infimum-preserving state does not see the deviation of an observable from its value. -/
-lemma map_abs_sub_eq_zero_of_map_inf {ω : 𝓢[ℝ, E]} (h : ∀ f g, ω (f ⊓ g) = min (ω f) (ω g))
-    (f : E) : ω |f - ω f • (1 : E)| = 0 := by
+lemma map_abs_sub_eq_zero_of_map_inf {ω : 𝓢[ℝ, E]} (h : ∀ f g, ω (f ⊓ g) = min (ω f) (ω g)) (f : E)
+    : ω |f - ω f • (1 : E)| = 0 := by
   have hk : ω (f - ω f • (1 : E)) = 0 := by simp [map_sub, map_smul]
   have := map_sup_of_map_inf (ω := ω.toPositiveLinearMap) h (f - ω f • 1) (-(f - ω f • 1))
   change ω (_ ⊔ _) = max (ω _) (ω _) at this
@@ -191,13 +192,15 @@ lemma map_abs_sub_eq_zero_of_map_inf {ω : 𝓢[ℝ, E]} (h : ∀ f g, ω (f ⊓
   rw [this, map_neg, hk, neg_zero, max_self]
 
 /-- A state dominated by a multiple of an infimum-preserving state is that state. -/
-lemma eq_of_le_smul_of_map_inf {ω φ : 𝓢[ℝ, E]} (h : ∀ f g, ω (f ⊓ g) = min (ω f) (ω g))
-    {c : ℝ} (hφ : ∀ f, 0 ≤ f → φ f ≤ c * ω f) : φ = ω := by
+lemma eq_of_le_smul_of_map_inf
+    {ω φ : 𝓢[ℝ, E]} (h : ∀ f g, ω (f ⊓ g) = min (ω f) (ω g))
+    {c : ℝ} (hφ : ∀ f, 0 ≤ f → φ f ≤ c * ω f)
+    : φ = ω := by
   refine ext fun f => ?_
   have habs := map_abs_sub_eq_zero_of_map_inf h f
   set k := f - ω f • (1 : E)
-  have hφk : φ |k| = 0 := le_antisymm (by simpa [habs] using hφ _ (abs_nonneg k))
-    (map_nonneg φ (abs_nonneg k))
+  have hφk : φ |k| = 0 :=
+    le_antisymm (by simpa [habs] using hφ _ (abs_nonneg k)) (map_nonneg φ (abs_nonneg k))
   have h₁ := OrderHomClass.mono φ (le_abs_self k)
   have h₂ := OrderHomClass.mono φ (neg_le_abs k)
   rw [hφk] at h₁ h₂
@@ -211,8 +214,10 @@ lemma isPure_of_map_inf {ω : 𝓢[ℝ, E]} (h : ∀ f g, ω (f ⊓ g) = min (ω
   have ht : (0 : ℝ) < t := unitInterval.pos_iff_ne_zero.2 ht0
   have ht' : (0 : ℝ) < 1 - t := sub_pos.2 (unitInterval.lt_one_iff_ne_one.2 ht1)
   have hω f : ω f = t * φ f + (1 - t) * ψ f := by rw [← hmix, mix_apply]
-  refine ⟨eq_of_le_smul_of_map_inf h (c := (t : ℝ)⁻¹) fun f hf => ?_,
-    eq_of_le_smul_of_map_inf h (c := (1 - t)⁻¹) fun f hf => ?_⟩
+  refine ⟨
+    eq_of_le_smul_of_map_inf h (c := (t : ℝ)⁻¹) fun f hf => ?_,
+    eq_of_le_smul_of_map_inf h (c := (1 - t)⁻¹) fun f hf => ?_
+  ⟩
   · rw [hω, le_inv_mul_iff₀ ht]
     nlinarith [map_nonneg ψ hf]
   · rw [hω, le_inv_mul_iff₀ ht']
@@ -238,14 +243,17 @@ variable (E : Type*) [OrderUnitLattice E]
 
 /-- The pure states of an order-unit lattice form a weak-star closed set. -/
 lemma isClosed_setOf_isPure : IsClosed {ω : stateSpace E | (toState ω).IsPure} := by
-  have h : {ω : stateSpace E | (toState ω).IsPure} = ⋂ f : E, ⋂ g : E,
-      {ω : stateSpace E | toState ω (f ⊓ g) = min (toState ω f) (toState ω g)} := by
+  have h
+      : {ω : stateSpace E | (toState ω).IsPure}
+        = ⋂ f : E, ⋂ g : E,
+          {ω : stateSpace E | toState ω (f ⊓ g) = min (toState ω f) (toState ω g)} := by
     ext ω
     simp [UnitalPositiveLinearMap.isPure_iff_map_inf]
   rw [h]
-  exact isClosed_iInter fun f => isClosed_iInter fun g => isClosed_eq
-    (StateSpace.continuous_apply _)
-    ((StateSpace.continuous_apply f).min (StateSpace.continuous_apply g))
+  exact isClosed_iInter fun f =>
+    isClosed_iInter fun g =>
+      isClosed_eq (StateSpace.continuous_apply _)
+        ((StateSpace.continuous_apply f).min (StateSpace.continuous_apply g))
 
 end OrderUnitLattice
 
@@ -273,14 +281,17 @@ lemma evalPure_sup (f g : E) : evalPure (f ⊔ g) = evalPure f ⊔ evalPure g :=
   exact map_sup_of_map_inf (ω := (toState ω.1).toPositiveLinearMap)
     (UnitalPositiveLinearMap.isPure_iff_map_inf.1 ω.2) f g
 
-lemma separatesPointsStrongly : (range (evalPure (E := E))).SeparatesPointsStrongly :=
-  fun v x y => by
-    obtain ⟨a, hx, hy⟩ := StateSpace.exists_apply_eq_apply (x := x.1) (y := y.1) (v x) (v y)
-      fun h => congrArg v (Subtype.ext h)
-    exact ⟨_, ⟨a, rfl⟩, hx, hy⟩
+lemma separatesPointsStrongly
+    : (range (evalPure (E := E))).SeparatesPointsStrongly := fun v x y => by
+  obtain ⟨a, hx, hy⟩ :=
+    StateSpace.exists_apply_eq_apply (x := x.1) (y := y.1) (v x) (v y) fun h =>
+      congrArg v (Subtype.ext h)
+  exact ⟨_, ⟨a, rfl⟩, hx, hy⟩
 
-/-- **Stone–Weierstrass**: observables are dense among continuous functions on the pure
-states. -/
+/--
+**Stone–Weierstrass**: observables are dense among continuous functions on the pure
+states.
+-/
 lemma denseRange_evalPure : DenseRange (evalPure (E := E)) :=
   dense_iff_closure_eq.2 <| ContinuousMap.sublattice_closure_eq_top _ ⟨_, 0, rfl⟩
     (by rintro _ ⟨f, rfl⟩ _ ⟨g, rfl⟩; exact ⟨f ⊓ g, evalPure_inf f g⟩)
@@ -293,14 +304,18 @@ lemma denseRange_evalPure : DenseRange (evalPure (E := E)) :=
 -/
 
 variable (E) in
-/-- **Classicality of lattice-ordered observables**: the state space of an order-unit lattice is a
-Bauer simplex. -/
+/--
+**Classicality of lattice-ordered observables**: the state space of an order-unit lattice is a
+Bauer simplex.
+-/
 lemma isBauerSimplexStateSpace : IsBauerSimplexStateSpace E :=
   isBauerSimplexStateSpace_iff.2
     ⟨(OrderUnitLattice.isClassical E).ensemblesRefine, isClosed_setOf_isPure E⟩
 
-/-- **Unique decomposition into pure states**: every state of an order-unit lattice is a mixture
-of pure states in exactly one way. -/
+/--
+**Unique decomposition into pure states**: every state of an order-unit lattice is a mixture
+of pure states in exactly one way.
+-/
 lemma hasUniquePureDecomposition (φ : 𝓢[ℝ, E]) : φ.HasUniquePureDecomposition :=
   (isBauerSimplexStateSpace E).1 φ
 
@@ -327,8 +342,7 @@ lemma isBauerSimplexStateSpace : IsBauerSimplexStateSpace (BoundedMeasurable Ω)
   OrderUnitLattice.isBauerSimplexStateSpace _
 
 /-- **Classicality**: every state of a classical system decomposes uniquely into pure states. -/
-lemma hasUniquePureDecomposition
-    (φ : 𝓢[ℝ, BoundedMeasurable Ω]) : φ.HasUniquePureDecomposition :=
+lemma hasUniquePureDecomposition (φ : 𝓢[ℝ, BoundedMeasurable Ω]) : φ.HasUniquePureDecomposition :=
   OrderUnitLattice.hasUniquePureDecomposition φ
 
 end BoundedMeasurable
@@ -349,9 +363,10 @@ namespace FiniteClassicalSystem
 
 variable {ι : Type*} [Fintype ι]
 
-instance : OrderUnitLattice (FiniteClassicalSystem ι) :=
-  { (inferInstance : ArchimedeanOrderUnitSpace (FiniteClassicalSystem ι)),
-    (inferInstance : Lattice (ι → ℝ)) with }
+instance : OrderUnitLattice (FiniteClassicalSystem ι) := {
+  (inferInstance : ArchimedeanOrderUnitSpace (FiniteClassicalSystem ι)),
+  (inferInstance : Lattice (ι → ℝ)) with
+}
 
 /-- The state space of a finite classical system is a Bauer simplex. -/
 lemma isBauerSimplexStateSpace : IsBauerSimplexStateSpace (FiniteClassicalSystem ι) :=

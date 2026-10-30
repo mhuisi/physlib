@@ -21,18 +21,17 @@ namespace LorentzGroup
 open Matrix
 open minkowskiMatrix
 
-/-- The restricted Lorentz group comprises the proper and orthochronous elements of the
-Lorentz group. -/
+/--
+The restricted Lorentz group comprises the proper and orthochronous elements of the
+Lorentz group.
+-/
 def restricted (d : ℕ) : Subgroup (LorentzGroup d) where
   carrier := { Λ : LorentzGroup d | IsProper Λ ∧ IsOrthochronous Λ }
-  one_mem' := ⟨
-    by rw [IsProper]; exact det_one,
-    by rw [IsOrthochronous]; exact zero_le_one⟩
+  one_mem' := ⟨by rw [IsProper]; exact det_one, by rw [IsOrthochronous]; exact zero_le_one⟩
   mul_mem' := by
     rintro Λ₁ Λ₂ ⟨Λ₁_proper, Λ₁_ortho⟩ ⟨Λ₂_proper, Λ₂_ortho⟩
-    exact ⟨
-      by exact isProper_mul Λ₁_proper Λ₂_proper,
-      by exact isOrthochronous_mul Λ₁_ortho Λ₂_ortho⟩
+    exact
+      ⟨by exact isProper_mul Λ₁_proper Λ₂_proper, by exact isOrthochronous_mul Λ₁_ortho Λ₂_ortho⟩
   inv_mem' := by
     rintro Λ ⟨Λ_proper, Λ_ortho⟩
 
@@ -42,10 +41,10 @@ def restricted (d : ℕ) : Subgroup (LorentzGroup d) where
 
     exact ⟨
       by rw [IsProper, inv_eq_dual, det_dual, Λ_proper],
-      by simp [IsOrthochronous, inv_eq_dual, h_dual]; exact Λ_ortho⟩
+      by simp [IsOrthochronous, inv_eq_dual, h_dual]; exact Λ_ortho
+    ⟩
 
-lemma isOrthochronous_of_restricted {d : ℕ} (Λ : restricted d) :
-    IsOrthochronous Λ.1 := Λ.2.2
+lemma isOrthochronous_of_restricted {d : ℕ} (Λ : restricted d) : IsOrthochronous Λ.1 := Λ.2.2
 
 /-- The restricted Lorentz group is a normal subgroup of the Lorentz group. -/
 lemma restricted_normal_subgroup {d : ℕ} : (restricted d).Normal := by
@@ -62,14 +61,18 @@ open TopologicalSpace
 semiformal_result "FXNL5" restricted_isConnected {d : ℕ} :
   IsConnected (restricted d : Set (LorentzGroup d))
 
-/-- Given the hypothesis that the restricted Lorentz group is connected,
-  the proof that the restricted lorentz group is equal to the connected component of the
-  identity. -/
-lemma restricted_eq_identity_component_of_isConnected {d : ℕ}
-    (h1 : IsConnected (restricted d : Set (LorentzGroup d))) :
-    (restricted d) = connectedComponent (1 : LorentzGroup d) := by
+/--
+Given the hypothesis that the restricted Lorentz group is connected,
+the proof that the restricted lorentz group is equal to the connected component of the
+identity.
+-/
+lemma restricted_eq_identity_component_of_isConnected
+    {d : ℕ} (h1 : IsConnected (restricted d : Set (LorentzGroup d)))
+    : (restricted d) = connectedComponent (1 : LorentzGroup d) := by
   exact Set.Subset.antisymm (IsConnected.subset_connectedComponent h1 (restricted d).one_mem)
-    fun x h => ⟨(isProper_on_connected_component h).mp isProper_id,
-      (isOrthochronous_on_connected_component h).mp id_isOrthochronous⟩
+    fun x h => ⟨
+      (isProper_on_connected_component h).mp isProper_id,
+      (isOrthochronous_on_connected_component h).mp id_isOrthochronous
+    ⟩
 
 end LorentzGroup

@@ -51,9 +51,9 @@ structure Bond (C : Crystal G) where
   displacement : G
 
 /-- Bonds can be compared when cells and unit-cell labels can be compared. -/
-instance {C : Crystal G} [DecidableEq G] [DecidableEq C.UnitCell] : DecidableEq (Bond C) :=
-  fun b b' => decidable_of_iff
-    (b.source = b'.source ∧ b.target = b'.target ∧ b.displacement = b'.displacement)
+instance {C : Crystal G} [DecidableEq G] [DecidableEq C.UnitCell]
+    : DecidableEq (Bond C) := fun b b' =>
+  decidable_of_iff (b.source = b'.source ∧ b.target = b'.target ∧ b.displacement = b'.displacement)
     (by cases b; cases b'; simp)
 
 namespace Bond
@@ -67,8 +67,8 @@ lemma links_reference (b : Bond C) : b.Links ⟨0, b.source⟩ ⟨b.displacement
   ⟨rfl, rfl, (zero_add _).symm⟩
 
 /-- Two bonds linking the same pair of sites are equal. -/
-lemma eq_of_links {b b' : Bond C} {x y : C.Site} (h : b.Links x y) (h' : b'.Links x y) :
-    b = b' := by
+lemma eq_of_links {b b' : Bond C} {x y : C.Site} (h : b.Links x y) (h' : b'.Links x y)
+    : b = b' := by
   obtain ⟨s, t, d⟩ := b
   obtain ⟨s', t', d'⟩ := b'
   obtain ⟨hs, ht, hd⟩ := h
@@ -76,14 +76,13 @@ lemma eq_of_links {b b' : Bond C} {x y : C.Site} (h : b.Links x y) (h' : b'.Link
   simp_all
 
 /-- Translating the endpoints gives another copy of the same bond. -/
-lemma links_vadd (b : Bond C) (a : G) (x y : C.Site) :
-    b.Links (a +ᵥ x) (a +ᵥ y) ↔ b.Links x y := by
+lemma links_vadd (b : Bond C) (a : G) (x y : C.Site) : b.Links (a +ᵥ x) (a +ᵥ y) ↔ b.Links x y := by
   simp only [Links, Site.vadd_def, add_assoc, add_right_inj]
 
 /-- The source and target of a bond can be checked from their site addresses. -/
-instance [DecidableEq G] [DecidableEq C.UnitCell] (b : Bond C) : DecidableRel b.Links :=
-  fun x y => inferInstanceAs (Decidable (x.label = b.source ∧ y.label = b.target ∧
-    y.cell = x.cell + b.displacement))
+instance [DecidableEq G] [DecidableEq C.UnitCell] (b : Bond C) : DecidableRel b.Links := fun x y =>
+  inferInstanceAs
+    (Decidable (x.label = b.source ∧ y.label = b.target ∧ y.cell = x.cell + b.displacement))
 
 end Bond
 

@@ -74,8 +74,9 @@ namespace SuperSymmetry
 namespace SU5
 namespace ChargeSpectrum
 
-variable {𝓩 𝓩1 𝓩2 : Type} [AddCommGroup 𝓩] [AddCommGroup 𝓩1] [DecidableEq 𝓩1]
-  [AddCommGroup 𝓩2] [DecidableEq 𝓩2]
+variable
+  {𝓩 𝓩1 𝓩2 : Type}
+  [AddCommGroup 𝓩] [AddCommGroup 𝓩1] [DecidableEq 𝓩1] [AddCommGroup 𝓩2] [DecidableEq 𝓩2]
 
 /-!
 
@@ -83,20 +84,18 @@ variable {𝓩 𝓩1 𝓩2 : Type} [AddCommGroup 𝓩] [AddCommGroup 𝓩1] [Dec
 
 -/
 
-/-- Given an additive monoid homomorphisms `f : 𝓩 →+ 𝓩1`, for a charge spectrum
-  `x : ChargeSpectrum 𝓩`, `x.map f` is the charge spectrum in `ChargeSpectrum 𝓩1` obtained by
-  mapping the elements of `x` by `f`. -/
+/--
+Given an additive monoid homomorphisms `f : 𝓩 →+ 𝓩1`, for a charge spectrum
+`x : ChargeSpectrum 𝓩`, `x.map f` is the charge spectrum in `ChargeSpectrum 𝓩1` obtained by
+mapping the elements of `x` by `f`.
+-/
 def map (f : 𝓩 →+ 𝓩1) (x : ChargeSpectrum 𝓩) : ChargeSpectrum 𝓩1 where
   qHd := f <$> x.qHd
   qHu := f <$> x.qHu
   Q5 := x.Q5.image f
   Q10 := x.Q10.image f
 
-/-
-
-### A.1. Mapping the empty charge spectrum gives the empty charge spectrum
-
--/
+/- ### A.1. Mapping the empty charge spectrum gives the empty charge spectrum -/
 
 @[simp]
 lemma map_empty (f : 𝓩 →+ 𝓩1) : map f (∅ : ChargeSpectrum 𝓩) = ∅ := by
@@ -110,8 +109,8 @@ lemma map_empty (f : 𝓩 →+ 𝓩1) : map f (∅ : ChargeSpectrum 𝓩) = ∅ 
 
 -/
 
-lemma map_map (f : 𝓩 →+ 𝓩1) (g : 𝓩1 →+ 𝓩2) (x : ChargeSpectrum 𝓩) :
-    map g (map f x) = map (g.comp f) x := by
+lemma map_map (f : 𝓩 →+ 𝓩1) (g : 𝓩1 →+ 𝓩2) (x : ChargeSpectrum 𝓩)
+    : map g (map f x) = map (g.comp f) x := by
   simp [map, Option.map_map, Finset.image_image]
 
 /-!
@@ -130,40 +129,39 @@ lemma map_id [DecidableEq 𝓩] (x : ChargeSpectrum 𝓩) : map (AddMonoidHom.id
 
 -/
 
-lemma map_ofFieldLabel (f : 𝓩 →+ 𝓩1) (x : ChargeSpectrum 𝓩) (F : FieldLabel) :
-    ofFieldLabel (map f x) F = (ofFieldLabel x F).image f := by
+lemma map_ofFieldLabel (f : 𝓩 →+ 𝓩1) (x : ChargeSpectrum 𝓩) (F : FieldLabel)
+    : ofFieldLabel (map f x) F = (ofFieldLabel x F).image f := by
   simp [ofFieldLabel, map]
   match x with
   | ⟨qHd, qHu, Q5, Q10⟩ =>
-  fin_cases F
-  all_goals simp
-  case «0» | «1» =>
-    match qHu with
-    | some a => simp
-    | none => simp
-  case «2» | «3» =>
-    match qHd with
-    | some a => simp
-    | none => simp
-  · trans (Finset.image (⇑f) Q5).image Neg.neg
-    · ext a
-      simp
-    · rw [Finset.image_image]
-      symm
-      trans Finset.image (⇑f ∘ Neg.neg) (Q5)
+    fin_cases F
+    all_goals simp
+    case «0» | «1» =>
+      match qHu with
+      | some a => simp
+      | none => simp
+    case «2» | «3» =>
+      match qHd with
+      | some a => simp
+      | none => simp
+    · trans (Finset.image (⇑f) Q5).image Neg.neg
       · ext a
         simp
-      congr 1
-      funext a
-      simp
+      · rw [Finset.image_image]
+        symm
+        trans Finset.image (⇑f ∘ Neg.neg) (Q5)
+        · ext a
+          simp
+        congr 1
+        funext a
+        simp
 /-!
 
 ### A.5. Mappings of charge spectra preserve the subset relation
 
 -/
 
-lemma map_subset {f : 𝓩 →+ 𝓩1} {x y : ChargeSpectrum 𝓩} (h : x ⊆ y) :
-    map f x ⊆ map f y := by
+lemma map_subset {f : 𝓩 →+ 𝓩1} {x y : ChargeSpectrum 𝓩} (h : x ⊆ y) : map f x ⊆ map f y := by
   simp [map, subset_def] at *
   obtain ⟨hHd, hHu, hQ5, hQ10⟩ := h
   refine ⟨?_, ?_, ?_, ?_⟩
@@ -192,34 +190,35 @@ lemma map_subset {f : 𝓩 →+ 𝓩1} {x y : ChargeSpectrum 𝓩} (h : x ⊆ y)
 
 -/
 
-lemma map_ofPotentialTerm_toFinset [DecidableEq 𝓩]
-    (f : 𝓩 →+ 𝓩1) (x : ChargeSpectrum 𝓩) (T : PotentialTerm) :
-    (ofPotentialTerm (map f x) T).toFinset = (ofPotentialTerm x T).toFinset.image f := by
-  have heq : ∀ {W : Type} [AddCommGroup W] [DecidableEq W] (y : ChargeSpectrum W)
-      (S : PotentialTerm), (ofPotentialTerm y S).toFinset = (ofPotentialTerm' y S).toFinset := by
+lemma map_ofPotentialTerm_toFinset
+    [DecidableEq 𝓩] (f : 𝓩 →+ 𝓩1) (x : ChargeSpectrum 𝓩) (T : PotentialTerm)
+    : (ofPotentialTerm (map f x) T).toFinset = (ofPotentialTerm x T).toFinset.image f := by
+  have heq
+      : ∀ {W : Type} [AddCommGroup W] [DecidableEq W] (y : ChargeSpectrum W) (S : PotentialTerm),
+        (ofPotentialTerm y S).toFinset = (ofPotentialTerm' y S).toFinset := by
     intro W _ _ y S
     ext i
     simp only [Multiset.mem_toFinset]
     rw [mem_ofPotentialTerm_iff_mem_ofPotentialTerm]
   rw [heq, heq]
-  rcases x with ⟨_ | qHd, _ | qHu, Q5, Q10⟩ <;> cases T <;>
-    simp only [ofPotentialTerm', map, Option.map_eq_map, Option.map_some, Option.map_none,
+  rcases x with ⟨_ | qHd, _ | qHu, Q5, Q10⟩ <;> cases T
+    <;> simp only [ofPotentialTerm', map, Option.map_eq_map, Option.map_some, Option.map_none,
       Multiset.toFinset_map, Finset.val_toFinset, Function.comp_def, map_add, map_sub, map_neg,
       Multiset.toFinset_singleton, Finset.image_singleton, Finset.product_eq_sprod,
-      ← Finset.prodMap_image_product, Finset.image_image, Prod.map_fst, Prod.map_snd] <;>
-    simp
+      ← Finset.prodMap_image_product, Finset.image_image, Prod.map_fst, Prod.map_snd]
+    <;> simp
 
-lemma mem_map_ofPotentialTerm_iff [DecidableEq 𝓩]
-    (f : 𝓩 →+ 𝓩1) (x : ChargeSpectrum 𝓩) (T : PotentialTerm) :
-    i ∈ (ofPotentialTerm (map f x) T) ↔ i ∈ (ofPotentialTerm x T).map f := by
+lemma mem_map_ofPotentialTerm_iff
+    [DecidableEq 𝓩] (f : 𝓩 →+ 𝓩1) (x : ChargeSpectrum 𝓩) (T : PotentialTerm)
+    : i ∈ (ofPotentialTerm (map f x) T) ↔ i ∈ (ofPotentialTerm x T).map f := by
   trans i ∈ (ofPotentialTerm (map f x) T).toFinset
   · simp
   rw [map_ofPotentialTerm_toFinset]
   simp
 
-lemma mem_map_ofPotentialTerm'_iff[DecidableEq 𝓩]
-    (f : 𝓩 →+ 𝓩1) (x : ChargeSpectrum 𝓩) (T : PotentialTerm) :
-    i ∈ (ofPotentialTerm' (map f x) T) ↔ i ∈ (ofPotentialTerm' x T).map f := by
+lemma mem_map_ofPotentialTerm'_iff
+    [DecidableEq 𝓩] (f : 𝓩 →+ 𝓩1) (x : ChargeSpectrum 𝓩) (T : PotentialTerm)
+    : i ∈ (ofPotentialTerm' (map f x) T) ↔ i ∈ (ofPotentialTerm' x T).map f := by
   rw [← mem_ofPotentialTerm_iff_mem_ofPotentialTerm]
   rw [mem_map_ofPotentialTerm_iff]
   simp only [Multiset.mem_map]
@@ -231,9 +230,9 @@ lemma mem_map_ofPotentialTerm'_iff[DecidableEq 𝓩]
     refine ⟨a, ?_, h1⟩
     exact mem_ofPotentialTerm_iff_mem_ofPotentialTerm.mpr h
 
-lemma map_ofPotentialTerm'_toFinset [DecidableEq 𝓩]
-    (f : 𝓩 →+ 𝓩1) (x : ChargeSpectrum 𝓩) (T : PotentialTerm) :
-    (ofPotentialTerm' (map f x) T).toFinset = (ofPotentialTerm' x T).toFinset.image f := by
+lemma map_ofPotentialTerm'_toFinset
+    [DecidableEq 𝓩] (f : 𝓩 →+ 𝓩1) (x : ChargeSpectrum 𝓩) (T : PotentialTerm)
+    : (ofPotentialTerm' (map f x) T).toFinset = (ofPotentialTerm' x T).toFinset.image f := by
   ext i
   simp only [Multiset.mem_toFinset, Finset.mem_image]
   rw [mem_map_ofPotentialTerm'_iff]
@@ -246,8 +245,8 @@ lemma map_ofPotentialTerm'_toFinset [DecidableEq 𝓩]
 -/
 variable [DecidableEq 𝓩]
 
-lemma allowsTermForm_map {T} {f : 𝓩 →+ 𝓩1} {a b c : 𝓩} :
-    (allowsTermForm a b c T).map f = allowsTermForm (f a) (f b) (f c) T := by
+lemma allowsTermForm_map {T} {f : 𝓩 →+ 𝓩1} {a b c : 𝓩}
+    : (allowsTermForm a b c T).map f = allowsTermForm (f a) (f b) (f c) T := by
   cases T
   all_goals simp [allowsTermForm, map]
 
@@ -257,8 +256,8 @@ lemma allowsTermForm_map {T} {f : 𝓩 →+ 𝓩1} {a b c : 𝓩} :
 
 -/
 
-lemma map_allowsTerm {f : 𝓩 →+ 𝓩1} {x : ChargeSpectrum 𝓩} {T : PotentialTerm}
-    (h : x.AllowsTerm T) : (map f x).AllowsTerm T := by
+lemma map_allowsTerm {f : 𝓩 →+ 𝓩1} {x : ChargeSpectrum 𝓩} {T : PotentialTerm} (h : x.AllowsTerm T)
+    : (map f x).AllowsTerm T := by
   rw [allowsTerm_iff_subset_allowsTermForm] at ⊢ h
   obtain ⟨a, b, c, h1⟩ := h
   use f a, f b, f c
@@ -271,8 +270,8 @@ lemma map_allowsTerm {f : 𝓩 →+ 𝓩1} {x : ChargeSpectrum 𝓩} {T : Potent
 
 -/
 
-lemma map_isPhenoConstrained (f : 𝓩 →+ 𝓩1) {x : ChargeSpectrum 𝓩}
-    (h : x.IsPhenoConstrained) : (map f x).IsPhenoConstrained := by
+lemma map_isPhenoConstrained (f : 𝓩 →+ 𝓩1) {x : ChargeSpectrum 𝓩} (h : x.IsPhenoConstrained)
+    : (map f x).IsPhenoConstrained := by
   simp [IsPhenoConstrained] at ⊢ h
   rcases h with h | h | h | h | h | h | h | h
   · exact Or.inl (map_allowsTerm h)
@@ -284,9 +283,10 @@ lemma map_isPhenoConstrained (f : 𝓩 →+ 𝓩1) {x : ChargeSpectrum 𝓩}
   · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl (map_allowsTerm h)))))))
   · exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr ((map_allowsTerm h))))))))
 
-lemma not_isPhenoConstrained_of_map {f : 𝓩 →+ 𝓩1} {x : ChargeSpectrum 𝓩}
-    (h : ¬ (map f x).IsPhenoConstrained) : ¬ x.IsPhenoConstrained :=
-  fun hn => h (map_isPhenoConstrained f hn)
+lemma not_isPhenoConstrained_of_map
+    {f : 𝓩 →+ 𝓩1} {x : ChargeSpectrum 𝓩} (h : ¬(map f x).IsPhenoConstrained)
+    : ¬x.IsPhenoConstrained := fun hn =>
+  h (map_isPhenoConstrained f hn)
 
 /-!
 
@@ -295,8 +295,8 @@ lemma not_isPhenoConstrained_of_map {f : 𝓩 →+ 𝓩1} {x : ChargeSpectrum �
 -/
 
 omit [DecidableEq 𝓩] in
-lemma map_isComplete_iff {f : 𝓩 →+ 𝓩1} {x : ChargeSpectrum 𝓩} :
-    (map f x).IsComplete ↔ x.IsComplete := by
+lemma map_isComplete_iff {f : 𝓩 →+ 𝓩1} {x : ChargeSpectrum 𝓩}
+    : (map f x).IsComplete ↔ x.IsComplete := by
   simp [IsComplete, map]
 
 /-!
@@ -305,8 +305,8 @@ lemma map_isComplete_iff {f : 𝓩 →+ 𝓩1} {x : ChargeSpectrum 𝓩} :
 
 -/
 
-lemma map_ofYukawaTerms_toFinset {f : 𝓩 →+ 𝓩1} {x : ChargeSpectrum 𝓩} :
-    (map f x).ofYukawaTerms.toFinset = x.ofYukawaTerms.toFinset.image f := by
+lemma map_ofYukawaTerms_toFinset {f : 𝓩 →+ 𝓩1} {x : ChargeSpectrum 𝓩}
+    : (map f x).ofYukawaTerms.toFinset = x.ofYukawaTerms.toFinset.image f := by
   simp [ofYukawaTerms]
   ext i
   rw [Finset.image_union]
@@ -314,8 +314,8 @@ lemma map_ofYukawaTerms_toFinset {f : 𝓩 →+ 𝓩1} {x : ChargeSpectrum 𝓩}
   rw [mem_map_ofPotentialTerm'_iff, mem_map_ofPotentialTerm'_iff]
   simp [Multiset.mem_map]
 
-lemma mem_map_ofYukawaTerms_iff {f : 𝓩 →+ 𝓩1} {x : ChargeSpectrum 𝓩} {i} :
-    i ∈ (map f x).ofYukawaTerms ↔ i ∈ x.ofYukawaTerms.map f := by
+lemma mem_map_ofYukawaTerms_iff {f : 𝓩 →+ 𝓩1} {x : ChargeSpectrum 𝓩} {i}
+    : i ∈ (map f x).ofYukawaTerms ↔ i ∈ x.ofYukawaTerms.map f := by
   trans i ∈ (map f x).ofYukawaTerms.toFinset
   · simp
   rw [map_ofYukawaTerms_toFinset]
@@ -327,8 +327,8 @@ lemma mem_map_ofYukawaTerms_iff {f : 𝓩 →+ 𝓩1} {x : ChargeSpectrum 𝓩} 
 
 -/
 
-lemma map_ofYukawaTermsNSum_toFinset {f : 𝓩 →+ 𝓩1} {x : ChargeSpectrum 𝓩} {n : ℕ}:
-    ((map f x).ofYukawaTermsNSum n).toFinset = (x.ofYukawaTermsNSum n).toFinset.image f:= by
+lemma map_ofYukawaTermsNSum_toFinset {f : 𝓩 →+ 𝓩1} {x : ChargeSpectrum 𝓩} {n : ℕ}
+    : ((map f x).ofYukawaTermsNSum n).toFinset = (x.ofYukawaTermsNSum n).toFinset.image f := by
   induction n with
   | zero => simp [ofYukawaTermsNSum]
   | succ n ih =>
@@ -362,20 +362,21 @@ lemma map_ofYukawaTermsNSum_toFinset {f : 𝓩 →+ 𝓩1} {x : ChargeSpectrum �
         use b
       exact h
 
-lemma mem_map_ofYukawaTermsNSum_iff {f : 𝓩 →+ 𝓩1} {x : ChargeSpectrum 𝓩} {n i} :
-    i ∈ (map f x).ofYukawaTermsNSum n ↔ i ∈ (x.ofYukawaTermsNSum n).map f := by
+lemma mem_map_ofYukawaTermsNSum_iff {f : 𝓩 →+ 𝓩1} {x : ChargeSpectrum 𝓩} {n i}
+    : i ∈ (map f x).ofYukawaTermsNSum n ↔ i ∈ (x.ofYukawaTermsNSum n).map f := by
   trans i ∈ ((map f x).ofYukawaTermsNSum n).toFinset
   · simp
   rw [map_ofYukawaTermsNSum_toFinset]
   simp
 
-lemma map_phenoConstrainingChargesSP_toFinset {f : 𝓩 →+ 𝓩1} {x : ChargeSpectrum 𝓩} :
-    (map f x).phenoConstrainingChargesSP.toFinset =
-    x.phenoConstrainingChargesSP.toFinset.image f := by
+lemma map_phenoConstrainingChargesSP_toFinset {f : 𝓩 →+ 𝓩1} {x : ChargeSpectrum 𝓩}
+    : (map f x).phenoConstrainingChargesSP.toFinset
+      = x.phenoConstrainingChargesSP.toFinset.image f := by
   simp [phenoConstrainingChargesSP, map_ofPotentialTerm'_toFinset, Finset.image_union]
 
-lemma map_yukawaGeneratesDangerousAtLevel (f : 𝓩 →+ 𝓩1) {x : ChargeSpectrum 𝓩} (n : ℕ)
-    (h : x.YukawaGeneratesDangerousAtLevel n) : (map f x).YukawaGeneratesDangerousAtLevel n := by
+lemma map_yukawaGeneratesDangerousAtLevel
+    (f : 𝓩 →+ 𝓩1) {x : ChargeSpectrum 𝓩} (n : ℕ) (h : x.YukawaGeneratesDangerousAtLevel n)
+    : (map f x).YukawaGeneratesDangerousAtLevel n := by
   rw [yukawaGeneratesDangerousAtLevel_iff_toFinset]
   rw [map_phenoConstrainingChargesSP_toFinset, map_ofYukawaTermsNSum_toFinset]
   rw [← Finset.nonempty_iff_ne_empty, ← Finset.not_disjoint_iff_nonempty_inter]
@@ -383,10 +384,10 @@ lemma map_yukawaGeneratesDangerousAtLevel (f : 𝓩 →+ 𝓩1) {x : ChargeSpect
   rw [Finset.not_disjoint_iff_nonempty_inter, Finset.nonempty_iff_ne_empty]
   exact (yukawaGeneratesDangerousAtLevel_iff_toFinset _ _).mp h
 
-lemma not_yukawaGeneratesDangerousAtLevel_of_map {f : 𝓩 →+ 𝓩1} {x : ChargeSpectrum 𝓩}
-    (n : ℕ) (h : ¬ (map f x).YukawaGeneratesDangerousAtLevel n) :
-    ¬ x.YukawaGeneratesDangerousAtLevel n :=
-  fun hn => h (map_yukawaGeneratesDangerousAtLevel f n hn)
+lemma not_yukawaGeneratesDangerousAtLevel_of_map
+    {f : 𝓩 →+ 𝓩1} {x : ChargeSpectrum 𝓩} (n : ℕ) (h : ¬ (map f x).YukawaGeneratesDangerousAtLevel n)
+    : ¬ x.YukawaGeneratesDangerousAtLevel n := fun hn =>
+  h (map_yukawaGeneratesDangerousAtLevel f n hn)
 
 /-!
 
@@ -398,14 +399,18 @@ equal to the actual preimage.
 
 -/
 
-/-- The preimage of a charge `Charges 𝓩1` in `ofFinset S5 S10 ⊆ Charges 𝓩` under
-  mapping charges through `f : 𝓩 →+ 𝓩1`. -/
-def preimageOfFinset (S5 S10 : Finset 𝓩) (f : 𝓩 →+ 𝓩1)
-    (x : ChargeSpectrum 𝓩1) : Finset (ChargeSpectrum 𝓩) :=
-  let SHd := (S5.map ⟨Option.some, Option.some_injective 𝓩⟩ ∪ {none} : Finset (Option 𝓩)).filter
-    fun y => f <$> y = x.qHd
-  let SHu := (S5.map ⟨Option.some, Option.some_injective 𝓩⟩ ∪ {none} : Finset (Option 𝓩)).filter
-    fun y => f <$> y = x.qHu
+/--
+The preimage of a charge `Charges 𝓩1` in `ofFinset S5 S10 ⊆ Charges 𝓩` under
+mapping charges through `f : 𝓩 →+ 𝓩1`.
+-/
+def preimageOfFinset (S5 S10 : Finset 𝓩) (f : 𝓩 →+ 𝓩1) (x : ChargeSpectrum 𝓩1)
+    : Finset (ChargeSpectrum 𝓩) :=
+  let SHd :=
+    (S5.map ⟨Option.some, Option.some_injective 𝓩⟩ ∪ {none} : Finset (Option 𝓩)).filter fun y =>
+      f <$> y = x.qHd
+  let SHu :=
+    (S5.map ⟨Option.some, Option.some_injective 𝓩⟩ ∪ {none} : Finset (Option 𝓩)).filter fun y =>
+      f <$> y = x.qHu
   let SQ5' := S5.filter fun y => f y ∈ x.Q5
   let SQ5 : Finset (Finset 𝓩) := SQ5'.powerset.filter fun y => y.image f = x.Q5
   let SQ10' := S10.filter fun y => f y ∈ x.Q10
@@ -417,66 +422,70 @@ def preimageOfFinset (S5 S10 : Finset 𝓩) (f : 𝓩 →+ 𝓩1)
 ### B.1. `preimageOfFinset` gives the actual preimage
 
 -/
-lemma preimageOfFinset_eq (S5 S10 : Finset 𝓩) (f : 𝓩 →+ 𝓩1) (x : ChargeSpectrum 𝓩1) :
-    preimageOfFinset S5 S10 f x = {y : ChargeSpectrum 𝓩 | y.map f = x ∧ y ∈ ofFinset S5 S10} := by
+lemma preimageOfFinset_eq (S5 S10 : Finset 𝓩) (f : 𝓩 →+ 𝓩1) (x : ChargeSpectrum 𝓩1)
+    : preimageOfFinset S5 S10 f x = {y : ChargeSpectrum 𝓩 | y.map f = x ∧ y ∈ ofFinset S5 S10} := by
   ext y
   simp [preimageOfFinset, toProd]
   match y, x with
   | ⟨yHd, yHu, y5, y10⟩, ⟨xHd, xHu, x5, x10⟩ =>
-  simp [map]
-  constructor
-  · intro ⟨⟨h1, rfl⟩, ⟨h2, rfl⟩, ⟨h3, rfl⟩, ⟨h4, rfl⟩⟩
-    simp only [true_and]
-    rw [mem_ofFinset_iff]
-    simp only
-    refine ⟨?_, ?_, ?_, ?_⟩
-    · match yHd with
-      | some a => simpa using h1
-      | none => simp
-    · match yHu with
-      | some a => simpa using h2
-      | none => simp
-    · exact h3.trans <| Finset.filter_subset (fun y => f y ∈ Finset.image (⇑f) y5) S5
-    · apply h4.trans <| Finset.filter_subset (fun y => f y ∈ Finset.image (⇑f) y10) S10
-  · intro ⟨⟨rfl, rfl, rfl, rfl⟩, h2⟩
-    simp only [and_true, Finset.mem_image]
-    rw [mem_ofFinset_iff] at h2
-    simp at h2
-    refine ⟨?_, ?_, ?_, ?_⟩
-    · match yHd with
-      | some a =>
-        simp at h2
-        simpa using h2.1
-      | none => simp
-    · match yHu with
-      | some a =>
-        simp at h2
-        simpa using h2.2.1
-      | none => simp
-    · refine Finset.subset_iff.mpr ?_
-      intro x hx
-      simp only [Finset.mem_filter]
-      refine ⟨h2.2.2.1 hx, ?_⟩
-      use x
-    · refine Finset.subset_iff.mpr ?_
-      intro x hx
-      simp only [Finset.mem_filter]
-      refine ⟨h2.2.2.2 hx, ?_⟩
-      use x
+    simp [map]
+    constructor
+    · intro ⟨⟨h1, rfl⟩, ⟨h2, rfl⟩, ⟨h3, rfl⟩, ⟨h4, rfl⟩⟩
+      simp only [true_and]
+      rw [mem_ofFinset_iff]
+      simp only
+      refine ⟨?_, ?_, ?_, ?_⟩
+      · match yHd with
+        | some a => simpa using h1
+        | none => simp
+      · match yHu with
+        | some a => simpa using h2
+        | none => simp
+      · exact h3.trans <| Finset.filter_subset (fun y => f y ∈ Finset.image (⇑f) y5) S5
+      · apply h4.trans <| Finset.filter_subset (fun y => f y ∈ Finset.image (⇑f) y10) S10
+    · intro ⟨⟨rfl, rfl, rfl, rfl⟩, h2⟩
+      simp only [and_true, Finset.mem_image]
+      rw [mem_ofFinset_iff] at h2
+      simp at h2
+      refine ⟨?_, ?_, ?_, ?_⟩
+      · match yHd with
+        | some a =>
+          simp at h2
+          simpa using h2.1
+        | none => simp
+      · match yHu with
+        | some a =>
+          simp at h2
+          simpa using h2.2.1
+        | none => simp
+      · refine Finset.subset_iff.mpr ?_
+        intro x hx
+        simp only [Finset.mem_filter]
+        refine ⟨h2.2.2.1 hx, ?_⟩
+        use x
+      · refine Finset.subset_iff.mpr ?_
+        intro x hx
+        simp only [Finset.mem_filter]
+        refine ⟨h2.2.2.2 hx, ?_⟩
+        use x
 
 /-!
 
 ### B.2. Efficient definition for the cardinality of the preimage
 
 -/
-/-- The cardinality of the
-  preimage of a charge `Charges 𝓩1` in `ofFinset S5 S10 ⊆ Charges 𝓩` under
-  mapping charges through `f : 𝓩 →+ 𝓩1`. -/
+/--
+The cardinality of the
+preimage of a charge `Charges 𝓩1` in `ofFinset S5 S10 ⊆ Charges 𝓩` under
+mapping charges through `f : 𝓩 →+ 𝓩1`.
+-/
 def preimageOfFinsetCard (S5 S10 : Finset 𝓩) (f : 𝓩 →+ 𝓩1) (x : ChargeSpectrum 𝓩1) : ℕ :=
-  let SHd := (S5.map ⟨Option.some, Option.some_injective 𝓩⟩ ∪ {none} : Finset (Option 𝓩)).filter
-    fun y => f <$> y = x.qHd
-  let SHu := (S5.map ⟨Option.some, Option.some_injective 𝓩⟩ ∪ {none} : Finset (Option 𝓩)).filter
-    fun y => f <$> y = x.qHu
+  let SHd :=
+    (S5.map ⟨Option.some, Option.some_injective 𝓩⟩ ∪ {none} : Finset (Option 𝓩)).filter fun y =>
+      f <$> y = x.qHd
+  let SHu :=
+    (S5.map ⟨Option.some, Option.some_injective 𝓩⟩ ∪ {none} : Finset (Option 𝓩)).filter fun y =>
+      f <$> y = x.qHu
   let SQ5' := S5.filter fun y => f y ∈ x.Q5
   let SQ5 : Finset (Finset 𝓩) := SQ5'.powerset.filter fun y => y.image f = x.Q5
   let SQ10' := S10.filter fun y => f y ∈ x.Q10
@@ -489,9 +498,8 @@ def preimageOfFinsetCard (S5 S10 : Finset 𝓩) (f : 𝓩 →+ 𝓩1) (x : Charg
 
 -/
 
-lemma preimageOfFinset_card_eq (S5 S10 : Finset 𝓩) (f : 𝓩 →+ 𝓩1) (x : ChargeSpectrum 𝓩1) :
-    preimageOfFinsetCard S5 S10 f x =
-    (preimageOfFinset S5 S10 f x).card := by
+lemma preimageOfFinset_card_eq (S5 S10 : Finset 𝓩) (f : 𝓩 →+ 𝓩1) (x : ChargeSpectrum 𝓩1)
+    : preimageOfFinsetCard S5 S10 f x = (preimageOfFinset S5 S10 f x).card := by
   rw [preimageOfFinset, Finset.card_map]
   simp only [Option.map_eq_map, Finset.product_eq_sprod]
   repeat rw [Finset.card_product]

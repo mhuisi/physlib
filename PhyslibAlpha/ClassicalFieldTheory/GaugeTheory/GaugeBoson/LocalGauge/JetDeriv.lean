@@ -53,7 +53,6 @@ set_option linter.unusedSectionVars false
 
 variable {𝔤 : Type} [LieRing 𝔤] [LieAlgebra ℝ 𝔤] [Module.Finite ℝ 𝔤]
 
-
 open TensorProduct
 
 /-!
@@ -65,36 +64,40 @@ open TensorProduct
 namespace GaugeBoson
 
 variable (𝔤) in
-/-- The derivative of components in the jet component space, in the direction `ν`: the
-  shift `∂_s A_μ^φ ↦ ∂_{s + {ν}} A_μ^φ` of the derivative label, i.e. right multiplication
-  by the degree-one symbol `∂_ν` on the `SpaceTimeDerivAlgebraℝ` factor. -/
-noncomputable def JetComponentSpace.jetDeriv (ν : Fin 1 ⊕ Fin 3) :
-    (JetComponentSpace 𝔤) →ₗ[ℝ] (JetComponentSpace 𝔤) :=
+/--
+The derivative of components in the jet component space, in the direction `ν`: the
+shift `∂_s A_μ^φ ↦ ∂_{s + {ν}} A_μ^φ` of the derivative label, i.e. right multiplication
+by the degree-one symbol `∂_ν` on the `SpaceTimeDerivAlgebraℝ` factor.
+-/
+noncomputable def JetComponentSpace.jetDeriv (ν : Fin 1 ⊕ Fin 3)
+    : (JetComponentSpace 𝔤) →ₗ[ℝ] (JetComponentSpace 𝔤) :=
   TensorProduct.map
-    (LinearMap.mulRight ℝ
-      (SpaceTimeDerivAlgebraℝ.basisMultiset ({ν} : Multiset (Fin 1 ⊕ Fin 3))))
+    (LinearMap.mulRight ℝ (SpaceTimeDerivAlgebraℝ.basisMultiset ({ν} : Multiset (Fin 1 ⊕ Fin 3))))
     LinearMap.id
 
 omit [Module.Finite ℝ 𝔤] in
 @[simp]
-lemma JetComponentSpace.jetDeriv_tmul (ν : Fin 1 ⊕ Fin 3) (a : SpaceTimeDerivAlgebraℝ)
-    (φ : Module.Dual ℝ (GaugeBoson 𝔤)) :
-    (JetComponentSpace.jetDeriv 𝔤) ν (a ⊗ₜ[ℝ] φ)
+lemma JetComponentSpace.jetDeriv_tmul
+    (ν : Fin 1 ⊕ Fin 3) (a : SpaceTimeDerivAlgebraℝ) (φ : Module.Dual ℝ (GaugeBoson 𝔤))
+    : (JetComponentSpace.jetDeriv 𝔤) ν (a ⊗ₜ[ℝ] φ)
       = (a * SpaceTimeDerivAlgebraℝ.basisMultiset
-          ({ν} : Multiset (Fin 1 ⊕ Fin 3))) ⊗ₜ[ℝ] φ := rfl
+          ({ν} : Multiset (Fin 1 ⊕ Fin 3))) ⊗ₜ[ℝ] φ :=
+  rfl
 
 omit [Module.Finite ℝ 𝔤] in
-/-- Total derivatives commute on the component space: the derivative labels live in a
-  symmetric algebra. -/
-lemma JetComponentSpace.jetDeriv_comm (μ ν : Fin 1 ⊕ Fin 3) :
-    ((JetComponentSpace.jetDeriv 𝔤) μ).comp ((JetComponentSpace.jetDeriv 𝔤) ν)
+/--
+Total derivatives commute on the component space: the derivative labels live in a
+symmetric algebra.
+-/
+lemma JetComponentSpace.jetDeriv_comm (μ ν : Fin 1 ⊕ Fin 3)
+    : ((JetComponentSpace.jetDeriv 𝔤) μ).comp ((JetComponentSpace.jetDeriv 𝔤) ν)
       = ((JetComponentSpace.jetDeriv 𝔤) ν).comp ((JetComponentSpace.jetDeriv 𝔤) μ) := by
-  have hmul : ∀ b c : SpaceTimeDerivAlgebraℝ,
-      (LinearMap.mulRight ℝ b).comp (LinearMap.mulRight ℝ c)
-        = LinearMap.mulRight ℝ (c * b) :=
-    fun b c => LinearMap.ext fun x => by
-      simp only [LinearMap.coe_comp, Function.comp_apply, LinearMap.mulRight_apply,
-        mul_assoc]
+  have hmul
+      : ∀ b c : SpaceTimeDerivAlgebraℝ,
+        (LinearMap.mulRight ℝ b).comp (LinearMap.mulRight ℝ c)
+          = LinearMap.mulRight ℝ (c * b) := fun b c =>
+    LinearMap.ext fun x => by
+      simp only [LinearMap.coe_comp, Function.comp_apply, LinearMap.mulRight_apply, mul_assoc]
   rw [JetComponentSpace.jetDeriv, JetComponentSpace.jetDeriv, ← TensorProduct.map_comp,
     ← TensorProduct.map_comp, hmul, hmul, mul_comm]
 
@@ -109,17 +112,19 @@ namespace LocalGaugeFieldAlgebra
 -/
 
 variable (𝔤) in
-/-- The formal total spacetime derivative on the gauge-boson jet algebra in the direction
-  `ν`: the derivation extending the shift `∂_s A_μ^φ ↦ ∂_{s + {ν}} A_μ^φ` of the component
-  functions. -/
-noncomputable def jetDeriv (ν : Fin 1 ⊕ Fin 3) :
-    (LocalGaugeFieldAlgebra 𝔤) →ₗ[ℝ] (LocalGaugeFieldAlgebra 𝔤) :=
+/--
+The formal total spacetime derivative on the gauge-boson jet algebra in the direction
+`ν`: the derivation extending the shift `∂_s A_μ^φ ↦ ∂_{s + {ν}} A_μ^φ` of the component
+functions.
+-/
+noncomputable def jetDeriv (ν : Fin 1 ⊕ Fin 3)
+    : (LocalGaugeFieldAlgebra 𝔤) →ₗ[ℝ] (LocalGaugeFieldAlgebra 𝔤) :=
   SymmetricAlgebra.derivationOfLinear ((GaugeBoson.JetComponentSpace.jetDeriv 𝔤) ν)
 
 omit [Module.Finite ℝ 𝔤] in
 @[simp]
-lemma jetDeriv_ι (ν : Fin 1 ⊕ Fin 3) (x : (GaugeBoson.JetComponentSpace 𝔤)) :
-    (jetDeriv 𝔤) ν (SymmetricAlgebra.ι ℝ _ x)
+lemma jetDeriv_ι (ν : Fin 1 ⊕ Fin 3) (x : (GaugeBoson.JetComponentSpace 𝔤))
+    : (jetDeriv 𝔤) ν (SymmetricAlgebra.ι ℝ _ x)
       = SymmetricAlgebra.ι ℝ _ ((GaugeBoson.JetComponentSpace.jetDeriv 𝔤) ν x) :=
   SymmetricAlgebra.derivationOfLinear_ι _ x
 
@@ -130,26 +135,25 @@ lemma jetDeriv_one (ν : Fin 1 ⊕ Fin 3) : (jetDeriv 𝔤) ν (1 : (LocalGaugeF
 
 omit [Module.Finite ℝ 𝔤] in
 @[simp]
-lemma jetDeriv_algebraMap (ν : Fin 1 ⊕ Fin 3) (r : ℝ) :
-    (jetDeriv 𝔤) ν (algebraMap ℝ (LocalGaugeFieldAlgebra 𝔤) r) = 0 :=
+lemma jetDeriv_algebraMap (ν : Fin 1 ⊕ Fin 3) (r : ℝ)
+    : (jetDeriv 𝔤) ν (algebraMap ℝ (LocalGaugeFieldAlgebra 𝔤) r) = 0 :=
   SymmetricAlgebra.derivationOfLinear_algebraMap _ r
 
 omit [Module.Finite ℝ 𝔤] in
 /-- The total derivative is a derivation: the Leibniz rule. -/
-lemma jetDeriv_mul (ν : Fin 1 ⊕ Fin 3) (x y : (LocalGaugeFieldAlgebra 𝔤)) :
-    (jetDeriv 𝔤) ν (x * y) = (jetDeriv 𝔤) ν x * y + x * (jetDeriv 𝔤) ν y :=
+lemma jetDeriv_mul (ν : Fin 1 ⊕ Fin 3) (x y : (LocalGaugeFieldAlgebra 𝔤))
+    : (jetDeriv 𝔤) ν (x * y) = (jetDeriv 𝔤) ν x * y + x * (jetDeriv 𝔤) ν y :=
   SymmetricAlgebra.derivationOfLinear_mul _ x y
 
 omit [Module.Finite ℝ 𝔤] in
 /-- Mixed partials agree on the jet algebra. -/
-lemma jetDeriv_comm_apply (μ ν : Fin 1 ⊕ Fin 3) (x : (LocalGaugeFieldAlgebra 𝔤)) :
-    (jetDeriv 𝔤) μ ((jetDeriv 𝔤) ν x) = (jetDeriv 𝔤) ν ((jetDeriv 𝔤) μ x) :=
-  SymmetricAlgebra.derivationOfLinear_comm_apply
-    (GaugeBoson.JetComponentSpace.jetDeriv_comm μ ν) x
+lemma jetDeriv_comm_apply (μ ν : Fin 1 ⊕ Fin 3) (x : (LocalGaugeFieldAlgebra 𝔤))
+    : (jetDeriv 𝔤) μ ((jetDeriv 𝔤) ν x) = (jetDeriv 𝔤) ν ((jetDeriv 𝔤) μ x) :=
+  SymmetricAlgebra.derivationOfLinear_comm_apply (GaugeBoson.JetComponentSpace.jetDeriv_comm μ ν) x
 
 omit [Module.Finite ℝ 𝔤] in
-lemma jetDeriv_comm (μ ν : Fin 1 ⊕ Fin 3) :
-    ((jetDeriv 𝔤) μ).comp ((jetDeriv 𝔤) ν) = ((jetDeriv 𝔤) ν).comp ((jetDeriv 𝔤) μ) :=
+lemma jetDeriv_comm (μ ν : Fin 1 ⊕ Fin 3)
+    : ((jetDeriv 𝔤) μ).comp ((jetDeriv 𝔤) ν) = ((jetDeriv 𝔤) ν).comp ((jetDeriv 𝔤) μ) :=
   LinearMap.ext fun x => jetDeriv_comm_apply μ ν x
 
 /-!
@@ -158,8 +162,9 @@ lemma jetDeriv_comm (μ ν : Fin 1 ⊕ Fin 3) :
 
 -/
 
-instance : RightCommutative
-    (fun (D : (LocalGaugeFieldAlgebra 𝔤) →ₗ[ℝ] (LocalGaugeFieldAlgebra 𝔤)) (μ : Fin 1 ⊕ Fin 3) =>
+instance
+    : RightCommutative (fun (D : (LocalGaugeFieldAlgebra 𝔤) →ₗ[ℝ] (LocalGaugeFieldAlgebra 𝔤))
+        (μ : Fin 1 ⊕ Fin 3) =>
       D.comp ((jetDeriv 𝔤) μ)) where
   right_comm D μ ν := by
     show (D.comp ((jetDeriv 𝔤) μ)).comp ((jetDeriv 𝔤) ν) = (D.comp ((jetDeriv 𝔤) ν)).comp
@@ -167,21 +172,23 @@ instance : RightCommutative
     rw [LinearMap.comp_assoc, LinearMap.comp_assoc, jetDeriv_comm]
 
 variable (𝔤) in
-/-- The iterated total derivative `∂_s` along a multiset `s` of directions, well defined
-  because the directional derivatives commute. -/
-noncomputable def iteratedJetDeriv (s : Multiset (Fin 1 ⊕ Fin 3)) :
-    (LocalGaugeFieldAlgebra 𝔤) →ₗ[ℝ] (LocalGaugeFieldAlgebra 𝔤) :=
+/--
+The iterated total derivative `∂_s` along a multiset `s` of directions, well defined
+because the directional derivatives commute.
+-/
+noncomputable def iteratedJetDeriv (s : Multiset (Fin 1 ⊕ Fin 3))
+    : (LocalGaugeFieldAlgebra 𝔤) →ₗ[ℝ] (LocalGaugeFieldAlgebra 𝔤) :=
   s.foldl (fun D μ => D.comp ((jetDeriv 𝔤) μ)) LinearMap.id
 
 omit [Module.Finite ℝ 𝔤] in
 @[simp]
-lemma iteratedJetDeriv_zero :
-    (iteratedJetDeriv 𝔤) (0 : Multiset (Fin 1 ⊕ Fin 3)) = LinearMap.id := rfl
+lemma iteratedJetDeriv_zero : (iteratedJetDeriv 𝔤) (0 : Multiset (Fin 1 ⊕ Fin 3)) = LinearMap.id :=
+  rfl
 
 omit [Module.Finite ℝ 𝔤] in
 /-- Any initial map factors out of the fold defining the iterated derivative. -/
-lemma foldl_comp_eq (s : Multiset (Fin 1 ⊕ Fin 3)) :
-    ∀ D : (LocalGaugeFieldAlgebra 𝔤) →ₗ[ℝ] (LocalGaugeFieldAlgebra 𝔤),
+lemma foldl_comp_eq (s : Multiset (Fin 1 ⊕ Fin 3))
+    : ∀ D : (LocalGaugeFieldAlgebra 𝔤) →ₗ[ℝ] (LocalGaugeFieldAlgebra 𝔤),
       s.foldl (fun D μ => D.comp ((jetDeriv 𝔤) μ)) D = D ∘ₗ (iteratedJetDeriv 𝔤) s := by
   induction s using Multiset.induction_on with
   | empty =>
@@ -190,25 +197,25 @@ lemma foldl_comp_eq (s : Multiset (Fin 1 ⊕ Fin 3)) :
     rfl
   | cons ν t ih =>
     intro D
-    rw [iteratedJetDeriv, Multiset.foldl_cons, Multiset.foldl_cons, ih, ih,
-      LinearMap.id_comp, LinearMap.comp_assoc]
+    rw [iteratedJetDeriv, Multiset.foldl_cons, Multiset.foldl_cons, ih, ih, LinearMap.id_comp,
+      LinearMap.comp_assoc]
 
 omit [Module.Finite ℝ 𝔤] in
-lemma iteratedJetDeriv_cons (μ : Fin 1 ⊕ Fin 3) (s : Multiset (Fin 1 ⊕ Fin 3)) :
-    (iteratedJetDeriv 𝔤) (μ ::ₘ s) = (jetDeriv 𝔤) μ ∘ₗ (iteratedJetDeriv 𝔤) s := by
+lemma iteratedJetDeriv_cons (μ : Fin 1 ⊕ Fin 3) (s : Multiset (Fin 1 ⊕ Fin 3))
+    : (iteratedJetDeriv 𝔤) (μ ::ₘ s) = (jetDeriv 𝔤) μ ∘ₗ (iteratedJetDeriv 𝔤) s := by
   rw [iteratedJetDeriv, Multiset.foldl_cons, foldl_comp_eq, LinearMap.id_comp]
 
 omit [Module.Finite ℝ 𝔤] in
 @[simp]
-lemma iteratedJetDeriv_singleton (μ : Fin 1 ⊕ Fin 3) :
-    (iteratedJetDeriv 𝔤) ({μ} : Multiset (Fin 1 ⊕ Fin 3)) = (jetDeriv 𝔤) μ := by
+lemma iteratedJetDeriv_singleton (μ : Fin 1 ⊕ Fin 3)
+    : (iteratedJetDeriv 𝔤) ({μ} : Multiset (Fin 1 ⊕ Fin 3)) = (jetDeriv 𝔤) μ := by
   rw [show ({μ} : Multiset (Fin 1 ⊕ Fin 3)) = μ ::ₘ 0 from rfl, iteratedJetDeriv_cons,
     iteratedJetDeriv_zero, LinearMap.comp_id]
 
 omit [Module.Finite ℝ 𝔤] in
 /-- Differentiating along `s + t` is differentiating along `t` and then along `s`. -/
-lemma iteratedJetDeriv_add (s t : Multiset (Fin 1 ⊕ Fin 3)) :
-    (iteratedJetDeriv 𝔤) (s + t) = (iteratedJetDeriv 𝔤) t ∘ₗ (iteratedJetDeriv 𝔤) s := by
+lemma iteratedJetDeriv_add (s t : Multiset (Fin 1 ⊕ Fin 3))
+    : (iteratedJetDeriv 𝔤) (s + t) = (iteratedJetDeriv 𝔤) t ∘ₗ (iteratedJetDeriv 𝔤) s := by
   induction t using Multiset.induction_on with
   | empty => rw [add_zero, iteratedJetDeriv_zero, LinearMap.id_comp]
   | cons μ t ih =>
@@ -218,24 +225,27 @@ lemma iteratedJetDeriv_add (s t : Multiset (Fin 1 ⊕ Fin 3)) :
       iteratedJetDeriv_cons, ih, iteratedJetDeriv_cons, LinearMap.comp_assoc]
 
 omit [Module.Finite ℝ 𝔤] in
-/-- The companion of `iteratedJetDeriv_cons`, peeling the new derivative on the inside:
-  the derivatives commute, so the extra direction may equally be applied first. -/
-lemma iteratedJetDeriv_cons' (μ : Fin 1 ⊕ Fin 3) (s : Multiset (Fin 1 ⊕ Fin 3)) :
-    (iteratedJetDeriv 𝔤) (μ ::ₘ s) = (iteratedJetDeriv 𝔤) s ∘ₗ (jetDeriv 𝔤) μ := by
+/--
+The companion of `iteratedJetDeriv_cons`, peeling the new derivative on the inside:
+the derivatives commute, so the extra direction may equally be applied first.
+-/
+lemma iteratedJetDeriv_cons' (μ : Fin 1 ⊕ Fin 3) (s : Multiset (Fin 1 ⊕ Fin 3))
+    : (iteratedJetDeriv 𝔤) (μ ::ₘ s) = (iteratedJetDeriv 𝔤) s ∘ₗ (jetDeriv 𝔤) μ := by
   rw [← Multiset.singleton_add, iteratedJetDeriv_add, iteratedJetDeriv_singleton]
 
 omit [Module.Finite ℝ 𝔤] in
-/-- On a component function the iterated derivative writes the derivative symbol `∂_s`
-  into the derivative label. -/
-lemma iteratedJetDeriv_ι (s : Multiset (Fin 1 ⊕ Fin 3)) (a : SpaceTimeDerivAlgebraℝ)
-    (φ : Module.Dual ℝ (GaugeBoson 𝔤)) :
-    (iteratedJetDeriv 𝔤) s (SymmetricAlgebra.ι ℝ _ (a ⊗ₜ[ℝ] φ))
-      = SymmetricAlgebra.ι ℝ _
-          ((a * SpaceTimeDerivAlgebraℝ.basisMultiset s) ⊗ₜ[ℝ] φ) := by
+/--
+On a component function the iterated derivative writes the derivative symbol `∂_s`
+into the derivative label.
+-/
+lemma iteratedJetDeriv_ι
+    (s : Multiset (Fin 1 ⊕ Fin 3)) (a : SpaceTimeDerivAlgebraℝ) (φ : Module.Dual ℝ (GaugeBoson 𝔤))
+    : (iteratedJetDeriv 𝔤) s (SymmetricAlgebra.ι ℝ _ (a ⊗ₜ[ℝ] φ))
+      = SymmetricAlgebra.ι ℝ _ ((a * SpaceTimeDerivAlgebraℝ.basisMultiset s) ⊗ₜ[ℝ] φ) := by
   induction s using Multiset.induction_on generalizing a with
   | empty =>
-    rw [iteratedJetDeriv_zero, LinearMap.id_apply,
-      SpaceTimeDerivAlgebraℝ.basisMultiset_nil, mul_one]
+    rw [iteratedJetDeriv_zero, LinearMap.id_apply, SpaceTimeDerivAlgebraℝ.basisMultiset_nil,
+      mul_one]
   | cons μ s ih =>
     rw [iteratedJetDeriv_cons, LinearMap.comp_apply, ih, jetDeriv_ι,
       GaugeBoson.JetComponentSpace.jetDeriv_tmul, mul_assoc,
@@ -244,14 +254,15 @@ lemma iteratedJetDeriv_ι (s : Multiset (Fin 1 ⊕ Fin 3)) (a : SpaceTimeDerivAl
         rw [add_comm, Multiset.singleton_add]]
 
 omit [Module.Finite ℝ 𝔤] in
-/-- **The derivative generator `∂_s A_μ^φ`**: the iterated derivative of the gauge-field
-  component function. -/
-lemma iteratedJetDeriv_ofA (s : Multiset (Fin 1 ⊕ Fin 3)) (μ : Fin 1 ⊕ Fin 3)
-    (φ : Module.Dual ℝ 𝔤) :
-    (iteratedJetDeriv 𝔤) s ((ofA 𝔤) μ φ)
+/--
+**The derivative generator `∂_s A_μ^φ`**: the iterated derivative of the gauge-field
+component function.
+-/
+lemma iteratedJetDeriv_ofA (s : Multiset (Fin 1 ⊕ Fin 3)) (μ : Fin 1 ⊕ Fin 3) (φ : Module.Dual ℝ 𝔤)
+    : (iteratedJetDeriv 𝔤) s ((ofA 𝔤) μ φ)
       = SymmetricAlgebra.ι ℝ _
-          (SpaceTimeDerivAlgebraℝ.basisMultiset s ⊗ₜ[ℝ]
-            (GaugeBoson.componentDual 𝔤) (Lorentz.CoVector.basis.dualBasis μ) φ) := by
+        (SpaceTimeDerivAlgebraℝ.basisMultiset s ⊗ₜ[ℝ]
+          (GaugeBoson.componentDual 𝔤) (Lorentz.CoVector.basis.dualBasis μ) φ) := by
   rw [ofA_apply, ofComponent_apply, iteratedJetDeriv_ι, one_mul]
 
 /-!
@@ -261,22 +272,25 @@ lemma iteratedJetDeriv_ofA (s : Multiset (Fin 1 ⊕ Fin 3)) (μ : Fin 1 ⊕ Fin 
 -/
 
 omit [Module.Finite ℝ 𝔤] in
-/-- Every covector on the gauge-boson target space decomposes along the Lorentz coordinate
-  directions into component covectors: the spacetime index is expanded in the coordinate
-  basis, while the adjoint index stays abstract. -/
-lemma _root_.GaugeBoson.dual_eq_sum_componentDual
-    (ψ : Module.Dual ℝ (GaugeBoson 𝔤)) :
-    ψ = ∑ μ, (GaugeBoson.componentDual 𝔤) (Lorentz.CoVector.basis.dualBasis μ)
-      (ψ ∘ₗ (GaugeBoson.valLinEquiv 𝔤).symm.toLinearMap ∘ₗ
-        TensorProduct.mk ℝ Lorentz.CoVector 𝔤 (Lorentz.CoVector.basis μ)) := by
+/--
+Every covector on the gauge-boson target space decomposes along the Lorentz coordinate
+directions into component covectors: the spacetime index is expanded in the coordinate
+basis, while the adjoint index stays abstract.
+-/
+lemma _root_.GaugeBoson.dual_eq_sum_componentDual (ψ : Module.Dual ℝ (GaugeBoson 𝔤))
+    : ψ
+      = ∑ μ, (GaugeBoson.componentDual 𝔤) (Lorentz.CoVector.basis.dualBasis μ)
+        (ψ ∘ₗ (GaugeBoson.valLinEquiv 𝔤).symm.toLinearMap ∘ₗ
+          TensorProduct.mk ℝ Lorentz.CoVector 𝔤 (Lorentz.CoVector.basis μ)) := by
   refine LinearMap.ext fun v => ?_
   obtain ⟨m⟩ := v
   induction m using TensorProduct.inductionOn with
   | tmul x a =>
     rw [LinearMap.sum_apply]
-    have hx : (⟨x ⊗ₜ[ℝ] a⟩ : (GaugeBoson 𝔤))
-        = ∑ μ, Lorentz.CoVector.basis.dualBasis μ x •
-            (⟨Lorentz.CoVector.basis μ ⊗ₜ[ℝ] a⟩ : (GaugeBoson 𝔤)) := by
+    have hx
+        : (⟨x ⊗ₜ[ℝ] a⟩ : (GaugeBoson 𝔤))
+          = ∑ μ, Lorentz.CoVector.basis.dualBasis μ x •
+              (⟨Lorentz.CoVector.basis μ ⊗ₜ[ℝ] a⟩ : (GaugeBoson 𝔤)) := by
       apply (GaugeBoson.valLinEquiv 𝔤).injective
       rw [map_sum]
       conv_lhs =>
@@ -286,54 +300,60 @@ lemma _root_.GaugeBoson.dual_eq_sum_componentDual
       refine Finset.sum_congr rfl fun μ _ => ?_
       rw [map_smul, GaugeBoson.valLinEquiv_apply,
         show (⟨Lorentz.CoVector.basis μ ⊗ₜ[ℝ] a⟩ : (GaugeBoson 𝔤)).val
-          = Lorentz.CoVector.basis μ ⊗ₜ[ℝ] a from rfl, ← TensorProduct.smul_tmul',
-        Module.Basis.dualBasis_apply]
+            = Lorentz.CoVector.basis μ ⊗ₜ[ℝ] a from
+          rfl,
+        ← TensorProduct.smul_tmul', Module.Basis.dualBasis_apply]
     conv_lhs => rw [hx, map_sum]
     refine Finset.sum_congr rfl fun μ _ => ?_
     rw [map_smul, GaugeBoson.componentDual_apply_val_tmul, smul_eq_mul]
     rfl
   | add m₁ m₂ h₁ h₂ =>
-    simp only [show (⟨m₁ + m₂⟩ : (GaugeBoson 𝔤)) = (⟨m₁⟩ : (GaugeBoson 𝔤)) + ⟨m₂⟩ from rfl,
-      map_add, LinearMap.sum_apply] at h₁ h₂ ⊢
+    simp only [show (⟨m₁ + m₂⟩ : (GaugeBoson 𝔤)) = (⟨m₁⟩ : (GaugeBoson 𝔤)) + ⟨m₂⟩ from rfl, map_add,
+        LinearMap.sum_apply]
+      at h₁ h₂ ⊢
     rw [h₁, h₂, ← Finset.sum_add_distrib]
 
 set_option maxHeartbeats 1000000 in
 omit [Module.Finite ℝ 𝔤] in
-/-- **The jet algebra is generated by the gauge fields and their derivatives.** Every
-  element is a polynomial in the derivative generators `∂_s A_μ^φ` — nothing else is
-  available to write down for the gauge sector of a Lagrangian. -/
-lemma adjoin_iteratedJetDeriv_eq_top :
-    Algebra.adjoin ℝ
-      (⋃ s : Multiset (Fin 1 ⊕ Fin 3), ⋃ μ : Fin 1 ⊕ Fin 3,
-        Set.range (fun φ : Module.Dual ℝ 𝔤 => (iteratedJetDeriv 𝔤) s ((ofA 𝔤) μ φ)))
+/--
+**The jet algebra is generated by the gauge fields and their derivatives.** Every
+element is a polynomial in the derivative generators `∂_s A_μ^φ` — nothing else is
+available to write down for the gauge sector of a Lagrangian.
+-/
+lemma adjoin_iteratedJetDeriv_eq_top
+    : Algebra.adjoin ℝ
+        (⋃ s : Multiset (Fin 1 ⊕ Fin 3), ⋃ μ : Fin 1 ⊕ Fin 3,
+          Set.range (fun φ : Module.Dual ℝ 𝔤 => (iteratedJetDeriv 𝔤) s ((ofA 𝔤) μ φ)))
       = (⊤ : Subalgebra ℝ (LocalGaugeFieldAlgebra 𝔤)) := by
   set S : Set (LocalGaugeFieldAlgebra 𝔤) :=
     ⋃ s : Multiset (Fin 1 ⊕ Fin 3), ⋃ μ : Fin 1 ⊕ Fin 3,
       Set.range (fun φ : Module.Dual ℝ 𝔤 => (iteratedJetDeriv 𝔤) s ((ofA 𝔤) μ φ))
     with hS
   /- The derivative generators lie in the adjoined set. -/
-  have hgen : ∀ (s : Multiset (Fin 1 ⊕ Fin 3)) (μ : Fin 1 ⊕ Fin 3)
-      (φ : Module.Dual ℝ 𝔤),
-      SymmetricAlgebra.ι ℝ _ (SpaceTimeDerivAlgebraℝ.basisMultiset s ⊗ₜ[ℝ]
-        (GaugeBoson.componentDual 𝔤) (Lorentz.CoVector.basis.dualBasis μ) φ)
-        ∈ Algebra.adjoin ℝ S := by
+  have hgen
+      : ∀ (s : Multiset (Fin 1 ⊕ Fin 3)) (μ : Fin 1 ⊕ Fin 3) (φ : Module.Dual ℝ 𝔤),
+        SymmetricAlgebra.ι ℝ _
+            (SpaceTimeDerivAlgebraℝ.basisMultiset s ⊗ₜ[ℝ]
+              (GaugeBoson.componentDual 𝔤) (Lorentz.CoVector.basis.dualBasis μ) φ)
+          ∈ Algebra.adjoin ℝ S := by
     intro s μ φ
     rw [← iteratedJetDeriv_ofA, hS]
-    exact Algebra.subset_adjoin
-      (Set.mem_iUnion.mpr ⟨s, Set.mem_iUnion.mpr ⟨μ, ⟨φ, rfl⟩⟩⟩)
+    exact Algebra.subset_adjoin (Set.mem_iUnion.mpr ⟨s, Set.mem_iUnion.mpr ⟨μ, ⟨φ, rfl⟩⟩⟩)
   /- Any covector slot: expand the spacetime index in the coordinate basis. -/
-  have hcomp : ∀ (s : Multiset (Fin 1 ⊕ Fin 3)) (ψ : Module.Dual ℝ (GaugeBoson 𝔤)),
-      SymmetricAlgebra.ι ℝ _ (SpaceTimeDerivAlgebraℝ.basisMultiset s ⊗ₜ[ℝ] ψ)
-        ∈ Algebra.adjoin ℝ S := by
+  have hcomp
+      : ∀ (s : Multiset (Fin 1 ⊕ Fin 3)) (ψ : Module.Dual ℝ (GaugeBoson 𝔤)),
+        SymmetricAlgebra.ι ℝ _ (SpaceTimeDerivAlgebraℝ.basisMultiset s ⊗ₜ[ℝ] ψ)
+          ∈ Algebra.adjoin ℝ S := by
     intro s ψ
     rw [show SpaceTimeDerivAlgebraℝ.basisMultiset s ⊗ₜ[ℝ] ψ
-        = ∑ μ, SpaceTimeDerivAlgebraℝ.basisMultiset s ⊗ₜ[ℝ]
-            (GaugeBoson.componentDual 𝔤) (Lorentz.CoVector.basis.dualBasis μ)
-              (ψ ∘ₗ (GaugeBoson.valLinEquiv 𝔤).symm.toLinearMap ∘ₗ
-                TensorProduct.mk ℝ Lorentz.CoVector 𝔤
-                  (Lorentz.CoVector.basis μ)) from by
-      conv_lhs => rw [GaugeBoson.dual_eq_sum_componentDual ψ]
-      rw [TensorProduct.tmul_sum], map_sum]
+          = ∑ μ, SpaceTimeDerivAlgebraℝ.basisMultiset s ⊗ₜ[ℝ]
+              (GaugeBoson.componentDual 𝔤) (Lorentz.CoVector.basis.dualBasis μ)
+                (ψ ∘ₗ (GaugeBoson.valLinEquiv 𝔤).symm.toLinearMap ∘ₗ
+                  TensorProduct.mk ℝ Lorentz.CoVector 𝔤
+                    (Lorentz.CoVector.basis μ)) from by
+        conv_lhs => rw [GaugeBoson.dual_eq_sum_componentDual ψ]
+        rw [TensorProduct.tmul_sum],
+      map_sum]
     exact Subalgebra.sum_mem _ fun μ _ => hgen s μ _
   /- The derivative monomials span the `SpaceTimeDerivAlgebraℝ` factor. -/
   refine top_le_iff.mp ?_
@@ -360,22 +380,25 @@ lemma adjoin_iteratedJetDeriv_eq_top :
 -/
 
 variable (𝔤) in
-/-- The formal total derivative on the complexified gauge-boson jet algebra, by base
-  change. This is the derivative the ambient Lagrangian theory uses. -/
-noncomputable def complexJetDeriv (ν : Fin 1 ⊕ Fin 3) :
-    ℂ ⊗[ℝ] (LocalGaugeFieldAlgebra 𝔤) →ₗ[ℂ] ℂ ⊗[ℝ] (LocalGaugeFieldAlgebra 𝔤) :=
+/--
+The formal total derivative on the complexified gauge-boson jet algebra, by base
+change. This is the derivative the ambient Lagrangian theory uses.
+-/
+noncomputable def complexJetDeriv (ν : Fin 1 ⊕ Fin 3)
+    : ℂ ⊗[ℝ] (LocalGaugeFieldAlgebra 𝔤) →ₗ[ℂ] ℂ ⊗[ℝ] (LocalGaugeFieldAlgebra 𝔤) :=
   LinearMap.baseChange ℂ ((jetDeriv 𝔤) ν)
 
 omit [Module.Finite ℝ 𝔤] in
 @[simp]
-lemma complexJetDeriv_tmul (ν : Fin 1 ⊕ Fin 3) (z : ℂ) (x : (LocalGaugeFieldAlgebra 𝔤)) :
-    (complexJetDeriv 𝔤) ν (z ⊗ₜ[ℝ] x) = z ⊗ₜ[ℝ] (jetDeriv 𝔤) ν x := rfl
+lemma complexJetDeriv_tmul (ν : Fin 1 ⊕ Fin 3) (z : ℂ) (x : (LocalGaugeFieldAlgebra 𝔤))
+    : (complexJetDeriv 𝔤) ν (z ⊗ₜ[ℝ] x) = z ⊗ₜ[ℝ] (jetDeriv 𝔤) ν x :=
+  rfl
 
 set_option maxHeartbeats 1000000 in
 omit [Module.Finite ℝ 𝔤] in
 /-- The Leibniz rule on the complexification. -/
-lemma complexJetDeriv_mul (ν : Fin 1 ⊕ Fin 3) (x y : ℂ ⊗[ℝ] (LocalGaugeFieldAlgebra 𝔤)) :
-    (complexJetDeriv 𝔤) ν (x * y)
+lemma complexJetDeriv_mul (ν : Fin 1 ⊕ Fin 3) (x y : ℂ ⊗[ℝ] (LocalGaugeFieldAlgebra 𝔤))
+    : (complexJetDeriv 𝔤) ν (x * y)
       = (complexJetDeriv 𝔤) ν x * y + x * (complexJetDeriv 𝔤) ν y := by
   induction x using TensorProduct.inductionOn with
   | add x₁ x₂ h₁ h₂ =>
@@ -393,11 +416,10 @@ lemma complexJetDeriv_mul (ν : Fin 1 ⊕ Fin 3) (x y : ℂ ⊗[ℝ] (LocalGauge
 
 omit [Module.Finite ℝ 𝔤] in
 /-- The complexified total derivatives commute. -/
-lemma complexJetDeriv_comm (μ ν : Fin 1 ⊕ Fin 3) :
-    ((complexJetDeriv 𝔤) μ).comp ((complexJetDeriv 𝔤) ν)
+lemma complexJetDeriv_comm (μ ν : Fin 1 ⊕ Fin 3)
+    : ((complexJetDeriv 𝔤) μ).comp ((complexJetDeriv 𝔤) ν)
       = ((complexJetDeriv 𝔤) ν).comp ((complexJetDeriv 𝔤) μ) := by
-  rw [complexJetDeriv, complexJetDeriv, ← LinearMap.baseChange_comp,
-    ← LinearMap.baseChange_comp, jetDeriv_comm]
+  rw [complexJetDeriv, complexJetDeriv, ← LinearMap.baseChange_comp, ← LinearMap.baseChange_comp,
+    jetDeriv_comm]
 
 end LocalGaugeFieldAlgebra
-

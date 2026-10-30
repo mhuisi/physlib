@@ -60,14 +60,11 @@ def unitaryToPMap (u : H ≃ₗᵢ[ℂ] H) : H →ₗ.[ℂ] H :=
   continuousLinearMapToPMap (u.toLinearIsometry.toContinuousLinearMap)
 
 omit [CompleteSpace H] in
-@[simp]
-lemma unitaryToPMap_domain (u : H ≃ₗᵢ[ℂ] H) : (unitaryToPMap u).domain = ⊤ := by
-  rfl
+@[simp] lemma unitaryToPMap_domain (u : H ≃ₗᵢ[ℂ] H) : (unitaryToPMap u).domain = ⊤ := by rfl
 
 omit [CompleteSpace H] in
 @[simp]
-lemma one_sub_unitaryToPMap_domain (u : H ≃ₗᵢ[ℂ] H) :
-    (1 - unitaryToPMap u).domain = ⊤ := by
+lemma one_sub_unitaryToPMap_domain (u : H ≃ₗᵢ[ℂ] H) : (1 - unitaryToPMap u).domain = ⊤ := by
   simp [unitaryToPMap, continuousLinearMapToPMap, LinearPMap.sub_domain]
 
 /-- The partial inverse Cayley transform of a unitary operator. -/
@@ -75,8 +72,8 @@ def inverseCayleyPMap (u : H ≃ₗᵢ[ℂ] H) : H →ₗ.[ℂ] H :=
   Complex.I • (1 + unitaryToPMap u) * (1 - unitaryToPMap u).inverse
 
 omit [CompleteSpace H] in
-lemma inverseCayleyPMap_domain (u : H ≃ₗᵢ[ℂ] H) :
-    (inverseCayleyPMap u).domain = (1 - unitaryToPMap u).toFun.range := by
+lemma inverseCayleyPMap_domain (u : H ≃ₗᵢ[ℂ] H)
+    : (inverseCayleyPMap u).domain = (1 - unitaryToPMap u).toFun.range := by
   rw [inverseCayleyPMap, LinearPMap.mul_def, LinearPMap.compRestricted_domain]
   simp only [LinearPMap.smul_domain, LinearPMap.add_domain]
   have hgd : ((1 : H →ₗ.[ℂ] H).domain ⊓ (unitaryToPMap u).domain) = ⊤ := by
@@ -95,24 +92,29 @@ lemma inverseCayleyPMap_domain (u : H ≃ₗᵢ[ℂ] H) :
 
 /-! ## B. Density of the range of `1 - u` -/
 
-/- The range of `1 - u` is dense as soon as its orthogonal complement is shown to be zero. The
+/-
+The range of `1 - u` is dense as soon as its orthogonal complement is shown to be zero. The
 proof below is deliberately written with the continuous representative: this is the version of
-the adjoint/orthogonal-range theorem that remains available in infinite dimension. -/
-lemma one_sub_unitaryToPMap_denseRange_of_ker_eq_bot {u : H ≃ₗᵢ[ℂ] H}
-    (hker : (1 - unitaryToPMap u).toFun.ker = ⊥) :
-    Dense ((1 - unitaryToPMap u).toFun.range : Set H) := by
-  have hrange_eq : (1 - unitaryToPMap u).toFun.range =
-      (1 - u.toLinearIsometry.toContinuousLinearMap).range := by
+the adjoint/orthogonal-range theorem that remains available in infinite dimension.
+-/
+lemma one_sub_unitaryToPMap_denseRange_of_ker_eq_bot
+    {u : H ≃ₗᵢ[ℂ] H} (hker : (1 - unitaryToPMap u).toFun.ker = ⊥)
+    : Dense ((1 - unitaryToPMap u).toFun.range : Set H) := by
+  have hrange_eq
+      : (1 - unitaryToPMap u).toFun.range
+        = (1 - u.toLinearIsometry.toContinuousLinearMap).range := by
     ext x
     constructor
     · rintro ⟨y, rfl⟩
       refine ⟨(y : H), ?_⟩
       rfl
     · rintro ⟨y, rfl⟩
-      let y' : (1 - unitaryToPMap u).domain :=
-        ⟨y, by
+      let y' : (1 - unitaryToPMap u).domain := ⟨
+        y,
+        by
           rw [one_sub_unitaryToPMap_domain u]
-          exact Submodule.mem_top⟩
+          exact Submodule.mem_top
+      ⟩
       refine ⟨y', ?_⟩
       rfl
   rw [hrange_eq]
@@ -138,16 +140,27 @@ lemma one_sub_unitaryToPMap_denseRange_of_ker_eq_bot {u : H ≃ₗᵢ[ℂ] H}
         have hxeq : x = u.symm x := ext_inner_right ℂ hinner
         have hxeq' := congrArg (fun z : H => u z) hxeq
         simpa only [u.apply_symm_apply] using hxeq'.symm
-      have hxker : (⟨x, by
-          rw [one_sub_unitaryToPMap_domain u]
-          exact Submodule.mem_top⟩ : (1 - unitaryToPMap u).domain) ∈
-          (1 - unitaryToPMap u).toFun.ker := by
+      have hxker
+          : (⟨
+               x,
+               by
+                 rw [one_sub_unitaryToPMap_domain u]
+                 exact Submodule.mem_top
+             ⟩
+              : (1 - unitaryToPMap u).domain)
+            ∈ (1 - unitaryToPMap u).toFun.ker := by
         rw [LinearMap.mem_ker]
         change x - u x = 0
         exact sub_eq_zero.mpr hfixed
-      have hxzero : (⟨x, by
-          rw [one_sub_unitaryToPMap_domain u]
-          exact Submodule.mem_top⟩ : (1 - unitaryToPMap u).domain) = 0 := by
+      have hxzero
+          : (⟨
+               x,
+               by
+                 rw [one_sub_unitaryToPMap_domain u]
+                 exact Submodule.mem_top
+             ⟩
+              : (1 - unitaryToPMap u).domain)
+            = 0 := by
         rw [hker] at hxker
         exact ((Submodule.mem_bot ℂ).mp hxker)
       exact congrArg Subtype.val hxzero
@@ -159,21 +172,20 @@ lemma one_sub_unitaryToPMap_denseRange_of_ker_eq_bot {u : H ≃ₗᵢ[ℂ] H}
   rw [horthbot, Submodule.bot_orthogonal_eq_top]
   rfl
 
-lemma unitaryToPMap_cayleyUnitary_eq_cayleyPMap {T : H →ₗ.[ℂ] H}
-    (hT : IsSelfAdjoint T) :
-    unitaryToPMap (cayleyUnitary T hT) = cayleyPMap T := by
-  have hc : (cayleyUnitary T hT).toLinearIsometry.toContinuousLinearMap =
-      cayleyContinuousLinearMap T hT := by
+lemma unitaryToPMap_cayleyUnitary_eq_cayleyPMap {T : H →ₗ.[ℂ] H} (hT : IsSelfAdjoint T)
+    : unitaryToPMap (cayleyUnitary T hT) = cayleyPMap T := by
+  have hc
+      : (cayleyUnitary T hT).toLinearIsometry.toContinuousLinearMap
+        = cayleyContinuousLinearMap T hT := by
     ext x
     exact cayleyUnitary_apply T hT x
   rw [unitaryToPMap, hc]
   exact (cayleyPMap_eq_continuousLinearMapToPMap hT).symm
 
-lemma cayleyUnitary_one_sub_ker_eq_bot {T : H →ₗ.[ℂ] H}
-    (hT : IsSelfAdjoint T) :
-    (1 - unitaryToPMap (cayleyUnitary T hT)).toFun.ker = ⊥ := by
-  have hres := LinearPMap.IsSelfAdjoint.mem_resolventSet_of_im_ne_zero hT
-    (z := -Complex.I) (by norm_num)
+lemma cayleyUnitary_one_sub_ker_eq_bot {T : H →ₗ.[ℂ] H} (hT : IsSelfAdjoint T)
+    : (1 - unitaryToPMap (cayleyUnitary T hT)).toFun.ker = ⊥ := by
+  have hres :=
+    LinearPMap.IsSelfAdjoint.mem_resolventSet_of_im_ne_zero hT (z := -Complex.I) (by norm_num)
   have hker : (T + Complex.I • (1 : H →ₗ.[ℂ] H)).toFun.ker = ⊥ := by
     have heq : T - (-Complex.I) • (1 : H →ₗ.[ℂ] H) = T + Complex.I • 1 := by
       exact LinearPMap.ext rfl fun x hf hg => by
@@ -181,12 +193,13 @@ lemma cayleyUnitary_one_sub_ker_eq_bot {T : H →ₗ.[ℂ] H}
     rw [← heq]
     exact hres.1
   have hinvker := LinearPMap.inverse_ker hker
-  have hEq : 1 - unitaryToPMap (cayleyUnitary T hT) =
-      (2 * Complex.I) • (T + Complex.I • (1 : H →ₗ.[ℂ] H)).inverse := by
+  have hEq
+      : 1 - unitaryToPMap (cayleyUnitary T hT)
+        = (2 * Complex.I) • (T + Complex.I • (1 : H →ₗ.[ℂ] H)).inverse := by
     rw [unitaryToPMap_cayleyUnitary_eq_cayleyPMap hT, cayleyPMap_eq_one_sub hT]
-    have hdom : (1 - (1 - (2 * Complex.I) •
-        (T + Complex.I • (1 : H →ₗ.[ℂ] H)).inverse)).domain =
-        ((2 * Complex.I) • (T + Complex.I • (1 : H →ₗ.[ℂ] H)).inverse).domain := by
+    have hdom
+        : (1 - (1 - (2 * Complex.I) • (T + Complex.I • (1 : H →ₗ.[ℂ] H)).inverse)).domain
+          = ((2 * Complex.I) • (T + Complex.I • (1 : H →ₗ.[ℂ] H)).inverse).domain := by
       simp [LinearPMap.sub_domain]
     apply LinearPMap.ext hdom
     intro x hx hx'
@@ -195,8 +208,7 @@ lemma cayleyUnitary_one_sub_ker_eq_bot {T : H →ₗ.[ℂ] H}
   rw [hEq]
   apply LinearMap.ker_eq_bot'.mpr
   intro x hx
-  have hx' : (2 * Complex.I) •
-      (T + Complex.I • (1 : H →ₗ.[ℂ] H)).inverse x = 0 := hx
+  have hx' : (2 * Complex.I) • (T + Complex.I • (1 : H →ₗ.[ℂ] H)).inverse x = 0 := hx
   have hxinv : (T + Complex.I • (1 : H →ₗ.[ℂ] H)).inverse x = 0 := by
     rcases smul_eq_zero.mp hx' with h | h
     · norm_num at h
@@ -207,24 +219,24 @@ lemma cayleyUnitary_one_sub_ker_eq_bot {T : H →ₗ.[ℂ] H}
   exact (Submodule.mem_bot ℂ).mp hxker
 
 omit [CompleteSpace H] in
-lemma linearPMap_range_smul {Q : H →ₗ.[ℂ] H} (a : ℂ) (ha : a ≠ 0) :
-    (a • Q).toFun.range = Q.toFun.range := by
+lemma linearPMap_range_smul {Q : H →ₗ.[ℂ] H} (a : ℂ) (ha : a ≠ 0)
+    : (a • Q).toFun.range = Q.toFun.range := by
   ext x
   constructor
   · rintro ⟨y, hy⟩
-    let yQ : Q.domain :=
-      ⟨(y : H), by simp [LinearPMap.smul_domain]⟩
+    let yQ : Q.domain := ⟨(y : H), by simp [LinearPMap.smul_domain]⟩
     let y' : Q.domain := a • yQ
     refine ⟨y', ?_⟩
     change a • Q.toFun yQ = x at hy
     simpa [y', Q.toFun.map_smul] using hy
   · rintro ⟨y, hy⟩
-    let yQ : Q.domain :=
-      ⟨(y : H), by simp [y.property]⟩
-    let y' : (a • Q).domain :=
-      ⟨a⁻¹ • (yQ : H), by
+    let yQ : Q.domain := ⟨(y : H), by simp [y.property]⟩
+    let y' : (a • Q).domain := ⟨
+      a⁻¹ • (yQ : H),
+      by
         rw [LinearPMap.smul_domain]
-        exact Q.domain.smul_mem _ (by simp [yQ.property])⟩
+        exact Q.domain.smul_mem _ (by simp [yQ.property])
+    ⟩
     refine ⟨y', ?_⟩
     change a • Q.toFun y' = x
     change Q.toFun yQ = x at hy
@@ -233,22 +245,31 @@ lemma linearPMap_range_smul {Q : H →ₗ.[ℂ] H} (a : ℂ) (ha : a ≠ 0) :
     exact hy
 
 omit [CompleteSpace H] in
-lemma linearPMap_comp_inverse_apply {Q : H →ₗ.[ℂ] H}
-    (hker : Q.toFun.ker = ⊥) (y : Q.inverse.domain) :
-    Q (⟨Q.inverse y, by
-      rw [← LinearPMap.inverse_range (LinearPMap.toFun_ker_eq_bot_iff.mp hker)]
-      exact LinearMap.mem_range_self _ y⟩ : Q.domain) = y := by
+lemma linearPMap_comp_inverse_apply {Q : H →ₗ.[ℂ] H} (hker : Q.toFun.ker = ⊥) (y : Q.inverse.domain)
+    : Q
+        (⟨
+           Q.inverse y,
+           by
+             rw [← LinearPMap.inverse_range (LinearPMap.toFun_ker_eq_bot_iff.mp hker)]
+             exact LinearMap.mem_range_self _ y
+         ⟩
+          : Q.domain)
+      = y := by
   have hc := LinearPMap.compRestricted_inverse_eq hker
   obtain ⟨hcd, hcf⟩ := LinearPMap.dExt_iff.mp hc
-  let ac : (Q ∘ᵣ Q.inverse).domain :=
-    ⟨(y : H), by
+  let ac : (Q ∘ᵣ Q.inverse).domain := ⟨
+    (y : H),
+    by
       refine LinearPMap.mem_compRestricted_domain_iff.mpr ⟨y.property, ?_⟩
       rw [← LinearPMap.inverse_range (LinearPMap.toFun_ker_eq_bot_iff.mp hker)]
-      exact LinearMap.mem_range_self _ y⟩
-  let ad : (LinearPMap.domRestrict (1 : H →ₗ.[ℂ] H) Q.inverse.domain).domain :=
-    ⟨(y : H), by
+      exact LinearMap.mem_range_self _ y
+  ⟩
+  let ad : (LinearPMap.domRestrict (1 : H →ₗ.[ℂ] H) Q.inverse.domain).domain := ⟨
+    (y : H),
+    by
       rw [LinearPMap.domRestrict_domain]
-      exact ⟨y.property, Submodule.mem_top⟩⟩
+      exact ⟨y.property, Submodule.mem_top⟩
+  ⟩
   have h := hcf (x := ac) (y := ad) rfl
   have had : LinearPMap.domRestrict (1 : H →ₗ.[ℂ] H) Q.inverse.domain ad = y := by
     change (ad : H) = (y : H)
@@ -256,11 +277,10 @@ lemma linearPMap_comp_inverse_apply {Q : H →ₗ.[ℂ] H}
   rw [had] at h
   simpa [ac, LinearPMap.compRestricted_apply] using h
 
-lemma inverseCayleyPMap_cayleyUnitary_domain {T : H →ₗ.[ℂ] H}
-    (hT : IsSelfAdjoint T) :
-    (inverseCayleyPMap (cayleyUnitary T hT)).domain = T.domain := by
-  have hres := LinearPMap.IsSelfAdjoint.mem_resolventSet_of_im_ne_zero hT
-    (z := -Complex.I) (by norm_num)
+lemma inverseCayleyPMap_cayleyUnitary_domain {T : H →ₗ.[ℂ] H} (hT : IsSelfAdjoint T)
+    : (inverseCayleyPMap (cayleyUnitary T hT)).domain = T.domain := by
+  have hres :=
+    LinearPMap.IsSelfAdjoint.mem_resolventSet_of_im_ne_zero hT (z := -Complex.I) (by norm_num)
   have hplusker : (T + Complex.I • (1 : H →ₗ.[ℂ] H)).toFun.ker = ⊥ := by
     have heq : T - (-Complex.I) • (1 : H →ₗ.[ℂ] H) = T + Complex.I • 1 := by
       exact LinearPMap.ext rfl fun x hf hg => by
@@ -273,12 +293,13 @@ lemma inverseCayleyPMap_cayleyUnitary_domain {T : H →ₗ.[ℂ] H}
         simp [LinearPMap.sub_apply, LinearPMap.add_apply, LinearPMap.smul_apply, neg_smul]
     rw [← heq]
     exact hres.2.1
-  have hEq : 1 - unitaryToPMap (cayleyUnitary T hT) =
-      (2 * Complex.I) • (T + Complex.I • (1 : H →ₗ.[ℂ] H)).inverse := by
+  have hEq
+      : 1 - unitaryToPMap (cayleyUnitary T hT)
+        = (2 * Complex.I) • (T + Complex.I • (1 : H →ₗ.[ℂ] H)).inverse := by
     rw [unitaryToPMap_cayleyUnitary_eq_cayleyPMap hT, cayleyPMap_eq_one_sub hT]
-    have hdom : (1 - (1 - (2 * Complex.I) •
-        (T + Complex.I • (1 : H →ₗ.[ℂ] H)).inverse)).domain =
-        ((2 * Complex.I) • (T + Complex.I • (1 : H →ₗ.[ℂ] H)).inverse).domain := by
+    have hdom
+        : (1 - (1 - (2 * Complex.I) • (T + Complex.I • (1 : H →ₗ.[ℂ] H)).inverse)).domain
+          = ((2 * Complex.I) • (T + Complex.I • (1 : H →ₗ.[ℂ] H)).inverse).domain := by
       simp [LinearPMap.sub_domain]
     apply LinearPMap.ext hdom
     intro x hx hx'
@@ -291,16 +312,21 @@ lemma inverseCayleyPMap_cayleyUnitary_domain {T : H →ₗ.[ℂ] H}
   rw [inverseCayleyPMap_domain, hrange]
 
 omit [CompleteSpace H] in
-lemma inverseCayleyPMap_apply_on_range {u : H ≃ₗᵢ[ℂ] H}
-    (hker : (1 - unitaryToPMap u).toFun.ker = ⊥) (a : (1 - unitaryToPMap u).domain) :
-    inverseCayleyPMap u (⟨(1 - unitaryToPMap u) a, by
+lemma inverseCayleyPMap_apply_on_range
+    {u : H ≃ₗᵢ[ℂ] H} (hker : (1 - unitaryToPMap u).toFun.ker = ⊥) (a : (1 - unitaryToPMap u).domain)
+    : inverseCayleyPMap u (⟨
+        (1 - unitaryToPMap u) a,
+        by
           rw [inverseCayleyPMap_domain u]
-          exact LinearMap.mem_range_self _ a⟩) =
-      Complex.I • (1 + unitaryToPMap u) a := by
-  let y : (1 - unitaryToPMap u).inverse.domain :=
-    ⟨(1 - unitaryToPMap u) a, by
+          exact LinearMap.mem_range_self _ a
+      ⟩)
+      = Complex.I • (1 + unitaryToPMap u) a := by
+  let y : (1 - unitaryToPMap u).inverse.domain := ⟨
+    (1 - unitaryToPMap u) a,
+    by
       rw [LinearPMap.inverse_domain]
-      exact LinearMap.mem_range_self _ a⟩
+      exact LinearMap.mem_range_self _ a
+  ⟩
   have hy : (1 - unitaryToPMap u).inverse y = a := by
     apply LinearPMap.inverse_apply_eq (LinearPMap.toFun_ker_eq_bot_iff.mp hker)
     rfl
@@ -309,29 +335,28 @@ lemma inverseCayleyPMap_apply_on_range {u : H ≃ₗᵢ[ℂ] H}
   rw [hy]
   congr 2
 
-lemma inverseCayleyPMap_cayleyUnitary {T : H →ₗ.[ℂ] H}
-    (hT : IsSelfAdjoint T) :
-    inverseCayleyPMap (cayleyUnitary T hT) = T := by
+lemma inverseCayleyPMap_cayleyUnitary {T : H →ₗ.[ℂ] H} (hT : IsSelfAdjoint T)
+    : inverseCayleyPMap (cayleyUnitary T hT) = T := by
   let u := cayleyUnitary T hT
   have hker : (1 - unitaryToPMap u).toFun.ker = ⊥ := by
     simpa [u] using cayleyUnitary_one_sub_ker_eq_bot hT
   have hdom : (inverseCayleyPMap u).domain = T.domain := by
     simpa [u] using inverseCayleyPMap_cayleyUnitary_domain hT
-  have hEq : 1 - unitaryToPMap u =
-      (2 * Complex.I) • (T + Complex.I • (1 : H →ₗ.[ℂ] H)).inverse := by
+  have hEq
+      : 1 - unitaryToPMap u = (2 * Complex.I) • (T + Complex.I • (1 : H →ₗ.[ℂ] H)).inverse := by
     rw [show unitaryToPMap u = cayleyPMap T by
       simpa [u] using unitaryToPMap_cayleyUnitary_eq_cayleyPMap hT]
     rw [cayleyPMap_eq_one_sub hT]
-    have hdom0 : (1 - (1 - (2 * Complex.I) •
-        (T + Complex.I • (1 : H →ₗ.[ℂ] H)).inverse)).domain =
-        ((2 * Complex.I) • (T + Complex.I • (1 : H →ₗ.[ℂ] H)).inverse).domain := by
+    have hdom0
+        : (1 - (1 - (2 * Complex.I) • (T + Complex.I • (1 : H →ₗ.[ℂ] H)).inverse)).domain
+          = ((2 * Complex.I) • (T + Complex.I • (1 : H →ₗ.[ℂ] H)).inverse).domain := by
       simp [LinearPMap.sub_domain]
     apply LinearPMap.ext hdom0
     intro q hq hq'
     simp only [LinearPMap.sub_apply, LinearPMap.smul_apply]
     module
-  have hres := LinearPMap.IsSelfAdjoint.mem_resolventSet_of_im_ne_zero hT
-    (z := -Complex.I) (by norm_num)
+  have hres :=
+    LinearPMap.IsSelfAdjoint.mem_resolventSet_of_im_ne_zero hT (z := -Complex.I) (by norm_num)
   have hplusker : (T + Complex.I • (1 : H →ₗ.[ℂ] H)).toFun.ker = ⊥ := by
     have heq : T - (-Complex.I) • (1 : H →ₗ.[ℂ] H) = T + Complex.I • 1 := by
       exact LinearPMap.ext rfl fun q hq hq' => by
@@ -350,44 +375,50 @@ lemma inverseCayleyPMap_cayleyUnitary {T : H →ₗ.[ℂ] H}
     rw [← inverseCayleyPMap_domain u]
     exact hx
   obtain ⟨a, ha⟩ := hxrange
-  let ai : (T + Complex.I • (1 : H →ₗ.[ℂ] H)).inverse.domain :=
-    ⟨(a : H), by
+  let ai : (T + Complex.I • (1 : H →ₗ.[ℂ] H)).inverse.domain := ⟨
+    (a : H),
+    by
       rw [LinearPMap.inverse_domain, hplusrange]
-      exact Submodule.mem_top⟩
-  let zp : (T + Complex.I • (1 : H →ₗ.[ℂ] H)).domain :=
-    ⟨(T + Complex.I • (1 : H →ₗ.[ℂ] H)).inverse ai, by
+      exact Submodule.mem_top
+  ⟩
+  let zp : (T + Complex.I • (1 : H →ₗ.[ℂ] H)).domain := ⟨
+    (T + Complex.I • (1 : H →ₗ.[ℂ] H)).inverse ai,
+    by
       rw [← LinearPMap.inverse_range (LinearPMap.toFun_ker_eq_bot_iff.mp hplusker)]
-      exact LinearMap.mem_range_self _ ai⟩
-  let zpT : T.domain :=
-    ⟨(zp : H), by simpa [LinearPMap.add_domain] using zp.property⟩
+      exact LinearMap.mem_range_self _ ai
+  ⟩
+  let zpT : T.domain := ⟨(zp : H), by simpa [LinearPMap.add_domain] using zp.property⟩
   have hza : (T + Complex.I • (1 : H →ₗ.[ℂ] H)) zp = (a : H) := by
     exact linearPMap_comp_inverse_apply hplusker ai
-  let al : (1 - unitaryToPMap u).domain :=
-    ⟨(a : H), by
-      exact a.property⟩
-  let ar : ((2 * Complex.I) •
-      (T + Complex.I • (1 : H →ₗ.[ℂ] H)).inverse).domain :=
-    ⟨(a : H), by
+  let al : (1 - unitaryToPMap u).domain := ⟨(a : H), by exact a.property⟩
+  let ar : ((2 * Complex.I) • (T + Complex.I • (1 : H →ₗ.[ℂ] H)).inverse).domain := ⟨
+    (a : H),
+    by
       rw [LinearPMap.smul_domain, LinearPMap.inverse_domain, hplusrange]
-      exact Submodule.mem_top⟩
+      exact Submodule.mem_top
+  ⟩
   obtain ⟨hEq_dom, hEq_fun⟩ := LinearPMap.dExt_iff.mp hEq
   have hEq_a := hEq_fun (x := al) (y := ar) rfl
-  change (1 - unitaryToPMap u) al =
-    (2 * Complex.I) • (T + Complex.I • (1 : H →ₗ.[ℂ] H)).inverse ai at hEq_a
+  change (1 - unitaryToPMap u) al = (2 * Complex.I) • (T + Complex.I • (1 : H →ₗ.[ℂ] H)).inverse ai
+    at hEq_a
   have hxval : (x : H) = (2 * Complex.I) • (zp : H) := by
     rw [← hEq_a]
     exact ha.symm
-  let xi : (inverseCayleyPMap u).domain :=
-    ⟨(1 - unitaryToPMap u) a, by
+  let xi : (inverseCayleyPMap u).domain := ⟨
+    (1 - unitaryToPMap u) a,
+    by
       rw [inverseCayleyPMap_domain u]
-      exact LinearMap.mem_range_self _ a⟩
+      exact LinearMap.mem_range_self _ a
+  ⟩
   have hxi : (⟨(x : H), hx⟩ : (inverseCayleyPMap u).domain) = xi := by
     apply Subtype.ext
     exact ha.symm
-  let zt : T.domain :=
-    ⟨(2 * Complex.I) • (zpT : H), by
+  let zt : T.domain := ⟨
+    (2 * Complex.I) • (zpT : H),
+    by
       rw [← hxval]
-      exact hx'⟩
+      exact hx'
+  ⟩
   have hxt : (⟨(x : H), hx'⟩ : T.domain) = zt := by
     apply Subtype.ext
     exact hxval
@@ -395,8 +426,7 @@ lemma inverseCayleyPMap_cayleyUnitary {T : H →ₗ.[ℂ] H}
   change Complex.I • ((a : H) + u (a : H)) = T ⟨(x : H), hx'⟩
   rw [hxt]
   dsimp [zt]
-  change Complex.I • ((a : H) + u (a : H)) =
-    T.toFun ((2 * Complex.I) • zpT)
+  change Complex.I • ((a : H) + u (a : H)) = T.toFun ((2 * Complex.I) • zpT)
   rw [T.toFun.map_smul]
   have hua : u (a : H) = T zpT - Complex.I • (zpT : H) := by
     have hEq_a' := hEq_a
@@ -408,7 +438,8 @@ lemma inverseCayleyPMap_cayleyUnitary {T : H →ₗ.[ℂ] H}
       rw [← hEq_a']
       module
     calc
-      u (a : H) = (a : H) - (2 * Complex.I) • (zpT : H) := hua'
+      u (a : H)
+        = (a : H) - (2 * Complex.I) • (zpT : H) := hua'
       _ = T zpT - Complex.I • (zpT : H) := by
         rw [← hza']
         module
@@ -416,29 +447,26 @@ lemma inverseCayleyPMap_cayleyUnitary {T : H →ₗ.[ℂ] H}
   have hza' := hza
   change T zpT + Complex.I • (zpT : H) = (a : H) at hza'
   rw [← hza']
-  have hsum : (T zpT + Complex.I • (zpT : H)) +
-      (T zpT - Complex.I • (zpT : H)) = (2 : ℂ) • T zpT := by
+  have hsum
+      : (T zpT + Complex.I • (zpT : H)) + (T zpT - Complex.I • (zpT : H)) = (2 : ℂ) • T zpT := by
     module
   rw [hsum]
   simp [smul_smul, mul_comm]
 
 omit [CompleteSpace H] in
-lemma cayley_inner_identity (u : H ≃ₗᵢ[ℂ] H) (a b : H) :
-    ⟪Complex.I • (a + u a), b - u b⟫_ℂ =
-      ⟪a - u a, Complex.I • (b + u b)⟫_ℂ := by
-  have hub : ⟪u a, u b⟫_ℂ = ⟪a, b⟫_ℂ := by
-    simp
-  simp only [inner_smul_left, inner_smul_right, inner_add_left, inner_add_right,
-    inner_sub_left, inner_sub_right]
+lemma cayley_inner_identity (u : H ≃ₗᵢ[ℂ] H) (a b : H)
+    : ⟪Complex.I • (a + u a), b - u b⟫_ℂ = ⟪a - u a, Complex.I • (b + u b)⟫_ℂ := by
+  have hub : ⟪u a, u b⟫_ℂ = ⟪a, b⟫_ℂ := by simp
+  simp only [inner_smul_left, inner_smul_right, inner_add_left, inner_add_right, inner_sub_left,
+    inner_sub_right]
   rw [show starRingEnd ℂ Complex.I = -Complex.I by simp]
   rw [hub]
   ring
 
 omit [CompleteSpace H] in
 /-- The inverse Cayley operator is symmetric whenever `1 - u` is injective. -/
-lemma inverseCayleyPMap_isSymmetric {u : H ≃ₗᵢ[ℂ] H}
-    (hker : (1 - unitaryToPMap u).toFun.ker = ⊥) :
-    (inverseCayleyPMap u).IsSymmetric := by
+lemma inverseCayleyPMap_isSymmetric {u : H ≃ₗᵢ[ℂ] H} (hker : (1 - unitaryToPMap u).toFun.ker = ⊥)
+    : (inverseCayleyPMap u).IsSymmetric := by
   intro x y
   have hxrange : (x : H) ∈ (1 - unitaryToPMap u).toFun.range := by
     rw [← inverseCayleyPMap_domain u]
@@ -448,78 +476,88 @@ lemma inverseCayleyPMap_isSymmetric {u : H ≃ₗᵢ[ℂ] H}
     exact y.property
   obtain ⟨a, ha⟩ := hxrange
   obtain ⟨b, hb⟩ := hyrange
-  let xa : (inverseCayleyPMap u).domain :=
-    ⟨(1 - unitaryToPMap u) a, by
+  let xa : (inverseCayleyPMap u).domain := ⟨
+    (1 - unitaryToPMap u) a,
+    by
       rw [inverseCayleyPMap_domain u]
-      exact LinearMap.mem_range_self _ a⟩
-  let ya : (inverseCayleyPMap u).domain :=
-    ⟨(1 - unitaryToPMap u) b, by
+      exact LinearMap.mem_range_self _ a
+  ⟩
+  let ya : (inverseCayleyPMap u).domain := ⟨
+    (1 - unitaryToPMap u) b,
+    by
       rw [inverseCayleyPMap_domain u]
-      exact LinearMap.mem_range_self _ b⟩
+      exact LinearMap.mem_range_self _ b
+  ⟩
   have hxa : x = xa := by
     apply Subtype.ext
     exact ha.symm
   have hya : y = ya := by
     apply Subtype.ext
     exact hb.symm
-  rw [hxa, hya, inverseCayleyPMap_apply_on_range hker a,
-    inverseCayleyPMap_apply_on_range hker b]
+  rw [hxa, hya, inverseCayleyPMap_apply_on_range hker a, inverseCayleyPMap_apply_on_range hker b]
   dsimp [xa, ya]
-  change ⟪Complex.I • ((a : H) + u (a : H)), (b : H) - u (b : H)⟫_ℂ =
-    ⟪(a : H) - u (a : H), Complex.I • ((b : H) + u (b : H))⟫_ℂ
+  change ⟪Complex.I • ((a : H) + u (a : H)), (b : H) - u (b : H)⟫_ℂ
+    = ⟪(a : H) - u (a : H), Complex.I • ((b : H) + u (b : H))⟫_ℂ
   exact cayley_inner_identity u (a : H) (b : H)
 
 omit [CompleteSpace H] in
-lemma inverseCayleyPMap_add_I_apply_on_range {u : H ≃ₗᵢ[ℂ] H}
-    (hker : (1 - unitaryToPMap u).toFun.ker = ⊥) (a : (1 - unitaryToPMap u).domain) :
-    let x : (inverseCayleyPMap u).domain :=
-      ⟨(1 - unitaryToPMap u) a, by
-        rw [inverseCayleyPMap_domain u]
-        exact LinearMap.mem_range_self _ a⟩
-    inverseCayleyPMap u x + Complex.I • x = (2 * Complex.I) • (a : H) := by
+lemma inverseCayleyPMap_add_I_apply_on_range
+    {u : H ≃ₗᵢ[ℂ] H} (hker : (1 - unitaryToPMap u).toFun.ker = ⊥) (a : (1 - unitaryToPMap u).domain)
+    : let x : (inverseCayleyPMap u).domain := ⟨
+        (1 - unitaryToPMap u) a,
+        by
+          rw [inverseCayleyPMap_domain u]
+          exact LinearMap.mem_range_self _ a
+      ⟩
+      inverseCayleyPMap u x + Complex.I • x = (2 * Complex.I) • (a : H) := by
   dsimp
   rw [inverseCayleyPMap_apply_on_range hker a]
   change Complex.I • ((a : H) + u (a : H)) + Complex.I • ((a : H) - u (a : H)) = _
   module
 
 omit [CompleteSpace H] in
-lemma inverseCayleyPMap_sub_I_apply_on_range {u : H ≃ₗᵢ[ℂ] H}
-    (hker : (1 - unitaryToPMap u).toFun.ker = ⊥) (a : (1 - unitaryToPMap u).domain) :
-    let x : (inverseCayleyPMap u).domain :=
-      ⟨(1 - unitaryToPMap u) a, by
-        rw [inverseCayleyPMap_domain u]
-        exact LinearMap.mem_range_self _ a⟩
-    inverseCayleyPMap u x - Complex.I • x = (2 * Complex.I) • u (a : H) := by
+lemma inverseCayleyPMap_sub_I_apply_on_range
+    {u : H ≃ₗᵢ[ℂ] H} (hker : (1 - unitaryToPMap u).toFun.ker = ⊥) (a : (1 - unitaryToPMap u).domain)
+    : let x : (inverseCayleyPMap u).domain := ⟨
+        (1 - unitaryToPMap u) a,
+        by
+          rw [inverseCayleyPMap_domain u]
+          exact LinearMap.mem_range_self _ a
+      ⟩
+      inverseCayleyPMap u x - Complex.I • x = (2 * Complex.I) • u (a : H) := by
   dsimp
   rw [inverseCayleyPMap_apply_on_range hker a]
   change Complex.I • ((a : H) + u (a : H)) - Complex.I • ((a : H) - u (a : H)) = _
   module
 
 omit [CompleteSpace H] in
-lemma inverseCayleyPMap_hasDenseDomain {u : H ≃ₗᵢ[ℂ] H}
-    (h_dense : Dense ((1 - unitaryToPMap u).toFun.range : Set H)) :
-    (inverseCayleyPMap u).HasDenseDomain := by
+lemma inverseCayleyPMap_hasDenseDomain
+    {u : H ≃ₗᵢ[ℂ] H} (h_dense : Dense ((1 - unitaryToPMap u).toFun.range : Set H))
+    : (inverseCayleyPMap u).HasDenseDomain := by
   change Dense ((inverseCayleyPMap u).domain : Set H)
   rw [inverseCayleyPMap_domain u]
   exact h_dense
 
 omit [CompleteSpace H] in
-lemma inverseCayleyPMap_add_I_range_eq_top {u : H ≃ₗᵢ[ℂ] H}
-    (hker : (1 - unitaryToPMap u).toFun.ker = ⊥) :
-    (inverseCayleyPMap u + Complex.I • (1 : H →ₗ.[ℂ] H)).toFun.range = ⊤ := by
+lemma inverseCayleyPMap_add_I_range_eq_top
+    {u : H ≃ₗᵢ[ℂ] H} (hker : (1 - unitaryToPMap u).toFun.ker = ⊥)
+    : (inverseCayleyPMap u + Complex.I • (1 : H →ₗ.[ℂ] H)).toFun.range = ⊤ := by
   apply LinearMap.range_eq_top.mpr
   intro y
-  let a : (1 - unitaryToPMap u).domain :=
-    ⟨(2 * Complex.I)⁻¹ • y, by
+  let a : (1 - unitaryToPMap u).domain := ⟨
+    (2 * Complex.I)⁻¹ • y,
+    by
       rw [one_sub_unitaryToPMap_domain u]
-      exact Submodule.mem_top⟩
-  let x : (inverseCayleyPMap u).domain :=
-    ⟨(1 - unitaryToPMap u) a, by
+      exact Submodule.mem_top
+  ⟩
+  let x : (inverseCayleyPMap u).domain := ⟨
+    (1 - unitaryToPMap u) a,
+    by
       rw [inverseCayleyPMap_domain u]
-      exact LinearMap.mem_range_self _ a⟩
+      exact LinearMap.mem_range_self _ a
+  ⟩
   let xp : (inverseCayleyPMap u + Complex.I • (1 : H →ₗ.[ℂ] H)).domain :=
-    ⟨(x : H), by
-      simp [LinearPMap.add_domain, x, inverseCayleyPMap_domain u]⟩
+    ⟨(x : H), by simp [LinearPMap.add_domain, x, inverseCayleyPMap_domain u]⟩
   refine ⟨xp, ?_⟩
   have hx := inverseCayleyPMap_add_I_apply_on_range hker a
   change inverseCayleyPMap u x + Complex.I • (x : H) = y
@@ -531,23 +569,29 @@ lemma inverseCayleyPMap_add_I_range_eq_top {u : H ≃ₗᵢ[ℂ] H}
   rw [hscalar, one_smul]
 
 omit [CompleteSpace H] in
-lemma inverseCayleyPMap_sub_I_range_eq_top {u : H ≃ₗᵢ[ℂ] H}
-    (hker : (1 - unitaryToPMap u).toFun.ker = ⊥) :
-    (inverseCayleyPMap u - Complex.I • (1 : H →ₗ.[ℂ] H)).toFun.range = ⊤ := by
+lemma inverseCayleyPMap_sub_I_range_eq_top
+    {u : H ≃ₗᵢ[ℂ] H} (hker : (1 - unitaryToPMap u).toFun.ker = ⊥)
+    : (inverseCayleyPMap u - Complex.I • (1 : H →ₗ.[ℂ] H)).toFun.range = ⊤ := by
   apply LinearMap.range_eq_top.mpr
   intro y
-  let a : (1 - unitaryToPMap u).domain :=
-    ⟨u.symm ((2 * Complex.I)⁻¹ • y), by
+  let a : (1 - unitaryToPMap u).domain := ⟨
+    u.symm ((2 * Complex.I)⁻¹ • y),
+    by
       rw [one_sub_unitaryToPMap_domain u]
-      exact Submodule.mem_top⟩
-  let x : (inverseCayleyPMap u).domain :=
-    ⟨(1 - unitaryToPMap u) a, by
+      exact Submodule.mem_top
+  ⟩
+  let x : (inverseCayleyPMap u).domain := ⟨
+    (1 - unitaryToPMap u) a,
+    by
       rw [inverseCayleyPMap_domain u]
-      exact LinearMap.mem_range_self _ a⟩
-  let xp : (inverseCayleyPMap u - Complex.I • (1 : H →ₗ.[ℂ] H)).domain :=
-    ⟨(x : H), by
+      exact LinearMap.mem_range_self _ a
+  ⟩
+  let xp : (inverseCayleyPMap u - Complex.I • (1 : H →ₗ.[ℂ] H)).domain := ⟨
+    (x : H),
+    by
       rw [LinearPMap.sub_domain, LinearPMap.smul_domain, LinearPMap.one_domain]
-      exact ⟨x.property, Submodule.mem_top⟩⟩
+      exact ⟨x.property, Submodule.mem_top⟩
+  ⟩
   refine ⟨xp, ?_⟩
   have hx := inverseCayleyPMap_sub_I_apply_on_range hker a
   change inverseCayleyPMap u x - Complex.I • (x : H) = y
@@ -566,22 +610,24 @@ structure CayleyUnitaryData (u : H ≃ₗᵢ[ℂ] H) : Prop where
   /-- The point `1` is not an eigenvalue of the unitary. -/
   one_sub_injective : (1 - unitaryToPMap u).toFun.ker = ⊥
 
-lemma inverseCayleyPMap_isSelfAdjoint {u : H ≃ₗᵢ[ℂ] H}
-    (hker : (1 - unitaryToPMap u).toFun.ker = ⊥)
-    (h_dense : Dense ((1 - unitaryToPMap u).toFun.range : Set H)) :
-    IsSelfAdjoint (inverseCayleyPMap u) := by
-  apply LinearPMap.IsSymmetric.isSelfAdjoint_of_range_eq_top
-    (inverseCayleyPMap_isSymmetric hker) (inverseCayleyPMap_hasDenseDomain h_dense)
+lemma inverseCayleyPMap_isSelfAdjoint
+    {u : H ≃ₗᵢ[ℂ] H} (hker : (1 - unitaryToPMap u).toFun.ker = ⊥)
+    (h_dense : Dense ((1 - unitaryToPMap u).toFun.range : Set H))
+    : IsSelfAdjoint (inverseCayleyPMap u) := by
+  apply LinearPMap.IsSymmetric.isSelfAdjoint_of_range_eq_top (inverseCayleyPMap_isSymmetric hker)
+    (inverseCayleyPMap_hasDenseDomain h_dense)
   · exact inverseCayleyPMap_add_I_range_eq_top hker
   · exact inverseCayleyPMap_sub_I_range_eq_top hker
 
 /-! ## D. Round trip with the forward Cayley transform -/
 
-lemma cayleyContinuousLinearMap_inverseCayleyPMap_apply {u : H ≃ₗᵢ[ℂ] H}
-    (hker : (1 - unitaryToPMap u).toFun.ker = ⊥)
-    (h_dense : Dense ((1 - unitaryToPMap u).toFun.range : Set H)) (x : H) :
-    cayleyContinuousLinearMap (inverseCayleyPMap u)
-      (inverseCayleyPMap_isSelfAdjoint hker h_dense) x = u x := by
+lemma cayleyContinuousLinearMap_inverseCayleyPMap_apply
+    {u : H ≃ₗᵢ[ℂ] H} (hker : (1 - unitaryToPMap u).toFun.ker = ⊥)
+    (h_dense : Dense ((1 - unitaryToPMap u).toFun.range : Set H))
+    (x : H)
+    : cayleyContinuousLinearMap (inverseCayleyPMap u) (inverseCayleyPMap_isSelfAdjoint hker h_dense)
+        x
+      = u x := by
   let T : H →ₗ.[ℂ] H := inverseCayleyPMap u
   have hT : IsSelfAdjoint T := inverseCayleyPMap_isSelfAdjoint hker h_dense
   have hrange := inverseCayleyPMap_add_I_range_eq_top hker
@@ -591,30 +637,29 @@ lemma cayleyContinuousLinearMap_inverseCayleyPMap_apply {u : H ≃ₗᵢ[ℂ] H}
   obtain ⟨y, hy⟩ := hxrange
   have hcalc := cayleyContinuousLinearMap_apply_of_mem_range hT y x hy
   rw [hcalc]
-  have hyT : (y : H) ∈ T.domain := by
-    simpa [LinearPMap.add_domain] using y.property
+  have hyT : (y : H) ∈ T.domain := by simpa [LinearPMap.add_domain] using y.property
   have hyI : (y : H) ∈ (inverseCayleyPMap u).domain := hyT
   rw [inverseCayleyPMap_domain u] at hyI
   obtain ⟨a, ha⟩ := hyI
   let ya : (T + Complex.I • (1 : H →ₗ.[ℂ] H)).domain :=
-    ⟨(1 - unitaryToPMap u) a, by
-      simp [LinearPMap.add_domain, T, inverseCayleyPMap_domain u]⟩
+    ⟨(1 - unitaryToPMap u) a, by simp [LinearPMap.add_domain, T, inverseCayleyPMap_domain u]⟩
   have hya : y = ya := by
     apply Subtype.ext
     exact ha.symm
   rw [hya]
-  have hsub : (T - Complex.I • (1 : H →ₗ.[ℂ] H)) ya =
-      (2 * Complex.I) • u (a : H) := by
-    change inverseCayleyPMap u
-      (⟨(1 - unitaryToPMap u) a, by
-        rw [inverseCayleyPMap_domain u]
-        exact LinearMap.mem_range_self _ a⟩) - Complex.I •
-        ((1 - unitaryToPMap u) a : H) = _
+  have hsub : (T - Complex.I • (1 : H →ₗ.[ℂ] H)) ya = (2 * Complex.I) • u (a : H) := by
+    change inverseCayleyPMap u (⟨
+          (1 - unitaryToPMap u) a,
+          by
+            rw [inverseCayleyPMap_domain u]
+            exact LinearMap.mem_range_self _ a
+        ⟩)
+        - Complex.I • ((1 - unitaryToPMap u) a : H)
+      = _
     rw [inverseCayleyPMap_sub_I_apply_on_range hker a]
   rw [hsub]
   have hadd := inverseCayleyPMap_add_I_apply_on_range hker a
-  have hadd' : (T + Complex.I • (1 : H →ₗ.[ℂ] H)) ya =
-      (2 * Complex.I) • (a : H) := by
+  have hadd' : (T + Complex.I • (1 : H →ₗ.[ℂ] H)) ya = (2 * Complex.I) • (a : H) := by
     simpa [LinearPMap.add_apply, T, ya] using hadd
   change (2 * Complex.I) • u (a : H) = u x
   rw [← map_smul]
@@ -623,23 +668,21 @@ lemma cayleyContinuousLinearMap_inverseCayleyPMap_apply {u : H ≃ₗᵢ[ℂ] H}
   rw [← hya]
   exact hy
 
-lemma cayleyContinuousLinearMap_inverseCayleyPMap_eq {u : H ≃ₗᵢ[ℂ] H}
-    (hker : (1 - unitaryToPMap u).toFun.ker = ⊥)
-    (h_dense : Dense ((1 - unitaryToPMap u).toFun.range : Set H)) :
-    cayleyContinuousLinearMap (inverseCayleyPMap u)
-        (inverseCayleyPMap_isSelfAdjoint hker h_dense) =
-      u.toLinearIsometry.toContinuousLinearMap := by
+lemma cayleyContinuousLinearMap_inverseCayleyPMap_eq
+    {u : H ≃ₗᵢ[ℂ] H} (hker : (1 - unitaryToPMap u).toFun.ker = ⊥)
+    (h_dense : Dense ((1 - unitaryToPMap u).toFun.range : Set H))
+    : cayleyContinuousLinearMap (inverseCayleyPMap u) (inverseCayleyPMap_isSelfAdjoint hker h_dense)
+      = u.toLinearIsometry.toContinuousLinearMap := by
   ext x
   exact cayleyContinuousLinearMap_inverseCayleyPMap_apply hker h_dense x
 
-lemma inverseCayleyPMap_isSelfAdjoint_of_ker_eq_bot {u : H ≃ₗᵢ[ℂ] H}
-    (hker : (1 - unitaryToPMap u).toFun.ker = ⊥) :
-    IsSelfAdjoint (inverseCayleyPMap u) :=
-  inverseCayleyPMap_isSelfAdjoint hker
-    (one_sub_unitaryToPMap_denseRange_of_ker_eq_bot hker)
+lemma inverseCayleyPMap_isSelfAdjoint_of_ker_eq_bot
+    {u : H ≃ₗᵢ[ℂ] H} (hker : (1 - unitaryToPMap u).toFun.ker = ⊥)
+    : IsSelfAdjoint (inverseCayleyPMap u) :=
+  inverseCayleyPMap_isSelfAdjoint hker (one_sub_unitaryToPMap_denseRange_of_ker_eq_bot hker)
 
-lemma CayleyUnitaryData.inverse_isSelfAdjoint {u : H ≃ₗᵢ[ℂ] H}
-    (hu : CayleyUnitaryData u) : IsSelfAdjoint (inverseCayleyPMap u) :=
+lemma CayleyUnitaryData.inverse_isSelfAdjoint {u : H ≃ₗᵢ[ℂ] H} (hu : CayleyUnitaryData u)
+    : IsSelfAdjoint (inverseCayleyPMap u) :=
   inverseCayleyPMap_isSelfAdjoint_of_ker_eq_bot hu.one_sub_injective
 
 end QuantumMechanics

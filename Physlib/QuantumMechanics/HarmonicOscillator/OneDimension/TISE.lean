@@ -26,7 +26,7 @@ open _root_.QuantumMechanics.OneDimension.HilbertSpace
 open Constants
 
 /-- The `n`th eigenvalues for a Harmonic oscillator is defined as `(n + 1/2) * ℏ * ω`. -/
-noncomputable def eigenValue (n : ℕ) : ℝ := (n + 1/2) * ℏ * Q.ω
+noncomputable def eigenValue (n : ℕ) : ℝ := (n + 1 / 2) * ℏ * Q.ω
 
 /-!
 
@@ -34,15 +34,18 @@ noncomputable def eigenValue (n : ℕ) : ℝ := (n + 1/2) * ℏ * Q.ω
 
 -/
 
-lemma deriv_eigenfunction_zero : deriv (Q.eigenfunction 0) =
-    Complex.ofReal (- 1 / Q.ξ ^2) • Complex.ofReal * Q.eigenfunction 0 := by
+lemma deriv_eigenfunction_zero
+    : deriv (Q.eigenfunction 0)
+      = Complex.ofReal (-1 / Q.ξ ^ 2) • Complex.ofReal * Q.eigenfunction 0 := by
   rw [eigenfunction_zero]
   simp only [deriv_const_mul_field', Complex.ofReal_div, Complex.ofReal_neg, Algebra.smul_mul_assoc]
   ext x
-  have h1 : deriv (fun (x : ℝ) => Complex.exp (- x ^ 2 / (2 * Q.ξ ^ 2))) x =
-      - x /Q.ξ^2 * Complex.exp (- x ^ 2 / (2 * Q.ξ ^ 2)) := by
+  have h1
+      : deriv (fun (x : ℝ) => Complex.exp (- x ^ 2 / (2 * Q.ξ ^ 2))) x
+        = -x / Q.ξ ^ 2 * Complex.exp (- x ^ 2 / (2 * Q.ξ ^ 2)) := by
     rw [show (fun (x : ℝ) => Complex.exp (- x ^ 2 / (2 * Q.ξ ^ 2)))
-          = Complex.exp ∘ (fun (x : ℝ) => - x ^ 2 / (2 * Q.ξ ^ 2)) from rfl,
+          = Complex.exp ∘ (fun (x : ℝ) => - x ^ 2 / (2 * Q.ξ ^ 2)) from
+        rfl,
       deriv_comp _ (by fun_prop) (by fun_prop)]
     simp only [Complex.deriv_exp, deriv_div_const, deriv.fun_neg']
     have h1' : deriv (fun x => (Complex.ofReal x) ^ 2) x = 2 * x := by
@@ -58,17 +61,17 @@ lemma deriv_eigenfunction_zero : deriv (Q.eigenfunction 0) =
     Complex.ofReal_one, Complex.ofReal_pow]
   ring
 
-lemma deriv_eigenfunction_zero' : deriv (Q.eigenfunction 0) =
-    (- √2 / (2 * Q.ξ) : ℂ) • Q.eigenfunction 1 := by
+lemma deriv_eigenfunction_zero'
+    : deriv (Q.eigenfunction 0) = (- √2 / (2 * Q.ξ) : ℂ) • Q.eigenfunction 1 := by
   rw [deriv_eigenfunction_zero]
   funext x
   simp [eigenfunction_eq, physHermite_zero, physHermite_one, map_ofNat]
   ring_nf
   simp
 
-lemma deriv_physHermite_characteristic_length (n : ℕ) :
-    deriv (fun x => Complex.ofReal (physHermite n (x/Q.ξ))) = fun x =>
-    Complex.ofReal (1/Q.ξ) * 2 * n * physHermite (n-1) (x/Q.ξ) := by
+lemma deriv_physHermite_characteristic_length (n : ℕ)
+    : deriv (fun x => Complex.ofReal (physHermite n (x / Q.ξ)))
+      = fun x => Complex.ofReal (1 / Q.ξ) * 2 * n * physHermite (n - 1) (x / Q.ξ) := by
   change deriv (fun x ↦ Complex.ofReal ((physHermite n ∘ fun x ↦ x / Q.ξ) x)) = _
   funext x
   have hd : DifferentiableAt ℝ (physHermite n ∘ fun x ↦ x / Q.ξ) x := by fun_prop
@@ -77,11 +80,12 @@ lemma deriv_physHermite_characteristic_length (n : ℕ) :
     deriv_id'', Complex.ofReal_mul, Complex.ofReal_ofNat, Complex.ofReal_natCast]
   ring
 
-lemma deriv_eigenfunction_succ (n : ℕ) :
-    deriv (Q.eigenfunction (n + 1)) = fun x =>
-    Complex.ofReal (1/√(2 ^ (n + 1) * (n + 1)!) * (1/Q.ξ)) •
-    ((2 * (n + 1) * physHermite n (x/Q.ξ)
-      - (x/Q.ξ) * physHermite (n + 1) (x/Q.ξ)) * Q.eigenfunction 0 x) := by
+lemma deriv_eigenfunction_succ (n : ℕ)
+    : deriv (Q.eigenfunction (n + 1))
+      = fun x =>
+        Complex.ofReal (1 / √(2 ^ (n + 1) * (n + 1)!) * (1 / Q.ξ))
+          • ((2 * (n + 1) * physHermite n (x / Q.ξ) - (x / Q.ξ) * physHermite (n + 1) (x / Q.ξ))
+            * Q.eigenfunction 0 x) := by
   funext x
   rw [eigenfunction_eq_mul_eigenfunction_zero]
   rw [deriv_fun_mul (by fun_prop) (by fun_prop)]
@@ -100,8 +104,9 @@ lemma deriv_eigenfunction_succ (n : ℕ) :
 
 -/
 
-lemma deriv_deriv_eigenfunction_zero (x : ℝ) : deriv (deriv (Q.eigenfunction 0)) x =
-    (- 1 / Q.ξ^2) * (1 + ((- 1/ Q.ξ^2) * x ^ 2)) * Q.eigenfunction 0 x := by
+lemma deriv_deriv_eigenfunction_zero (x : ℝ)
+    : deriv (deriv (Q.eigenfunction 0)) x
+      = (-1 / Q.ξ ^ 2) * (1 + ((-1 / Q.ξ ^ 2) * x ^ 2)) * Q.eigenfunction 0 x := by
   simp only [deriv_eigenfunction_zero, Complex.ofReal_div, Complex.ofReal_neg,
     Algebra.smul_mul_assoc]
   trans deriv (fun x => (- (1/Q.ξ^2)) • (Complex.ofReal x * Q.eigenfunction 0 x)) x
@@ -119,13 +124,13 @@ lemma deriv_deriv_eigenfunction_zero (x : ℝ) : deriv (deriv (Q.eigenfunction 0
   push_cast
   ring
 
-lemma deriv_deriv_eigenfunction_succ (n : ℕ) (x : ℝ) :
-    deriv (fun x => deriv (Q.eigenfunction (n + 1)) x) x =
-    Complex.ofReal (1/√(2 ^ (n + 1) * (n + 1) !) * (1/Q.ξ)) *
-      ((2 * (↑n + 1) * deriv (fun x => ↑(physHermite n (x/Q.ξ))) x +
-      (-(1/Q.ξ^2)) * (4 * (↑n + 1) * x) *
-      (physHermite n (x/Q.ξ)) + (- (1/Q.ξ)) * (1 + (- (1/Q.ξ^2)) * x ^ 2) *
-      (physHermite (n + 1) (x/Q.ξ))) * Q.eigenfunction 0 x) := by
+lemma deriv_deriv_eigenfunction_succ (n : ℕ) (x : ℝ)
+    : deriv (fun x => deriv (Q.eigenfunction (n + 1)) x) x
+      = Complex.ofReal (1 / √(2 ^ (n + 1) * (n + 1) !) * (1 / Q.ξ))
+        * ((2 * (↑n + 1) * deriv (fun x => ↑(physHermite n (x / Q.ξ))) x
+            + (-(1 / Q.ξ ^ 2)) * (4 * (↑n + 1) * x) * (physHermite n (x / Q.ξ))
+            + (-(1 / Q.ξ)) * (1 + (-(1 / Q.ξ ^ 2)) * x ^ 2) * (physHermite (n + 1) (x / Q.ξ)))
+          * Q.eigenfunction 0 x) := by
   rw [deriv_eigenfunction_succ]
   simp only [ofNat_nonneg, pow_nonneg, Real.sqrt_mul, one_div, mul_inv_rev, Complex.ofReal_mul,
     Complex.ofReal_inv, smul_eq_mul, deriv_const_mul_field', neg_mul, mul_eq_mul_left_iff,
@@ -135,8 +140,8 @@ lemma deriv_deriv_eigenfunction_succ (n : ℕ) (x : ℝ) :
   left
   rw [deriv_fun_mul (by fun_prop) (by fun_prop)]
   rw [deriv_eigenfunction_zero]
-  simp only [Complex.ofReal_div, Complex.ofReal_neg, Pi.mul_apply, Pi.smul_apply, smul_eq_mul, ←
-    mul_assoc, ← add_mul, mul_eq_mul_right_iff]
+  simp only [Complex.ofReal_div, Complex.ofReal_neg, Pi.mul_apply, Pi.smul_apply, smul_eq_mul,
+    ← mul_assoc, ← add_mul, mul_eq_mul_right_iff]
   left
   rw [deriv_fun_sub (by fun_prop) (by fun_prop)]
   rw [deriv_fun_mul (by fun_prop) (by fun_prop)]
@@ -147,9 +152,9 @@ lemma deriv_deriv_eigenfunction_succ (n : ℕ) (x : ℝ) :
   simp only [one_div, Complex.ofReal_inv, cast_add, cast_one, add_tsub_cancel_right]
   ring
 
-lemma deriv_deriv_eigenfunction (n : ℕ) (x : ℝ) :
-    deriv (fun x => deriv (Q.eigenfunction n) x) x = (- 1 / Q.ξ^2) * ((2 * n + 1)
-    + ((- 1/ Q.ξ^2) * x ^ 2)) * Q.eigenfunction n x := by
+lemma deriv_deriv_eigenfunction (n : ℕ) (x : ℝ)
+    : deriv (fun x => deriv (Q.eigenfunction n) x) x
+      = (-1 / Q.ξ ^ 2) * ((2 * n + 1) + ((-1 / Q.ξ ^ 2) * x ^ 2)) * Q.eigenfunction n x := by
   match n with
   | 0 => simpa using Q.deriv_deriv_eigenfunction_zero x
   | n + 1 =>
@@ -163,8 +168,9 @@ lemma deriv_deriv_eigenfunction (n : ℕ) (x : ℝ) :
       rw [← mul_assoc]
       congr 1
       rw [deriv_physHermite_characteristic_length]
-      have hr : (physHermite (n + 1) (x / Q.ξ) : ℝ) =
-          2 * (x / Q.ξ) * physHermite n (x / Q.ξ) - 2 * n * physHermite (n - 1) (x / Q.ξ) := by
+      have hr
+          : (physHermite (n + 1) (x / Q.ξ) : ℝ)
+            = 2 * (x / Q.ξ) * physHermite n (x / Q.ξ) - 2 * n * physHermite (n - 1) (x / Q.ξ) := by
         rw [physHermite_succ_apply']
       rw [hr]
       push_cast
@@ -179,15 +185,16 @@ lemma deriv_deriv_eigenfunction (n : ℕ) (x : ℝ) :
 ## Application of the schrodingerOperator
 -/
 
-/-- The `n`th eigenfunction satisfies the time-independent Schrodinger equation with
-  respect to the `n`th eigenvalue. That is to say for `Q` a harmonic oscillator,
+/--
+The `n`th eigenfunction satisfies the time-independent Schrodinger equation with
+respect to the `n`th eigenvalue. That is to say for `Q` a harmonic oscillator,
 
-  `Q.schrodingerOperator (Q.eigenfunction n) x = Q.eigenValue n * Q.eigenfunction n x`.
+`Q.schrodingerOperator (Q.eigenfunction n) x = Q.eigenValue n * Q.eigenfunction n x`.
 
-  The proof of this result is done by explicit calculation of derivatives.
+The proof of this result is done by explicit calculation of derivatives.
 -/
-lemma schrodingerOperator_eigenfunction (n : ℕ) (x : ℝ) :
-    Q.schrodingerOperator (Q.eigenfunction n) x = Q.eigenValue n * Q.eigenfunction n x := by
+lemma schrodingerOperator_eigenfunction (n : ℕ) (x : ℝ)
+    : Q.schrodingerOperator (Q.eigenfunction n) x = Q.eigenValue n * Q.eigenfunction n x := by
   simp only [schrodingerOperator_eq_ξ, one_div]
   rw [Q.deriv_deriv_eigenfunction]
   have hm' := Complex.ofReal_ne_zero.mpr (Ne.symm (_root_.ne_of_lt Q.hm))

@@ -44,10 +44,15 @@ is faithful (free).
 
 namespace LocalGaugeData
 
-variable {G₁ : Type} [Group G₁] {𝔤₁ : Type} [LieRing 𝔤₁] [LieAlgebra ℝ 𝔤₁]
-  {G₀₁ : Type} [Group G₀₁] {𝔤J₁ : Type} [LieRing 𝔤J₁] [LieAlgebra ℝ 𝔤J₁]
-  {G₂ : Type} [Group G₂] {𝔤₂ : Type} [LieRing 𝔤₂] [LieAlgebra ℝ 𝔤₂]
-  {G₀₂ : Type} [Group G₀₂] {𝔤J₂ : Type} [LieRing 𝔤J₂] [LieAlgebra ℝ 𝔤J₂]
+variable
+  {G₁ : Type} [Group G₁]
+  {𝔤₁ : Type} [LieRing 𝔤₁] [LieAlgebra ℝ 𝔤₁]
+  {G₀₁ : Type} [Group G₀₁]
+  {𝔤J₁ : Type} [LieRing 𝔤J₁] [LieAlgebra ℝ 𝔤J₁]
+  {G₂ : Type} [Group G₂]
+  {𝔤₂ : Type} [LieRing 𝔤₂] [LieAlgebra ℝ 𝔤₂]
+  {G₀₂ : Type} [Group G₀₂]
+  {𝔤J₂ : Type} [LieRing 𝔤J₂] [LieAlgebra ℝ 𝔤J₂]
   (j₁ : LocalGaugeData G₀₁ 𝔤₁ G₁ 𝔤J₁) (j₂ : LocalGaugeData G₀₂ 𝔤₂ G₂ 𝔤J₂)
 
 /-!
@@ -63,19 +68,15 @@ noncomputable def prod : LocalGaugeData (G₀₁ × G₀₂) (𝔤₁ × 𝔤₂
   eval_ofConstant g := Prod.ext (j₁.eval_ofConstant g.1) (j₂.eval_ofConstant g.2)
   evalLie := j₁.evalLie.prodMap j₂.evalLie
   ofConstantLie := j₁.ofConstantLie.prodMap j₂.ofConstantLie
-  evalLie_ofConstantLie a :=
-    Prod.ext (j₁.evalLie_ofConstantLie a.1) (j₂.evalLie_ofConstantLie a.2)
+  evalLie_ofConstantLie a := Prod.ext (j₁.evalLie_ofConstantLie a.1) (j₂.evalLie_ofConstantLie a.2)
   deriv μ := (j₁.deriv μ).prodMap (j₂.deriv μ)
   deriv_comm μ ν a := Prod.ext (j₁.deriv_comm μ ν a.1) (j₂.deriv_comm μ ν a.2)
   deriv_bracket μ x y := Prod.ext (j₁.deriv_bracket μ x.1 y.1) (j₂.deriv_bracket μ x.2 y.2)
-  deriv_ofConstantLie μ a :=
-    Prod.ext (j₁.deriv_ofConstantLie μ a.1) (j₂.deriv_ofConstantLie μ a.2)
+  deriv_ofConstantLie μ a := Prod.ext (j₁.deriv_ofConstantLie μ a.1) (j₂.deriv_ofConstantLie μ a.2)
   mulCoord μ := (j₁.mulCoord μ).prodMap (j₂.mulCoord μ)
-  deriv_mulCoord μ ν a := by
-    ext <;> split_ifs <;> simp [j₁.deriv_mulCoord, j₂.deriv_mulCoord, *]
+  deriv_mulCoord μ ν a := by ext <;> split_ifs <;> simp [j₁.deriv_mulCoord, j₂.deriv_mulCoord, *]
   evalLie_mulCoord μ a := Prod.ext (j₁.evalLie_mulCoord μ a.1) (j₂.evalLie_mulCoord μ a.2)
-  mulCoord_bracket μ a b :=
-    Prod.ext (j₁.mulCoord_bracket μ a.1 b.1) (j₂.mulCoord_bracket μ a.2 b.2)
+  mulCoord_bracket μ a b := Prod.ext (j₁.mulCoord_bracket μ a.1 b.1) (j₂.mulCoord_bracket μ a.2 b.2)
   adjointJ := Representation.prodMap j₁.adjointJ j₂.adjointJ
   adjointJ_bracket U x y :=
     Prod.ext (j₁.adjointJ_bracket U.1 x.1 y.1) (j₂.adjointJ_bracket U.2 x.2 y.2)
@@ -90,36 +91,40 @@ noncomputable def prod : LocalGaugeData (G₀₁ × G₀₂) (𝔤₁ × 𝔤₂
     Prod.ext (j₁.maurerCartan_structure U.1 μ ν) (j₂.maurerCartan_structure U.2 μ ν)
   deriv_adjointJ U μ x := Prod.ext (j₁.deriv_adjointJ U.1 μ x.1) (j₂.deriv_adjointJ U.2 μ x.2)
 
-@[simp]
-lemma prod_eval (U : G₁ × G₂) : (j₁.prod j₂).eval U = (j₁.eval U.1, j₂.eval U.2) := rfl
+@[simp] lemma prod_eval (U : G₁ × G₂) : (j₁.prod j₂).eval U = (j₁.eval U.1, j₂.eval U.2) := rfl
 
 @[simp]
-lemma prod_ofConstant (g : G₀₁ × G₀₂) :
-    (j₁.prod j₂).ofConstant g = (j₁.ofConstant g.1, j₂.ofConstant g.2) := rfl
+lemma prod_ofConstant (g : G₀₁ × G₀₂)
+    : (j₁.prod j₂).ofConstant g = (j₁.ofConstant g.1, j₂.ofConstant g.2) :=
+  rfl
 
 @[simp]
 lemma prod_evalLie (a : 𝔤J₁ × 𝔤J₂) : (j₁.prod j₂).evalLie a = (j₁.evalLie a.1, j₂.evalLie a.2) :=
   rfl
 
 @[simp]
-lemma prod_ofConstantLie (a : 𝔤₁ × 𝔤₂) :
-    (j₁.prod j₂).ofConstantLie a = (j₁.ofConstantLie a.1, j₂.ofConstantLie a.2) := rfl
+lemma prod_ofConstantLie (a : 𝔤₁ × 𝔤₂)
+    : (j₁.prod j₂).ofConstantLie a = (j₁.ofConstantLie a.1, j₂.ofConstantLie a.2) :=
+  rfl
 
 @[simp]
-lemma prod_deriv (μ : Fin 1 ⊕ Fin 3) (a : 𝔤J₁ × 𝔤J₂) :
-    (j₁.prod j₂).deriv μ a = (j₁.deriv μ a.1, j₂.deriv μ a.2) := rfl
+lemma prod_deriv (μ : Fin 1 ⊕ Fin 3) (a : 𝔤J₁ × 𝔤J₂)
+    : (j₁.prod j₂).deriv μ a = (j₁.deriv μ a.1, j₂.deriv μ a.2) :=
+  rfl
 
 @[simp]
-lemma prod_adjointJ (U : G₁ × G₂) (a : 𝔤J₁ × 𝔤J₂) :
-    (j₁.prod j₂).adjointJ U a = (j₁.adjointJ U.1 a.1, j₂.adjointJ U.2 a.2) := rfl
+lemma prod_adjointJ (U : G₁ × G₂) (a : 𝔤J₁ × 𝔤J₂)
+    : (j₁.prod j₂).adjointJ U a = (j₁.adjointJ U.1 a.1, j₂.adjointJ U.2 a.2) :=
+  rfl
 
 @[simp]
-lemma prod_maurerCartan (U : G₁ × G₂) (μ : Fin 1 ⊕ Fin 3) :
-    (j₁.prod j₂).maurerCartan U μ = (j₁.maurerCartan U.1 μ, j₂.maurerCartan U.2 μ) := rfl
+lemma prod_maurerCartan (U : G₁ × G₂) (μ : Fin 1 ⊕ Fin 3)
+    : (j₁.prod j₂).maurerCartan U μ = (j₁.maurerCartan U.1 μ, j₂.maurerCartan U.2 μ) :=
+  rfl
 
 @[simp]
-lemma prod_iteratedDeriv (s : Multiset (Fin 1 ⊕ Fin 3)) (a : 𝔤J₁ × 𝔤J₂) :
-    (j₁.prod j₂).iteratedDeriv s a = (j₁.iteratedDeriv s a.1, j₂.iteratedDeriv s a.2) := by
+lemma prod_iteratedDeriv (s : Multiset (Fin 1 ⊕ Fin 3)) (a : 𝔤J₁ × 𝔤J₂)
+    : (j₁.prod j₂).iteratedDeriv s a = (j₁.iteratedDeriv s a.1, j₂.iteratedDeriv s a.2) := by
   induction s using Multiset.induction_on generalizing a with
   | empty => simp
   | cons μ t ih =>
@@ -196,20 +201,21 @@ instance instFaithfulProd [j₁.Faithful] [j₂.Faithful] : (j₁.prod j₂).Fai
 -/
 
 @[simp]
-lemma prod_mulCoord (μ : Fin 1 ⊕ Fin 3) (a : 𝔤J₁ × 𝔤J₂) :
-    (j₁.prod j₂).mulCoord μ a = (j₁.mulCoord μ a.1, j₂.mulCoord μ a.2) := rfl
+lemma prod_mulCoord (μ : Fin 1 ⊕ Fin 3) (a : 𝔤J₁ × 𝔤J₂)
+    : (j₁.prod j₂).mulCoord μ a = (j₁.mulCoord μ a.1, j₂.mulCoord μ a.2) :=
+  rfl
 
-/-- The radial component of the Maurer–Cartan form of a product jet is the pair of the
-  radial components of its factors. -/
+/--
+The radial component of the Maurer–Cartan form of a product jet is the pair of the
+radial components of its factors.
+-/
 @[simp]
-lemma prod_radial (U : G₁ × G₂) :
-    (j₁.prod j₂).radial U = (j₁.radial U.1, j₂.radial U.2) := by
+lemma prod_radial (U : G₁ × G₂) : (j₁.prod j₂).radial U = (j₁.radial U.1, j₂.radial U.2) := by
   ext <;> simp [radial, Prod.fst_sum, Prod.snd_sum]
 
 /-- A product jet lies in the `n`-th truncation kernel exactly when both of its factors do. -/
-lemma mem_prod_truncationKer_iff (n : ℕ) (U : G₁ × G₂) :
-    U ∈ (j₁.prod j₂).truncationKer n ↔
-      U.1 ∈ j₁.truncationKer n ∧ U.2 ∈ j₂.truncationKer n := by
+lemma mem_prod_truncationKer_iff (n : ℕ) (U : G₁ × G₂)
+    : U ∈ (j₁.prod j₂).truncationKer n ↔ U.1 ∈ j₁.truncationKer n ∧ U.2 ∈ j₂.truncationKer n := by
   simp only [truncationKer, Subgroup.mem_mk, prod_eval, Prod.mk_eq_one, prod_maurerCartan,
     prod_iteratedDeriv, prod_evalLie, Prod.mk_eq_zero]
   constructor
@@ -218,8 +224,10 @@ lemma mem_prod_truncationKer_iff (n : ℕ) (U : G₁ × G₂) :
   · rintro ⟨⟨h1, h⟩, ⟨h2, h'⟩⟩
     exact ⟨⟨h1, h2⟩, fun s μ hs => ⟨h s μ hs, h' s μ hs⟩⟩
 
-/-- The product of two free packages is free: Taylor data and radial components are
-  realized factor by factor and paired. -/
+/--
+The product of two free packages is free: Taylor data and radial components are
+realized factor by factor and paired.
+-/
 instance instFreeProd [j₁.Free] [j₂.Free] : (j₁.prod j₂).Free where
   exists_evalLie_iteratedDeriv_eq c := by
     obtain ⟨Y₁, hY₁⟩ := j₁.exists_evalLie_iteratedDeriv_eq fun s => (c s).1
@@ -228,7 +236,6 @@ instance instFreeProd [j₁.Free] [j₂.Free] : (j₁.prod j₂).Free where
   exists_radial_eq ρ hρ := by
     obtain ⟨U₁, hU₁⟩ := j₁.exists_radial_eq (congrArg Prod.fst hρ)
     obtain ⟨U₂, hU₂⟩ := j₂.exists_radial_eq (congrArg Prod.snd hρ)
-    exact ⟨⟨(U₁.1, U₂.1), (mem_prod_truncationKer_iff 0 _).2 ⟨U₁.2, U₂.2⟩⟩,
-      by simp [hU₁, hU₂]⟩
+    exact ⟨⟨(U₁.1, U₂.1), (mem_prod_truncationKer_iff 0 _).2 ⟨U₁.2, U₂.2⟩⟩, by simp [hU₁, hU₂]⟩
 
 end LocalGaugeData

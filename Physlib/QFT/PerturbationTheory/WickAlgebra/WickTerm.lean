@@ -27,20 +27,23 @@ open WickAlgebra
 open FieldStatistic
 noncomputable section
 
-/-- For a list `φs` of `𝓕.FieldOp`, and a Wick contraction `φsΛ` of `φs`, the element
-  of `𝓕.WickAlgebra`, `φsΛ.wickTerm` is defined as
+/--
+For a list `φs` of `𝓕.FieldOp`, and a Wick contraction `φsΛ` of `φs`, the element
+of `𝓕.WickAlgebra`, `φsΛ.wickTerm` is defined as
 
-  `φsΛ.sign • φsΛ.timeContract * 𝓝([φsΛ]ᵘᶜ)`.
+`φsΛ.sign • φsΛ.timeContract * 𝓝([φsΛ]ᵘᶜ)`.
 
-  This is a term which appears in the Wick's theorem. -/
+This is a term which appears in the Wick's theorem.
+-/
 def wickTerm {φs : List 𝓕.FieldOp} (φsΛ : WickContraction φs.length) : 𝓕.WickAlgebra :=
   φsΛ.sign • φsΛ.timeContract * 𝓝(ofFieldOpList [φsΛ]ᵘᶜ)
 
-/-- For the empty list `[]` of `𝓕.FieldOp`, the `wickTerm` of the Wick contraction
-  corresponding to the empty set `∅` (the only Wick contraction of `[]`) is `1`. -/
+/--
+For the empty list `[]` of `𝓕.FieldOp`, the `wickTerm` of the Wick contraction
+corresponding to the empty set `∅` (the only Wick contraction of `[]`) is `1`.
+-/
 @[simp]
-lemma wickTerm_empty_nil :
-    wickTerm (empty (n := ([] : List 𝓕.FieldOp).length)) = 1 := by
+lemma wickTerm_empty_nil : wickTerm (empty (n := ([] : List 𝓕.FieldOp).length)) = 1 := by
   rw [wickTerm]
   simp [sign_empty]
 
@@ -55,16 +58,16 @@ The proof of this result relies on
 - `timeContract_insert_none` to rewrite the time contract.
 - `sign_insert_none` to rewrite the sign.
 -/
-lemma wickTerm_insert_none (φ : 𝓕.FieldOp) (φs : List 𝓕.FieldOp)
-    (i : Fin φs.length.succ) (φsΛ : WickContraction φs.length) :
-    (φsΛ ↩Λ φ i none).wickTerm =
-    𝓢(𝓕 |>ₛ φ, 𝓕 |>ₛ ⟨φs.get, (Finset.univ.filter (fun k => i.succAbove k < i))⟩)
-    • (φsΛ.sign • φsΛ.timeContract * 𝓝(ofFieldOpList (φ :: [φsΛ]ᵘᶜ))) := by
+lemma wickTerm_insert_none
+    (φ : 𝓕.FieldOp) (φs : List 𝓕.FieldOp) (i : Fin φs.length.succ) (φsΛ : WickContraction φs.length)
+    : (φsΛ ↩Λ φ i none).wickTerm
+      = 𝓢(𝓕 |>ₛ φ, 𝓕 |>ₛ ⟨φs.get, (Finset.univ.filter (fun k => i.succAbove k < i))⟩)
+        • (φsΛ.sign • φsΛ.timeContract * 𝓝(ofFieldOpList (φ :: [φsΛ]ᵘᶜ))) := by
   rw [wickTerm]
   by_cases hg : GradingCompliant φs φsΛ
   · rw [normalOrder_uncontracted_none, sign_insert_none _ _ _ _ hg]
-    simp only [Nat.succ_eq_add_one, timeContract_insert_none,
-      Algebra.mul_smul_comm, Algebra.smul_mul_assoc, smul_smul]
+    simp only [Nat.succ_eq_add_one, timeContract_insert_none, Algebra.mul_smul_comm,
+      Algebra.smul_mul_assoc, smul_smul]
     congr 1
     rw [← mul_assoc]
     congr 1
@@ -84,8 +87,7 @@ lemma wickTerm_insert_none (φ : 𝓕.FieldOp) (φs : List 𝓕.FieldOp)
     · intro ha
       simp only [uncontracted, Finset.mem_filter, Finset.mem_univ, true_and, ha, and_true,
         forall_const]
-      have hx : φsΛ.getDual? a = none ↔ ¬ (φsΛ.getDual? a).isSome := by
-        simp
+      have hx : φsΛ.getDual? a = none ↔ ¬(φsΛ.getDual? a).isSome := by simp
       rw [hx]
       simp only [Bool.not_eq_true, Bool.eq_false_or_eq_true_self, true_and]
       intro h1 h2
@@ -96,7 +98,8 @@ lemma wickTerm_insert_none (φ : 𝓕.FieldOp) (φs : List 𝓕.FieldOp)
     exact hg
 
 set_option backward.isDefEq.respectTransparency false in
-/-- For a list `φs = φ₀…φₙ` of `𝓕.FieldOp`, a Wick contraction `φsΛ` of `φs`, an element `φ` of
+/--
+For a list `φs = φ₀…φₙ` of `𝓕.FieldOp`, a Wick contraction `φsΛ` of `φs`, an element `φ` of
   `𝓕.FieldOp`, `i ≤ φs.length` and a `k` in `φsΛ.uncontracted`,
   such that all `𝓕.FieldOp` in `φ₀…φᵢ₋₁` have time strictly less than `φ` and
   `φ` has a time greater than or equal to all `FieldOp` in `φ₀…φₙ`, then
@@ -116,15 +119,16 @@ The proof of this result relies on
 - `normalOrder_uncontracted_some` to rewrite normal orderings.
 - `sign_insert_some_of_not_lt` and `sign_insert_some_of_lt` to rewrite signs.
 -/
-lemma wickTerm_insert_some (φ : 𝓕.FieldOp) (φs : List 𝓕.FieldOp)
-    (i : Fin φs.length.succ) (φsΛ : WickContraction φs.length) (k : φsΛ.uncontracted)
-    (hlt : ∀ (k : Fin φs.length), timeOrderRel φ φs[k])
-    (hn : ∀ (k : Fin φs.length), i.succAbove k < i → ¬ timeOrderRel φs[k] φ) :
-    (φsΛ ↩Λ φ i (some k)).wickTerm =
-    𝓢(𝓕 |>ₛ φ, 𝓕 |>ₛ ⟨φs.get, (Finset.univ.filter (fun x => i.succAbove x < i))⟩)
-    • (φsΛ.sign • (contractStateAtIndex φ [φsΛ]ᵘᶜ
-      ((uncontractedFieldOpEquiv φs φsΛ) (some k)) * φsΛ.timeContract)
-    * 𝓝(ofFieldOpList (optionEraseZ [φsΛ]ᵘᶜ φ (uncontractedFieldOpEquiv φs φsΛ k)))) := by
+lemma wickTerm_insert_some
+    (φ : 𝓕.FieldOp) (φs : List 𝓕.FieldOp) (i : Fin φs.length.succ) (φsΛ : WickContraction φs.length)
+    (k : φsΛ.uncontracted) (hlt : ∀ (k : Fin φs.length), timeOrderRel φ φs[k])
+    (hn : ∀ (k : Fin φs.length), i.succAbove k < i → ¬ timeOrderRel φs[k] φ)
+    : (φsΛ ↩Λ φ i (some k)).wickTerm
+      = 𝓢(𝓕 |>ₛ φ, 𝓕 |>ₛ ⟨φs.get, (Finset.univ.filter (fun x => i.succAbove x < i))⟩)
+        • (φsΛ.sign
+            • (contractStateAtIndex φ ([φsΛ]ᵘᶜ) ((uncontractedFieldOpEquiv φs φsΛ) (some k))
+              * φsΛ.timeContract)
+          * 𝓝(ofFieldOpList (optionEraseZ [φsΛ]ᵘᶜ φ (uncontractedFieldOpEquiv φs φsΛ k)))) := by
   rw [wickTerm]
   by_cases hg : GradingCompliant φs φsΛ ∧ (𝓕 |>ₛ φ) = (𝓕 |>ₛ φs[k.1])
   · by_cases hk : i.succAbove k < i
@@ -153,19 +157,19 @@ lemma wickTerm_insert_some (φ : 𝓕.FieldOp) (φs : List 𝓕.FieldOp)
     by_cases hg' : GradingCompliant φs φsΛ
     · have hg := hg hg'
       simp only [Nat.succ_eq_add_one, Fin.getElem_fin, ite_mul, Algebra.smul_mul_assoc,
-        contractStateAtIndex, uncontractedFieldOpEquiv, Equiv.optionCongr_apply,
-        Equiv.coe_trans, Option.map_some, Function.comp_apply, finCongr_apply, Fin.val_cast,
-        List.getElem_map, uncontractedList_getElem_uncontractedIndexEquiv_symm, List.get_eq_getElem,
+        contractStateAtIndex, uncontractedFieldOpEquiv, Equiv.optionCongr_apply, Equiv.coe_trans,
+        Option.map_some, Function.comp_apply, finCongr_apply, Fin.val_cast, List.getElem_map,
+        uncontractedList_getElem_uncontractedIndexEquiv_symm, List.get_eq_getElem,
         uncontractedListGet]
       by_cases h1 : i < i.succAbove ↑k
-      · simp only [h1, ↓reduceIte, MulMemClass.coe_mul]
+      · simp only [h1, ↓ reduceIte, MulMemClass.coe_mul]
         rw [timeContract_zero_of_diff_grade]
         simp only [zero_mul, smul_zero]
         rw [superCommute_anPart_ofFieldOpF_diff_grade_zero]
         simp only [zero_mul, smul_zero]
         exact hg
         exact hg
-      · simp only [h1, ↓reduceIte, MulMemClass.coe_mul]
+      · simp only [h1, ↓ reduceIte, MulMemClass.coe_mul]
         rw [timeContract_zero_of_diff_grade]
         simp only [zero_mul, smul_zero]
         rw [superCommute_anPart_ofFieldOpF_diff_grade_zero]
@@ -192,15 +196,17 @@ The proof proceeds as follows:
   a sum over `k` in `Option φsΛ.uncontracted` of terms involving `[anPart φ, φs[k]]ₛ`.
 - Then `wickTerm_insert_none` and `wickTerm_insert_some` are used to equate terms.
 -/
-lemma mul_wickTerm_eq_sum (φ : 𝓕.FieldOp) (φs : List 𝓕.FieldOp) (i : Fin φs.length.succ)
+lemma mul_wickTerm_eq_sum
+    (φ : 𝓕.FieldOp) (φs : List 𝓕.FieldOp) (i : Fin φs.length.succ)
     (φsΛ : WickContraction φs.length) (hlt : ∀ (k : Fin φs.length), timeOrderRel φ φs[k])
-    (hn : ∀ (k : Fin φs.length), i.succAbove k < i → ¬timeOrderRel φs[k] φ) :
-    ofFieldOp φ * φsΛ.wickTerm =
-    𝓢(𝓕 |>ₛ φ, 𝓕 |>ₛ ⟨φs.get, (Finset.univ.filter (fun x => i.succAbove x < i))⟩) •
-    ∑ (k : Option φsΛ.uncontracted), (φsΛ ↩Λ φ i k).wickTerm := by
+    (hn : ∀ (k : Fin φs.length), i.succAbove k < i → ¬ timeOrderRel φs[k] φ)
+    : ofFieldOp φ * φsΛ.wickTerm
+      = 𝓢(𝓕 |>ₛ φ, 𝓕 |>ₛ ⟨φs.get, (Finset.univ.filter (fun x => i.succAbove x < i))⟩)
+        • ∑ (k : Option φsΛ.uncontracted), (φsΛ ↩Λ φ i k).wickTerm := by
   trans (φsΛ.sign • φsΛ.timeContract) * ((ofFieldOp φ) * 𝓝(ofFieldOpList [φsΛ]ᵘᶜ))
-  · have ht := Subalgebra.mem_center_iff.mp (Subalgebra.smul_mem (Subalgebra.center ℂ _)
-      (WickContraction.timeContract φsΛ).2 (φsΛ.sign))
+  · have ht :=
+      Subalgebra.mem_center_iff.mp (Subalgebra.smul_mem (Subalgebra.center ℂ _)
+        (WickContraction.timeContract φsΛ).2 (φsΛ.sign))
     rw [wickTerm]
     rw [← mul_assoc, ht, mul_assoc]
   rw [ofFieldOp_mul_normalOrder_ofFieldOpList_eq_sum, Finset.mul_sum,
@@ -217,8 +223,7 @@ lemma mul_wickTerm_eq_sum (φ : 𝓕.FieldOp) (φs : List 𝓕.FieldOp) (i : Fin
     rw [← mul_assoc, exchangeSign_mul_self]
     simp
   | some n =>
-    rw [wickTerm_insert_some _ _ _ _ _
-      (fun k => hlt k) (fun k a => hn k a)]
+    rw [wickTerm_insert_some _ _ _ _ _ (fun k => hlt k) (fun k a => hn k a)]
     simp only [uncontractedFieldOpEquiv, Equiv.optionCongr_apply, Equiv.coe_trans, Option.map_some,
       Function.comp_apply, finCongr_apply, Algebra.smul_mul_assoc, smul_smul]
     congr 1

@@ -44,11 +44,13 @@ namespace FluidDynamics
 
 -/
 
-/-- A Cauchy flow equipped with thermodynamic entropy and enthalpy fields.
+/--
+A Cauchy flow equipped with thermodynamic entropy and enthalpy fields.
 
 These fields are independent of the kinematic and momentum-balance data unless additional
 thermodynamic constitutive laws are imposed. They are sufficient for the current isentropic and
-Bernoulli APIs; other thermodynamic fields belong in later extensions that require them. -/
+Bernoulli APIs; other thermodynamic fields belong in later extensions that require them.
+-/
 structure ThermodynamicCauchyFlow (d : ℕ) extends CauchyFlow d where
   /-- The specific entropy field. -/
   entropy : ScalarField d

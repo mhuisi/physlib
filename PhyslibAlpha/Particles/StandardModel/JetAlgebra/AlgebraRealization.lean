@@ -113,8 +113,10 @@ The bridges of section A.3 identify the two.
 
 -/
 
-/-- The fields of the Standard Model generate its jet algebra: the field algebra of the
-  instance is the whole of `JetAlgebra`. -/
+/--
+The fields of the Standard Model generate its jet algebra: the field algebra of the
+instance is the whole of `JetAlgebra`.
+-/
 lemma algebraRealization_fieldAlgebra_eq_top : AlgebraRealization.id.fieldAlgebra = ⊤ :=
   adjoin_generators_eq_top
 
@@ -130,27 +132,32 @@ namespace AlgebraRealization
 
 open TensorProduct Matrix MatrixGroups Lorentz
 
-variable {B : Type} [Ring B] [Algebra ℂ B]
-  {repJet : Representation ℂ JetGaugeGroupI B}
-  {repLorentz : Representation ℂ SL(2,ℂ) B}
+variable
+  {B : Type} [Ring B] [Algebra ℂ B]
+  {repJet : Representation ℂ JetGaugeGroupI B} {repLorentz : Representation ℂ (SL(2,ℂ)) B}
   {massWeightPoly : B →ₐ[ℂ] Polynomial B}
   (h : AlgebraRealization B repJet repLorentz massWeightPoly)
 
-/-- When the field algebra is everything the graded piece of mass weight `n` is the
-  weight-`n` eigenspace of `massWeightPoly` on the whole algebra: the intersection with the
-  field algebra in the definition of `massWeightSubmodule` cuts nothing away. -/
-lemma massWeightSubmodule_eq_ker (htop : h.fieldAlgebra = ⊤) (n : ℕ) :
-    h.massWeightSubmodule n
-      = LinearMap.ker (massWeightPoly.toLinearMap
-        - (Polynomial.monomial n : B →ₗ[B] Polynomial B).restrictScalars ℂ) := by
+/--
+When the field algebra is everything the graded piece of mass weight `n` is the
+weight-`n` eigenspace of `massWeightPoly` on the whole algebra: the intersection with the
+field algebra in the definition of `massWeightSubmodule` cuts nothing away.
+-/
+lemma massWeightSubmodule_eq_ker (htop : h.fieldAlgebra = ⊤) (n : ℕ)
+    : h.massWeightSubmodule n
+      = LinearMap.ker
+        (massWeightPoly.toLinearMap
+          - (Polynomial.monomial n : B →ₗ[B] Polynomial B).restrictScalars ℂ) := by
   show h.fieldAlgebra.toSubmodule ⊓ _ = _
   rw [htop, Algebra.top_toSubmodule, top_inf_eq]
 
-/-- When the field algebra is everything the filtration by mass weight at most `w` is the
-  join of the eigenspaces of `massWeightPoly` of weight `0` through `w`, taken over the
-  whole algebra. -/
-lemma massWeightSubmoduleLE_eq_iSup_ker (htop : h.fieldAlgebra = ⊤) (w : ℕ) :
-    h.massWeightSubmoduleLE w
+/--
+When the field algebra is everything the filtration by mass weight at most `w` is the
+join of the eigenspaces of `massWeightPoly` of weight `0` through `w`, taken over the
+whole algebra.
+-/
+lemma massWeightSubmoduleLE_eq_iSup_ker (htop : h.fieldAlgebra = ⊤) (w : ℕ)
+    : h.massWeightSubmoduleLE w
       = ⨆ k ∈ Finset.range (w + 1), LinearMap.ker (massWeightPoly.toLinearMap
           - (Polynomial.monomial k : B →ₗ[B] Polynomial B).restrictScalars ℂ) :=
   iSup_congr fun k => iSup_congr fun _ => h.massWeightSubmodule_eq_ker htop k
@@ -167,14 +174,15 @@ open TensorProduct Matrix MatrixGroups Lorentz
 
 -/
 
-/-- The weight-`n` piece of the jet algebra, defined on the algebra itself: the eigenspace
-  on which `massWeightPoly` is the monomial `X ^ n`. Nothing about `AlgebraRealization` enters
-  the definition; that it agrees with the instance's graded piece is
-  `algebraRealization_massWeightSubmodule`. -/
+/--
+The weight-`n` piece of the jet algebra, defined on the algebra itself: the eigenspace
+on which `massWeightPoly` is the monomial `X ^ n`. Nothing about `AlgebraRealization` enters
+the definition; that it agrees with the instance's graded piece is
+`algebraRealization_massWeightSubmodule`.
+-/
 noncomputable def massWeightSubmodule (n : ℕ) : Submodule ℂ JetAlgebra where
   carrier := {x | massWeightPoly x = Polynomial.monomial n x}
-  zero_mem' :=
-    (map_zero massWeightPoly).trans (Polynomial.monomial_zero_right n).symm
+  zero_mem' := (map_zero massWeightPoly).trans (Polynomial.monomial_zero_right n).symm
   add_mem' {x y} hx hy :=
     (map_add massWeightPoly x y).trans
       ((congrArg₂ (fun p q : Polynomial JetAlgebra => p + q) hx hy).trans
@@ -186,32 +194,41 @@ noncomputable def massWeightSubmodule (n : ℕ) : Submodule ℂ JetAlgebra where
 
 /-- Membership of the weight-`n` piece is the eigenvalue equation. -/
 @[simp]
-lemma mem_massWeightSubmodule {n : ℕ} {x : JetAlgebra} :
-    x ∈ massWeightSubmodule n ↔ massWeightPoly x = Polynomial.monomial n x := Iff.rfl
+lemma mem_massWeightSubmodule {n : ℕ} {x : JetAlgebra}
+    : x ∈ massWeightSubmodule n ↔ massWeightPoly x = Polynomial.monomial n x :=
+  Iff.rfl
 
-/-- The mass-weight filtration of the jet algebra, defined on the algebra itself: the join
-  of the weight pieces of weight at most `w`. An element lies in it exactly when it is a
-  sum of eigenvectors of `massWeightPoly` of weight at most `w`. -/
+/--
+The mass-weight filtration of the jet algebra, defined on the algebra itself: the join
+of the weight pieces of weight at most `w`. An element lies in it exactly when it is a
+sum of eigenvectors of `massWeightPoly` of weight at most `w`.
+-/
 noncomputable def massWeightSubmoduleLE (w : ℕ) : Submodule ℂ JetAlgebra :=
   ⨆ k ∈ Finset.range (w + 1), massWeightSubmodule k
 
-/-- The graded piece defined on the jet algebra is the graded piece of the instance: the
-  two differ only by the intersection with the field algebra, which is everything. -/
-lemma algebraRealization_massWeightSubmodule (n : ℕ) :
-    AlgebraRealization.id.massWeightSubmodule n = massWeightSubmodule n := by
-  refine (AlgebraRealization.id.massWeightSubmodule_eq_ker
-    algebraRealization_fieldAlgebra_eq_top n).trans (SetLike.ext fun x => ?_)
+/--
+The graded piece defined on the jet algebra is the graded piece of the instance: the
+two differ only by the intersection with the field algebra, which is everything.
+-/
+lemma algebraRealization_massWeightSubmodule (n : ℕ)
+    : AlgebraRealization.id.massWeightSubmodule n = massWeightSubmodule n := by
+  refine (AlgebraRealization.id.massWeightSubmodule_eq_ker algebraRealization_fieldAlgebra_eq_top
+      n).trans
+    (SetLike.ext fun x => ?_)
   exact LinearMap.mem_ker.trans sub_eq_zero
 
-/-- Membership of two equal submodules of the jet algebra agree. It is stated at variable
-  endpoints so that the substitution never abstracts a pattern out of a goal mentioning the
-  jet algebra. -/
-private lemma mem_submodule_congr {S T : Submodule ℂ JetAlgebra} (h : S = T)
-    (x : JetAlgebra) : x ∈ S ↔ x ∈ T := h ▸ Iff.rfl
+/--
+Membership of two equal submodules of the jet algebra agree. It is stated at variable
+endpoints so that the substitution never abstracts a pattern out of a goal mentioning the
+jet algebra.
+-/
+private lemma mem_submodule_congr {S T : Submodule ℂ JetAlgebra} (h : S = T) (x : JetAlgebra)
+    : x ∈ S ↔ x ∈ T :=
+  h ▸ Iff.rfl
 
 /-- The filtration defined on the jet algebra is the filtration of the instance. -/
-lemma algebraRealization_massWeightSubmoduleLE (w : ℕ) :
-    AlgebraRealization.id.massWeightSubmoduleLE w = massWeightSubmoduleLE w := by
+lemma algebraRealization_massWeightSubmoduleLE (w : ℕ)
+    : AlgebraRealization.id.massWeightSubmoduleLE w = massWeightSubmoduleLE w := by
   show ⨆ k ∈ Finset.range (w + 1), AlgebraRealization.id.massWeightSubmodule k = _
   exact iSup_congr fun k => iSup_congr fun _ => algebraRealization_massWeightSubmodule k
 
@@ -249,70 +266,75 @@ towers for the classification to say anything about it.
 
 -/
 
-/-- The invariant content of the Standard Model up to mass dimension four, on the jet
-  algebra of the Standard Model itself, with nothing set aside. An element of mass weight
-  at most eight is fixed by the jet gauge group and by the Lorentz group exactly when it is
-  a combination of the constant term, the Higgs mass term `H† H`, and the dimension-four
-  span: the Lorentz contractions of the gauge sector, among them the gauge kinetic and theta
-  terms (`IsGaugeSector.lorentzContractionEightSpan`), the Higgs kinetic term, quartic potential
-  and box terms (`HiggsAlgebraCovRealization.lorentzContractionEightSpan`),
-    the fermion kinetic terms
-  (`IsFermionSector.kineticSpan`) and the Yukawa couplings (`yukawaSpan`) — and nothing
-  else.
+/--
+The invariant content of the Standard Model up to mass dimension four, on the jet
+algebra of the Standard Model itself, with nothing set aside. An element of mass weight
+at most eight is fixed by the jet gauge group and by the Lorentz group exactly when it is
+a combination of the constant term, the Higgs mass term `H† H`, and the dimension-four
+span: the Lorentz contractions of the gauge sector, among them the gauge kinetic and theta
+terms (`IsGaugeSector.lorentzContractionEightSpan`), the Higgs kinetic term, quartic potential
+and box terms (`HiggsAlgebraCovRealization.lorentzContractionEightSpan`),
+  the fermion kinetic terms
+(`IsFermionSector.kineticSpan`) and the Yukawa couplings (`yukawaSpan`) — and nothing
+else.
 
-  There are no other hypotheses. The mass-weight condition is a condition on `x` alone: by
-  `mem_massWeightSubmodule` it says that `x` is a sum of eigenvectors of `massWeightPoly`
-  of weight at most eight, with no demand that `x` lie in any subalgebra. -/
-lemma mem_massWeightSubmoduleLE_eight_and_invariant_iff_lagrangian (x : JetAlgebra) :
-    (x ∈ massWeightSubmoduleLE 8
-        ∧ (∀ U : JetGaugeGroupI, repJetGaugeGroupI U x = x)
+There are no other hypotheses. The mass-weight condition is a condition on `x` alone: by
+`mem_massWeightSubmodule` it says that `x` is a sum of eigenvectors of `massWeightPoly`
+of weight at most eight, with no demand that `x` lie in any subalgebra.
+-/
+lemma mem_massWeightSubmoduleLE_eight_and_invariant_iff_lagrangian (x : JetAlgebra)
+    : (x ∈ massWeightSubmoduleLE 8 ∧ (∀ U : JetGaugeGroupI, repJetGaugeGroupI U x = x)
         ∧ ∀ Λ : SL(2,ℂ), repLorentzGroup Λ x = x)
-      ↔ x ∈ 1
-        ⊔ (AlgebraRealization.id.toCovAlgebraRealization.isHiggsSector.dotSpan 0 0
-          ⊔ (AlgebraRealization.id.toCovAlgebraRealization.isGaugeSector.lorentzContractionEightSpan
-           ⊔ AlgebraRealization.id.toCovAlgebraRealization.isHiggsSector.lorentzContractionEightSpan
-            ⊔ (AlgebraRealization.id.toCovAlgebraRealization.isFermionSector.kineticSpan
-              ⊔ AlgebraRealization.id.toCovAlgebraRealization.yukawaSpan))) := by
-  exact (and_congr_left'
-      (mem_submodule_congr (algebraRealization_massWeightSubmoduleLE 8).symm x)).trans
+      ↔ x
+        ∈ 1
+          ⊔ (AlgebraRealization.id.toCovAlgebraRealization.isHiggsSector.dotSpan 0 0
+            ⊔ (AlgebraRealization.id.toCovAlgebraRealization.isGaugeSector.lorentzContractionEightSpan
+              ⊔ AlgebraRealization.id.toCovAlgebraRealization.isHiggsSector.lorentzContractionEightSpan
+              ⊔ (AlgebraRealization.id.toCovAlgebraRealization.isFermionSector.kineticSpan
+                ⊔ AlgebraRealization.id.toCovAlgebraRealization.yukawaSpan))) := by
+  exact (and_congr_left' (mem_submodule_congr (algebraRealization_massWeightSubmoduleLE 8).symm
+      x)).trans
     (AlgebraRealization.id.mem_massWeightSubmoduleLE_eight_and_invariant_iff_lagrangian x)
 
 set_option maxHeartbeats 40000000 in
-/-- The same classification as
-  `mem_massWeightSubmoduleLE_eight_and_invariant_iff_lagrangian`, with a submodule `S` set
-  aside — the operators of mass dimension above four, say. An element of
-  `massWeightSubmoduleLE 8 ⊔ S` is fixed by the jet gauge group and the Lorentz group
-  exactly when it is the Standard Model Lagrangian, the Higgs mass term and a constant, up
-  to a remainder in `S` fixed by both groups.
+/--
+The same classification as
+`mem_massWeightSubmoduleLE_eight_and_invariant_iff_lagrangian`, with a submodule `S` set
+aside — the operators of mass dimension above four, say. An element of
+`massWeightSubmoduleLE 8 ⊔ S` is fixed by the jet gauge group and the Lorentz group
+exactly when it is the Standard Model Lagrangian, the Higgs mass term and a constant, up
+to a remainder in `S` fixed by both groups.
 
-  The hypothesis `hScov` does not disappear when the field algebra becomes everything: the
-  covariant subalgebra `covAlgebra` remains a proper subalgebra, because a covariant
-  element is fixed by the pure gauge jets whereas the gauge potential picks up the
-  Maurer–Cartan shift. A set-aside `S` therefore still has to be written in the covariant
-  towers, which is the case of interest — higher-dimension operators are built from
-  covariant derivatives and the field strength. -/
+The hypothesis `hScov` does not disappear when the field algebra becomes everything: the
+covariant subalgebra `covAlgebra` remains a proper subalgebra, because a covariant
+element is fixed by the pure gauge jets whereas the gauge potential picks up the
+Maurer–Cartan shift. A set-aside `S` therefore still has to be written in the covariant
+towers, which is the case of interest — higher-dimension operators are built from
+covariant derivatives and the field strength.
+-/
 lemma mem_massWeightSubmoduleLE_eight_sup_and_invariant_iff_lagrangian
-    (S : Submodule ℂ JetAlgebra)
-    (hS : ∀ U : JetGaugeGroupI, ∀ y ∈ S, repJetGaugeGroupI U y ∈ S)
+    (S : Submodule ℂ JetAlgebra) (hS : ∀ U : JetGaugeGroupI, ∀ y ∈ S, repJetGaugeGroupI U y ∈ S)
     (hSL : ∀ Λ : SL(2,ℂ), ∀ y ∈ S, repLorentzGroup Λ y ∈ S)
-    (hScov : S ≤ AlgebraRealization.id.covAlgebra.toSubmodule) (x : JetAlgebra) :
-    (x ∈ massWeightSubmoduleLE 8 ⊔ S
-        ∧ (∀ U : JetGaugeGroupI, repJetGaugeGroupI U x = x)
+    (hScov : S ≤ AlgebraRealization.id.covAlgebra.toSubmodule)
+    (x : JetAlgebra)
+    : (x ∈ massWeightSubmoduleLE 8 ⊔ S ∧ (∀ U : JetGaugeGroupI, repJetGaugeGroupI U x = x)
         ∧ ∀ Λ : SL(2,ℂ), repLorentzGroup Λ x = x)
-      ↔ ∃ y ∈ S, (∀ U : JetGaugeGroupI, repJetGaugeGroupI U y = y)
-          ∧ (∀ Λ : SL(2,ℂ), repLorentzGroup Λ y = y)
-          ∧ x - y ∈ 1
-          ⊔ (AlgebraRealization.id.toCovAlgebraRealization.isHiggsSector.dotSpan 0 0
-          ⊔ (AlgebraRealization.id.toCovAlgebraRealization.isGaugeSector.lorentzContractionEightSpan
-           ⊔ AlgebraRealization.id.toCovAlgebraRealization.isHiggsSector.lorentzContractionEightSpan
-            ⊔ (AlgebraRealization.id.toCovAlgebraRealization.isFermionSector.kineticSpan
-              ⊔ AlgebraRealization.id.toCovAlgebraRealization.yukawaSpan))) := by
-  exact (and_congr_left'
-      (mem_submodule_congr
-        (congrArg (fun T : Submodule ℂ JetAlgebra => T ⊔ S)
-          (algebraRealization_massWeightSubmoduleLE 8).symm) x)).trans
-    (AlgebraRealization.id.mem_massWeightSubmoduleLE_eight_sup_and_invariant_iff_lagrangian
-      S hS hSL hScov x)
+      ↔ ∃ y ∈ S,
+        (∀ U : JetGaugeGroupI, repJetGaugeGroupI U y = y) ∧ (∀ Λ : SL(2,ℂ), repLorentzGroup Λ y = y)
+          ∧ x - y
+            ∈ 1
+              ⊔ (AlgebraRealization.id.toCovAlgebraRealization.isHiggsSector.dotSpan 0 0
+                ⊔ (AlgebraRealization.id.toCovAlgebraRealization.isGaugeSector.lorentzContractionEightSpan
+                  ⊔ AlgebraRealization.id.toCovAlgebraRealization.isHiggsSector.lorentzContractionEightSpan
+                  ⊔ (AlgebraRealization.id.toCovAlgebraRealization.isFermionSector.kineticSpan
+                    ⊔ AlgebraRealization.id.toCovAlgebraRealization.yukawaSpan))) := by
+  exact (and_congr_left' (mem_submodule_congr
+      (congrArg
+        (fun T : Submodule ℂ JetAlgebra => T ⊔ S)
+        (algebraRealization_massWeightSubmoduleLE 8).symm)
+      x)).trans
+    (AlgebraRealization.id.mem_massWeightSubmoduleLE_eight_sup_and_invariant_iff_lagrangian S hS hSL
+      hScov x)
 
 end JetAlgebra
 

@@ -53,16 +53,19 @@ noncomputable def FLRW.radiationDominated (t₀ : Time) (ht₀ : 0 < t₀.val) :
   FLRW.powerLaw t₀ ht₀ (1 / 2)
 
 /-- The scale factor of the radiation-dominated model is `radiationScaleFactor t₀`. -/
-lemma FLRW.radiationDominated_a {t₀ : Time} (ht₀ : 0 < t₀.val) :
-    (FLRW.radiationDominated t₀ ht₀).a = radiationScaleFactor t₀ := rfl
+lemma FLRW.radiationDominated_a {t₀ : Time} (ht₀ : 0 < t₀.val)
+    : (FLRW.radiationDominated t₀ ht₀).a = radiationScaleFactor t₀ :=
+  rfl
 
-/-- The radiation-dominated model, filled with radiation of density `3 n² / (8 π G t²)` with
-  `n = 1/2`, that is `3 / (32 π G t²)`, and pressure `ρ c² / 3`, solves the Friedmann equations
-  without cosmological constant on its interval. -/
-lemma FLRW.friedmannSolution_radiationDominated {t₀ : Time} (ht₀ : 0 < t₀.val)
-    {G c : ℝ} (hG : 0 < G) (hc : 0 < c) :
-    (FLRW.radiationDominated t₀ ht₀).FriedmannSolution
-      (CosmicFluid.powerLaw (1 / 2) (1 / 3) G c) 0 G c :=
+/--
+The radiation-dominated model, filled with radiation of density `3 n² / (8 π G t²)` with
+`n = 1/2`, that is `3 / (32 π G t²)`, and pressure `ρ c² / 3`, solves the Friedmann equations
+without cosmological constant on its interval.
+-/
+lemma FLRW.friedmannSolution_radiationDominated
+    {t₀ : Time} (ht₀ : 0 < t₀.val) {G c : ℝ} (hG : 0 < G) (hc : 0 < c)
+    : (FLRW.radiationDominated t₀ ht₀).FriedmannSolution (CosmicFluid.powerLaw (1 / 2) (1 / 3) G c)
+      0 G c :=
   FLRW.friedmannSolution_powerLaw ht₀ hG hc (by norm_num) (by norm_num)
 
 end Cosmology

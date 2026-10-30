@@ -33,30 +33,33 @@ open BigOperators
 variable {n : ℕ}
 open VectorLikeEvenPlane
 
-/-- A property on `LinSols`, satisfied if every point on the line between the two planes
-in the basis through that point is in the cubic. -/
+/--
+A property on `LinSols`, satisfied if every point on the line between the two planes
+in the basis through that point is in the cubic.
+-/
 def LineInCubic (S : (PureU1 (2 * n.succ)).LinSols) : Prop :=
   ∀ (g : Fin n.succ → ℚ) (f : Fin n → ℚ) (_ : S.val = Pa g f) (a b : ℚ),
-  accCube (2 * n.succ) (a • Unshifted.planeCharges g + b • Shifted.planeCharges f) = 0
+    accCube (2 * n.succ) (a • Unshifted.planeCharges g + b • Shifted.planeCharges f) = 0
 
 set_option backward.isDefEq.respectTransparency false in
-lemma lineInCubic_expand {S : (PureU1 (2 * n.succ)).LinSols} (h : LineInCubic S) :
-    ∀ (g : Fin n.succ → ℚ) (f : Fin n → ℚ) (_ : S.val = Pa g f) (a b : ℚ),
-    3 * a * b *
-      (a * accCubeTriLinSymm (Unshifted.planeCharges g)
-          (Unshifted.planeCharges g) (Shifted.planeCharges f) +
-        b * accCubeTriLinSymm (Shifted.planeCharges f)
-          (Shifted.planeCharges f) (Unshifted.planeCharges g)) = 0 := by
+lemma lineInCubic_expand {S : (PureU1 (2 * n.succ)).LinSols} (h : LineInCubic S)
+    : ∀ (g : Fin n.succ → ℚ) (f : Fin n → ℚ) (_ : S.val = Pa g f) (a b : ℚ),
+      3 * a * b
+          * (a * accCubeTriLinSymm (Unshifted.planeCharges g) (Unshifted.planeCharges g)
+              (Shifted.planeCharges f)
+            + b * accCubeTriLinSymm (Shifted.planeCharges f) (Shifted.planeCharges f)
+              (Unshifted.planeCharges g))
+        = 0 := by
   intro g f hS a b
   have h1 := h g f hS a b
-  change accCubeTriLinSymm.toCubic
-    (a • Unshifted.planeCharges g + b • Shifted.planeCharges f) = 0 at h1
-  simp only [TriLinearSymm.toCubic_add, HomogeneousCubic.map_smul,
-    accCubeTriLinSymm.map_smul₁, accCubeTriLinSymm.map_smul₂, accCubeTriLinSymm.map_smul₃] at h1
+  change accCubeTriLinSymm.toCubic (a • Unshifted.planeCharges g + b • Shifted.planeCharges f) = 0
+    at h1
+  simp only [TriLinearSymm.toCubic_add, HomogeneousCubic.map_smul, accCubeTriLinSymm.map_smul₁,
+      accCubeTriLinSymm.map_smul₂, accCubeTriLinSymm.map_smul₃]
+    at h1
   have hU : accCubeTriLinSymm.toCubic (Unshifted.planeCharges g) = 0 :=
     Unshifted.planeCharges_accCube g
-  have hS : accCubeTriLinSymm.toCubic (Shifted.planeCharges f) = 0 :=
-    Shifted.planeCharges_accCube f
+  have hS : accCubeTriLinSymm.toCubic (Shifted.planeCharges f) = 0 := Shifted.planeCharges_accCube f
   rw [hU, hS] at h1
   linear_combination h1
 
@@ -70,11 +73,12 @@ then
   Shifted.planeCharges f) = 0`.
 -/
 lemma line_in_cubic_unshifted_unshifted_shifted
-    {S : (PureU1 (2 * n.succ)).LinSols} (h : LineInCubic S) :
-    ∀ (g : Fin n.succ → ℚ) (f : Fin n → ℚ)
-      (_ : S.val = Unshifted.planeCharges g + Shifted.planeCharges f),
-    accCubeTriLinSymm (Unshifted.planeCharges g) (Unshifted.planeCharges g)
-      (Shifted.planeCharges f) = 0 := by
+    {S : (PureU1 (2 * n.succ)).LinSols} (h : LineInCubic S)
+    : ∀ (g : Fin n.succ → ℚ) (f : Fin n → ℚ)
+        (_ : S.val = Unshifted.planeCharges g + Shifted.planeCharges f),
+      accCubeTriLinSymm (Unshifted.planeCharges g) (Unshifted.planeCharges g)
+          (Shifted.planeCharges f)
+        = 0 := by
   intro g f hS
   linear_combination 2 / 3 * (lineInCubic_expand h g f hS 1 1) -
     (lineInCubic_expand h g f hS 1 2) / 6
@@ -82,53 +86,57 @@ lemma line_in_cubic_unshifted_unshifted_shifted
 /-- A `LinSol` satisfies `LineInCubicPerm` if all its permutations satisfy `lineInCubic`. -/
 def LineInCubicPerm (S : (PureU1 (2 * n.succ)).LinSols) : Prop :=
   ∀ (M : (FamilyPermutations (2 * n.succ)).group),
-  LineInCubic ((FamilyPermutations (2 * n.succ)).linSolRep M S)
+    LineInCubic ((FamilyPermutations (2 * n.succ)).linSolRep M S)
 
 /-- If `lineInCubicPerm S` then `lineInCubic S`. -/
-lemma lineInCubicPerm_self {S : (PureU1 (2 * n.succ)).LinSols}
-    (hS : LineInCubicPerm S) : LineInCubic S := hS 1
+lemma lineInCubicPerm_self {S : (PureU1 (2 * n.succ)).LinSols} (hS : LineInCubicPerm S)
+    : LineInCubic S :=
+  hS 1
 
 /-- If `lineInCubicPerm S` then `lineInCubicPerm (M S)` for all permutations `M`. -/
-lemma lineInCubicPerm_permute {S : (PureU1 (2 * n.succ)).LinSols}
-    (hS : LineInCubicPerm S) (M' : (FamilyPermutations (2 * n.succ)).group) :
-    LineInCubicPerm ((FamilyPermutations (2 * n.succ)).linSolRep M' S) := by
+lemma lineInCubicPerm_permute
+    {S : (PureU1 (2 * n.succ)).LinSols} (hS : LineInCubicPerm S)
+    (M' : (FamilyPermutations (2 * n.succ)).group)
+    : LineInCubicPerm ((FamilyPermutations (2 * n.succ)).linSolRep M' S) := by
   intro M
   have h := hS (M * M')
   rw [(FamilyPermutations (2 * n.succ)).linSolRep.map_mul M M'] at h
   exact h
 
 set_option backward.isDefEq.respectTransparency false in
-lemma lineInCubicPerm_swap {S : (PureU1 (2 * n.succ)).LinSols}
-    (LIC : LineInCubicPerm S) :
-    ∀ (j : Fin n) (g : Fin n.succ → ℚ) (f : Fin n → ℚ) (_ : S.val = Pa g f),
-      (S.val (evenShiftSnd j) - S.val (evenShiftFst j))
-      * accCubeTriLinSymm (Unshifted.planeCharges g) (Unshifted.planeCharges g)
-        (Shifted.basisAsCharges j) = 0 := by
+lemma lineInCubicPerm_swap {S : (PureU1 (2 * n.succ)).LinSols} (LIC : LineInCubicPerm S)
+    : ∀ (j : Fin n) (g : Fin n.succ → ℚ) (f : Fin n → ℚ) (_ : S.val = Pa g f),
+      (S.val (evenShiftSnd j) - S.val (evenShiftFst j)) * accCubeTriLinSymm
+          (Unshifted.planeCharges g) (Unshifted.planeCharges g) (Shifted.basisAsCharges j)
+        = 0 := by
   intro j g f h
   obtain ⟨g', f', hall⟩ := span_basis_swap! j rfl g f h
   have h1 := line_in_cubic_unshifted_unshifted_shifted (lineInCubicPerm_self LIC) g f h
-  have h2 := line_in_cubic_unshifted_unshifted_shifted
-    (lineInCubicPerm_self (lineInCubicPerm_permute LIC
-    (Equiv.swap (evenShiftFst j) (evenShiftSnd j)))) g' f' hall.1
+  have h2 :=
+    line_in_cubic_unshifted_unshifted_shifted
+      (lineInCubicPerm_self (lineInCubicPerm_permute LIC
+        (Equiv.swap (evenShiftFst j) (evenShiftSnd j))))
+      g' f' hall.1
   rw [hall.2.1, hall.2.2, accCubeTriLinSymm.map_add₃, h1, accCubeTriLinSymm.map_smul₃] at h2
   simpa using h2
 
-lemma unshifted_unshifted_shifted_accCube' {S : (PureU1 (2 * n.succ.succ)).LinSols}
-    (f : Fin n.succ.succ → ℚ) (g : Fin n.succ → ℚ) (hS : S.val = Pa f g) :
-    accCubeTriLinSymm (Unshifted.planeCharges f) (Unshifted.planeCharges f)
-      (Shifted.basisAsCharges (Fin.last n)) =
-    - (S.val (evenShiftSnd (Fin.last n)) + S.val (evenShiftFst (Fin.last n))) *
-    (2 * S.val evenShiftLast +
-    S.val (evenShiftSnd (Fin.last n)) + S.val (evenShiftFst (Fin.last n))) := by
-  rw [unshifted_unshifted_shifted_accCube f (Fin.last n), hS, Pa_evenShiftSnd,
-    Pa_evenShiftFst, Pa_evenShiftLast, Fin.succ_last]
+lemma unshifted_unshifted_shifted_accCube'
+    {S : (PureU1 (2 * n.succ.succ)).LinSols}
+    (f : Fin n.succ.succ → ℚ) (g : Fin n.succ → ℚ) (hS : S.val = Pa f g)
+    : accCubeTriLinSymm (Unshifted.planeCharges f) (Unshifted.planeCharges f)
+        (Shifted.basisAsCharges (Fin.last n))
+      = -(S.val (evenShiftSnd (Fin.last n)) + S.val (evenShiftFst (Fin.last n)))
+        * (2 * S.val evenShiftLast + S.val (evenShiftSnd (Fin.last n))
+          + S.val (evenShiftFst (Fin.last n))) := by
+  rw [unshifted_unshifted_shifted_accCube f (Fin.last n), hS, Pa_evenShiftSnd, Pa_evenShiftFst,
+    Pa_evenShiftLast, Fin.succ_last]
   ring
 
-lemma lineInCubicPerm_last_cond {S : (PureU1 (2 * n.succ.succ)).LinSols}
-    (LIC : LineInCubicPerm S) :
-    LineInPlaneProp
-    ((S.val (evenShiftSnd (Fin.last n))), ((S.val (evenShiftFst (Fin.last n))),
-      (S.val evenShiftLast))) := by
+lemma lineInCubicPerm_last_cond {S : (PureU1 (2 * n.succ.succ)).LinSols} (LIC : LineInCubicPerm S)
+    : LineInPlaneProp (
+      (S.val (evenShiftSnd (Fin.last n))),
+      ((S.val (evenShiftFst (Fin.last n))), (S.val evenShiftLast))
+    ) := by
   obtain ⟨g, f, hfg⟩ := span_basis S
   have h1 := lineInCubicPerm_swap LIC (Fin.last n) g f hfg
   rw [unshifted_unshifted_shifted_accCube' g f hfg] at h1
@@ -138,29 +146,28 @@ lemma lineInCubicPerm_last_cond {S : (PureU1 (2 * n.succ.succ)).LinSols}
   · exact Or.inr (Or.inl (by linear_combination -(1 * h1)))
   · exact Or.inr (Or.inr h1)
 
-lemma lineInCubicPerm_last_perm {S : (PureU1 (2 * n.succ.succ)).LinSols}
-    (LIC : LineInCubicPerm S) : LineInPlaneCond S := by
-  refine @Prop_three (2 * n.succ.succ) LineInPlaneProp S
-    (evenShiftSnd (Fin.last n)) (evenShiftFst (Fin.last n))
-    evenShiftLast ?_ ?_ ?_ ?_
+lemma lineInCubicPerm_last_perm {S : (PureU1 (2 * n.succ.succ)).LinSols} (LIC : LineInCubicPerm S)
+    : LineInPlaneCond S := by
+  refine @Prop_three (2 * n.succ.succ) LineInPlaneProp S (evenShiftSnd (Fin.last n))
+    (evenShiftFst (Fin.last n)) evenShiftLast ?_ ?_ ?_ ?_
   · simp [Fin.ext_iff, evenShiftSnd, evenShiftFst]
   · simp [Fin.ext_iff, evenShiftSnd, evenShiftLast]
   · simp [Fin.ext_iff, evenShiftFst, evenShiftLast]
     omega
   · exact fun M => lineInCubicPerm_last_cond (lineInCubicPerm_permute LIC M)
 
-lemma lineInCubicPerm_constAbs {S : (PureU1 (2 * n.succ.succ)).Sols}
-    (LIC : LineInCubicPerm S.1.1) : ConstAbs S.val :=
+lemma lineInCubicPerm_constAbs {S : (PureU1 (2 * n.succ.succ)).Sols} (LIC : LineInCubicPerm S.1.1)
+    : ConstAbs S.val :=
   linesInPlane_constAbs_AF S (lineInCubicPerm_last_perm LIC)
 
-lemma lineInCubicPerm_vectorLike {S : (PureU1 (2 * n.succ.succ)).Sols}
-    (LIC : LineInCubicPerm S.1.1) : VectorLikeEven S.val :=
+lemma lineInCubicPerm_vectorLike {S : (PureU1 (2 * n.succ.succ)).Sols} (LIC : LineInCubicPerm S.1.1)
+    : VectorLikeEven S.val :=
   ConstAbs.boundary_value_even S.1.1 (lineInCubicPerm_constAbs LIC)
 
-lemma lineInCubicPerm_in_plane (S : (PureU1 (2 * n.succ.succ)).Sols)
-    (LIC : LineInCubicPerm S.1.1) : ∃ (M : (FamilyPermutations (2 * n.succ.succ)).group),
-    (FamilyPermutations (2 * n.succ.succ)).linSolRep M S.1.1
-    ∈ Submodule.span ℚ (Set.range Unshifted.basis) :=
+lemma lineInCubicPerm_in_plane (S : (PureU1 (2 * n.succ.succ)).Sols) (LIC : LineInCubicPerm S.1.1)
+    : ∃ (M : (FamilyPermutations (2 * n.succ.succ)).group),
+      (FamilyPermutations (2 * n.succ.succ)).linSolRep M S.1.1
+        ∈ Submodule.span ℚ (Set.range Unshifted.basis) :=
   Unshifted.vectorLikeEven_in_span S.1.1 (lineInCubicPerm_vectorLike LIC)
 
 end Even

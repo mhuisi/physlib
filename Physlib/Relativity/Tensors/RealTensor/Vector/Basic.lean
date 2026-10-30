@@ -29,36 +29,32 @@ noncomputable section
 namespace Lorentz
 
 /-- Real contravariant Lorentz vector. -/
-@[implicit_reducible]
-def Vector (d : ℕ := 3) := Fin 1 ⊕ Fin d → ℝ
+@[implicit_reducible] def Vector (d : ℕ := 3) := Fin 1 ⊕ Fin d → ℝ
 
-/- `Vector d` is applied directly as a function throughout the library. Marking it
-  implicit-reducible lets such applications typecheck at implicit transparency, so that
-  `rw` and `simp` can match patterns containing them (see the Lean 4.33 release notes on
-  `backward.isDefEq.respectTransparency.types`). -/
+/-
+`Vector d` is applied directly as a function throughout the library. Marking it
+implicit-reducible lets such applications typecheck at implicit transparency, so that
+`rw` and `simp` can match patterns containing them (see the Lean 4.33 release notes on
+`backward.isDefEq.respectTransparency.types`).
+-/
 
 namespace Vector
 
-instance {d} : AddCommMonoid (Vector d) :=
-  inferInstanceAs (AddCommMonoid (Fin 1 ⊕ Fin d → ℝ))
+instance {d} : AddCommMonoid (Vector d) := inferInstanceAs (AddCommMonoid (Fin 1 ⊕ Fin d → ℝ))
 
-instance {d} : Module ℝ (Vector d) :=
-  inferInstanceAs (Module ℝ (Fin 1 ⊕ Fin d → ℝ))
+instance {d} : Module ℝ (Vector d) := inferInstanceAs (Module ℝ (Fin 1 ⊕ Fin d → ℝ))
 
-instance {d} : AddCommGroup (Vector d) :=
-  inferInstanceAs (AddCommGroup (Fin 1 ⊕ Fin d → ℝ))
+instance {d} : AddCommGroup (Vector d) := inferInstanceAs (AddCommGroup (Fin 1 ⊕ Fin d → ℝ))
 
 instance {d} : FiniteDimensional ℝ (Vector d) :=
   inferInstanceAs (FiniteDimensional ℝ (Fin 1 ⊕ Fin d → ℝ))
 
 /-- The equivalence between `Vector d` and `EuclideanSpace ℝ (Fin 1 ⊕ Fin d)`. -/
-def equivEuclid (d : ℕ) :
-    Vector d ≃ₗ[ℝ] EuclideanSpace ℝ (Fin 1 ⊕ Fin d) :=
+def equivEuclid (d : ℕ) : Vector d ≃ₗ[ℝ] EuclideanSpace ℝ (Fin 1 ⊕ Fin d) :=
   (WithLp.linearEquiv _ _ _).symm
 
 @[simp]
-lemma equivEuclid_apply (d : ℕ) (v : Vector d) (i : Fin 1 ⊕ Fin d) :
-    equivEuclid d v i = v i := rfl
+lemma equivEuclid_apply (d : ℕ) (v : Vector d) (i : Fin 1 ⊕ Fin d) : equivEuclid d v i = v i := rfl
 
 @[ext]
 lemma eq_of_apply_eq {d : ℕ} {v w : Vector d} (h : ∀ i, v i = w i) : v = w := by
@@ -69,12 +65,10 @@ lemma eq_of_apply_eq {d : ℕ} {v w : Vector d} (h : ∀ i, v i = w i) : v = w :
 instance (d : ℕ) : Norm (Vector d) where
   norm := fun v => ‖equivEuclid d v‖
 
-lemma norm_eq_equivEuclid (d : ℕ) (v : Vector d) :
-    ‖v‖ = ‖equivEuclid d v‖ := rfl
+lemma norm_eq_equivEuclid (d : ℕ) (v : Vector d) : ‖v‖ = ‖equivEuclid d v‖ := rfl
 
 @[simp]
-lemma abs_component_le_norm {d : ℕ} (v : Vector d) (i : Fin 1 ⊕ Fin d) :
-    |v i| ≤ ‖v‖ := by
+lemma abs_component_le_norm {d : ℕ} (v : Vector d) (i : Fin 1 ⊕ Fin d) : |v i| ≤ ‖v‖ := by
   simp [norm_eq_equivEuclid, PiLp.norm_eq_of_L2, -Fintype.sum_sum_type]
   refine Real.abs_le_sqrt ?_
   trans ∑ j ∈ {i}, (v j) ^ 2
@@ -86,8 +80,8 @@ instance isNormedAddCommGroup (d : ℕ) : NormedAddCommGroup (Vector d) where
   dist_comm x y := by
     simpa [norm_eq_equivEuclid, dist_eq_norm_neg_add] using dist_comm ((equivEuclid d) x) _
   dist_triangle x y z := by
-    simpa [norm_eq_equivEuclid, dist_eq_norm_neg_add] using dist_triangle
-      ((equivEuclid d) x) ((equivEuclid d) y) ((equivEuclid d) z)
+    simpa [norm_eq_equivEuclid, dist_eq_norm_neg_add] using
+      dist_triangle ((equivEuclid d) x) ((equivEuclid d) y) ((equivEuclid d) z)
   eq_of_dist_eq_zero {x y} := by
     simp only [norm_eq_equivEuclid, map_add]
     intro h
@@ -104,8 +98,9 @@ open InnerProductSpace
 instance (d : ℕ) : Inner ℝ (Vector d) where
   inner := fun v w => ⟪equivEuclid d v, equivEuclid d w⟫_ℝ
 
-lemma inner_eq_equivEuclid (d : ℕ) (v w : Vector d) :
-    ⟪v, w⟫_ℝ = ⟪equivEuclid d v, equivEuclid d w⟫_ℝ := rfl
+lemma inner_eq_equivEuclid (d : ℕ) (v w : Vector d)
+    : ⟪v, w⟫_ℝ = ⟪equivEuclid d v, equivEuclid d w⟫_ℝ :=
+  rfl
 
 /-- The Euclidean inner product structure on `CoVector`. -/
 instance innerProductSpace (d : ℕ) : InnerProductSpace ℝ (Vector d) where
@@ -139,21 +134,17 @@ lemma ext_of_apply {d} {v w : Vector d} (h : ∀ i, v i = w i) : v = w := by
   simpa using h i
 
 @[simp]
-lemma apply_smul {d : ℕ} (c : ℝ) (v : Vector d) (i : Fin 1 ⊕ Fin d) :
-    (c • v) i = c * v i := rfl
+lemma apply_smul {d : ℕ} (c : ℝ) (v : Vector d) (i : Fin 1 ⊕ Fin d) : (c • v) i = c * v i := rfl
+
+@[simp] lemma apply_add {d : ℕ} (v w : Vector d) (i : Fin 1 ⊕ Fin d) : (v + w) i = v i + w i := rfl
 
 @[simp]
-lemma apply_add {d : ℕ} (v w : Vector d) (i : Fin 1 ⊕ Fin d) :
-    (v + w) i = v i + w i := rfl
+lemma apply_sub {d : ℕ} (v w : Vector d) (i : Fin 1 ⊕ Fin d) : (v - w) i = v i - w i := by rfl
 
-@[simp]
-lemma apply_sub {d : ℕ} (v w : Vector d) (i : Fin 1 ⊕ Fin d) :
-    (v - w) i = v i - w i := by rfl
-
-lemma apply_sum {d : ℕ} {ι : Type} [Fintype ι] (f : ι → Vector d) (i : Fin 1 ⊕ Fin d) :
-    (∑ j, f j) i = ∑ j, f j i := by
-  let P (ι : Type) [Fintype ι] := ∀ (f : ι → Vector d) (i : Fin 1 ⊕ Fin d),
-    (∑ j : ι, f j) i = ∑ j, f j i
+lemma apply_sum {d : ℕ} {ι : Type} [Fintype ι] (f : ι → Vector d) (i : Fin 1 ⊕ Fin d)
+    : (∑ j, f j) i = ∑ j, f j i := by
+  let P (ι : Type) [Fintype ι] :=
+    ∀ (f : ι → Vector d) (i : Fin 1 ⊕ Fin d), (∑ j : ι, f j) i = ∑ j, f j i
   revert i f
   change P ι
   apply Fintype.induction_empty_option
@@ -169,41 +160,32 @@ lemma apply_sum {d : ℕ} {ι : Type} [Fintype ι] (f : ι → Vector d) (i : Fi
   · intro ι _ h f i
     rw [Fintype.sum_option, apply_add, h, Fintype.sum_option]
 
-@[simp]
-lemma neg_apply {d : ℕ} (v : Vector d) (i : Fin 1 ⊕ Fin d) :
-    (-v) i = - v i := rfl
+@[simp] lemma neg_apply {d : ℕ} (v : Vector d) (i : Fin 1 ⊕ Fin d) : (-v) i = - v i := rfl
 
-@[simp]
-lemma zero_apply {d : ℕ} (i : Fin 1 ⊕ Fin d) :
-    (0 : Vector d) i = 0 := rfl
+@[simp] lemma zero_apply {d : ℕ} (i : Fin 1 ⊕ Fin d) : (0 : Vector d) i = 0 := rfl
 
 /-- The continuous linear map from a Lorentz vector to one of its coordinates. -/
-def coordCLM {d : ℕ} (i : Fin 1 ⊕ Fin d) : Vector d →L[ℝ] ℝ := LinearMap.toContinuousLinearMap {
-  toFun v := v i
-  map_add' := by simp
-  map_smul' := by simp}
+def coordCLM {d : ℕ} (i : Fin 1 ⊕ Fin d) : Vector d →L[ℝ] ℝ :=
+  LinearMap.toContinuousLinearMap { toFun v := v i, map_add' := by simp, map_smul' := by simp }
 
-lemma coordCLM_apply {d : ℕ} (i : Fin 1 ⊕ Fin d) (v : Vector d) :
-    coordCLM i v = v i := rfl
+lemma coordCLM_apply {d : ℕ} (i : Fin 1 ⊕ Fin d) (v : Vector d) : coordCLM i v = v i := rfl
 
 @[fun_prop]
-lemma coord_continuous {d : ℕ} (i : Fin 1 ⊕ Fin d) :
-    Continuous (fun v : Vector d => v i) :=
+lemma coord_continuous {d : ℕ} (i : Fin 1 ⊕ Fin d) : Continuous (fun v : Vector d => v i) :=
   (coordCLM i).continuous
 
 @[fun_prop]
-lemma coord_contDiff {n} {d : ℕ} (i : Fin 1 ⊕ Fin d) :
-    ContDiff ℝ n (fun v : Vector d => v i) :=
+lemma coord_contDiff {n} {d : ℕ} (i : Fin 1 ⊕ Fin d) : ContDiff ℝ n (fun v : Vector d => v i) :=
   (coordCLM i).contDiff
 
 @[fun_prop]
-lemma coord_differentiable {d : ℕ} (i : Fin 1 ⊕ Fin d) :
-    Differentiable ℝ (fun v : Vector d => v i) :=
+lemma coord_differentiable {d : ℕ} (i : Fin 1 ⊕ Fin d)
+    : Differentiable ℝ (fun v : Vector d => v i) :=
   (coordCLM i).differentiable
 
 @[fun_prop]
-lemma coord_differentiableAt {d : ℕ} (i : Fin 1 ⊕ Fin d) (v : Vector d) :
-    DifferentiableAt ℝ (fun v : Vector d => v i) v :=
+lemma coord_differentiableAt {d : ℕ} (i : Fin 1 ⊕ Fin d) (v : Vector d)
+    : DifferentiableAt ℝ (fun v : Vector d => v i) v :=
   (coordCLM i).differentiableAt
 
 /-- The continuous linear equivalence between `Vector d` and Euclidean space. -/
@@ -211,28 +193,25 @@ def euclidCLE (d : ℕ) : Vector d ≃L[ℝ] EuclideanSpace ℝ (Fin 1 ⊕ Fin d
   LinearEquiv.toContinuousLinearEquiv (equivEuclid d)
 
 /-- The continuous linear equivalence between `Vector d` and the corresponding `Pi` type. -/
-def equivPi (d : ℕ) :
-    Vector d ≃L[ℝ] Π (_ : Fin 1 ⊕ Fin d), ℝ :=
+def equivPi (d : ℕ) : Vector d ≃L[ℝ] Π (_ : Fin 1 ⊕ Fin d), ℝ :=
   LinearEquiv.toContinuousLinearEquiv (LinearEquiv.refl _ _)
 
-@[simp]
-lemma equivPi_apply {d : ℕ} (v : Vector d) (i : Fin 1 ⊕ Fin d) :
-    equivPi d v i = v i := rfl
+@[simp] lemma equivPi_apply {d : ℕ} (v : Vector d) (i : Fin 1 ⊕ Fin d) : equivPi d v i = v i := rfl
 
 @[fun_prop]
-lemma continuous_of_apply {d : ℕ} {α : Type*} [TopologicalSpace α]
-    (f : α → Vector d)
-    (h : ∀ i : Fin 1 ⊕ Fin d, Continuous (fun x => f x i)) :
-    Continuous f := by
+lemma continuous_of_apply
+    {d : ℕ} {α : Type*} [TopologicalSpace α]
+    (f : α → Vector d) (h : ∀ i : Fin 1 ⊕ Fin d, Continuous (fun x => f x i))
+    : Continuous f := by
   rw [← (equivPi d).comp_continuous_iff]
   apply continuous_pi
   intro i
   simp only [Function.comp_apply, equivPi_apply]
   fun_prop
 
-lemma differentiable_apply {d : ℕ} {α : Type*} [NormedAddCommGroup α] [NormedSpace ℝ α]
-    (f : α → Vector d) :
-    (∀ i : Fin 1 ⊕ Fin d, Differentiable ℝ (fun x => f x i)) ↔ Differentiable ℝ f := by
+lemma differentiable_apply
+    {d : ℕ} {α : Type*} [NormedAddCommGroup α] [NormedSpace ℝ α] (f : α → Vector d)
+    : (∀ i : Fin 1 ⊕ Fin d, Differentiable ℝ (fun x => f x i)) ↔ Differentiable ℝ f := by
   apply Iff.intro
   · intro h
     rw [← (Lorentz.Vector.equivPi d).comp_differentiable_iff]
@@ -243,10 +222,9 @@ lemma differentiable_apply {d : ℕ} {α : Type*} [NormedAddCommGroup α] [Norme
     · fun_prop
     · exact h
 
-lemma contDiff_apply {n : WithTop ℕ∞} {d : ℕ} {α : Type*}
-    [NormedAddCommGroup α] [NormedSpace ℝ α]
-    (f : α → Vector d) :
-    (∀ i : Fin 1 ⊕ Fin d, ContDiff ℝ n (fun x => f x i)) ↔ ContDiff ℝ n f := by
+lemma contDiff_apply
+    {n : WithTop ℕ∞} {d : ℕ} {α : Type*} [NormedAddCommGroup α] [NormedSpace ℝ α] (f : α → Vector d)
+    : (∀ i : Fin 1 ⊕ Fin d, ContDiff ℝ n (fun x => f x i)) ↔ ContDiff ℝ n f := by
   apply Iff.intro
   · intro h
     rw [← (Lorentz.Vector.equivPi d).comp_contDiff_iff]
@@ -259,19 +237,19 @@ lemma contDiff_apply {n : WithTop ℕ∞} {d : ℕ} {α : Type*}
     · fun_prop
     · exact h
 
-lemma fderiv_apply {d : ℕ} {α : Type*}
-    [NormedAddCommGroup α] [NormedSpace ℝ α]
+lemma fderiv_apply
+    {d : ℕ} {α : Type*} [NormedAddCommGroup α] [NormedSpace ℝ α]
     (f : α → Vector d) (h : Differentiable ℝ f)
-    (x : α) (dt : α) (ν : Fin 1 ⊕ Fin d) :
-    fderiv ℝ f x dt ν = fderiv ℝ (fun y => f y ν) x dt := by
+    (x : α) (dt : α) (ν : Fin 1 ⊕ Fin d)
+    : fderiv ℝ f x dt ν = fderiv ℝ (fun y => f y ν) x dt := by
   change _ = (fderiv ℝ (Lorentz.Vector.coordCLM ν ∘ f) x) dt
   rw [fderiv_comp _ (by fun_prop) (by fun_prop)]
   simp only [ContinuousLinearMap.fderiv, ContinuousLinearMap.coe_comp, Function.comp_apply]
   rfl
 
 @[simp]
-lemma fderiv_coord {d : ℕ} (μ : Fin 1 ⊕ Fin d) (x : Vector d) :
-    fderiv ℝ (fun v : Vector d => v μ) x = coordCLM μ := by
+lemma fderiv_coord {d : ℕ} (μ : Fin 1 ⊕ Fin d) (x : Vector d)
+    : fderiv ℝ (fun v : Vector d => v μ) x = coordCLM μ := by
   change fderiv ℝ (coordCLM μ) x = coordCLM μ
   simp
 
@@ -282,28 +260,25 @@ lemma fderiv_coord {d : ℕ} (μ : Fin 1 ⊕ Fin d) (x : Vector d) :
 -/
 
 /-- The basis on `Vector d` indexed by `Fin 1 ⊕ Fin d`. -/
-def basis {d : ℕ} : Basis (Fin 1 ⊕ Fin d) ℝ (Vector d) :=
-  Pi.basisFun ℝ _
+def basis {d : ℕ} : Basis (Fin 1 ⊕ Fin d) ℝ (Vector d) := Pi.basisFun ℝ _
 
 @[simp]
-lemma basis_apply {d : ℕ} (μ ν : Fin 1 ⊕ Fin d) :
-    basis μ ν = if μ = ν then 1 else 0 := by
+lemma basis_apply {d : ℕ} (μ ν : Fin 1 ⊕ Fin d) : basis μ ν = if μ = ν then 1 else 0 := by
   simp [basis]
   rw [Pi.basisFun_apply, Pi.single_apply]
   congr 1
   exact Lean.Grind.eq_congr' rfl rfl
 
-lemma basis_repr_apply {d : ℕ} (p : Vector d) (μ : Fin 1 ⊕ Fin d) :
-    basis.repr p μ = p μ := by
+lemma basis_repr_apply {d : ℕ} (p : Vector d) (μ : Fin 1 ⊕ Fin d) : basis.repr p μ = p μ := by
   simp [basis]
   rw [Pi.basisFun_repr]
 
-lemma map_apply_eq_basis_mulVec {d : ℕ} (f : Vector d →ₗ[ℝ] Vector d) (p : Vector d) :
-    (f p) = (LinearMap.toMatrix basis basis) f *ᵥ p := by
+lemma map_apply_eq_basis_mulVec {d : ℕ} (f : Vector d →ₗ[ℝ] Vector d) (p : Vector d)
+    : (f p) = (LinearMap.toMatrix basis basis) f *ᵥ p := by
   exact Eq.symm (LinearMap.toMatrix_mulVec_repr basis basis f p)
 
-lemma sum_basis_eq_zero_iff {d : ℕ} (f : Fin 1 ⊕ Fin d → ℝ) :
-    (∑ μ, f μ • basis μ) = 0 ↔ ∀ μ, f μ = 0 := by
+lemma sum_basis_eq_zero_iff {d : ℕ} (f : Fin 1 ⊕ Fin d → ℝ)
+    : (∑ μ, f μ • basis μ) = 0 ↔ ∀ μ, f μ = 0 := by
   apply Iff.intro
   · intro h
     have h1 := (linearIndependent_iff').mp basis.linearIndependent Finset.univ f h
@@ -312,15 +287,14 @@ lemma sum_basis_eq_zero_iff {d : ℕ} (f : Fin 1 ⊕ Fin d → ℝ) :
   · intro h
     simp [h]
 
-lemma sum_inl_inr_basis_eq_zero_iff {d : ℕ} (f₀ : ℝ) (f : Fin d → ℝ) :
-    f₀ • basis (Sum.inl 0) + (∑ i, f i • basis (Sum.inr i)) = 0 ↔
-    f₀ = 0 ∧ ∀ i, f i = 0 := by
+lemma sum_inl_inr_basis_eq_zero_iff {d : ℕ} (f₀ : ℝ) (f : Fin d → ℝ)
+    : f₀ • basis (Sum.inl 0) + (∑ i, f i • basis (Sum.inr i)) = 0 ↔ f₀ = 0 ∧ ∀ i, f i = 0 := by
   let f' : Fin 1 ⊕ Fin d → ℝ := fun μ =>
     match μ with
     | Sum.inl 0 => f₀
     | Sum.inr i => f i
-  have h1 : f₀ • basis (Sum.inl 0) + (∑ i, f i • basis (Sum.inr i))
-    = ∑ μ, f' μ • basis μ := by simp [f']
+  have h1 : f₀ • basis (Sum.inl 0) + (∑ i, f i • basis (Sum.inr i)) = ∑ μ, f' μ • basis μ := by
+    simp [f']
   rw [h1, sum_basis_eq_zero_iff]
   simp [f']
 
@@ -330,23 +304,26 @@ lemma sum_inl_inr_basis_eq_zero_iff {d : ℕ} (f₀ : ℝ) (f : Fin d → ℝ) :
 
 -/
 
-/-- Extract spatial components from a Lorentz vector,
-    returning them as a vector in Euclidean space. -/
+/--
+Extract spatial components from a Lorentz vector,
+returning them as a vector in Euclidean space.
+-/
 abbrev spatialPart {d : ℕ} (v : Vector d) : EuclideanSpace ℝ (Fin d) :=
   WithLp.toLp 2 fun i => v (Sum.inr i)
 
-lemma spatialPart_apply_eq_toCoord {d : ℕ} (v : Vector d) (i : Fin d) :
-    spatialPart v i = v (Sum.inr i) := rfl
+lemma spatialPart_apply_eq_toCoord {d : ℕ} (v : Vector d) (i : Fin d)
+    : spatialPart v i = v (Sum.inr i) :=
+  rfl
 
-lemma spatialPart_basis_sum_inr {d : ℕ} (i : Fin d) (j : Fin d) :
-    spatialPart (basis (Sum.inr i)) j =
-      (Finsupp.single (Sum.inr i : Fin 1 ⊕ Fin d) 1) (Sum.inr j) := by
+lemma spatialPart_basis_sum_inr {d : ℕ} (i : Fin d) (j : Fin d)
+    : spatialPart (basis (Sum.inr i)) j
+      = (Finsupp.single (Sum.inr i : Fin 1 ⊕ Fin d) 1) (Sum.inr j) := by
   simp [basis_apply]
   rw [Finsupp.single_apply]
   simp
 
-lemma spatialPart_basis_sum_inl {d : ℕ} (i : Fin d) :
-    spatialPart (basis (Sum.inl 0)) i = 0 := by simp
+lemma spatialPart_basis_sum_inl {d : ℕ} (i : Fin d) : spatialPart (basis (Sum.inl 0)) i = 0 := by
+  simp
 
 /-- The spatial part of a Lorentz vector as a continuous linear map. -/
 def spatialCLM (d : ℕ) : Vector d →L[ℝ] EuclideanSpace ℝ (Fin d) where
@@ -355,18 +332,18 @@ def spatialCLM (d : ℕ) : Vector d →L[ℝ] EuclideanSpace ℝ (Fin d) where
   map_smul' c v := by rfl
   cont := by fun_prop
 
-lemma spatialCLM_apply_eq_spatialPart {d : ℕ} (v : Vector d) (i : Fin d) :
-    spatialCLM d v i = spatialPart v i := rfl
+lemma spatialCLM_apply_eq_spatialPart {d : ℕ} (v : Vector d) (i : Fin d)
+    : spatialCLM d v i = spatialPart v i :=
+  rfl
 
 @[simp]
-lemma spatialCLM_basis_sum_inl {d : ℕ} :
-    spatialCLM d (basis (Sum.inl 0)) = 0 := by
+lemma spatialCLM_basis_sum_inl {d : ℕ} : spatialCLM d (basis (Sum.inl 0)) = 0 := by
   ext i
   exact spatialPart_basis_sum_inl i
 
 @[simp]
-lemma spatialCLM_basis_sum_inr {d : ℕ} (i : Fin d) :
-    spatialCLM d (basis (Sum.inr i)) = EuclideanSpace.basisFun (Fin d) ℝ i := by
+lemma spatialCLM_basis_sum_inr {d : ℕ} (i : Fin d)
+    : spatialCLM d (basis (Sum.inr i)) = EuclideanSpace.basisFun (Fin d) ℝ i := by
   ext j
   rw [spatialCLM_apply_eq_spatialPart, spatialPart_basis_sum_inr i j]
   simp [Finsupp.single_apply]
@@ -380,50 +357,51 @@ lemma spatialCLM_basis_sum_inr {d : ℕ} (i : Fin d) :
 -/
 
 /-- Extract time component from a Lorentz vector -/
-abbrev timeComponent {d : ℕ} (v : Vector d) : ℝ :=
-  v (Sum.inl 0)
+abbrev timeComponent {d : ℕ} (v : Vector d) : ℝ := v (Sum.inl 0)
 
-lemma timeComponent_basis_sum_inr {d : ℕ} (i : Fin d) :
-    timeComponent (basis (Sum.inr i)) = 0 := by simp
+lemma timeComponent_basis_sum_inr {d : ℕ} (i : Fin d) : timeComponent (basis (Sum.inr i)) = 0 := by
+  simp
 
-lemma timeComponent_basis_sum_inl {d : ℕ} :
-    timeComponent (d := d) (basis (Sum.inl 0)) = 1 := by simp
+lemma timeComponent_basis_sum_inl {d : ℕ} : timeComponent (d := d) (basis (Sum.inl 0)) = 1 := by
+  simp
 
 /-- The temporal part of a Lorentz vector as a continuous linear map. -/
 def temporalCLM (d : ℕ) : Vector d →L[ℝ] ℝ :=
   LinearMap.toContinuousLinearMap {
     toFun := fun v => v (Sum.inl 0)
     map_add' := by simp
-    map_smul' := by simp}
+    map_smul' := by simp
+  }
 
-lemma temporalCLM_apply_eq_timeComponent {d : ℕ} (v : Vector d) :
-    temporalCLM d v = timeComponent v := rfl
+lemma temporalCLM_apply_eq_timeComponent {d : ℕ} (v : Vector d)
+    : temporalCLM d v = timeComponent v :=
+  rfl
 
 @[simp]
-lemma temporalCLM_basis_sum_inr {d : ℕ} (i : Fin d) :
-    temporalCLM d (basis (Sum.inr i)) = 0 := by
+lemma temporalCLM_basis_sum_inr {d : ℕ} (i : Fin d) : temporalCLM d (basis (Sum.inr i)) = 0 := by
   simp [temporalCLM_apply_eq_timeComponent, basis_apply]
 
 @[simp]
-lemma temporalCLM_basis_sum_inl {d : ℕ} :
-    temporalCLM d (basis (Sum.inl 0)) = 1 := by
+lemma temporalCLM_basis_sum_inl {d : ℕ} : temporalCLM d (basis (Sum.inl 0)) = 1 := by
   simp [temporalCLM_apply_eq_timeComponent, basis_apply]
 
-/-- The continuous linear map corresponding to the creation of a
-  Lorentz Vector with only a non-zero temporal component. -/
+/--
+The continuous linear map corresponding to the creation of a
+Lorentz Vector with only a non-zero temporal component.
+-/
 def ofTemporalComponent {d : ℕ} : ℝ →L[ℝ] Vector d where
   toFun xt := xt • basis (Sum.inl 0)
   map_add' := by simp [add_smul]
   map_smul' := by simp [smul_smul]
 
-/-- The continuous linear map corresponding to the creation of a
-  Lorentz Vector with only non-zero spatial components. -/
+/--
+The continuous linear map corresponding to the creation of a
+Lorentz Vector with only non-zero spatial components.
+-/
 def ofSpatialComponent {d : ℕ} : EuclideanSpace ℝ (Fin d) →L[ℝ] Vector d where
   toFun xs := ∑ i, xs i • basis (Sum.inr i)
-  map_add' xs ys := by
-    simp [add_smul, Finset.sum_add_distrib]
-  map_smul' c xs := by
-    simp [smul_smul, Finset.smul_sum]
+  map_add' xs ys := by simp [add_smul, Finset.sum_add_distrib]
+  map_smul' c xs := by simp [smul_smul, Finset.smul_sum]
 
 /-!
 
@@ -442,17 +420,18 @@ def asSmoothManifold (d : ℕ) : ModelWithCorners ℝ (Vector d) (Vector d) := �
 -/
 open InnerProductSpace
 
-lemma basis_inner {d : ℕ} (μ : Fin 1 ⊕ Fin d) (p : Lorentz.Vector d) :
-    ⟪Lorentz.Vector.basis μ, p⟫_ℝ = p μ := by
+lemma basis_inner {d : ℕ} (μ : Fin 1 ⊕ Fin d) (p : Lorentz.Vector d)
+    : ⟪Lorentz.Vector.basis μ, p⟫_ℝ = p μ := by
   simp [inner_eq_sum]
 
-lemma inner_basis {d : ℕ} (p : Lorentz.Vector d) (μ : Fin 1 ⊕ Fin d) :
-    ⟪p, Lorentz.Vector.basis μ⟫_ℝ = p μ := by
+lemma inner_basis {d : ℕ} (p : Lorentz.Vector d) (μ : Fin 1 ⊕ Fin d)
+    : ⟪p, Lorentz.Vector.basis μ⟫_ℝ = p μ := by
   simp [inner_eq_sum]
 
 /-- A vector with zero time component and zero spatial part is zero. -/
-lemma eq_zero_of_timeComponent_of_spatialPart {d : ℕ} {u : Vector d} (h0 : u.timeComponent = 0)
-    (hs : u.spatialPart = 0) : u = 0 := by
+lemma eq_zero_of_timeComponent_of_spatialPart
+    {d : ℕ} {u : Vector d} (h0 : u.timeComponent = 0) (hs : u.spatialPart = 0)
+    : u = 0 := by
   refine ext_of_apply fun i => ?_
   rcases i with i | i
   · fin_cases i
@@ -461,8 +440,9 @@ lemma eq_zero_of_timeComponent_of_spatialPart {d : ℕ} {u : Vector d} (h0 : u.t
     simpa [spatialPart_apply_eq_toCoord] using this
 
 /-- The spatial components of a vector whose spatial part has zero norm vanish. -/
-lemma apply_inr_eq_zero_of_norm_spatialPart {d : ℕ} {u : Vector d} (h : ‖u.spatialPart‖ = 0)
-    (i : Fin d) : u (Sum.inr i) = 0 := by
+lemma apply_inr_eq_zero_of_norm_spatialPart
+    {d : ℕ} {u : Vector d} (h : ‖u.spatialPart‖ = 0) (i : Fin d)
+    : u (Sum.inr i) = 0 := by
   have := congrArg (fun x : EuclideanSpace ℝ (Fin d) => x i) (norm_eq_zero.mp h)
   simpa [spatialPart_apply_eq_toCoord] using this
 

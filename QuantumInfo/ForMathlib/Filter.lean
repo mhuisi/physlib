@@ -8,14 +8,13 @@ module
 public import Mathlib.Algebra.Order.Floor.Semifield
 public import Mathlib.Analysis.RCLike.Basic
 public import Mathlib.Analysis.SpecificLimits.Basic
-
 public import Mathlib.Tactic.Bound
 
 @[expose] public section
 
 open Topology
 
---This is a stupid name for a stupid lemma
+-- This is a stupid name for a stupid lemma
 lemma Filter.Tendsto_inv_nat_mul_div_real (m : ℕ)
    : Filter.Tendsto (fun (x : ℕ) => ((↑x)⁻¹ * ↑(x / m) : ℝ)) Filter.atTop (𝓝 (1 / ↑m)) := by
   --Thanks aristotle!
@@ -45,17 +44,16 @@ lemma Filter.Tendsto_inv_nat_mul_div_real (m : ℕ)
   funext x; simp [Nat.floor_div_natCast];
   ring
 
---Similar to `ENNReal.tendsto_toReal_iff` in `Mathlib/Topology/Instances/ENNReal/Lemmas`, but
+-- Similar to `ENNReal.tendsto_toReal_iff` in `Mathlib/Topology/Instances/ENNReal/Lemmas`, but
 -- instead of requiring finiteness for all values, just eventually is needed.
 open Filter Topology ENNReal in
 lemma ENNReal.tendsto_toReal_iff_of_eventually_ne_top
-  {ι} {fi : Filter ι} {f : ι → ℝ≥0∞} (hf : ∀ᶠ i in fi, f i ≠ ∞) {x : ℝ≥0∞}
-    (hx : x ≠ ∞) : Tendsto (fun n => (f n).toReal) fi (𝓝 x.toReal) ↔ Tendsto f fi (𝓝 x) := by
+    {ι} {fi : Filter ι} {f : ι → ℝ≥0∞} (hf : ∀ᶠ i in fi, f i ≠ ∞) {x : ℝ≥0∞} (hx : x ≠ ∞)
+    : Tendsto (fun n => (f n).toReal) fi (𝓝 x.toReal) ↔ Tendsto f fi (𝓝 x) := by
   have he₁ : f =ᶠ[fi] (fun n ↦ (f n).toNNReal) := by
     rw [EventuallyEq]
     filter_upwards [hf] with i h
     simp [h]
-  have he₂ : (fun n ↦ (f n).toReal) = (fun n ↦ ((f n).toNNReal : ℝ≥0∞).toReal) :=
-    rfl
+  have he₂ : (fun n ↦ (f n).toReal) = (fun n ↦ ((f n).toNNReal : ℝ≥0∞).toReal) := rfl
   rw [Filter.tendsto_congr' he₁, he₂]
   exact tendsto_toReal_iff (by finiteness) hx

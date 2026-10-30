@@ -52,15 +52,14 @@ variable {H : Type*} [NormedAddCommGroup H] [InnerProductSpace ℂ H] [CompleteS
 
 -/
 
-lemma trace_rankOne_formula (x y : H) :
-    trace (InnerProductSpace.rankOne ℂ x y) (isTraceClass_rankOne x y) =
-      ⟪y, x⟫_ℂ := by
+lemma trace_rankOne_formula (x y : H)
+    : trace (InnerProductSpace.rankOne ℂ x y) (isTraceClass_rankOne x y) = ⟪y, x⟫_ℂ := by
   obtain ⟨w, b, _⟩ := exists_hilbertBasis ℂ H
   rw [trace_eq_of_hilbertBasis (isTraceClass_rankOne x y) b]
   have hsum := b.hasSum_inner_mul_inner y x
-  have hterm : (fun i : w =>
-      ⟪b i, (InnerProductSpace.rankOne ℂ x y) (b i)⟫_ℂ) =
-      (fun i : w => ⟪y, b i⟫_ℂ * ⟪b i, x⟫_ℂ) := by
+  have hterm
+      : (fun i : w => ⟪b i, (InnerProductSpace.rankOne ℂ x y) (b i)⟫_ℂ)
+        = (fun i : w => ⟪y, b i⟫_ℂ * ⟪b i, x⟫_ℂ) := by
     funext i
     simp only [InnerProductSpace.rankOne_apply, inner_smul_right]
   rw [hterm]
@@ -72,15 +71,14 @@ lemma trace_rankOne_formula (x y : H) :
 
 -/
 
-lemma tracePairing_rankOne_left (T : TraceClass H) (x y : H) :
-    tracePairing (InnerProductSpace.rankOne ℂ x y) T =
-      ⟪y, T.1 x⟫_ℂ := by
+lemma tracePairing_rankOne_left (T : TraceClass H) (x y : H)
+    : tracePairing (InnerProductSpace.rankOne ℂ x y) T = ⟪y, T.1 x⟫_ℂ := by
   rw [tracePairing_apply]
-  have hcycle := trace_mul_cycle (A := InnerProductSpace.rankOne ℂ x y)
-    (T := T.1) (isTraceClass_coe T)
+  have hcycle :=
+    trace_mul_cycle (A := InnerProductSpace.rankOne ℂ x y) (T := T.1) (isTraceClass_coe T)
   calc
-    trace (InnerProductSpace.rankOne ℂ x y * T.1) _ =
-        trace (T.1 * InnerProductSpace.rankOne ℂ x y) _ := hcycle
+    trace (InnerProductSpace.rankOne ℂ x y * T.1) _
+      = trace (T.1 * InnerProductSpace.rankOne ℂ x y) _ := hcycle
     _ = trace (InnerProductSpace.rankOne ℂ (T.1 x) y) _ := by
       congr 1
       change T.1 ∘L InnerProductSpace.rankOne ℂ x y = _

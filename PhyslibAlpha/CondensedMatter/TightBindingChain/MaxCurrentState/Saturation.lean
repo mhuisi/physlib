@@ -52,11 +52,12 @@ variable (T : TightBindingChain)
 -/
 
 /-- The energy fluctuation of the maximal current state, site by site. -/
-lemma inner_energyFluctuation_maxCurrentState (m : Fin T.N) :
-    ⟪|m⟩, (T.openHamiltonianObservable : T.HilbertSpace →L[ℂ] T.HilbertSpace) T.maxCurrentState -
-      T.maxCurrentVectorState⟨T.openHamiltonianObservable⟩ • T.maxCurrentState⟫_ℂ =
-      -((√(2 / (T.N + 1)) : ℝ) * (2 * T.t * Real.sin (Real.pi / (T.N + 1)) *
-        Complex.I ^ ((m : ℕ) + 1) * Real.cos (((m : ℕ) + 1) * (Real.pi / (T.N + 1))))) := by
+lemma inner_energyFluctuation_maxCurrentState (m : Fin T.N)
+    : ⟪|m⟩, (T.openHamiltonianObservable : T.HilbertSpace →L[ℂ] T.HilbertSpace) T.maxCurrentState -
+        T.maxCurrentVectorState⟨T.openHamiltonianObservable⟩ • T.maxCurrentState⟫_ℂ
+      = -((√(2 / (T.N + 1)) : ℝ)
+        * (2 * T.t * Real.sin (Real.pi / (T.N + 1)) * Complex.I ^ ((m : ℕ) + 1)
+          * Real.cos (((m : ℕ) + 1) * (Real.pi / (T.N + 1))))) := by
   rw [expectation_openHamiltonian_maxCurrentState, inner_sub_right, ← Complex.coe_smul,
     inner_smul_right]
   change ⟪|m⟩, T.openHamiltonian T.maxCurrentState⟫_ℂ - _ = _
@@ -64,12 +65,11 @@ lemma inner_energyFluctuation_maxCurrentState (m : Fin T.N) :
   ring
 
 /-- The position fluctuation of the maximal current state, site by site. -/
-lemma inner_positionFluctuation_maxCurrentState (m : Fin T.N) :
-    ⟪|m⟩, (T.positionObservable : T.HilbertSpace →L[ℂ] T.HilbertSpace) T.maxCurrentState -
-      T.maxCurrentVectorState⟨T.positionObservable⟩ • T.maxCurrentState⟫_ℂ =
-      (T.a * ((m : ℕ) - (T.N - 1) / 2) : ℝ) * ⟪|m⟩, T.maxCurrentState⟫_ℂ := by
-  rw [expectation_position_maxCurrentState, inner_sub_right, ← Complex.coe_smul,
-    inner_smul_right]
+lemma inner_positionFluctuation_maxCurrentState (m : Fin T.N)
+    : ⟪|m⟩, (T.positionObservable : T.HilbertSpace →L[ℂ] T.HilbertSpace) T.maxCurrentState -
+        T.maxCurrentVectorState⟨T.positionObservable⟩ • T.maxCurrentState⟫_ℂ
+      = (T.a * ((m : ℕ) - (T.N - 1) / 2) : ℝ) * ⟪|m⟩, T.maxCurrentState⟫_ℂ := by
+  rw [expectation_position_maxCurrentState, inner_sub_right, ← Complex.coe_smul, inner_smul_right]
   change ⟪|m⟩, T.position T.maxCurrentState⟫_ℂ - _ = _
   rw [← position_hermitian, position_apply_localizedState, inner_smul_left, Complex.conj_ofReal]
   push_cast
@@ -81,47 +81,58 @@ lemma inner_positionFluctuation_maxCurrentState (m : Fin T.N) :
 
 -/
 
-/-- In the maximal current state, `(2 m - N + 1) cos θ sin ((m + 1) θ) + (N - 1) sin θ
-cos ((m + 1) θ) = 0` on every site when `N = 2, 3`, where `θ = π / (N + 1)`. -/
-private lemma parallel_of_two_or_three (h : T.N = 2 ∨ T.N = 3) (m : Fin T.N) :
-    (2 * ((m : ℕ) : ℝ) - T.N + 1) * Real.cos (Real.pi / (T.N + 1)) *
-        Real.sin (((m : ℕ) + 1) * (Real.pi / (T.N + 1))) +
-      (T.N - 1) * Real.sin (Real.pi / (T.N + 1)) *
-        Real.cos (((m : ℕ) + 1) * (Real.pi / (T.N + 1))) = 0 := by
+/--
+In the maximal current state, `(2 m - N + 1) cos θ sin ((m + 1) θ) + (N - 1) sin θ
+cos ((m + 1) θ) = 0` on every site when `N = 2, 3`, where `θ = π / (N + 1)`.
+-/
+private lemma parallel_of_two_or_three (h : T.N = 2 ∨ T.N = 3) (m : Fin T.N)
+    : (2 * ((m : ℕ) : ℝ) - T.N + 1) * Real.cos (Real.pi / (T.N + 1))
+          * Real.sin (((m : ℕ) + 1) * (Real.pi / (T.N + 1)))
+        + (T.N - 1) * Real.sin (Real.pi / (T.N + 1))
+          * Real.cos (((m : ℕ) + 1) * (Real.pi / (T.N + 1)))
+      = 0 := by
   have hm := m.isLt
   rcases (by omega : (m : ℕ) = 0 ∨ (m : ℕ) + 1 = T.N ∨ (T.N = 3 ∧ (m : ℕ) = 1)) with
     h0 | hl | ⟨h3, h1⟩
   · simp only [h0, Nat.cast_zero, zero_add, one_mul]
     ring
   · have hl' : ((m : ℕ) : ℝ) + 1 = T.N := by exact_mod_cast hl
-    rw [hl', show (T.N : ℝ) * (Real.pi / (T.N + 1)) = Real.pi - Real.pi / (T.N + 1) by
-      field_simp; ring, Real.sin_pi_sub, Real.cos_pi_sub, ← hl']
+    rw [hl',
+      show (T.N : ℝ) * (Real.pi / (T.N + 1)) = Real.pi - Real.pi / (T.N + 1) by field_simp; ring,
+      Real.sin_pi_sub, Real.cos_pi_sub, ← hl']
     ring
   · simp only [h1, h3, Nat.cast_one, Nat.cast_ofNat]
     rw [show ((1 : ℝ) + 1) * (Real.pi / (3 + 1)) = Real.pi / 2 by ring, Real.cos_pi_div_two]
     ring
 
-/-- In the maximal current state of a chain with `N ≥ 2` sites and hopping `t ≠ 0`, the centered
-Gram defect of `H` and `X` vanishes exactly for `N = 2` and `N = 3`. -/
-lemma centeredGramDefect_maxCurrentState_eq_zero_iff (ht : T.t ≠ 0) (hN : 2 ≤ T.N) :
-    centeredGramDefect T.maxCurrentVectorState T.openHamiltonianObservable
-      T.positionObservable = 0 ↔ T.N = 2 ∨ T.N = 3 := by
+/--
+In the maximal current state of a chain with `N ≥ 2` sites and hopping `t ≠ 0`, the centered
+Gram defect of `H` and `X` vanishes exactly for `N = 2` and `N = 3`.
+-/
+lemma centeredGramDefect_maxCurrentState_eq_zero_iff (ht : T.t ≠ 0) (hN : 2 ≤ T.N)
+    : centeredGramDefect T.maxCurrentVectorState T.openHamiltonianObservable T.positionObservable
+        = 0
+      ↔ T.N = 2 ∨ T.N = 3 := by
   have hu := T.inner_energyFluctuation_maxCurrentState
   have hw := T.inner_positionFluctuation_maxCurrentState
   rw [centeredGramDefect_ofVec]
-  generalize (T.openHamiltonianObservable : T.HilbertSpace →L[ℂ] T.HilbertSpace)
-    T.maxCurrentState - T.maxCurrentVectorState⟨T.openHamiltonianObservable⟩ •
-      T.maxCurrentState = u at hu ⊢
-  generalize (T.positionObservable : T.HilbertSpace →L[ℂ] T.HilbertSpace) T.maxCurrentState -
-    T.maxCurrentVectorState⟨T.positionObservable⟩ • T.maxCurrentState = w at hw ⊢
+  generalize (T.openHamiltonianObservable : T.HilbertSpace →L[ℂ] T.HilbertSpace) T.maxCurrentState
+        - T.maxCurrentVectorState⟨T.openHamiltonianObservable⟩ • T.maxCurrentState
+      = u
+    at hu ⊢
+  generalize (T.positionObservable : T.HilbertSpace →L[ℂ] T.HilbertSpace) T.maxCurrentState
+        - T.maxCurrentVectorState⟨T.positionObservable⟩ • T.maxCurrentState
+      = w
+    at hw ⊢
   have hpar := T.parallel_of_two_or_three
   simp only [inner_maxCurrentState] at hw
   generalize hθ : Real.pi / (T.N + 1) = θ at hu hw hpar
   have hN' : (2 : ℝ) ≤ T.N := by exact_mod_cast hN
   have hθ0 : 0 < θ := hθ ▸ by positivity
-  have hθ2 : θ < Real.pi / 2 := hθ ▸ by
-    rw [div_lt_div_iff_of_pos_left Real.pi_pos (by positivity) two_pos]
-    linarith
+  have hθ2 : θ < Real.pi / 2 :=
+    hθ ▸ by
+      rw [div_lt_div_iff_of_pos_left Real.pi_pos (by positivity) two_pos]
+      linarith
   have hS := Real.sin_pos_of_pos_of_lt_pi hθ0 (by linarith [Real.pi_pos])
   have hC := Real.cos_pos_of_mem_Ioo ⟨by linarith, hθ2⟩
   have hc : 0 < √(2 / (T.N + 1)) := Real.sqrt_pos.mpr (by positivity)
@@ -131,9 +142,14 @@ lemma centeredGramDefect_maxCurrentState_eq_zero_iff (ht : T.t ≠ 0) (hN : 2 �
   simp only [Nat.cast_zero, zero_add, one_mul, pow_zero, pow_one] at hu0 hw0
   have hune : u ≠ 0 := fun h => by
     rw [h, inner_zero_right, zero_eq_neg] at hu0
-    exact mul_ne_zero (Complex.ofReal_ne_zero.mpr hc.ne') (mul_ne_zero (mul_ne_zero (mul_ne_zero
-      (mul_ne_zero two_ne_zero (Complex.ofReal_ne_zero.mpr ht)) (Complex.ofReal_ne_zero.mpr
-        hS.ne')) Complex.I_ne_zero) (Complex.ofReal_ne_zero.mpr hC.ne')) hu0
+    exact mul_ne_zero (Complex.ofReal_ne_zero.mpr hc.ne')
+      (mul_ne_zero
+        (mul_ne_zero
+          (mul_ne_zero (mul_ne_zero two_ne_zero (Complex.ofReal_ne_zero.mpr ht))
+            (Complex.ofReal_ne_zero.mpr hS.ne'))
+          Complex.I_ne_zero)
+        (Complex.ofReal_ne_zero.mpr hC.ne'))
+      hu0
   have hwne : w ≠ 0 := fun h => by
     rw [h, inner_zero_right] at hw0
     exact mul_ne_zero (Complex.ofReal_ne_zero.mpr (mul_neg_of_pos_of_neg ha (by linarith)).ne)
@@ -145,7 +161,8 @@ lemma centeredGramDefect_maxCurrentState_eq_zero_iff (ht : T.t ≠ 0) (hN : 2 �
     have hw1 := hw ⟨1, by omega⟩
     rw [inner_smul_right, hu] at hw1 hw0
     simp only [Nat.cast_zero, Nat.cast_one, zero_add, one_mul, pow_one, one_add_one_eq_two,
-      Real.sin_two_mul, Real.cos_two_mul] at hw1 hw0
+        Real.sin_two_mul, Real.cos_two_mul]
+      at hw1 hw0
     have hSC := Real.sin_sq_add_cos_sq θ
     generalize Real.sin θ = S at hS hw0 hw1 hSC
     generalize hCθ : Real.cos θ = C at hC hw0 hw1 hSC
@@ -170,10 +187,13 @@ lemma centeredGramDefect_maxCurrentState_eq_zero_iff (ht : T.t ≠ 0) (hN : 2 �
       nlinarith
   · intro h
     have hC' := hC.ne'
-    refine ⟨-Complex.I * (T.a * (T.N - 1) / (4 * T.t * Real.cos θ) : ℝ),
-      mul_ne_zero (neg_ne_zero.mpr Complex.I_ne_zero) (Complex.ofReal_ne_zero.mpr
-        (div_ne_zero (mul_pos ha (by linarith)).ne' (mul_ne_zero (mul_ne_zero four_ne_zero ht)
-          hC'))), ?_⟩
+    refine ⟨
+      -Complex.I * (T.a * (T.N - 1) / (4 * T.t * Real.cos θ) : ℝ),
+      mul_ne_zero (neg_ne_zero.mpr Complex.I_ne_zero)
+        (Complex.ofReal_ne_zero.mpr (div_ne_zero (mul_pos ha (by linarith)).ne'
+          (mul_ne_zero (mul_ne_zero four_ne_zero ht) hC'))),
+      ?_
+    ⟩
     apply localizedState.repr.injective
     ext m
     simp only [OrthonormalBasis.repr_apply_apply]
@@ -193,23 +213,25 @@ lemma centeredGramDefect_maxCurrentState_eq_zero_iff (ht : T.t ≠ 0) (hN : 2 �
         Complex.I_sq +
       T.a * c * Complex.I ^ (m : ℕ) * (T.N - 1) * S * k * (C : ℂ)⁻¹ / 2 * htt
 
-/-- **Saturation.** In the maximal current state of a chain with `N ≥ 2` sites and hopping
-`t ≠ 0`, the energy–position uncertainty relation is an equality exactly for `N = 2, 3`. -/
-lemma robertson_schrodinger_maxCurrentState_eq_iff (ht : T.t ≠ 0) (hN : 2 ≤ T.N) :
-    covariance T.maxCurrentVectorState T.openHamiltonianObservable T.positionObservable ^ 2 +
-        (T.a * T.t * Real.cos (Real.pi / (T.N + 1))) ^ 2 =
-      variance T.maxCurrentVectorState T.openHamiltonianObservable *
-        variance T.maxCurrentVectorState T.positionObservable ↔ T.N = 2 ∨ T.N = 3 := by
+/--
+**Saturation.** In the maximal current state of a chain with `N ≥ 2` sites and hopping
+`t ≠ 0`, the energy–position uncertainty relation is an equality exactly for `N = 2, 3`.
+-/
+lemma robertson_schrodinger_maxCurrentState_eq_iff (ht : T.t ≠ 0) (hN : 2 ≤ T.N)
+    : covariance T.maxCurrentVectorState T.openHamiltonianObservable T.positionObservable ^ 2
+          + (T.a * T.t * Real.cos (Real.pi / (T.N + 1))) ^ 2
+        = variance T.maxCurrentVectorState T.openHamiltonianObservable
+          * variance T.maxCurrentVectorState T.positionObservable
+      ↔ T.N = 2 ∨ T.N = 3 := by
   rw [← neg_sq (T.a * _ * _), ← expectation_bracket_maxCurrentState,
-    robertson_schrodinger_eq_iff_gram_zero,
-    centeredGramDefect_maxCurrentState_eq_zero_iff T ht hN]
+    robertson_schrodinger_eq_iff_gram_zero, centeredGramDefect_maxCurrentState_eq_zero_iff T ht hN]
 
 /-- From four sites on, the uncertainty relation of the maximal current state is strict. -/
-lemma robertson_schrodinger_maxCurrentState_lt (ht : T.t ≠ 0) (hN : 4 ≤ T.N) :
-    covariance T.maxCurrentVectorState T.openHamiltonianObservable T.positionObservable ^ 2 +
-        (T.a * T.t * Real.cos (Real.pi / (T.N + 1))) ^ 2 <
-      variance T.maxCurrentVectorState T.openHamiltonianObservable *
-        variance T.maxCurrentVectorState T.positionObservable :=
+lemma robertson_schrodinger_maxCurrentState_lt (ht : T.t ≠ 0) (hN : 4 ≤ T.N)
+    : covariance T.maxCurrentVectorState T.openHamiltonianObservable T.positionObservable ^ 2
+        + (T.a * T.t * Real.cos (Real.pi / (T.N + 1))) ^ 2
+      < variance T.maxCurrentVectorState T.openHamiltonianObservable
+        * variance T.maxCurrentVectorState T.positionObservable :=
   (T.robertson_schrodinger_maxCurrentState).lt_of_ne fun h => by
     rcases (T.robertson_schrodinger_maxCurrentState_eq_iff ht (by omega)).mp h with h | h <;> omega
 

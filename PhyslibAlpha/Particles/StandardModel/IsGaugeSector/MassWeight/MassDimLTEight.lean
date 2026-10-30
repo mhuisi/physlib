@@ -73,18 +73,18 @@ open Matrix MatrixGroups Lorentz
 
 namespace IsGaugeSector
 
-variable {B : Type} [Ring B] [Algebra ℂ B]
+variable
+  {B : Type} [Ring B] [Algebra ℂ B]
   {repGauge : Representation ℂ GaugeGroupI B}
-  {hrepGauge_mul : ∀ (g : GaugeGroupI) (b₁ b₂ : B),
-    repGauge g (b₁ * b₂) = repGauge g b₁ * repGauge g b₂}
-  {repLorentz : Representation ℂ SL(2,ℂ) B}
-  {hrepLorentz_mul : ∀ (Λ : SL(2,ℂ)) (b₁ b₂ : B),
-    repLorentz Λ (b₁ * b₂) = repLorentz Λ b₁ * repLorentz Λ b₂}
-  {F : {n : ℕ} → (Fin n → Fin 1 ⊕ Fin 3) → (Fin 1 ⊕ Fin 3) → (Fin 1 ⊕ Fin 3) →
-    Module.Dual ℝ GaugeAlgebra →ₗ[ℝ] B}
+  {hrepGauge_mul
+    : ∀ (g : GaugeGroupI) (b₁ b₂ : B), repGauge g (b₁ * b₂) = repGauge g b₁ * repGauge g b₂}
+  {repLorentz : Representation ℂ (SL(2,ℂ)) B}
+  {hrepLorentz_mul
+    : ∀ (Λ : SL(2,ℂ)) (b₁ b₂ : B), repLorentz Λ (b₁ * b₂) = repLorentz Λ b₁ * repLorentz Λ b₂}
+  {F : {n : ℕ} → (Fin n → Fin 1 ⊕ Fin 3) → (Fin 1 ⊕ Fin 3) → (Fin 1 ⊕ Fin 3)
+    → Module.Dual ℝ GaugeAlgebra →ₗ[ℝ] B}
   {massWeightPoly : B →ₐ[ℂ] Polynomial B}
-  (h : IsGaugeSector B repGauge hrepGauge_mul repLorentz hrepLorentz_mul
-      F massWeightPoly)
+  (h : IsGaugeSector B repGauge hrepGauge_mul repLorentz hrepLorentz_mul F massWeightPoly)
 
 /-!
 
@@ -97,15 +97,18 @@ symbols evaluated on those coordinates.
 
 -/
 
-/-- A field-strength symbol lies in the span of the twelve symbols evaluated on the
-  coordinates of the standard basis of the gauge algebra. -/
-lemma F_mem_iSup_span_coord {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin 3) (μ ν : Fin 1 ⊕ Fin 3)
-    (φ : Module.Dual ℝ GaugeAlgebra) :
-    F l μ ν φ ∈ ⨆ c : Fin 8 ⊕ Fin 3 ⊕ Fin 1,
+/--
+A field-strength symbol lies in the span of the twelve symbols evaluated on the
+coordinates of the standard basis of the gauge algebra.
+-/
+lemma F_mem_iSup_span_coord
+    {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin 3) (μ ν : Fin 1 ⊕ Fin 3) (φ : Module.Dual ℝ GaugeAlgebra)
+    : F l μ ν φ ∈ ⨆ c : Fin 8 ⊕ Fin 3 ⊕ Fin 1,
       ℂ ∙ F l μ ν (GaugeAlgebra.stdBasis.coord c) := by
-  have hF : F l μ ν φ
-      = ∑ c : Fin 8 ⊕ Fin 3 ⊕ Fin 1,
-        φ (GaugeAlgebra.stdBasis c) • F l μ ν (GaugeAlgebra.stdBasis.coord c) := by
+  have hF
+      : F l μ ν φ
+        = ∑ c : Fin 8 ⊕ Fin 3 ⊕ Fin 1,
+          φ (GaugeAlgebra.stdBasis c) • F l μ ν (GaugeAlgebra.stdBasis.coord c) := by
     conv_lhs => rw [← GaugeAlgebra.stdBasis.sum_dual_apply_smul_coord φ]
     rw [map_sum]
     exact Finset.sum_congr rfl fun c _ => map_smul _ _ _
@@ -126,8 +129,8 @@ back.
 -/
 
 /-- A sum over families of one covector index is a single sum. -/
-lemma sum_cov_one {M : Type*} [AddCommMonoid M] (f : (Fin 1 → Fin 1 ⊕ Fin 3) → M) :
-    ∑ d : Fin 1 → Fin 1 ⊕ Fin 3, f d = ∑ x : Fin 1 ⊕ Fin 3, f ![x] :=
+lemma sum_cov_one {M : Type*} [AddCommMonoid M] (f : (Fin 1 → Fin 1 ⊕ Fin 3) → M)
+    : ∑ d : Fin 1 → Fin 1 ⊕ Fin 3, f d = ∑ x : Fin 1 ⊕ Fin 3, f ![x] :=
   Fintype.sum_equiv (Equiv.funUnique (Fin 1) (Fin 1 ⊕ Fin 3)) _ _ fun d => by
     congr 1
     funext i
@@ -135,17 +138,21 @@ lemma sum_cov_one {M : Type*} [AddCommMonoid M] (f : (Fin 1 → Fin 1 ⊕ Fin 3)
     simp
 
 /-- A sum over families of three covector indices is a triple sum. -/
-lemma sum_cov_three {M : Type*} [AddCommMonoid M] (f : (Fin 3 → Fin 1 ⊕ Fin 3) → M) :
-    ∑ d : Fin 3 → Fin 1 ⊕ Fin 3, f d
+lemma sum_cov_three {M : Type*} [AddCommMonoid M] (f : (Fin 3 → Fin 1 ⊕ Fin 3) → M)
+    : ∑ d : Fin 3 → Fin 1 ⊕ Fin 3, f d
       = ∑ x : Fin 1 ⊕ Fin 3, ∑ y : Fin 1 ⊕ Fin 3, ∑ z : Fin 1 ⊕ Fin 3, f ![x, y, z] := by
   rw [show (∑ d : Fin 3 → Fin 1 ⊕ Fin 3, f d)
       = ∑ p : (Fin 1 ⊕ Fin 3) × (Fin 1 ⊕ Fin 3) × (Fin 1 ⊕ Fin 3),
         f ![p.1, p.2.1, p.2.2] from
-      Fintype.sum_equiv
-        { toFun := fun d => (d 0, d 1, d 2)
-          invFun := fun p => ![p.1, p.2.1, p.2.2]
-          left_inv := fun d => by funext i; fin_cases i <;> simp
-          right_inv := fun p => by simp } _ _ fun d => by
+    Fintype.sum_equiv
+      {
+        toFun := fun d => (d 0, d 1, d 2)
+        invFun := fun p => ![p.1, p.2.1, p.2.2]
+        left_inv := fun d => by funext i; fin_cases i <;> simp
+        right_inv := fun p => by simp
+      }
+      _ _
+      fun d => by
         congr 1
         funext i
         fin_cases i <;> simp]
@@ -163,13 +170,15 @@ of `IsGaugeSector` moving every index by the Lorentz matrix of the `SL(2,ℂ)` e
 -/
 
 include h in
-/-- An underived field-strength symbol, viewed as a family indexed by its two covector
-  indices, is a bi-Lorentz tensor. -/
-lemma isLorentzCovariant_F_underived (φ : Module.Dual ℝ GaugeAlgebra) :
-    IsLorentzCovariant 2 B repLorentz
-      (ofComponents fun d : Fin 2 → Fin 1 ⊕ Fin 3 => F ![] (d 0) (d 1) φ) := by
+/--
+An underived field-strength symbol, viewed as a family indexed by its two covector
+indices, is a bi-Lorentz tensor.
+-/
+lemma isLorentzCovariant_F_underived (φ : Module.Dual ℝ GaugeAlgebra)
+    : IsLorentzCovariant 2 B repLorentz
+      (ofComponents fun d : Fin 2 → Fin 1 ⊕ Fin 3 => F (![]) (d 0) (d 1) φ) := by
   refine (isLorentzCovariant_ofComponents_iff _).2 fun g l => ?_
-  rw [h.repLorentz_F g 0 ![] (l 0) (l 1) φ,
+  rw [h.repLorentz_F g 0 (![]) (l 0) (l 1) φ,
     Finset.sum_eq_single (![] : Fin 0 → Fin 1 ⊕ Fin 3)
       (fun b _ hb => absurd (Subsingleton.elim b ![]) hb)
       (fun hb => absurd (Finset.mem_univ _) hb),
@@ -181,21 +190,23 @@ lemma isLorentzCovariant_F_underived (φ : Module.Dual ℝ GaugeAlgebra) :
   simp only [Fin.prod_univ_two, Matrix.cons_val_zero, Matrix.cons_val_one]
 
 include h in
-/-- A once-derived field-strength symbol, viewed as a family indexed by its derivative
-  slot and its two covector indices, is a triple Lorentz tensor. -/
-lemma isLorentzCovariant_F_deriv_one (φ : Module.Dual ℝ GaugeAlgebra) :
-    IsLorentzCovariant 3 B repLorentz
-      (ofComponents fun d : Fin 3 → Fin 1 ⊕ Fin 3 => F ![d 0] (d 1) (d 2) φ) := by
+/--
+A once-derived field-strength symbol, viewed as a family indexed by its derivative
+slot and its two covector indices, is a triple Lorentz tensor.
+-/
+lemma isLorentzCovariant_F_deriv_one (φ : Module.Dual ℝ GaugeAlgebra)
+    : IsLorentzCovariant 3 B repLorentz
+      (ofComponents fun d : Fin 3 → Fin 1 ⊕ Fin 3 => F (![d 0]) (d 1) (d 2) φ) := by
   refine (isLorentzCovariant_ofComponents_iff _).2 fun g l => ?_
-  rw [h.repLorentz_F g 1 ![l 0] (l 1) (l 2) φ, sum_cov_one, sum_cov_three]
+  rw [h.repLorentz_F g 1 (![l 0]) (l 1) (l 2) φ, sum_cov_one, sum_cov_three]
   refine Finset.sum_congr rfl fun x _ => ?_
   rw [Finset.smul_sum]
   refine Finset.sum_congr rfl fun y _ => ?_
   rw [smul_smul, Finset.smul_sum]
   refine Finset.sum_congr rfl fun z _ => ?_
   rw [smul_smul]
-  simp only [Fin.prod_univ_one, Fin.prod_univ_three, Matrix.cons_val_zero,
-    Matrix.cons_val_one, Matrix.head_cons, Matrix.cons_val_two, Matrix.tail_cons]
+  simp only [Fin.prod_univ_one, Fin.prod_univ_three, Matrix.cons_val_zero, Matrix.cons_val_one,
+    Matrix.head_cons, Matrix.cons_val_two, Matrix.tail_cons]
 
 /-!
 
@@ -208,11 +219,13 @@ hence zero, and the trace vanishes with them.
 
 -/
 
-/-- The metric trace of a bi-Lorentz family antisymmetric in its two indices vanishes:
-  the metric is diagonal, and the diagonal components of such a family are zero. -/
-lemma ofComponents_metric_eq_zero_of_antisymm {T : (Fin 2 → Fin 1 ⊕ Fin 3) → B}
-    (hswap : ∀ x y : Fin 1 ⊕ Fin 3, T ![y, x] = - T ![x, y]) :
-    ofComponents T RankTwo.metric = 0 := by
+/--
+The metric trace of a bi-Lorentz family antisymmetric in its two indices vanishes:
+the metric is diagonal, and the diagonal components of such a family are zero.
+-/
+lemma ofComponents_metric_eq_zero_of_antisymm
+    {T : (Fin 2 → Fin 1 ⊕ Fin 3) → B} (hswap : ∀ x y : Fin 1 ⊕ Fin 3, T ![y, x] = - T ![x, y])
+    : ofComponents T RankTwo.metric = 0 := by
   rw [RankTwo.ofComponents_metric]
   refine Finset.sum_eq_zero fun d _ => ?_
   rcases eq_or_ne (d 0) (d 1) with heq | hne
@@ -242,40 +255,57 @@ join of them.
 
 -/
 
-/-- A finite join of the spans of bi-Lorentz families with vanishing metric traces carries
-  no Lorentz invariant modulo a Lorentz-stable submodule: a Lorentz invariant of the join
-  together with `S` lies in `S`. Each span reduces to the line through its metric
-  contraction, which is zero, and `ReducesInvariantsTo.biSup` combines the reductions. -/
-lemma mem_of_lorentz_invariant_biSup_rankTwo_span {ι : Type} [DecidableEq ι]
+/--
+A finite join of the spans of bi-Lorentz families with vanishing metric traces carries
+no Lorentz invariant modulo a Lorentz-stable submodule: a Lorentz invariant of the join
+together with `S` lies in `S`. Each span reduces to the line through its metric
+contraction, which is zero, and `ReducesInvariantsTo.biSup` combines the reductions.
+-/
+lemma mem_of_lorentz_invariant_biSup_rankTwo_span
+    {ι : Type} [DecidableEq ι]
     {T : ι → (Fin 2 → Fin 1 ⊕ Fin 3) → B}
     (hT : ∀ i, IsLorentzCovariant 2 B repLorentz (ofComponents (T i)))
-    (hzero : ∀ i, ofComponents (T i) RankTwo.metric = 0) (S : Submodule ℂ B)
-    (hS : ∀ g : SL(2,ℂ), ∀ y ∈ S, repLorentz g y ∈ S) (s : Finset ι) {x : B}
-    (hx : x ∈ (⨆ i ∈ s, Submodule.span ℂ (Set.range (T i))) ⊔ S)
-    (hinv : ∀ g : SL(2,ℂ), repLorentz g x = x) : x ∈ S := by
+    (hzero : ∀ i, ofComponents (T i) RankTwo.metric = 0)
+    (S : Submodule ℂ B) (hS : ∀ g : SL(2,ℂ), ∀ y ∈ S, repLorentz g y ∈ S)
+    (s : Finset ι)
+    {x : B} (hx : x ∈ (⨆ i ∈ s, Submodule.span ℂ (Set.range (T i))) ⊔ S)
+    (hinv : ∀ g : SL(2,ℂ), repLorentz g x = x)
+    : x ∈ S := by
   simp_rw [← range_ofComponents] at hx
-  simpa using ReducesInvariantsTo.biSup
-    (fun i => (RankTwo.reducesInvariantsTo_span_metric (hT i)).mono_right
-      (Submodule.span_singleton_eq_bot.2 (hzero i)).le)
-    (fun i => (hT i).isStableUnder_range) isStableUnder_bot s S hS x hx hinv
+  simpa using
+    ReducesInvariantsTo.biSup
+      (fun i =>
+        (RankTwo.reducesInvariantsTo_span_metric (hT i)).mono_right
+          (Submodule.span_singleton_eq_bot.2 (hzero i)).le)
+      (fun i => (hT i).isStableUnder_range)
+      isStableUnder_bot s S hS x hx hinv
 
-/-- A finite join of the spans of triple Lorentz families carries no Lorentz invariant
-  modulo a Lorentz-stable submodule: three covector indices carry no invariant contraction
-  at all, so each span reduces to `⊥`, and `ReducesInvariantsTo.biSup` combines the
-  reductions. -/
-lemma mem_of_lorentz_invariant_biSup_rankThree_span {ι : Type} [DecidableEq ι]
+/--
+A finite join of the spans of triple Lorentz families carries no Lorentz invariant
+modulo a Lorentz-stable submodule: three covector indices carry no invariant contraction
+at all, so each span reduces to `⊥`, and `ReducesInvariantsTo.biSup` combines the
+reductions.
+-/
+lemma mem_of_lorentz_invariant_biSup_rankThree_span
+    {ι : Type} [DecidableEq ι]
     {T : ι → (Fin 3 → Fin 1 ⊕ Fin 3) → B}
     (hT : ∀ i, IsLorentzCovariant 3 B repLorentz (ofComponents (T i)))
-    (S : Submodule ℂ B) (hS : ∀ g : SL(2,ℂ), ∀ y ∈ S, repLorentz g y ∈ S) (s : Finset ι)
+    (S : Submodule ℂ B) (hS : ∀ g : SL(2,ℂ), ∀ y ∈ S, repLorentz g y ∈ S)
+    (s : Finset ι)
     {x : B} (hx : x ∈ (⨆ i ∈ s, Submodule.span ℂ (Set.range (T i))) ⊔ S)
-    (hinv : ∀ g : SL(2,ℂ), repLorentz g x = x) : x ∈ S := by
+    (hinv : ∀ g : SL(2,ℂ), repLorentz g x = x)
+    : x ∈ S := by
   simp_rw [← range_ofComponents] at hx
-  simpa using ReducesInvariantsTo.biSup (fun i => RankThree.reducesInvariantsTo_bot (hT i))
-    (fun i => (hT i).isStableUnder_range) isStableUnder_bot s S hS x hx hinv
+  simpa using
+    ReducesInvariantsTo.biSup
+      (fun i => RankThree.reducesInvariantsTo_bot (hT i))
+      (fun i => (hT i).isStableUnder_range)
+      isStableUnder_bot s S hS x hx hinv
 
 /-- A join over a finite index type is the join over its universal finite set. -/
-lemma iSup_eq_biSup_univ {ι : Type} [Fintype ι] (f : ι → Submodule ℂ B) :
-    ⨆ i, f i = ⨆ i ∈ (Finset.univ : Finset ι), f i := by simp
+lemma iSup_eq_biSup_univ {ι : Type} [Fintype ι] (f : ι → Submodule ℂ B)
+    : ⨆ i, f i = ⨆ i ∈ (Finset.univ : Finset ι), f i := by
+  simp
 
 /-!
 
@@ -290,47 +320,56 @@ holds at the colour and isospin directions just as at the hypercharge one.
 -/
 
 include h in
-/-- The metric trace of the underived field-strength symbols at a fixed direction of the
-  gauge algebra vanishes, the symbol being antisymmetric in its two covector indices. -/
-lemma ofComponents_F_underived_metric_eq_zero (φ : Module.Dual ℝ GaugeAlgebra) :
-    ofComponents (fun d : Fin 2 → Fin 1 ⊕ Fin 3 => F ![] (d 0) (d 1) φ) RankTwo.metric = 0 :=
+/--
+The metric trace of the underived field-strength symbols at a fixed direction of the
+gauge algebra vanishes, the symbol being antisymmetric in its two covector indices.
+-/
+lemma ofComponents_F_underived_metric_eq_zero (φ : Module.Dual ℝ GaugeAlgebra)
+    : ofComponents (fun d : Fin 2 → Fin 1 ⊕ Fin 3 => F (![]) (d 0) (d 1) φ) RankTwo.metric = 0 :=
   ofComponents_metric_eq_zero_of_antisymm fun x y => by
     simp only [Matrix.cons_val_zero, Matrix.cons_val_one]
-    exact h.F_antisymm ![] x y φ
+    exact h.F_antisymm (![]) x y φ
 
 include h in
-/-- The underived field strengths lie in the join, over the twelve directions of the
-  standard basis of the gauge algebra, of the spans of the bi-Lorentz families they
-  form. -/
-lemma derivSubmodule_zero_le_iSup_span :
-    h.derivSubmodule 0 ≤ ⨆ c : Fin 8 ⊕ Fin 3 ⊕ Fin 1,
-      Submodule.span ℂ (Set.range fun d : Fin 2 → Fin 1 ⊕ Fin 3 =>
-        F ![] (d 0) (d 1) (GaugeAlgebra.stdBasis.coord c)) := by
+/--
+The underived field strengths lie in the join, over the twelve directions of the
+standard basis of the gauge algebra, of the spans of the bi-Lorentz families they
+form.
+-/
+lemma derivSubmodule_zero_le_iSup_span
+    : h.derivSubmodule 0
+      ≤ ⨆ c : Fin 8 ⊕ Fin 3 ⊕ Fin 1,
+        Submodule.span ℂ (Set.range fun d : Fin 2 → Fin 1 ⊕ Fin 3 =>
+          F ![] (d 0) (d 1) (GaugeAlgebra.stdBasis.coord c)) := by
   rw [derivSubmodule]
   refine iSup_le fun l => iSup_le fun μ => iSup_le fun ν => ?_
   rw [Submodule.span_le]
   rintro x ⟨φ, rfl⟩
   rw [SetLike.mem_coe, Subsingleton.elim l ![]]
-  have hle : (⨆ c : Fin 8 ⊕ Fin 3 ⊕ Fin 1,
-        ℂ ∙ F ![] μ ν (GaugeAlgebra.stdBasis.coord c))
-      ≤ ⨆ c : Fin 8 ⊕ Fin 3 ⊕ Fin 1,
-        Submodule.span ℂ (Set.range fun d : Fin 2 → Fin 1 ⊕ Fin 3 =>
-        F ![] (d 0) (d 1) (GaugeAlgebra.stdBasis.coord c)) := by
+  have hle
+      : (⨆ c : Fin 8 ⊕ Fin 3 ⊕ Fin 1,
+          ℂ ∙ F ![] μ ν (GaugeAlgebra.stdBasis.coord c))
+        ≤ ⨆ c : Fin 8 ⊕ Fin 3 ⊕ Fin 1,
+          Submodule.span ℂ (Set.range fun d : Fin 2 → Fin 1 ⊕ Fin 3 =>
+          F ![] (d 0) (d 1) (GaugeAlgebra.stdBasis.coord c)) := by
     refine iSup_mono fun c => ?_
     rw [Submodule.span_singleton_le_iff_mem]
     exact Submodule.subset_span ⟨![μ, ν], by simp⟩
-  exact hle (F_mem_iSup_span_coord ![] μ ν φ)
+  exact hle (F_mem_iSup_span_coord (![]) μ ν φ)
 
 include h in
-/-- Mass weight four carries no Lorentz invariant modulo a Lorentz-stable submodule: a
-  Lorentz invariant of `massWeightSubmodule 4 ⊔ S` lies in `S`. -/
-lemma mem_of_lorentz_invariant_massWeightSubmodule_four_sup (S : Submodule ℂ B)
-    (hSL : ∀ g : SL(2,ℂ), ∀ y ∈ S, repLorentz g y ∈ S) {x : B}
-    (hx : x ∈ h.massWeightSubmodule 4 ⊔ S)
-    (hinv : ∀ g : SL(2,ℂ), repLorentz g x = x) : x ∈ S := by
+/--
+Mass weight four carries no Lorentz invariant modulo a Lorentz-stable submodule: a
+Lorentz invariant of `massWeightSubmodule 4 ⊔ S` lies in `S`.
+-/
+lemma mem_of_lorentz_invariant_massWeightSubmodule_four_sup
+    (S : Submodule ℂ B) (hSL : ∀ g : SL(2,ℂ), ∀ y ∈ S, repLorentz g y ∈ S)
+    {x : B} (hx : x ∈ h.massWeightSubmodule 4 ⊔ S) (hinv : ∀ g : SL(2,ℂ), repLorentz g x = x)
+    : x ∈ S := by
   refine mem_of_lorentz_invariant_biSup_rankTwo_span
     (fun c => h.isLorentzCovariant_F_underived (GaugeAlgebra.stdBasis.coord c))
-    (fun c => h.ofComponents_F_underived_metric_eq_zero _) S hSL Finset.univ ?_ hinv
+    (fun c => h.ofComponents_F_underived_metric_eq_zero _)
+    S hSL Finset.univ ?_ hinv
   rw [h.massWeightSubmodule_four_eq] at hx
   refine sup_le_sup_right ?_ S hx
   rw [← iSup_eq_biSup_univ]
@@ -354,37 +393,43 @@ lemma etaExpand_cov_one (l : Fin 1 → Fin 1 ⊕ Fin 3) : ![l 0] = l := by
   rfl
 
 include h in
-/-- The once-derived field strengths lie in the join, over the twelve directions of the
-  standard basis of the gauge algebra, of the spans of the triple Lorentz families they
-  form. -/
-lemma derivSubmodule_one_le_iSup_span :
-    h.derivSubmodule 1 ≤ ⨆ c : Fin 8 ⊕ Fin 3 ⊕ Fin 1,
-      Submodule.span ℂ (Set.range fun d : Fin 3 → Fin 1 ⊕ Fin 3 =>
-        F ![d 0] (d 1) (d 2) (GaugeAlgebra.stdBasis.coord c)) := by
+/--
+The once-derived field strengths lie in the join, over the twelve directions of the
+standard basis of the gauge algebra, of the spans of the triple Lorentz families they
+form.
+-/
+lemma derivSubmodule_one_le_iSup_span
+    : h.derivSubmodule 1
+      ≤ ⨆ c : Fin 8 ⊕ Fin 3 ⊕ Fin 1,
+        Submodule.span ℂ (Set.range fun d : Fin 3 → Fin 1 ⊕ Fin 3 =>
+          F ![d 0] (d 1) (d 2) (GaugeAlgebra.stdBasis.coord c)) := by
   rw [derivSubmodule]
   refine iSup_le fun l => iSup_le fun μ => iSup_le fun ν => ?_
   rw [Submodule.span_le]
   rintro x ⟨φ, rfl⟩
   rw [SetLike.mem_coe]
-  have hle : (⨆ c : Fin 8 ⊕ Fin 3 ⊕ Fin 1,
-        ℂ ∙ F l μ ν (GaugeAlgebra.stdBasis.coord c))
-      ≤ ⨆ c : Fin 8 ⊕ Fin 3 ⊕ Fin 1,
-        Submodule.span ℂ (Set.range fun d : Fin 3 → Fin 1 ⊕ Fin 3 =>
-        F ![d 0] (d 1) (d 2) (GaugeAlgebra.stdBasis.coord c)) := by
+  have hle
+      : (⨆ c : Fin 8 ⊕ Fin 3 ⊕ Fin 1,
+          ℂ ∙ F l μ ν (GaugeAlgebra.stdBasis.coord c))
+        ≤ ⨆ c : Fin 8 ⊕ Fin 3 ⊕ Fin 1,
+          Submodule.span ℂ (Set.range fun d : Fin 3 → Fin 1 ⊕ Fin 3 =>
+          F ![d 0] (d 1) (d 2) (GaugeAlgebra.stdBasis.coord c)) := by
     refine iSup_mono fun c => ?_
     rw [Submodule.span_singleton_le_iff_mem]
     refine Submodule.subset_span ⟨![l 0, μ, ν], ?_⟩
-    simp only [Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons,
-      Matrix.cons_val_two, Matrix.tail_cons, etaExpand_cov_one]
+    simp only [Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons, Matrix.cons_val_two,
+      Matrix.tail_cons, etaExpand_cov_one]
   exact hle (F_mem_iSup_span_coord l μ ν φ)
 
 include h in
-/-- Mass weight six carries no Lorentz invariant modulo a Lorentz-stable submodule: a
-  Lorentz invariant of `massWeightSubmodule 6 ⊔ S` lies in `S`. -/
-lemma mem_of_lorentz_invariant_massWeightSubmodule_six_sup (S : Submodule ℂ B)
-    (hSL : ∀ g : SL(2,ℂ), ∀ y ∈ S, repLorentz g y ∈ S) {x : B}
-    (hx : x ∈ h.massWeightSubmodule 6 ⊔ S)
-    (hinv : ∀ g : SL(2,ℂ), repLorentz g x = x) : x ∈ S := by
+/--
+Mass weight six carries no Lorentz invariant modulo a Lorentz-stable submodule: a
+Lorentz invariant of `massWeightSubmodule 6 ⊔ S` lies in `S`.
+-/
+lemma mem_of_lorentz_invariant_massWeightSubmodule_six_sup
+    (S : Submodule ℂ B) (hSL : ∀ g : SL(2,ℂ), ∀ y ∈ S, repLorentz g y ∈ S)
+    {x : B} (hx : x ∈ h.massWeightSubmodule 6 ⊔ S) (hinv : ∀ g : SL(2,ℂ), repLorentz g x = x)
+    : x ∈ S := by
   refine mem_of_lorentz_invariant_biSup_rankThree_span
     (fun c => h.isLorentzCovariant_F_deriv_one (GaugeAlgebra.stdBasis.coord c))
     S hSL Finset.univ ?_ hinv
@@ -409,15 +454,17 @@ representations being multiplicative, without lying in any given `S`.
 -/
 
 include h in
-/-- Between mass weight zero and mass weight eight there is no Lorentz invariant: a
-  Lorentz invariant of `massWeightSubmodule w ⊔ S` for `0 < w < 8` lies in `S`. The five
-  odd or small weights are trivial submodules, and weights four and six are sections F
-  and G. -/
-lemma mem_of_lorentz_invariant_massWeightSubmodule_lt_eight_sup (w : ℕ) (hw0 : 0 < w)
-    (hw : w < 8) (S : Submodule ℂ B)
-    (hSL : ∀ g : SL(2,ℂ), ∀ y ∈ S, repLorentz g y ∈ S) {x : B}
-    (hx : x ∈ h.massWeightSubmodule w ⊔ S)
-    (hinv : ∀ g : SL(2,ℂ), repLorentz g x = x) : x ∈ S := by
+/--
+Between mass weight zero and mass weight eight there is no Lorentz invariant: a
+Lorentz invariant of `massWeightSubmodule w ⊔ S` for `0 < w < 8` lies in `S`. The five
+odd or small weights are trivial submodules, and weights four and six are sections F
+and G.
+-/
+lemma mem_of_lorentz_invariant_massWeightSubmodule_lt_eight_sup
+    (w : ℕ) (hw0 : 0 < w) (hw : w < 8)
+    (S : Submodule ℂ B) (hSL : ∀ g : SL(2,ℂ), ∀ y ∈ S, repLorentz g y ∈ S)
+    {x : B} (hx : x ∈ h.massWeightSubmodule w ⊔ S) (hinv : ∀ g : SL(2,ℂ), repLorentz g x = x)
+    : x ∈ S := by
   interval_cases w
   · rwa [h.massWeightSubmodule_one_eq, bot_sup_eq] at hx
   · rwa [h.massWeightSubmodule_two_eq, bot_sup_eq] at hx
@@ -427,42 +474,56 @@ lemma mem_of_lorentz_invariant_massWeightSubmodule_lt_eight_sup (w : ℕ) (hw0 :
   · exact h.mem_of_lorentz_invariant_massWeightSubmodule_six_sup S hSL hx hinv
   · rwa [h.massWeightSubmodule_seven_eq, bot_sup_eq] at hx
 
-/-- The classification below mass weight eight as an equivalence, in the shape of
-  `mem_massWeightSubmodule_eight_sup_and_gauge_lorentz_invariant_iff`: an element of
-  `massWeightSubmodule w ⊔ S` for `0 < w < 8` is fixed by both groups exactly when it is
-  itself an element of `S` fixed by both groups. The span of invariants that the weight
-  eight statement leaves over is here the trivial one, so `x - y` lies in it exactly when
-  `x = y`. Gauge stability of `S` is not needed, and neither is gauge invariance of `x`:
-  the forward direction is
-  `mem_of_lorentz_invariant_massWeightSubmodule_lt_eight_sup`, which uses the Lorentz
-  group alone. -/
-lemma mem_massWeightSubmodule_lt_eight_sup_and_gauge_lorentz_invariant_iff (w : ℕ)
-    (hw0 : 0 < w) (hw : w < 8) (S : Submodule ℂ B)
-    (hSL : ∀ g : SL(2,ℂ), ∀ y ∈ S, repLorentz g y ∈ S) (x : B) :
-    (x ∈ h.massWeightSubmodule w ⊔ S ∧ (∀ g : GaugeGroupI, repGauge g x = x)
+/--
+The classification below mass weight eight as an equivalence, in the shape of
+`mem_massWeightSubmodule_eight_sup_and_gauge_lorentz_invariant_iff`: an element of
+`massWeightSubmodule w ⊔ S` for `0 < w < 8` is fixed by both groups exactly when it is
+itself an element of `S` fixed by both groups. The span of invariants that the weight
+eight statement leaves over is here the trivial one, so `x - y` lies in it exactly when
+`x = y`. Gauge stability of `S` is not needed, and neither is gauge invariance of `x`:
+the forward direction is
+`mem_of_lorentz_invariant_massWeightSubmodule_lt_eight_sup`, which uses the Lorentz
+group alone.
+-/
+lemma mem_massWeightSubmodule_lt_eight_sup_and_gauge_lorentz_invariant_iff
+    (w : ℕ) (hw0 : 0 < w) (hw : w < 8)
+    (S : Submodule ℂ B) (hSL : ∀ g : SL(2,ℂ), ∀ y ∈ S, repLorentz g y ∈ S)
+    (x : B)
+    : (x ∈ h.massWeightSubmodule w ⊔ S ∧ (∀ g : GaugeGroupI, repGauge g x = x)
         ∧ ∀ g : SL(2,ℂ), repLorentz g x = x)
-      ↔ ∃ y ∈ S, (∀ g : GaugeGroupI, repGauge g y = y)
-          ∧ (∀ g : SL(2,ℂ), repLorentz g y = y)
-          ∧ x = y := by
+      ↔ ∃ y ∈ S,
+        (∀ g : GaugeGroupI, repGauge g y = y) ∧ (∀ g : SL(2,ℂ), repLorentz g y = y) ∧ x = y := by
   constructor
   · rintro ⟨hx, hG, hL⟩
-    exact ⟨x, h.mem_of_lorentz_invariant_massWeightSubmodule_lt_eight_sup w hw0 hw S hSL
-      hx hL, hG, hL, rfl⟩
+    exact ⟨
+      x,
+      h.mem_of_lorentz_invariant_massWeightSubmodule_lt_eight_sup w hw0 hw S hSL hx hL,
+      hG,
+      hL,
+      rfl
+    ⟩
   · rintro ⟨y, hyS, hyG, hyL, rfl⟩
     exact ⟨Submodule.mem_sup_right hyS, hyG, hyL⟩
 
-/-- The same classification without the existential: below mass weight eight an element
-  of `massWeightSubmodule w ⊔ S` fixed by both groups is an element of `S` fixed by both
-  groups, and conversely. -/
-lemma mem_massWeightSubmodule_lt_eight_sup_and_gauge_lorentz_invariant_iff_mem (w : ℕ)
-    (hw0 : 0 < w) (hw : w < 8) (S : Submodule ℂ B)
-    (hSL : ∀ g : SL(2,ℂ), ∀ y ∈ S, repLorentz g y ∈ S) (x : B) :
-    (x ∈ h.massWeightSubmodule w ⊔ S ∧ (∀ g : GaugeGroupI, repGauge g x = x)
+/--
+The same classification without the existential: below mass weight eight an element
+of `massWeightSubmodule w ⊔ S` fixed by both groups is an element of `S` fixed by both
+groups, and conversely.
+-/
+lemma mem_massWeightSubmodule_lt_eight_sup_and_gauge_lorentz_invariant_iff_mem
+    (w : ℕ) (hw0 : 0 < w) (hw : w < 8)
+    (S : Submodule ℂ B) (hSL : ∀ g : SL(2,ℂ), ∀ y ∈ S, repLorentz g y ∈ S)
+    (x : B)
+    : (x ∈ h.massWeightSubmodule w ⊔ S ∧ (∀ g : GaugeGroupI, repGauge g x = x)
         ∧ ∀ g : SL(2,ℂ), repLorentz g x = x)
-      ↔ (x ∈ S ∧ (∀ g : GaugeGroupI, repGauge g x = x)
-          ∧ ∀ g : SL(2,ℂ), repLorentz g x = x) := by
-  refine ⟨fun hx => ⟨h.mem_of_lorentz_invariant_massWeightSubmodule_lt_eight_sup w hw0 hw
-    S hSL hx.1 hx.2.2, hx.2⟩, fun hx => ⟨Submodule.mem_sup_right hx.1, hx.2⟩⟩
+      ↔ (x ∈ S ∧ (∀ g : GaugeGroupI, repGauge g x = x) ∧ ∀ g : SL(2,ℂ), repLorentz g x = x) := by
+  refine ⟨
+    fun hx => ⟨
+      h.mem_of_lorentz_invariant_massWeightSubmodule_lt_eight_sup w hw0 hw S hSL hx.1 hx.2.2,
+      hx.2
+    ⟩,
+    fun hx => ⟨Submodule.mem_sup_right hx.1, hx.2⟩
+  ⟩
 
 end IsGaugeSector
 

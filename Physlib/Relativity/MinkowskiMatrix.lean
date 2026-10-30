@@ -87,8 +87,9 @@ lemma as_diagonal : @minkowskiMatrix d = diagonal (Sum.elim 1 (-1)) := by
   simp [minkowskiMatrix, LieAlgebra.Orthogonal.indefiniteDiagonal]
 
 /-- The Minkowski matrix as a block matrix. -/
-lemma as_block : minkowskiMatrix =
-    Matrix.fromBlocks (1 : Matrix (Fin 1) (Fin 1) ℝ) 0 0 (-1 : Matrix (Fin d) (Fin d) ℝ) := by
+lemma as_block
+    : minkowskiMatrix
+      = Matrix.fromBlocks (1 : Matrix (Fin 1) (Fin 1) ℝ) 0 0 (-1 : Matrix (Fin d) (Fin d) ℝ) := by
   simp [as_diagonal, ← fromBlocks_diagonal, ← diagonal_one]
 
 /-!
@@ -112,9 +113,7 @@ We prove some simple properties related to the components of the Minkowski matri
 -/
 
 /-- The `time-time` component of the Minkowski matrix is `1`. -/
-@[simp]
-lemma inl_0_inl_0 : @minkowskiMatrix d (Sum.inl 0) (Sum.inl 0) = 1 := by
-  rfl
+@[simp] lemma inl_0_inl_0 : @minkowskiMatrix d (Sum.inl 0) (Sum.inl 0) = 1 := by rfl
 
 /-- The space diagonal components of the Minkowski matrix are `-1`. -/
 @[simp]
@@ -126,13 +125,14 @@ lemma inr_i_inr_i (i : Fin d) : @minkowskiMatrix d (Sum.inr i) (Sum.inr i) = -1 
 lemma off_diag_zero {μ ν : Fin 1 ⊕ Fin d} (h : μ ≠ ν) : η μ ν = 0 := by
   aesop (add safe forward as_diagonal)
 
-lemma η_diag_ne_zero {μ : Fin 1 ⊕ Fin d} : η μ μ ≠ 0 := by
-  aesop (add safe forward as_diagonal)
+lemma η_diag_ne_zero {μ : Fin 1 ⊕ Fin d} : η μ μ ≠ 0 := by aesop (add safe forward as_diagonal)
 
-/-- Right multiplication of a row vector by the Minkowski matrix multiplies each component by
-the corresponding diagonal sign. -/
-lemma vecMul_apply (v : (Fin 1 ⊕ Fin d) → ℝ) (μ : Fin 1 ⊕ Fin d) :
-    (v ᵥ* minkowskiMatrix) μ = v μ * minkowskiMatrix μ μ := by
+/--
+Right multiplication of a row vector by the Minkowski matrix multiplies each component by
+the corresponding diagonal sign.
+-/
+lemma vecMul_apply (v : (Fin 1 ⊕ Fin d) → ℝ) (μ : Fin 1 ⊕ Fin d)
+    : (v ᵥ* minkowskiMatrix) μ = v μ * minkowskiMatrix μ μ := by
   rw [as_diagonal, Matrix.vecMul_diagonal]
   simp
 
@@ -147,8 +147,7 @@ as well as other properties related to squaring the Minkowski matrix.
 
 /-- The Minkowski matrix is self-inverting. -/
 @[simp]
-lemma sq : @minkowskiMatrix d * minkowskiMatrix = 1 := by
-  simp [as_block, fromBlocks_multiply]
+lemma sq : @minkowskiMatrix d * minkowskiMatrix = 1 := by simp [as_block, fromBlocks_multiply]
 
 /-- Multiplying any element on the diagonal of the Minkowski matrix by itself gives `1`. -/
 @[simp]
@@ -156,8 +155,7 @@ lemma η_apply_mul_η_apply_diag (μ : Fin 1 ⊕ Fin d) : η μ μ * η μ μ = 
   aesop (add safe forward as_diagonal)
 
 @[simp]
-lemma η_apply_sq_eq_one (μ : Fin 1 ⊕ Fin d) : η μ μ ^ 2 = 1 := by
-  cases μ <;> simp [as_diagonal]
+lemma η_apply_sq_eq_one (μ : Fin 1 ⊕ Fin d) : η μ μ ^ 2 = 1 := by cases μ <;> simp [as_diagonal]
 
 /-!
 
@@ -168,9 +166,7 @@ The Minkowski matrix is symmetric, due to it being diagonal.
 -/
 
 /-- The Minkowski matrix is symmetric. -/
-@[simp]
-lemma eq_transpose : minkowskiMatrixᵀ = @minkowskiMatrix d := by
-  simp [as_diagonal]
+@[simp] lemma eq_transpose : minkowskiMatrixᵀ = @minkowskiMatrix d := by simp [as_diagonal]
 
 /-!
 
@@ -181,11 +177,11 @@ We show the determinant of the Minkowski matrix is equal to `(-1)^d` where
 
 -/
 
-/-- The determinant of the Minkowski matrix is equal to `-1` to the power
-  of the number of spatial dimensions. -/
-@[simp]
-lemma det_eq_neg_one_pow_d : (@minkowskiMatrix d).det = (- 1) ^ d := by
-  simp [as_diagonal]
+/--
+The determinant of the Minkowski matrix is equal to `-1` to the power
+of the number of spatial dimensions.
+-/
+@[simp] lemma det_eq_neg_one_pow_d : (@minkowskiMatrix d).det = (-1) ^ d := by simp [as_diagonal]
 
 /-- The product of all diagonal entries of the Minkowski matrix is `(-1) ^ d`. -/
 lemma prod_diagonal : ∏ μ : Fin 1 ⊕ Fin d, minkowskiMatrix μ μ = (-1) ^ d := by
@@ -195,13 +191,10 @@ lemma prod_diagonal : ∏ μ : Fin 1 ⊕ Fin d, minkowskiMatrix μ μ = (-1) ^ d
   simp
 
 /-- Reindexing all diagonal entries injectively does not change their product. -/
-lemma prod_diagonal_comp_of_injective {v : Fin (d + 1) → Fin 1 ⊕ Fin d}
-    (hv : Function.Injective v) :
-    ∏ i, minkowskiMatrix (v i) (v i) = (-1) ^ d := by
-  have hcard : Fintype.card (Fin (d + 1)) = Fintype.card (Fin 1 ⊕ Fin d) := by
-    simp [Nat.add_comm]
-  have hbij : Function.Bijective v :=
-    (Fintype.bijective_iff_injective_and_card v).mpr ⟨hv, hcard⟩
+lemma prod_diagonal_comp_of_injective {v : Fin (d + 1) → Fin 1 ⊕ Fin d} (hv : Function.Injective v)
+    : ∏ i, minkowskiMatrix (v i) (v i) = (-1) ^ d := by
+  have hcard : Fintype.card (Fin (d + 1)) = Fintype.card (Fin 1 ⊕ Fin d) := by simp [Nat.add_comm]
+  have hbij : Function.Bijective v := (Fintype.bijective_iff_injective_and_card v).mpr ⟨hv, hcard⟩
   let e : Fin (d + 1) ≃ Fin 1 ⊕ Fin d := Equiv.ofBijective v hbij
   change ∏ i, minkowskiMatrix (e i) (e i) = (-1) ^ d
   exact (Equiv.prod_comp e (fun μ => minkowskiMatrix μ μ)).trans prod_diagonal
@@ -216,8 +209,7 @@ This is a useful part of the API but is not used often.
 
 -/
 
-lemma mul_η_diag_eq_iff {μ : Fin 1 ⊕ Fin d} {x y : ℝ} :
-    η μ μ * x = η μ μ * y ↔ x = y :=
+lemma mul_η_diag_eq_iff {μ : Fin 1 ⊕ Fin d} {x y : ℝ} : η μ μ * x = η μ μ * y ↔ x = y :=
   mul_right_inj' η_diag_ne_zero
 
 /-!
@@ -230,14 +222,13 @@ We show properties of the action of the Minkowski matrix on vectors.
 
 /-- The time components of a vector acted on by the Minkowski matrix remains unchanged. -/
 @[simp]
-lemma mulVec_inl_0 (v : (Fin 1 ⊕ Fin d) → ℝ) :
-    (η *ᵥ v) (Sum.inl 0) = v (Sum.inl 0) := by
+lemma mulVec_inl_0 (v : (Fin 1 ⊕ Fin d) → ℝ) : (η *ᵥ v) (Sum.inl 0) = v (Sum.inl 0) := by
   simp [as_diagonal, mulVec_diagonal]
 
 /-- The space components of a vector acted on by the Minkowski matrix swaps sign. -/
 @[simp]
-lemma mulVec_inr_i (v : (Fin 1 ⊕ Fin d) → ℝ) (i : Fin d) :
-    (η *ᵥ v) (Sum.inr i) = - v (Sum.inr i) := by
+lemma mulVec_inr_i (v : (Fin 1 ⊕ Fin d) → ℝ) (i : Fin d)
+    : (η *ᵥ v) (Sum.inr i) = - v (Sum.inr i) := by
   simp [as_diagonal, mulVec_diagonal]
 
 /-!
@@ -258,8 +249,10 @@ This notion of a dual is not quite a homomorphism because it reverses the order 
 
 variable (Λ Λ' : Matrix (Fin 1 ⊕ Fin d) (Fin 1 ⊕ Fin d) ℝ)
 
-/-- The dual of a matrix with respect to the Minkowski metric.
-  A suitable name for this construction is the Minkowski dual. -/
+/--
+The dual of a matrix with respect to the Minkowski metric.
+A suitable name for this construction is the Minkowski dual.
+-/
 def dual : Matrix (Fin 1 ⊕ Fin d) (Fin 1 ⊕ Fin d) ℝ := η * Λᵀ * η
 
 /-!
@@ -310,9 +303,7 @@ lemma dual_dual : Function.Involutive (@dual d) := by
 -/
 
 /-- The Minkowski dual commutes with the transpose. -/
-@[simp]
-lemma dual_transpose : dual Λᵀ = (dual Λ)ᵀ := by
-  simp [dual, mul_assoc]
+@[simp] lemma dual_transpose : dual Λᵀ = (dual Λ)ᵀ := by simp [dual, mul_assoc]
 
 /-!
 
@@ -321,9 +312,7 @@ lemma dual_transpose : dual Λᵀ = (dual Λ)ᵀ := by
 -/
 
 /-- The Minkowski dual preserves the Minkowski matrix. -/
-@[simp]
-lemma dual_eta : @dual d η = η := by
-  simp [dual]
+@[simp] lemma dual_eta : @dual d η = η := by simp [dual]
 
 /-!
 
@@ -347,16 +336,18 @@ We show a number of properties related to the components of the duals.
 
 -/
 
-/-- Expansion of the components of the Minkowski dual in terms of the components
-  of the original matrix. -/
-lemma dual_apply (μ ν : Fin 1 ⊕ Fin d) :
-    dual Λ μ ν = η μ μ * Λ ν μ * η ν ν := by
+/--
+Expansion of the components of the Minkowski dual in terms of the components
+of the original matrix.
+-/
+lemma dual_apply (μ ν : Fin 1 ⊕ Fin d) : dual Λ μ ν = η μ μ * Λ ν μ * η ν ν := by
   simp [dual, as_diagonal]
 
-/-- The components of the Minkowski dual of a matrix multiplied by the Minkowski matrix
-  in terms of the original matrix. -/
-lemma dual_apply_minkowskiMatrix (μ ν : Fin 1 ⊕ Fin d) :
-    dual Λ μ ν * η ν ν = η μ μ * Λ ν μ := by
+/--
+The components of the Minkowski dual of a matrix multiplied by the Minkowski matrix
+in terms of the original matrix.
+-/
+lemma dual_apply_minkowskiMatrix (μ ν : Fin 1 ⊕ Fin d) : dual Λ μ ν * η ν ν = η μ μ * Λ ν μ := by
   simp [dual_apply, mul_assoc]
 
 end minkowskiMatrix

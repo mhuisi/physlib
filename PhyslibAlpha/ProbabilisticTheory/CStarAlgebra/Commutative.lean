@@ -43,7 +43,6 @@ self-adjoint part of a commutative C⋆-algebra is a classical system.
 
 @[expose] public section
 
-
 namespace CommCStarAlgebra
 open ProbabilisticTheory
 open scoped ComplexOrder
@@ -56,34 +55,34 @@ variable {A : Type*} [CommCStarAlgebra A]
 noncomputable def character (χ : WeakDual.characterSpace ℂ A) : A →⋆ₐ[ℂ] ℂ :=
   (ContinuousMap.evalStarAlgHom ℂ ℂ χ).comp (gelfandStarTransform A).toStarAlgHom
 
-@[simp]
-lemma character_apply (χ : WeakDual.characterSpace ℂ A) (a : A) : character χ a = χ a := rfl
+@[simp] lemma character_apply (χ : WeakDual.characterSpace ℂ A) (a : A) : character χ a = χ a := rfl
 
 /-- Characters separate the elements of a commutative C⋆-algebra. -/
 lemma ext_character {a b : A} (h : ∀ χ : WeakDual.characterSpace ℂ A, χ a = χ b) : a = b :=
   (gelfandStarTransform A).injective (ContinuousMap.ext h)
 
 /-- A character takes real values on self-adjoint elements. -/
-lemma character_eq_re {a : A} (ha : IsSelfAdjoint a) (χ : WeakDual.characterSpace ℂ A) :
-    χ a = ((χ a).re : ℂ) := by
-  have h : star (χ a) = χ a := by
-    rw [← character_apply, ← map_star, ha.star_eq]
+lemma character_eq_re {a : A} (ha : IsSelfAdjoint a) (χ : WeakDual.characterSpace ℂ A)
+    : χ a = ((χ a).re : ℂ) := by
+  have h : star (χ a) = χ a := by rw [← character_apply, ← map_star, ha.star_eq]
   exact (Complex.conj_eq_iff_re.1 h).symm
 
 /-- The pointwise minimum of two self-adjoint elements, taken character by character. -/
 noncomputable def inf (a b : A) : A :=
-  (gelfandStarTransform A).symm
-    ⟨fun χ => ((min (χ a).re (χ b).re : ℝ) : ℂ), by
+  (gelfandStarTransform A).symm ⟨
+    fun χ => ((min (χ a).re (χ b).re : ℝ) : ℂ),
+    by
       have ha : Continuous fun χ : WeakDual.characterSpace ℂ A => χ a :=
         (WeakDual.gelfandTransform ℂ A a).continuous
       have hb : Continuous fun χ : WeakDual.characterSpace ℂ A => χ b :=
         (WeakDual.gelfandTransform ℂ A b).continuous
-      exact Complex.continuous_ofReal.comp
-        ((Complex.continuous_re.comp ha).min (Complex.continuous_re.comp hb))⟩
+      exact Complex.continuous_ofReal.comp ((Complex.continuous_re.comp ha).min
+        (Complex.continuous_re.comp hb))
+  ⟩
 
 @[simp]
-lemma character_inf (a b : A) (χ : WeakDual.characterSpace ℂ A) :
-    χ (inf a b) = ((min (χ a).re (χ b).re : ℝ) : ℂ) := by
+lemma character_inf (a b : A) (χ : WeakDual.characterSpace ℂ A)
+    : χ (inf a b) = ((min (χ a).re (χ b).re : ℝ) : ℂ) := by
   change gelfandStarTransform A (inf a b) χ = _
   rw [inf, StarAlgEquiv.apply_symm_apply]
   rfl
@@ -98,15 +97,14 @@ lemma isSelfAdjoint_inf (a b : A) : IsSelfAdjoint (inf a b) :=
 variable [PartialOrder A] [StarOrderedRing A]
 
 /-- **Characters detect positivity.** -/
-lemma nonneg_iff_forall_character {a : A} :
-    0 ≤ a ↔ ∀ χ : WeakDual.characterSpace ℂ A, 0 ≤ χ a := by
+lemma nonneg_iff_forall_character {a : A} : 0 ≤ a ↔ ∀ χ : WeakDual.characterSpace ℂ A, 0 ≤ χ a := by
   rw [StarOrderedRing.nonneg_iff_spectrum_nonneg (R := ℂ) a]
   simp only [WeakDual.CharacterSpace.mem_spectrum_iff_exists, forall_exists_index,
     forall_apply_eq_imp_iff]
 
 /-- Characters detect the order between self-adjoint elements. -/
-lemma le_iff_forall_character {a b : A} (ha : IsSelfAdjoint a) (hb : IsSelfAdjoint b) :
-    a ≤ b ↔ ∀ χ : WeakDual.characterSpace ℂ A, (χ a).re ≤ (χ b).re := by
+lemma le_iff_forall_character {a b : A} (ha : IsSelfAdjoint a) (hb : IsSelfAdjoint b)
+    : a ≤ b ↔ ∀ χ : WeakDual.characterSpace ℂ A, (χ a).re ≤ (χ b).re := by
   rw [← sub_nonneg, nonneg_iff_forall_character]
   refine forall_congr' fun χ => ?_
   rw [map_sub, character_eq_re ha χ, character_eq_re hb χ, ← Complex.ofReal_sub,
@@ -115,8 +113,10 @@ lemma le_iff_forall_character {a b : A} (ha : IsSelfAdjoint a) (hb : IsSelfAdjoi
 
 /-! ## C. Classicality -/
 
-/-- **Riesz decomposition.** A nonnegative observable below a sum of two nonnegative observables
-splits, character by character, into two pieces below the summands. -/
+/--
+**Riesz decomposition.** A nonnegative observable below a sum of two nonnegative observables
+splits, character by character, into two pieces below the summands.
+-/
 lemma hasRieszDecomposition : HasRieszDecomposition (selfAdjoint A) := by
   intro f₁ f₂ g hf₁ hf₂ hg
   have sa := fun x : selfAdjoint A => x.2
@@ -124,8 +124,11 @@ lemma hasRieszDecomposition : HasRieszDecomposition (selfAdjoint A) := by
   have le := fun (x y : selfAdjoint A) => le_iff_forall_character (A := A) (sa x) (sa y)
   have h0 := fun x : selfAdjoint A => le 0 x
   simp only [ZeroMemClass.coe_zero, map_zero, Complex.zero_re] at h0
-  refine ⟨g₁, ⟨(h0 _).2 fun χ => ?_, (le _ _).2 fun χ => ?_⟩,
-    ⟨(h0 _).2 fun χ => ?_, (le _ _).2 fun χ => ?_⟩⟩
+  refine ⟨
+    g₁,
+    ⟨(h0 _).2 fun χ => ?_, (le _ _).2 fun χ => ?_⟩,
+    ⟨(h0 _).2 fun χ => ?_, (le _ _).2 fun χ => ?_⟩
+  ⟩
   · simpa [g₁] using ⟨(h0 g).1 hg.1 χ, (h0 f₁).1 hf₁ χ⟩
   · simp [g₁]
   · simp [g₁]
@@ -136,8 +139,6 @@ lemma hasRieszDecomposition : HasRieszDecomposition (selfAdjoint A) := by
     rcases min_cases (χ g).re (χ f₁).re with h | h <;> linarith [(h0 f₂).1 hf₂ χ]
 
 /-- **The observables of a commutative C⋆-algebra form a classical system.** -/
-lemma isClassical : IsClassical (selfAdjoint A) :=
-  hasRieszDecomposition.hasLatticeDualCone
+lemma isClassical : IsClassical (selfAdjoint A) := hasRieszDecomposition.hasLatticeDualCone
 
 end CommCStarAlgebra
-

@@ -57,38 +57,46 @@ namespace QuantumMechanics
 /-! ## A. Bands of Hermitian matrices -/
 
 /-- The `k`-th largest eigenvalue of a Hermitian matrix: its `k`-th band. -/
-def bandOf {N : ℕ} {M : Matrix (Fin N) (Fin N) ℂ} (hM : M.IsHermitian)
-    (k : Fin (Fintype.card (Fin N))) : ℝ :=
+def bandOf
+    {N : ℕ} {M : Matrix (Fin N) (Fin N) ℂ} (hM : M.IsHermitian) (k : Fin (Fintype.card (Fin N)))
+    : ℝ :=
   hM.eigenvalues₀ k
 
-/-- **Weyl's inequality for bands**: the `k`-th band of two Hermitian matrices differ by at most
-the operator norm of the difference.   -/
-lemma abs_bandOf_sub_le {N : ℕ} {M S : Matrix (Fin N) (Fin N) ℂ} (hM : M.IsHermitian)
-    (hS : S.IsHermitian) (k : Fin (Fintype.card (Fin N))) :
-    |bandOf hM k - bandOf hS k| ≤
-      ‖LinearMap.toContinuousLinearMap (Matrix.toEuclideanLin (M - S))‖ := by
-  have := LinearMap.IsSymmetric.abs_eigenvalues_sub_le_opNorm
-    (isSymmetric_toEuclideanLin_iff.mpr hM) (isSymmetric_toEuclideanLin_iff.mpr hS)
-    (finrank_euclideanSpace (ι := Fin N)) k
+/--
+**Weyl's inequality for bands**: the `k`-th band of two Hermitian matrices differ by at most
+the operator norm of the difference.
+-/
+lemma abs_bandOf_sub_le
+    {N : ℕ} {M S : Matrix (Fin N) (Fin N) ℂ}
+    (hM : M.IsHermitian) (hS : S.IsHermitian) (k : Fin (Fintype.card (Fin N)))
+    : |bandOf hM k - bandOf hS k|
+      ≤ ‖LinearMap.toContinuousLinearMap (Matrix.toEuclideanLin (M - S))‖ := by
+  have :=
+    LinearMap.IsSymmetric.abs_eigenvalues_sub_le_opNorm (isSymmetric_toEuclideanLin_iff.mpr hM)
+      (isSymmetric_toEuclideanLin_iff.mpr hS) (finrank_euclideanSpace (ι := Fin N)) k
   simpa [bandOf, Matrix.IsHermitian.eigenvalues₀, map_sub] using this
 
-/-- **Bands are continuous**: the `k`-th band of a continuous family of Hermitian matrices is a
-continuous function. -/
-lemma continuous_bandOf {X : Type*} [TopologicalSpace X] {N : ℕ}
-    {b : X → Matrix (Fin N) (Fin N) ℂ} (hb : ∀ x, (b x).IsHermitian) (hc : Continuous b)
-    (k : Fin (Fintype.card (Fin N))) : Continuous fun x => bandOf (hb x) k := by
+/--
+**Bands are continuous**: the `k`-th band of a continuous family of Hermitian matrices is a
+continuous function.
+-/
+lemma continuous_bandOf
+    {X : Type*} [TopologicalSpace X]
+    {N : ℕ} {b : X → Matrix (Fin N) (Fin N) ℂ}
+    (hb : ∀ x, (b x).IsHermitian) (hc : Continuous b) (k : Fin (Fintype.card (Fin N)))
+    : Continuous fun x => bandOf (hb x) k := by
   let Ψ : Matrix (Fin N) (Fin N) ℂ →ₗ[ℂ]
       (EuclideanSpace ℂ (Fin N) →L[ℂ] EuclideanSpace ℂ (Fin N)) :=
     (LinearMap.toContinuousLinearMap (𝕜 := ℂ) (E := EuclideanSpace ℂ (Fin N))
-      (F' := EuclideanSpace ℂ (Fin N))).toLinearMap ∘ₗ (Matrix.toEuclideanLin).toLinearMap
+        (F' := EuclideanSpace ℂ (Fin N))).toLinearMap
+      ∘ₗ (Matrix.toEuclideanLin).toLinearMap
   have hΨ : Continuous Ψ := LinearMap.continuous_of_finiteDimensional Ψ
   refine continuous_iff_continuousAt.mpr fun x₀ => ?_
   rw [ContinuousAt, tendsto_iff_norm_sub_tendsto_zero]
   refine squeeze_zero (fun x => norm_nonneg _) (fun x => ?_) (g := fun x => ‖Ψ (b x - b x₀)‖) ?_
   · have := abs_bandOf_sub_le (hb x) (hb x₀) k
     simpa [Real.norm_eq_abs, Ψ] using this
-  · have hcont : Continuous fun x => ‖Ψ (b x - b x₀)‖ :=
-      (hΨ.comp (hc.sub continuous_const)).norm
+  · have hcont : Continuous fun x => ‖Ψ (b x - b x₀)‖ := (hΨ.comp (hc.sub continuous_const)).norm
     have h0 : ‖Ψ (b x₀ - b x₀)‖ = 0 := by simp
     have h := hcont.tendsto x₀
     rwa [h0] at h
@@ -100,30 +108,36 @@ namespace UnitaryRep
 variable {G : Type*} [AddCommGroup G] [TopologicalSpace G] [DiscreteTopology G]
 variable {H : Type*} [NormedAddCommGroup H] [InnerProductSpace ℂ H] [CompleteSpace H]
 variable (π : Multiplicative G →* unitary (H →L[ℂ] H))
-variable [MeasurableSpace (PontryaginDual (Multiplicative G))]
+variable
+  [MeasurableSpace (PontryaginDual (Multiplicative G))]
   [BorelSpace (PontryaginDual (Multiplicative G))]
 variable {N : ℕ} (ι : Matrix (Fin N) (Fin N) ℂ →⋆ₐ[ℂ] (H →L[ℂ] H))
-variable (hι : ∀ (M : Matrix (Fin N) (Fin N) ℂ) (g : Multiplicative G),
-  Commute ((π g : unitary (H →L[ℂ] H)) : H →L[ℂ] H) (ι M))
+variable
+  (hι : ∀ (M : Matrix (Fin N) (Fin N) ℂ) (g : Multiplicative G),
+    Commute ((π g : unitary (H →L[ℂ] H)) : H →L[ℂ] H) (ι M))
 
 include hι
 
 /-- The operator of a Hermitian symbol is self-adjoint. -/
 lemma isSelfAdjoint_blochHom
     (b : C(PontryaginDual (Multiplicative G), Matrix (Fin N) (Fin N) ℂ))
-    (hb : ∀ χ, (b χ).IsHermitian) : IsSelfAdjoint (blochHom π ι hι b) := by
+    (hb : ∀ χ, (b χ).IsHermitian)
+    : IsSelfAdjoint (blochHom π ι hι b) := by
   have hstar : star b = b := by
     ext χ : 1
     exact hb χ
   show star (blochHom π ι hι b) = blochHom π ι hι b
   rw [← map_star, hstar]
 
-/-- **Every point of the spectrum of the operator of a Hermitian symbol is a band value**: it is
-the `k`-th band `ε_k(χ)` of some crystal momentum `χ`. -/
+/--
+**Every point of the spectrum of the operator of a Hermitian symbol is a band value**: it is
+the `k`-th band `ε_k(χ)` of some crystal momentum `χ`.
+-/
 lemma exists_band_eq_of_mem_spectrum
     (b : C(PontryaginDual (Multiplicative G), Matrix (Fin N) (Fin N) ℂ))
-    (hb : ∀ χ, (b χ).IsHermitian) {z : ℂ} (hz : z ∈ spectrum ℂ (blochHom π ι hι b)) :
-    ∃ (χ : PontryaginDual (Multiplicative G)) (k : Fin (Fintype.card (Fin N))),
+    (hb : ∀ χ, (b χ).IsHermitian)
+    {z : ℂ} (hz : z ∈ spectrum ℂ (blochHom π ι hι b))
+    : ∃ (χ : PontryaginDual (Multiplicative G)) (k : Fin (Fintype.card (Fin N))),
       z = ((bandOf (hb χ) k : ℝ) : ℂ) := by
   obtain ⟨χ, hχ⟩ := Set.mem_iUnion.mp (spectrum_blochHom_subset π ι hι b hz)
   rw [(hb χ).spectrum_eq_image_range] at hχ

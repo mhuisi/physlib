@@ -24,36 +24,37 @@ variable {n : ℕ}
 namespace Three
 
 set_option backward.isDefEq.respectTransparency false in
-lemma cube_for_linSol' (S : (PureU1 3).LinSols) :
-    3 * S.val (0 : Fin 3) * S.val (1 : Fin 3) * S.val (2 : Fin 3) = 0 ↔
-    (PureU1 3).cubicACC S.val = 0 := by
+lemma cube_for_linSol' (S : (PureU1 3).LinSols)
+    : 3 * S.val (0 : Fin 3) * S.val (1 : Fin 3) * S.val (2 : Fin 3) = 0
+      ↔ (PureU1 3).cubicACC S.val = 0 := by
   have hL := pureU1_linear S
   rw [Fin.sum_univ_three] at hL
   change _ ↔ accCube _ _ = _
   rw [accCube_explicit, Fin.sum_univ_three]
-  rw [show S.val (0 : Fin 3) = - (S.val (1 : Fin 3) + S.val (2 : Fin 3)) by
-      linear_combination hL]
+  rw [show S.val (0 : Fin 3) = -(S.val (1 : Fin 3) + S.val (2 : Fin 3)) by linear_combination hL]
   ring_nf
 
-lemma cube_for_linSol (S : (PureU1 3).LinSols) :
-    (S.val (0 : Fin 3) = 0 ∨ S.val (1 : Fin 3) = 0 ∨ S.val (2 : Fin 3) = 0) ↔
-    (PureU1 3).cubicACC S.val = 0 := by
-  simp only [← cube_for_linSol', Fin.isValue, _root_.mul_eq_zero, OfNat.ofNat_ne_zero,
-    false_or, or_assoc]
+lemma cube_for_linSol (S : (PureU1 3).LinSols)
+    : (S.val (0 : Fin 3) = 0 ∨ S.val (1 : Fin 3) = 0 ∨ S.val (2 : Fin 3) = 0)
+      ↔ (PureU1 3).cubicACC S.val = 0 := by
+  simp only [← cube_for_linSol', Fin.isValue, _root_.mul_eq_zero, OfNat.ofNat_ne_zero, false_or,
+    or_assoc]
 
-lemma three_sol_zero (S : (PureU1 3).Sols) : S.val (0 : Fin 3) = 0 ∨ S.val (1 : Fin 3) = 0
-    ∨ S.val (2 : Fin 3) = 0 := (cube_for_linSol S.1.1).mpr S.cubicSol
+lemma three_sol_zero (S : (PureU1 3).Sols)
+    : S.val (0 : Fin 3) = 0 ∨ S.val (1 : Fin 3) = 0 ∨ S.val (2 : Fin 3) = 0 :=
+  (cube_for_linSol S.1.1).mpr S.cubicSol
 
 /-- Given a `LinSol` with a charge equal to zero a `Sol`. -/
-def solOfLinear (S : (PureU1 3).LinSols)
-    (hS : S.val (0 : Fin 3) = 0 ∨ S.val (1 : Fin 3) = 0 ∨ S.val (2 : Fin 3) = 0) :
-    (PureU1 3).Sols :=
-  ⟨⟨S, fun i => Fin.elim0 i⟩,
-    (cube_for_linSol S).mp hS⟩
+def solOfLinear
+    (S : (PureU1 3).LinSols)
+    (hS : S.val (0 : Fin 3) = 0 ∨ S.val (1 : Fin 3) = 0 ∨ S.val (2 : Fin 3) = 0)
+    : (PureU1 3).Sols :=
+  ⟨⟨S, fun i => Fin.elim0 i⟩, (cube_for_linSol S).mp hS⟩
 
-lemma solOfLinear_surjects (S : (PureU1 3).Sols) :
-    ∃ (T : (PureU1 3).LinSols) (hT : T.val (0 : Fin 3) = 0 ∨ T.val (1 : Fin 3) = 0
-    ∨ T.val (2 : Fin 3) = 0), solOfLinear T hT = S :=
+lemma solOfLinear_surjects (S : (PureU1 3).Sols)
+    : ∃ (T : (PureU1 3).LinSols)
+        (hT : T.val (0 : Fin 3) = 0 ∨ T.val (1 : Fin 3) = 0 ∨ T.val (2 : Fin 3) = 0),
+      solOfLinear T hT = S :=
   ⟨S.1.1, three_sol_zero S, rfl⟩
 
 end Three

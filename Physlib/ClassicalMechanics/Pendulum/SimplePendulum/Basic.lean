@@ -131,9 +131,11 @@ pendulum with a massless bob, a rod of zero length or no gravity is not a pendul
 
 -/
 
-/-- The simple gravity pendulum is specified by the mass `m` of its bob, the length `ℓ` of its
-  rod, and the gravitational acceleration `g`. All three are assumed to be positive. The
-  configuration of the pendulum is the angle of the rod from the downward vertical. -/
+/--
+The simple gravity pendulum is specified by the mass `m` of its bob, the length `ℓ` of its
+rod, and the gravitational acceleration `g`. All three are assumed to be positive. The
+configuration of the pendulum is the angle of the rod from the downward vertical.
+-/
 structure SimplePendulum where
   /-- The mass of the bob. -/
   m : ℝ
@@ -159,16 +161,13 @@ statements, which is the form in which the field-clearing tactics consume it.
 -/
 
 /-- The mass of the bob is not equal to zero. -/
-@[simp]
-lemma m_ne_zero : S.m ≠ 0 := S.m_pos.ne'
+@[simp] lemma m_ne_zero : S.m ≠ 0 := S.m_pos.ne'
 
 /-- The length of the rod is not equal to zero. -/
-@[simp]
-lemma ℓ_ne_zero : S.ℓ ≠ 0 := S.ℓ_pos.ne'
+@[simp] lemma ℓ_ne_zero : S.ℓ ≠ 0 := S.ℓ_pos.ne'
 
 /-- The gravitational acceleration is not equal to zero. -/
-@[simp]
-lemma g_ne_zero : S.g ≠ 0 := S.g_pos.ne'
+@[simp] lemma g_ne_zero : S.g ≠ 0 := S.g_pos.ne'
 
 /-!
 
@@ -194,13 +193,14 @@ frequency is the natural time scale of the pendulum and appears throughout its a
 
 -/
 
-/-- The angular frequency of the simple pendulum, `ω`, is defined as `√(g/ℓ)`. It is the angular
-  frequency of the small oscillations of the pendulum about the bottom of its swing. -/
+/--
+The angular frequency of the simple pendulum, `ω`, is defined as `√(g/ℓ)`. It is the angular
+frequency of the small oscillations of the pendulum about the bottom of its swing.
+-/
 noncomputable def ω : ℝ := √(S.g / S.ℓ)
 
 /-- The angular frequency of the simple pendulum is positive. -/
-@[simp]
-lemma ω_pos : 0 < S.ω := sqrt_pos.mpr (div_pos S.g_pos S.ℓ_pos)
+@[simp] lemma ω_pos : 0 < S.ω := sqrt_pos.mpr (div_pos S.g_pos S.ℓ_pos)
 
 /-- The angular frequency of the simple pendulum is not equal to zero. -/
 lemma ω_ne_zero : S.ω ≠ 0 := S.ω_pos.ne'
@@ -221,20 +221,23 @@ the torque, and so plays for the angle the role that the mass plays for a positi
 
 -/
 
-/-- The moment of inertia of the simple pendulum about its pivot is `I = m ℓ²`, the moment of
-  inertia of a point mass `m` at distance `ℓ` from the axis. -/
+/--
+The moment of inertia of the simple pendulum about its pivot is `I = m ℓ²`, the moment of
+inertia of a point mass `m` at distance `ℓ` from the axis.
+-/
 def inertia : ℝ := S.m * S.ℓ ^ 2
 
 /-- The moment of inertia of the simple pendulum is positive. -/
 lemma inertia_pos : 0 < S.inertia := mul_pos S.m_pos (pow_pos S.ℓ_pos 2)
 
 /-- The moment of inertia of the simple pendulum is not equal to zero. -/
-@[simp]
-lemma inertia_ne_zero : S.inertia ≠ 0 := S.inertia_pos.ne'
+@[simp] lemma inertia_ne_zero : S.inertia ≠ 0 := S.inertia_pos.ne'
 
-/-- The square of the angular frequency times the moment of inertia is `m g ℓ`, the coefficient
-  appearing in the potential energy and in the torque. This is the identity by which the mass
-  cancels from the equation of motion. -/
+/--
+The square of the angular frequency times the moment of inertia is `m g ℓ`, the coefficient
+appearing in the potential energy and in the torque. This is the identity by which the mass
+cancels from the equation of motion.
+-/
 lemma ω_sq_mul_inertia : S.ω ^ 2 * S.inertia = S.m * S.g * S.ℓ := by
   rw [ω_sq, inertia]
   field_simp
@@ -264,14 +267,18 @@ through the Lagrangian.
 
 -/
 
-/-- The kinetic energy of the simple pendulum along a lift `θ` of the angle is
-  $\frac{1}{2} I ‖\dot θ‖^2$, where `I` is the moment of inertia about the pivot. -/
+/--
+The kinetic energy of the simple pendulum along a lift `θ` of the angle is
+$\frac{1}{2} I ‖\dot θ‖^2$, where `I` is the moment of inertia about the pivot.
+-/
 noncomputable def kineticEnergy (θ : Time → EuclideanSpace ℝ (Fin 1)) : Time → ℝ := fun t =>
   (1 / (2 : ℝ)) * S.inertia * ⟪∂ₜ θ t, ∂ₜ θ t⟫_ℝ
 
-/-- The potential energy of the simple pendulum at the angle `x` is `m g ℓ (1 - cos (x 0))`, the
-  work done against gravity in raising the bob from the bottom of the swing. It is normalized to
-  vanish at the bottom. -/
+/--
+The potential energy of the simple pendulum at the angle `x` is `m g ℓ (1 - cos (x 0))`, the
+work done against gravity in raising the bob from the bottom of the swing. It is normalized to
+vanish at the bottom.
+-/
 noncomputable def potentialEnergy (x : EuclideanSpace ℝ (Fin 1)) : ℝ :=
   S.m * S.g * S.ℓ * (1 - Real.cos (x 0))
 
@@ -292,19 +299,24 @@ value at the top of the swing.
 -/
 
 /-- The kinetic energy of the simple pendulum, written out. -/
-lemma kineticEnergy_eq (θ : Time → EuclideanSpace ℝ (Fin 1)) :
-    S.kineticEnergy θ = fun t => (1 / (2 : ℝ)) * S.inertia * ⟪∂ₜ θ t, ∂ₜ θ t⟫_ℝ := rfl
+lemma kineticEnergy_eq (θ : Time → EuclideanSpace ℝ (Fin 1))
+    : S.kineticEnergy θ = fun t => (1 / (2 : ℝ)) * S.inertia * ⟪∂ₜ θ t, ∂ₜ θ t⟫_ℝ :=
+  rfl
 
 /-- The potential energy of the simple pendulum, written out. -/
-lemma potentialEnergy_eq (x : EuclideanSpace ℝ (Fin 1)) :
-    S.potentialEnergy x = S.m * S.g * S.ℓ * (1 - Real.cos (x 0)) := rfl
+lemma potentialEnergy_eq (x : EuclideanSpace ℝ (Fin 1))
+    : S.potentialEnergy x = S.m * S.g * S.ℓ * (1 - Real.cos (x 0)) :=
+  rfl
 
 /-- The energy of the simple pendulum, written out. -/
-lemma energy_eq (θ : Time → EuclideanSpace ℝ (Fin 1)) :
-    S.energy θ = fun t => S.kineticEnergy θ t + S.potentialEnergy (θ t) := rfl
+lemma energy_eq (θ : Time → EuclideanSpace ℝ (Fin 1))
+    : S.energy θ = fun t => S.kineticEnergy θ t + S.potentialEnergy (θ t) :=
+  rfl
 
-/-- The potential energy of the simple pendulum is non-negative, the bottom of the swing being
-  the lowest point of the circle on which the bob moves. -/
+/--
+The potential energy of the simple pendulum is non-negative, the bottom of the swing being
+the lowest point of the circle on which the bob moves.
+-/
 lemma potentialEnergy_nonneg (x : EuclideanSpace ℝ (Fin 1)) : 0 ≤ S.potentialEnergy x := by
   have hc : 0 < S.m * S.g * S.ℓ := mul_pos (mul_pos S.m_pos S.g_pos) S.ℓ_pos
   have h : (0 : ℝ) ≤ 1 - Real.cos (x 0) := by
@@ -313,22 +325,28 @@ lemma potentialEnergy_nonneg (x : EuclideanSpace ℝ (Fin 1)) : 0 ≤ S.potentia
   rw [potentialEnergy_eq]
   exact mul_nonneg hc.le h
 
-/-- The potential energy of the simple pendulum is at most `2 m g ℓ`, its value at the top of the
-  swing. -/
-lemma potentialEnergy_le (x : EuclideanSpace ℝ (Fin 1)) :
-    S.potentialEnergy x ≤ 2 * (S.m * S.g * S.ℓ) := by
+/--
+The potential energy of the simple pendulum is at most `2 m g ℓ`, its value at the top of the
+swing.
+-/
+lemma potentialEnergy_le (x : EuclideanSpace ℝ (Fin 1))
+    : S.potentialEnergy x ≤ 2 * (S.m * S.g * S.ℓ) := by
   have hc : 0 < S.m * S.g * S.ℓ := mul_pos (mul_pos S.m_pos S.g_pos) S.ℓ_pos
   have h : 1 - Real.cos (x 0) ≤ 2 := by
     have := Real.neg_one_le_cos (x 0)
     linarith
-  calc S.potentialEnergy x = S.m * S.g * S.ℓ * (1 - Real.cos (x 0)) := S.potentialEnergy_eq x
+  calc
+    S.potentialEnergy x
+      = S.m * S.g * S.ℓ * (1 - Real.cos (x 0)) := S.potentialEnergy_eq x
     _ ≤ S.m * S.g * S.ℓ * 2 := mul_le_mul_of_nonneg_left h hc.le
     _ = 2 * (S.m * S.g * S.ℓ) := by ring
 
-/-- The potential energy of the simple pendulum vanishes exactly when the cosine of the angle is
-  equal to `1`, that is exactly at the bottom of the swing. -/
-lemma potentialEnergy_eq_zero_iff (x : EuclideanSpace ℝ (Fin 1)) :
-    S.potentialEnergy x = 0 ↔ Real.cos (x 0) = 1 := by
+/--
+The potential energy of the simple pendulum vanishes exactly when the cosine of the angle is
+equal to `1`, that is exactly at the bottom of the swing.
+-/
+lemma potentialEnergy_eq_zero_iff (x : EuclideanSpace ℝ (Fin 1))
+    : S.potentialEnergy x = 0 ↔ Real.cos (x 0) = 1 := by
   have hc : S.m * S.g * S.ℓ ≠ 0 := (mul_pos (mul_pos S.m_pos S.g_pos) S.ℓ_pos).ne'
   rw [potentialEnergy_eq, mul_eq_zero, or_iff_right hc, sub_eq_zero, eq_comm]
 
@@ -352,22 +370,28 @@ lemma potentialEnergy_contDiff (n : WithTop ℕ∞) : ContDiff ℝ n S.potential
   unfold potentialEnergy
   fun_prop
 
-/-- The potential energy of the simple pendulum is a differentiable function of the angle. This
-  is differentiability in the angle; for differentiability in time along a smooth lift of the
-  angle see `potentialEnergy_differentiable`. -/
+/--
+The potential energy of the simple pendulum is a differentiable function of the angle. This
+is differentiability in the angle; for differentiability in time along a smooth lift of the
+angle see `potentialEnergy_differentiable`.
+-/
 @[fun_prop]
 lemma differentiable_potentialEnergy : Differentiable ℝ S.potentialEnergy :=
   (S.potentialEnergy_contDiff 1).differentiable one_ne_zero
 
-/-- The gradient of the potential energy of the simple pendulum is `m g ℓ sin θ` times the unit
-  vector of the angular coordinate. -/
-lemma gradient_potentialEnergy (x : EuclideanSpace ℝ (Fin 1)) :
-    gradient S.potentialEnergy x =
-      (S.m * S.g * S.ℓ * Real.sin (x 0)) • EuclideanSpace.single 0 1 := by
+/--
+The gradient of the potential energy of the simple pendulum is `m g ℓ sin θ` times the unit
+vector of the angular coordinate.
+-/
+lemma gradient_potentialEnergy (x : EuclideanSpace ℝ (Fin 1))
+    : gradient S.potentialEnergy x
+      = (S.m * S.g * S.ℓ * Real.sin (x 0)) • EuclideanSpace.single 0 1 := by
   have hcos : DifferentiableAt ℝ (fun y : EuclideanSpace ℝ (Fin 1) => Real.cos (y 0)) x := by
     fun_prop
-  have h : S.potentialEnergy = fun y : EuclideanSpace ℝ (Fin 1) =>
-      -(S.m * S.g * S.ℓ) * Real.cos (y 0) + S.m * S.g * S.ℓ := by
+  have h
+      : S.potentialEnergy
+        = fun y : EuclideanSpace ℝ (Fin 1) =>
+          -(S.m * S.g * S.ℓ) * Real.cos (y 0) + S.m * S.g * S.ℓ := by
     funext y
     rw [potentialEnergy_eq]
     ring
@@ -377,24 +401,26 @@ lemma gradient_potentialEnergy (x : EuclideanSpace ℝ (Fin 1)) :
 
 /-- Along a smooth lift of the angle the kinetic energy is differentiable in time. -/
 @[fun_prop]
-lemma kineticEnergy_differentiable (θ : Time → EuclideanSpace ℝ (Fin 1)) (hθ : ContDiff ℝ ∞ θ) :
-    Differentiable ℝ (S.kineticEnergy θ) := by
+lemma kineticEnergy_differentiable (θ : Time → EuclideanSpace ℝ (Fin 1)) (hθ : ContDiff ℝ ∞ θ)
+    : Differentiable ℝ (S.kineticEnergy θ) := by
   rw [kineticEnergy_eq]
   fun_prop
 
-/-- Along a smooth lift of the angle the potential energy is a differentiable function of the
-  time. This is differentiability in time along the lift; for differentiability in the angle see
-  `differentiable_potentialEnergy`. -/
+/--
+Along a smooth lift of the angle the potential energy is a differentiable function of the
+time. This is differentiability in time along the lift; for differentiability in the angle see
+`differentiable_potentialEnergy`.
+-/
 @[fun_prop]
-lemma potentialEnergy_differentiable (θ : Time → EuclideanSpace ℝ (Fin 1)) (hθ : ContDiff ℝ ∞ θ) :
-    Differentiable ℝ (fun t => S.potentialEnergy (θ t)) := by
+lemma potentialEnergy_differentiable (θ : Time → EuclideanSpace ℝ (Fin 1)) (hθ : ContDiff ℝ ∞ θ)
+    : Differentiable ℝ (fun t => S.potentialEnergy (θ t)) := by
   have hd : Differentiable ℝ θ := hθ.differentiable (by simp)
   fun_prop
 
 /-- Along a smooth lift of the angle the energy is differentiable in time. -/
 @[fun_prop]
-lemma energy_differentiable (θ : Time → EuclideanSpace ℝ (Fin 1)) (hθ : ContDiff ℝ ∞ θ) :
-    Differentiable ℝ (S.energy θ) := by
+lemma energy_differentiable (θ : Time → EuclideanSpace ℝ (Fin 1)) (hθ : ContDiff ℝ ∞ θ)
+    : Differentiable ℝ (S.energy θ) := by
   rw [energy_eq]
   fun_prop
 
@@ -408,24 +434,27 @@ velocity: the equation of motion will be exactly the statement that the two cont
 
 -/
 
-/-- The rate of change of the kinetic energy is the angular velocity paired with the angular
-  momentum's rate of change, `I θ̈`. -/
-lemma kineticEnergy_deriv (θ : Time → EuclideanSpace ℝ (Fin 1)) (hθ : ContDiff ℝ ∞ θ) :
-    ∂ₜ (S.kineticEnergy θ) = fun t => ⟪∂ₜ θ t, S.inertia • ∂ₜ (∂ₜ θ) t⟫_ℝ := by
+/--
+The rate of change of the kinetic energy is the angular velocity paired with the angular
+momentum's rate of change, `I θ̈`.
+-/
+lemma kineticEnergy_deriv (θ : Time → EuclideanSpace ℝ (Fin 1)) (hθ : ContDiff ℝ ∞ θ)
+    : ∂ₜ (S.kineticEnergy θ) = fun t => ⟪∂ₜ θ t, S.inertia • ∂ₜ (∂ₜ θ) t⟫_ℝ := by
   funext t
   unfold kineticEnergy
-  have hd : DifferentiableAt ℝ (∂ₜ θ) t :=
-    (deriv_differentiable_of_contDiff θ hθ).differentiableAt
+  have hd : DifferentiableAt ℝ (∂ₜ θ) t := (deriv_differentiable_of_contDiff θ hθ).differentiableAt
   rw [Time.deriv_eq, fderiv_const_mul (by fun_prop), _root_.smul_apply,
     fderiv_inner_apply (𝕜 := ℝ) hd hd, ← Time.deriv_eq]
   simp [inner_smul_right, real_inner_comm]
   ring
 
-/-- The rate of change of the potential energy is the angular velocity paired with the gradient
-  of the potential. -/
-lemma potentialEnergy_deriv (θ : Time → EuclideanSpace ℝ (Fin 1)) (hθ : ContDiff ℝ ∞ θ) :
-    ∂ₜ (fun t => S.potentialEnergy (θ t)) =
-      fun t => ⟪∂ₜ θ t, gradient S.potentialEnergy (θ t)⟫_ℝ := by
+/--
+The rate of change of the potential energy is the angular velocity paired with the gradient
+of the potential.
+-/
+lemma potentialEnergy_deriv (θ : Time → EuclideanSpace ℝ (Fin 1)) (hθ : ContDiff ℝ ∞ θ)
+    : ∂ₜ (fun t => S.potentialEnergy (θ t))
+      = fun t => ⟪∂ₜ θ t, gradient S.potentialEnergy (θ t)⟫_ℝ := by
   funext t
   have hd : DifferentiableAt ℝ θ t := (hθ.differentiable (by simp)).differentiableAt
   have hV : DifferentiableAt ℝ S.potentialEnergy (θ t) :=
@@ -435,11 +464,13 @@ lemma potentialEnergy_deriv (θ : Time → EuclideanSpace ℝ (Fin 1)) (hθ : Co
   rw [Time.deriv_eq, hf.fderiv]
   simp [Time.deriv_eq]
 
-/-- The rate of change of the energy is the angular velocity paired with the sum of `I θ̈` and
-  the gradient of the potential; the equation of motion is exactly the vanishing of that sum. -/
-lemma energy_deriv (θ : Time → EuclideanSpace ℝ (Fin 1)) (hθ : ContDiff ℝ ∞ θ) :
-    ∂ₜ (S.energy θ) =
-      fun t => ⟪∂ₜ θ t, S.inertia • ∂ₜ (∂ₜ θ) t + gradient S.potentialEnergy (θ t)⟫_ℝ := by
+/--
+The rate of change of the energy is the angular velocity paired with the sum of `I θ̈` and
+the gradient of the potential; the equation of motion is exactly the vanishing of that sum.
+-/
+lemma energy_deriv (θ : Time → EuclideanSpace ℝ (Fin 1)) (hθ : ContDiff ℝ ∞ θ)
+    : ∂ₜ (S.energy θ)
+      = fun t => ⟪∂ₜ θ t, S.inertia • ∂ₜ (∂ₜ θ) t + gradient S.potentialEnergy (θ t)⟫_ℝ := by
   unfold energy
   funext t
   rw [Time.deriv_eq, fderiv_fun_add (by fun_prop) (S.potentialEnergy_differentiable θ hθ t)]
@@ -471,24 +502,30 @@ the kinetic energy minus the potential energy along a lift of the angle.
 -/
 
 set_option linter.unusedVariables false in
-/-- The Lagrangian of the simple pendulum, `L(t, θ, θ̇) = ½ I ‖θ̇‖² - V(θ)`, the kinetic energy
-  minus the potential energy as a function on phase space. It does not depend on the time. -/
+/--
+The Lagrangian of the simple pendulum, `L(t, θ, θ̇) = ½ I ‖θ̇‖² - V(θ)`, the kinetic energy
+minus the potential energy as a function on phase space. It does not depend on the time.
+-/
 @[nolint unusedArguments]
 noncomputable def lagrangian (t : Time) (x v : EuclideanSpace ℝ (Fin 1)) : ℝ :=
   (1 / (2 : ℝ)) * S.inertia * ⟪v, v⟫_ℝ - S.potentialEnergy x
 
 /-- The Lagrangian of the simple pendulum, written out in the input data. -/
-lemma lagrangian_eq :
-    S.lagrangian = fun _ x v =>
-      (1 / (2 : ℝ)) * S.inertia * ⟪v, v⟫_ℝ - S.m * S.g * S.ℓ * (1 - Real.cos (x 0)) := by
+lemma lagrangian_eq
+    : S.lagrangian
+      = fun _ x v =>
+        (1 / (2 : ℝ)) * S.inertia * ⟪v, v⟫_ℝ - S.m * S.g * S.ℓ * (1 - Real.cos (x 0)) := by
   funext t x v
   rw [lagrangian, potentialEnergy_eq]
 
-/-- Along a lift of the angle the Lagrangian of the simple pendulum is the kinetic energy minus
-  the potential energy. -/
-lemma lagrangian_eq_kineticEnergy_sub_potentialEnergy (t : Time)
-    (θ : Time → EuclideanSpace ℝ (Fin 1)) :
-    S.lagrangian t (θ t) (∂ₜ θ t) = S.kineticEnergy θ t - S.potentialEnergy (θ t) := rfl
+/--
+Along a lift of the angle the Lagrangian of the simple pendulum is the kinetic energy minus
+the potential energy.
+-/
+lemma lagrangian_eq_kineticEnergy_sub_potentialEnergy
+    (t : Time) (θ : Time → EuclideanSpace ℝ (Fin 1))
+    : S.lagrangian t (θ t) (∂ₜ θ t) = S.kineticEnergy θ t - S.potentialEnergy (θ t) :=
+  rfl
 
 /-!
 
@@ -500,8 +537,10 @@ form `↿S.lagrangian`.
 
 -/
 
-/-- The Lagrangian of the simple pendulum is a smooth function of the time, the angle and the
-  angular velocity jointly. -/
+/--
+The Lagrangian of the simple pendulum is a smooth function of the time, the angle and the
+angular velocity jointly.
+-/
 @[fun_prop]
 lemma contDiff_lagrangian (n : WithTop ℕ∞) : ContDiff ℝ n ↿S.lagrangian := by
   rw [lagrangian_eq]
@@ -517,13 +556,16 @@ section E; the gradient in the angular velocity is the angular momentum `I θ̇`
 
 -/
 
-/-- The gradient of the Lagrangian of the simple pendulum in the angle is minus the gradient of
-  the potential energy, `-m g ℓ sin θ` times the unit vector of the angular coordinate. -/
-lemma gradient_lagrangian_position_eq (t : Time) (x v : EuclideanSpace ℝ (Fin 1)) :
-    gradient (fun x => S.lagrangian t x v) x =
-      -((S.m * S.g * S.ℓ * Real.sin (x 0)) • EuclideanSpace.single 0 1) := by
-  have h : (fun y : EuclideanSpace ℝ (Fin 1) => S.lagrangian t y v) =
-      fun y => (-1 : ℝ) * S.potentialEnergy y + (1 / (2 : ℝ)) * S.inertia * ⟪v, v⟫_ℝ := by
+/--
+The gradient of the Lagrangian of the simple pendulum in the angle is minus the gradient of
+the potential energy, `-m g ℓ sin θ` times the unit vector of the angular coordinate.
+-/
+lemma gradient_lagrangian_position_eq (t : Time) (x v : EuclideanSpace ℝ (Fin 1))
+    : gradient (fun x => S.lagrangian t x v) x
+      = -((S.m * S.g * S.ℓ * Real.sin (x 0)) • EuclideanSpace.single 0 1) := by
+  have h
+      : (fun y : EuclideanSpace ℝ (Fin 1) => S.lagrangian t y v)
+        = fun y => (-1 : ℝ) * S.potentialEnergy y + (1 / (2 : ℝ)) * S.inertia * ⟪v, v⟫_ℝ := by
     funext y
     rw [lagrangian]
     ring
@@ -531,12 +573,16 @@ lemma gradient_lagrangian_position_eq (t : Time) (x v : EuclideanSpace ℝ (Fin 
     gradient_potentialEnergy]
   module
 
-/-- The gradient of the Lagrangian of the simple pendulum in the angular velocity is the angular
-  momentum `I θ̇` about the pivot. -/
-lemma gradient_lagrangian_velocity_eq (t : Time) (x v : EuclideanSpace ℝ (Fin 1)) :
-    gradient (S.lagrangian t x) v = S.inertia • v := by
-  have h : S.lagrangian t x = fun y : EuclideanSpace ℝ (Fin 1) =>
-      ((1 / (2 : ℝ)) * S.inertia) * ⟪y, y⟫_ℝ + -S.potentialEnergy x := by
+/--
+The gradient of the Lagrangian of the simple pendulum in the angular velocity is the angular
+momentum `I θ̇` about the pivot.
+-/
+lemma gradient_lagrangian_velocity_eq (t : Time) (x v : EuclideanSpace ℝ (Fin 1))
+    : gradient (S.lagrangian t x) v = S.inertia • v := by
+  have h
+      : S.lagrangian t x
+        = fun y : EuclideanSpace ℝ (Fin 1) =>
+          ((1 / (2 : ℝ)) * S.inertia) * ⟪y, y⟫_ℝ + - S.potentialEnergy x := by
     funext y
     rw [lagrangian]
     ring
@@ -577,21 +623,25 @@ being the coordinate; this is why it is `m g ℓ sin θ` and not `m g sin θ`.
 
 -/
 
-/-- The generalized force of the simple pendulum conjugate to the angle, that is the torque about
-  the pivot, is minus the gradient of the potential energy, `τ = -∂V/∂θ`. -/
+/--
+The generalized force of the simple pendulum conjugate to the angle, that is the torque about
+the pivot, is minus the gradient of the potential energy, `τ = -∂V/∂θ`.
+-/
 noncomputable def torque (x : EuclideanSpace ℝ (Fin 1)) : EuclideanSpace ℝ (Fin 1) :=
-  -gradient S.potentialEnergy x
+  - gradient S.potentialEnergy x
 
-/-- The torque of the simple pendulum is `-m g ℓ sin θ` times the unit vector of the angular
-  coordinate. It is restoring near the bottom of the swing: for `|θ| < π` it opposes the
-  displacement, and it vanishes both at the bottom and at the inverted position. -/
-lemma torque_eq (x : EuclideanSpace ℝ (Fin 1)) :
-    S.torque x = -((S.m * S.g * S.ℓ * Real.sin (x 0)) • EuclideanSpace.single 0 1) := by
+/--
+The torque of the simple pendulum is `-m g ℓ sin θ` times the unit vector of the angular
+coordinate. It is restoring near the bottom of the swing: for `|θ| < π` it opposes the
+displacement, and it vanishes both at the bottom and at the inverted position.
+-/
+lemma torque_eq (x : EuclideanSpace ℝ (Fin 1))
+    : S.torque x = -((S.m * S.g * S.ℓ * Real.sin (x 0)) • EuclideanSpace.single 0 1) := by
   rw [torque, gradient_potentialEnergy]
 
 /-- The single component of the torque of the simple pendulum is `-m g ℓ sin θ`. -/
-lemma torque_apply (x : EuclideanSpace ℝ (Fin 1)) :
-    S.torque x 0 = -(S.m * S.g * S.ℓ * Real.sin (x 0)) := by
+lemma torque_apply (x : EuclideanSpace ℝ (Fin 1))
+    : S.torque x 0 = -(S.m * S.g * S.ℓ * Real.sin (x 0)) := by
   rw [torque_eq]
   simp
 
@@ -604,23 +654,27 @@ about the pivot with the torque of gravity, at every instant.
 
 -/
 
-/-- The equation of motion of the simple pendulum: at every instant the rate of change `I θ̈` of
-  the angular momentum about the pivot equals the torque `τ(θ)` of gravity.
+/--
+The equation of motion of the simple pendulum: at every instant the rate of change `I θ̈` of
+the angular momentum about the pivot equals the torque `τ(θ)` of gravity.
 
-  This pointwise relation, and not the vanishing of the variational derivative of the action, is
-  the definition of the equation of motion here; see the discussion in section E. For a smooth
-  lift of the angle the two agree, by `equationOfMotion_iff_gradLagrangian_zero` of section G. -/
+This pointwise relation, and not the vanishing of the variational derivative of the action, is
+the definition of the equation of motion here; see the discussion in section E. For a smooth
+lift of the angle the two agree, by `equationOfMotion_iff_gradLagrangian_zero` of section G.
+-/
 def EquationOfMotion (θ : Time → EuclideanSpace ℝ (Fin 1)) : Prop :=
   ∀ t, S.inertia • ∂ₜ (∂ₜ θ) t = S.torque (θ t)
 
-/-- The equation of motion of the simple pendulum with all of its terms on one side: at every
-  instant the rate of change `I θ̈` of the angular momentum plus the gradient of the potential
-  energy vanishes. This is the rotational form of Newton's second law, in the shape in which
-  `DampedHarmonicOscillator` states its own; the sum on the left is exactly the combination that
-  `energy_deriv` pairs with the velocity `∂ₜ θ`. -/
-lemma equationOfMotion_iff_newtons_2nd_law (θ : Time → EuclideanSpace ℝ (Fin 1)) :
-    S.EquationOfMotion θ ↔
-      ∀ t, S.inertia • ∂ₜ (∂ₜ θ) t + gradient S.potentialEnergy (θ t) = 0 := by
+/--
+The equation of motion of the simple pendulum with all of its terms on one side: at every
+instant the rate of change `I θ̈` of the angular momentum plus the gradient of the potential
+energy vanishes. This is the rotational form of Newton's second law, in the shape in which
+`DampedHarmonicOscillator` states its own; the sum on the left is exactly the combination that
+`energy_deriv` pairs with the velocity `∂ₜ θ`.
+-/
+lemma equationOfMotion_iff_newtons_2nd_law (θ : Time → EuclideanSpace ℝ (Fin 1))
+    : S.EquationOfMotion θ
+      ↔ ∀ t, S.inertia • ∂ₜ (∂ₜ θ) t + gradient S.potentialEnergy (θ t) = 0 := by
   simp only [EquationOfMotion, torque, eq_neg_iff_add_eq_zero]
 
 /-!
@@ -637,18 +691,23 @@ description of the motion agrees with the pointwise one.
 
 -/
 
-/-- A solution of the simple pendulum is a smooth lift of the angle satisfying the equation of
-  motion. -/
-def IsSolution (θ : Time → EuclideanSpace ℝ (Fin 1)) : Prop :=
-  ContDiff ℝ ∞ θ ∧ S.EquationOfMotion θ
+/--
+A solution of the simple pendulum is a smooth lift of the angle satisfying the equation of
+motion.
+-/
+def IsSolution (θ : Time → EuclideanSpace ℝ (Fin 1)) : Prop := ContDiff ℝ ∞ θ ∧ S.EquationOfMotion θ
 
 /-- A solution of the simple pendulum is smooth. -/
-lemma IsSolution.contDiff {S : SimplePendulum} {θ : Time → EuclideanSpace ℝ (Fin 1)}
-    (h : S.IsSolution θ) : ContDiff ℝ ∞ θ := h.1
+lemma IsSolution.contDiff
+    {S : SimplePendulum} {θ : Time → EuclideanSpace ℝ (Fin 1)} (h : S.IsSolution θ)
+    : ContDiff ℝ ∞ θ :=
+  h.1
 
 /-- A solution of the simple pendulum satisfies the equation of motion. -/
-lemma IsSolution.equationOfMotion {S : SimplePendulum} {θ : Time → EuclideanSpace ℝ (Fin 1)}
-    (h : S.IsSolution θ) : S.EquationOfMotion θ := h.2
+lemma IsSolution.equationOfMotion
+    {S : SimplePendulum} {θ : Time → EuclideanSpace ℝ (Fin 1)} (h : S.IsSolution θ)
+    : S.EquationOfMotion θ :=
+  h.2
 
 /-!
 
@@ -661,14 +720,17 @@ with the same `ω = √(g/ℓ)` have exactly the same angular motions, whatever 
 
 -/
 
-/-- The equation of motion of the simple pendulum in scalar form, `θ̈ + ω² sin θ = 0`. The mass
-  has cancelled: only the angular frequency `ω = √(g/ℓ)` survives. -/
-lemma equationOfMotion_iff_scalar (θ : Time → EuclideanSpace ℝ (Fin 1)) :
-    S.EquationOfMotion θ ↔ ∀ t, ∂ₜ (∂ₜ θ) t 0 + S.ω ^ 2 * Real.sin (θ t 0) = 0 := by
+/--
+The equation of motion of the simple pendulum in scalar form, `θ̈ + ω² sin θ = 0`. The mass
+has cancelled: only the angular frequency `ω = √(g/ℓ)` survives.
+-/
+lemma equationOfMotion_iff_scalar (θ : Time → EuclideanSpace ℝ (Fin 1))
+    : S.EquationOfMotion θ ↔ ∀ t, ∂ₜ (∂ₜ θ) t 0 + S.ω ^ 2 * Real.sin (θ t 0) = 0 := by
   simp only [EquationOfMotion]
   refine forall_congr' fun t => ?_
-  have hcomp : (S.inertia • ∂ₜ (∂ₜ θ) t = S.torque (θ t)) ↔
-      S.inertia * ∂ₜ (∂ₜ θ) t 0 = -(S.m * S.g * S.ℓ * Real.sin (θ t 0)) := by
+  have hcomp
+      : (S.inertia • ∂ₜ (∂ₜ θ) t = S.torque (θ t))
+        ↔ S.inertia * ∂ₜ (∂ₜ θ) t 0 = -(S.m * S.g * S.ℓ * Real.sin (θ t 0)) := by
     rw [← S.torque_apply (θ t)]
     constructor
     · intro h
@@ -686,13 +748,15 @@ lemma equationOfMotion_iff_scalar (θ : Time → EuclideanSpace ℝ (Fin 1)) :
   · intro h
     linear_combination S.inertia * h
 
-/-- Two simple pendulums with the same angular frequency have the same angular equation of
-  motion, and hence the same angular motions; in particular, changing only the mass does not
-  affect the angular motion. An equal `ω` still permits different lengths, and so different
-  trajectories of the bob in space. -/
-lemma equationOfMotion_iff_of_eq_ω (S' : SimplePendulum) (h : S'.ω = S.ω)
-    (θ : Time → EuclideanSpace ℝ (Fin 1)) :
-    S'.EquationOfMotion θ ↔ S.EquationOfMotion θ := by
+/--
+Two simple pendulums with the same angular frequency have the same angular equation of
+motion, and hence the same angular motions; in particular, changing only the mass does not
+affect the angular motion. An equal `ω` still permits different lengths, and so different
+trajectories of the bob in space.
+-/
+lemma equationOfMotion_iff_of_eq_ω
+    (S' : SimplePendulum) (h : S'.ω = S.ω) (θ : Time → EuclideanSpace ℝ (Fin 1))
+    : S'.EquationOfMotion θ ↔ S.EquationOfMotion θ := by
   rw [S'.equationOfMotion_iff_scalar, S.equationOfMotion_iff_scalar, h]
 
 /-!
@@ -716,10 +780,12 @@ below are stated for smooth lifts of the angle.
 
 -/
 
-/-- The variational derivative of the action of the simple pendulum, the action being the time
-  integral of the Lagrangian along a lift of the angle. -/
-noncomputable def gradLagrangian (θ : Time → EuclideanSpace ℝ (Fin 1)) :
-    Time → EuclideanSpace ℝ (Fin 1) :=
+/--
+The variational derivative of the action of the simple pendulum, the action being the time
+integral of the Lagrangian along a lift of the angle.
+-/
+noncomputable def gradLagrangian (θ : Time → EuclideanSpace ℝ (Fin 1))
+    : Time → EuclideanSpace ℝ (Fin 1) :=
   (δ (q':=θ), ∫ t, S.lagrangian t (q' t) (fderiv ℝ q' t 1))
 
 /-!
@@ -732,11 +798,12 @@ of that theorem are the smoothness of the lift and `contDiff_lagrangian`.
 
 -/
 
-/-- For a smooth lift of the angle the variational derivative of the action of the simple
-  pendulum is the Euler–Lagrange operator of its Lagrangian. -/
-lemma gradLagrangian_eq_eulerLagrangeOp (θ : Time → EuclideanSpace ℝ (Fin 1))
-    (hθ : ContDiff ℝ ∞ θ) :
-    S.gradLagrangian θ = eulerLagrangeOp S.lagrangian θ := by
+/--
+For a smooth lift of the angle the variational derivative of the action of the simple
+pendulum is the Euler–Lagrange operator of its Lagrangian.
+-/
+lemma gradLagrangian_eq_eulerLagrangeOp (θ : Time → EuclideanSpace ℝ (Fin 1)) (hθ : ContDiff ℝ ∞ θ)
+    : S.gradLagrangian θ = eulerLagrangeOp S.lagrangian θ := by
   rw [gradLagrangian, euler_lagrange_varGradient _ _ hθ (S.contDiff_lagrangian _)]
 
 /-!
@@ -750,10 +817,12 @@ therefore the equation of motion of section E; that equivalence is
 
 -/
 
-/-- For a smooth lift of the angle the variational derivative of the action of the simple
-  pendulum is the torque minus the rate of change `I θ̈` of the angular momentum. -/
-lemma gradLagrangian_eq_torque (θ : Time → EuclideanSpace ℝ (Fin 1)) (hθ : ContDiff ℝ ∞ θ) :
-    S.gradLagrangian θ = fun t => S.torque (θ t) - S.inertia • ∂ₜ (∂ₜ θ) t := by
+/--
+For a smooth lift of the angle the variational derivative of the action of the simple
+pendulum is the torque minus the rate of change `I θ̈` of the angular momentum.
+-/
+lemma gradLagrangian_eq_torque (θ : Time → EuclideanSpace ℝ (Fin 1)) (hθ : ContDiff ℝ ∞ θ)
+    : S.gradLagrangian θ = fun t => S.torque (θ t) - S.inertia • ∂ₜ (∂ₜ θ) t := by
   funext t
   rw [S.gradLagrangian_eq_eulerLagrangeOp θ hθ, eulerLagrangeOp]
   simp [S.gradient_lagrangian_position_eq, S.gradient_lagrangian_velocity_eq, S.torque_eq,
@@ -783,12 +852,14 @@ of the equation of motion.
 
 -/
 
-/-- For a smooth lift of the angle the equation of motion of the simple pendulum holds if and
-  only if the variational derivative of the action vanishes: the smooth motions of the pendulum
-  are the critical points of its action. -/
-lemma equationOfMotion_iff_gradLagrangian_zero (θ : Time → EuclideanSpace ℝ (Fin 1))
-    (hθ : ContDiff ℝ ∞ θ) :
-    S.EquationOfMotion θ ↔ S.gradLagrangian θ = 0 := by
+/--
+For a smooth lift of the angle the equation of motion of the simple pendulum holds if and
+only if the variational derivative of the action vanishes: the smooth motions of the pendulum
+are the critical points of its action.
+-/
+lemma equationOfMotion_iff_gradLagrangian_zero
+    (θ : Time → EuclideanSpace ℝ (Fin 1)) (hθ : ContDiff ℝ ∞ θ)
+    : S.EquationOfMotion θ ↔ S.gradLagrangian θ = 0 := by
   rw [S.gradLagrangian_eq_torque θ hθ, funext_iff]
   simp only [EquationOfMotion, Pi.zero_apply, sub_eq_zero]
   exact forall_congr' fun t => eq_comm
@@ -804,10 +875,12 @@ which the variational derivative of the action vanishes.
 
 -/
 
-/-- A lift of the angle is a solution of the simple pendulum if and only if it is smooth and the
-  variational derivative of the action vanishes along it. -/
-lemma isSolution_iff (θ : Time → EuclideanSpace ℝ (Fin 1)) :
-    S.IsSolution θ ↔ ContDiff ℝ ∞ θ ∧ S.gradLagrangian θ = 0 :=
+/--
+A lift of the angle is a solution of the simple pendulum if and only if it is smooth and the
+variational derivative of the action vanishes along it.
+-/
+lemma isSolution_iff (θ : Time → EuclideanSpace ℝ (Fin 1))
+    : S.IsSolution θ ↔ ContDiff ℝ ∞ θ ∧ S.gradLagrangian θ = 0 :=
   and_congr_right fun hθ => S.equationOfMotion_iff_gradLagrangian_zero θ hθ
 
 /-!
@@ -830,10 +903,13 @@ along any smooth lift of the angle satisfying the equation of motion.
 
 -/
 
-/-- Along a smooth lift of the angle satisfying the equation of motion the time derivative of
-  the energy of the simple pendulum vanishes. -/
-lemma energy_conservation_of_equationOfMotion (θ : Time → EuclideanSpace ℝ (Fin 1))
-    (hθ : ContDiff ℝ ∞ θ) (h : S.EquationOfMotion θ) : ∂ₜ (S.energy θ) = 0 := by
+/--
+Along a smooth lift of the angle satisfying the equation of motion the time derivative of
+the energy of the simple pendulum vanishes.
+-/
+lemma energy_conservation_of_equationOfMotion
+    (θ : Time → EuclideanSpace ℝ (Fin 1)) (hθ : ContDiff ℝ ∞ θ) (h : S.EquationOfMotion θ)
+    : ∂ₜ (S.energy θ) = 0 := by
   rw [S.equationOfMotion_iff_newtons_2nd_law θ] at h
   funext t
   rw [S.energy_deriv θ hθ]
@@ -849,16 +925,18 @@ value.
 
 -/
 
-/-- Along a smooth lift of the angle satisfying the equation of motion the energy of the simple
-  pendulum at any time is equal to its initial value. -/
-lemma energy_conservation_of_equationOfMotion' (θ : Time → EuclideanSpace ℝ (Fin 1))
-    (hθ : ContDiff ℝ ∞ θ) (h : S.EquationOfMotion θ) (t : Time) :
-    S.energy θ t = S.energy θ 0 := by
+/--
+Along a smooth lift of the angle satisfying the equation of motion the energy of the simple
+pendulum at any time is equal to its initial value.
+-/
+lemma energy_conservation_of_equationOfMotion'
+    (θ : Time → EuclideanSpace ℝ (Fin 1)) (hθ : ContDiff ℝ ∞ θ) (h : S.EquationOfMotion θ)
+    (t : Time)
+    : S.energy θ t = S.energy θ 0 := by
   apply is_const_of_fderiv_eq_zero (𝕜 := ℝ) (S.energy_differentiable θ hθ)
   intro t
   ext p
-  rw [p.eq_one_smul, map_smul, ← Time.deriv_eq,
-    S.energy_conservation_of_equationOfMotion θ hθ h]
+  rw [p.eq_one_smul, map_smul, ← Time.deriv_eq, S.energy_conservation_of_equationOfMotion θ hθ h]
   simp
 
 /-!
@@ -870,10 +948,13 @@ two components of being a solution, so for solutions conservation takes its most
 
 -/
 
-/-- The energy of the simple pendulum along a solution at any time is equal to its initial
-  value. -/
-lemma IsSolution.energy_eq {S : SimplePendulum} {θ : Time → EuclideanSpace ℝ (Fin 1)}
-    (h : S.IsSolution θ) (t : Time) : S.energy θ t = S.energy θ 0 :=
+/--
+The energy of the simple pendulum along a solution at any time is equal to its initial
+value.
+-/
+lemma IsSolution.energy_eq
+    {S : SimplePendulum} {θ : Time → EuclideanSpace ℝ (Fin 1)} (h : S.IsSolution θ) (t : Time)
+    : S.energy θ t = S.energy θ 0 :=
   S.energy_conservation_of_equationOfMotion' θ h.contDiff h.equationOfMotion t
 
 end SimplePendulum

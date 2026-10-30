@@ -61,14 +61,16 @@ variable {G : Type*} [AddCommGroup G]
 /-! ## A. Automorphisms preserving the bonds -/
 
 /-- The lattice automorphisms that map bonded displacements to bonded displacements. -/
-def pointStabilizer (g : PeriodicGraph (Crystal.ofUnitCell G Unit)) :
-    Subgroup (Multiplicative (AddAut G)) where
-  carrier := {A | ∀ d, g.Bonded () () ((Multiplicative.toAdd A : AddAut G) d) ↔
-    g.Bonded () () d}
+def pointStabilizer (g : PeriodicGraph (Crystal.ofUnitCell G Unit))
+    : Subgroup (Multiplicative (AddAut G)) where
+  carrier :=
+    {A | ∀ d, g.Bonded () () ((Multiplicative.toAdd A : AddAut G) d) ↔
+      g.Bonded () () d}
   one_mem' d := Iff.rfl
   mul_mem' {A B} hA hB d := by
-    change g.Bonded () () ((Multiplicative.toAdd A : AddAut G)
-      ((Multiplicative.toAdd B : AddAut G) d)) ↔ _
+    change g.Bonded () ()
+        ((Multiplicative.toAdd A : AddAut G) ((Multiplicative.toAdd B : AddAut G) d))
+      ↔ _
     rw [hA, hB]
   inv_mem' {A} hA d := by
     have h := hA ((Multiplicative.toAdd A⁻¹ : AddAut G) d)
@@ -84,9 +86,10 @@ def linearHom (G F : Type*) [AddCommGroup G] : CellSymmetry G F →* Multiplicat
   map_mul' _s _t := rfl
 
 /-- Bond-preserving symmetries have linear parts in the point stabilizer. -/
-lemma linear_mem_pointStabilizer (g : PeriodicGraph (Crystal.ofUnitCell G Unit))
-    {s : CellSymmetry G Unit} (hs : s ∈ g.symmetries) :
-    Multiplicative.ofAdd s.linear ∈ g.pointStabilizer := by
+lemma linear_mem_pointStabilizer
+    (g : PeriodicGraph (Crystal.ofUnitCell G Unit))
+    {s : CellSymmetry G Unit} (hs : s ∈ g.symmetries)
+    : Multiplicative.ofAdd s.linear ∈ g.pointStabilizer := by
   intro d
   have := (mem_symmetries_iff g s).1 hs () () d
   simp only [add_sub_cancel_right] at this
@@ -94,23 +97,24 @@ lemma linear_mem_pointStabilizer (g : PeriodicGraph (Crystal.ofUnitCell G Unit))
 
 /-! ## B. The point group of a crystal with one site per cell -/
 
-/-- The homomorphism from bond-preserving symmetries to the point stabilizer taking a symmetry to
-its action on the lattice. -/
-def pointHom (g : PeriodicGraph (Crystal.ofUnitCell G Unit)) :
-    g.symmetries →* g.pointStabilizer :=
-  ((linearHom G Unit).comp g.symmetries.subtype).codRestrict g.pointStabilizer
-    fun s => linear_mem_pointStabilizer g s.2
+/--
+The homomorphism from bond-preserving symmetries to the point stabilizer taking a symmetry to
+its action on the lattice.
+-/
+def pointHom (g : PeriodicGraph (Crystal.ofUnitCell G Unit)) : g.symmetries →* g.pointStabilizer :=
+  ((linearHom G Unit).comp g.symmetries.subtype).codRestrict g.pointStabilizer fun s =>
+    linear_mem_pointStabilizer g s.2
 
-lemma pointHom_surjective (g : PeriodicGraph (Crystal.ofUnitCell G Unit)) :
-    Function.Surjective (pointHom g) := by
+lemma pointHom_surjective (g : PeriodicGraph (Crystal.ofUnitCell G Unit))
+    : Function.Surjective (pointHom g) := by
   rintro ⟨A, hA⟩
   refine ⟨⟨⟨Multiplicative.toAdd A, 1, fun _ => 0⟩, ?_⟩, rfl⟩
   rw [mem_symmetries_iff]
   rintro ⟨⟩ ⟨⟩ d
   simpa using (hA d).symm
 
-lemma ker_pointHom (g : PeriodicGraph (Crystal.ofUnitCell G Unit)) :
-    (pointHom g).ker = (CellSymmetry.translations G Unit).subgroupOf g.symmetries := by
+lemma ker_pointHom (g : PeriodicGraph (Crystal.ofUnitCell G Unit))
+    : (pointHom g).ker = (CellSymmetry.translations G Unit).subgroupOf g.symmetries := by
   ext s
   rw [MonoidHom.mem_ker, Subgroup.mem_subgroupOf]
   constructor
@@ -128,19 +132,23 @@ lemma ker_pointHom (g : PeriodicGraph (Crystal.ofUnitCell G Unit)) :
     rw [ha]
     rfl
 
-/-- **The point group of a crystal with one site per cell is the group of lattice automorphisms
-preserving the bonded displacements.** -/
-noncomputable def pointGroupEquiv (g : PeriodicGraph (Crystal.ofUnitCell G Unit)) :
-    g.pointGroup ≃* g.pointStabilizer :=
+/--
+**The point group of a crystal with one site per cell is the group of lattice automorphisms
+preserving the bonded displacements.**
+-/
+noncomputable def pointGroupEquiv (g : PeriodicGraph (Crystal.ofUnitCell G Unit))
+    : g.pointGroup ≃* g.pointStabilizer :=
   (QuotientGroup.quotientMulEquivOfEq (ker_pointHom g).symm).trans
     (QuotientGroup.quotientKerEquivOfSurjective _ (pointHom_surjective g))
 
 /-! ## C. The action on the lattice of any crystal -/
 
-/-- **The point group of any crystal acts on its translation lattice** through the linear parts of
-its symmetries. -/
-noncomputable def pointLinearHom {F : Type*} [Finite F]
-    (g : PeriodicGraph (Crystal.ofUnitCell G F)) : g.pointGroup →* Multiplicative (AddAut G) :=
+/--
+**The point group of any crystal acts on its translation lattice** through the linear parts of
+its symmetries.
+-/
+noncomputable def pointLinearHom {F : Type*} [Finite F] (g : PeriodicGraph (Crystal.ofUnitCell G F))
+    : g.pointGroup →* Multiplicative (AddAut G) :=
   QuotientGroup.lift _ ((linearHom G F).comp g.symmetries.subtype) (by
     rintro ⟨s, hs⟩ ⟨a, rfl⟩
     rfl)

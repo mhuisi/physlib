@@ -45,8 +45,7 @@ namespace ProbabilisticTheory
 
 namespace JordanAlgebra
 
-variable {E : Type*} [NonAssocCommRing E] [Module ℝ E] [SMulCommClass ℝ E E]
-  [IsScalarTower ℝ E E]
+variable {E : Type*} [NonAssocCommRing E] [Module ℝ E] [SMulCommClass ℝ E E] [IsScalarTower ℝ E E]
 
 /-! ## A. Jordan derivations -/
 
@@ -64,7 +63,8 @@ instance : CoeFun (JordanDerivation E) (fun _ => E → E) := ⟨fun D => D.toLin
 instance : Coe (JordanDerivation E) (E →ₗ[ℝ] E) := ⟨fun D => D.toLinearMap⟩
 
 omit [SMulCommClass ℝ E E] [IsScalarTower ℝ E E] in
-@[ext] lemma ext (h : ∀ x, D₁ x = D₂ x) : D₁ = D₂ := by
+@[ext]
+lemma ext (h : ∀ x, D₁ x = D₂ x) : D₁ = D₂ := by
   cases D₁
   cases D₂
   simp only at h
@@ -73,8 +73,8 @@ omit [SMulCommClass ℝ E E] [IsScalarTower ℝ E E] in
   exact h x
 
 omit [SMulCommClass ℝ E E] [IsScalarTower ℝ E E] in
-@[simp] lemma leibniz (D : JordanDerivation E) (x y : E) :
-    D (x * y) = D x * y + x * D y := D.leibniz' x y
+@[simp]
+lemma leibniz (D : JordanDerivation E) (x y : E) : D (x * y) = D x * y + x * D y := D.leibniz' x y
 
 /-- All derivations as a submodule of linear endomorphisms. -/
 def submodule : Submodule ℝ (E →ₗ[ℝ] E) where
@@ -93,8 +93,7 @@ instance : Add (JordanDerivation E) :=
   ⟨fun D₁ D₂ => ⟨D₁.toLinearMap + D₂.toLinearMap, IsDerivation.add D₁.leibniz' D₂.leibniz'⟩⟩
 
 /-- Negation of infinitesimal symmetries. -/
-instance : Neg (JordanDerivation E) :=
-  ⟨fun D => ⟨-D.toLinearMap, IsDerivation.neg D.leibniz'⟩⟩
+instance : Neg (JordanDerivation E) := ⟨fun D => ⟨-D.toLinearMap, IsDerivation.neg D.leibniz'⟩⟩
 
 omit [SMulCommClass ℝ E E] [IsScalarTower ℝ E E] in
 @[simp] lemma zero_apply (x : E) : (0 : JordanDerivation E) x = 0 := rfl
@@ -103,7 +102,7 @@ omit [SMulCommClass ℝ E E] [IsScalarTower ℝ E E] in
 @[simp] lemma add_apply (D₁ D₂ : JordanDerivation E) (x : E) : (D₁ + D₂) x = D₁ x + D₂ x := rfl
 
 omit [SMulCommClass ℝ E E] [IsScalarTower ℝ E E] in
-@[simp] lemma neg_apply (D : JordanDerivation E) (x : E) : (-D) x = -D x := rfl
+@[simp] lemma neg_apply (D : JordanDerivation E) (x : E) : (-D) x = - D x := rfl
 
 /-- Scalar multiples of infinitesimal symmetries. -/
 instance : SMul ℝ (JordanDerivation E) :=
@@ -139,8 +138,7 @@ instance : Module ℝ (JordanDerivation E) where
   smul_zero c := by ext x; simp only [smul_apply, zero_apply, smul_zero]
   smul_add c D₁ D₂ := by
     ext x
-    change c • (D₁.toLinearMap x + D₂.toLinearMap x) =
-      c • D₁.toLinearMap x + c • D₂.toLinearMap x
+    change c • (D₁.toLinearMap x + D₂.toLinearMap x) = c • D₁.toLinearMap x + c • D₂.toLinearMap x
     exact smul_add c (D₁.toLinearMap x) (D₂.toLinearMap x)
   add_smul c d D := by
     ext x
@@ -163,15 +161,15 @@ def comm (D₁ D₂ : JordanDerivation E) : JordanDerivation E where
     module
 
 omit [SMulCommClass ℝ E E] [IsScalarTower ℝ E E] in
-@[simp] lemma comm_apply (D₁ D₂ : JordanDerivation E) (x : E) :
-    comm D₁ D₂ x = D₁ (D₂ x) - D₂ (D₁ x) := rfl
+@[simp]
+lemma comm_apply (D₁ D₂ : JordanDerivation E) (x : E) : comm D₁ D₂ x = D₁ (D₂ x) - D₂ (D₁ x) := rfl
 
 /-- Derivations carry their canonical commutator bracket. -/
 instance : Bracket (JordanDerivation E) (JordanDerivation E) := ⟨comm⟩
 
 omit [SMulCommClass ℝ E E] [IsScalarTower ℝ E E] in
-@[simp] lemma lie_apply (D₁ D₂ : JordanDerivation E) (x : E) :
-    ⁅D₁, D₂⁆ x = D₁ (D₂ x) - D₂ (D₁ x) := rfl
+@[simp]
+lemma lie_apply (D₁ D₂ : JordanDerivation E) (x : E) : ⁅D₁, D₂⁆ x = D₁ (D₂ x) - D₂ (D₁ x) := rfl
 
 /-- Infinitesimal Jordan symmetries form a Lie ring under commutator. -/
 instance : LieRing (JordanDerivation E) where
@@ -216,13 +214,13 @@ omit [IsScalarTower ℝ E E] in
 
 omit [IsScalarTower ℝ E E] in
 /-- The inner-derivation commutator law in bundled infinitesimal-symmetry form. -/
-lemma inner_comm (a b c d : E) :
-    JordanDerivation.comm (inner a b) (inner c d) =
-      inner (inner a b c) d + inner c (inner a b d) := by
+lemma inner_comm (a b c d : E)
+    : JordanDerivation.comm (inner a b) (inner c d)
+      = inner (inner a b c) d + inner c (inner a b d) := by
   ext x
-  change (innerDerivation a b).comp (innerDerivation c d) x -
-      (innerDerivation c d).comp (innerDerivation a b) x =
-    (innerDerivation (innerDerivation a b c) d + innerDerivation c (innerDerivation a b d)) x
+  change (innerDerivation a b).comp (innerDerivation c d) x
+      - (innerDerivation c d).comp (innerDerivation a b) x
+    = (innerDerivation (innerDerivation a b c) d + innerDerivation c (innerDerivation a b d)) x
   exact DFunLike.congr_fun (innerDerivation_comm a b c d) x
 
 end Inner

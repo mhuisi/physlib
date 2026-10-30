@@ -25,13 +25,14 @@ namespace complexLorentzTensor
 open TensorSpecies
 open Tensor
 
-lemma antiSymm_contr_symm {A : ℂT[.up, .up]} {S : ℂT[.down, .down]}
-    (hA : {A | μ ν = - (A | ν μ)}ᵀ) (hs : {S | μ ν = S | ν μ}ᵀ) :
-    {A | μ ν ⊗ S | μ ν = - A | μ ν ⊗ S | μ ν}ᵀ := by
+lemma antiSymm_contr_symm
+    {A : ℂT[.up, .up]} {S : ℂT[.down, .down]}
+    (hA : {A | μ ν = - (A | ν μ)}ᵀ) (hs : {S | μ ν = S | ν μ}ᵀ)
+    : {A | μ ν ⊗ S | μ ν = - A | μ ν ⊗ S | μ ν}ᵀ := by
   conv_lhs =>
     rw [hA, hs, prodT_permT_left, prodT_permT_right, contrT_comm, permT_permT,
       contrT_permT, contrT_permT, permT_permT]
-  simp only[LinearMap.neg_apply, map_neg]
+  simp only [LinearMap.neg_apply, map_neg]
   congr 1
   apply permT_congr_eq_id
   decide

@@ -41,42 +41,45 @@ open MeasureTheory
 
 namespace TauCeti
 
-variable {G : Type*} [AddCommGroup G] [TopologicalSpace G]
-  [MeasurableSpace (PontryaginDual (Multiplicative G))]
+variable
+  {G : Type*}
+  [AddCommGroup G] [TopologicalSpace G] [MeasurableSpace (PontryaginDual (Multiplicative G))]
 
-/-- The Fourier–Stieltjes transform of a finite measure on the Pontryagin dual of an
-additive group. -/
+/--
+The Fourier–Stieltjes transform of a finite measure on the Pontryagin dual of an
+additive group.
+-/
 noncomputable def _root_.MeasureTheory.FiniteMeasure.pontryaginMeasureTransform
-    (μ : FiniteMeasure (PontryaginDual (Multiplicative G))) (g : G) : ℂ :=
+    (μ : FiniteMeasure (PontryaginDual (Multiplicative G))) (g : G)
+    : ℂ :=
   ∫ χ, (χ (Multiplicative.ofAdd g) : ℂ) ∂μ.toMeasure
 
 /-- The transform evaluated at a group element is the integral of character evaluations. -/
 lemma _root_.MeasureTheory.FiniteMeasure.pontryaginMeasureTransform_apply
-    (μ : FiniteMeasure (PontryaginDual (Multiplicative G))) (g : G) :
-    μ.pontryaginMeasureTransform g =
-      ∫ χ, (χ (Multiplicative.ofAdd g) : ℂ) ∂μ.toMeasure := by
+    (μ : FiniteMeasure (PontryaginDual (Multiplicative G))) (g : G)
+    : μ.pontryaginMeasureTransform g = ∫ χ, (χ (Multiplicative.ofAdd g) : ℂ) ∂μ.toMeasure := by
   unfold FiniteMeasure.pontryaginMeasureTransform
   rfl
 
 /-- At the identity, the transform records the total mass of the measure. -/
 @[simp]
 lemma _root_.MeasureTheory.FiniteMeasure.pontryaginMeasureTransform_zero
-    (μ : FiniteMeasure (PontryaginDual (Multiplicative G))) :
-    μ.pontryaginMeasureTransform 0 = (μ.toMeasure.real Set.univ : ℂ) := by
+    (μ : FiniteMeasure (PontryaginDual (Multiplicative G)))
+    : μ.pontryaginMeasureTransform 0 = (μ.toMeasure.real Set.univ : ℂ) := by
   simp [FiniteMeasure.pontryaginMeasureTransform]
 
 /-- The transform of the zero measure vanishes. -/
 @[simp]
-lemma _root_.MeasureTheory.FiniteMeasure.pontryaginMeasureTransform_zero_measure :
-    (0 : FiniteMeasure (PontryaginDual (Multiplicative G))).pontryaginMeasureTransform = 0 := by
+lemma _root_.MeasureTheory.FiniteMeasure.pontryaginMeasureTransform_zero_measure
+    : (0 : FiniteMeasure (PontryaginDual (Multiplicative G))).pontryaginMeasureTransform = 0 := by
   funext g
   simp [FiniteMeasure.pontryaginMeasureTransform]
 
 /-- The transform commutes with nonnegative scalar multiplication of finite measures. -/
 @[simp]
 lemma _root_.MeasureTheory.FiniteMeasure.pontryaginMeasureTransform_smul
-    (c : NNReal) (μ : FiniteMeasure (PontryaginDual (Multiplicative G))) :
-    (c • μ).pontryaginMeasureTransform = c • μ.pontryaginMeasureTransform := by
+    (c : NNReal) (μ : FiniteMeasure (PontryaginDual (Multiplicative G)))
+    : (c • μ).pontryaginMeasureTransform = c • μ.pontryaginMeasureTransform := by
   funext g
   simp [FiniteMeasure.pontryaginMeasureTransform]
 
@@ -85,9 +88,9 @@ variable [OpensMeasurableSpace (PontryaginDual (Multiplicative G))]
 /-- The transform commutes with addition of finite measures. -/
 @[simp]
 lemma _root_.MeasureTheory.FiniteMeasure.pontryaginMeasureTransform_add
-    (μ ν : FiniteMeasure (PontryaginDual (Multiplicative G))) :
-    (μ + ν).pontryaginMeasureTransform =
-      μ.pontryaginMeasureTransform + ν.pontryaginMeasureTransform := by
+    (μ ν : FiniteMeasure (PontryaginDual (Multiplicative G)))
+    : (μ + ν).pontryaginMeasureTransform
+      = μ.pontryaginMeasureTransform + ν.pontryaginMeasureTransform := by
   funext g
   unfold FiniteMeasure.pontryaginMeasureTransform
   rw [FiniteMeasure.toMeasure_add,
@@ -99,11 +102,10 @@ lemma _root_.MeasureTheory.FiniteMeasure.pontryaginMeasureTransform_add
 /-- The transform of a point mass is its character. -/
 @[simp]
 lemma _root_.MeasureTheory.FiniteMeasure.pontryaginMeasureTransform_dirac
-    (χ : PontryaginDual (Multiplicative G)) (g : G) :
-    FiniteMeasure.pontryaginMeasureTransform
-      (⟨Measure.dirac χ, inferInstance⟩ : FiniteMeasure
-        (PontryaginDual (Multiplicative G))) g =
-      (χ (Multiplicative.ofAdd g) : ℂ) := by
+    (χ : PontryaginDual (Multiplicative G)) (g : G)
+    : FiniteMeasure.pontryaginMeasureTransform
+        (⟨Measure.dirac χ, inferInstance⟩ : FiniteMeasure (PontryaginDual (Multiplicative G))) g
+      = (χ (Multiplicative.ofAdd g) : ℂ) := by
   simp [FiniteMeasure.pontryaginMeasureTransform,
     integral_dirac' _ _
       (PontryaginDual.continuous_coe_eval_const (Multiplicative.ofAdd g)).stronglyMeasurable]

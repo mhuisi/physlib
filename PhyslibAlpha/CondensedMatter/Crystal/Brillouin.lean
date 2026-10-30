@@ -59,8 +59,10 @@ namespace CondensedMatter.Crystal
 
 variable {G F : Type*} [AddCommGroup G] [TopologicalSpace G] [DiscreteTopology G]
 
-/-- The Brillouin zone of a crystal with translation group `G`: the crystal momenta, which are the
-characters of `G`. -/
+/--
+The Brillouin zone of a crystal with translation group `G`: the crystal momenta, which are the
+characters of `G`.
+-/
 abbrev BrillouinZone (G : Type*) [AddCommGroup G] [TopologicalSpace G] :=
   PontryaginDual (Multiplicative G)
 
@@ -69,22 +71,27 @@ noncomputable def dualMap (A : G ≃+ G) (χ : BrillouinZone G) : BrillouinZone 
   toFun x := χ (Multiplicative.ofAdd (A (Multiplicative.toAdd x)))
   map_one' := by
     change χ (Multiplicative.ofAdd (A 0)) = 1
-    rw [map_zero]; exact map_one χ
+    rw [map_zero]
+    exact map_one χ
   map_mul' x y := by
     change χ (Multiplicative.ofAdd (A (Multiplicative.toAdd x + Multiplicative.toAdd y))) = _
     rw [map_add, ofAdd_add, map_mul]
   continuous_toFun := continuous_of_discreteTopology
 
-lemma dualMap_apply (A : G ≃+ G) (χ : BrillouinZone G) (a : G) :
-    dualMap A χ (Multiplicative.ofAdd a) = χ (Multiplicative.ofAdd (A a)) := rfl
+lemma dualMap_apply (A : G ≃+ G) (χ : BrillouinZone G) (a : G)
+    : dualMap A χ (Multiplicative.ofAdd a) = χ (Multiplicative.ofAdd (A a)) :=
+  rfl
 
 lemma dualMap_refl (χ : BrillouinZone G) : dualMap (AddEquiv.refl G) χ = χ := rfl
 
-lemma dualMap_trans (A B : G ≃+ G) (χ : BrillouinZone G) :
-    dualMap B (dualMap A χ) = dualMap (B.trans A) χ := rfl
+lemma dualMap_trans (A B : G ≃+ G) (χ : BrillouinZone G)
+    : dualMap B (dualMap A χ) = dualMap (B.trans A) χ :=
+  rfl
 
-/-- The symmetries of a crystal act on the crystal momenta: a symmetry with linear part `A` sends
-`χ` to `χ ∘ A⁻¹`. -/
+/--
+The symmetries of a crystal act on the crystal momenta: a symmetry with linear part `A` sends
+`χ` to `χ ∘ A⁻¹`.
+-/
 noncomputable instance : MulAction (CellSymmetry G F) (BrillouinZone G) where
   smul s χ := dualMap s.linear.symm χ
   one_smul χ := rfl
@@ -93,12 +100,14 @@ noncomputable instance : MulAction (CellSymmetry G F) (BrillouinZone G) where
     rw [dualMap_trans]
     rfl
 
-lemma smul_apply (s : CellSymmetry G F) (χ : BrillouinZone G) (a : G) :
-    (s • χ) (Multiplicative.ofAdd a) = χ (Multiplicative.ofAdd (s.linear.symm a)) := rfl
+lemma smul_apply (s : CellSymmetry G F) (χ : BrillouinZone G) (a : G)
+    : (s • χ) (Multiplicative.ofAdd a) = χ (Multiplicative.ofAdd (s.linear.symm a)) :=
+  rfl
 
 /-- Translations act trivially on crystal momenta. -/
-lemma translation_smul_brillouin (a : G) (χ : BrillouinZone G) :
-    (CellSymmetry.translation a : CellSymmetry G F) • χ = χ := rfl
+lemma translation_smul_brillouin (a : G) (χ : BrillouinZone G)
+    : (CellSymmetry.translation a : CellSymmetry G F) • χ = χ :=
+  rfl
 /-! ## B. The point group and the little groups -/
 
 namespace PeriodicGraph
@@ -109,8 +118,8 @@ variable [Finite F] (g : PeriodicGraph (Crystal.ofUnitCell G F))
 noncomputable def symmetryAction : g.symmetries →* Equiv.Perm (BrillouinZone G) :=
   MulAction.toPermHom g.symmetries (BrillouinZone G)
 
-lemma translations_le_ker_symmetryAction :
-    (CellSymmetry.translations G F).subgroupOf g.symmetries ≤ (symmetryAction g).ker := by
+lemma translations_le_ker_symmetryAction
+    : (CellSymmetry.translations G F).subgroupOf g.symmetries ≤ (symmetryAction g).ker := by
   rintro ⟨s, hs⟩ ⟨a, rfl⟩
   rw [MonoidHom.mem_ker]
   ext χ : 1
@@ -123,11 +132,14 @@ noncomputable def pointAction : g.pointGroup →* Equiv.Perm (BrillouinZone G) :
 noncomputable instance : MulAction g.pointGroup (BrillouinZone G) :=
   MulAction.compHom _ (pointAction g)
 
-lemma mk_smul (s : g.symmetries) (χ : BrillouinZone G) :
-    (QuotientGroup.mk s : g.pointGroup) • χ = s • χ := rfl
+lemma mk_smul (s : g.symmetries) (χ : BrillouinZone G)
+    : (QuotientGroup.mk s : g.pointGroup) • χ = s • χ :=
+  rfl
 
-/-- The little group of a momentum: the bond-preserving symmetries that fix it. It contains all
-translations. -/
+/--
+The little group of a momentum: the bond-preserving symmetries that fix it. It contains all
+translations.
+-/
 noncomputable def littleGroup (χ : BrillouinZone G) : Subgroup g.symmetries :=
   MulAction.stabilizer g.symmetries χ
 
@@ -135,17 +147,17 @@ noncomputable def littleGroup (χ : BrillouinZone G) : Subgroup g.symmetries :=
 noncomputable def littleCoGroup (χ : BrillouinZone G) : Subgroup g.pointGroup :=
   MulAction.stabilizer g.pointGroup χ
 
-lemma mem_littleGroup (χ : BrillouinZone G) (s : g.symmetries) :
-    s ∈ g.littleGroup χ ↔ s • χ = χ := MulAction.mem_stabilizer_iff
+lemma mem_littleGroup (χ : BrillouinZone G) (s : g.symmetries) : s ∈ g.littleGroup χ ↔ s • χ = χ :=
+  MulAction.mem_stabilizer_iff
 
-lemma translation_mem_littleGroup (χ : BrillouinZone G) (a : G) :
-    (⟨CellSymmetry.translation a, g.translation_mem_symmetries a⟩ : g.symmetries) ∈
-      g.littleGroup χ :=
+lemma translation_mem_littleGroup (χ : BrillouinZone G) (a : G)
+    : (⟨CellSymmetry.translation a, g.translation_mem_symmetries a⟩ : g.symmetries)
+      ∈ g.littleGroup χ :=
   (g.mem_littleGroup χ _).2 (translation_smul_brillouin a χ)
 
 /-- The little group is the preimage of the little co-group. -/
-lemma littleGroup_eq_comap (χ : BrillouinZone G) :
-    g.littleGroup χ = (g.littleCoGroup χ).comap (QuotientGroup.mk' _) := by
+lemma littleGroup_eq_comap (χ : BrillouinZone G)
+    : g.littleGroup χ = (g.littleCoGroup χ).comap (QuotientGroup.mk' _) := by
   ext s
   simp only [Subgroup.mem_comap, QuotientGroup.mk'_apply, littleGroup, littleCoGroup,
     MulAction.mem_stabilizer_iff]
@@ -157,9 +169,10 @@ lemma littleGroup_eq_comap (χ : BrillouinZone G) :
 abbrev IrreducibleZone := MulAction.orbitRel.Quotient g.pointGroup (BrillouinZone G)
 
 /-- Momenta in the same orbit of the point group are identified in the irreducible zone. -/
-lemma irreducibleZone_mk_eq_iff (χ ψ : BrillouinZone G) :
-    (Quotient.mk (MulAction.orbitRel g.pointGroup (BrillouinZone G)) χ : g.IrreducibleZone) =
-      Quotient.mk _ ψ ↔ ∃ p : g.pointGroup, p • ψ = χ := by
+lemma irreducibleZone_mk_eq_iff (χ ψ : BrillouinZone G)
+    : (Quotient.mk (MulAction.orbitRel g.pointGroup (BrillouinZone G)) χ : g.IrreducibleZone)
+        = Quotient.mk _ ψ
+      ↔ ∃ p : g.pointGroup, p • ψ = χ := by
   rw [Quotient.eq]
   exact Iff.rfl
 

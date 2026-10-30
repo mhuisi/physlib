@@ -57,8 +57,7 @@ variable {H : Type*} [NormedAddCommGroup H] [InnerProductSpace ℂ H] [CompleteS
 
 -/
 
-lemma isTraceClass_rankOne (x y : H) :
-    IsTraceClass (InnerProductSpace.rankOne ℂ x y) := by
+lemma isTraceClass_rankOne (x y : H) : IsTraceClass (InnerProductSpace.rankOne ℂ x y) := by
   by_cases hy : y = 0
   · subst hy
     have hz : InnerProductSpace.rankOne ℂ x (0 : H) = 0 := by
@@ -66,19 +65,17 @@ lemma isTraceClass_rankOne (x y : H) :
       simp
     rw [hz]
     exact isTraceClass_zero
-  · have hyy : IsTraceClass (InnerProductSpace.rankOne ℂ y y) :=
-      isTraceClass_rankOne_self y
-    have hprod : IsTraceClass
-        (InnerProductSpace.rankOne ℂ x y * InnerProductSpace.rankOne ℂ y y) := by
-      simpa using (isTraceClass_mul_mul (A := InnerProductSpace.rankOne ℂ x y)
-        (B := (1 : H →L[ℂ] H)) hyy)
-    have hnorm : (‖y‖ ^ 2 : ℂ) ≠ 0 := by
-      exact_mod_cast (pow_ne_zero 2 (norm_ne_zero_iff.mpr hy))
-    have heq : (‖y‖ ^ 2 : ℂ)⁻¹ •
-        (InnerProductSpace.rankOne ℂ x y * InnerProductSpace.rankOne ℂ y y) =
-          InnerProductSpace.rankOne ℂ x y := by
-      change (‖y‖ ^ 2 : ℂ)⁻¹ •
-          (InnerProductSpace.rankOne ℂ x y ∘L InnerProductSpace.rankOne ℂ y y) = _
+  · have hyy : IsTraceClass (InnerProductSpace.rankOne ℂ y y) := isTraceClass_rankOne_self y
+    have hprod
+        : IsTraceClass (InnerProductSpace.rankOne ℂ x y * InnerProductSpace.rankOne ℂ y y) := by
+      simpa using
+        (isTraceClass_mul_mul (A := InnerProductSpace.rankOne ℂ x y) (B := (1 : H →L[ℂ] H)) hyy)
+    have hnorm : (‖y‖ ^ 2 : ℂ) ≠ 0 := by exact_mod_cast (pow_ne_zero 2 (norm_ne_zero_iff.mpr hy))
+    have heq
+        : (‖y‖ ^ 2 : ℂ)⁻¹ • (InnerProductSpace.rankOne ℂ x y * InnerProductSpace.rankOne ℂ y y)
+          = InnerProductSpace.rankOne ℂ x y := by
+      change (‖y‖ ^ 2 : ℂ)⁻¹ • (InnerProductSpace.rankOne ℂ x y ∘L InnerProductSpace.rankOne ℂ y y)
+        = _
       rw [InnerProductSpace.rankOne_comp_rankOne]
       rw [inner_self_eq_norm_sq_to_K]
       rw [smul_smul]
@@ -87,15 +84,14 @@ lemma isTraceClass_rankOne (x y : H) :
     rw [← heq]
     exact isTraceClass_smul _ hprod
 
-lemma trace_rankOne (x y : H) :
-    trace (InnerProductSpace.rankOne ℂ x y) (isTraceClass_rankOne x y) =
-      ⟪y, x⟫_ℂ := by
+lemma trace_rankOne (x y : H)
+    : trace (InnerProductSpace.rankOne ℂ x y) (isTraceClass_rankOne x y) = ⟪y, x⟫_ℂ := by
   obtain ⟨w, b, _⟩ := exists_hilbertBasis ℂ H
   rw [trace_eq_of_hilbertBasis (isTraceClass_rankOne x y) b]
   have hsum := b.hasSum_inner_mul_inner y x
-  have hterm : (fun i : w =>
-      ⟪b i, (InnerProductSpace.rankOne ℂ x y) (b i)⟫_ℂ) =
-      (fun i : w => ⟪y, b i⟫_ℂ * ⟪b i, x⟫_ℂ) := by
+  have hterm
+      : (fun i : w => ⟪b i, (InnerProductSpace.rankOne ℂ x y) (b i)⟫_ℂ)
+        = (fun i : w => ⟪y, b i⟫_ℂ * ⟪b i, x⟫_ℂ) := by
     funext i
     simp only [InnerProductSpace.rankOne_apply, inner_smul_right]
   rw [hterm]
@@ -107,27 +103,22 @@ lemma trace_rankOne (x y : H) :
 
 -/
 
-lemma tracePairing_rankOne (A : H →L[ℂ] H) (x y : H) :
-    tracePairing A (ofOperator (InnerProductSpace.rankOne ℂ x y) (isTraceClass_rankOne x y)) =
-      ⟪y, A x⟫_ℂ := by
+lemma tracePairing_rankOne (A : H →L[ℂ] H) (x y : H)
+    : tracePairing A (ofOperator (InnerProductSpace.rankOne ℂ x y) (isTraceClass_rankOne x y))
+      = ⟪y, A x⟫_ℂ := by
   rw [tracePairing_apply]
-  have hcomp : A * InnerProductSpace.rankOne ℂ x y =
-      InnerProductSpace.rankOne ℂ (A x) y := by
-    rw [show A * InnerProductSpace.rankOne ℂ x y =
-        A ∘L InnerProductSpace.rankOne ℂ x y by rfl]
+  have hcomp : A * InnerProductSpace.rankOne ℂ x y = InnerProductSpace.rankOne ℂ (A x) y := by
+    rw [show A * InnerProductSpace.rankOne ℂ x y = A ∘L InnerProductSpace.rankOne ℂ x y by rfl]
     exact InnerProductSpace.comp_rankOne x y A
   calc
-    trace (A * (ofOperator (InnerProductSpace.rankOne ℂ x y)
-        (isTraceClass_rankOne x y)).1)
-        (isTraceClass_mul_coe A (ofOperator
-          (InnerProductSpace.rankOne ℂ x y) (isTraceClass_rankOne x y))) =
-        trace (InnerProductSpace.rankOne ℂ (A x) y)
-          (hcomp ▸ isTraceClass_mul_coe A (ofOperator
-            (InnerProductSpace.rankOne ℂ x y) (isTraceClass_rankOne x y))) :=
+    trace (A * (ofOperator (InnerProductSpace.rankOne ℂ x y) (isTraceClass_rankOne x y)).1)
+          (isTraceClass_mul_coe A
+            (ofOperator (InnerProductSpace.rankOne ℂ x y) (isTraceClass_rankOne x y)))
+        = trace (InnerProductSpace.rankOne ℂ (A x) y)
+          (hcomp ▸ isTraceClass_mul_coe A
+            (ofOperator (InnerProductSpace.rankOne ℂ x y) (isTraceClass_rankOne x y))) :=
       trace_transport hcomp _
-    _ = trace (InnerProductSpace.rankOne ℂ (A x) y)
-        (isTraceClass_rankOne (A x) y) := by
-      congr 1
+    _ = trace (InnerProductSpace.rankOne ℂ (A x) y) (isTraceClass_rankOne (A x) y) := by congr 1
     _ = ⟪y, A x⟫_ℂ := trace_rankOne (A x) y
 
 /-!
@@ -137,8 +128,7 @@ lemma tracePairing_rankOne (A : H →L[ℂ] H) (x y : H) :
 -/
 
 /- The trace pairing has the sharp lower bound `‖A‖ ≤ ‖Tr (A ·)‖`. -/
-lemma norm_le_tracePairing (A : H →L[ℂ] H) :
-    ‖A‖ ≤ ‖tracePairing A‖ := by
+lemma norm_le_tracePairing (A : H →L[ℂ] H) : ‖A‖ ≤ ‖tracePairing A‖ := by
   apply ContinuousLinearMap.opNorm_le_bound A (norm_nonneg (tracePairing A))
   intro x
   by_cases hx : A x = 0
@@ -154,70 +144,70 @@ lemma norm_le_tracePairing (A : H →L[ℂ] H) :
       rw [norm_smul, norm_inv, Complex.norm_real]
       simp only [norm_norm]
       field_simp [norm_ne_zero_iff.mpr hx]
-    have hpair : ‖tracePairing A
-        (ofOperator (InnerProductSpace.rankOne ℂ x y) (isTraceClass_rankOne x y))‖ = ‖A x‖ := by
+    have hpair
+        : ‖tracePairing A
+            (ofOperator (InnerProductSpace.rankOne ℂ x y) (isTraceClass_rankOne x y))‖
+          = ‖A x‖ := by
       rw [tracePairing_rankOne]
       dsimp [y]
       rw [inner_smul_left, inner_self_eq_norm_sq_to_K]
       simp [map_inv₀, Complex.norm_real, norm_inv]
       field_simp [norm_ne_zero_iff.mpr hx]
-    have hR : ‖(ofOperator (InnerProductSpace.rankOne ℂ x y)
-        (isTraceClass_rankOne x y) : TraceClass H)‖ ≤ ‖x‖ := by
+    have hR
+        : ‖(ofOperator (InnerProductSpace.rankOne ℂ x y)
+            (isTraceClass_rankOne x y) : TraceClass H)‖
+          ≤ ‖x‖ := by
       rw [TraceClass.norm_eq_traceNorm]
       let P : H →L[ℂ] H := InnerProductSpace.rankOne ℂ y y
       have hP : IsTraceClass P := isTraceClass_rankOne_self y
-      have hprod : IsTraceClass
-          (InnerProductSpace.rankOne ℂ x y * P * (1 : H →L[ℂ] H)) := by
-        simpa [P] using (isTraceClass_mul_mul
-          (A := InnerProductSpace.rankOne ℂ x y) (B := (1 : H →L[ℂ] H)) hP)
-      have heq : InnerProductSpace.rankOne ℂ x y * P =
-          InnerProductSpace.rankOne ℂ x y := by
+      have hprod : IsTraceClass (InnerProductSpace.rankOne ℂ x y * P * (1 : H →L[ℂ] H)) := by
+        simpa [P] using
+          (isTraceClass_mul_mul (A := InnerProductSpace.rankOne ℂ x y) (B := (1 : H →L[ℂ] H)) hP)
+      have heq : InnerProductSpace.rankOne ℂ x y * P = InnerProductSpace.rankOne ℂ x y := by
         change InnerProductSpace.rankOne ℂ x y ∘L P = _
-        rw [show P = InnerProductSpace.rankOne ℂ y y by rfl,
-          InnerProductSpace.rankOne_comp_rankOne]
+        rw [show P = InnerProductSpace.rankOne ℂ y y by rfl, InnerProductSpace.rankOne_comp_rankOne]
         rw [inner_self_eq_norm_sq_to_K]
         norm_num [hy]
-      have hbound := traceNorm_mul_mul_le
-        (A := InnerProductSpace.rankOne ℂ x y) (B := (1 : H →L[ℂ] H)) hP hprod
-      have heq' : InnerProductSpace.rankOne ℂ x y * P * (1 : H →L[ℂ] H) =
-          InnerProductSpace.rankOne ℂ x y := by
+      have hbound :=
+        traceNorm_mul_mul_le (A := InnerProductSpace.rankOne ℂ x y) (B := (1 : H →L[ℂ] H)) hP hprod
+      have heq'
+          : InnerProductSpace.rankOne ℂ x y * P * (1 : H →L[ℂ] H)
+            = InnerProductSpace.rankOne ℂ x y := by
         simpa using heq
-      have hPnorm : traceNorm P hP = 1 := by
-        simpa [P, hy] using traceNorm_rankOne_self y
-      have htransport : traceNorm
-          (InnerProductSpace.rankOne ℂ x y * P * (1 : H →L[ℂ] H)) hprod =
-          traceNorm (InnerProductSpace.rankOne ℂ x y)
-            (isTraceClass_rankOne x y) := by
+      have hPnorm : traceNorm P hP = 1 := by simpa [P, hy] using traceNorm_rankOne_self y
+      have htransport
+          : traceNorm (InnerProductSpace.rankOne ℂ x y * P * (1 : H →L[ℂ] H)) hprod
+            = traceNorm (InnerProductSpace.rankOne ℂ x y) (isTraceClass_rankOne x y) := by
         simpa using traceNorm_transport heq' hprod
       calc
-        traceNorm (InnerProductSpace.rankOne ℂ x y)
-            (isTraceClass_rankOne x y) =
-            traceNorm (InnerProductSpace.rankOne ℂ x y * P * (1 : H →L[ℂ] H)) hprod :=
+        traceNorm (InnerProductSpace.rankOne ℂ x y) (isTraceClass_rankOne x y)
+            = traceNorm (InnerProductSpace.rankOne ℂ x y * P * (1 : H →L[ℂ] H)) hprod :=
           htransport.symm
-        _ ≤ ‖InnerProductSpace.rankOne ℂ x y‖ * traceNorm P hP * ‖(1 : H →L[ℂ] H)‖ :=
-          hbound
+        _ ≤ ‖InnerProductSpace.rankOne ℂ x y‖ * traceNorm P hP * ‖(1 : H →L[ℂ] H)‖ := hbound
         _ = ‖x‖ := by
           rw [hPnorm]
           simp [InnerProductSpace.norm_rankOne, hy, norm_one]
     calc
-      ‖A x‖ = ‖tracePairing A
-          (ofOperator (InnerProductSpace.rankOne ℂ x y) (isTraceClass_rankOne x y))‖ := hpair.symm
-      _ ≤ ‖tracePairing A‖ *
-          ‖(ofOperator (InnerProductSpace.rankOne ℂ x y)
-            (isTraceClass_rankOne x y) : TraceClass H)‖ :=
+      ‖A x‖
+          = ‖tracePairing A
+            (ofOperator (InnerProductSpace.rankOne ℂ x y) (isTraceClass_rankOne x y))‖ :=
+        hpair.symm
+      _ ≤ ‖tracePairing A‖
+          * ‖(ofOperator (InnerProductSpace.rankOne ℂ x y)
+              (isTraceClass_rankOne x y) : TraceClass H)‖ :=
         (tracePairing A).le_opNorm _
-      _ ≤ ‖tracePairing A‖ * ‖x‖ :=
-        mul_le_mul_of_nonneg_left hR (norm_nonneg _)
+      _ ≤ ‖tracePairing A‖ * ‖x‖ := mul_le_mul_of_nonneg_left hR (norm_nonneg _)
 
-/-- The concrete trace pairing is isometric; this is the norm half of the `H →L[ℂ] H` predual
-theorem. -/
-lemma norm_tracePairing (A : H →L[ℂ] H) :
-    ‖tracePairing A‖ = ‖A‖ :=
+/--
+The concrete trace pairing is isometric; this is the norm half of the `H →L[ℂ] H` predual
+theorem.
+-/
+lemma norm_tracePairing (A : H →L[ℂ] H) : ‖tracePairing A‖ = ‖A‖ :=
   le_antisymm (norm_tracePairing_le A) (norm_le_tracePairing A)
 
 /-- The operator-to-functional map has the same norm as the operator. -/
-lemma norm_tracePairingContinuousLinearMap (A : H →L[ℂ] H) :
-    ‖tracePairingContinuousLinearMap A‖ = ‖A‖ := by
+lemma norm_tracePairingContinuousLinearMap (A : H →L[ℂ] H)
+    : ‖tracePairingContinuousLinearMap A‖ = ‖A‖ := by
   rw [tracePairingContinuousLinearMap_apply, norm_tracePairing]
 
 /-!
@@ -226,19 +216,21 @@ lemma norm_tracePairingContinuousLinearMap (A : H →L[ℂ] H) :
 
 -/
 
-/-- The trace pairing, as a linear isometry from bounded operators into the dual of the trace-class
-operators. -/
-def tracePairingLinearIsometry :
-    (H →L[ℂ] H) →ₗᵢ[ℂ] (TraceClass H →L[ℂ] ℂ) :=
-  { toLinearMap := (tracePairingContinuousLinearMap :
-      (H →L[ℂ] H) →L[ℂ] (TraceClass H →L[ℂ] ℂ))
-    norm_map' := fun A => norm_tracePairingContinuousLinearMap (H := H) A }
+/--
+The trace pairing, as a linear isometry from bounded operators into the dual of the trace-class
+operators.
+-/
+def tracePairingLinearIsometry : (H →L[ℂ] H) →ₗᵢ[ℂ] (TraceClass H →L[ℂ] ℂ) := {
+  toLinearMap := (tracePairingContinuousLinearMap : (H →L[ℂ] H) →L[ℂ] (TraceClass H →L[ℂ] ℂ))
+  norm_map' := fun A => norm_tracePairingContinuousLinearMap (H := H) A
+}
 
-@[simp] lemma tracePairingLinearIsometry_apply (A : H →L[ℂ] H) :
-    tracePairingLinearIsometry A = tracePairing A := rfl
+@[simp]
+lemma tracePairingLinearIsometry_apply (A : H →L[ℂ] H)
+    : tracePairingLinearIsometry A = tracePairing A :=
+  rfl
 
-lemma tracePairingLinearIsometry_norm (A : H →L[ℂ] H) :
-    ‖tracePairingLinearIsometry A‖ = ‖A‖ :=
+lemma tracePairingLinearIsometry_norm (A : H →L[ℂ] H) : ‖tracePairingLinearIsometry A‖ = ‖A‖ :=
   (tracePairingLinearIsometry : (H →L[ℂ] H) →ₗᵢ[ℂ] (TraceClass H →L[ℂ] ℂ)).norm_map' A
 
 end TraceClass

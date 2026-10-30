@@ -63,15 +63,17 @@ attribute [-simp] Fin.succAbove_zero
 ### A.1. Boost of the x-component of the electric field
 
 -/
-lemma electricField_apply_x_boost_zero {d : ℕ} {c : SpeedOfLight} (β : ℝ) (hβ : |β| < 1)
-    (A : ElectromagneticPotential d.succ) (hA : Differentiable ℝ A) (t : Time) (x : Space d.succ) :
-    let Λ := LorentzGroup.boost (d := d.succ) 0 β hβ
-    let t' : Time := γ β * (t.val + β /c * x 0)
-    let x' : Space d.succ := ⟨fun
-      | 0 => γ β * (x 0 + c * β * t.val)
-      | ⟨Nat.succ n, ih⟩ => x ⟨Nat.succ n, ih⟩⟩
-    electricField c (Λ • A) t x 0 =
-    A.electricField c t' x' 0 := by
+lemma electricField_apply_x_boost_zero
+    {d : ℕ} {c : SpeedOfLight}
+    (β : ℝ) (hβ : |β| < 1)
+    (A : ElectromagneticPotential d.succ) (hA : Differentiable ℝ A)
+    (t : Time) (x : Space d.succ)
+    : let Λ := LorentzGroup.boost (d := d.succ) 0 β hβ
+      let t' : Time := γ β * (t.val + β / c * x 0)
+      let x' : Space d.succ := ⟨fun
+        | 0 => γ β * (x 0 + c * β * t.val)
+        | ⟨Nat.succ n, ih⟩ => x ⟨Nat.succ n, ih⟩⟩
+      electricField c (Λ • A) t x 0 = A.electricField c t' x' 0 := by
   dsimp
   rw [electricField_eq_toFieldStrength_eval, toFieldStrength_eval_equivariant _ _ hA]
   simp [Fintype.sum_sum_type, Fin.sum_univ_succ, toFieldStrength_eval_diag_eq_zero]
@@ -98,19 +100,22 @@ lemma electricField_apply_x_boost_zero {d : ℕ} {c : SpeedOfLight} (β : ℝ) (
 
 -/
 
-lemma electricField_apply_x_boost_succ {d : ℕ} {c : SpeedOfLight} (β : ℝ) (hβ : |β| < 1)
-    (A : ElectromagneticPotential d.succ) (hA : Differentiable ℝ A) (t : Time) (x : Space d.succ)
-    (i : Fin d) :
-    let Λ := LorentzGroup.boost (d := d.succ) 0 β hβ
-    let t' : Time := γ β * (t.val + β /c * x 0)
-    let x' : Space d.succ := ⟨fun
-      | 0 => γ β * (x 0 + c * β * t.val)
-      | ⟨Nat.succ n, ih⟩ => x ⟨Nat.succ n, ih⟩⟩
-    electricField c (Λ • A) t x i.succ =
-    γ β * (A.electricField c t' x' i.succ + c * β * A.magneticFieldMatrix c t' x' (0, i.succ)) := by
+lemma electricField_apply_x_boost_succ
+    {d : ℕ} {c : SpeedOfLight}
+    (β : ℝ) (hβ : |β| < 1)
+    (A : ElectromagneticPotential d.succ) (hA : Differentiable ℝ A)
+    (t : Time) (x : Space d.succ) (i : Fin d)
+    : let Λ := LorentzGroup.boost (d := d.succ) 0 β hβ
+      let t' : Time := γ β * (t.val + β / c * x 0)
+      let x' : Space d.succ := ⟨fun
+        | 0 => γ β * (x 0 + c * β * t.val)
+        | ⟨Nat.succ n, ih⟩ => x ⟨Nat.succ n, ih⟩⟩
+      electricField c (Λ • A) t x i.succ
+        = γ β
+          * (A.electricField c t' x' i.succ
+            + c * β * A.magneticFieldMatrix c t' x' (0, i.succ)) := by
   dsimp
-  rw [electricField_eq_toFieldStrength_eval,
-    toFieldStrength_eval_equivariant _ _ hA]
+  rw [electricField_eq_toFieldStrength_eval, toFieldStrength_eval_equivariant _ _ hA]
   simp [Fintype.sum_sum_type, boost_zero_inr_succ_inr_succ, Fin.sum_univ_succ]
   rw [toFieldStrength_eval_inl_inr_eq_electricField (c := c) (hA := hA),
     toFieldStrength_eval_inr_inr_eq_magneticFieldMatrix (c := c),
@@ -134,16 +139,20 @@ lemma electricField_apply_x_boost_succ {d : ℕ} {c : SpeedOfLight} (β : ℝ) (
 
 -/
 
-lemma magneticFieldMatrix_apply_x_boost_zero_succ {d : ℕ} {c : SpeedOfLight} (β : ℝ) (hβ : |β| < 1)
-    (A : ElectromagneticPotential d.succ) (hA : Differentiable ℝ A) (t : Time) (x : Space d.succ)
-    (i : Fin d) :
-    let Λ := LorentzGroup.boost (d := d.succ) 0 β hβ
-    let t' : Time := γ β * (t.val + β /c * x 0)
-    let x' : Space d.succ := ⟨fun
-      | 0 => γ β * (x 0 + c * β * t.val)
-      | ⟨Nat.succ n, ih⟩ => x ⟨Nat.succ n, ih⟩⟩
-    magneticFieldMatrix c (Λ • A) t x (0, i.succ) =
-    γ β * (A.magneticFieldMatrix c t' x' (0, i.succ) + β / c * A.electricField c t' x' i.succ) := by
+lemma magneticFieldMatrix_apply_x_boost_zero_succ
+    {d : ℕ} {c : SpeedOfLight}
+    (β : ℝ) (hβ : |β| < 1)
+    (A : ElectromagneticPotential d.succ) (hA : Differentiable ℝ A)
+    (t : Time) (x : Space d.succ) (i : Fin d)
+    : let Λ := LorentzGroup.boost (d := d.succ) 0 β hβ
+      let t' : Time := γ β * (t.val + β / c * x 0)
+      let x' : Space d.succ := ⟨fun
+        | 0 => γ β * (x 0 + c * β * t.val)
+        | ⟨Nat.succ n, ih⟩ => x ⟨Nat.succ n, ih⟩⟩
+      magneticFieldMatrix c (Λ • A) t x (0, i.succ)
+        = γ β
+          * (A.magneticFieldMatrix c t' x' (0, i.succ)
+            + β / c * A.electricField c t' x' i.succ) := by
   dsimp [magneticFieldMatrix_eq]
   rw [toFieldStrength_eval_equivariant _ _ hA]
   simp [Fintype.sum_sum_type, boost_zero_inr_succ_inr_succ, Fin.sum_univ_succ]
@@ -162,16 +171,18 @@ lemma magneticFieldMatrix_apply_x_boost_zero_succ {d : ℕ} {c : SpeedOfLight} (
 
 -/
 
-lemma magneticFieldMatrix_apply_x_boost_succ_succ {d : ℕ} {c : SpeedOfLight} (β : ℝ) (hβ : |β| < 1)
-    (A : ElectromagneticPotential d.succ) (hA : Differentiable ℝ A) (t : Time) (x : Space d.succ)
-    (i j : Fin d) :
-    let Λ := LorentzGroup.boost (d := d.succ) 0 β hβ
-    let t' : Time := γ β * (t.val + β /c * x 0)
-    let x' : Space d.succ := ⟨fun
-      | 0 => γ β * (x 0 + c * β * t.val)
-      | ⟨Nat.succ n, ih⟩ => x ⟨Nat.succ n, ih⟩⟩
-    magneticFieldMatrix c (Λ • A) t x (i.succ, j.succ) =
-    A.magneticFieldMatrix c t' x' (i.succ, j.succ) := by
+lemma magneticFieldMatrix_apply_x_boost_succ_succ
+    {d : ℕ} {c : SpeedOfLight}
+    (β : ℝ) (hβ : |β| < 1)
+    (A : ElectromagneticPotential d.succ) (hA : Differentiable ℝ A)
+    (t : Time) (x : Space d.succ) (i j : Fin d)
+    : let Λ := LorentzGroup.boost (d := d.succ) 0 β hβ
+      let t' : Time := γ β * (t.val + β / c * x 0)
+      let x' : Space d.succ := ⟨fun
+        | 0 => γ β * (x 0 + c * β * t.val)
+        | ⟨Nat.succ n, ih⟩ => x ⟨Nat.succ n, ih⟩⟩
+      magneticFieldMatrix c (Λ • A) t x (i.succ, j.succ)
+        = A.magneticFieldMatrix c t' x' (i.succ, j.succ) := by
   dsimp [magneticFieldMatrix_eq]
   rw [toFieldStrength_eval_equivariant _ _ hA]
   simp [Fintype.sum_sum_type, boost_zero_inr_succ_inr_succ, Fin.sum_univ_succ]

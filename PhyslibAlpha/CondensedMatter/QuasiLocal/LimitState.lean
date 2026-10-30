@@ -61,12 +61,14 @@ section Bounded
 
 open scoped Matrix.Norms.L2Operator MatrixOrder
 
-/-- In a matrix algebra every `a* a` lies below a multiple of the identity by a sum of
-squares. -/
-lemma matrix_exists_sumSq {n : Type*} [Fintype n] [DecidableEq n] (a : Matrix n n ℂ) :
-    ∃ c : ℝ, ∃ p ∈ sumSq (Matrix n n ℂ), star a * a + p = (c : ℂ) • (1 : Matrix n n ℂ) := by
-  obtain ⟨p, hp, h⟩ := (StarOrderedRing.le_iff _ _).1
-    (CStarAlgebra.star_mul_le_algebraMap_norm_sq a)
+/--
+In a matrix algebra every `a* a` lies below a multiple of the identity by a sum of
+squares.
+-/
+lemma matrix_exists_sumSq {n : Type*} [Fintype n] [DecidableEq n] (a : Matrix n n ℂ)
+    : ∃ c : ℝ, ∃ p ∈ sumSq (Matrix n n ℂ), star a * a + p = (c : ℂ) • (1 : Matrix n n ℂ) := by
+  obtain ⟨p, hp, h⟩ :=
+    (StarOrderedRing.le_iff _ _).1 (CStarAlgebra.star_mul_le_algebraMap_norm_sq a)
   refine ⟨‖a‖ ^ 2, p, hp, ?_⟩
   rw [← h, Algebra.algebraMap_eq_smul_one, Complex.coe_smul]
 
@@ -76,34 +78,46 @@ variable {S : Type*} [DecidableEq S]
 variable {Ω : S → Type*} [∀ s, Fintype (Ω s)] [∀ s, DecidableEq (Ω s)]
 
 /-- **The net of operators is locally bounded.** -/
-lemma quantumNet_isLocallyBounded : (quantumNet Ω).IsLocallyBounded :=
-  fun _ a => matrix_exists_sumSq a
+lemma quantumNet_isLocallyBounded : (quantumNet Ω).IsLocallyBounded := fun _ a =>
+  matrix_exists_sumSq a
 
 /-! ## B. Limit states of the ensembles -/
 
 variable [∀ s, Nonempty (Ω s)]
 
-/-- **The thermodynamic limit state of the canonical ensemble** along an ultrafilter of boxes:
-a state of the infinite system. -/
-def Interaction.canonicalLimitState (I : Interaction Ω) (β : ℝ) (𝒰 : Ultrafilter (Finset S))
-    (h𝒰 : (𝒰 : Filter (Finset S)) ≤ atTop) : AlgState (quantumNet Ω).Quasilocal :=
+/--
+**The thermodynamic limit state of the canonical ensemble** along an ultrafilter of boxes:
+a state of the infinite system.
+-/
+def Interaction.canonicalLimitState
+    (I : Interaction Ω) (β : ℝ) (𝒰 : Ultrafilter (Finset S)) (h𝒰 : (𝒰 : Filter (Finset S)) ≤ atTop)
+    : AlgState (quantumNet Ω).Quasilocal :=
   limitState (N := quantumNet Ω) (fun Λ => I.canonicalState β Λ) quantumNet_isLocallyBounded h𝒰
 
-/-- **The thermodynamic limit state of the grand canonical ensemble** along an ultrafilter of
-boxes. -/
-def Interaction.grandCanonicalLimitState (I : Interaction Ω) (q : Charge Ω) (β μ : ℝ)
-    (𝒰 : Ultrafilter (Finset S)) (h𝒰 : (𝒰 : Filter (Finset S)) ≤ atTop) :
-    AlgState (quantumNet Ω).Quasilocal :=
-  limitState (N := quantumNet Ω) (fun Λ => I.grandCanonicalState q β μ Λ)
+/--
+**The thermodynamic limit state of the grand canonical ensemble** along an ultrafilter of
+boxes.
+-/
+def Interaction.grandCanonicalLimitState
+    (I : Interaction Ω) (q : Charge Ω) (β μ : ℝ)
+    (𝒰 : Ultrafilter (Finset S)) (h𝒰 : (𝒰 : Filter (Finset S)) ≤ atTop)
+    : AlgState (quantumNet Ω).Quasilocal :=
+  limitState (N := quantumNet Ω)
+    (fun Λ => I.grandCanonicalState q β μ Λ)
     quantumNet_isLocallyBounded h𝒰
 
-/-- The limit state of the canonical ensemble on a local observable is the limit of the box
-expectations. -/
-lemma Interaction.canonicalLimitState_of (I : Interaction Ω) (β : ℝ) (𝒰 : Ultrafilter (Finset S))
-    (h𝒰 : (𝒰 : Filter (Finset S)) ≤ atTop) (X : Finset S) (a : Alg Ω X) :
-    Tendsto (localSeq (N := quantumNet Ω) (fun Λ => I.canonicalState β Λ) X a) 𝒰
+/--
+The limit state of the canonical ensemble on a local observable is the limit of the box
+expectations.
+-/
+lemma Interaction.canonicalLimitState_of
+    (I : Interaction Ω) (β : ℝ)
+    (𝒰 : Ultrafilter (Finset S)) (h𝒰 : (𝒰 : Filter (Finset S)) ≤ atTop)
+    (X : Finset S) (a : Alg Ω X)
+    : Tendsto (localSeq (N := quantumNet Ω) (fun Λ => I.canonicalState β Λ) X a) 𝒰
       (nhds (I.canonicalLimitState β 𝒰 h𝒰 ((quantumNet Ω).of X a))) :=
-  limitState_of (N := quantumNet Ω) (fun Λ => I.canonicalState β Λ)
+  limitState_of (N := quantumNet Ω)
+    (fun Λ => I.canonicalState β Λ)
     quantumNet_isLocallyBounded h𝒰 X a
 
 end QuasiLocal

@@ -163,8 +163,7 @@ instance : Repr Fluxes where
 
 -/
 
-lemma ext_iff {f1 f2 : Fluxes} : f1 = f2 ↔ f1.M = f2.M ∧ f1.N = f2.N := by
-  cases f1; cases f2; simp
+lemma ext_iff {f1 f2 : Fluxes} : f1 = f2 ↔ f1.M = f2.M ∧ f1.N = f2.N := by cases f1; cases f2; simp
 
 instance : Zero Fluxes := ⟨0, 0⟩
 
@@ -174,11 +173,9 @@ instance : Zero Fluxes := ⟨0, 0⟩
 
 -/
 
-@[simp]
-lemma zero_M : (0 : Fluxes).M = 0 := rfl
+@[simp] lemma zero_M : (0 : Fluxes).M = 0 := rfl
 
-@[simp]
-lemma zero_N : (0 : Fluxes).N = 0 := rfl
+@[simp] lemma zero_N : (0 : Fluxes).N = 0 := rfl
 
 /-!
 
@@ -189,11 +186,9 @@ lemma zero_N : (0 : Fluxes).N = 0 := rfl
 instance : Add Fluxes where
   add f1 f2 := ⟨f1.M + f2.M, f1.N + f2.N⟩
 
-@[simp]
-lemma add_M (f1 f2 : Fluxes) : (f1 + f2).M = f1.M + f2.M := rfl
+@[simp] lemma add_M (f1 f2 : Fluxes) : (f1 + f2).M = f1.M + f2.M := rfl
 
-@[simp]
-lemma add_N (f1 f2 : Fluxes) : (f1 + f2).N = f1.N + f2.N := rfl
+@[simp] lemma add_N (f1 f2 : Fluxes) : (f1 + f2).N = f1.N + f2.N := rfl
 
 /-!
 
@@ -229,8 +224,7 @@ namespace FluxesFive
 
 -/
 
-instance : DecidableEq FluxesFive :=
-  inferInstanceAs (DecidableEq (Multiset Fluxes))
+instance : DecidableEq FluxesFive := inferInstanceAs (DecidableEq (Multiset Fluxes))
 
 /-!
 
@@ -238,8 +232,10 @@ instance : DecidableEq FluxesFive :=
 
 -/
 
-/-- The proposition on `FluxesFive` such that `(0, 0)` is not in `F`
-  and as such each component in `F` leads to chiral matter. -/
+/--
+The proposition on `FluxesFive` such that `(0, 0)` is not in `F`
+and as such each component in `F` leads to chiral matter.
+-/
 abbrev HasNoZero (F : FluxesFive) : Prop := 0 ∉ F
 
 /-!
@@ -254,8 +250,10 @@ abbrev HasNoZero (F : FluxesFive) : Prop := 0 ∉ F
 
 -/
 
-/-- The multiset of chiral indices of the representation `D = (bar 3,1)_{1/3}`
-  arising from the matter 5d representations. -/
+/--
+The multiset of chiral indices of the representation `D = (bar 3,1)_{1/3}`
+arising from the matter 5d representations.
+-/
 def chiralIndicesOfD (F : FluxesFive) : Multiset ℤ := F.map (fun f => f.M)
 
 /-!
@@ -264,10 +262,11 @@ def chiralIndicesOfD (F : FluxesFive) : Multiset ℤ := F.map (fun f => f.M)
 
 -/
 
-/-- The total number of chiral `D` representations arising from the matter 5d
-  representations. -/
-def numChiralD (F : FluxesFive) : ℤ :=
-  ((chiralIndicesOfD F).filter (fun x => 0 ≤ x)).sum
+/--
+The total number of chiral `D` representations arising from the matter 5d
+representations.
+-/
+def numChiralD (F : FluxesFive) : ℤ := ((chiralIndicesOfD F).filter (fun x => 0 ≤ x)).sum
 
 /-!
 
@@ -275,10 +274,11 @@ def numChiralD (F : FluxesFive) : ℤ :=
 
 -/
 
-/-- The total number of anti-chiral `D` representations arising from the matter 5d
-  representations. -/
-def numAntiChiralD (F : FluxesFive) : ℤ :=
-  ((chiralIndicesOfD F).filter (fun x => x < 0)).sum
+/--
+The total number of anti-chiral `D` representations arising from the matter 5d
+representations.
+-/
+def numAntiChiralD (F : FluxesFive) : ℤ := ((chiralIndicesOfD F).filter (fun x => x < 0)).sum
 
 /-!
 
@@ -286,8 +286,8 @@ def numAntiChiralD (F : FluxesFive) : ℤ :=
 
 -/
 
-lemma numChiralD_eq_sum_sub_numAntiChiralD (F : FluxesFive) :
-    F.numChiralD = (chiralIndicesOfD F).sum - F.numAntiChiralD := by
+lemma numChiralD_eq_sum_sub_numAntiChiralD (F : FluxesFive)
+    : F.numChiralD = (chiralIndicesOfD F).sum - F.numAntiChiralD := by
   simpa only [numChiralD, numAntiChiralD, not_le, eq_sub_iff_add_eq] using
     Multiset.sum_filter_add_sum_filter_not (s := chiralIndicesOfD F) (fun x => 0 ≤ x)
 
@@ -303,8 +303,10 @@ lemma numChiralD_eq_sum_sub_numAntiChiralD (F : FluxesFive) :
 
 -/
 
-/-- The multiset of chiral indices of the representation `L = (1,2)_{-1/2}`
-  arising from the matter 5d representations. -/
+/--
+The multiset of chiral indices of the representation `L = (1,2)_{-1/2}`
+arising from the matter 5d representations.
+-/
 def chiralIndicesOfL (F : FluxesFive) : Multiset ℤ := F.map (fun f => f.M + f.N)
 
 /-!
@@ -313,10 +315,11 @@ def chiralIndicesOfL (F : FluxesFive) : Multiset ℤ := F.map (fun f => f.M + f.
 
 -/
 
-/-- The total number of chiral `L` representations arising from the matter 5d
-  representations. -/
-def numChiralL (F : FluxesFive) : ℤ :=
-  ((chiralIndicesOfL F).filter (fun x => 0 ≤ x)).sum
+/--
+The total number of chiral `L` representations arising from the matter 5d
+representations.
+-/
+def numChiralL (F : FluxesFive) : ℤ := ((chiralIndicesOfL F).filter (fun x => 0 ≤ x)).sum
 
 /-!
 
@@ -324,10 +327,11 @@ def numChiralL (F : FluxesFive) : ℤ :=
 
 -/
 
-/-- The total number of anti-chiral `L` representations arising from the matter 5d
-  representations. -/
-def numAntiChiralL (F : FluxesFive) : ℤ :=
-  ((chiralIndicesOfL F).filter (fun x => x < 0)).sum
+/--
+The total number of anti-chiral `L` representations arising from the matter 5d
+representations.
+-/
+def numAntiChiralL (F : FluxesFive) : ℤ := ((chiralIndicesOfL F).filter (fun x => x < 0)).sum
 
 /-!
 
@@ -335,8 +339,8 @@ def numAntiChiralL (F : FluxesFive) : ℤ :=
 
 -/
 
-lemma numChiralL_eq_sum_sub_numAntiChiralL (F : FluxesFive) :
-    F.numChiralL = (chiralIndicesOfL F).sum - F.numAntiChiralL := by
+lemma numChiralL_eq_sum_sub_numAntiChiralL (F : FluxesFive)
+    : F.numChiralL = (chiralIndicesOfL F).sum - F.numAntiChiralL := by
   simpa only [numChiralL, numAntiChiralL, not_le, eq_sub_iff_add_eq] using
     Multiset.sum_filter_add_sum_filter_not (s := chiralIndicesOfL F) (fun x => 0 ≤ x)
 
@@ -346,7 +350,8 @@ lemma numChiralL_eq_sum_sub_numAntiChiralL (F : FluxesFive) :
 
 -/
 
-/-- The condition that the 5d-matter representations do not lead to exotic chiral matter in the
+/--
+The condition that the 5d-matter representations do not lead to exotic chiral matter in the
   MSSM spectrum. This corresponds to the conditions that:
 - There are 3 chiral `L` representations and no anti-chiral `L` representations.
 - There are 3 chiral `D` representations and no anti-chiral `D` representations.
@@ -354,8 +359,7 @@ lemma numChiralL_eq_sum_sub_numAntiChiralL (F : FluxesFive) :
 def NoExotics (F : FluxesFive) : Prop :=
   F.numChiralL = 3 ∧ F.numAntiChiralL = 0 ∧ F.numChiralD = 3 ∧ F.numAntiChiralD = 0
 
-instance (F : FluxesFive) : Decidable (F.NoExotics) :=
-  instDecidableAnd
+instance (F : FluxesFive) : Decidable (F.NoExotics) := instDecidableAnd
 
 end FluxesFive
 
@@ -376,8 +380,7 @@ namespace FluxesTen
 
 -/
 
-instance : DecidableEq FluxesTen :=
-  inferInstanceAs (DecidableEq (Multiset Fluxes))
+instance : DecidableEq FluxesTen := inferInstanceAs (DecidableEq (Multiset Fluxes))
 
 /-!
 
@@ -385,8 +388,10 @@ instance : DecidableEq FluxesTen :=
 
 -/
 
-/-- The proposition on `FluxesTen` such that `(0, 0)` is not in `F`
-  and as such each component in `F` leads to chiral matter. -/
+/--
+The proposition on `FluxesTen` such that `(0, 0)` is not in `F`
+and as such each component in `F` leads to chiral matter.
+-/
 abbrev HasNoZero (F : FluxesTen) : Prop := 0 ∉ F
 
 /-!
@@ -401,8 +406,10 @@ abbrev HasNoZero (F : FluxesTen) : Prop := 0 ∉ F
 
 -/
 
-/-- The multiset of chiral indices of the representation `Q = (3,2)_{1/6}`
-  arising from the matter 10d representations, corresponding to `M`. -/
+/--
+The multiset of chiral indices of the representation `Q = (3,2)_{1/6}`
+arising from the matter 10d representations, corresponding to `M`.
+-/
 def chiralIndicesOfQ (F : FluxesTen) : Multiset ℤ := F.map (fun f => f.M)
 
 /-!
@@ -411,8 +418,10 @@ def chiralIndicesOfQ (F : FluxesTen) : Multiset ℤ := F.map (fun f => f.M)
 
 -/
 
-/-- The total number of chiral `Q` representations arising from the matter 10d
-  representations. -/
+/--
+The total number of chiral `Q` representations arising from the matter 10d
+representations.
+-/
 def numChiralQ (F : FluxesTen) : ℤ := ((chiralIndicesOfQ F).filter (fun x => 0 ≤ x)).sum
 
 /-!
@@ -421,8 +430,10 @@ def numChiralQ (F : FluxesTen) : ℤ := ((chiralIndicesOfQ F).filter (fun x => 0
 
 -/
 
-/-- The total number of anti-chiral `Q` representations arising from the matter 10d
-  representations. -/
+/--
+The total number of anti-chiral `Q` representations arising from the matter 10d
+representations.
+-/
 def numAntiChiralQ (F : FluxesTen) : ℤ := ((chiralIndicesOfQ F).filter (fun x => x < 0)).sum
 
 /-!
@@ -431,8 +442,8 @@ def numAntiChiralQ (F : FluxesTen) : ℤ := ((chiralIndicesOfQ F).filter (fun x 
 
 -/
 
-lemma numChiralQ_eq_sum_sub_numAntiChiralQ (F : FluxesTen) :
-    F.numChiralQ = (chiralIndicesOfQ F).sum - F.numAntiChiralQ := by
+lemma numChiralQ_eq_sum_sub_numAntiChiralQ (F : FluxesTen)
+    : F.numChiralQ = (chiralIndicesOfQ F).sum - F.numAntiChiralQ := by
   simpa only [numChiralQ, numAntiChiralQ, not_le, eq_sub_iff_add_eq] using
     Multiset.sum_filter_add_sum_filter_not (s := chiralIndicesOfQ F) (fun x => 0 ≤ x)
 
@@ -448,8 +459,10 @@ lemma numChiralQ_eq_sum_sub_numAntiChiralQ (F : FluxesTen) :
 
 -/
 
-/-- The multiset of chiral indices of the representation `U = (bar 3,1)_{-2/3}`
-  arising from the matter 10d representations, corresponding to `M - N` -/
+/--
+The multiset of chiral indices of the representation `U = (bar 3,1)_{-2/3}`
+arising from the matter 10d representations, corresponding to `M - N`
+-/
 def chiralIndicesOfU (F : FluxesTen) : Multiset ℤ := F.map (fun f => f.M - f.N)
 
 /-!
@@ -458,8 +471,10 @@ def chiralIndicesOfU (F : FluxesTen) : Multiset ℤ := F.map (fun f => f.M - f.N
 
 -/
 
-/-- The total number of chiral `U` representations arising from the matter 10d
-  representations. -/
+/--
+The total number of chiral `U` representations arising from the matter 10d
+representations.
+-/
 def numChiralU (F : FluxesTen) : ℤ := ((chiralIndicesOfU F).filter (fun x => 0 ≤ x)).sum
 
 /-!
@@ -468,18 +483,16 @@ def numChiralU (F : FluxesTen) : ℤ := ((chiralIndicesOfU F).filter (fun x => 0
 
 -/
 
-/-- The total number of anti-chiral `U` representations arising from the matter 10d
-  representations. -/
+/--
+The total number of anti-chiral `U` representations arising from the matter 10d
+representations.
+-/
 def numAntiChiralU (F : FluxesTen) : ℤ := ((chiralIndicesOfU F).filter (fun x => x < 0)).sum
 
-/-
+/- #### C.4.4. Relation between number of chiral and anti-chiral `Q` -/
 
-#### C.4.4. Relation between number of chiral and anti-chiral `Q`
-
--/
-
-lemma numChiralU_eq_sum_sub_numAntiChiralU (F : FluxesTen) :
-    F.numChiralU = (chiralIndicesOfU F).sum - F.numAntiChiralU := by
+lemma numChiralU_eq_sum_sub_numAntiChiralU (F : FluxesTen)
+    : F.numChiralU = (chiralIndicesOfU F).sum - F.numAntiChiralU := by
   simpa only [numChiralU, numAntiChiralU, not_le, eq_sub_iff_add_eq] using
     Multiset.sum_filter_add_sum_filter_not (s := chiralIndicesOfU F) (fun x => 0 ≤ x)
 /-!
@@ -494,8 +507,10 @@ lemma numChiralU_eq_sum_sub_numAntiChiralU (F : FluxesTen) :
 
 -/
 
-/-- The multiset of chiral indices of the representation `E = (1,1)_{1}`
-  arising from the matter 10d representations, corresponding to `M + N` -/
+/--
+The multiset of chiral indices of the representation `E = (1,1)_{1}`
+arising from the matter 10d representations, corresponding to `M + N`
+-/
 def chiralIndicesOfE (F : FluxesTen) : Multiset ℤ := F.map (fun f => f.M + f.N)
 
 /-!
@@ -504,8 +519,10 @@ def chiralIndicesOfE (F : FluxesTen) : Multiset ℤ := F.map (fun f => f.M + f.N
 
 -/
 
-/-- The total number of chiral `E` representations arising from the matter 10d
-  representations. -/
+/--
+The total number of chiral `E` representations arising from the matter 10d
+representations.
+-/
 def numChiralE (F : FluxesTen) : ℤ := ((chiralIndicesOfE F).filter (fun x => 0 ≤ x)).sum
 
 /-!
@@ -514,8 +531,10 @@ def numChiralE (F : FluxesTen) : ℤ := ((chiralIndicesOfE F).filter (fun x => 0
 
 -/
 
-/-- The total number of anti-chiral `E` representations arising from the matter 10d
-  representations. -/
+/--
+The total number of anti-chiral `E` representations arising from the matter 10d
+representations.
+-/
 def numAntiChiralE (F : FluxesTen) : ℤ := ((chiralIndicesOfE F).filter (fun x => x < 0)).sum
 
 /-!
@@ -524,8 +543,8 @@ def numAntiChiralE (F : FluxesTen) : ℤ := ((chiralIndicesOfE F).filter (fun x 
 
 -/
 
-lemma numChiralE_eq_sum_sub_numAntiChiralE (F : FluxesTen) :
-    F.numChiralE = (chiralIndicesOfE F).sum - F.numAntiChiralE := by
+lemma numChiralE_eq_sum_sub_numAntiChiralE (F : FluxesTen)
+    : F.numChiralE = (chiralIndicesOfE F).sum - F.numAntiChiralE := by
   simpa only [numChiralE, numAntiChiralE, not_le, eq_sub_iff_add_eq] using
     Multiset.sum_filter_add_sum_filter_not (s := chiralIndicesOfE F) (fun x => 0 ≤ x)
 
@@ -535,19 +554,18 @@ lemma numChiralE_eq_sum_sub_numAntiChiralE (F : FluxesTen) :
 
 -/
 
-/-- The condition that the 10d-matter representations do not lead to exotic chiral matter in the
+/--
+The condition that the 10d-matter representations do not lead to exotic chiral matter in the
   MSSM spectrum. This corresponds to the conditions that:
 - There are 3 chiral `Q` representations and no anti-chiral `Q` representations.
 - There are 3 chiral `U` representations and no anti-chiral `U` representations.
 - There are 3 chiral `E` representations and no anti-chiral `E` representations.
 -/
 def NoExotics (F : FluxesTen) : Prop :=
-  F.numChiralQ = 3 ∧ F.numAntiChiralQ = 0 ∧
-  F.numChiralU = 3 ∧ F.numAntiChiralU = 0 ∧
-  F.numChiralE = 3 ∧ F.numAntiChiralE = 0
+  F.numChiralQ = 3 ∧ F.numAntiChiralQ = 0 ∧ F.numChiralU = 3 ∧ F.numAntiChiralU = 0
+    ∧ F.numChiralE = 3 ∧ F.numAntiChiralE = 0
 
-instance (F : FluxesTen) : Decidable (F.NoExotics) :=
-  instDecidableAnd
+instance (F : FluxesTen) : Decidable (F.NoExotics) := instDecidableAnd
 
 end FluxesTen
 

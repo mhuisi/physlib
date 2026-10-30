@@ -48,8 +48,7 @@ noncomputable section diracRepresentation
 /-! ## A. Dirac matrix representation -/
 
 /-- The γ⁰ gamma matrix in the Dirac representation. -/
-def γ0 : Matrix (Fin 4) (Fin 4) ℂ :=
-  endEquivMatrix (Fermion.Dirac.gamma (Sum.inl 0))
+def γ0 : Matrix (Fin 4) (Fin 4) ℂ := endEquivMatrix (Fermion.Dirac.gamma (Sum.inl 0))
 
 /-- The entries of `γ0`. -/
 lemma γ0_eq_matrix : γ0 = !![1, 0, 0, 0; 0, 1, 0, 0; 0, 0, -1, 0; 0, 0, 0, -1] := by
@@ -58,8 +57,7 @@ lemma γ0_eq_matrix : γ0 = !![1, 0, 0, 0; 0, 1, 0, 0; 0, 0, -1, 0; 0, 0, 0, -1]
   fin_cases i <;> fin_cases j <;> norm_num [Matrix.mul_apply, Fin.sum_univ_four]
 
 /-- The γ¹ gamma matrix in the Dirac representation. -/
-def γ1 : Matrix (Fin 4) (Fin 4) ℂ :=
-  endEquivMatrix (Fermion.Dirac.gamma (Sum.inr 0))
+def γ1 : Matrix (Fin 4) (Fin 4) ℂ := endEquivMatrix (Fermion.Dirac.gamma (Sum.inr 0))
 
 /-- The entries of `γ1`. -/
 lemma γ1_eq_matrix : γ1 = !![0, 0, 0, 1; 0, 0, 1, 0; 0, -1, 0, 0; -1, 0, 0, 0] := by
@@ -68,8 +66,7 @@ lemma γ1_eq_matrix : γ1 = !![0, 0, 0, 1; 0, 0, 1, 0; 0, -1, 0, 0; -1, 0, 0, 0]
   fin_cases i <;> fin_cases j <;> norm_num [Matrix.mul_apply, Fin.sum_univ_four]
 
 /-- The γ² gamma matrix in the Dirac representation. -/
-def γ2 : Matrix (Fin 4) (Fin 4) ℂ :=
-  endEquivMatrix (Fermion.Dirac.gamma (Sum.inr 1))
+def γ2 : Matrix (Fin 4) (Fin 4) ℂ := endEquivMatrix (Fermion.Dirac.gamma (Sum.inr 1))
 
 /-- The entries of `γ2`. -/
 lemma γ2_eq_matrix : γ2 = !![0, 0, 0, -I; 0, 0, I, 0; 0, I, 0, 0; -I, 0, 0, 0] := by
@@ -78,8 +75,7 @@ lemma γ2_eq_matrix : γ2 = !![0, 0, 0, -I; 0, 0, I, 0; 0, I, 0, 0; -I, 0, 0, 0]
   fin_cases i <;> fin_cases j <;> norm_num [Matrix.mul_apply, Fin.sum_univ_four] <;> ring
 
 /-- The γ³ gamma matrix in the Dirac representation. -/
-def γ3 : Matrix (Fin 4) (Fin 4) ℂ :=
-  endEquivMatrix (Fermion.Dirac.gamma (Sum.inr 2))
+def γ3 : Matrix (Fin 4) (Fin 4) ℂ := endEquivMatrix (Fermion.Dirac.gamma (Sum.inr 2))
 
 /-- The entries of `γ3`. -/
 lemma γ3_eq_matrix : γ3 = !![0, 0, 1, 0; 0, 0, 0, -1; -1, 0, 0, 0; 0, 1, 0, 0] := by
@@ -87,8 +83,8 @@ lemma γ3_eq_matrix : γ3 = !![0, 0, 1, 0; 0, 0, 0, -1; -1, 0, 0, 0; 0, 1, 0, 0]
   ext i j
   fin_cases i <;> fin_cases j <;> norm_num [Matrix.mul_apply, Fin.sum_univ_four]
 
-lemma _root_.Matrix.one_fin_four {α} [Zero α] [One α] :
-    (1 : Matrix (Fin 4) (Fin 4) α) = !![1, 0, 0, 0; 0, 1, 0, 0; 0, 0, 1, 0; 0, 0, 0, 1] :=
+lemma _root_.Matrix.one_fin_four {α} [Zero α] [One α]
+    : (1 : Matrix (Fin 4) (Fin 4) α) = !![1, 0, 0, 0; 0, 1, 0, 0; 0, 0, 1, 0; 0, 0, 0, 1] :=
   Matrix.etaExpand_eq _ |>.symm
 
 @[simp] lemma γ0_mul_γ0 : γ0 * γ0 = 1 := by simp [γ0, ← map_mul]
@@ -96,39 +92,47 @@ lemma _root_.Matrix.one_fin_four {α} [Zero α] [One α] :
 @[simp] lemma γ2_mul_γ2 : γ2 * γ2 = -1 := by simp [γ2, ← map_mul]
 @[simp] lemma γ3_mul_γ3 : γ3 * γ3 = -1 := by simp [γ3, ← map_mul]
 
-@[simp] lemma γ1_mul_γ0 : γ1 * γ0 = -(γ0 * γ1) := by
+@[simp]
+lemma γ1_mul_γ0 : γ1 * γ0 = -(γ0 * γ1) := by
   rw [γ1, γ0, ← map_mul, Fermion.Dirac.gamma_mul_gamma_of_ne (by decide), map_neg, map_mul]
-@[simp] lemma γ2_mul_γ0 : γ2 * γ0 = -(γ0 * γ2) := by
+@[simp]
+lemma γ2_mul_γ0 : γ2 * γ0 = -(γ0 * γ2) := by
   rw [γ2, γ0, ← map_mul, Fermion.Dirac.gamma_mul_gamma_of_ne (by decide), map_neg, map_mul]
-@[simp] lemma γ3_mul_γ0 : γ3 * γ0 = -(γ0 * γ3) := by
+@[simp]
+lemma γ3_mul_γ0 : γ3 * γ0 = -(γ0 * γ3) := by
   rw [γ3, γ0, ← map_mul, Fermion.Dirac.gamma_mul_gamma_of_ne (by decide), map_neg, map_mul]
-@[simp] lemma γ2_mul_γ1 : γ2 * γ1 = -(γ1 * γ2) := by
+@[simp]
+lemma γ2_mul_γ1 : γ2 * γ1 = -(γ1 * γ2) := by
   rw [γ2, γ1, ← map_mul, Fermion.Dirac.gamma_mul_gamma_of_ne (by decide), map_neg, map_mul]
-@[simp] lemma γ3_mul_γ1 : γ3 * γ1 = -(γ1 * γ3) := by
+@[simp]
+lemma γ3_mul_γ1 : γ3 * γ1 = -(γ1 * γ3) := by
   rw [γ3, γ1, ← map_mul, Fermion.Dirac.gamma_mul_gamma_of_ne (by decide), map_neg, map_mul]
-@[simp] lemma γ3_mul_γ2 : γ3 * γ2 = -(γ2 * γ3) := by
+@[simp]
+lemma γ3_mul_γ2 : γ3 * γ2 = -(γ2 * γ3) := by
   rw [γ3, γ2, ← map_mul, Fermion.Dirac.gamma_mul_gamma_of_ne (by decide), map_neg, map_mul]
 
-/-- The Clifford anticommutator for the gamma matrices in the Dirac representation, with
+/--
+The Clifford anticommutator for the gamma matrices in the Dirac representation, with
 signature `(+,-,-,-)`. It is the image of `Fermion.Dirac.gamma_anticomm` under the change
-of coordinates `Fermion.Dirac.endEquivMatrix`. -/
-theorem γ_anticomm (μ ν : Fin 1 ⊕ Fin 3) :
-    endEquivMatrix (gamma μ) * endEquivMatrix (gamma ν) +
-      endEquivMatrix (gamma ν) * endEquivMatrix (gamma μ) =
-      (2 * (minkowskiMatrix μ ν : ℂ)) • (1 : Matrix (Fin 4) (Fin 4) ℂ) := by
+of coordinates `Fermion.Dirac.endEquivMatrix`.
+-/
+theorem γ_anticomm (μ ν : Fin 1 ⊕ Fin 3)
+    : endEquivMatrix (gamma μ) * endEquivMatrix (gamma ν)
+        + endEquivMatrix (gamma ν) * endEquivMatrix (gamma μ)
+      = (2 * (minkowskiMatrix μ ν : ℂ)) • (1 : Matrix (Fin 4) (Fin 4) ℂ) := by
   rw [← map_mul, ← map_mul, ← map_add, Fermion.Dirac.gamma_anticomm, map_smul, map_one]
 
 /-- The gamma matrices in the Dirac representation are unitary. -/
-lemma γ_mem_unitary (μ : Fin 1 ⊕ Fin 3) :
-    endEquivMatrix (gamma μ) ∈ Matrix.unitaryGroup (Fin 4) ℂ := by
+lemma γ_mem_unitary (μ : Fin 1 ⊕ Fin 3)
+    : endEquivMatrix (gamma μ) ∈ Matrix.unitaryGroup (Fin 4) ℂ := by
   rw [Matrix.mem_unitaryGroup_iff]
   fin_cases μ <;>
     [(change γ0 * star γ0 = 1; rw [γ0_eq_matrix]);
       (change γ1 * star γ1 = 1; rw [γ1_eq_matrix]);
       (change γ2 * star γ2 = 1; rw [γ2_eq_matrix]);
-      (change γ3 * star γ3 = 1; rw [γ3_eq_matrix])] <;>
-    ext i j <;> fin_cases i <;> fin_cases j <;>
-    simp [Matrix.mul_apply, Fin.sum_univ_four, Matrix.star_apply]
+      (change γ3 * star γ3 = 1; rw [γ3_eq_matrix])]
+    <;> ext i j <;> fin_cases i <;> fin_cases j
+    <;> simp [Matrix.mul_apply, Fin.sum_univ_four, Matrix.star_apply]
 
 /-- The γ⁵ gamma matrix in the Dirac representation. -/
 def γ5 : Matrix (Fin 4) (Fin 4) ℂ := I • (γ0 * γ1 * γ2 * γ3)
@@ -143,20 +147,18 @@ namespace γ
 
 open spaceTime
 
-/-- The subset of `Matrix (Fin 4) (Fin 4) ℂ` formed by the gamma matrices in the Dirac
-representation. -/
-@[simp]
-def γSet : Set (Matrix (Fin 4) (Fin 4) ℂ) :=
-  {endEquivMatrix (gamma i) | i : Fin 1 ⊕ Fin 3}
+/--
+The subset of `Matrix (Fin 4) (Fin 4) ℂ` formed by the gamma matrices in the Dirac
+representation.
+-/
+@[simp] def γSet : Set (Matrix (Fin 4) (Fin 4) ℂ) := {endEquivMatrix (gamma i) | i : Fin 1 ⊕ Fin 3}
 
 lemma γ_in_γSet (μ : Fin 1 ⊕ Fin 3) : endEquivMatrix (gamma μ) ∈ γSet := ⟨μ, rfl⟩
 
 /-- The algebra generated by the gamma matrices in the Dirac representation. -/
-def diracAlgebra : Subalgebra ℝ (Matrix (Fin 4) (Fin 4) ℂ) :=
-  Algebra.adjoin ℝ γSet
+def diracAlgebra : Subalgebra ℝ (Matrix (Fin 4) (Fin 4) ℂ) := Algebra.adjoin ℝ γSet
 
-lemma γSet_subset_diracAlgebra : γSet ⊆ diracAlgebra :=
-  Algebra.subset_adjoin
+lemma γSet_subset_diracAlgebra : γSet ⊆ diracAlgebra := Algebra.subset_adjoin
 
 lemma γ_in_diracAlgebra (μ : Fin 1 ⊕ Fin 3) : endEquivMatrix (gamma μ) ∈ diracAlgebra :=
   γSet_subset_diracAlgebra (γ_in_γSet μ)
@@ -164,36 +166,40 @@ lemma γ_in_diracAlgebra (μ : Fin 1 ⊕ Fin 3) : endEquivMatrix (gamma μ) ∈ 
 /-- The quadratic form of the Clifford algebra corresponding to the gamma matrices. -/
 @[simps!]
 def diracForm : QuadraticForm ℝ (Fin 4 → ℝ) :=
-  QuadraticMap.sq.comp (LinearMap.proj 0)
-    - QuadraticMap.sq.comp (LinearMap.proj 1)
-    - QuadraticMap.sq.comp (LinearMap.proj 2)
-    - QuadraticMap.sq.comp (LinearMap.proj 3)
+  QuadraticMap.sq.comp (LinearMap.proj 0) - QuadraticMap.sq.comp (LinearMap.proj 1)
+    - QuadraticMap.sq.comp (LinearMap.proj 2) - QuadraticMap.sq.comp (LinearMap.proj 3)
 
-/-- The algebra homomorphism from the Clifford algebra over `diracForm` to the algebra
-generated by the Dirac representations of the gamma endomorphisms. -/
+/--
+The algebra homomorphism from the Clifford algebra over `diracForm` to the algebra
+generated by the Dirac representations of the gamma endomorphisms.
+-/
 def ofCliffordAlgebra : CliffordAlgebra diracForm →ₐ[ℝ] diracAlgebra :=
-  CliffordAlgebra.lift _
-    ⟨∑ i, (LinearMap.proj i).smulRight
-      ⟨endEquivMatrix (gamma (finSumFinEquiv.symm i)), γ_in_diracAlgebra _⟩, fun v => by
+  CliffordAlgebra.lift _ ⟨
+    ∑ i, (LinearMap.proj i).smulRight
+     ⟨endEquivMatrix (gamma (finSumFinEquiv.symm i)), γ_in_diracAlgebra _⟩,
+    fun v => by
       ext : 1
       simp only [Fin.sum_univ_four, LinearMap.add_apply, LinearMap.coe_smulRight,
         LinearMap.coe_proj, Function.eval, SetLike.mk_smul_mk, AddMemClass.mk_add_mk,
         MulMemClass.mk_mul_mk]
-      change (v 0 • γ0 + v 1 • γ1 + v 2 • γ2 + v 3 • γ3) *
-        (v 0 • γ0 + v 1 • γ1 + v 2 • γ2 + v 3 • γ3) = _
-      simp only [mul_add, Algebra.mul_smul_comm, add_mul, Algebra.smul_mul_assoc,
-        γ0_mul_γ0, γ1_mul_γ0, smul_neg,
-        γ2_mul_γ0, γ3_mul_γ0, smul_add, γ1_mul_γ1, γ2_mul_γ1, γ3_mul_γ1, γ2_mul_γ2, γ3_mul_γ2,
-        γ3_mul_γ3, diracForm_apply, Algebra.algebraMap_eq_smul_one, SetLike.val_smul,
-        OneMemClass.coe_one]
-      module⟩
+      change (v 0 • γ0 + v 1 • γ1 + v 2 • γ2 + v 3 • γ3)
+          * (v 0 • γ0 + v 1 • γ1 + v 2 • γ2 + v 3 • γ3)
+        = _
+      simp only [mul_add, Algebra.mul_smul_comm, add_mul, Algebra.smul_mul_assoc, γ0_mul_γ0,
+        γ1_mul_γ0, smul_neg, γ2_mul_γ0, γ3_mul_γ0, smul_add, γ1_mul_γ1, γ2_mul_γ1, γ3_mul_γ1,
+        γ2_mul_γ2, γ3_mul_γ2, γ3_mul_γ3, diracForm_apply, Algebra.algebraMap_eq_smul_one,
+        SetLike.val_smul, OneMemClass.coe_one]
+      module
+  ⟩
 
-/-- The Clifford generators correspond to the gamma endomorphisms in the Dirac representation.
-The equivalence `finSumFinEquiv` identifies the two Lorentz index types. -/
+/--
+The Clifford generators correspond to the gamma endomorphisms in the Dirac representation.
+The equivalence `finSumFinEquiv` identifies the two Lorentz index types.
+-/
 @[simp]
-lemma ofCliffordAlgebra_ι_single (i : Fin 4) (r : ℝ) :
-    ofCliffordAlgebra (CliffordAlgebra.ι _ (Pi.single i r)) =
-      r • ⟨endEquivMatrix (gamma (finSumFinEquiv.symm i)), γ_in_diracAlgebra _⟩ :=
+lemma ofCliffordAlgebra_ι_single (i : Fin 4) (r : ℝ)
+    : ofCliffordAlgebra (CliffordAlgebra.ι _ (Pi.single i r))
+      = r • ⟨endEquivMatrix (gamma (finSumFinEquiv.symm i)), γ_in_diracAlgebra _⟩ :=
   CliffordAlgebra.lift_ι_apply _ _ _ |>.trans <| Subtype.ext <| by
     simp only [LinearMap.coe_sum, LinearMap.coe_smulRight, LinearMap.coe_proj, Function.eval,
       SetLike.mk_smul_mk, Finset.sum_apply, AddSubmonoidClass.coe_finsetSum]
@@ -206,14 +212,15 @@ lemma ofCliffordAlgebra_ι_single (i : Fin 4) (r : ℝ) :
 /-! ### B.1. Surjectivity of ofCliffordAlgebra -/
 
 /-- Each gamma matrix (as an element of diracAlgebra) is in the range of ofCliffordAlgebra. -/
-lemma γ_subtype_in_range (i : Fin 1 ⊕ Fin 3) :
-    ⟨endEquivMatrix (gamma i), γ_in_diracAlgebra i⟩ ∈ ofCliffordAlgebra.range := by
+lemma γ_subtype_in_range (i : Fin 1 ⊕ Fin 3)
+    : ⟨endEquivMatrix (gamma i), γ_in_diracAlgebra i⟩ ∈ ofCliffordAlgebra.range := by
   use CliffordAlgebra.ι diracForm (Pi.single (finSumFinEquiv i) 1)
   simp [ofCliffordAlgebra_ι_single]
 
 /-- Helper lemma: If a matrix is in Algebra.adjoin ℝ γSet, then its subtype is in the range. -/
-private lemma mem_adjoin_imp_subtype_in_range (m : Matrix (Fin 4) (Fin 4) ℂ)
-    (hm : m ∈ Algebra.adjoin ℝ γSet) : ⟨m, hm⟩ ∈ ofCliffordAlgebra.range := by
+private lemma mem_adjoin_imp_subtype_in_range
+    (m : Matrix (Fin 4) (Fin 4) ℂ) (hm : m ∈ Algebra.adjoin ℝ γSet)
+    : ⟨m, hm⟩ ∈ ofCliffordAlgebra.range := by
   induction hm using Algebra.adjoin_induction with
   | mem y hy =>
     -- y ∈ γSet, so y = endEquivMatrix (gamma i) for some i
@@ -256,9 +263,11 @@ theorem ofCliffordAlgebra_surjective : Function.Surjective ofCliffordAlgebra := 
 
 /-! ### B.2. The ordered products of the gamma matrices -/
 
-/-- The product, with increasing indices, of the gamma matrices in the Dirac representation whose
+/--
+The product, with increasing indices, of the gamma matrices in the Dirac representation whose
 index lies in `s`; the empty product is `1`. The index `i : Fin 4` labels the image of
-`CliffordAlgebra.ι diracForm (Pi.single i 1)` under `ofCliffordAlgebra`. -/
+`CliffordAlgebra.ι diracForm (Pi.single i 1)` under `ofCliffordAlgebra`.
+-/
 def γProd (s : Finset (Fin 4)) : Matrix (Fin 4) (Fin 4) ℂ :=
   (List.ofFn fun i : Fin 4 =>
     if i ∈ s then endEquivMatrix (gamma (finSumFinEquiv.symm i)) else 1).prod
@@ -272,15 +281,17 @@ lemma γProd_mem_diracAlgebra (s : Finset (Fin 4)) : γProd s ∈ diracAlgebra :
   · exact one_mem _
 
 /-- The product `γProd {i}` is the gamma matrix of index `i`. -/
-lemma γProd_singleton (i : Fin 4) :
-    γProd {i} = endEquivMatrix (gamma (finSumFinEquiv.symm i)) := by
+lemma γProd_singleton (i : Fin 4) : γProd {i} = endEquivMatrix (gamma (finSumFinEquiv.symm i)) := by
   fin_cases i <;> simp [γProd, List.ofFn_succ]
 
-/-- The gamma matrix of index `j` commutes past `γProd s` up to the sign `(-1) ^ #(s.erase j)`,
-as it anticommutes with the gamma matrices of the other indices. -/
-lemma γ_mul_γProd (j : Fin 4) (s : Finset (Fin 4)) :
-    endEquivMatrix (gamma (finSumFinEquiv.symm j)) * γProd s =
-      (-1 : ℂ) ^ (s.erase j).card • (γProd s * endEquivMatrix (gamma (finSumFinEquiv.symm j))) := by
+/--
+The gamma matrix of index `j` commutes past `γProd s` up to the sign `(-1) ^ #(s.erase j)`,
+as it anticommutes with the gamma matrices of the other indices.
+-/
+lemma γ_mul_γProd (j : Fin 4) (s : Finset (Fin 4))
+    : endEquivMatrix (gamma (finSumFinEquiv.symm j)) * γProd s
+      = (-1 : ℂ) ^ (s.erase j).card
+        • (γProd s * endEquivMatrix (gamma (finSumFinEquiv.symm j))) := by
   let G (i : Fin 4) : Matrix (Fin 4) (Fin 4) ℂ := endEquivMatrix (gamma (finSumFinEquiv.symm i))
   let F (i : Fin 4) : Matrix (Fin 4) (Fin 4) ℂ := if i ∈ s then G i else 1
   let c (i : Fin 4) : ℂ := if i ∈ s.erase j then -1 else 1
@@ -290,15 +301,14 @@ lemma γ_mul_γProd (j : Fin 4) (s : Finset (Fin 4)) :
     · by_cases hij : i = j
       · subst hij
         simp [F, c, hi]
-      · have hne : (finSumFinEquiv.symm j : Fin 1 ⊕ Fin 3) ≠ finSumFinEquiv.symm i :=
-          fun h => hij (finSumFinEquiv.symm.injective h).symm
+      · have hne : (finSumFinEquiv.symm j : Fin 1 ⊕ Fin 3) ≠ finSumFinEquiv.symm i := fun h =>
+          hij (finSumFinEquiv.symm.injective h).symm
         simp only [F, c, G, hi, hij, Finset.mem_erase, ne_eq, not_false_eq_true, and_self,
-          ↓reduceIte]
+          ↓ reduceIte]
         rw [← map_mul, gamma_mul_gamma_of_ne hne, map_neg, map_mul, neg_smul, one_smul]
     · simp [F, c, hi]
   -- moving `G j` through a product of such factors collects the product of the signs
-  have key (l : List (Fin 4)) :
-      G j * (l.map F).prod = (l.map c).prod • ((l.map F).prod * G j) := by
+  have key (l : List (Fin 4)) : G j * (l.map F).prod = (l.map c).prod • ((l.map F).prod * G j) := by
     induction l with
     | nil => simp
     | cons i l ih =>
@@ -322,10 +332,12 @@ lemma γProd_mem_unitary (s : Finset (Fin 4)) : γProd s ∈ Matrix.unitaryGroup
   · exact γ_mem_unitary _
   · exact one_mem _
 
-/-- The products `γProd s` are orthogonal for the trace form `tr (star A * B)`, each with square
-norm `4`. -/
-lemma trace_star_γProd_mul_γProd (t s : Finset (Fin 4)) :
-    (star (γProd t) * γProd s).trace = if t = s then 4 else 0 := by
+/--
+The products `γProd s` are orthogonal for the trace form `tr (star A * B)`, each with square
+norm `4`.
+-/
+lemma trace_star_γProd_mul_γProd (t s : Finset (Fin 4))
+    : (star (γProd t) * γProd s).trace = if t = s then 4 else 0 := by
   split_ifs with h
   · subst h
     rw [Unitary.star_mul_self_of_mem (γProd_mem_unitary t), Matrix.trace_one, Fintype.card_fin]
@@ -339,26 +351,28 @@ lemma trace_star_γProd_mul_γProd (t s : Finset (Fin 4)) :
   have hs := γ_mul_γProd j s
   set G := endEquivMatrix (gamma (finSumFinEquiv.symm j))
   have key : (star (γProd t) * γProd s).trace = -(star (γProd t) * γProd s).trace := by
-    calc (star (γProd t) * γProd s).trace
-        = (star (G * γProd t) * (G * γProd s)).trace := by
-          rw [star_mul, mul_assoc, ← mul_assoc (star G), Unitary.star_mul_self_of_mem hu, one_mul]
-      _ = (-1 : ℂ) ^ ((t.erase j).card + (s.erase j).card) *
-            (star (γProd t) * γProd s).trace := by
-          rw [ht, hs, star_smul, star_mul, smul_mul_smul_comm, Matrix.trace_smul, mul_assoc,
-            Matrix.trace_mul_comm, mul_assoc, mul_assoc, Unitary.mul_star_self_of_mem hu, mul_one,
-            pow_add, smul_eq_mul, star_pow, star_neg, star_one]
+    calc
+      (star (γProd t) * γProd s).trace = (star (G * γProd t) * (G * γProd s)).trace := by
+        rw [star_mul, mul_assoc, ← mul_assoc (star G), Unitary.star_mul_self_of_mem hu, one_mul]
+      _ = (-1 : ℂ) ^ ((t.erase j).card + (s.erase j).card) * (star (γProd t) * γProd s).trace := by
+        rw [ht, hs, star_smul, star_mul, smul_mul_smul_comm, Matrix.trace_smul, mul_assoc,
+          Matrix.trace_mul_comm, mul_assoc, mul_assoc, Unitary.mul_star_self_of_mem hu, mul_one,
+          pow_add, smul_eq_mul, star_pow, star_neg, star_one]
       _ = -(star (γProd t) * γProd s).trace := by rw [hj.neg_one_pow, neg_one_mul]
   linear_combination key / 2
 
-/-- The 16 products `γProd s` are linearly independent over `ℝ`, since they are orthogonal for the
-trace form `tr (star A * B)`. -/
+/--
+The 16 products `γProd s` are linearly independent over `ℝ`, since they are orthogonal for the
+trace form `tr (star A * B)`.
+-/
 lemma linearIndependent_γProd : LinearIndependent ℝ γProd := by
   rw [Fintype.linearIndependent_iff]
   intro g hg t
   have h := congrArg (fun M => (star (γProd t) * M).trace) hg
   simp only [Finset.mul_sum, Matrix.mul_smul, Matrix.trace_sum, Matrix.trace_smul,
-    trace_star_γProd_mul_γProd, smul_ite, smul_zero, Finset.sum_ite_eq, Finset.mem_univ,
-    ↓reduceIte, Matrix.mul_zero, Matrix.trace_zero] at h
+      trace_star_γProd_mul_γProd, smul_ite, smul_zero, Finset.sum_ite_eq, Finset.mem_univ,
+      ↓ reduceIte, Matrix.mul_zero, Matrix.trace_zero]
+    at h
   simpa using h
 
 end γ

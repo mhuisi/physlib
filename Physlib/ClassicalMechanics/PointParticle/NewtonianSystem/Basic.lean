@@ -61,8 +61,9 @@ structure NewtonianSystem (d : ℕ) where
   /-- Forces on the system from external sources. -/
   externalForces : Multiset (frame.Force particles)
   /-- Newton's second law: the net force on each particle equals its mass times its acceleration. -/
-  newton_second_law : ∀ particle : particles,
-    netForce particle internalForces externalForces = particle.1.mass • particle.1.acceleration
+  newton_second_law
+    : ∀ particle : particles,
+      netForce particle internalForces externalForces = particle.1.mass • particle.1.acceleration
   /-- Newton's third law: internal forces and their reverses occur with equal multiplicities. -/
   newton_third_law : internalForces.map .reverse = internalForces
 
@@ -70,8 +71,7 @@ namespace NewtonianSystem
 
 variable (system : NewtonianSystem d)
 
-instance : Fact system.frame.IsInertial :=
-  system.isInertial
+instance : Fact system.frame.IsInertial := system.isInertial
 
 /-!
 ## B. System particles
@@ -112,16 +112,18 @@ end Particle
 -/
 
 /-- A force in `system`. -/
-abbrev Force : Type :=
-  system.internalForces ⊕ system.externalForces
+abbrev Force : Type := system.internalForces ⊕ system.externalForces
 
 namespace Force
 
 variable {system : NewtonianSystem d} (force : system.Force)
 
 /-- The underlying force. -/
-@[coe] def inner : system.frame.Force system.Particle :=
-  match force with | .inl force => force | .inr force => force
+@[coe]
+def inner : system.frame.Force system.Particle :=
+  match force with
+  | .inl force => force
+  | .inr force => force
 
 instance : Coe system.Force (system.frame.Force system.Particle) := Coe.mk inner
 
@@ -162,8 +164,8 @@ def target : system.Particle := force.1.target
 def source : system.Particle := force.1.source
 
 /-- A force and its reverse have the same multiplicity. -/
-lemma reverse_count_eq :
-    system.internalForces.count force.1.reverse = system.internalForces.count force.1 := by
+lemma reverse_count_eq
+    : system.internalForces.count force.1.reverse = system.internalForces.count force.1 := by
   rw [← congrArg (Multiset.count force.1.reverse) system.newton_third_law]
   refine Multiset.count_map_eq_count' _ _ (Function.Involutive.injective ?_) _
   intro internalForce
@@ -175,8 +177,7 @@ def reverse : system.InternalForce :=
   ⟨force.1.reverse, (finCongr force.reverse_count_eq).symm force.2⟩
 
 /-- Whether the force lies along the line joining its source and target. -/
-def Central : Prop :=
-  ∀ t, ∃ c : ℝ, force.value t = c • (force.target.pos t - force.source.pos t)
+def Central : Prop := ∀ t, ∃ c : ℝ, force.value t = c • (force.target.pos t - force.source.pos t)
 
 end InternalForce
 
@@ -187,19 +188,15 @@ end InternalForce
 variable (t : ℝ)
 
 /-- Total mass. -/
-def mass : ℝ :=
-  ∑ particle : system.Particle, particle.mass
+def mass : ℝ := ∑ particle : system.Particle, particle.mass
 
 /-- Total momentum at `t`. -/
-def momentum : system.Vector :=
-  ∑ particle : system.Particle, particle.momentum t
+def momentum : system.Vector := ∑ particle : system.Particle, particle.momentum t
 
 /-- Net external force at `t`. -/
-def netExternalForce : system.Vector :=
-  ∑ force : system.Force with force.External, force t
+def netExternalForce : system.Vector := ∑ force : system.Force with force.External, force t
 
 /-- Total kinetic energy at `t`. -/
-def kineticEnergy : ℝ :=
-  ∑ particle : system.Particle, particle.kineticEnergy t
+def kineticEnergy : ℝ := ∑ particle : system.Particle, particle.kineticEnergy t
 
 end ClassicalMechanics.PointParticle.NewtonianSystem

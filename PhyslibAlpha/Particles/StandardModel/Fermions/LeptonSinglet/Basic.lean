@@ -105,52 +105,58 @@ identification of a charged-lepton singlet with its spinor.
 
 open Matrix MatrixGroups
 
-/-- The Lorentz action on the lepton-singlet basis: the right-handed Weyl
-  action by the entrywise conjugate matrix. -/
-lemma repLorentzGroup_apply_basis (Λ : SL(2,ℂ)) (α : Fin 2) :
-    repLorentzGroup Λ (basis α) = ∑ β, star (Λ.1 β α) • basis β := by
-  simp only [basis, Module.Basis.map_apply, repLorentzGroup, MonoidHom.coe_mk,
-    OneHom.coe_mk, LinearMap.coe_comp, LinearEquiv.coe_coe, Function.comp_apply,
-    LinearEquiv.apply_symm_apply, Fermion.RightHandedWeyl.rep_apply_basis,
-    Matrix.map_apply, map_sum, map_smul]
+/--
+The Lorentz action on the lepton-singlet basis: the right-handed Weyl
+action by the entrywise conjugate matrix.
+-/
+lemma repLorentzGroup_apply_basis (Λ : SL(2,ℂ)) (α : Fin 2)
+    : repLorentzGroup Λ (basis α) = ∑ β, star (Λ.1 β α) • basis β := by
+  simp only [basis, Module.Basis.map_apply, repLorentzGroup, MonoidHom.coe_mk, OneHom.coe_mk,
+    LinearMap.coe_comp, LinearEquiv.coe_coe, Function.comp_apply, LinearEquiv.apply_symm_apply,
+    Fermion.RightHandedWeyl.rep_apply_basis, Matrix.map_apply, map_sum, map_smul]
 
-/-- The lepton jet coordinates transform contragrediently, by the entrywise
-  conjugate of the inverse matrix. -/
-lemma repLorentzGroup_dual_dualBasis (Λ : SL(2,ℂ)) (α : Fin 2) :
-    repLorentzGroup.dual Λ (basis.dualBasis α) =
-      ∑ β, star ((Λ⁻¹).1 α β) • basis.dualBasis β :=
-  Representation.dual_apply_dualBasis _ _ _ _
-    (Matrix.of fun l j => star ((Λ⁻¹).1 l j))
+/--
+The lepton jet coordinates transform contragrediently, by the entrywise
+conjugate of the inverse matrix.
+-/
+lemma repLorentzGroup_dual_dualBasis (Λ : SL(2,ℂ)) (α : Fin 2)
+    : repLorentzGroup.dual Λ (basis.dualBasis α) = ∑ β, star ((Λ⁻¹).1 α β) • basis.dualBasis β :=
+  Representation.dual_apply_dualBasis _ _ _ _ (Matrix.of fun l j => star ((Λ⁻¹).1 l j))
     (fun j => repLorentzGroup_apply_basis Λ⁻¹ j)
 
-/-- The Lorentz action on the conjugate lepton basis: the coefficients are the
-  conjugates of those of the lepton action, that is, the matrix itself. -/
-lemma repLorentzGroup_conj_apply_basis (Λ : SL(2,ℂ)) (α : Fin 2) :
-    repLorentzGroup.conj Λ ((Basis.conj basis) α) = ∑ β, Λ.1 β α • (Basis.conj basis) β := by
-  rw [Representation.conj_apply, Basis.conj_apply,
-    LinearEquiv.symm_apply_apply, repLorentzGroup_apply_basis, map_sum]
+/--
+The Lorentz action on the conjugate lepton basis: the coefficients are the
+conjugates of those of the lepton action, that is, the matrix itself.
+-/
+lemma repLorentzGroup_conj_apply_basis (Λ : SL(2,ℂ)) (α : Fin 2)
+    : repLorentzGroup.conj Λ ((Basis.conj basis) α) = ∑ β, Λ.1 β α • (Basis.conj basis) β := by
+  rw [Representation.conj_apply, Basis.conj_apply, LinearEquiv.symm_apply_apply,
+    repLorentzGroup_apply_basis, map_sum]
   refine Finset.sum_congr rfl fun β _ => ?_
   rw [LinearEquiv.map_smulₛₗ, starRingEnd_apply, star_star, Basis.conj_apply]
 
 /-- The conjugate lepton jet coordinates transform by the inverse matrix. -/
-lemma repLorentzGroup_conj_dual_dualBasis (Λ : SL(2,ℂ)) (α : Fin 2) :
-    repLorentzGroup.conj.dual Λ ((Basis.conj basis).dualBasis α) =
-      ∑ β, (Λ⁻¹).1 α β • (Basis.conj basis).dualBasis β :=
-  Representation.dual_apply_dualBasis _ _ _ _
-    (Matrix.of fun l j => (Λ⁻¹).1 l j)
+lemma repLorentzGroup_conj_dual_dualBasis (Λ : SL(2,ℂ)) (α : Fin 2)
+    : repLorentzGroup.conj.dual Λ ((Basis.conj basis).dualBasis α)
+      = ∑ β, (Λ⁻¹).1 α β • (Basis.conj basis).dualBasis β :=
+  Representation.dual_apply_dualBasis _ _ _ _ (Matrix.of fun l j => (Λ⁻¹).1 l j)
     (fun j => repLorentzGroup_conj_apply_basis Λ⁻¹ j)
 
-/-- **The centre of `SL(2,ℂ)` acts on the charged-lepton-singlet space by `-1`**: the value
-  space carries a single Weyl-spinor index, and `-1` is not the identity on a half-integer
-  spin. -/
+/--
+**The centre of `SL(2,ℂ)` acts on the charged-lepton-singlet space by `-1`**: the value
+space carries a single Weyl-spinor index, and `-1` is not the identity on a half-integer
+spin.
+-/
 lemma repLorentzGroup_neg_one : repLorentzGroup (-1) = -LinearMap.id := by
   apply basis.ext
   intro α
   rw [repLorentzGroup_apply_basis]
   fin_cases α <;> simp [Matrix.one_apply]
 
-/-- The centre acts on the conjugate charged-lepton-singlet space by `-1` as well:
-  conjugation does not move a real sign. -/
+/--
+The centre acts on the conjugate charged-lepton-singlet space by `-1` as well:
+conjugation does not move a real sign.
+-/
 lemma repLorentzGroup_conj_neg_one : repLorentzGroup.conj (-1) = -LinearMap.id := by
   apply (Basis.conj basis).ext
   intro α
@@ -168,42 +174,52 @@ charge `-6`.
 The formulas below expose the scalar used to compare actions and compute the kernel.
 -/
 
-/-- The gauge action on the lepton-singlet basis: multiplication by the hypercharge
-  scalar, the colour and weak factors acting trivially. -/
-lemma repGaugeGroupI_apply_basis (g : GaugeGroupI) (α : Fin 2) :
-    repGaugeGroupI g (basis α) = (star g.toU1.1 ^ 6 : ℂ) • basis α := by
+/--
+The gauge action on the lepton-singlet basis: multiplication by the hypercharge
+scalar, the colour and weak factors acting trivially.
+-/
+lemma repGaugeGroupI_apply_basis (g : GaugeGroupI) (α : Fin 2)
+    : repGaugeGroupI g (basis α) = (star g.toU1.1 ^ 6 : ℂ) • basis α := by
   have hb : basis α = ⟨Fermion.RightHandedWeyl.basis α⟩ := by
     simp only [basis, Module.Basis.map_apply]
     rfl
   rw [hb, repGaugeGroupI_basis]
 
-/-- The lepton-singlet coordinate functionals carry the contragredient gauge action: the
-  hypercharge scalar of the inverse group element. -/
-lemma repGaugeGroupI_dual_dualBasis (g : GaugeGroupI) (α : Fin 2) :
-    repGaugeGroupI.dual g (basis.dualBasis α) =
-      (star (g⁻¹).toU1.1 ^ 6 : ℂ) • basis.dualBasis α := by
-  have key := Representation.dual_apply_dualBasis repGaugeGroupI basis g α
-    (Matrix.of fun p q => if p = q then (star (g⁻¹).toU1.1 ^ 6 : ℂ) else 0)
-    (fun q => by rw [repGaugeGroupI_apply_basis]; simp [ite_smul, eq_comm])
+/--
+The lepton-singlet coordinate functionals carry the contragredient gauge action: the
+hypercharge scalar of the inverse group element.
+-/
+lemma repGaugeGroupI_dual_dualBasis (g : GaugeGroupI) (α : Fin 2)
+    : repGaugeGroupI.dual g (basis.dualBasis α)
+      = (star (g⁻¹).toU1.1 ^ 6 : ℂ) • basis.dualBasis α := by
+  have key :=
+    Representation.dual_apply_dualBasis repGaugeGroupI basis g α
+      (Matrix.of fun p q => if p = q then (star (g⁻¹).toU1.1 ^ 6 : ℂ) else 0)
+      (fun q => by rw [repGaugeGroupI_apply_basis]; simp [ite_smul, eq_comm])
   rw [key]
   simp [ite_smul]
 
-/-- The gauge action on the conjugate lepton-singlet basis: the hypercharge scalar,
-  conjugated. -/
-lemma repGaugeGroupI_conj_apply_basis (g : GaugeGroupI) (α : Fin 2) :
-    repGaugeGroupI.conj g ((Basis.conj basis) α) =
-      star (star g.toU1.1 ^ 6 : ℂ) • (Basis.conj basis) α := by
+/--
+The gauge action on the conjugate lepton-singlet basis: the hypercharge scalar,
+conjugated.
+-/
+lemma repGaugeGroupI_conj_apply_basis (g : GaugeGroupI) (α : Fin 2)
+    : repGaugeGroupI.conj g ((Basis.conj basis) α)
+      = star (star g.toU1.1 ^ 6 : ℂ) • (Basis.conj basis) α := by
   rw [Representation.conj_apply, Basis.conj_apply, LinearEquiv.symm_apply_apply,
     repGaugeGroupI_apply_basis, LinearEquiv.map_smulₛₗ, starRingEnd_apply]
 
-/-- The conjugate lepton-singlet coordinate functionals carry the conjugate of the
-  contragredient gauge action. -/
-lemma repGaugeGroupI_conj_dual_dualBasis (g : GaugeGroupI) (α : Fin 2) :
-    repGaugeGroupI.conj.dual g ((Basis.conj basis).dualBasis α) =
-      star (star (g⁻¹).toU1.1 ^ 6 : ℂ) • (Basis.conj basis).dualBasis α := by
-  have key := Representation.dual_apply_dualBasis repGaugeGroupI.conj (Basis.conj basis) g α
-    (Matrix.of fun p q => if p = q then star (star (g⁻¹).toU1.1 ^ 6 : ℂ) else 0)
-    (fun q => by rw [repGaugeGroupI_conj_apply_basis]; simp [ite_smul, eq_comm])
+/--
+The conjugate lepton-singlet coordinate functionals carry the conjugate of the
+contragredient gauge action.
+-/
+lemma repGaugeGroupI_conj_dual_dualBasis (g : GaugeGroupI) (α : Fin 2)
+    : repGaugeGroupI.conj.dual g ((Basis.conj basis).dualBasis α)
+      = star (star (g⁻¹).toU1.1 ^ 6 : ℂ) • (Basis.conj basis).dualBasis α := by
+  have key :=
+    Representation.dual_apply_dualBasis repGaugeGroupI.conj (Basis.conj basis) g α
+      (Matrix.of fun p q => if p = q then star (star (g⁻¹).toU1.1 ^ 6 : ℂ) else 0)
+      (fun q => by rw [repGaugeGroupI_conj_apply_basis]; simp [ite_smul, eq_comm])
   rw [key]
   simp [ite_smul]
 
@@ -235,75 +251,90 @@ transformations acts on its jets purely through the hypercharge power series
 -/
 
 open TensorProduct in
-/-- The `(1, 1)_{-6}` action of the jet gauge group on the jet space of the charged-lepton
+/--
+The `(1, 1)_{-6}` action of the jet gauge group on the jet space of the charged-lepton
 singlet: multiplication of the jet-ring factor by the hypercharge power series
-`(star u) ^ 6`. -/
-noncomputable def repJetGaugeGroupI :
-    Representation ℂ JetGaugeGroupI (SpaceTimeAlgebra ⊗[ℂ] LeptonSinglet) where
-  toFun U := LinearMap.rTensor LeptonSinglet
-    (LinearMap.mulLeft ℂ ((star ((U.2.2 : unitary SpaceTimeAlgebra) : SpaceTimeAlgebra)) ^ 6))
+`(star u) ^ 6`.
+-/
+noncomputable def repJetGaugeGroupI
+    : Representation ℂ JetGaugeGroupI (SpaceTimeAlgebra ⊗[ℂ] LeptonSinglet) where
+  toFun U :=
+    LinearMap.rTensor LeptonSinglet
+      (LinearMap.mulLeft ℂ ((star ((U.2.2 : unitary SpaceTimeAlgebra) : SpaceTimeAlgebra)) ^ 6))
   map_one' := by
     rw [show (star (((1 : JetGaugeGroupI).2.2 : unitary SpaceTimeAlgebra) : SpaceTimeAlgebra)) ^ 6
-        = 1 from by simp, LinearMap.mulLeft_one, LinearMap.rTensor_id]
+          = 1 from by
+        simp,
+      LinearMap.mulLeft_one, LinearMap.rTensor_id]
     rfl
   map_mul' U₁ U₂ := by
     rw [show (star (((U₁ * U₂).2.2 : unitary SpaceTimeAlgebra) : SpaceTimeAlgebra)) ^ 6
           = (star ((U₁.2.2 : unitary SpaceTimeAlgebra) : SpaceTimeAlgebra)) ^ 6
             * (star ((U₂.2.2 : unitary SpaceTimeAlgebra) : SpaceTimeAlgebra)) ^ 6 from by
         rw [show (((U₁ * U₂).2.2 : unitary SpaceTimeAlgebra) : SpaceTimeAlgebra)
-            = ((U₁.2.2 : unitary SpaceTimeAlgebra) : SpaceTimeAlgebra) *
-                ((U₂.2.2 : unitary SpaceTimeAlgebra) : SpaceTimeAlgebra)
-            from rfl, star_mul', mul_pow, mul_comm],
+              = ((U₁.2.2 : unitary SpaceTimeAlgebra) : SpaceTimeAlgebra)
+                * ((U₂.2.2 : unitary SpaceTimeAlgebra) : SpaceTimeAlgebra) from
+            rfl,
+          star_mul', mul_pow, mul_comm],
       show LinearMap.mulLeft ℂ
-          ((star ((U₁.2.2 : unitary SpaceTimeAlgebra) : SpaceTimeAlgebra)) ^ 6
-            * (star ((U₂.2.2 : unitary SpaceTimeAlgebra) : SpaceTimeAlgebra)) ^ 6)
-        = (LinearMap.mulLeft ℂ
-            ((star ((U₁.2.2 : unitary SpaceTimeAlgebra) : SpaceTimeAlgebra)) ^ 6)) ∘ₗ
-          (LinearMap.mulLeft ℂ
+            ((star ((U₁.2.2 : unitary SpaceTimeAlgebra) : SpaceTimeAlgebra)) ^ 6
+              * (star ((U₂.2.2 : unitary SpaceTimeAlgebra) : SpaceTimeAlgebra)) ^ 6)
+          = (LinearMap.mulLeft ℂ
+              ((star ((U₁.2.2 : unitary SpaceTimeAlgebra) : SpaceTimeAlgebra)) ^ 6))
+            ∘ₗ (LinearMap.mulLeft ℂ
               ((star ((U₂.2.2 : unitary SpaceTimeAlgebra) : SpaceTimeAlgebra)) ^ 6)) from
         LinearMap.ext fun z => mul_assoc _ _ z,
       LinearMap.rTensor_comp]
     rfl
 
 open TensorProduct in
-/-- The jet gauge action on a pure tensor of the jet space of the charged-lepton
-singlet. -/
-lemma repJetGaugeGroupI_tmul (U : JetGaugeGroupI) (f : SpaceTimeAlgebra) (ψ : LeptonSinglet) :
-    repJetGaugeGroupI U (f ⊗ₜ[ℂ] ψ)
+/--
+The jet gauge action on a pure tensor of the jet space of the charged-lepton
+singlet.
+-/
+lemma repJetGaugeGroupI_tmul (U : JetGaugeGroupI) (f : SpaceTimeAlgebra) (ψ : LeptonSinglet)
+    : repJetGaugeGroupI U (f ⊗ₜ[ℂ] ψ)
       = ((star ((U.2.2 : unitary SpaceTimeAlgebra) : SpaceTimeAlgebra)) ^ 6 * f) ⊗ₜ[ℂ] ψ :=
   LinearMap.rTensor_tmul _ _ _ _
 
 open TensorProduct in
-/-- **The jet gauge action on the jets of the charged-lepton singlet is fibrewise**: it
-commutes with multiplication by scalar jets. -/
-lemma repJetGaugeGroupI_smul (U : JetGaugeGroupI) (χ : SpaceTimeAlgebra)
-    (z : SpaceTimeAlgebra ⊗[ℂ] LeptonSinglet) :
-    repJetGaugeGroupI U (χ • z) = χ • repJetGaugeGroupI U z := by
+/--
+**The jet gauge action on the jets of the charged-lepton singlet is fibrewise**: it
+commutes with multiplication by scalar jets.
+-/
+lemma repJetGaugeGroupI_smul
+    (U : JetGaugeGroupI) (χ : SpaceTimeAlgebra) (z : SpaceTimeAlgebra ⊗[ℂ] LeptonSinglet)
+    : repJetGaugeGroupI U (χ • z) = χ • repJetGaugeGroupI U z := by
   induction z using TensorProduct.inductionOn with
   | add a b ha hb => rw [smul_add, map_add, ha, hb, map_add, smul_add]
   | tmul f ψ =>
-    rw [TensorProduct.smul_tmul', smul_eq_mul, repJetGaugeGroupI_tmul,
-      repJetGaugeGroupI_tmul, TensorProduct.smul_tmul', smul_eq_mul, mul_left_comm]
+    rw [TensorProduct.smul_tmul', smul_eq_mul, repJetGaugeGroupI_tmul, repJetGaugeGroupI_tmul,
+      TensorProduct.smul_tmul', smul_eq_mul, mul_left_comm]
 
 open TensorProduct in
-/-- On jets of constant gauge transformations the jet action reduces to the global
+/--
+On jets of constant gauge transformations the jet action reduces to the global
 gauge action on the fibre: the `(1, 1)_{-6}` action on the lepton-singlet factor, and
-the trivial action on the jet ring. -/
-lemma repJetGaugeGroupI_ofConstant (g : GaugeGroupI) :
-    repJetGaugeGroupI (JetGaugeGroupI.ofConstant g) =
-      TensorProduct.map LinearMap.id (repGaugeGroupI g) := by
+the trivial action on the jet ring.
+-/
+lemma repJetGaugeGroupI_ofConstant (g : GaugeGroupI)
+    : repJetGaugeGroupI (JetGaugeGroupI.ofConstant g)
+      = TensorProduct.map LinearMap.id (repGaugeGroupI g) := by
   ext f x
   obtain ⟨ψ⟩ := x
-  have hu : (((JetGaugeGroupI.ofConstant g).2.2 : unitary SpaceTimeAlgebra) : SpaceTimeAlgebra)
-      = MvPowerSeries.C ((g.toU1.1 : ℂ)) := rfl
+  have hu
+      : (((JetGaugeGroupI.ofConstant g).2.2 : unitary SpaceTimeAlgebra) : SpaceTimeAlgebra)
+        = MvPowerSeries.C ((g.toU1.1 : ℂ)) :=
+    rfl
   simp only [TensorProduct.AlgebraTensorModule.curry_apply, TensorProduct.curry_apply,
     LinearMap.restrictScalars_apply, repJetGaugeGroupI_tmul, hu, SpaceTimeAlgebra.star_C, ← map_pow,
     TensorProduct.map_tmul, LinearMap.id_apply, repGaugeGroupI_apply]
   rw [show (⟨(star (g.toU1.1 : ℂ) ^ 6) • ψ⟩ : LeptonSinglet)
-      = (star (g.toU1.1 : ℂ) ^ 6) • (⟨ψ⟩ : LeptonSinglet) from rfl,
+        = (star (g.toU1.1 : ℂ) ^ 6) • (⟨ψ⟩ : LeptonSinglet) from
+      rfl,
     TensorProduct.tmul_smul,
-    show (MvPowerSeries.C (star (g.toU1.1 : ℂ) ^ 6) * f) = (star (g.toU1.1 : ℂ) ^ 6) • f from
-      by rw [Algebra.smul_def, MvPowerSeries.algebraMap_apply, Algebra.algebraMap_self_apply],
+    show (MvPowerSeries.C (star (g.toU1.1 : ℂ) ^ 6) * f) = (star (g.toU1.1 : ℂ) ^ 6) • f from by
+      rw [Algebra.smul_def, MvPowerSeries.algebraMap_apply, Algebra.algebraMap_self_apply],
     TensorProduct.smul_tmul']
 
 end LeptonSinglet
@@ -319,46 +350,54 @@ functionals with the expected signs.
 -/
 
 /-- The gauge weight of the lepton-singlet basis: hypercharge `-6`. -/
-def LeptonSinglet.valueGaugeWeight (_ : Fin 2) : GaugeWeight :=
-  (0, 0, 0, -6)
+def LeptonSinglet.valueGaugeWeight (_ : Fin 2) : GaugeWeight := (0, 0, 0, -6)
 
-/-- The gauge torus acts diagonally on the basis of `LeptonSinglet`, with the weights
-  `LeptonSinglet.valueGaugeWeight`. -/
-lemma LeptonSinglet.repGaugeGroupI_gaugeTorusGen_basis (i : Fin 4) (j : Fin 2) :
-    LeptonSinglet.repGaugeGroupI (gaugeTorusGen i) (LeptonSinglet.basis j)
-      = ((expI : ℂ) ^ GaugeWeight.coord (LeptonSinglet.valueGaugeWeight j) i) •
-        LeptonSinglet.basis j := by
+/--
+The gauge torus acts diagonally on the basis of `LeptonSinglet`, with the weights
+`LeptonSinglet.valueGaugeWeight`.
+-/
+lemma LeptonSinglet.repGaugeGroupI_gaugeTorusGen_basis (i : Fin 4) (j : Fin 2)
+    : LeptonSinglet.repGaugeGroupI (gaugeTorusGen i) (LeptonSinglet.basis j)
+      = ((expI : ℂ) ^ GaugeWeight.coord (LeptonSinglet.valueGaugeWeight j) i)
+        • LeptonSinglet.basis j := by
   have hb : LeptonSinglet.basis j = ⟨Fermion.RightHandedWeyl.basis j⟩ := by
     simp only [LeptonSinglet.basis, Module.Basis.map_apply]
     rfl
   rw [hb, LeptonSinglet.repGaugeGroupI_basis]
-  fin_cases i <;>
-    simp [gaugeTorusGen, GaugeGroupI.toU1,
-      LeptonSinglet.valueGaugeWeight, GaugeWeight.coord,
-      starRingEnd_expI_pow]
+  fin_cases i <;> simp [gaugeTorusGen, GaugeGroupI.toU1, LeptonSinglet.valueGaugeWeight,
+    GaugeWeight.coord, starRingEnd_expI_pow]
 
-/-- The dual action of the gauge torus on the coordinate functionals of
-  `LeptonSinglet`: the weights are negated. -/
-lemma LeptonSinglet.repGaugeGroupI_dual_gaugeTorusGen_coord (i : Fin 4) (j : Fin 2) :
-    LeptonSinglet.repGaugeGroupI.dual (gaugeTorusGen i) (LeptonSinglet.basis.coord j)
-      = ((expI : ℂ) ^ (-(GaugeWeight.coord (LeptonSinglet.valueGaugeWeight j) i))) •
-        LeptonSinglet.basis.coord j :=
+/--
+The dual action of the gauge torus on the coordinate functionals of
+`LeptonSinglet`: the weights are negated.
+-/
+lemma LeptonSinglet.repGaugeGroupI_dual_gaugeTorusGen_coord (i : Fin 4) (j : Fin 2)
+    : LeptonSinglet.repGaugeGroupI.dual (gaugeTorusGen i) (LeptonSinglet.basis.coord j)
+      = ((expI : ℂ) ^ (-(GaugeWeight.coord (LeptonSinglet.valueGaugeWeight j) i)))
+        • LeptonSinglet.basis.coord j :=
   dual_gaugeTorusGen_coord _ _ _ _
-    (fun j' => LeptonSinglet.repGaugeGroupI_gaugeTorusGen_basis i j') j
+    (fun j' => LeptonSinglet.repGaugeGroupI_gaugeTorusGen_basis i j')
+    j
 
-/-- The dual of the conjugate action of the gauge torus on the coordinate functionals
-  of the conjugate of `LeptonSinglet`: the two negations cancel and the weights are those of
-  the value space. -/
-lemma LeptonSinglet.repGaugeGroupI_conj_dual_gaugeTorusGen_coord (i : Fin 4) (j : Fin 2) :
-    LeptonSinglet.repGaugeGroupI.conj.dual (gaugeTorusGen i)
-      (((Basis.conj LeptonSinglet.basis)).coord j)
-      = ((expI : ℂ) ^ GaugeWeight.coord (LeptonSinglet.valueGaugeWeight j) i) •
-        ((Basis.conj LeptonSinglet.basis)).coord j := by
-  have hd := dual_gaugeTorusGen_coord LeptonSinglet.repGaugeGroupI.conj
-    ((Basis.conj LeptonSinglet.basis))
-    (gaugeTorusGen i) (fun j' => -(GaugeWeight.coord (LeptonSinglet.valueGaugeWeight j') i))
-    (fun j' => conj_gaugeTorusGen_basis _ _ _ _
-      (fun j'' => LeptonSinglet.repGaugeGroupI_gaugeTorusGen_basis i j'') j') j
+/--
+The dual of the conjugate action of the gauge torus on the coordinate functionals
+of the conjugate of `LeptonSinglet`: the two negations cancel and the weights are those of
+the value space.
+-/
+lemma LeptonSinglet.repGaugeGroupI_conj_dual_gaugeTorusGen_coord (i : Fin 4) (j : Fin 2)
+    : LeptonSinglet.repGaugeGroupI.conj.dual (gaugeTorusGen i)
+        (((Basis.conj LeptonSinglet.basis)).coord j)
+      = ((expI : ℂ) ^ GaugeWeight.coord (LeptonSinglet.valueGaugeWeight j) i)
+        • ((Basis.conj LeptonSinglet.basis)).coord j := by
+  have hd :=
+    dual_gaugeTorusGen_coord LeptonSinglet.repGaugeGroupI.conj ((Basis.conj LeptonSinglet.basis))
+      (gaugeTorusGen i)
+      (fun j' => -(GaugeWeight.coord (LeptonSinglet.valueGaugeWeight j') i))
+      (fun j' =>
+        conj_gaugeTorusGen_basis _ _ _ _
+          (fun j'' => LeptonSinglet.repGaugeGroupI_gaugeTorusGen_basis i j'')
+          j')
+      j
   simpa using hd
 
 /-!
@@ -369,8 +408,8 @@ lemma LeptonSinglet.repGaugeGroupI_conj_dual_gaugeTorusGen_coord (i : Fin 4) (j 
 
 open Lorentz in
 /-- The charged-lepton-singlet basis diagonalises the `z`-boost. -/
-lemma leptonSinglet_repLorentzGroup_boostAxis_two_basis (t : ℝ) (ht : t ≠ 0) (j : Fin 2) :
-    LeptonSinglet.repLorentzGroup (SL2C.boostAxis 2 t ht) (LeptonSinglet.basis j)
+lemma leptonSinglet_repLorentzGroup_boostAxis_two_basis (t : ℝ) (ht : t ≠ 0) (j : Fin 2)
+    : LeptonSinglet.repLorentzGroup (SL2C.boostAxis 2 t ht) (LeptonSinglet.basis j)
       = ((t : ℝ) : ℂ) ^ (weylWeight j) • LeptonSinglet.basis j := by
   simp [LeptonSinglet.basis, LeptonSinglet.repLorentzGroup, Module.Basis.map_apply,
     rightHandedWeyl_rep_boostAxis_two_basis]

@@ -89,12 +89,17 @@ It consists of:
 
 -/
 
-/-- Local gauge data. A gauge group `G₀` with Lie algebra `𝔤`, its group of jets `GJ` with
-  Lie algebra of jets `𝔤J`, evaluation at the base point, formal derivatives, the adjoint
-  action and the Maurer–Cartan form, subject to the identities used by the transformation
-  laws of gauge and matter fields. -/
-structure LocalGaugeData (G₀ : Type) [Group G₀] (𝔤 : Type) [LieRing 𝔤] [LieAlgebra ℝ 𝔤]
-    (GJ : Type) [Group GJ] (𝔤J : Type) [LieRing 𝔤J] [LieAlgebra ℝ 𝔤J] where
+/--
+Local gauge data. A gauge group `G₀` with Lie algebra `𝔤`, its group of jets `GJ` with
+Lie algebra of jets `𝔤J`, evaluation at the base point, formal derivatives, the adjoint
+action and the Maurer–Cartan form, subject to the identities used by the transformation
+laws of gauge and matter fields.
+-/
+structure LocalGaugeData
+    (G₀ : Type) [Group G₀]
+    (𝔤 : Type) [LieRing 𝔤] [LieAlgebra ℝ 𝔤]
+    (GJ : Type) [Group GJ]
+    (𝔤J : Type) [LieRing 𝔤J] [LieAlgebra ℝ 𝔤J] where
   /-- Evaluation of a gauge jet at the base point. -/
   eval : GJ →* G₀
   /-- A constant gauge transformation as a jet. -/
@@ -108,14 +113,14 @@ structure LocalGaugeData (G₀ : Type) [Group G₀] (𝔤 : Type) [LieRing 𝔤]
   /-- The formal derivative in the direction `μ`. -/
   deriv : (Fin 1 ⊕ Fin 3) → 𝔤J →ₗ[ℝ] 𝔤J
   deriv_comm : ∀ (μ ν : Fin 1 ⊕ Fin 3) (a : 𝔤J), deriv μ (deriv ν a) = deriv ν (deriv μ a)
-  deriv_bracket : ∀ (μ : Fin 1 ⊕ Fin 3) (x y : 𝔤J),
-    deriv μ ⁅x, y⁆ = ⁅deriv μ x, y⁆ + ⁅x, deriv μ y⁆
+  deriv_bracket : ∀ (μ : Fin 1 ⊕ Fin 3) (x y : 𝔤J), deriv μ ⁅x, y⁆ = ⁅deriv μ x, y⁆ + ⁅x, deriv μ y⁆
   deriv_ofConstantLie : ∀ (μ : Fin 1 ⊕ Fin 3) (a : 𝔤), deriv μ (ofConstantLie a) = 0
   /-- Multiplication of a jet by the spacetime coordinate `x_μ`. -/
   mulCoord : (Fin 1 ⊕ Fin 3) → 𝔤J →ₗ[ℝ] 𝔤J
   /-- The Leibniz rule for a coordinate: `∂_μ (x_ν a) = x_ν ∂_μ a + δ_{μν} a`. -/
-  deriv_mulCoord : ∀ (μ ν : Fin 1 ⊕ Fin 3) (a : 𝔤J),
-    deriv μ (mulCoord ν a) = mulCoord ν (deriv μ a) + if μ = ν then a else 0
+  deriv_mulCoord
+    : ∀ (μ ν : Fin 1 ⊕ Fin 3) (a : 𝔤J),
+      deriv μ (mulCoord ν a) = mulCoord ν (deriv μ a) + if μ = ν then a else 0
   /-- A multiple of a coordinate vanishes at the base point. -/
   evalLie_mulCoord : ∀ (μ : Fin 1 ⊕ Fin 3) (a : 𝔤J), evalLie (mulCoord μ a) = 0
   /-- Multiplication by a coordinate commutes with the bracket. -/
@@ -129,24 +134,32 @@ structure LocalGaugeData (G₀ : Type) [Group G₀] (𝔤 : Type) [LieRing 𝔤]
   evalLie_adjointJ : ∀ (U : GJ) (x : 𝔤J), evalLie (adjointJ U x) = adjoint (eval U) (evalLie x)
   /-- The Maurer–Cartan form `i (∂_μ U) U⁻¹` of a gauge jet. -/
   maurerCartan : GJ → (Fin 1 ⊕ Fin 3) → 𝔤J
-  /-- A constant gauge transformation has vanishing Maurer–Cartan form: it has no
-    spacetime dependence to differentiate. -/
+  /--
+  A constant gauge transformation has vanishing Maurer–Cartan form: it has no
+  spacetime dependence to differentiate.
+  -/
   maurerCartan_ofConstant : ∀ (g : G₀) (μ : Fin 1 ⊕ Fin 3), maurerCartan (ofConstant g) μ = 0
   /-- The Maurer–Cartan form is a cocycle for the adjoint action. -/
-  maurerCartan_cocycle : ∀ (U V : GJ) (μ : Fin 1 ⊕ Fin 3),
-    maurerCartan (U * V) μ = maurerCartan U μ + adjointJ U (maurerCartan V μ)
+  maurerCartan_cocycle
+    : ∀ (U V : GJ) (μ : Fin 1 ⊕ Fin 3),
+      maurerCartan (U * V) μ = maurerCartan U μ + adjointJ U (maurerCartan V μ)
   /-- The Maurer–Cartan form is flat. -/
-  maurerCartan_structure : ∀ (U : GJ) (μ ν : Fin 1 ⊕ Fin 3),
-    deriv μ (maurerCartan U ν) - deriv ν (maurerCartan U μ)
-      + ⁅maurerCartan U μ, maurerCartan U ν⁆ = 0
+  maurerCartan_structure
+    : ∀ (U : GJ) (μ ν : Fin 1 ⊕ Fin 3),
+      deriv μ (maurerCartan U ν) - deriv ν (maurerCartan U μ) + ⁅maurerCartan U μ, maurerCartan U ν⁆
+        = 0
   /-- The Leibniz rule for the adjoint action. -/
-  deriv_adjointJ : ∀ (U : GJ) (μ : Fin 1 ⊕ Fin 3) (x : 𝔤J),
-    deriv μ (adjointJ U x) = adjointJ U (deriv μ x) - ⁅maurerCartan U μ, adjointJ U x⁆
+  deriv_adjointJ
+    : ∀ (U : GJ) (μ : Fin 1 ⊕ Fin 3) (x : 𝔤J),
+      deriv μ (adjointJ U x) = adjointJ U (deriv μ x) - ⁅maurerCartan U μ, adjointJ U x⁆
 
 namespace LocalGaugeData
 
-variable {G₀ : Type} [Group G₀] {𝔤 : Type} [LieRing 𝔤] [LieAlgebra ℝ 𝔤]
-  {GJ : Type} [Group GJ] {𝔤J : Type} [LieRing 𝔤J] [LieAlgebra ℝ 𝔤J]
+variable
+  {G₀ : Type} [Group G₀]
+  {𝔤 : Type} [LieRing 𝔤] [LieAlgebra ℝ 𝔤]
+  {GJ : Type} [Group GJ]
+  {𝔤J : Type} [LieRing 𝔤J] [LieAlgebra ℝ 𝔤J]
   (jets : LocalGaugeData G₀ 𝔤 GJ 𝔤J)
 
 TODO "Add a constructor for LocalGaugeData from a Lie group and its Lie algebra"
@@ -174,17 +187,17 @@ lemma evalLie_surjective : Function.Surjective jets.evalLie :=
 lemma ofConstantLie_injective : Function.Injective jets.ofConstantLie :=
   Function.LeftInverse.injective jets.evalLie_ofConstantLie
 
-lemma adjoint_bracket (g : G₀) (a b : 𝔤) :
-    jets.adjoint g ⁅a, b⁆ = ⁅jets.adjoint g a, jets.adjoint g b⁆ := by
+lemma adjoint_bracket (g : G₀) (a b : 𝔤)
+    : jets.adjoint g ⁅a, b⁆ = ⁅jets.adjoint g a, jets.adjoint g b⁆ := by
   have h := jets.evalLie_adjointJ (jets.ofConstant g)
   rw [jets.eval_ofConstant] at h
   rw [← jets.evalLie_ofConstantLie ⁅a, b⁆, ← h, LieHom.map_lie jets.ofConstantLie,
     jets.adjointJ_bracket, LieHom.map_lie, h, h, jets.evalLie_ofConstantLie,
     jets.evalLie_ofConstantLie]
 
-lemma deriv_adjointJ_ofConstant (g : G₀) (μ : Fin 1 ⊕ Fin 3) (x : 𝔤J) :
-    jets.deriv μ (jets.adjointJ (jets.ofConstant g) x) =
-      jets.adjointJ (jets.ofConstant g) (jets.deriv μ x) := by
+lemma deriv_adjointJ_ofConstant (g : G₀) (μ : Fin 1 ⊕ Fin 3) (x : 𝔤J)
+    : jets.deriv μ (jets.adjointJ (jets.ofConstant g) x)
+      = jets.adjointJ (jets.ofConstant g) (jets.deriv μ x) := by
   rw [jets.deriv_adjointJ, jets.maurerCartan_ofConstant, zero_lie, sub_zero]
 
 /-!
@@ -200,8 +213,8 @@ lemma deriv_adjointJ_ofConstant (g : G₀) (μ : Fin 1 ⊕ Fin 3) (x : 𝔤J) :
 -/
 
 /-- Post-composition with `deriv` is right-commutative. -/
-instance instRightCommutativeCompDeriv : RightCommutative
-    (fun (D : 𝔤J →ₗ[ℝ] 𝔤J) (μ : Fin 1 ⊕ Fin 3) => D.comp (jets.deriv μ)) where
+instance instRightCommutativeCompDeriv
+    : RightCommutative (fun (D : 𝔤J →ₗ[ℝ] 𝔤J) (μ : Fin 1 ⊕ Fin 3) => D.comp (jets.deriv μ)) where
   right_comm D μ ν := by
     refine LinearMap.ext fun a => ?_
     exact congrArg D (jets.deriv_comm μ ν a)
@@ -226,66 +239,62 @@ noncomputable def iteratedDeriv (μs : Multiset (Fin 1 ⊕ Fin 3)) : 𝔤J →�
 lemma iteratedDeriv_zero : jets.iteratedDeriv (0 : Multiset (Fin 1 ⊕ Fin 3)) = LinearMap.id := by
   simp [iteratedDeriv]
 
-lemma iteratedDeriv_cons (μ : Fin 1 ⊕ Fin 3) (μs : Multiset (Fin 1 ⊕ Fin 3)) :
-    jets.iteratedDeriv (μ ::ₘ μs) = (jets.deriv μ).comp (jets.iteratedDeriv μs) := by
-  have h : ∀ (s : Multiset (Fin 1 ⊕ Fin 3)) (D : 𝔤J →ₗ[ℝ] 𝔤J),
-      s.foldl (fun D μ => D.comp (jets.deriv μ)) D = D.comp (jets.iteratedDeriv s) := by
+lemma iteratedDeriv_cons (μ : Fin 1 ⊕ Fin 3) (μs : Multiset (Fin 1 ⊕ Fin 3))
+    : jets.iteratedDeriv (μ ::ₘ μs) = (jets.deriv μ).comp (jets.iteratedDeriv μs) := by
+  have h
+      : ∀ (s : Multiset (Fin 1 ⊕ Fin 3)) (D : 𝔤J →ₗ[ℝ] 𝔤J),
+        s.foldl (fun D μ => D.comp (jets.deriv μ)) D = D.comp (jets.iteratedDeriv s) := by
     intro s
     induction s using Multiset.induction_on with
     | empty => intro D; simp [iteratedDeriv]
     | cons κ t ih =>
-        intro D
-        rw [iteratedDeriv, Multiset.foldl_cons, Multiset.foldl_cons, ih, ih]
-        simp [LinearMap.comp_assoc]
+      intro D
+      rw [iteratedDeriv, Multiset.foldl_cons, Multiset.foldl_cons, ih, ih]
+      simp [LinearMap.comp_assoc]
   rw [iteratedDeriv, Multiset.foldl_cons, h]
   simp
 
 /-- The iterated derivative is additive in the multiset. -/
-lemma iteratedDeriv_add (s t : Multiset (Fin 1 ⊕ Fin 3)) :
-    jets.iteratedDeriv (s + t) = (jets.iteratedDeriv s).comp (jets.iteratedDeriv t) := by
+lemma iteratedDeriv_add (s t : Multiset (Fin 1 ⊕ Fin 3))
+    : jets.iteratedDeriv (s + t) = (jets.iteratedDeriv s).comp (jets.iteratedDeriv t) := by
   induction s using Multiset.induction_on with
   | empty => simp [iteratedDeriv_zero]
   | cons μ s ih =>
-      rw [Multiset.cons_add, iteratedDeriv_cons, iteratedDeriv_cons, ih,
-        LinearMap.comp_assoc]
+    rw [Multiset.cons_add, iteratedDeriv_cons, iteratedDeriv_cons, ih, LinearMap.comp_assoc]
 
 @[simp]
-lemma iteratedDeriv_singleton (μ : Fin 1 ⊕ Fin 3) :
-    jets.iteratedDeriv ({μ} : Multiset (Fin 1 ⊕ Fin 3)) = jets.deriv μ := by
+lemma iteratedDeriv_singleton (μ : Fin 1 ⊕ Fin 3)
+    : jets.iteratedDeriv ({μ} : Multiset (Fin 1 ⊕ Fin 3)) = jets.deriv μ := by
   rw [show ({μ} : Multiset (Fin 1 ⊕ Fin 3)) = μ ::ₘ 0 from rfl, iteratedDeriv_cons,
     iteratedDeriv_zero, LinearMap.comp_id]
 
-lemma iteratedDeriv_cons_eq_comp_deriv (μ : Fin 1 ⊕ Fin 3) (s : Multiset (Fin 1 ⊕ Fin 3)) :
-    jets.iteratedDeriv (μ ::ₘ s) = (jets.iteratedDeriv s).comp (jets.deriv μ) := by
+lemma iteratedDeriv_cons_eq_comp_deriv (μ : Fin 1 ⊕ Fin 3) (s : Multiset (Fin 1 ⊕ Fin 3))
+    : jets.iteratedDeriv (μ ::ₘ s) = (jets.iteratedDeriv s).comp (jets.deriv μ) := by
   rw [show (μ ::ₘ s : Multiset (Fin 1 ⊕ Fin 3)) = s + {μ} from by
       rw [add_comm, Multiset.singleton_add],
     iteratedDeriv_add, iteratedDeriv_singleton]
 
 /-- The iterated Leibniz rule for the bracket. -/
-lemma iteratedDeriv_bracket (s : Multiset (Fin 1 ⊕ Fin 3)) (a b : 𝔤J) :
-    jets.iteratedDeriv s ⁅a, b⁆ =
-      (s.antidiagonal.map fun p =>
-        ⁅jets.iteratedDeriv p.1 a, jets.iteratedDeriv p.2 b⁆).sum := by
+lemma iteratedDeriv_bracket (s : Multiset (Fin 1 ⊕ Fin 3)) (a b : 𝔤J)
+    : jets.iteratedDeriv s ⁅a, b⁆
+      = (s.antidiagonal.map fun p => ⁅jets.iteratedDeriv p.1 a, jets.iteratedDeriv p.2 b⁆).sum := by
   induction s using Multiset.induction_on with
   | empty => simp [Multiset.antidiagonal_zero]
   | cons κ s ih =>
-      rw [iteratedDeriv_cons, LinearMap.comp_apply, ih, map_multiset_sum,
-        Multiset.map_map,
-        Multiset.map_congr rfl (fun p hp => by
-          rw [Function.comp_apply, jets.deriv_bracket,
-            show jets.deriv κ (jets.iteratedDeriv p.1 a)
-                = jets.iteratedDeriv (κ ::ₘ p.1) a from by
-              rw [iteratedDeriv_cons]; rfl,
-            show jets.deriv κ (jets.iteratedDeriv p.2 b)
-                = jets.iteratedDeriv (κ ::ₘ p.2) b from by
-              rw [iteratedDeriv_cons]; rfl]),
-        Multiset.sum_map_add]
-      simp only [Multiset.antidiagonal_cons, Multiset.map_add, Multiset.sum_add,
-        Multiset.map_map, Function.comp_apply, Prod.map_fst, Prod.map_snd, id_eq]
-      abel
+    rw [iteratedDeriv_cons, LinearMap.comp_apply, ih, map_multiset_sum, Multiset.map_map,
+      Multiset.map_congr rfl (fun p hp => by
+        rw [Function.comp_apply, jets.deriv_bracket,
+          show jets.deriv κ (jets.iteratedDeriv p.1 a) = jets.iteratedDeriv (κ ::ₘ p.1) a from by
+            rw [iteratedDeriv_cons]; rfl,
+          show jets.deriv κ (jets.iteratedDeriv p.2 b) = jets.iteratedDeriv (κ ::ₘ p.2) b from by
+            rw [iteratedDeriv_cons]; rfl]),
+      Multiset.sum_map_add]
+    simp only [Multiset.antidiagonal_cons, Multiset.map_add, Multiset.sum_add, Multiset.map_map,
+      Function.comp_apply, Prod.map_fst, Prod.map_snd, id_eq]
+    abel
 
-lemma iteratedDeriv_ofConstantLie_of_ne_zero {p : Multiset (Fin 1 ⊕ Fin 3)} (hp : p ≠ 0)
-    (a : 𝔤) : jets.iteratedDeriv p (jets.ofConstantLie a) = 0 := by
+lemma iteratedDeriv_ofConstantLie_of_ne_zero {p : Multiset (Fin 1 ⊕ Fin 3)} (hp : p ≠ 0) (a : 𝔤)
+    : jets.iteratedDeriv p (jets.ofConstantLie a) = 0 := by
   induction p using Multiset.induction_on with
   | empty => exact absurd rfl hp
   | cons μ t ih =>
@@ -294,16 +303,16 @@ lemma iteratedDeriv_ofConstantLie_of_ne_zero {p : Multiset (Fin 1 ⊕ Fin 3)} (h
     · rw [iteratedDeriv_zero, LinearMap.id_apply, deriv_ofConstantLie]
     · rw [ih ht, map_zero]
 
-lemma iteratedDeriv_adjointJ_ofConstant (g : G₀) (s : Multiset (Fin 1 ⊕ Fin 3)) (x : 𝔤J) :
-    jets.iteratedDeriv s (jets.adjointJ (jets.ofConstant g) x) =
-      jets.adjointJ (jets.ofConstant g) (jets.iteratedDeriv s x) := by
+lemma iteratedDeriv_adjointJ_ofConstant (g : G₀) (s : Multiset (Fin 1 ⊕ Fin 3)) (x : 𝔤J)
+    : jets.iteratedDeriv s (jets.adjointJ (jets.ofConstant g) x)
+      = jets.adjointJ (jets.ofConstant g) (jets.iteratedDeriv s x) := by
   induction s using Multiset.induction_on with
   | empty => simp
   | cons μ s ih => simp [iteratedDeriv_cons, ih, deriv_adjointJ_ofConstant]
 
-lemma evalLie_iteratedDeriv_mulCoord (μ : Fin 1 ⊕ Fin 3) (s : Multiset (Fin 1 ⊕ Fin 3)) (a : 𝔤J) :
-    jets.evalLie (jets.iteratedDeriv s (jets.mulCoord μ a)) =
-      s.count μ • jets.evalLie (jets.iteratedDeriv (s.erase μ) a) := by
+lemma evalLie_iteratedDeriv_mulCoord (μ : Fin 1 ⊕ Fin 3) (s : Multiset (Fin 1 ⊕ Fin 3)) (a : 𝔤J)
+    : jets.evalLie (jets.iteratedDeriv s (jets.mulCoord μ a))
+      = s.count μ • jets.evalLie (jets.iteratedDeriv (s.erase μ) a) := by
   induction s using Multiset.induction_on generalizing a with
   | empty => simp [jets.evalLie_mulCoord]
   | cons ν s ih =>
@@ -320,12 +329,17 @@ lemma evalLie_iteratedDeriv_mulCoord (μ : Fin 1 ⊕ Fin 3) (s : Multiset (Fin 1
 
 -/
 
-variable {G₀' : Type} [Group G₀'] {𝔤' : Type} [LieRing 𝔤'] [LieAlgebra ℝ 𝔤']
-  {GJ' : Type} [Group GJ'] {𝔤J' : Type} [LieRing 𝔤J'] [LieAlgebra ℝ 𝔤J']
+variable
+  {G₀' : Type} [Group G₀']
+  {𝔤' : Type} [LieRing 𝔤'] [LieAlgebra ℝ 𝔤']
+  {GJ' : Type} [Group GJ']
+  {𝔤J' : Type} [LieRing 𝔤J'] [LieAlgebra ℝ 𝔤J']
 
-/-- A morphism of local gauge data.
+/--
+A morphism of local gauge data.
 
-  `Hom` is the standard name for a morphism in Lean. -/
+`Hom` is the standard name for a morphism in Lean.
+-/
 structure Hom (jets : LocalGaugeData G₀ 𝔤 GJ 𝔤J) (jets' : LocalGaugeData G₀' 𝔤' GJ' 𝔤J') where
   /-- The map of gauge groups. -/
   group : G₀ →* G₀'
@@ -348,8 +362,8 @@ TODO "Add the constructor for `Hom` from a Lie group homomorphism."
 
 namespace Hom
 
-variable {jets : LocalGaugeData G₀ 𝔤 GJ 𝔤J} {jets' : LocalGaugeData G₀' 𝔤' GJ' 𝔤J'}
-  (f : Hom jets jets')
+variable
+  {jets : LocalGaugeData G₀ 𝔤 GJ 𝔤J} {jets' : LocalGaugeData G₀' 𝔤' GJ' 𝔤J'} (f : Hom jets jets')
 
 /-!
 
@@ -358,8 +372,8 @@ variable {jets : LocalGaugeData G₀ 𝔤 GJ 𝔤J} {jets' : LocalGaugeData G₀
 -/
 
 /-- A morphism intertwines the adjoint actions of the gauge groups. -/
-lemma lie_adjoint (g : G₀) (x : 𝔤) :
-    f.lie (jets.adjoint g x) = jets'.adjoint (f.group g) (f.lie x) := by
+lemma lie_adjoint (g : G₀) (x : 𝔤)
+    : f.lie (jets.adjoint g x) = jets'.adjoint (f.group g) (f.lie x) := by
   have h := jets.evalLie_adjointJ (jets.ofConstant g) (jets.ofConstantLie x)
   rw [jets.eval_ofConstant, jets.evalLie_ofConstantLie] at h
   rw [← h, ← f.evalLie_lieJ, f.lieJ_adjointJ, f.groupJ_ofConstant, f.lieJ_ofConstantLie,
@@ -372,8 +386,8 @@ lemma lie_adjoint (g : G₀) (x : 𝔤) :
 -/
 
 /-- A morphism commutes with iterated derivatives. -/
-lemma lieJ_iteratedDeriv (s : Multiset (Fin 1 ⊕ Fin 3)) (a : 𝔤J) :
-    f.lieJ (jets.iteratedDeriv s a) = jets'.iteratedDeriv s (f.lieJ a) := by
+lemma lieJ_iteratedDeriv (s : Multiset (Fin 1 ⊕ Fin 3)) (a : 𝔤J)
+    : f.lieJ (jets.iteratedDeriv s a) = jets'.iteratedDeriv s (f.lieJ a) := by
   induction s using Multiset.induction_on generalizing a with
   | empty => simp
   | cons μ t ih =>
@@ -407,8 +421,11 @@ protected def id (jets : LocalGaugeData G₀ 𝔤 GJ 𝔤J) : Hom jets jets wher
 
 -/
 
-variable {G₀'' : Type} [Group G₀''] {𝔤'' : Type} [LieRing 𝔤''] [LieAlgebra ℝ 𝔤'']
-  {GJ'' : Type} [Group GJ''] {𝔤J'' : Type} [LieRing 𝔤J''] [LieAlgebra ℝ 𝔤J'']
+variable
+  {G₀'' : Type} [Group G₀'']
+  {𝔤'' : Type} [LieRing 𝔤''] [LieAlgebra ℝ 𝔤'']
+  {GJ'' : Type} [Group GJ'']
+  {𝔤J'' : Type} [LieRing 𝔤J''] [LieAlgebra ℝ 𝔤J'']
   {jets'' : LocalGaugeData G₀'' 𝔤'' GJ'' 𝔤J''}
 
 /-- The composite `g ∘ f` of morphisms of local gauge data. -/

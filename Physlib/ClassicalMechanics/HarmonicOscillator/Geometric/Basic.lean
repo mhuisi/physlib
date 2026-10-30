@@ -80,12 +80,16 @@ TODO "The API around the configuration space
 function-like coordinate access mirroring that of `EuclideanSpace ℝ (Fin 1)`.
 -/
 
-/-- The one-dimensional configuration space `Q` of the harmonic oscillator: the space of
+/--
+The one-dimensional configuration space `Q` of the harmonic oscillator: the space of
 possible positions of the oscillator, equipped with a single chosen global coordinate
-modeled by `EuclideanSpace ℝ (Fin 1)`. -/
+modeled by `EuclideanSpace ℝ (Fin 1)`.
+-/
 structure ConfigurationSpace where
-  /-- The chosen global coordinate of the configuration, valued in
-  `EuclideanSpace ℝ (Fin 1)`. -/
+  /--
+  The chosen global coordinate of the configuration, valued in
+  `EuclideanSpace ℝ (Fin 1)`.
+  -/
   val : EuclideanSpace ℝ (Fin 1)
 
 namespace ConfigurationSpace
@@ -98,13 +102,17 @@ lemma ext {x y : ConfigurationSpace} (h : x.val = y.val) : x = y := by
   subst h
   rfl
 
-/-- A configuration may be applied like a function `Fin 1 → ℝ`, evaluating its
-underlying coordinate. This mirrors the function-like use of `EuclideanSpace ℝ (Fin 1)`. -/
+/--
+A configuration may be applied like a function `Fin 1 → ℝ`, evaluating its
+underlying coordinate. This mirrors the function-like use of `EuclideanSpace ℝ (Fin 1)`.
+-/
 instance : CoeFun ConfigurationSpace (fun _ => Fin 1 → ℝ) where
   coe x := fun i => x.val i
 
-/-- Applying a configuration as a function reads the corresponding component of its global
-coordinate. -/
+/--
+Applying a configuration as a function reads the corresponding component of its global
+coordinate.
+-/
 lemma coe_apply (x : ConfigurationSpace) (i : Fin 1) : x i = x.val i := rfl
 
 /-!
@@ -119,23 +127,29 @@ and second countability across it from the model space, so `Q` is a well-behaved
 manifold.
 -/
 
-/-- The topology on configuration space, induced by the chosen coordinate
-`ConfigurationSpace.val` into `EuclideanSpace ℝ (Fin 1)`. -/
+/--
+The topology on configuration space, induced by the chosen coordinate
+`ConfigurationSpace.val` into `EuclideanSpace ℝ (Fin 1)`.
+-/
 instance : TopologicalSpace ConfigurationSpace :=
   TopologicalSpace.induced ConfigurationSpace.val inferInstance
 
-/-- The coordinate equivalence between configuration space and its `EuclideanSpace ℝ (Fin 1)`
-model, given by `ConfigurationSpace.val` with its wrapper inverse. -/
+/--
+The coordinate equivalence between configuration space and its `EuclideanSpace ℝ (Fin 1)`
+model, given by `ConfigurationSpace.val` with its wrapper inverse.
+-/
 def valEquiv : ConfigurationSpace ≃ EuclideanSpace ℝ (Fin 1) where
   toFun := ConfigurationSpace.val
   invFun v := ⟨v⟩
   left_inv x := by cases x; rfl
   right_inv v := rfl
 
-/-- The global coordinate homeomorphism between configuration space and its
+/--
+The global coordinate homeomorphism between configuration space and its
 `EuclideanSpace ℝ (Fin 1)` model. Continuity in both directions is exactly the universal
 property of the induced topology, so no norm or isometry structure is involved. This
-homeomorphism underlies the single global chart used for the smooth-manifold structure. -/
+homeomorphism underlies the single global chart used for the smooth-manifold structure.
+-/
 def valHomeomorphism : ConfigurationSpace ≃ₜ EuclideanSpace ℝ (Fin 1) where
   toEquiv := valEquiv
   continuous_toFun := continuous_induced_dom
@@ -143,14 +157,17 @@ def valHomeomorphism : ConfigurationSpace ≃ₜ EuclideanSpace ℝ (Fin 1) wher
     apply continuous_induced_rng.mpr
     exact continuous_id
 
-/-- Configuration space is Hausdorff, transported from `EuclideanSpace ℝ (Fin 1)` across the
-coordinate homeomorphism. -/
+/--
+Configuration space is Hausdorff, transported from `EuclideanSpace ℝ (Fin 1)` across the
+coordinate homeomorphism.
+-/
 instance : T2Space ConfigurationSpace := valHomeomorphism.symm.t2Space
 
-/-- Configuration space is second countable, transported from `EuclideanSpace ℝ (Fin 1)`
-across the coordinate homeomorphism. -/
-instance : SecondCountableTopology ConfigurationSpace :=
-  valHomeomorphism.secondCountableTopology
+/--
+Configuration space is second countable, transported from `EuclideanSpace ℝ (Fin 1)`
+across the coordinate homeomorphism.
+-/
+instance : SecondCountableTopology ConfigurationSpace := valHomeomorphism.secondCountableTopology
 
 /-!
 ## C. Smooth manifold structure
@@ -160,23 +177,26 @@ single global chart `valHomeomorphism`. With one chart the only coordinate chang
 chart's self-transition, which is analytic, so chart compatibility is immediate.
 -/
 
-/-- The structure of a charted space on `ConfigurationSpace`, modeled on its
-`EuclideanSpace ℝ (Fin 1)` coordinate via the single global chart `valHomeomorphism`. -/
+/--
+The structure of a charted space on `ConfigurationSpace`, modeled on its
+`EuclideanSpace ℝ (Fin 1)` coordinate via the single global chart `valHomeomorphism`.
+-/
 instance : ChartedSpace (EuclideanSpace ℝ (Fin 1)) ConfigurationSpace where
-  atlas := { valHomeomorphism.toOpenPartialHomeomorph }
+  atlas := {valHomeomorphism.toOpenPartialHomeomorph}
   chartAt _ := valHomeomorphism.toOpenPartialHomeomorph
-  mem_chart_source := by
-    simp
+  mem_chart_source := by simp
   chart_mem_atlas := by
     intro x
     simp
 
 open Manifold ContDiff
 
-/-- The structure of a smooth (indeed analytic) manifold on `ConfigurationSpace`. With a
+/--
+The structure of a smooth (indeed analytic) manifold on `ConfigurationSpace`. With a
 single global chart, the only coordinate change is the chart's self-transition, which is
-analytic. -/
-instance : IsManifold 𝓘(ℝ, EuclideanSpace ℝ (Fin 1)) ω ConfigurationSpace where
+analytic.
+-/
+instance : IsManifold (𝓘(ℝ, EuclideanSpace ℝ (Fin 1))) ω ConfigurationSpace where
   compatible := by
     intro e1 e2 h1 h2
     simp [atlas, ChartedSpace.atlas] at h1 h2
@@ -193,23 +213,31 @@ manifold structure. This smooth identification is what lets smoothness of maps t
 be tested in the chosen global coordinate, the device used for trajectories and their velocities.
 -/
 
-/-- The global coordinate chart as an analytic diffeomorphism between `ConfigurationSpace` and
-its `EuclideanSpace ℝ (Fin 1)` model, upgrading `valHomeomorphism` to a smooth identification. -/
-def valDiffeomorph :
-    ConfigurationSpace ≃ₘ^ω⟮𝓘(ℝ, EuclideanSpace ℝ (Fin 1)), 𝓘(ℝ, EuclideanSpace ℝ (Fin 1))⟯
-      EuclideanSpace ℝ (Fin 1) where
+/--
+The global coordinate chart as an analytic diffeomorphism between `ConfigurationSpace` and
+its `EuclideanSpace ℝ (Fin 1)` model, upgrading `valHomeomorphism` to a smooth identification.
+-/
+def valDiffeomorph
+    : ConfigurationSpace ≃ₘ^ω⟮𝓘(ℝ, EuclideanSpace ℝ (Fin 1)), 𝓘(ℝ, EuclideanSpace ℝ (Fin 1))⟯
+        EuclideanSpace ℝ (Fin 1) where
   toEquiv := valEquiv
   contMDiff_toFun := by
-    have h := contMDiffOn_chart (I := 𝓘(ℝ, EuclideanSpace ℝ (Fin 1))) (n := ω)
-      (x := (⟨0⟩ : ConfigurationSpace))
-    rw [show (chartAt (EuclideanSpace ℝ (Fin 1)) (⟨0⟩ : ConfigurationSpace)).source = Set.univ
-        from rfl, contMDiffOn_univ] at h
+    have h :=
+      contMDiffOn_chart (I := 𝓘(ℝ, EuclideanSpace ℝ (Fin 1))) (n := ω)
+        (x := (⟨0⟩ : ConfigurationSpace))
+    rw [show (chartAt (EuclideanSpace ℝ (Fin 1)) (⟨0⟩ : ConfigurationSpace)).source = Set.univ from
+          rfl,
+        contMDiffOn_univ]
+      at h
     exact h
   contMDiff_invFun := by
-    have h := contMDiffOn_chart_symm (I := 𝓘(ℝ, EuclideanSpace ℝ (Fin 1))) (n := ω)
-      (x := (⟨0⟩ : ConfigurationSpace))
-    rw [show (chartAt (EuclideanSpace ℝ (Fin 1)) (⟨0⟩ : ConfigurationSpace)).target = Set.univ
-        from rfl, contMDiffOn_univ] at h
+    have h :=
+      contMDiffOn_chart_symm (I := 𝓘(ℝ, EuclideanSpace ℝ (Fin 1))) (n := ω)
+        (x := (⟨0⟩ : ConfigurationSpace))
+    rw [show (chartAt (EuclideanSpace ℝ (Fin 1)) (⟨0⟩ : ConfigurationSpace)).target = Set.univ from
+          rfl,
+        contMDiffOn_univ]
+      at h
     exact h
 
 end ConfigurationSpace
@@ -228,28 +256,32 @@ noncomputable section
 set_option backward.isDefEq.respectTransparency false
 
 /-- The model-space normed additive group structure on tangent spaces. -/
-instance instNormedAddCommGroupTangent (q : ConfigurationSpace) :
-    NormedAddCommGroup (TangentSpace 𝓘(ℝ, EuclideanSpace ℝ (Fin 1)) q) :=
+instance instNormedAddCommGroupTangent (q : ConfigurationSpace)
+    : NormedAddCommGroup (TangentSpace (𝓘(ℝ, EuclideanSpace ℝ (Fin 1))) q) :=
   inferInstanceAs (NormedAddCommGroup (EuclideanSpace ℝ (Fin 1)))
 
 /-- The model-space real normed vector space structure on tangent spaces. -/
-instance instNormedSpaceTangent (q : ConfigurationSpace) :
-    NormedSpace ℝ (TangentSpace 𝓘(ℝ, EuclideanSpace ℝ (Fin 1)) q) :=
+instance instNormedSpaceTangent (q : ConfigurationSpace)
+    : NormedSpace ℝ (TangentSpace (𝓘(ℝ, EuclideanSpace ℝ (Fin 1))) q) :=
   inferInstanceAs (NormedSpace ℝ (EuclideanSpace ℝ (Fin 1)))
 
-/-- The chart-induced continuous linear equivalence from the tangent space at `q` to the
-Euclidean coordinate model `EuclideanSpace ℝ (Fin 1)`. -/
-def tangentCoord (q : ConfigurationSpace) :
-    TangentSpace 𝓘(ℝ, EuclideanSpace ℝ (Fin 1)) q ≃L[ℝ] EuclideanSpace ℝ (Fin 1) where
+/--
+The chart-induced continuous linear equivalence from the tangent space at `q` to the
+Euclidean coordinate model `EuclideanSpace ℝ (Fin 1)`.
+-/
+def tangentCoord (q : ConfigurationSpace)
+    : TangentSpace 𝓘(ℝ, EuclideanSpace ℝ (Fin 1)) q ≃L[ℝ] EuclideanSpace ℝ (Fin 1) where
   toFun v := v
   invFun v := v
   map_add' := by simp
   map_smul' := by simp
 
-/-- Each tangent space is finite-dimensional because it is linearly equivalent to
-`EuclideanSpace ℝ (Fin 1)` through `tangentCoord`. -/
-instance instFiniteDimensionalTangent (q : ConfigurationSpace) :
-    FiniteDimensional ℝ (TangentSpace 𝓘(ℝ, EuclideanSpace ℝ (Fin 1)) q) :=
+/--
+Each tangent space is finite-dimensional because it is linearly equivalent to
+`EuclideanSpace ℝ (Fin 1)` through `tangentCoord`.
+-/
+instance instFiniteDimensionalTangent (q : ConfigurationSpace)
+    : FiniteDimensional ℝ (TangentSpace (𝓘(ℝ, EuclideanSpace ℝ (Fin 1))) q) :=
   LinearEquiv.finiteDimensional (tangentCoord q).symm.toLinearEquiv
 
 end
@@ -267,8 +299,10 @@ concrete coordinate model.
 /-- The position in one-dimensional space associated to the configuration. -/
 def toSpace (q : ConfigurationSpace) : Space 1 := ⟨fun i => q.val i⟩
 
-/-- The physical-space coordinate associated to a configuration is its chosen global
-coordinate. -/
+/--
+The physical-space coordinate associated to a configuration is its chosen global
+coordinate.
+-/
 lemma toSpace_apply (q : ConfigurationSpace) (i : Fin 1) : q.toSpace i = q.val i := rfl
 
 end ConfigurationSpace

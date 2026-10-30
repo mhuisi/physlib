@@ -59,24 +59,29 @@ def toLadderSystem (Q : HarmonicOscillator d) : LadderSystem ℂ (𝓢(Space d, 
     apply_fun ContinuousLinearMap.toLinearMap at h
     rcases eq_or_ne i j with rfl | hij
     · simpa [LieRing.of_associative_ring_bracket, ContinuousLinearMap.mul_def,
-        ContinuousLinearMap.coe_comp, Module.End.mul_eq_comp, Module.End.one_eq_id,
-        ContinuousLinearMap.one_def] using h
+          ContinuousLinearMap.coe_comp, Module.End.mul_eq_comp, Module.End.one_eq_id,
+          ContinuousLinearMap.one_def]
+        using h
     · simpa [LieRing.of_associative_ring_bracket, ContinuousLinearMap.mul_def,
-        ContinuousLinearMap.coe_comp, Module.End.mul_eq_comp, hij,
-        KroneckerDelta.eq_zero_of_ne hij] using h
+          ContinuousLinearMap.coe_comp, Module.End.mul_eq_comp, hij,
+          KroneckerDelta.eq_zero_of_ne hij]
+        using h
   comm_a_a i j := by
     have h := Q.lowering_commutation_lowering i j
     apply_fun ContinuousLinearMap.toLinearMap at h
     simpa [LieRing.of_associative_ring_bracket, ContinuousLinearMap.mul_def,
-      ContinuousLinearMap.coe_comp, Module.End.mul_eq_comp] using h
+        ContinuousLinearMap.coe_comp, Module.End.mul_eq_comp]
+      using h
   comm_ac_ac i j := by
     have h := Q.raising_commutation_raising i j
     apply_fun ContinuousLinearMap.toLinearMap at h
     simpa [LieRing.of_associative_ring_bracket, ContinuousLinearMap.mul_def,
-      ContinuousLinearMap.coe_comp, Module.End.mul_eq_comp] using h
+        ContinuousLinearMap.coe_comp, Module.End.mul_eq_comp]
+      using h
 
-lemma toLadderSystem_N_toLinearMap (Q : HarmonicOscillator d) (i : Fin d) :
-    Q.toLadderSystem.N i = (Q.numberCLM i).toLinearMap := rfl
+lemma toLadderSystem_N_toLinearMap (Q : HarmonicOscillator d) (i : Fin d)
+    : Q.toLadderSystem.N i = (Q.numberCLM i).toLinearMap :=
+  rfl
 
 end
 end HarmonicOscillator

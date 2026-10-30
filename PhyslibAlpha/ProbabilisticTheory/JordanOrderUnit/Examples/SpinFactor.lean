@@ -54,8 +54,10 @@ variable (R V : Type*) [CommRing R] [AddCommGroup V] [Module R V]
 
 -/
 
-/-- The spin factor determined by a bilinear form.  The synonym keeps products belonging to
-different forms from becoming definitionally interchangeable. -/
+/--
+The spin factor determined by a bilinear form.  The synonym keeps products belonging to
+different forms from becoming definitionally interchangeable.
+-/
 abbrev SpinFactor (_B : LinearMap.BilinForm R V) : Type _ := V × R
 
 namespace SpinFactor
@@ -66,8 +68,8 @@ variable (B : LinearMap.BilinForm R V)
 instance : AddCommGroup (SpinFactor R V B) := inferInstanceAs (AddCommGroup (V × R))
 instance : Module R (SpinFactor R V B) := inferInstanceAs (Module R (V × R))
 
-@[ext] lemma ext {z w : SpinFactor R V B} (hV : z.1 = w.1) (hR : z.2 = w.2) : z = w :=
-  Prod.ext hV hR
+@[ext]
+lemma ext {z w : SpinFactor R V B} (hV : z.1 = w.1) (hR : z.2 = w.2) : z = w := Prod.ext hV hR
 
 @[simp] lemma add_fst (z w : SpinFactor R V B) : (z + w).1 = z.1 + w.1 := rfl
 @[simp] lemma add_snd (z w : SpinFactor R V B) : (z + w).2 = z.2 + w.2 := rfl
@@ -93,11 +95,9 @@ def mk (x : V) (a : R) : SpinFactor R V B := (x, a)
 instance : Mul (SpinFactor R V B) where
   mul z w := mk B (z.2 • w.1 + w.2 • z.1) (B z.1 w.1 + z.2 * w.2)
 
-@[simp] lemma mul_fst (z w : SpinFactor R V B) :
-    (z * w).1 = z.2 • w.1 + w.2 • z.1 := rfl
+@[simp] lemma mul_fst (z w : SpinFactor R V B) : (z * w).1 = z.2 • w.1 + w.2 • z.1 := rfl
 
-@[simp] lemma mul_snd (z w : SpinFactor R V B) :
-    (z * w).2 = B z.1 w.1 + z.2 * w.2 := rfl
+@[simp] lemma mul_snd (z w : SpinFactor R V B) : (z * w).2 = B z.1 w.1 + z.2 * w.2 := rfl
 
 instance : One (SpinFactor R V B) := ⟨mk B 0 1⟩
 
@@ -118,17 +118,16 @@ lemma mul_comm (hB : B.IsSymm) (z w : SpinFactor R V B) : z * w = w * z := by
   ext
   · simp [add_comm]
   · calc
-      B x y + a * b = B y x + a * b := congrArg (fun t => t + a * b) (hB.eq x y)
+      B x y + a * b
+        = B y x + a * b := congrArg (fun t => t + a * b) (hB.eq x y)
       _ = B y x + b * a := by rw [_root_.mul_comm a b]
       _ = _ := rfl
 
 instance : IsScalarTower R (SpinFactor R V B) (SpinFactor R V B) where
-  smul_assoc r z w := by
-    ext <;> simp [smul_add, smul_smul, smul_eq_mul] <;> ring_nf
+  smul_assoc r z w := by ext <;> simp [smul_add, smul_smul, smul_eq_mul] <;> ring_nf
 
 instance : SMulCommClass R (SpinFactor R V B) (SpinFactor R V B) where
-  smul_comm r z w := by
-    ext <;> simp [smul_add, smul_smul, smul_eq_mul] <;> ring_nf
+  smul_comm r z w := by ext <;> simp [smul_add, smul_smul, smul_eq_mul] <;> ring_nf
 
 /-- A symmetric form gives the commutative Jordan algebra structure on the spin factor. -/
 @[instance_reducible]
@@ -137,9 +136,9 @@ noncomputable def nonAssocCommRing (hB : B.IsSymm) : NonAssocCommRing (SpinFacto
   mul_comm := mul_comm B hB
 
 /-- The Jordan identity for the spin-factor product. -/
-lemma isCommJordan (hB : B.IsSymm) :
-    let _ : NonAssocCommRing (SpinFactor R V B) := nonAssocCommRing B hB
-    IsCommJordan (SpinFactor R V B) := by
+lemma isCommJordan (hB : B.IsSymm)
+    : let _ : NonAssocCommRing (SpinFactor R V B) := nonAssocCommRing B hB
+      IsCommJordan (SpinFactor R V B) := by
   let : NonAssocCommRing (SpinFactor R V B) := nonAssocCommRing B hB
   refine ⟨?_⟩
   intro z w
@@ -156,23 +155,20 @@ lemma isCommJordan (hB : B.IsSymm) :
 
 /-- The rank-two determinant/norm form of a spin factor. -/
 def determinant : QuadraticMap R (SpinFactor R V B) R :=
-  QuadraticMap.sq.comp
-    { toFun := fun z => z.2
-      map_add' := add_snd B
-      map_smul' := smul_snd B } -
-  B.toQuadraticMap.comp
-    { toFun := fun z => z.1
+  QuadraticMap.sq.comp { toFun := fun z => z.2, map_add' := add_snd B, map_smul' := smul_snd B }
+    - B.toQuadraticMap.comp {
+      toFun := fun z => z.1
       map_add' := add_fst B
-      map_smul' := smul_fst B }
+      map_smul' := smul_fst B
+    }
 
-@[simp] lemma determinant_apply (z : SpinFactor R V B) :
-    determinant B z = z.2 * z.2 - B z.1 z.1 := by
+@[simp]
+lemma determinant_apply (z : SpinFactor R V B) : determinant B z = z.2 * z.2 - B z.1 z.1 := by
   simp [determinant]
 
 /-- The quadratic Cayley--Hamilton identity characteristic of rank-two spin factors. -/
-lemma mul_self_sub_two_smul_snd_mul_add_determinant_smul_one
-    (z : SpinFactor R V B) :
-    z * z - (2 * z.2) • z + determinant B z • (1 : SpinFactor R V B) = 0 := by
+lemma mul_self_sub_two_smul_snd_mul_add_determinant_smul_one (z : SpinFactor R V B)
+    : z * z - (2 * z.2) • z + determinant B z • (1 : SpinFactor R V B) = 0 := by
   obtain ⟨x, a⟩ := z
   ext <;> simp [mul_fst, mul_snd, determinant_apply, smul_eq_mul] <;> [module; ring]
 

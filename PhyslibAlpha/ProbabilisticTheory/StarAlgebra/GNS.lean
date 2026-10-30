@@ -63,8 +63,10 @@ open scoped ComplexOrder InnerProductSpace
 
 /-! ## A. States and the pre-Hilbert space -/
 
-/-- A state on a unital complex `*`-algebra: a normalized, Hermitian, positive linear
-functional. -/
+/--
+A state on a unital complex `*`-algebra: a normalized, Hermitian, positive linear
+functional.
+-/
 structure AlgState (A : Type*) [Ring A] [Algebra ℂ A] [StarRing A] [StarModule ℂ A] where
   /-- The linear functional. -/
   toLinearMap : A →ₗ[ℂ] ℂ
@@ -82,7 +84,8 @@ variable {A : Type*} [Ring A] [Algebra ℂ A] [StarRing A] [StarModule ℂ A]
 instance : FunLike (AlgState A) A ℂ where
   coe ω := ω.toLinearMap
   coe_injective ω ω' h := by
-    cases ω; cases ω'
+    cases ω
+    cases ω'
     simp only at h
     congr
     exact LinearMap.ext (congrFun h)
@@ -120,8 +123,8 @@ noncomputable abbrev core : PreInnerProductSpace.Core ℂ ω.PreGNS where
     rw [← ω.map_star, star_mul, star_star]
   re_inner_nonneg x := (Complex.nonneg_iff.mp (ω.nonneg (ω.ofPre x))).1
   add_left x y z := by
-    change ω (star (ω.ofPre (x + y)) * ω.ofPre z) =
-      ω (star (ω.ofPre x) * ω.ofPre z) + ω (star (ω.ofPre y) * ω.ofPre z)
+    change ω (star (ω.ofPre (x + y)) * ω.ofPre z)
+      = ω (star (ω.ofPre x) * ω.ofPre z) + ω (star (ω.ofPre y) * ω.ofPre z)
     rw [_root_.map_add, star_add, add_mul, ω.map_add]
   smul_left x y r := by
     change ω (star (ω.ofPre (r • x)) * ω.ofPre y) = star r * ω (star (ω.ofPre x) * ω.ofPre y)
@@ -134,8 +137,10 @@ noncomputable instance : InnerProductSpace ℂ ω.PreGNS := InnerProductSpace.of
 
 lemma inner_pre (a b : ω.PreGNS) : ⟪a, b⟫_ℂ = ω (star (ω.ofPre a) * ω.ofPre b) := rfl
 
-/-- The **GNS Hilbert space** of a state: the completion of the algebra for the inner product
-`⟨a, b⟩ = ω (a* b)`.   -/
+/--
+The **GNS Hilbert space** of a state: the completion of the algebra for the inner product
+`⟨a, b⟩ = ω (a* b)`.
+-/
 abbrev GNS : Type _ := UniformSpace.Completion ω.PreGNS
 
 /-! ## B. Implementing automorphisms -/
@@ -149,8 +154,8 @@ def preAut : ω.PreGNS →ₗ[ℂ] ω.PreGNS :=
 
 lemma ofPre_preAut (x : ω.PreGNS) : ω.ofPre (preAut ω σ x) = σ (ω.ofPre x) := rfl
 
-lemma inner_preAut (hσ : ∀ a, ω (σ a) = ω a) (x y : ω.PreGNS) :
-    ⟪preAut ω σ x, preAut ω σ y⟫_ℂ = ⟪x, y⟫_ℂ := by
+lemma inner_preAut (hσ : ∀ a, ω (σ a) = ω a) (x y : ω.PreGNS)
+    : ⟪preAut ω σ x, preAut ω σ y⟫_ℂ = ⟪x, y⟫_ℂ := by
   rw [inner_pre, inner_pre, ofPre_preAut, ofPre_preAut, ← StarHomClass.map_star σ,
     ← _root_.map_mul σ]
   exact hσ _
@@ -168,16 +173,18 @@ def preAutCLM (hσ : ∀ a, ω (σ a) = ω a) : ω.PreGNS →L[ℂ] ω.PreGNS :=
 /-- **The operator on the GNS space implementing a state preserving automorphism.** -/
 def gnsAut (hσ : ∀ a, ω (σ a) = ω a) : ω.GNS →L[ℂ] ω.GNS := (preAutCLM σ hσ).completion
 
-lemma gnsAut_coe (hσ : ∀ a, ω (σ a) = ω a) (x : ω.PreGNS) :
-    gnsAut σ hσ (x : ω.GNS) = ((preAut ω σ x : ω.PreGNS) : ω.GNS) := by
+lemma gnsAut_coe (hσ : ∀ a, ω (σ a) = ω a) (x : ω.PreGNS)
+    : gnsAut σ hσ (x : ω.GNS) = ((preAut ω σ x : ω.PreGNS) : ω.GNS) := by
   simp [gnsAut, preAutCLM]
 
-lemma inner_gnsAut (hσ : ∀ a, ω (σ a) = ω a) (x y : ω.GNS) :
-    ⟪gnsAut σ hσ x, gnsAut σ hσ y⟫_ℂ = ⟪x, y⟫_ℂ := by
+lemma inner_gnsAut (hσ : ∀ a, ω (σ a) = ω a) (x y : ω.GNS)
+    : ⟪gnsAut σ hσ x, gnsAut σ hσ y⟫_ℂ = ⟪x, y⟫_ℂ := by
   induction x, y using UniformSpace.Completion.induction_on₂ with
   | hp =>
-    exact isClosed_eq ((continuous_inner.comp ((gnsAut σ hσ).continuous.prodMap
-      (gnsAut σ hσ).continuous)).comp continuous_id) continuous_inner
+    exact isClosed_eq
+      ((continuous_inner.comp ((gnsAut σ hσ).continuous.prodMap (gnsAut σ hσ).continuous)).comp
+        continuous_id)
+      continuous_inner
   | ih x y =>
     rw [gnsAut_coe, gnsAut_coe, UniformSpace.Completion.inner_coe,
       UniformSpace.Completion.inner_coe, inner_preAut σ hσ]
@@ -190,8 +197,8 @@ variable {Γ : Type*} [Group Γ] {α : Γ →* (A ≃⋆ₐ[ℂ] A)} (hα : ∀ 
 
 include hα
 
-lemma gnsAut_mul (g h : Γ) :
-    gnsAut (α (g * h)) (hα (g * h)) = gnsAut (α g) (hα g) * gnsAut (α h) (hα h) := by
+lemma gnsAut_mul (g h : Γ)
+    : gnsAut (α (g * h)) (hα (g * h)) = gnsAut (α g) (hα g) * gnsAut (α h) (hα h) := by
   ext x
   induction x using UniformSpace.Completion.induction_on with
   | hp =>
@@ -216,8 +223,7 @@ lemma gnsAut_one : gnsAut (α 1) (hα 1) = 1 := by
     rw [_root_.map_one]
     rfl
 
-lemma star_gnsAut_mul_gnsAut (g : Γ) :
-    star (gnsAut (α g) (hα g)) * gnsAut (α g) (hα g) = 1 := by
+lemma star_gnsAut_mul_gnsAut (g : Γ) : star (gnsAut (α g) (hα g)) * gnsAut (α g) (hα g) = 1 := by
   rw [ContinuousLinearMap.star_eq_adjoint, ContinuousLinearMap.mul_def]
   exact (ContinuousLinearMap.inner_map_map_iff_adjoint_comp_self _).mp
     (fun x y => inner_gnsAut (α g) (hα g) x y)
@@ -225,20 +231,25 @@ lemma star_gnsAut_mul_gnsAut (g : Γ) :
 lemma star_gnsAut (g : Γ) : star (gnsAut (α g) (hα g)) = gnsAut (α g⁻¹) (hα g⁻¹) := by
   have h1 : gnsAut (α g) (hα g) * gnsAut (α g⁻¹) (hα g⁻¹) = 1 := by
     rw [← gnsAut_mul hα, mul_inv_cancel, gnsAut_one hα]
-  calc star (gnsAut (α g) (hα g))
-      = star (gnsAut (α g) (hα g)) * (gnsAut (α g) (hα g) * gnsAut (α g⁻¹) (hα g⁻¹)) := by
-        rw [h1, mul_one]
+  calc
+    star (gnsAut (α g) (hα g))
+        = star (gnsAut (α g) (hα g)) * (gnsAut (α g) (hα g) * gnsAut (α g⁻¹) (hα g⁻¹)) := by
+      rw [h1, mul_one]
     _ = gnsAut (α g⁻¹) (hα g⁻¹) := by rw [← mul_assoc, star_gnsAut_mul_gnsAut hα, one_mul]
 
 /-- **The unitary operator on the GNS space implementing a symmetry** of the state. -/
-def gnsUnitary (g : Γ) : unitary (ω.GNS →L[ℂ] ω.GNS) :=
-  ⟨gnsAut (α g) (hα g), by
+def gnsUnitary (g : Γ) : unitary (ω.GNS →L[ℂ] ω.GNS) := ⟨
+  gnsAut (α g) (hα g),
+  by
     rw [Unitary.mem_iff]
     refine ⟨star_gnsAut_mul_gnsAut hα g, ?_⟩
-    rw [star_gnsAut hα g, ← gnsAut_mul hα, mul_inv_cancel, gnsAut_one hα]⟩
+    rw [star_gnsAut hα g, ← gnsAut_mul hα, mul_inv_cancel, gnsAut_one hα]
+⟩
 
-/-- **The unitary representation of a group of symmetries on the GNS space of an invariant
-state.**   -/
+/--
+**The unitary representation of a group of symmetries on the GNS space of an invariant
+state.**
+-/
 def gnsRep : Γ →* unitary (ω.GNS →L[ℂ] ω.GNS) where
   toFun := gnsUnitary hα
   map_one' := Subtype.ext (gnsAut_one hα)
@@ -258,13 +269,12 @@ variable {σ τ : A ≃⋆ₐ[ℂ] A} (hσ : ∀ a, ω (σ a) = ω a) (hτ : ∀
 include hσ hτ
 
 /-- The operator implementing a composite of automorphisms is the composite of the operators. -/
-lemma gnsAut_comp :
-    gnsAut (σ * τ) (fun a => by rw [StarAlgEquiv.mul_apply, hσ, hτ]) =
-      gnsAut σ hσ * gnsAut τ hτ := by
+lemma gnsAut_comp
+    : gnsAut (σ * τ) (fun a => by rw [StarAlgEquiv.mul_apply, hσ, hτ])
+      = gnsAut σ hσ * gnsAut τ hτ := by
   ext x
   induction x using UniformSpace.Completion.induction_on with
-  | hp =>
-    exact isClosed_eq (gnsAut (σ * τ) _).continuous (gnsAut σ hσ * gnsAut τ hτ).continuous
+  | hp => exact isClosed_eq (gnsAut (σ * τ) _).continuous (gnsAut σ hσ * gnsAut τ hτ).continuous
   | ih x =>
     rw [mul_apply_eq_comp, gnsAut_coe, gnsAut_coe, gnsAut_coe]
     rfl
@@ -272,19 +282,22 @@ lemma gnsAut_comp :
 end Comp
 
 /-- Equal automorphisms are implemented by equal operators. -/
-lemma gnsAut_congr {σ τ : A ≃⋆ₐ[ℂ] A} (h : σ = τ) (hσ : ∀ a, ω (σ a) = ω a)
-    (hτ : ∀ a, ω (τ a) = ω a) : gnsAut σ hσ = gnsAut τ hτ := by
+lemma gnsAut_congr
+    {σ τ : A ≃⋆ₐ[ℂ] A} (h : σ = τ) (hσ : ∀ a, ω (σ a) = ω a) (hτ : ∀ a, ω (τ a) = ω a)
+    : gnsAut σ hσ = gnsAut τ hτ := by
   subst h; rfl
 
 /-- Commuting automorphisms are implemented by commuting operators. -/
-lemma gnsAut_commute {σ τ : A ≃⋆ₐ[ℂ] A} (hσ : ∀ a, ω (σ a) = ω a) (hτ : ∀ a, ω (τ a) = ω a)
-    (h : σ * τ = τ * σ) : Commute (gnsAut σ hσ) (gnsAut τ hτ) := by
+lemma gnsAut_commute
+    {σ τ : A ≃⋆ₐ[ℂ] A} (hσ : ∀ a, ω (σ a) = ω a) (hτ : ∀ a, ω (τ a) = ω a) (h : σ * τ = τ * σ)
+    : Commute (gnsAut σ hσ) (gnsAut τ hτ) := by
   have h1 := gnsAut_comp hσ hτ
   have h2 := gnsAut_comp hτ hσ
-  have h3 := gnsAut_congr h (fun a => by rw [StarAlgEquiv.mul_apply, hσ, hτ])
-    (fun a => by rw [StarAlgEquiv.mul_apply, hτ, hσ])
+  have h3 :=
+    gnsAut_congr h
+      (fun a => by rw [StarAlgEquiv.mul_apply, hσ, hτ])
+      (fun a => by rw [StarAlgEquiv.mul_apply, hτ, hσ])
   exact h1.symm.trans (h3.trans h2)
-
 
 end AlgState
 

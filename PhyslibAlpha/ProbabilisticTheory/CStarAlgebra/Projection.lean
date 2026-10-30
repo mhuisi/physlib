@@ -60,8 +60,8 @@ instance : CoeOut (Projection A) (Effect (selfAdjoint A)) := ⟨Subtype.val⟩
 
 omit [StarOrderedRing A] in
 @[ext]
-lemma ext {p q : Projection A} (h : (p : Effect (selfAdjoint A)) = (q : Effect (selfAdjoint A))) :
-    p = q :=
+lemma ext {p q : Projection A} (h : (p : Effect (selfAdjoint A)) = (q : Effect (selfAdjoint A)))
+    : p = q :=
   Subtype.ext h
 
 /-!
@@ -71,8 +71,7 @@ lemma ext {p q : Projection A} (h : (p : Effect (selfAdjoint A)) = (q : Effect (
 -/
 
 /-- Every projection is a sharp effect. -/
-lemma isSharp (p : Projection A) : Effect.IsSharp (p : Effect (selfAdjoint A)) :=
-  p.2.isSharp
+lemma isSharp (p : Projection A) : Effect.IsSharp (p : Effect (selfAdjoint A)) := p.2.isSharp
 
 /-- The complementary projection `1 - p`. -/
 noncomputable def complement (p : Projection A) : Projection A :=
@@ -85,10 +84,11 @@ lemma complement_complement (p : Projection A) : complement (complement p) = p :
 
 omit [StarOrderedRing A] in
 /-- The real spectrum of a projection is contained in `{0, 1}`. -/
-lemma spectrum_subset_zero_one (p : Projection A) :
-    spectrum ℝ (((p : Effect (selfAdjoint A)) : selfAdjoint A) : A) ⊆ {0, 1} :=
+lemma spectrum_subset_zero_one (p : Projection A)
+    : spectrum ℝ (((p : Effect (selfAdjoint A)) : selfAdjoint A) : A) ⊆ {0, 1} :=
   (isIdempotentElem_iff_spectrum_subset ℝ (((p : Effect (selfAdjoint A)) : selfAdjoint A) : A)
-    ((p : Effect (selfAdjoint A)) : selfAdjoint A).2).mp p.2
+      ((p : Effect (selfAdjoint A)) : selfAdjoint A).2).mp
+    p.2
 
 end Projection
 

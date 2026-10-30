@@ -16,7 +16,6 @@ import Physlib.Meta.Informal.SemiFormal
 
 open Lean System Meta Physlib Core
 
-
 def tagsFromTODOs : MetaM (Array String) := do
   let env ← getEnv
   let todoInfo := (todoExtension.getState env)
@@ -30,7 +29,7 @@ unsafe def informalTODO (x : ConstantInfo) : CoreM String := do
 unsafe def tagsFromInformal : CoreM (Array String) := do
   (← AllInformal).mapM (fun x => Informal.getTag x)
 
-unsafe def tagsFromSemiformal  : CoreM (Array String) := do
+unsafe def tagsFromSemiformal : CoreM (Array String) := do
   let env ← getEnv
   let semiInformalInfos := (wantedExtension.getState env)
   pure (semiInformalInfos.map fun x => x.tag)
@@ -50,8 +49,8 @@ unsafe def main (_ : List String) : IO UInt32 := do
   let env ← importModules (loadExts := true) #[`Physlib, `QuantumInfo] {} 0
   let fileName := ""
   let options : Options := {}
-  let ctx : Core.Context := {fileName, options, fileMap := default }
-  let state := {env}
+  let ctx : Core.Context := { fileName, options, fileMap := default }
+  let state := { env }
   let _ ← (Lean.Core.CoreM.toIO · ctx state) do (tagDuplicateTest).run'
   println! "\x1b[32mLinter finished, no duplicaate tags found.\x1b[0m"
   pure 0

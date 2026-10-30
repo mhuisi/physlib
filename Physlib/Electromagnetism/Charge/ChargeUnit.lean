@@ -33,9 +33,11 @@ existence of the charge unit of the coulomb, and construct all other charge unit
 
 open NNReal
 
-/-- The choices of translationally-invariant metrics on the charge-manifold.
-  Such a choice corresponds to a choice of units for charge.
-  This assumes that an orientation has already being picked on the charge manifold. -/
+/--
+The choices of translationally-invariant metrics on the charge-manifold.
+Such a choice corresponds to a choice of units for charge.
+This assumes that an orientation has already being picked on the charge manifold.
+-/
 structure ChargeUnit where
   /-- The underlying scale of the unit. -/
   val : ℝ

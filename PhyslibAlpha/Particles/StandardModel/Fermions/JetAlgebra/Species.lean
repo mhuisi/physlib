@@ -87,32 +87,32 @@ variable {V W : Type} [AddCommGroup V] [Module ℂ V] [AddCommGroup W] [Module �
 -/
 
 /-- Including a constant into value-space jets is natural in the value space. -/
-lemma lTensor_comp_jetOfConstant (p : V →ₗ[ℂ] W) :
-    (LinearMap.lTensor SpaceTimeAlgebra p).comp jetOfConstant = jetOfConstant.comp p :=
+lemma lTensor_comp_jetOfConstant (p : V →ₗ[ℂ] W)
+    : (LinearMap.lTensor SpaceTimeAlgebra p).comp jetOfConstant = jetOfConstant.comp p :=
   LinearMap.ext fun _ => rfl
 
-/-- The formal derivative on value-space jets is natural in the value space: it touches
-  only the jet factor. -/
-lemma lTensor_comp_jetDeriv (p : V →ₗ[ℂ] W) (μ : Fin 1 ⊕ Fin 3) :
-    (LinearMap.lTensor SpaceTimeAlgebra p).comp (jetDeriv μ)
+/--
+The formal derivative on value-space jets is natural in the value space: it touches
+only the jet factor.
+-/
+lemma lTensor_comp_jetDeriv (p : V →ₗ[ℂ] W) (μ : Fin 1 ⊕ Fin 3)
+    : (LinearMap.lTensor SpaceTimeAlgebra p).comp (jetDeriv μ)
       = (jetDeriv μ).comp (LinearMap.lTensor SpaceTimeAlgebra p) :=
   TensorProduct.ext' fun _ _ => rfl
 
 /-- The iterated formal derivative on value-space jets is natural in the value space. -/
-lemma lTensor_comp_jetIteratedDeriv (p : V →ₗ[ℂ] W) (s : Multiset (Fin 1 ⊕ Fin 3)) :
-    (LinearMap.lTensor SpaceTimeAlgebra p).comp (jetIteratedDeriv s)
+lemma lTensor_comp_jetIteratedDeriv (p : V →ₗ[ℂ] W) (s : Multiset (Fin 1 ⊕ Fin 3))
+    : (LinearMap.lTensor SpaceTimeAlgebra p).comp (jetIteratedDeriv s)
       = (jetIteratedDeriv s).comp (LinearMap.lTensor SpaceTimeAlgebra p) := by
   induction s using Multiset.induction_on with
-  | empty =>
-    rw [jetIteratedDeriv_zero, LinearMap.comp_id, jetIteratedDeriv_zero,
-      LinearMap.id_comp]
+  | empty => rw [jetIteratedDeriv_zero, LinearMap.comp_id, jetIteratedDeriv_zero, LinearMap.id_comp]
   | cons μ s ih =>
-    rw [jetIteratedDeriv_cons, jetIteratedDeriv_cons, ← LinearMap.comp_assoc,
-      lTensor_comp_jetDeriv, LinearMap.comp_assoc, ih, ← LinearMap.comp_assoc]
+    rw [jetIteratedDeriv_cons, jetIteratedDeriv_cons, ← LinearMap.comp_assoc, lTensor_comp_jetDeriv,
+      LinearMap.comp_assoc, ih, ← LinearMap.comp_assoc]
 
 /-- Evaluation of a value-space jet at the base point is natural in the value space. -/
-lemma jetEval_comp_lTensor (p : V →ₗ[ℂ] W) :
-    (jetEval (V := W)).comp (LinearMap.lTensor SpaceTimeAlgebra p) = p.comp jetEval :=
+lemma jetEval_comp_lTensor (p : V →ₗ[ℂ] W)
+    : (jetEval (V := W)).comp (LinearMap.lTensor SpaceTimeAlgebra p) = p.comp jetEval :=
   TensorProduct.ext' fun f v => by
     rw [LinearMap.comp_apply, LinearMap.lTensor_tmul, jetEval_tmul, LinearMap.comp_apply,
       jetEval_tmul, map_smul]
@@ -123,38 +123,47 @@ lemma jetEval_comp_lTensor (p : V →ₗ[ℂ] W) :
 
 -/
 
-/-- The base-point Taylor coefficients of two jet gauge actions are intertwined by any map
-  of value spaces intertwining the actions themselves: `repCoeff` is built from
-  `jetOfConstant`, `jetIteratedDeriv` and `jetEval`, and each of those is natural. -/
-lemma repCoeff_comp {repV : Representation ℂ JetGaugeGroupI (SpaceTimeAlgebra ⊗[ℂ] V)}
-    {repW : Representation ℂ JetGaugeGroupI (SpaceTimeAlgebra ⊗[ℂ] W)} (p : V →ₗ[ℂ] W)
-    (hp : ∀ U : JetGaugeGroupI, (LinearMap.lTensor SpaceTimeAlgebra p).comp (repV U)
-      = (repW U).comp (LinearMap.lTensor SpaceTimeAlgebra p))
-    (U : JetGaugeGroupI) (s : Multiset (Fin 1 ⊕ Fin 3)) :
-    p.comp (GaugeAlgebraRealization.repCoeff repV U s)
+/--
+The base-point Taylor coefficients of two jet gauge actions are intertwined by any map
+of value spaces intertwining the actions themselves: `repCoeff` is built from
+`jetOfConstant`, `jetIteratedDeriv` and `jetEval`, and each of those is natural.
+-/
+lemma repCoeff_comp
+    {repV : Representation ℂ JetGaugeGroupI (SpaceTimeAlgebra ⊗[ℂ] V)}
+    {repW : Representation ℂ JetGaugeGroupI (SpaceTimeAlgebra ⊗[ℂ] W)}
+    (p : V →ₗ[ℂ] W)
+    (hp : ∀ U : JetGaugeGroupI,
+      (LinearMap.lTensor SpaceTimeAlgebra p).comp (repV U)
+        = (repW U).comp (LinearMap.lTensor SpaceTimeAlgebra p))
+    (U : JetGaugeGroupI) (s : Multiset (Fin 1 ⊕ Fin 3))
+    : p.comp (GaugeAlgebraRealization.repCoeff repV U s)
       = (GaugeAlgebraRealization.repCoeff repW U s).comp p := by
   refine LinearMap.ext fun v => ?_
   have h1 := LinearMap.congr_fun (lTensor_comp_jetOfConstant p) v
   have h2 := LinearMap.congr_fun (hp U) (jetOfConstant v)
-  have h3 := LinearMap.congr_fun (lTensor_comp_jetIteratedDeriv p s)
-    (repV U (jetOfConstant v))
-  have h4 := LinearMap.congr_fun (jetEval_comp_lTensor p)
-    (jetIteratedDeriv s (repV U (jetOfConstant v)))
+  have h3 := LinearMap.congr_fun (lTensor_comp_jetIteratedDeriv p s) (repV U (jetOfConstant v))
+  have h4 :=
+    LinearMap.congr_fun (jetEval_comp_lTensor p) (jetIteratedDeriv s (repV U (jetOfConstant v)))
   simp only [LinearMap.comp_apply] at h1 h2 h3 h4 ⊢
   simp only [GaugeAlgebraRealization.repCoeff, LinearMap.comp_apply]
   rw [← h4, h3, h2, h1]
 
-/-- The transposed form of `repCoeff_comp`: the dual coefficients, which act on the
-  component-function index, are intertwined the other way round. -/
-lemma repDualCoeff_comp {repV : Representation ℂ JetGaugeGroupI (SpaceTimeAlgebra ⊗[ℂ] V)}
-    {repW : Representation ℂ JetGaugeGroupI (SpaceTimeAlgebra ⊗[ℂ] W)} (p : V →ₗ[ℂ] W)
-    (hp : ∀ U : JetGaugeGroupI, (LinearMap.lTensor SpaceTimeAlgebra p).comp (repV U)
-      = (repW U).comp (LinearMap.lTensor SpaceTimeAlgebra p))
-    (U : JetGaugeGroupI) (s : Multiset (Fin 1 ⊕ Fin 3)) :
-    (GaugeAlgebraRealization.repDualCoeff repV U s).comp (Module.Dual.transpose p)
+/--
+The transposed form of `repCoeff_comp`: the dual coefficients, which act on the
+component-function index, are intertwined the other way round.
+-/
+lemma repDualCoeff_comp
+    {repV : Representation ℂ JetGaugeGroupI (SpaceTimeAlgebra ⊗[ℂ] V)}
+    {repW : Representation ℂ JetGaugeGroupI (SpaceTimeAlgebra ⊗[ℂ] W)}
+    (p : V →ₗ[ℂ] W)
+    (hp : ∀ U : JetGaugeGroupI,
+      (LinearMap.lTensor SpaceTimeAlgebra p).comp (repV U)
+        = (repW U).comp (LinearMap.lTensor SpaceTimeAlgebra p))
+    (U : JetGaugeGroupI) (s : Multiset (Fin 1 ⊕ Fin 3))
+    : (GaugeAlgebraRealization.repDualCoeff repV U s).comp (Module.Dual.transpose p)
       = (Module.Dual.transpose p).comp (GaugeAlgebraRealization.repDualCoeff repW U s) :=
-  LinearMap.ext fun φ => LinearMap.ext fun v =>
-    congrArg φ (LinearMap.congr_fun (repCoeff_comp p hp U s) v)
+  LinearMap.ext fun φ =>
+    LinearMap.ext fun v => congrArg φ (LinearMap.congr_fun (repCoeff_comp p hp U s) v)
 
 /-!
 
@@ -173,42 +182,52 @@ species-and-generation slot, nothing but the projection applied to the value fac
 
 -/
 
-/-- The lepton-doublet slot of the splitting of the jets is the projection on the value
-  factor. -/
-lemma jetEquiv_leptonDoublet (i : Fin 3) (z : SpaceTimeAlgebra ⊗[ℂ] FermionSpace) :
-    (jetEquiv z).1 i = LinearMap.lTensor SpaceTimeAlgebra (leptonDoubletProj i) z := by
+/--
+The lepton-doublet slot of the splitting of the jets is the projection on the value
+factor.
+-/
+lemma jetEquiv_leptonDoublet (i : Fin 3) (z : SpaceTimeAlgebra ⊗[ℂ] FermionSpace)
+    : (jetEquiv z).1 i = LinearMap.lTensor SpaceTimeAlgebra (leptonDoubletProj i) z := by
   induction z using TensorProduct.inductionOn with
   | add x y hx hy => simp [hx, hy]
   | tmul f v => rfl
 
-/-- The charged-lepton-singlet slot of the splitting of the jets is the projection on the value
-  factor. -/
-lemma jetEquiv_leptonSinglet (i : Fin 3) (z : SpaceTimeAlgebra ⊗[ℂ] FermionSpace) :
-    (jetEquiv z).2.1 i = LinearMap.lTensor SpaceTimeAlgebra (leptonSingletProj i) z := by
+/--
+The charged-lepton-singlet slot of the splitting of the jets is the projection on the value
+factor.
+-/
+lemma jetEquiv_leptonSinglet (i : Fin 3) (z : SpaceTimeAlgebra ⊗[ℂ] FermionSpace)
+    : (jetEquiv z).2.1 i = LinearMap.lTensor SpaceTimeAlgebra (leptonSingletProj i) z := by
   induction z using TensorProduct.inductionOn with
   | add x y hx hy => simp [hx, hy]
   | tmul f v => rfl
 
-/-- The quark-doublet slot of the splitting of the jets is the projection on the value
-  factor. -/
-lemma jetEquiv_quarkDoublet (i : Fin 3) (z : SpaceTimeAlgebra ⊗[ℂ] FermionSpace) :
-    (jetEquiv z).2.2.1 i = LinearMap.lTensor SpaceTimeAlgebra (quarkDoubletProj i) z := by
+/--
+The quark-doublet slot of the splitting of the jets is the projection on the value
+factor.
+-/
+lemma jetEquiv_quarkDoublet (i : Fin 3) (z : SpaceTimeAlgebra ⊗[ℂ] FermionSpace)
+    : (jetEquiv z).2.2.1 i = LinearMap.lTensor SpaceTimeAlgebra (quarkDoubletProj i) z := by
   induction z using TensorProduct.inductionOn with
   | add x y hx hy => simp [hx, hy]
   | tmul f v => rfl
 
-/-- The up-type-quark-singlet slot of the splitting of the jets is the projection on the value
-  factor. -/
-lemma jetEquiv_upSinglet (i : Fin 3) (z : SpaceTimeAlgebra ⊗[ℂ] FermionSpace) :
-    (jetEquiv z).2.2.2.1 i = LinearMap.lTensor SpaceTimeAlgebra (upSingletProj i) z := by
+/--
+The up-type-quark-singlet slot of the splitting of the jets is the projection on the value
+factor.
+-/
+lemma jetEquiv_upSinglet (i : Fin 3) (z : SpaceTimeAlgebra ⊗[ℂ] FermionSpace)
+    : (jetEquiv z).2.2.2.1 i = LinearMap.lTensor SpaceTimeAlgebra (upSingletProj i) z := by
   induction z using TensorProduct.inductionOn with
   | add x y hx hy => simp [hx, hy]
   | tmul f v => rfl
 
-/-- The down-type-quark-singlet slot of the splitting of the jets is the projection on the value
-  factor. -/
-lemma jetEquiv_downSinglet (i : Fin 3) (z : SpaceTimeAlgebra ⊗[ℂ] FermionSpace) :
-    (jetEquiv z).2.2.2.2 i = LinearMap.lTensor SpaceTimeAlgebra (downSingletProj i) z := by
+/--
+The down-type-quark-singlet slot of the splitting of the jets is the projection on the value
+factor.
+-/
+lemma jetEquiv_downSinglet (i : Fin 3) (z : SpaceTimeAlgebra ⊗[ℂ] FermionSpace)
+    : (jetEquiv z).2.2.2.2 i = LinearMap.lTensor SpaceTimeAlgebra (downSingletProj i) z := by
   induction z using TensorProduct.inductionOn with
   | add x y hx hy => simp [hx, hy]
   | tmul f v => rfl
@@ -223,10 +242,12 @@ own.
 
 -/
 
-/-- The lepton-doublet projection intertwines the total jet gauge action with the
-  lepton doublet's own. -/
-lemma lTensor_leptonDoubletProj_repJetGaugeGroupI (i : Fin 3) (U : JetGaugeGroupI) :
-    (LinearMap.lTensor SpaceTimeAlgebra (leptonDoubletProj i)).comp (repJetGaugeGroupI U)
+/--
+The lepton-doublet projection intertwines the total jet gauge action with the
+lepton doublet's own.
+-/
+lemma lTensor_leptonDoubletProj_repJetGaugeGroupI (i : Fin 3) (U : JetGaugeGroupI)
+    : (LinearMap.lTensor SpaceTimeAlgebra (leptonDoubletProj i)).comp (repJetGaugeGroupI U)
       = (LeptonDoubletV.repJetGaugeGroupI U).comp
         (LinearMap.lTensor SpaceTimeAlgebra (leptonDoubletProj i)) := by
   refine LinearMap.ext fun z => ?_
@@ -240,10 +261,12 @@ lemma lTensor_leptonDoubletProj_repJetGaugeGroupI (i : Fin 3) (U : JetGaugeGroup
     ← jetEquiv_leptonDoublet, hz]
   rfl
 
-/-- The charged-lepton-singlet projection intertwines the total jet gauge action with the
-  charged-lepton singlet's own. -/
-lemma lTensor_leptonSingletProj_repJetGaugeGroupI (i : Fin 3) (U : JetGaugeGroupI) :
-    (LinearMap.lTensor SpaceTimeAlgebra (leptonSingletProj i)).comp (repJetGaugeGroupI U)
+/--
+The charged-lepton-singlet projection intertwines the total jet gauge action with the
+charged-lepton singlet's own.
+-/
+lemma lTensor_leptonSingletProj_repJetGaugeGroupI (i : Fin 3) (U : JetGaugeGroupI)
+    : (LinearMap.lTensor SpaceTimeAlgebra (leptonSingletProj i)).comp (repJetGaugeGroupI U)
       = (LeptonSinglet.repJetGaugeGroupI U).comp
         (LinearMap.lTensor SpaceTimeAlgebra (leptonSingletProj i)) := by
   refine LinearMap.ext fun z => ?_
@@ -257,10 +280,12 @@ lemma lTensor_leptonSingletProj_repJetGaugeGroupI (i : Fin 3) (U : JetGaugeGroup
     ← jetEquiv_leptonSinglet, hz]
   rfl
 
-/-- The quark-doublet projection intertwines the total jet gauge action with the
-  quark doublet's own. -/
-lemma lTensor_quarkDoubletProj_repJetGaugeGroupI (i : Fin 3) (U : JetGaugeGroupI) :
-    (LinearMap.lTensor SpaceTimeAlgebra (quarkDoubletProj i)).comp (repJetGaugeGroupI U)
+/--
+The quark-doublet projection intertwines the total jet gauge action with the
+quark doublet's own.
+-/
+lemma lTensor_quarkDoubletProj_repJetGaugeGroupI (i : Fin 3) (U : JetGaugeGroupI)
+    : (LinearMap.lTensor SpaceTimeAlgebra (quarkDoubletProj i)).comp (repJetGaugeGroupI U)
       = (QuarkDoublet.repJetGaugeGroupI U).comp
         (LinearMap.lTensor SpaceTimeAlgebra (quarkDoubletProj i)) := by
   refine LinearMap.ext fun z => ?_
@@ -270,14 +295,16 @@ lemma lTensor_quarkDoubletProj_repJetGaugeGroupI (i : Fin 3) (U : JetGaugeGroupI
       = jetActionMap U (jetEquiv z)
     rw [(jetEquiv.restrictScalars ℂ).apply_symm_apply]
     rfl
-  rw [LinearMap.comp_apply, LinearMap.comp_apply, ← jetEquiv_quarkDoublet,
-    ← jetEquiv_quarkDoublet, hz]
+  rw [LinearMap.comp_apply, LinearMap.comp_apply, ← jetEquiv_quarkDoublet, ← jetEquiv_quarkDoublet,
+    hz]
   rfl
 
-/-- The up-type-quark-singlet projection intertwines the total jet gauge action with the
-  up-type quark singlet's own. -/
-lemma lTensor_upSingletProj_repJetGaugeGroupI (i : Fin 3) (U : JetGaugeGroupI) :
-    (LinearMap.lTensor SpaceTimeAlgebra (upSingletProj i)).comp (repJetGaugeGroupI U)
+/--
+The up-type-quark-singlet projection intertwines the total jet gauge action with the
+up-type quark singlet's own.
+-/
+lemma lTensor_upSingletProj_repJetGaugeGroupI (i : Fin 3) (U : JetGaugeGroupI)
+    : (LinearMap.lTensor SpaceTimeAlgebra (upSingletProj i)).comp (repJetGaugeGroupI U)
       = (UpSinglet.repJetGaugeGroupI U).comp
         (LinearMap.lTensor SpaceTimeAlgebra (upSingletProj i)) := by
   refine LinearMap.ext fun z => ?_
@@ -287,14 +314,15 @@ lemma lTensor_upSingletProj_repJetGaugeGroupI (i : Fin 3) (U : JetGaugeGroupI) :
       = jetActionMap U (jetEquiv z)
     rw [(jetEquiv.restrictScalars ℂ).apply_symm_apply]
     rfl
-  rw [LinearMap.comp_apply, LinearMap.comp_apply, ← jetEquiv_upSinglet,
-    ← jetEquiv_upSinglet, hz]
+  rw [LinearMap.comp_apply, LinearMap.comp_apply, ← jetEquiv_upSinglet, ← jetEquiv_upSinglet, hz]
   rfl
 
-/-- The down-type-quark-singlet projection intertwines the total jet gauge action with the
-  down-type quark singlet's own. -/
-lemma lTensor_downSingletProj_repJetGaugeGroupI (i : Fin 3) (U : JetGaugeGroupI) :
-    (LinearMap.lTensor SpaceTimeAlgebra (downSingletProj i)).comp (repJetGaugeGroupI U)
+/--
+The down-type-quark-singlet projection intertwines the total jet gauge action with the
+down-type quark singlet's own.
+-/
+lemma lTensor_downSingletProj_repJetGaugeGroupI (i : Fin 3) (U : JetGaugeGroupI)
+    : (LinearMap.lTensor SpaceTimeAlgebra (downSingletProj i)).comp (repJetGaugeGroupI U)
       = (DownSinglet.repJetGaugeGroupI U).comp
         (LinearMap.lTensor SpaceTimeAlgebra (downSingletProj i)) := by
   refine LinearMap.ext fun z => ?_
@@ -304,8 +332,8 @@ lemma lTensor_downSingletProj_repJetGaugeGroupI (i : Fin 3) (U : JetGaugeGroupI)
       = jetActionMap U (jetEquiv z)
     rw [(jetEquiv.restrictScalars ℂ).apply_symm_apply]
     rfl
-  rw [LinearMap.comp_apply, LinearMap.comp_apply, ← jetEquiv_downSinglet,
-    ← jetEquiv_downSinglet, hz]
+  rw [LinearMap.comp_apply, LinearMap.comp_apply, ← jetEquiv_downSinglet, ← jetEquiv_downSinglet,
+    hz]
   rfl
 
 /-!
@@ -314,49 +342,55 @@ lemma lTensor_downSingletProj_repJetGaugeGroupI (i : Fin 3) (U : JetGaugeGroupI)
 
 -/
 
-/-- The lepton-doublet projection intertwines the base-point Taylor coefficients of
-  the total jet gauge action with those of the lepton doublet's own. -/
-lemma leptonDoubletProj_comp_repCoeff (i : Fin 3) (U : JetGaugeGroupI)
-    (s : Multiset (Fin 1 ⊕ Fin 3)) :
-    (leptonDoubletProj i).comp (GaugeAlgebraRealization.repCoeff repJetGaugeGroupI U s)
+/--
+The lepton-doublet projection intertwines the base-point Taylor coefficients of
+the total jet gauge action with those of the lepton doublet's own.
+-/
+lemma leptonDoubletProj_comp_repCoeff
+    (i : Fin 3) (U : JetGaugeGroupI) (s : Multiset (Fin 1 ⊕ Fin 3))
+    : (leptonDoubletProj i).comp (GaugeAlgebraRealization.repCoeff repJetGaugeGroupI U s)
       = (GaugeAlgebraRealization.repCoeff LeptonDoubletV.repJetGaugeGroupI U s).comp
-          (leptonDoubletProj i) :=
+        (leptonDoubletProj i) :=
   repCoeff_comp _ (lTensor_leptonDoubletProj_repJetGaugeGroupI i) U s
 
-/-- The charged-lepton-singlet projection intertwines the base-point Taylor coefficients of
-  the total jet gauge action with those of the charged-lepton singlet's own. -/
-lemma leptonSingletProj_comp_repCoeff (i : Fin 3) (U : JetGaugeGroupI)
-    (s : Multiset (Fin 1 ⊕ Fin 3)) :
-    (leptonSingletProj i).comp (GaugeAlgebraRealization.repCoeff repJetGaugeGroupI U s)
+/--
+The charged-lepton-singlet projection intertwines the base-point Taylor coefficients of
+the total jet gauge action with those of the charged-lepton singlet's own.
+-/
+lemma leptonSingletProj_comp_repCoeff
+    (i : Fin 3) (U : JetGaugeGroupI) (s : Multiset (Fin 1 ⊕ Fin 3))
+    : (leptonSingletProj i).comp (GaugeAlgebraRealization.repCoeff repJetGaugeGroupI U s)
       = (GaugeAlgebraRealization.repCoeff LeptonSinglet.repJetGaugeGroupI U s).comp
-          (leptonSingletProj i) :=
+        (leptonSingletProj i) :=
   repCoeff_comp _ (lTensor_leptonSingletProj_repJetGaugeGroupI i) U s
 
-/-- The quark-doublet projection intertwines the base-point Taylor coefficients of
-  the total jet gauge action with those of the quark doublet's own. -/
-lemma quarkDoubletProj_comp_repCoeff (i : Fin 3) (U : JetGaugeGroupI)
-    (s : Multiset (Fin 1 ⊕ Fin 3)) :
-    (quarkDoubletProj i).comp (GaugeAlgebraRealization.repCoeff repJetGaugeGroupI U s)
+/--
+The quark-doublet projection intertwines the base-point Taylor coefficients of
+the total jet gauge action with those of the quark doublet's own.
+-/
+lemma quarkDoubletProj_comp_repCoeff (i : Fin 3) (U : JetGaugeGroupI) (s : Multiset (Fin 1 ⊕ Fin 3))
+    : (quarkDoubletProj i).comp (GaugeAlgebraRealization.repCoeff repJetGaugeGroupI U s)
       = (GaugeAlgebraRealization.repCoeff QuarkDoublet.repJetGaugeGroupI U s).comp
-          (quarkDoubletProj i) :=
+        (quarkDoubletProj i) :=
   repCoeff_comp _ (lTensor_quarkDoubletProj_repJetGaugeGroupI i) U s
 
-/-- The up-type-quark-singlet projection intertwines the base-point Taylor coefficients of
-  the total jet gauge action with those of the up-type quark singlet's own. -/
-lemma upSingletProj_comp_repCoeff (i : Fin 3) (U : JetGaugeGroupI)
-    (s : Multiset (Fin 1 ⊕ Fin 3)) :
-    (upSingletProj i).comp (GaugeAlgebraRealization.repCoeff repJetGaugeGroupI U s)
-      = (GaugeAlgebraRealization.repCoeff UpSinglet.repJetGaugeGroupI U s).comp
-          (upSingletProj i) :=
+/--
+The up-type-quark-singlet projection intertwines the base-point Taylor coefficients of
+the total jet gauge action with those of the up-type quark singlet's own.
+-/
+lemma upSingletProj_comp_repCoeff (i : Fin 3) (U : JetGaugeGroupI) (s : Multiset (Fin 1 ⊕ Fin 3))
+    : (upSingletProj i).comp (GaugeAlgebraRealization.repCoeff repJetGaugeGroupI U s)
+      = (GaugeAlgebraRealization.repCoeff UpSinglet.repJetGaugeGroupI U s).comp (upSingletProj i) :=
   repCoeff_comp _ (lTensor_upSingletProj_repJetGaugeGroupI i) U s
 
-/-- The down-type-quark-singlet projection intertwines the base-point Taylor coefficients of
-  the total jet gauge action with those of the down-type quark singlet's own. -/
-lemma downSingletProj_comp_repCoeff (i : Fin 3) (U : JetGaugeGroupI)
-    (s : Multiset (Fin 1 ⊕ Fin 3)) :
-    (downSingletProj i).comp (GaugeAlgebraRealization.repCoeff repJetGaugeGroupI U s)
+/--
+The down-type-quark-singlet projection intertwines the base-point Taylor coefficients of
+the total jet gauge action with those of the down-type quark singlet's own.
+-/
+lemma downSingletProj_comp_repCoeff (i : Fin 3) (U : JetGaugeGroupI) (s : Multiset (Fin 1 ⊕ Fin 3))
+    : (downSingletProj i).comp (GaugeAlgebraRealization.repCoeff repJetGaugeGroupI U s)
       = (GaugeAlgebraRealization.repCoeff DownSinglet.repJetGaugeGroupI U s).comp
-          (downSingletProj i) :=
+        (downSingletProj i) :=
   repCoeff_comp _ (lTensor_downSingletProj_repJetGaugeGroupI i) U s
 
 /-!
@@ -369,35 +403,50 @@ action on the nose.
 
 -/
 
-/-- The lepton-doublet projection intertwines the total Lorentz action with the
-  lepton doublet's own. -/
-lemma leptonDoubletProj_comp_repLorentzGroup (i : Fin 3) (Λ : SL(2,ℂ)) :
-    (leptonDoubletProj i).comp (repLorentzGroup Λ)
-      = (LeptonDoubletV.repLorentzGroup Λ).comp (leptonDoubletProj i) := rfl
+/--
+The lepton-doublet projection intertwines the total Lorentz action with the
+lepton doublet's own.
+-/
+lemma leptonDoubletProj_comp_repLorentzGroup (i : Fin 3) (Λ : SL(2,ℂ))
+    : (leptonDoubletProj i).comp (repLorentzGroup Λ)
+      = (LeptonDoubletV.repLorentzGroup Λ).comp (leptonDoubletProj i) :=
+  rfl
 
-/-- The charged-lepton-singlet projection intertwines the total Lorentz action with the
-  charged-lepton singlet's own. -/
-lemma leptonSingletProj_comp_repLorentzGroup (i : Fin 3) (Λ : SL(2,ℂ)) :
-    (leptonSingletProj i).comp (repLorentzGroup Λ)
-      = (LeptonSinglet.repLorentzGroup Λ).comp (leptonSingletProj i) := rfl
+/--
+The charged-lepton-singlet projection intertwines the total Lorentz action with the
+charged-lepton singlet's own.
+-/
+lemma leptonSingletProj_comp_repLorentzGroup (i : Fin 3) (Λ : SL(2,ℂ))
+    : (leptonSingletProj i).comp (repLorentzGroup Λ)
+      = (LeptonSinglet.repLorentzGroup Λ).comp (leptonSingletProj i) :=
+  rfl
 
-/-- The quark-doublet projection intertwines the total Lorentz action with the
-  quark doublet's own. -/
-lemma quarkDoubletProj_comp_repLorentzGroup (i : Fin 3) (Λ : SL(2,ℂ)) :
-    (quarkDoubletProj i).comp (repLorentzGroup Λ)
-      = (QuarkDoublet.repLorentzGroup Λ).comp (quarkDoubletProj i) := rfl
+/--
+The quark-doublet projection intertwines the total Lorentz action with the
+quark doublet's own.
+-/
+lemma quarkDoubletProj_comp_repLorentzGroup (i : Fin 3) (Λ : SL(2,ℂ))
+    : (quarkDoubletProj i).comp (repLorentzGroup Λ)
+      = (QuarkDoublet.repLorentzGroup Λ).comp (quarkDoubletProj i) :=
+  rfl
 
-/-- The up-type-quark-singlet projection intertwines the total Lorentz action with the
-  up-type quark singlet's own. -/
-lemma upSingletProj_comp_repLorentzGroup (i : Fin 3) (Λ : SL(2,ℂ)) :
-    (upSingletProj i).comp (repLorentzGroup Λ)
-      = (UpSinglet.repLorentzGroup Λ).comp (upSingletProj i) := rfl
+/--
+The up-type-quark-singlet projection intertwines the total Lorentz action with the
+up-type quark singlet's own.
+-/
+lemma upSingletProj_comp_repLorentzGroup (i : Fin 3) (Λ : SL(2,ℂ))
+    : (upSingletProj i).comp (repLorentzGroup Λ)
+      = (UpSinglet.repLorentzGroup Λ).comp (upSingletProj i) :=
+  rfl
 
-/-- The down-type-quark-singlet projection intertwines the total Lorentz action with the
-  down-type quark singlet's own. -/
-lemma downSingletProj_comp_repLorentzGroup (i : Fin 3) (Λ : SL(2,ℂ)) :
-    (downSingletProj i).comp (repLorentzGroup Λ)
-      = (DownSinglet.repLorentzGroup Λ).comp (downSingletProj i) := rfl
+/--
+The down-type-quark-singlet projection intertwines the total Lorentz action with the
+down-type quark singlet's own.
+-/
+lemma downSingletProj_comp_repLorentzGroup (i : Fin 3) (Λ : SL(2,ℂ))
+    : (downSingletProj i).comp (repLorentzGroup Λ)
+      = (DownSinglet.repLorentzGroup Λ).comp (downSingletProj i) :=
+  rfl
 
 /-!
 
@@ -411,34 +460,39 @@ lemma downSingletProj_comp_repLorentzGroup (i : Fin 3) (Λ : SL(2,ℂ)) :
 
 -/
 
-/-- The identity on the total fermionic target space is the sum, over the five species and
-  the three generations, of the inclusion after the projection. -/
-lemma sum_incl_proj (v : FermionSpace) :
-    (∑ i, leptonDoubletIncl i (leptonDoubletProj i v))
-      + (∑ i, leptonSingletIncl i (leptonSingletProj i v))
-      + (∑ i, quarkDoubletIncl i (quarkDoubletProj i v))
-      + (∑ i, upSingletIncl i (upSingletProj i v))
-      + (∑ i, downSingletIncl i (downSingletProj i v)) = v := by
-  refine Prod.ext ?_ (Prod.ext ?_ (Prod.ext ?_ (Prod.ext ?_ ?_))) <;>
-  · funext j
-    simp [leptonDoubletIncl, leptonSingletIncl, quarkDoubletIncl, upSingletIncl,
-      downSingletIncl, leptonDoubletProj, leptonSingletProj, quarkDoubletProj,
-      upSingletProj, downSingletProj, Prod.fst_sum, Prod.snd_sum, Finset.sum_apply,
-      Pi.single_apply]
+/--
+The identity on the total fermionic target space is the sum, over the five species and
+the three generations, of the inclusion after the projection.
+-/
+lemma sum_incl_proj (v : FermionSpace)
+    : (∑ i, leptonDoubletIncl i (leptonDoubletProj i v))
+        + (∑ i, leptonSingletIncl i (leptonSingletProj i v))
+        + (∑ i, quarkDoubletIncl i (quarkDoubletProj i v))
+        + (∑ i, upSingletIncl i (upSingletProj i v))
+        + (∑ i, downSingletIncl i (downSingletProj i v))
+      = v := by
+  refine Prod.ext ?_ (Prod.ext ?_ (Prod.ext ?_ (Prod.ext ?_ ?_)))
+    <;> · funext j
+          simp [leptonDoubletIncl, leptonSingletIncl, quarkDoubletIncl, upSingletIncl,
+            downSingletIncl, leptonDoubletProj, leptonSingletProj, quarkDoubletProj, upSingletProj,
+            downSingletProj, Prod.fst_sum, Prod.snd_sum, Finset.sum_apply, Pi.single_apply]
 
-/-- The conjugate form of `sum_incl_proj`: conjugation leaves the underlying additive
-  group and the underlying maps alone. -/
-lemma sum_conj_incl_proj (v : ConjModule FermionSpace) :
-    (∑ i, ConjModule.map (leptonDoubletIncl i)
-        (ConjModule.map (leptonDoubletProj i) v))
-      + (∑ i, ConjModule.map (leptonSingletIncl i)
-          (ConjModule.map (leptonSingletProj i) v))
-      + (∑ i, ConjModule.map (quarkDoubletIncl i)
-          (ConjModule.map (quarkDoubletProj i) v))
-      + (∑ i, ConjModule.map (upSingletIncl i)
-          (ConjModule.map (upSingletProj i) v))
-      + (∑ i, ConjModule.map (downSingletIncl i)
-          (ConjModule.map (downSingletProj i) v)) = v :=
+/--
+The conjugate form of `sum_incl_proj`: conjugation leaves the underlying additive
+group and the underlying maps alone.
+-/
+lemma sum_conj_incl_proj (v : ConjModule FermionSpace)
+    : (∑ i, ConjModule.map (leptonDoubletIncl i)
+          (ConjModule.map (leptonDoubletProj i) v))
+        + (∑ i, ConjModule.map (leptonSingletIncl i)
+            (ConjModule.map (leptonSingletProj i) v))
+        + (∑ i, ConjModule.map (quarkDoubletIncl i)
+            (ConjModule.map (quarkDoubletProj i) v))
+        + (∑ i, ConjModule.map (upSingletIncl i)
+            (ConjModule.map (upSingletProj i) v))
+        + (∑ i, ConjModule.map (downSingletIncl i)
+            (ConjModule.map (downSingletProj i) v))
+      = v :=
   sum_incl_proj v
 
 /-!
@@ -447,28 +501,33 @@ lemma sum_conj_incl_proj (v : ConjModule FermionSpace) :
 
 -/
 
-/-- Every covector on the total fermionic target space is the sum, over the five species
-  and the three generations, of its restriction to that species and generation pulled back
-  along the corresponding projection. -/
-lemma dual_eq_sum (φ : Module.Dual ℂ FermionSpace) :
-    φ = (∑ i, Module.Dual.transpose (leptonDoubletProj i)
+/--
+Every covector on the total fermionic target space is the sum, over the five species
+and the three generations, of its restriction to that species and generation pulled back
+along the corresponding projection.
+-/
+lemma dual_eq_sum (φ : Module.Dual ℂ FermionSpace)
+    : φ
+      = (∑ i, Module.Dual.transpose (leptonDoubletProj i)
           (Module.Dual.transpose (leptonDoubletIncl i) φ))
-      + (∑ i, Module.Dual.transpose (leptonSingletProj i)
-          (Module.Dual.transpose (leptonSingletIncl i) φ))
-      + (∑ i, Module.Dual.transpose (quarkDoubletProj i)
-          (Module.Dual.transpose (quarkDoubletIncl i) φ))
-      + (∑ i, Module.Dual.transpose (upSingletProj i)
-          (Module.Dual.transpose (upSingletIncl i) φ))
-      + (∑ i, Module.Dual.transpose (downSingletProj i)
-          (Module.Dual.transpose (downSingletIncl i) φ)) := by
+        + (∑ i, Module.Dual.transpose (leptonSingletProj i)
+            (Module.Dual.transpose (leptonSingletIncl i) φ))
+        + (∑ i, Module.Dual.transpose (quarkDoubletProj i)
+            (Module.Dual.transpose (quarkDoubletIncl i) φ))
+        + (∑ i, Module.Dual.transpose (upSingletProj i)
+            (Module.Dual.transpose (upSingletIncl i) φ))
+        + (∑ i, Module.Dual.transpose (downSingletProj i)
+            (Module.Dual.transpose (downSingletIncl i) φ)) := by
   refine LinearMap.ext fun v => ?_
   have h := congrArg φ (sum_incl_proj v)
   simp only [map_add, map_sum] at h
   simp only [LinearMap.add_apply, LinearMap.sum_apply]
   exact h.symm
 
-/-- The covectors on the total fermionic target space that are pulled back from a single
-  species and generation. -/
+/--
+The covectors on the total fermionic target space that are pulled back from a single
+species and generation.
+-/
 def speciesDual : Set (Module.Dual ℂ FermionSpace) :=
   {φ | (∃ (i : Fin 3) (ψ : Module.Dual ℂ LeptonDoubletV),
         φ = Module.Dual.transpose (leptonDoubletProj i) ψ)
@@ -481,18 +540,18 @@ def speciesDual : Set (Module.Dual ℂ FermionSpace) :=
     ∨ (∃ (i : Fin 3) (ψ : Module.Dual ℂ DownSinglet),
         φ = Module.Dual.transpose (downSingletProj i) ψ)}
 
-/-- The covectors pulled back from the individual species and generations span every
-  covector on the total fermionic target space. This is what lets an adjoin taken over the
-  species covectors reach an adjoin taken over all of them. -/
+/--
+The covectors pulled back from the individual species and generations span every
+covector on the total fermionic target space. This is what lets an adjoin taken over the
+species covectors reach an adjoin taken over all of them.
+-/
 lemma span_speciesDual_eq_top : Submodule.span ℂ speciesDual = ⊤ := by
   refine Submodule.eq_top_iff'.mpr fun φ => ?_
   rw [dual_eq_sum φ]
-  refine Submodule.add_mem _ (Submodule.add_mem _ (Submodule.add_mem _
-    (Submodule.add_mem _ ?_ ?_) ?_) ?_) ?_
-  · exact Submodule.sum_mem _ fun i _ =>
-      Submodule.subset_span (Or.inl ⟨i, _, rfl⟩)
-  · exact Submodule.sum_mem _ fun i _ =>
-      Submodule.subset_span (Or.inr (Or.inl ⟨i, _, rfl⟩))
+  refine Submodule.add_mem _
+    (Submodule.add_mem _ (Submodule.add_mem _ (Submodule.add_mem _ ?_ ?_) ?_) ?_) ?_
+  · exact Submodule.sum_mem _ fun i _ => Submodule.subset_span (Or.inl ⟨i, _, rfl⟩)
+  · exact Submodule.sum_mem _ fun i _ => Submodule.subset_span (Or.inr (Or.inl ⟨i, _, rfl⟩))
   · exact Submodule.sum_mem _ fun i _ =>
       Submodule.subset_span (Or.inr (Or.inr (Or.inl ⟨i, _, rfl⟩)))
   · exact Submodule.sum_mem _ fun i _ =>
@@ -506,28 +565,33 @@ lemma span_speciesDual_eq_top : Submodule.span ℂ speciesDual = ⊤ := by
 
 -/
 
-/-- The conjugate form of `dual_eq_sum`: every covector on the conjugate of the total
-  fermionic target space is the sum of the covectors pulled back from the species and
-  generations. -/
-lemma conjDual_eq_sum (φ : Module.Dual ℂ (ConjModule FermionSpace)) :
-    φ = (∑ i, Module.Dual.transpose (ConjModule.map (leptonDoubletProj i))
+/--
+The conjugate form of `dual_eq_sum`: every covector on the conjugate of the total
+fermionic target space is the sum of the covectors pulled back from the species and
+generations.
+-/
+lemma conjDual_eq_sum (φ : Module.Dual ℂ (ConjModule FermionSpace))
+    : φ
+      = (∑ i, Module.Dual.transpose (ConjModule.map (leptonDoubletProj i))
           (Module.Dual.transpose (ConjModule.map (leptonDoubletIncl i)) φ))
-      + (∑ i, Module.Dual.transpose (ConjModule.map (leptonSingletProj i))
-          (Module.Dual.transpose (ConjModule.map (leptonSingletIncl i)) φ))
-      + (∑ i, Module.Dual.transpose (ConjModule.map (quarkDoubletProj i))
-          (Module.Dual.transpose (ConjModule.map (quarkDoubletIncl i)) φ))
-      + (∑ i, Module.Dual.transpose (ConjModule.map (upSingletProj i))
-          (Module.Dual.transpose (ConjModule.map (upSingletIncl i)) φ))
-      + (∑ i, Module.Dual.transpose (ConjModule.map (downSingletProj i))
-          (Module.Dual.transpose (ConjModule.map (downSingletIncl i)) φ)) := by
+        + (∑ i, Module.Dual.transpose (ConjModule.map (leptonSingletProj i))
+            (Module.Dual.transpose (ConjModule.map (leptonSingletIncl i)) φ))
+        + (∑ i, Module.Dual.transpose (ConjModule.map (quarkDoubletProj i))
+            (Module.Dual.transpose (ConjModule.map (quarkDoubletIncl i)) φ))
+        + (∑ i, Module.Dual.transpose (ConjModule.map (upSingletProj i))
+            (Module.Dual.transpose (ConjModule.map (upSingletIncl i)) φ))
+        + (∑ i, Module.Dual.transpose (ConjModule.map (downSingletProj i))
+            (Module.Dual.transpose (ConjModule.map (downSingletIncl i)) φ)) := by
   refine LinearMap.ext fun v => ?_
   have h := congrArg φ (sum_conj_incl_proj v)
   simp only [map_add, map_sum] at h
   simp only [LinearMap.add_apply, LinearMap.sum_apply]
   exact h.symm
 
-/-- The covectors on the conjugate of the total fermionic target space that are pulled
-  back from a single species and generation. -/
+/--
+The covectors on the conjugate of the total fermionic target space that are pulled
+back from a single species and generation.
+-/
 def speciesConjDual : Set (Module.Dual ℂ (ConjModule FermionSpace)) :=
   {φ | (∃ (i : Fin 3) (ψ : Module.Dual ℂ (ConjModule LeptonDoubletV)),
         φ = Module.Dual.transpose (ConjModule.map (leptonDoubletProj i)) ψ)
@@ -540,17 +604,17 @@ def speciesConjDual : Set (Module.Dual ℂ (ConjModule FermionSpace)) :=
     ∨ (∃ (i : Fin 3) (ψ : Module.Dual ℂ (ConjModule DownSinglet)),
         φ = Module.Dual.transpose (ConjModule.map (downSingletProj i)) ψ)}
 
-/-- The conjugate covectors pulled back from the individual species and generations span
-  every covector on the conjugate of the total fermionic target space. -/
+/--
+The conjugate covectors pulled back from the individual species and generations span
+every covector on the conjugate of the total fermionic target space.
+-/
 lemma span_speciesConjDual_eq_top : Submodule.span ℂ speciesConjDual = ⊤ := by
   refine Submodule.eq_top_iff'.mpr fun φ => ?_
   rw [conjDual_eq_sum φ]
-  refine Submodule.add_mem _ (Submodule.add_mem _ (Submodule.add_mem _
-    (Submodule.add_mem _ ?_ ?_) ?_) ?_) ?_
-  · exact Submodule.sum_mem _ fun i _ =>
-      Submodule.subset_span (Or.inl ⟨i, _, rfl⟩)
-  · exact Submodule.sum_mem _ fun i _ =>
-      Submodule.subset_span (Or.inr (Or.inl ⟨i, _, rfl⟩))
+  refine Submodule.add_mem _
+    (Submodule.add_mem _ (Submodule.add_mem _ (Submodule.add_mem _ ?_ ?_) ?_) ?_) ?_
+  · exact Submodule.sum_mem _ fun i _ => Submodule.subset_span (Or.inl ⟨i, _, rfl⟩)
+  · exact Submodule.sum_mem _ fun i _ => Submodule.subset_span (Or.inr (Or.inl ⟨i, _, rfl⟩))
   · exact Submodule.sum_mem _ fun i _ =>
       Submodule.subset_span (Or.inr (Or.inr (Or.inl ⟨i, _, rfl⟩)))
   · exact Submodule.sum_mem _ fun i _ =>
@@ -561,4 +625,3 @@ lemma span_speciesConjDual_eq_top : Submodule.span ℂ speciesConjDual = ⊤ := 
 end FermionSpace
 
 end StandardModel
-

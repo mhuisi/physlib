@@ -64,13 +64,11 @@ variable (μS : WOTSpectralMeasure α H)
 lemma boundedIntegralOfUniformApprox_inner
     [Nonempty α]
     {f : α → ℂ} {s : ℕ → SimpleFunc α ℂ}
-    (hs : ∀ ε > 0, ∃ N, ∀ n ≥ N, ∀ x, ‖s n x - f x‖ < ε)
-    (hsBound : ∃ C : ℝ, ∀ n x, ‖s n x‖ ≤ C)
-    (x y : H)
-    (hfinite : IsFiniteMeasure (μS.scalarMeasure x y).variation) :
-    ⟪y, boundedIntegralOfUniformApprox μS f s hs x⟫_ℂ =
-      ∫ᵛ z, f z ∂[ContinuousLinearMap.lsmul ℝ ℂ (E := ℂ);
-        μS.scalarMeasure x y] := by
+    (hs : ∀ ε > 0, ∃ N, ∀ n ≥ N, ∀ x, ‖s n x - f x‖ < ε) (hsBound : ∃ C : ℝ, ∀ n x, ‖s n x‖ ≤ C)
+    (x y : H) (hfinite : IsFiniteMeasure (μS.scalarMeasure x y).variation)
+    : ⟪y, boundedIntegralOfUniformApprox μS f s hs x⟫_ℂ
+      = ∫ᵛ z, f z ∂[ContinuousLinearMap.lsmul ℝ ℂ (E := ℂ);
+          μS.scalarMeasure x y] := by
   let μ := μS.scalarMeasure x y
   let B : ℂ →L[ℝ] ℂ →L[ℝ] ℂ := ContinuousLinearMap.lsmul ℝ ℂ
   let _ : IsFiniteMeasure μ.variation := hfinite
@@ -87,14 +85,11 @@ lemma boundedIntegralOfUniformApprox_inner
     intro ε hε
     rcases hs ε hε with ⟨N, hN⟩
     exact ⟨N, fun n hn => by simpa only [dist_eq_norm] using hN n hn z⟩
-  have hint :
-      Filter.Tendsto (fun n => ∫ᵛ z, s n z ∂[B; μ]) Filter.atTop
-        (𝓝 (∫ᵛ z, f z ∂[B; μ])) := by
-    exact MeasureTheory.VectorMeasure.tendsto_integral_filter_of_norm_le_const
-      (μ := μ) (B := B) (Filter.Eventually.of_forall hmeas) hbound hlim
-  have hsimple : ∀ n,
-      ∫ᵛ z, s n z ∂[B; μ] =
-        ⟪y, simpleIntegral μS (s n) x⟫_ℂ := by
+  have hint
+      : Filter.Tendsto (fun n => ∫ᵛ z, s n z ∂[B; μ]) Filter.atTop (𝓝 (∫ᵛ z, f z ∂[B; μ])) := by
+    exact MeasureTheory.VectorMeasure.tendsto_integral_filter_of_norm_le_const (μ := μ) (B := B)
+      (Filter.Eventually.of_forall hmeas) hbound hlim
+  have hsimple : ∀ n, ∫ᵛ z, s n z ∂[B; μ] = ⟪y, simpleIntegral μS (s n) x⟫_ℂ := by
     intro n
     rcases hsBound with ⟨C, hC⟩
     let a₀ : α := Classical.choice (inferInstance : Nonempty α)
@@ -110,20 +105,19 @@ lemma boundedIntegralOfUniformApprox_inner
     rfl
   have hclm := (simpleIntegral_toCLM_cauchySeq μS hs).tendsto_limUnder
   have hclm' : Filter.Tendsto
-      (fun n => ContinuousLinearMapWOT.toCLM (simpleIntegral μS (s n))) Filter.atTop
-      (𝓝 (ContinuousLinearMapWOT.toCLM
-        (boundedIntegralOfUniformApprox μS f s hs))) := by
+      (fun n => ContinuousLinearMapWOT.toCLM (simpleIntegral μS (s n)))
+      Filter.atTop
+      (𝓝 (ContinuousLinearMapWOT.toCLM (boundedIntegralOfUniformApprox μS f s hs))) := by
     rw [boundedIntegralOfUniformApprox_eq_limUnder]
     exact hclm
-  have hoperator :
-      Filter.Tendsto
-        (fun n => ⟪y, simpleIntegral μS (s n) x⟫_ℂ) Filter.atTop
-        (𝓝 (⟪y, boundedIntegralOfUniformApprox μS f s hs x⟫_ℂ)) := by
+  have hoperator : Filter.Tendsto
+      (fun n => ⟪y, simpleIntegral μS (s n) x⟫_ℂ)
+      Filter.atTop (𝓝 (⟪y, boundedIntegralOfUniformApprox μS f s hs x⟫_ℂ)) := by
     have hev : Continuous (fun A : H →L[ℂ] H => ⟪y, A x⟫_ℂ) := by fun_prop
     exact hev.continuousAt.tendsto.comp hclm'
-  have hsimple' :
-      Filter.Tendsto (fun n => ∫ᵛ z, s n z ∂[B; μ]) Filter.atTop
-        (𝓝 (⟪y, boundedIntegralOfUniformApprox μS f s hs x⟫_ℂ)) := by
+  have hsimple' : Filter.Tendsto
+      (fun n => ∫ᵛ z, s n z ∂[B; μ])
+      Filter.atTop (𝓝 (⟪y, boundedIntegralOfUniformApprox μS f s hs x⟫_ℂ)) := by
     simpa only [hsimple] using hoperator
   exact tendsto_nhds_unique hsimple' hint
 
@@ -134,37 +128,40 @@ def weakIntegral (f : α → ℝ) (x y : H) : ℂ :=
   ∫ᵛ z, f z ∂[ContinuousLinearMap.lsmul ℝ ℝ (E := ℂ);
     μS.scalarMeasure x y]
 
-/-- The complex weak integral of a complex-valued spectral multiplier. The real-valued integral
+/--
+The complex weak integral of a complex-valued spectral multiplier. The real-valued integral
 above is retained for the self-adjoint reconstruction API; this companion is the bounded-unitary
-side of the Cayley construction. -/
+side of the Cayley construction.
+-/
 def complexWeakIntegral (f : α → ℂ) (x y : H) : ℂ :=
   ∫ᵛ z, f z ∂[ContinuousLinearMap.lsmul ℝ ℂ (E := ℂ);
     μS.scalarMeasure x y]
 
-lemma weakIntegral_map {β : Type*} [MeasurableSpace β]
-    (f : α → β) (hf : Measurable f) (g : β → ℝ)
-    (x y : H) (hgm : AEStronglyMeasurable g ((μS.scalarMeasure x y).variation.map f))
-    (hgi : (μS.scalarMeasure x y).Integrable (g ∘ f)) :
-    (μS.map f hf).weakIntegral g x y = μS.weakIntegral (g ∘ f) x y := by
+lemma weakIntegral_map
+    {β : Type*} [MeasurableSpace β]
+    (f : α → β) (hf : Measurable f)
+    (g : β → ℝ) (x y : H) (hgm : AEStronglyMeasurable g ((μS.scalarMeasure x y).variation.map f))
+    (hgi : (μS.scalarMeasure x y).Integrable (g ∘ f))
+    : (μS.map f hf).weakIntegral g x y = μS.weakIntegral (g ∘ f) x y := by
   unfold weakIntegral
   rw [scalarMeasure_map]
   exact VectorMeasure.integral_map hf hgm hgi
 
-lemma complexWeakIntegral_map {β : Type*} [MeasurableSpace β]
-    (f : α → β) (hf : Measurable f) (g : β → ℂ)
-    (x y : H) (hgm : AEStronglyMeasurable g ((μS.scalarMeasure x y).variation.map f))
-    (hgi : (μS.scalarMeasure x y).Integrable (g ∘ f)) :
-    (μS.map f hf).complexWeakIntegral g x y =
-      μS.complexWeakIntegral (g ∘ f) x y := by
+lemma complexWeakIntegral_map
+    {β : Type*} [MeasurableSpace β]
+    (f : α → β) (hf : Measurable f)
+    (g : β → ℂ) (x y : H) (hgm : AEStronglyMeasurable g ((μS.scalarMeasure x y).variation.map f))
+    (hgi : (μS.scalarMeasure x y).Integrable (g ∘ f))
+    : (μS.map f hf).complexWeakIntegral g x y = μS.complexWeakIntegral (g ∘ f) x y := by
   unfold complexWeakIntegral
   rw [scalarMeasure_map]
   exact VectorMeasure.integral_map hf hgm hgi
 
 lemma unitaryConjSpectralMeasure_weakIntegral
     {H' : Type*} [NormedAddCommGroup H'] [InnerProductSpace ℂ H'] [CompleteSpace H']
-    (u : H ≃ₗᵢ[ℂ] H') (μS : WOTSpectralMeasure α H) (f : α → ℝ) (x y : H') :
-    (unitaryConjSpectralMeasure u μS).weakIntegral f x y =
-      μS.weakIntegral f (u.symm x) (u.symm y) := by
+    (u : H ≃ₗᵢ[ℂ] H') (μS : WOTSpectralMeasure α H) (f : α → ℝ) (x y : H')
+    : (unitaryConjSpectralMeasure u μS).weakIntegral f x y
+      = μS.weakIntegral f (u.symm x) (u.symm y) := by
   unfold weakIntegral
   rw [unitaryConjSpectralMeasure_scalarMeasure]
 

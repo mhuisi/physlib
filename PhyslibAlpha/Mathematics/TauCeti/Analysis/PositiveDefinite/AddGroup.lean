@@ -93,12 +93,14 @@ namespace TauCeti
 
 /-! ### A.1. The negation involution -/
 
-/-- `WithNegStar G` is a type synonym for an additive commutative group `G`, carrying the negation
+/--
+`WithNegStar G` is a type synonym for an additive commutative group `G`, carrying the negation
 involution `star a = -a`.
 
 Mathlib pins no negation `StarAddMonoid` instance on an additive group — on a real vector space
 `star` is the identity — so the involution used by classical positive definiteness is installed on
-this synonym rather than on `G` itself. -/
+this synonym rather than on `G` itself.
+-/
 @[expose] def WithNegStar (G : Type*) : Type _ := G
 
 namespace WithNegStar
@@ -111,8 +113,7 @@ instance : AddCommGroup (WithNegStar G) := inferInstanceAs (AddCommGroup G)
 
 instance : Star (WithNegStar G) := ⟨fun a => -a⟩
 
-@[simp]
-lemma star_eq_neg (a : WithNegStar G) : star a = -a := rfl
+@[simp] lemma star_eq_neg (a : WithNegStar G) : star a = -a := rfl
 
 instance : StarAddMonoid (WithNegStar G) where
   star_involutive a := neg_neg a
@@ -125,8 +126,7 @@ def toNegStar : G ≃+ WithNegStar G := AddEquiv.refl G
 def ofNegStar : WithNegStar G ≃+ G := toNegStar.symm
 
 @[simp]
-lemma ofNegStar_toNegStar (a : G) : ofNegStar (toNegStar a) = a :=
-  toNegStar.symm_apply_apply a
+lemma ofNegStar_toNegStar (a : G) : ofNegStar (toNegStar a) = a := toNegStar.symm_apply_apply a
 
 @[simp]
 lemma toNegStar_ofNegStar (a : WithNegStar G) : toNegStar (ofNegStar a) = a :=
@@ -138,8 +138,7 @@ section Seminormed
 
 variable {G : Type*} [SeminormedAddCommGroup G]
 
-instance : SeminormedAddCommGroup (WithNegStar G) :=
-  inferInstanceAs (SeminormedAddCommGroup G)
+instance : SeminormedAddCommGroup (WithNegStar G) := inferInstanceAs (SeminormedAddCommGroup G)
 
 end Seminormed
 
@@ -149,30 +148,35 @@ end WithNegStar
 
 variable {G : Type*} [AddCommGroup G] {F H : G → ℂ}
 
-/-- A function `F : G → ℂ` on an additive commutative group is **positive definite** when, for
+/--
+A function `F : G → ℂ` on an additive commutative group is **positive definite** when, for
 every finite family of scalars `c : Fin n → ℂ` and points `v : Fin n → G`, the Hermitian form
 `∑_{i,j} c i · conj (c j) * F (v i - v j)` is a nonnegative real number (using the order on `ℂ`
 for which `0 ≤ z` means `z` is real and nonnegative).
 
 This is the classical translation-invariant condition, the one Bochner's theorem is stated in. It
 is `TauCeti.IsPositiveDefinite` for the negation involution; see
-`TauCeti.isPositiveDefiniteSub_iff_isPositiveDefinite`. -/
+`TauCeti.isPositiveDefiniteSub_iff_isPositiveDefinite`.
+-/
 def IsPositiveDefiniteSub (F : G → ℂ) : Prop :=
-  ∀ (n : ℕ) (c : Fin n → ℂ) (v : Fin n → G),
-    0 ≤ ∑ i, ∑ j, c i * conj (c j) * F (v i - v j)
+  ∀ (n : ℕ) (c : Fin n → ℂ) (v : Fin n → G), 0 ≤ ∑ i, ∑ j, c i * conj (c j) * F (v i - v j)
 
-/-- The defining finite-family characterization, for building a positive-definite function
-directly from the quadratic-form condition. -/
-lemma isPositiveDefiniteSub_iff_forall_sum_nonneg :
-    IsPositiveDefiniteSub F ↔ ∀ (n : ℕ) (c : Fin n → ℂ) (v : Fin n → G),
-      0 ≤ ∑ i, ∑ j, c i * conj (c j) * F (v i - v j) :=
+/--
+The defining finite-family characterization, for building a positive-definite function
+directly from the quadratic-form condition.
+-/
+lemma isPositiveDefiniteSub_iff_forall_sum_nonneg
+    : IsPositiveDefiniteSub F
+      ↔ ∀ (n : ℕ) (c : Fin n → ℂ) (v : Fin n → G), 0 ≤ ∑ i, ∑ j, c i * conj (c j) * F (v i - v j) :=
   Iff.rfl
 
-/-- Subtraction-form positive definiteness is the generic involutive predicate for the negation
-involution, read on the type synonym `TauCeti.WithNegStar`. -/
-lemma isPositiveDefiniteSub_iff_isPositiveDefinite :
-    IsPositiveDefiniteSub F ↔
-      IsPositiveDefinite fun a : WithNegStar G => F (WithNegStar.ofNegStar a) := by
+/--
+Subtraction-form positive definiteness is the generic involutive predicate for the negation
+involution, read on the type synonym `TauCeti.WithNegStar`.
+-/
+lemma isPositiveDefiniteSub_iff_isPositiveDefinite
+    : IsPositiveDefiniteSub F
+      ↔ IsPositiveDefinite fun a : WithNegStar G => F (WithNegStar.ofNegStar a) := by
   constructor
   · intro hF n c v
     simpa [sub_eq_add_neg] using hF n c fun i => WithNegStar.ofNegStar (v i)
@@ -181,59 +185,69 @@ lemma isPositiveDefiniteSub_iff_isPositiveDefinite :
 
 namespace IsPositiveDefiniteSub
 
-/-- The generic involutive predicate attached to a subtraction-form positive-definite function.
-This is the workhorse for transporting the generic API. -/
-lemma isPositiveDefinite (hF : IsPositiveDefiniteSub F) :
-    IsPositiveDefinite fun a : WithNegStar G => F (WithNegStar.ofNegStar a) :=
+/--
+The generic involutive predicate attached to a subtraction-form positive-definite function.
+This is the workhorse for transporting the generic API.
+-/
+lemma isPositiveDefinite (hF : IsPositiveDefiniteSub F)
+    : IsPositiveDefinite fun a : WithNegStar G => F (WithNegStar.ofNegStar a) :=
   isPositiveDefiniteSub_iff_isPositiveDefinite.mp hF
 
 /-- Positive-definiteness holds for an arbitrary finite index type, not just `Fin n`. -/
-lemma sum_nonneg (hF : IsPositiveDefiniteSub F) {ι : Type*} [Fintype ι] (c : ι → ℂ) (v : ι → G) :
-    0 ≤ ∑ i, ∑ j, c i * conj (c j) * F (v i - v j) := by
+lemma sum_nonneg (hF : IsPositiveDefiniteSub F) {ι : Type*} [Fintype ι] (c : ι → ℂ) (v : ι → G)
+    : 0 ≤ ∑ i, ∑ j, c i * conj (c j) * F (v i - v j) := by
   simpa [sub_eq_add_neg] using
     hF.isPositiveDefinite.sum_nonneg c fun i => WithNegStar.toNegStar (v i)
 
-/-- A subtraction-form positive-definite function gives the translation-invariant
-positive-definite kernel `K(a, b) = F (a - b)`. -/
-lemma posSemidef (hF : IsPositiveDefiniteSub F) :
-    Matrix.PosSemidef fun a b : G => F (a - b) := by
+/--
+A subtraction-form positive-definite function gives the translation-invariant
+positive-definite kernel `K(a, b) = F (a - b)`.
+-/
+lemma posSemidef (hF : IsPositiveDefiniteSub F) : Matrix.PosSemidef fun a b : G => F (a - b) := by
   have h := hF.isPositiveDefinite.posSemidef.submatrix fun a : G => WithNegStar.toNegStar a
-  have heq : Matrix.submatrix
-      (Matrix.of fun a b : WithNegStar G =>
-        F (WithNegStar.ofNegStar (a + star b)))
-      (fun a : G => WithNegStar.toNegStar a) (fun a : G => WithNegStar.toNegStar a) =
-      fun a b : G => F (a - b) := by
+  have heq
+      : Matrix.submatrix
+          (Matrix.of fun a b : WithNegStar G => F (WithNegStar.ofNegStar (a + star b)))
+          (fun a : G => WithNegStar.toNegStar a)
+          (fun a : G => WithNegStar.toNegStar a)
+        = fun a b : G => F (a - b) := by
     ext a b
     simp [sub_eq_add_neg]
   exact heq ▸ h
 
-/-- A function whose translation-invariant kernel `K(a, b) = F (a - b)` is positive definite is
-positive definite. -/
-lemma of_posSemidef (hK : Matrix.PosSemidef fun a b : G => F (a - b)) :
-    IsPositiveDefiniteSub F := by
-  refine isPositiveDefiniteSub_iff_isPositiveDefinite.mpr
-    (IsPositiveDefinite.of_posSemidef ?_)
+/--
+A function whose translation-invariant kernel `K(a, b) = F (a - b)` is positive definite is
+positive definite.
+-/
+lemma of_posSemidef (hK : Matrix.PosSemidef fun a b : G => F (a - b))
+    : IsPositiveDefiniteSub F := by
+  refine isPositiveDefiniteSub_iff_isPositiveDefinite.mpr (IsPositiveDefinite.of_posSemidef ?_)
   have h := hK.submatrix fun a : WithNegStar G => WithNegStar.ofNegStar a
-  have heq : Matrix.submatrix (Matrix.of fun a b : G => F (a - b))
-      (fun a : WithNegStar G => WithNegStar.ofNegStar a)
-      (fun a : WithNegStar G => WithNegStar.ofNegStar a) =
-      fun a b : WithNegStar G => F (WithNegStar.ofNegStar (a + star b)) := by
+  have heq
+      : Matrix.submatrix (Matrix.of fun a b : G => F (a - b))
+          (fun a : WithNegStar G => WithNegStar.ofNegStar a)
+          (fun a : WithNegStar G => WithNegStar.ofNegStar a)
+        = fun a b : WithNegStar G => F (WithNegStar.ofNegStar (a + star b)) := by
     ext a b
     simp [sub_eq_add_neg]
   exact heq ▸ h
 
 end IsPositiveDefiniteSub
 
-/-- The PD-function ↔ PD-kernel equivalence in its classical translation-invariant form: `F` is
-positive definite if and only if the kernel `K(a, b) = F (a - b)` is positive definite. -/
-lemma isPositiveDefiniteSub_iff_posSemidef :
-    IsPositiveDefiniteSub F ↔ Matrix.PosSemidef fun a b : G => F (a - b) :=
+/--
+The PD-function ↔ PD-kernel equivalence in its classical translation-invariant form: `F` is
+positive definite if and only if the kernel `K(a, b) = F (a - b)` is positive definite.
+-/
+lemma isPositiveDefiniteSub_iff_posSemidef
+    : IsPositiveDefiniteSub F ↔ Matrix.PosSemidef fun a b : G => F (a - b) :=
   ⟨IsPositiveDefiniteSub.posSemidef, IsPositiveDefiniteSub.of_posSemidef⟩
 
-/-- On a group whose own involution is negation, the generic involutive predicate and the
-subtraction-form predicate agree. -/
-lemma isPositiveDefinite_iff_isPositiveDefiniteSub [StarAddMonoid G]
-    (hstar : ∀ a : G, star a = -a) : IsPositiveDefinite F ↔ IsPositiveDefiniteSub F :=
+/--
+On a group whose own involution is negation, the generic involutive predicate and the
+subtraction-form predicate agree.
+-/
+lemma isPositiveDefinite_iff_isPositiveDefiniteSub [StarAddMonoid G] (hstar : ∀ a : G, star a = -a)
+    : IsPositiveDefinite F ↔ IsPositiveDefiniteSub F :=
   (isPositiveDefinite_iff_posSemidef_sub hstar).trans isPositiveDefiniteSub_iff_posSemidef.symm
 
 /-! ### A.3. Values at and around the origin -/
@@ -253,15 +267,18 @@ lemma map_zero_im (hF : IsPositiveDefiniteSub F) : (F 0).im = 0 :=
 lemma map_zero_re_nonneg (hF : IsPositiveDefiniteSub F) : 0 ≤ (F 0).re :=
   (Complex.nonneg_iff.mp hF.map_zero_nonneg).1
 
-/-- The value at the origin of a positive-definite function is the real number `(F 0).re`, viewed
-as a complex number. -/
+/--
+The value at the origin of a positive-definite function is the real number `(F 0).re`, viewed
+as a complex number.
+-/
 lemma map_zero_eq_ofReal_re (hF : IsPositiveDefiniteSub F) : F 0 = ((F 0).re : ℂ) := by
   simpa using hF.isPositiveDefinite.map_zero_eq_ofReal_re
 
-/-- If a positive-definite function is nonzero at the origin, then the real part of that value is
-strictly positive. -/
-lemma map_zero_re_pos_of_ne_zero (hF : IsPositiveDefiniteSub F) (h0 : F 0 ≠ 0) :
-    0 < (F 0).re := by
+/--
+If a positive-definite function is nonzero at the origin, then the real part of that value is
+strictly positive.
+-/
+lemma map_zero_re_pos_of_ne_zero (hF : IsPositiveDefiniteSub F) (h0 : F 0 ≠ 0) : 0 < (F 0).re := by
   refine hF.isPositiveDefinite.map_zero_re_pos_of_ne_zero ?_
   simpa using h0
 
@@ -275,119 +292,124 @@ lemma conj_symm (hF : IsPositiveDefiniteSub F) (a b : G) : conj (F (b - a)) = F 
 lemma map_neg (hF : IsPositiveDefiniteSub F) (a : G) : F (-a) = conj (F a) := by
   simpa using (hF.conj_symm 0 a).symm
 
-/-- The Cauchy–Schwarz inequality for a positive-definite function: the squared norm of any value
-is bounded by the square of the value at the origin. -/
-lemma normSq_le (hF : IsPositiveDefiniteSub F) (a b : G) :
-    Complex.normSq (F (a - b)) ≤ (F 0).re * (F 0).re := by
+/--
+The Cauchy–Schwarz inequality for a positive-definite function: the squared norm of any value
+is bounded by the square of the value at the origin.
+-/
+lemma normSq_le (hF : IsPositiveDefiniteSub F) (a b : G)
+    : Complex.normSq (F (a - b)) ≤ (F 0).re * (F 0).re := by
   simpa [sub_eq_add_neg] using
     hF.isPositiveDefinite.normSq_le (WithNegStar.toNegStar a) (WithNegStar.toNegStar b)
 
 /-- A positive-definite function is bounded by its value at the origin. -/
 lemma norm_apply_le_map_zero_re (hF : IsPositiveDefiniteSub F) (a : G) : ‖F a‖ ≤ (F 0).re := by
-  simpa using hF.isPositiveDefinite.norm_apply_le_map_zero_re_of_star_eq_neg
-    (WithNegStar.toNegStar a) rfl
+  simpa using
+    hF.isPositiveDefinite.norm_apply_le_map_zero_re_of_star_eq_neg (WithNegStar.toNegStar a) rfl
 
 -- Not a `simp` lemma: the conclusion `F a = 0` has a variable head symbol, which Lean rejects.
 /-- **A positive-definite function with `(F 0).re = 0` vanishes identically.** -/
-lemma apply_eq_zero_of_map_zero_re_eq_zero (hF : IsPositiveDefiniteSub F) (h0 : (F 0).re = 0)
-    (a : G) : F a = 0 := by
-  simpa using hF.isPositiveDefinite.apply_eq_zero_of_map_zero_re_eq_zero (by simpa using h0)
-    (WithNegStar.toNegStar a)
+lemma apply_eq_zero_of_map_zero_re_eq_zero
+    (hF : IsPositiveDefiniteSub F) (h0 : (F 0).re = 0) (a : G)
+    : F a = 0 := by
+  simpa using
+    hF.isPositiveDefinite.apply_eq_zero_of_map_zero_re_eq_zero (by simpa using h0)
+      (WithNegStar.toNegStar a)
 
 /-! ### A.4. Closure properties -/
 
 /-- Positive-definite functions are closed under addition. -/
-lemma add (hF : IsPositiveDefiniteSub F) (hH : IsPositiveDefiniteSub H) :
-    IsPositiveDefiniteSub fun x => F x + H x :=
-  isPositiveDefiniteSub_iff_isPositiveDefinite.mpr
-    (hF.isPositiveDefinite.add hH.isPositiveDefinite)
+lemma add (hF : IsPositiveDefiniteSub F) (hH : IsPositiveDefiniteSub H)
+    : IsPositiveDefiniteSub fun x => F x + H x :=
+  isPositiveDefiniteSub_iff_isPositiveDefinite.mpr (hF.isPositiveDefinite.add hH.isPositiveDefinite)
 
-/-- Positive-definite functions are closed under multiplication by a nonnegative complex
-scalar. -/
-lemma const_mul {k : ℂ} (hk : 0 ≤ k) (hF : IsPositiveDefiniteSub F) :
-    IsPositiveDefiniteSub fun x => k * F x :=
+/--
+Positive-definite functions are closed under multiplication by a nonnegative complex
+scalar.
+-/
+lemma const_mul {k : ℂ} (hk : 0 ≤ k) (hF : IsPositiveDefiniteSub F)
+    : IsPositiveDefiniteSub fun x => k * F x :=
   isPositiveDefiniteSub_iff_isPositiveDefinite.mpr (hF.isPositiveDefinite.const_mul hk)
 
 /-- Positive-definite functions are closed under multiplication by a nonnegative real scalar. -/
-lemma real_smul {r : ℝ} (hr : 0 ≤ r) (hF : IsPositiveDefiniteSub F) :
-    IsPositiveDefiniteSub fun x => r • F x :=
+lemma real_smul {r : ℝ} (hr : 0 ≤ r) (hF : IsPositiveDefiniteSub F)
+    : IsPositiveDefiniteSub fun x => r • F x :=
   isPositiveDefiniteSub_iff_isPositiveDefinite.mpr (hF.isPositiveDefinite.real_smul hr)
 
 /-- Positive-definite functions are closed under pointwise multiplication (Schur product). -/
-lemma mul (hF : IsPositiveDefiniteSub F) (hH : IsPositiveDefiniteSub H) :
-    IsPositiveDefiniteSub fun x => F x * H x :=
-  isPositiveDefiniteSub_iff_isPositiveDefinite.mpr
-    (hF.isPositiveDefinite.mul hH.isPositiveDefinite)
+lemma mul (hF : IsPositiveDefiniteSub F) (hH : IsPositiveDefiniteSub H)
+    : IsPositiveDefiniteSub fun x => F x * H x :=
+  isPositiveDefiniteSub_iff_isPositiveDefinite.mpr (hF.isPositiveDefinite.mul hH.isPositiveDefinite)
 
 /-- Positive-definite functions are closed under finite sums. -/
-lemma sum {ι : Type*} {s : Finset ι} {F : ι → G → ℂ}
-    (hF : ∀ i ∈ s, IsPositiveDefiniteSub (F i)) :
-    IsPositiveDefiniteSub fun x => ∑ i ∈ s, F i x :=
-  isPositiveDefiniteSub_iff_isPositiveDefinite.mpr
-    (IsPositiveDefinite.sum fun i hi => (hF i hi).isPositiveDefinite)
+lemma sum {ι : Type*} {s : Finset ι} {F : ι → G → ℂ} (hF : ∀ i ∈ s, IsPositiveDefiniteSub (F i))
+    : IsPositiveDefiniteSub fun x => ∑ i ∈ s, F i x :=
+  isPositiveDefiniteSub_iff_isPositiveDefinite.mpr (IsPositiveDefinite.sum fun i hi =>
+    (hF i hi).isPositiveDefinite)
 
 /-- Positive-definite functions are closed under finite products (Schur products). -/
-lemma prod {ι : Type*} {s : Finset ι} {F : ι → G → ℂ}
-    (hF : ∀ i ∈ s, IsPositiveDefiniteSub (F i)) :
-    IsPositiveDefiniteSub fun x => ∏ i ∈ s, F i x :=
-  isPositiveDefiniteSub_iff_isPositiveDefinite.mpr
-    (IsPositiveDefinite.prod fun i hi => (hF i hi).isPositiveDefinite)
+lemma prod {ι : Type*} {s : Finset ι} {F : ι → G → ℂ} (hF : ∀ i ∈ s, IsPositiveDefiniteSub (F i))
+    : IsPositiveDefiniteSub fun x => ∏ i ∈ s, F i x :=
+  isPositiveDefiniteSub_iff_isPositiveDefinite.mpr (IsPositiveDefinite.prod fun i hi =>
+    (hF i hi).isPositiveDefinite)
 
 /-! ### A.5. Pullbacks -/
 
-/-- Positive definiteness is preserved by precomposition with an additive homomorphism; no
+/--
+Positive definiteness is preserved by precomposition with an additive homomorphism; no
 compatibility with an involution is needed, since an additive homomorphism automatically
-commutes with negation. -/
-lemma comp_addMonoidHom {N : Type*} [AddCommGroup N] (hF : IsPositiveDefiniteSub F)
-    (φ : N →+ G) : IsPositiveDefiniteSub fun x => F (φ x) := by
+commutes with negation.
+-/
+lemma comp_addMonoidHom {N : Type*} [AddCommGroup N] (hF : IsPositiveDefiniteSub F) (φ : N →+ G)
+    : IsPositiveDefiniteSub fun x => F (φ x) := by
   intro n c v
   simpa [← map_sub] using hF n c fun i => φ (v i)
 
 /-- Positive definiteness is preserved by rescaling the argument. -/
-lemma comp_smul {R : Type*} [DistribSMul R G] (hF : IsPositiveDefiniteSub F) (r : R) :
-    IsPositiveDefiniteSub fun x => F (r • x) := by
+lemma comp_smul {R : Type*} [DistribSMul R G] (hF : IsPositiveDefiniteSub F) (r : R)
+    : IsPositiveDefiniteSub fun x => F (r • x) := by
   intro n c v
   simpa [← smul_sub] using hF n c fun i => r • v i
 
 /-- Positive definiteness is preserved by negating the argument. -/
 lemma comp_neg (hF : IsPositiveDefiniteSub F) : IsPositiveDefiniteSub fun x => F (-x) := by
   intro n c v
-  simpa [neg_sub, sub_eq_neg_add, add_comm] using hF n c fun i => -v i
+  simpa [neg_sub, sub_eq_neg_add, add_comm] using hF n c fun i => - v i
 
 /-! ### A.6. Limits -/
 
 /-- Positive definiteness is preserved under pointwise limits along a nontrivial filter. -/
-lemma of_tendsto {ι : Type*} {l : Filter ι} [NeBot l] {F : ι → G → ℂ} {H : G → ℂ}
-    (hF : ∀ᶠ i in l, IsPositiveDefiniteSub (F i))
-    (hlim : ∀ x : G, Tendsto (fun i => F i x) l (𝓝 (H x))) :
-    IsPositiveDefiniteSub H :=
-  isPositiveDefiniteSub_iff_isPositiveDefinite.mpr
-    (IsPositiveDefinite.of_tendsto (hF.mono fun _ hi => hi.isPositiveDefinite)
-      fun a => hlim (WithNegStar.ofNegStar a))
+lemma of_tendsto
+    {ι : Type*} {l : Filter ι} [NeBot l]
+    {F : ι → G → ℂ} {H : G → ℂ} (hF : ∀ᶠ i in l, IsPositiveDefiniteSub (F i))
+    (hlim : ∀ x : G, Tendsto (fun i => F i x) l (𝓝 (H x)))
+    : IsPositiveDefiniteSub H :=
+  isPositiveDefiniteSub_iff_isPositiveDefinite.mpr (IsPositiveDefinite.of_tendsto
+    (hF.mono fun _ hi => hi.isPositiveDefinite) fun a => hlim (WithNegStar.ofNegStar a))
 
 /-! ### A.7. Normalization -/
 
-/-- Multiplying a positive-definite function by the reciprocal of its real value at the origin
-preserves positive definiteness. -/
-lemma normalize (hF : IsPositiveDefiniteSub F) :
-    IsPositiveDefiniteSub fun x => (((F 0).re)⁻¹ : ℂ) * F x :=
-  isPositiveDefiniteSub_iff_isPositiveDefinite.mpr (by
-    simpa using hF.isPositiveDefinite.normalize)
+/--
+Multiplying a positive-definite function by the reciprocal of its real value at the origin
+preserves positive definiteness.
+-/
+lemma normalize (hF : IsPositiveDefiniteSub F)
+    : IsPositiveDefiniteSub fun x => (((F 0).re)⁻¹ : ℂ) * F x :=
+  isPositiveDefiniteSub_iff_isPositiveDefinite.mpr (by simpa using hF.isPositiveDefinite.normalize)
 
 /-- The normalized function has value `1` at the origin. -/
 @[simp]
-lemma normalize_apply_zero (hF : IsPositiveDefiniteSub F) (h0 : F 0 ≠ 0) :
-    (((F 0).re)⁻¹ : ℂ) * F 0 = 1 := by
+lemma normalize_apply_zero (hF : IsPositiveDefiniteSub F) (h0 : F 0 ≠ 0)
+    : (((F 0).re)⁻¹ : ℂ) * F 0 = 1 := by
   have hpos := hF.map_zero_re_pos_of_ne_zero h0
   rw [hF.map_zero_eq_ofReal_re]
   norm_cast
   exact inv_mul_cancel₀ hpos.ne'
 
 /-- A normalized positive-definite function is bounded by `1`. -/
-lemma norm_normalize_apply_le_one (hF : IsPositiveDefiniteSub F) (a : G) :
-    ‖(((F 0).re)⁻¹ : ℂ) * F a‖ ≤ 1 := by
-  simpa using hF.isPositiveDefinite.norm_normalize_apply_le_one_of_star_eq_neg
-    (WithNegStar.toNegStar a) rfl
+lemma norm_normalize_apply_le_one (hF : IsPositiveDefiniteSub F) (a : G)
+    : ‖(((F 0).re)⁻¹ : ℂ) * F a‖ ≤ 1 := by
+  simpa using
+    hF.isPositiveDefinite.norm_normalize_apply_le_one_of_star_eq_neg (WithNegStar.toNegStar a) rfl
 
 end IsPositiveDefiniteSub
 
@@ -397,24 +419,29 @@ namespace IsPositiveDefiniteSub
 
 variable {G : Type*} [SeminormedAddCommGroup G] {F : G → ℂ}
 
-/-- A positive-definite function on a seminormed additive commutative group is uniformly
-continuous as soon as it is continuous at the origin. -/
-lemma uniformContinuous_of_continuousAt_zero (hF : IsPositiveDefiniteSub F)
-    (hcont : ContinuousAt F 0) : UniformContinuous F :=
+/--
+A positive-definite function on a seminormed additive commutative group is uniformly
+continuous as soon as it is continuous at the origin.
+-/
+lemma uniformContinuous_of_continuousAt_zero
+    (hF : IsPositiveDefiniteSub F) (hcont : ContinuousAt F 0)
+    : UniformContinuous F :=
   hF.isPositiveDefinite.uniformContinuous_of_continuousAt_zero_of_forall_star_eq_neg
-    (fun _ => rfl) hcont
+    (fun _ => rfl)
+    hcont
 
-/-- A positive-definite function on a seminormed additive commutative group is continuous as soon
-as it is continuous at the origin. -/
-lemma continuous_of_continuousAt_zero (hF : IsPositiveDefiniteSub F)
-    (hcont : ContinuousAt F 0) : Continuous F :=
+/--
+A positive-definite function on a seminormed additive commutative group is continuous as soon
+as it is continuous at the origin.
+-/
+lemma continuous_of_continuousAt_zero (hF : IsPositiveDefiniteSub F) (hcont : ContinuousAt F 0)
+    : Continuous F :=
   (hF.uniformContinuous_of_continuousAt_zero hcont).continuous
 
 end IsPositiveDefiniteSub
 
 /-- A nonnegative real constant is a positive-definite function. -/
-lemma isPositiveDefiniteSub_const {k : ℂ} (hk : 0 ≤ k) :
-    IsPositiveDefiniteSub (fun _ : G => k) :=
+lemma isPositiveDefiniteSub_const {k : ℂ} (hk : 0 ≤ k) : IsPositiveDefiniteSub (fun _ : G => k) :=
   isPositiveDefiniteSub_iff_isPositiveDefinite.mpr (isPositiveDefinite_const hk)
 
 /-- The zero function is positive definite. -/

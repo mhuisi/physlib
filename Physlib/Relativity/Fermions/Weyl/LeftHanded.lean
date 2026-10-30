@@ -82,20 +82,25 @@ def toFin2ℂFun : LeftHandedWeyl ≃ (Fin 2 → ℂ) where
   left_inv _ := rfl
   right_inv _ := rfl
 
-/-- The instance of `AddCommMonoid` on `LeftHandedWeyl` defined via its equivalence
-  with `Fin 2 → ℂ`. -/
+/--
+The instance of `AddCommMonoid` on `LeftHandedWeyl` defined via its equivalence
+with `Fin 2 → ℂ`.
+-/
 instance : AddCommMonoid LeftHandedWeyl := Equiv.addCommMonoid toFin2ℂFun
 
-/-- The instance of `AddCommGroup` on `LeftHandedWeyl` defined via its equivalence
-  with `Fin 2 → ℂ`. -/
+/--
+The instance of `AddCommGroup` on `LeftHandedWeyl` defined via its equivalence
+with `Fin 2 → ℂ`.
+-/
 instance : AddCommGroup LeftHandedWeyl := Equiv.addCommGroup toFin2ℂFun
 
 /-- The additive equivalence between `LeftHandedWeyl` and `Fin 2 → ℂ`. -/
-def toFin2ℂAddEquiv : LeftHandedWeyl ≃+ (Fin 2 → ℂ) :=
-  { toFin2ℂFun with map_add' _ _ := rfl }
+def toFin2ℂAddEquiv : LeftHandedWeyl ≃+ (Fin 2 → ℂ) := { toFin2ℂFun with map_add' _ _ := rfl }
 
-/-- The instance of `Module` on `LeftHandedWeyl` defined via its equivalence
-  with `Fin 2 → ℂ`. -/
+/--
+The instance of `Module` on `LeftHandedWeyl` defined via its equivalence
+with `Fin 2 → ℂ`.
+-/
 instance : Module ℂ LeftHandedWeyl := AddEquiv.module ℂ toFin2ℂAddEquiv
 
 /-- The linear equivalence between `LeftHandedWeyl` and `(Fin 2 → ℂ)`. -/
@@ -108,8 +113,10 @@ def toFin2ℂEquiv : LeftHandedWeyl ≃ₗ[ℂ] (Fin 2 → ℂ) where
   left_inv := fun _ => rfl
   right_inv := fun _ => rfl
 
-/-- The underlying element of `Fin 2 → ℂ` of a element in `LeftHandedWeyl` defined
-  through the linear equivalence `toFin2ℂEquiv`. -/
+/--
+The underlying element of `Fin 2 → ℂ` of a element in `LeftHandedWeyl` defined
+through the linear equivalence `toFin2ℂEquiv`.
+-/
 abbrev toFin2ℂ (ψ : LeftHandedWeyl) := toFin2ℂEquiv ψ
 
 lemma toFin2ℂ_eq_val (ψ : LeftHandedWeyl) : ψ.toFin2ℂ = ψ.val := rfl
@@ -123,8 +130,8 @@ instance : Nontrivial LeftHandedWeyl := toFin2ℂEquiv.toEquiv.nontrivial
 -/
 
 /-- The standard basis on left-handed Weyl fermions. -/
-def basis : Basis (Fin 2) ℂ LeftHandedWeyl := Basis.ofEquivFun
-  (AddEquiv.linearEquiv ℂ LeftHandedWeyl.toFin2ℂAddEquiv)
+def basis : Basis (Fin 2) ℂ LeftHandedWeyl :=
+  Basis.ofEquivFun (AddEquiv.linearEquiv ℂ LeftHandedWeyl.toFin2ℂAddEquiv)
 
 lemma basis_apply (i j : Fin 2) : (basis i).1 j = if j = i then 1 else 0 := by
   simp only [basis, AddEquiv.linearEquiv, AddEquiv.toEquiv_eq_coe, Equiv.toFun_as_coe,
@@ -154,18 +161,20 @@ lemma finrank_eq_two : Module.finrank ℂ LeftHandedWeyl = 2 := by
 
 -/
 
-/-- The vector space ℂ^2 carrying the fundamental representation of SL(2,C).
-  In index notation corresponds to a Weyl fermion with indices ψ^a. -/
-def rep : Representation ℂ SL(2,ℂ) LeftHandedWeyl where
+/--
+The vector space ℂ^2 carrying the fundamental representation of SL(2,C).
+In index notation corresponds to a Weyl fermion with indices ψ^a.
+-/
+def rep : Representation ℂ (SL(2,ℂ)) LeftHandedWeyl where
   toFun := fun M => {
-    toFun := fun (ψ : LeftHandedWeyl) =>
-      LeftHandedWeyl.toFin2ℂEquiv.symm (M.1 *ᵥ ψ.toFin2ℂ),
+    toFun := fun (ψ : LeftHandedWeyl) => LeftHandedWeyl.toFin2ℂEquiv.symm (M.1 *ᵥ ψ.toFin2ℂ)
     map_add' := by
       intro ψ ψ'
       simp [mulVec_add]
     map_smul' := by
       intro r ψ
-      simp [mulVec_smul]}
+      simp [mulVec_smul]
+  }
   map_one' := by
     ext i
     simp
@@ -177,13 +186,12 @@ def rep : Representation ℂ SL(2,ℂ) LeftHandedWeyl where
 
 lemma rep_apply (M : SL(2,ℂ)) (ψ : LeftHandedWeyl) : rep M ψ = ⟨M.1 *ᵥ ψ.1⟩ := rfl
 
-lemma rep_apply_eq_sum_basis (M : SL(2,ℂ)) (ψ : LeftHandedWeyl) :
-    rep M ψ = ∑ i, (∑ j, M.1 i j * ψ.1 j) • basis i := by
+lemma rep_apply_eq_sum_basis (M : SL(2,ℂ)) (ψ : LeftHandedWeyl)
+    : rep M ψ = ∑ i, (∑ j, M.1 i j * ψ.1 j) • basis i := by
   rw [eq_sum_basis (rep M ψ)]
   rfl
 
-lemma rep_apply_basis (M : SL(2,ℂ)) (i : Fin 2) :
-    rep M (basis i) = ∑ j, M.1 j i • basis j := by
+lemma rep_apply_basis (M : SL(2,ℂ)) (i : Fin 2) : rep M (basis i) = ∑ j, M.1 j i • basis j := by
   rw [rep_apply_eq_sum_basis]
   congr
   funext j
@@ -196,8 +204,8 @@ lemma rep_toMatrix (M : SL(2,ℂ)) : (LinearMap.toMatrix basis basis) (rep M) = 
   change (M.1 *ᵥ (Pi.single j 1)) i = _
   simp
 
-lemma rep_apply_basis_repr (M : SL(2,ℂ)) (i j : Fin 2) :
-    basis.repr (rep M (basis i)) j = M.1 j i := by
+lemma rep_apply_basis_repr (M : SL(2,ℂ)) (i j : Fin 2)
+    : basis.repr (rep M (basis i)) j = M.1 j i := by
   fin_cases j <;> simp [rep_apply_basis]
 
 /-!
@@ -207,8 +215,8 @@ lemma rep_apply_basis_repr (M : SL(2,ℂ)) (i j : Fin 2) :
 -/
 
 /-- The representation `rep` has no common eigenvector. -/
-lemma eq_zero_of_rep_eq_smul (ψ : LeftHandedWeyl)
-    (h : ∀ M : SL(2,ℂ), ∃ c : ℂ, rep M ψ = c • ψ) : ψ = 0 := by
+lemma eq_zero_of_rep_eq_smul (ψ : LeftHandedWeyl) (h : ∀ M : SL(2,ℂ), ∃ c : ℂ, rep M ψ = c • ψ)
+    : ψ = 0 := by
   have h : ∀ M : SL(2,ℂ), ∃ c : ℂ, ∀ i, (M.1 *ᵥ ψ.1) i = c * ψ.1 i := by
     intro M
     obtain ⟨c, hc⟩ := h M
@@ -226,14 +234,16 @@ lemma eq_zero_of_rep_eq_smul (ψ : LeftHandedWeyl)
   fin_cases i <;> assumption
 
 /-- A submodule of `LeftHandedWeyl` stable under `rep` is either `⊥` or everything. -/
-lemma eq_bot_or_eq_top_of_rep_mem (p : Submodule ℂ LeftHandedWeyl)
-    (h : ∀ (M : SL(2,ℂ)) (ψ : LeftHandedWeyl), ψ ∈ p → rep M ψ ∈ p) :
-    p = ⊥ ∨ p = ⊤ := by
+lemma eq_bot_or_eq_top_of_rep_mem
+    (p : Submodule ℂ LeftHandedWeyl) (h : ∀ (M : SL(2,ℂ)) (ψ : LeftHandedWeyl), ψ ∈ p → rep M ψ ∈ p)
+    : p = ⊥ ∨ p = ⊤ := by
   refine (eq_or_ne p ⊥).imp id fun hp => ?_
   obtain ⟨ψ, hψp, hψ⟩ := (Submodule.ne_bot_iff p).1 hp
   rcases eq_or_lt_of_le ((Submodule.span_singleton_le_iff_mem ψ p).2 hψp) with heq | hlt
-  · exact absurd (eq_zero_of_rep_eq_smul ψ fun M =>
-      (Submodule.mem_span_singleton.1 (heq.symm ▸ h M ψ hψp)).imp fun c hc => hc.symm) hψ
+  · exact absurd
+      (eq_zero_of_rep_eq_smul ψ fun M =>
+        (Submodule.mem_span_singleton.1 (heq.symm ▸ h M ψ hψp)).imp fun c hc => hc.symm)
+      hψ
   · have h₁ := Submodule.finrank_lt_finrank_of_lt hlt
     rw [finrank_span_singleton hψ] at h₁
     have h₂ : Module.finrank ℂ p ≤ 2 := by simpa using Submodule.finrank_le p
@@ -243,17 +253,17 @@ lemma eq_bot_or_eq_top_of_rep_mem (p : Submodule ℂ LeftHandedWeyl)
 instance : rep.IsIrreducible where
   exists_pair_ne := ⟨⊥, ⊤, fun h => bot_ne_top (congrArg Subrepresentation.toSubmodule h)⟩
   eq_bot_or_eq_top p :=
-    (eq_bot_or_eq_top_of_rep_mem p.toSubmodule
-      fun M _ hψ => p.apply_mem_toSubmodule M hψ).imp
+    (eq_bot_or_eq_top_of_rep_mem p.toSubmodule fun M _ hψ => p.apply_mem_toSubmodule M hψ).imp
       (fun h => Subrepresentation.toSubmodule_injective h)
       fun h => Subrepresentation.toSubmodule_injective h
 
 /-- Schur's lemma for left-handed Weyl fermions. -/
-lemma end_eq_smul_id_of_commute_rep {T : Module.End ℂ LeftHandedWeyl}
-    (hT : ∀ M : SL(2,ℂ), T ∘ₗ rep M = rep M ∘ₗ T) : ∃ μ : ℂ, T = μ • LinearMap.id := by
+lemma end_eq_smul_id_of_commute_rep
+    {T : Module.End ℂ LeftHandedWeyl} (hT : ∀ M : SL(2,ℂ), T ∘ₗ rep M = rep M ∘ₗ T)
+    : ∃ μ : ℂ, T = μ • LinearMap.id := by
   obtain ⟨μ, hμ⟩ :=
-    (Representation.IsIrreducible.algebraMap_intertwiningMap_bijective_of_isAlgClosed
-      (ρ := rep)).2 ⟨T, hT⟩
+    (Representation.IsIrreducible.algebraMap_intertwiningMap_bijective_of_isAlgClosed (ρ := rep)).2
+      ⟨T, hT⟩
   exact ⟨μ, congrArg Representation.IntertwiningMap.toLinearMap hμ.symm⟩
 
 end LeftHandedWeyl

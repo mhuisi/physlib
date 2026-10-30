@@ -49,10 +49,10 @@ namespace Local
 -/
 
 /-- Evaluate a local jet-dependent function along the `k`-jet of a field. -/
-noncomputable def evalOnJet (k : ℕ) (F : JetPoint d m k → ℝ)
-    (f : Space d → EuclideanSpace ℝ (Fin m)) :
-    Space d → ℝ :=
-  fun x => F (jetAt k f x)
+noncomputable def evalOnJet
+    (k : ℕ) (F : JetPoint d m k → ℝ) (f : Space d → EuclideanSpace ℝ (Fin m))
+    : Space d → ℝ := fun x =>
+  F (jetAt k f x)
 
 /-!
 ## B. Total derivatives
@@ -60,39 +60,44 @@ noncomputable def evalOnJet (k : ℕ) (F : JetPoint d m k → ℝ)
 -/
 
 /-- The total derivative of a jet-dependent function in the coordinate direction `i`. -/
-noncomputable def totalDerivative (k : ℕ) (i : Fin d) (F : JetPoint d m k → ℝ)
-    (f : Space d → EuclideanSpace ℝ (Fin m)) : Space d → ℝ :=
+noncomputable def totalDerivative
+    (k : ℕ) (i : Fin d) (F : JetPoint d m k → ℝ) (f : Space d → EuclideanSpace ℝ (Fin m))
+    : Space d → ℝ :=
   ∂[i] (evalOnJet k F f)
 
 /-- The iterated total derivative indexed by a multi-index. -/
-noncomputable def iteratedTotalDerivative (k : ℕ) (I : MultiIndex d) (F : JetPoint d m k → ℝ)
-    (f : Space d → EuclideanSpace ℝ (Fin m)) : Space d → ℝ :=
+noncomputable def iteratedTotalDerivative
+    (k : ℕ) (I : MultiIndex d) (F : JetPoint d m k → ℝ) (f : Space d → EuclideanSpace ℝ (Fin m))
+    : Space d → ℝ :=
   ∂^[I] (evalOnJet k F f)
 
 @[simp]
-lemma evalOnJet_apply (k : ℕ) (F : JetPoint d m k → ℝ)
-    (f : Space d → EuclideanSpace ℝ (Fin m)) (x : Space d) :
-    evalOnJet k F f x = F (jetAt k f x) := rfl
+lemma evalOnJet_apply
+    (k : ℕ) (F : JetPoint d m k → ℝ) (f : Space d → EuclideanSpace ℝ (Fin m)) (x : Space d)
+    : evalOnJet k F f x = F (jetAt k f x) :=
+  rfl
 
 @[simp]
-lemma totalDerivative_eq (k : ℕ) (i : Fin d) (F : JetPoint d m k → ℝ)
-    (f : Space d → EuclideanSpace ℝ (Fin m)) :
-    totalDerivative k i F f = ∂[i] (fun x => F (jetAt k f x)) := rfl
+lemma totalDerivative_eq
+    (k : ℕ) (i : Fin d) (F : JetPoint d m k → ℝ) (f : Space d → EuclideanSpace ℝ (Fin m))
+    : totalDerivative k i F f = ∂[i] (fun x => F (jetAt k f x)) :=
+  rfl
 
 @[simp]
-lemma iteratedTotalDerivative_eq (k : ℕ) (I : MultiIndex d) (F : JetPoint d m k → ℝ)
-    (f : Space d → EuclideanSpace ℝ (Fin m)) :
-    iteratedTotalDerivative k I F f = ∂^[I] (fun x => F (jetAt k f x)) := rfl
+lemma iteratedTotalDerivative_eq
+    (k : ℕ) (I : MultiIndex d) (F : JetPoint d m k → ℝ) (f : Space d → EuclideanSpace ℝ (Fin m))
+    : iteratedTotalDerivative k I F f = ∂^[I] (fun x => F (jetAt k f x)) :=
+  rfl
 
-lemma iteratedTotalDerivative_zero (k : ℕ) (F : JetPoint d m k → ℝ)
-    (f : Space d → EuclideanSpace ℝ (Fin m)) :
-    iteratedTotalDerivative k (0 : MultiIndex d) F f = evalOnJet k F f := by
+lemma iteratedTotalDerivative_zero
+    (k : ℕ) (F : JetPoint d m k → ℝ) (f : Space d → EuclideanSpace ℝ (Fin m))
+    : iteratedTotalDerivative k (0 : MultiIndex d) F f = evalOnJet k F f := by
   simp [iteratedTotalDerivative]
 
-lemma iteratedTotalDerivative_single (k : ℕ) (i : Fin d) (F : JetPoint d m k → ℝ)
-    (f : Space d → EuclideanSpace ℝ (Fin m)) :
-    iteratedTotalDerivative k (Physlib.MultiIndex.increment 0 i) F f =
-      totalDerivative k i F f := by
+lemma iteratedTotalDerivative_single
+    (k : ℕ) (i : Fin d) (F : JetPoint d m k → ℝ) (f : Space d → EuclideanSpace ℝ (Fin m))
+    : iteratedTotalDerivative k (Physlib.MultiIndex.increment 0 i) F f
+      = totalDerivative k i F f := by
   simp [iteratedTotalDerivative, totalDerivative]
 
 end Local

@@ -20,7 +20,6 @@ by its tensor structure.
 
 @[expose] public section
 
-
 open Module Matrix MatrixGroups Complex TensorProduct
 
 noncomputable section
@@ -42,26 +41,25 @@ def rep {d : ℕ} : Representation ℝ (LorentzGroup d) (Vector d) where
 
 -/
 
-lemma rep_apply_eq_mulVec (d : ℕ) (Λ : LorentzGroup d) (v : Vector d) :
-    rep Λ v = Λ *ᵥ v := by rfl
+lemma rep_apply_eq_mulVec (d : ℕ) (Λ : LorentzGroup d) (v : Vector d) : rep Λ v = Λ *ᵥ v := by rfl
 
-lemma rep_apply_eq_sum (d : ℕ) (Λ : LorentzGroup d) (v : Vector d) (k : Fin 1 ⊕ Fin d) :
-    rep Λ v k = ∑ j, Λ.1 k j • v j := rfl
+lemma rep_apply_eq_sum (d : ℕ) (Λ : LorentzGroup d) (v : Vector d) (k : Fin 1 ⊕ Fin d)
+    : rep Λ v k = ∑ j, Λ.1 k j • v j :=
+  rfl
 
-lemma rep_apply_basis {d} (μ : Fin 1 ⊕ Fin d) (Λ : LorentzGroup d) :
-    rep Λ (basis μ) = ∑ j, Λ.1 j μ • basis j := by
+lemma rep_apply_basis {d} (μ : Fin 1 ⊕ Fin d) (Λ : LorentzGroup d)
+    : rep Λ (basis μ) = ∑ j, Λ.1 j μ • basis j := by
   ext k
   simp [rep_apply_eq_sum, apply_sum]
 
-lemma rep_toMatrix (d : ℕ) (Λ : LorentzGroup d) :
-    LinearMap.toMatrix basis basis (rep Λ) = Λ.1 :=
+lemma rep_toMatrix (d : ℕ) (Λ : LorentzGroup d) : LinearMap.toMatrix basis basis (rep Λ) = Λ.1 :=
   (LinearEquiv.eq_symm_apply (LinearMap.toMatrix basis basis)).mp rfl
 
-lemma rep_injective (d : ℕ) (Λ : LorentzGroup d) : Function.Injective (rep Λ) :=
-  fun _ _ h => Matrix.mulVec_injective_of_isUnit (isUnit_of_invertible Λ.1) h
+lemma rep_injective (d : ℕ) (Λ : LorentzGroup d) : Function.Injective (rep Λ) := fun _ _ h =>
+  Matrix.mulVec_injective_of_isUnit (isUnit_of_invertible Λ.1) h
 
-lemma rep_surjective (d : ℕ) (Λ : LorentzGroup d) : Function.Surjective (rep Λ) :=
-  fun v => ⟨Λ⁻¹ *ᵥ v, by simp [rep_apply_eq_mulVec]⟩
+lemma rep_surjective (d : ℕ) (Λ : LorentzGroup d) : Function.Surjective (rep Λ) := fun v =>
+  ⟨Λ⁻¹ *ᵥ v, by simp [rep_apply_eq_mulVec]⟩
 
 lemma rep_bijective (d : ℕ) (Λ : LorentzGroup d) : Function.Bijective (rep Λ) :=
   ⟨rep_injective d Λ, rep_surjective d Λ⟩
@@ -72,8 +70,8 @@ lemma rep_contDiff (d : ℕ) {n} (Λ : LorentzGroup d) : ContDiff ℝ n (rep Λ)
   simp only [rep_apply_eq_sum, smul_eq_mul]
   fun_prop
 
-lemma rep_left_injective (d : ℕ) : Function.Injective (rep (d := d)) :=
-  fun _ _ h => LorentzGroup.eq_of_mulVec_eq (LinearMap.congr_fun h)
+lemma rep_left_injective (d : ℕ) : Function.Injective (rep (d := d)) := fun _ _ h =>
+  LorentzGroup.eq_of_mulVec_eq (LinearMap.congr_fun h)
 
 end Vector
 

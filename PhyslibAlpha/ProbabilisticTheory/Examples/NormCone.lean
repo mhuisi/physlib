@@ -65,9 +65,11 @@ namespace ProbabilisticTheory
 
 -/
 
-/-- The order-unit space `ℝ × V` built from a real normed vector space `V`, ordered by the
+/--
+The order-unit space `ℝ × V` built from a real normed vector space `V`, ordered by the
 ice-cream cone `{(r, x) | ‖x‖ ≤ r}`, as a type synonym so its order does not clash with the
-product order on `ℝ × V`. -/
+product order on `ℝ × V`.
+-/
 @[nolint unusedArguments]
 def NormCone (V : Type*) [NormedAddCommGroup V] [NormedSpace ℝ V] := ℝ × V
 
@@ -89,7 +91,7 @@ instance [FiniteDimensional ℝ V] : Module.Finite ℝ (NormCone V) :=
 
 @[simp] lemma toProd_zero : toProd (0 : NormCone V) = 0 := rfl
 @[simp] lemma toProd_add (x y : NormCone V) : toProd (x + y) = toProd x + toProd y := rfl
-@[simp] lemma toProd_neg (x : NormCone V) : toProd (-x) = -toProd x := rfl
+@[simp] lemma toProd_neg (x : NormCone V) : toProd (-x) = - toProd x := rfl
 @[simp] lemma toProd_sub (x y : NormCone V) : toProd (x - y) = toProd x - toProd y := rfl
 @[simp] lemma toProd_smul (c : ℝ) (x : NormCone V) : toProd (c • x) = c • toProd x := rfl
 @[simp] lemma toProd_one : toProd (1 : NormCone V) = (1, 0) := rfl
@@ -109,12 +111,11 @@ def NonnegCone (z : NormCone V) : Prop := ‖(toProd z).2‖ ≤ (toProd z).1
 instance : LE (NormCone V) := ⟨fun x y => NonnegCone (y - x)⟩
 instance : LT (NormCone V) := ⟨fun x y => x ≤ y ∧ ¬ y ≤ x⟩
 
-lemma le_iff {x y : NormCone V} :
-    x ≤ y ↔ ‖(toProd y).2 - (toProd x).2‖ ≤ (toProd y).1 - (toProd x).1 :=
+lemma le_iff {x y : NormCone V}
+    : x ≤ y ↔ ‖(toProd y).2 - (toProd x).2‖ ≤ (toProd y).1 - (toProd x).1 :=
   Iff.rfl
 
-lemma mk_le_mk_iff {r₁ r₂ : ℝ} {v₁ v₂ : V} :
-    mk r₁ v₁ ≤ mk r₂ v₂ ↔ ‖v₂ - v₁‖ ≤ r₂ - r₁ := by
+lemma mk_le_mk_iff {r₁ r₂ : ℝ} {v₁ v₂ : V} : mk r₁ v₁ ≤ mk r₂ v₂ ↔ ‖v₂ - v₁‖ ≤ r₂ - r₁ := by
   rw [le_iff, toProd_mk, toProd_mk]
 
 instance : PartialOrder (NormCone V) where
@@ -178,9 +179,9 @@ instance instArchimedeanOrderUnitSpace : ArchimedeanOrderUnitSpace (NormCone V) 
 -/
 
 /-- The effects of `NormCone V` are the pairs `(r, v)` with `‖v‖ ≤ r` and `‖v‖ ≤ 1 - r`. -/
-lemma mem_effect_iff {z : NormCone V} :
-    z ∈ (Effect (NormCone V) : Set (NormCone V)) ↔
-      ‖(toProd z).2‖ ≤ (toProd z).1 ∧ ‖(toProd z).2‖ ≤ 1 - (toProd z).1 := by
+lemma mem_effect_iff {z : NormCone V}
+    : z ∈ (Effect (NormCone V) : Set (NormCone V))
+      ↔ ‖(toProd z).2‖ ≤ (toProd z).1 ∧ ‖(toProd z).2‖ ≤ 1 - (toProd z).1 := by
   simp [Set.mem_Icc, le_iff]
 
 /-!
@@ -189,16 +190,18 @@ lemma mem_effect_iff {z : NormCone V} :
 
 -/
 
-@[simp] lemma mk_add (r₁ r₂ : ℝ) (v₁ v₂ : V) : mk r₁ v₁ + mk r₂ v₂ = mk (r₁ + r₂) (v₁ + v₂) :=
+@[simp]
+lemma mk_add (r₁ r₂ : ℝ) (v₁ v₂ : V) : mk r₁ v₁ + mk r₂ v₂ = mk (r₁ + r₂) (v₁ + v₂) :=
   toProd.injective (by simp)
 
-@[simp] lemma mk_smul (c : ℝ) (r : ℝ) (v : V) : c • mk r v = mk (c * r) (c • v) :=
+@[simp]
+lemma mk_smul (c : ℝ) (r : ℝ) (v : V) : c • mk r v = mk (c * r) (c • v) :=
   toProd.injective (by simp)
 
-@[simp] lemma mk_neg (r : ℝ) (v : V) : -mk r v = mk (-r) (-v) :=
-  toProd.injective (by simp)
+@[simp] lemma mk_neg (r : ℝ) (v : V) : - mk r v = mk (-r) (-v) := toProd.injective (by simp)
 
-@[simp] lemma smul_one_eq_mk (r : ℝ) : r • (1 : NormCone V) = mk r 0 :=
+@[simp]
+lemma smul_one_eq_mk (r : ℝ) : r • (1 : NormCone V) = mk r 0 :=
   toProd.injective (by rw [toProd_smul_one, toProd_mk])
 
 @[simp] lemma mk_toProd (z : NormCone V) : mk (toProd z).1 (toProd z).2 = z := rfl
@@ -212,8 +215,10 @@ lemma mk_zero_le_smul_one_iff {r : ℝ} {v : V} : mk 0 v ≤ r • (1 : NormCone
   simp [norm_neg]
 
 open ArchimedeanOrderUnitSpace in
-/-- The order-unit norm of a purely spatial coordinate `(0, v)` is exactly the norm of `v`: the
-order-unit norm restricted to this slice is the norm it was built from. -/
+/--
+The order-unit norm of a purely spatial coordinate `(0, v)` is exactly the norm of `v`: the
+order-unit norm restricted to this slice is the norm it was built from.
+-/
 lemma orderUnitNorm_mk_zero (v : V) : orderUnitNorm (mk 0 v) = ‖v‖ := by
   apply le_antisymm
   · exact orderUnitNorm_le
@@ -229,15 +234,13 @@ def mkZeroLinear : V →ₗ[ℝ] NormCone V where
 @[simp] lemma mkZeroLinear_apply (v : V) : mkZeroLinear v = mk 0 v := rfl
 
 /-- Every state is a "radius plus a bounded linear functional of the spatial part". -/
-lemma apply_mk_eq (ω : 𝓢[ℝ, NormCone V]) (r : ℝ) (v : V) :
-    ω (mk r v) = r + ω (mkZeroLinear v) := by
+lemma apply_mk_eq (ω : 𝓢[ℝ, NormCone V]) (r : ℝ) (v : V) : ω (mk r v) = r + ω (mkZeroLinear v) := by
   have hmk : mk r v = r • (1 : NormCone V) + mkZeroLinear v := by
     rw [smul_one_eq_mk, mkZeroLinear_apply, mk_add, zero_add, add_zero]
   rw [hmk, map_add, map_smul, map_one, smul_eq_mul, mul_one]
 
 /-- The functional a state induces on `V`, `v ↦ ω (0, v)`, is `1`-Lipschitz. -/
-lemma abs_apply_mkZeroLinear_le (ω : 𝓢[ℝ, NormCone V]) (v : V) :
-    |ω (mkZeroLinear v)| ≤ ‖v‖ := by
+lemma abs_apply_mkZeroLinear_le (ω : 𝓢[ℝ, NormCone V]) (v : V) : |ω (mkZeroLinear v)| ≤ ‖v‖ := by
   have hbdd : |ω (mkZeroLinear v)| ≤ ArchimedeanOrderUnitSpace.orderUnitNorm (mkZeroLinear v) :=
     UnitalPositiveLinearMap.abs_apply_le_orderUnitNorm ω _
   rwa [mkZeroLinear_apply, orderUnitNorm_mk_zero] at hbdd
@@ -248,39 +251,50 @@ def dualOfLinear (ω : 𝓢[ℝ, NormCone V]) : V →ₗ[ℝ] ℝ where
   map_add' _ _ := by rw [mkZeroLinear.map_add, map_add]
   map_smul' _ _ := by rw [mkZeroLinear.map_smul, map_smul]; rfl
 
-@[simp] lemma dualOfLinear_apply (ω : 𝓢[ℝ, NormCone V]) (v : V) :
-    dualOfLinear ω v = ω (mkZeroLinear v) := rfl
+@[simp]
+lemma dualOfLinear_apply (ω : 𝓢[ℝ, NormCone V]) (v : V) : dualOfLinear ω v = ω (mkZeroLinear v) :=
+  rfl
 
 /-- The bounded linear functional on `V` induced by a state of `NormCone V`. -/
 noncomputable def dualOf (ω : 𝓢[ℝ, NormCone V]) : V →L[ℝ] ℝ :=
   (dualOfLinear ω).mkContinuous 1 (fun v => by simpa using abs_apply_mkZeroLinear_le ω v)
 
-@[simp] lemma dualOf_apply (ω : 𝓢[ℝ, NormCone V]) (v : V) : dualOf ω v = ω (mkZeroLinear v) := by
+@[simp]
+lemma dualOf_apply (ω : 𝓢[ℝ, NormCone V]) (v : V) : dualOf ω v = ω (mkZeroLinear v) := by
   rw [dualOf, LinearMap.mkContinuous_apply, dualOfLinear_apply]
 
 lemma norm_dualOf_le (ω : 𝓢[ℝ, NormCone V]) : ‖dualOf ω‖ ≤ 1 :=
   LinearMap.mkContinuous_norm_le _ zero_le_one _
 
-/-- Build a state of `NormCone V` from a bounded linear functional `f` of norm at most `1`:
-`ω (r, x) = r + f x`. -/
+/--
+Build a state of `NormCone V` from a bounded linear functional `f` of norm at most `1`:
+`ω (r, x) = r + f x`.
+-/
 noncomputable def stateOfDual (f : V →L[ℝ] ℝ) (hf : ‖f‖ ≤ 1) : 𝓢[ℝ, NormCone V] :=
   UnitalPositiveLinearMap.ofLinearMap
-    { toFun := fun z => (toProd z).1 + f (toProd z).2
+    {
+      toFun := fun z => (toProd z).1 + f (toProd z).2
       map_add' := fun x y => by simp [map_add]; ring
-      map_smul' := fun c x => by simp [map_smul]; ring }
+      map_smul' := fun c x => by simp [map_smul]; ring
+    }
     (fun z hz => by
       have hz' : ‖(toProd z).2‖ ≤ (toProd z).1 := by simpa [le_iff] using hz
-      have := neg_le_of_abs_le ((f.le_opNorm (toProd z).2).trans
-        (mul_le_of_le_one_left (norm_nonneg _) hf))
+      have :=
+        neg_le_of_abs_le ((f.le_opNorm (toProd z).2).trans
+          (mul_le_of_le_one_left (norm_nonneg _) hf))
       change 0 ≤ (toProd z).1 + f (toProd z).2
       linarith)
     (by simp)
 
-@[simp] lemma stateOfDual_apply (f : V →L[ℝ] ℝ) (hf : ‖f‖ ≤ 1) (z : NormCone V) :
-    stateOfDual f hf z = (toProd z).1 + f (toProd z).2 := rfl
+@[simp]
+lemma stateOfDual_apply (f : V →L[ℝ] ℝ) (hf : ‖f‖ ≤ 1) (z : NormCone V)
+    : stateOfDual f hf z = (toProd z).1 + f (toProd z).2 :=
+  rfl
 
-/-- States of `NormCone V` correspond exactly to the closed unit ball of the continuous dual
-of `V`. -/
+/--
+States of `NormCone V` correspond exactly to the closed unit ball of the continuous dual
+of `V`.
+-/
 noncomputable def stateEquiv : 𝓢[ℝ, NormCone V] ≃ {f : V →L[ℝ] ℝ // ‖f‖ ≤ 1} where
   toFun ω := ⟨dualOf ω, norm_dualOf_le ω⟩
   invFun f := stateOfDual f.1 f.2
@@ -303,8 +317,8 @@ noncomputable def stateEquiv : 𝓢[ℝ, NormCone V] ≃ {f : V →L[ℝ] ℝ //
 variable {ι : Type*} [Fintype ι]
 
 /-- A state is determined by its values on a basis. -/
-lemma apply_mk_basis (b : Module.Basis ι ℝ V) (ω : 𝓢[ℝ, NormCone V]) (r : ℝ) (v : V) :
-    ω (mk r v) = r + ∑ i, b.repr v i * ω (mk 0 (b i)) := by
+lemma apply_mk_basis (b : Module.Basis ι ℝ V) (ω : 𝓢[ℝ, NormCone V]) (r : ℝ) (v : V)
+    : ω (mk r v) = r + ∑ i, b.repr v i * ω (mk 0 (b i)) := by
   rw [apply_mk_eq]
   congr 1
   conv_lhs => rw [← b.sum_repr v]
@@ -317,13 +331,12 @@ lemma apply_mk_basis (b : Module.Basis ι ℝ V) (ω : 𝓢[ℝ, NormCone V]) (r
 -/
 
 /-- `dualOf` sends mixtures to convex combinations. -/
-lemma dualOf_mix (φ ψ : 𝓢[ℝ, NormCone V]) (t : unitInterval) :
-    dualOf (UnitalPositiveLinearMap.mix φ ψ t) =
-      (t : ℝ) • dualOf φ + (1 - (t : ℝ)) • dualOf ψ := by
+lemma dualOf_mix (φ ψ : 𝓢[ℝ, NormCone V]) (t : unitInterval)
+    : dualOf (UnitalPositiveLinearMap.mix φ ψ t)
+      = (t : ℝ) • dualOf φ + (1 - (t : ℝ)) • dualOf ψ := by
   apply ContinuousLinearMap.ext
   intro v
-  simp only [dualOf_apply, UnitalPositiveLinearMap.mix_apply, add_apply, smul_apply,
-    smul_eq_mul]
+  simp only [dualOf_apply, UnitalPositiveLinearMap.mix_apply, add_apply, smul_apply, smul_eq_mul]
 
 /-- `dualOf` is injective. -/
 lemma dualOf_injective : Function.Injective (dualOf (V := V)) := by
@@ -331,18 +344,20 @@ lemma dualOf_injective : Function.Injective (dualOf (V := V)) := by
   exact stateEquiv.injective (Subtype.ext h)
 
 /-- `dualOf` undoes `stateOfDual`. -/
-@[simp] lemma dualOf_stateOfDual (f : V →L[ℝ] ℝ) (hf : ‖f‖ ≤ 1) :
-    dualOf (stateOfDual f hf) = f :=
+@[simp]
+lemma dualOf_stateOfDual (f : V →L[ℝ] ℝ) (hf : ‖f‖ ≤ 1) : dualOf (stateOfDual f hf) = f :=
   congrArg Subtype.val (stateEquiv.apply_symm_apply (⟨f, hf⟩ : {g : V →L[ℝ] ℝ // ‖g‖ ≤ 1}))
 
 lemma range_dualOf : Set.range (dualOf (V := V)) = {g | ‖g‖ ≤ 1} :=
   (Set.range_subset_iff.2 norm_dualOf_le).antisymm fun f hf =>
     ⟨stateOfDual f hf, dualOf_stateOfDual f hf⟩
 
-/-- A state is pure exactly when its functional is an extreme point of the unit ball of the
-dual. -/
-lemma isPure_stateOfDual_iff {f : V →L[ℝ] ℝ} (hf : ‖f‖ ≤ 1) :
-    (stateOfDual f hf).IsPure ↔ f ∈ Set.extremePoints ℝ {g : V →L[ℝ] ℝ | ‖g‖ ≤ 1} := by
+/--
+A state is pure exactly when its functional is an extreme point of the unit ball of the
+dual.
+-/
+lemma isPure_stateOfDual_iff {f : V →L[ℝ] ℝ} (hf : ‖f‖ ≤ 1)
+    : (stateOfDual f hf).IsPure ↔ f ∈ Set.extremePoints ℝ {g : V →L[ℝ] ℝ | ‖g‖ ≤ 1} := by
   rw [UnitalPositiveLinearMap.isPure_iff_mem_extremePoints dualOf_injective dualOf_mix,
     dualOf_stateOfDual, range_dualOf]
 
@@ -360,28 +375,29 @@ variable {n : ℕ} (b : Module.Basis (Fin n) ℝ V) {p q : ℝ}
 
 include b in
 /-- The states of an `ℓp` norm cone are the closed `ℓq` ball. -/
-noncomputable def lpStateEquiv (hpq : p.HolderConjugate q)
-    (hnorm : ∀ v : V, ‖v‖ = (∑ i, |b.repr v i| ^ p) ^ (1 / p)) :
-    𝓢[ℝ, NormCone V] ≃ {a : Fin n → ℝ // ∑ i, |a i| ^ q ≤ 1} :=
+noncomputable def lpStateEquiv
+    (hpq : p.HolderConjugate q) (hnorm : ∀ v : V, ‖v‖ = (∑ i, |b.repr v i| ^ p) ^ (1 / p))
+    : 𝓢[ℝ, NormCone V] ≃ {a : Fin n → ℝ // ∑ i, |a i| ^ q ≤ 1} :=
   stateEquiv.trans (dualLpEquiv b hpq hnorm)
 
 include b in
-lemma lpCone_mem_effect_iff (hnorm : ∀ v : V, ‖v‖ = (∑ i, |b.repr v i| ^ p) ^ (1 / p))
-    {z : NormCone V} : z ∈ (Effect (NormCone V) : Set (NormCone V)) ↔
-      (∑ i, |b.repr (toProd z).2 i| ^ p) ^ (1 / p) ≤ (toProd z).1 ∧
-        (∑ i, |b.repr (toProd z).2 i| ^ p) ^ (1 / p) ≤ 1 - (toProd z).1 := by
+lemma lpCone_mem_effect_iff
+    (hnorm : ∀ v : V, ‖v‖ = (∑ i, |b.repr v i| ^ p) ^ (1 / p)) {z : NormCone V}
+    : z ∈ (Effect (NormCone V) : Set (NormCone V))
+      ↔ (∑ i, |b.repr (toProd z).2 i| ^ p) ^ (1 / p) ≤ (toProd z).1
+        ∧ (∑ i, |b.repr (toProd z).2 i| ^ p) ^ (1 / p) ≤ 1 - (toProd z).1 := by
   rw [mem_effect_iff, hnorm]
 
 end Lp
 
 /-- The states of the sup-normed norm cone are the closed `ℓ1` ball. -/
-noncomputable def supStateEquiv {m : ℕ} :
-    𝓢[ℝ, NormCone (Fin m → ℝ)] ≃ {a : Fin m → ℝ // ∑ i, |a i| ≤ 1} :=
+noncomputable def supStateEquiv {m : ℕ}
+    : 𝓢[ℝ, NormCone (Fin m → ℝ)] ≃ {a : Fin m → ℝ // ∑ i, |a i| ≤ 1} :=
   stateEquiv.trans HolderDual.dualSupEquiv
 
-lemma supCone_mem_effect_iff {m : ℕ} {z : NormCone (Fin m → ℝ)} :
-    z ∈ (Effect (NormCone (Fin m → ℝ)) : Set (NormCone (Fin m → ℝ))) ↔
-      ‖(toProd z).2‖ ≤ (toProd z).1 ∧ ‖(toProd z).2‖ ≤ 1 - (toProd z).1 :=
+lemma supCone_mem_effect_iff {m : ℕ} {z : NormCone (Fin m → ℝ)}
+    : z ∈ (Effect (NormCone (Fin m → ℝ)) : Set (NormCone (Fin m → ℝ)))
+      ↔ ‖(toProd z).2‖ ≤ (toProd z).1 ∧ ‖(toProd z).2‖ ≤ 1 - (toProd z).1 :=
   mem_effect_iff
 
 end NormCone

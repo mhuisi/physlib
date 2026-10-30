@@ -40,16 +40,22 @@ namespace Integration
 /-! ## A. Integrals against a real-valued density -/
 
 open MeasureTheory in
-/-- Integrating `g` against the measure with real-valued density `f` (taken through
+/--
+Integrating `g` against the measure with real-valued density `f` (taken through
 `ENNReal.ofReal`) is integrating `f x • g x` against the original measure, for measurable
 `f` that is everywhere nonnegative. This is the `ℝ`-valued form of
-`integral_withDensity_eq_integral_smul`, which takes an `NNReal`-valued density. -/
-lemma integral_withDensity_ofReal_eq_integral_smul {α : Type*} [MeasurableSpace α]
+`integral_withDensity_eq_integral_smul`, which takes an `NNReal`-valued density.
+-/
+lemma integral_withDensity_ofReal_eq_integral_smul
+    {α : Type*} [MeasurableSpace α]
     {μ : Measure α} {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-    {f : α → ℝ} (hf : Measurable f) (hf0 : ∀ x, 0 ≤ f x) (g : α → E) :
-    ∫ x, g x ∂(μ.withDensity fun x => ENNReal.ofReal (f x)) = ∫ x, f x • g x ∂μ := by
+    {f : α → ℝ} (hf : Measurable f) (hf0 : ∀ x, 0 ≤ f x)
+    (g : α → E)
+    : ∫ x, g x ∂(μ.withDensity fun x => ENNReal.ofReal (f x)) = ∫ x, f x • g x ∂μ := by
   refine (integral_withDensity_eq_integral_smul
-    (f := fun x => Real.toNNReal (f x)) hf.real_toNNReal g).trans ?_
+      (f := fun x => Real.toNNReal (f x))
+      hf.real_toNNReal g).trans
+    ?_
   congr 1
   funext x
   rw [NNReal.smul_def, Real.coe_toNNReal _ (hf0 x)]

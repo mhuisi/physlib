@@ -51,10 +51,12 @@ variable {H : Type*} [NormedAddCommGroup H] [InnerProductSpace ℂ H] [CompleteS
 
 -/
 
-/-- A bounded sesquilinear form in the orientation expected by Mathlib's Riesz representation
-theorem. -/
-structure BoundedSesquilinearForm (H : Type*) [NormedAddCommGroup H] [InnerProductSpace ℂ H]
-    [CompleteSpace H] where
+/--
+A bounded sesquilinear form in the orientation expected by Mathlib's Riesz representation
+theorem.
+-/
+structure BoundedSesquilinearForm
+    (H : Type*) [NormedAddCommGroup H] [InnerProductSpace ℂ H] [CompleteSpace H] where
   /-- The underlying sesquilinear form. -/
   form : H →ₛₗ[starRingEnd ℂ] H →ₗ[ℂ] ℂ
   /-- The form is bounded by some constant `C`. -/
@@ -85,11 +87,9 @@ lemma continuous_apply (x y : H) : B.continuous x y = B.form x y :=
 -/
 
 /-- The unique bounded operator represented by `B`. -/
-noncomputable def operator : H →L[ℂ] H :=
-  InnerProductSpace.continuousLinearMapOfBilin B.continuous
+noncomputable def operator : H →L[ℂ] H := InnerProductSpace.continuousLinearMapOfBilin B.continuous
 
-lemma operator_inner (x y : H) :
-    ⟪y, B.operator x⟫_ℂ = starRingEnd ℂ (B.form x y) := by
+lemma operator_inner (x y : H) : ⟪y, B.operator x⟫_ℂ = starRingEnd ℂ (B.form x y) := by
   have h := InnerProductSpace.continuousLinearMapOfBilin_apply B.continuous x y
   change ⟪B.operator x, y⟫_ℂ = B.form x y at h
   rw [← inner_conj_symm, h]

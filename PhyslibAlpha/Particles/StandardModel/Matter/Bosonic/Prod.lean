@@ -43,8 +43,11 @@ sum is the tensor product of the symmetric algebras, which is
 
 @[expose] public section
 
-variable {G₀ : Type} [Group G₀] {𝔤 : Type} [LieRing 𝔤] [LieAlgebra ℝ 𝔤]
-  {GJ : Type} [Group GJ] {𝔤J : Type} [LieRing 𝔤J] [LieAlgebra ℝ 𝔤J]
+variable
+  {G₀ : Type} [Group G₀]
+  {𝔤 : Type} [LieRing 𝔤] [LieAlgebra ℝ 𝔤]
+  {GJ : Type} [Group GJ]
+  {𝔤J : Type} [LieRing 𝔤J] [LieAlgebra ℝ 𝔤J]
   {jets : LocalGaugeData G₀ 𝔤 GJ 𝔤J}
 
 open scoped TensorProduct
@@ -57,15 +60,16 @@ namespace StandardModel
 
 -/
 
-/-- **The bosonic algebra of a direct sum is the tensor product of the bosonic algebras.**
-  Two bosonic matter fields taken together are one field valued in the direct sum of their
-  target spaces, and its bosonic algebra is the tensor product of theirs. The ordinary —
-  rather than the graded — tensor product is correct here: bosonic generators commute
-  across species just as they do within one. -/
-noncomputable def BosonicAlgebra.prodEquiv (M N : MatterField jets)
-    (h : M.massWeight = N.massWeight) :
-    BosonicAlgebra (M.prod N h) ≃ₐ[ℂ] BosonicAlgebra M ⊗[ℂ] BosonicAlgebra N :=
-  (SymmetricAlgebra.congr (JetComponentSpace.prodEquiv M N h)).trans
-    SymmetricAlgebra.prodEquiv
+/--
+**The bosonic algebra of a direct sum is the tensor product of the bosonic algebras.**
+Two bosonic matter fields taken together are one field valued in the direct sum of their
+target spaces, and its bosonic algebra is the tensor product of theirs. The ordinary —
+rather than the graded — tensor product is correct here: bosonic generators commute
+across species just as they do within one.
+-/
+noncomputable def BosonicAlgebra.prodEquiv
+    (M N : MatterField jets) (h : M.massWeight = N.massWeight)
+    : BosonicAlgebra (M.prod N h) ≃ₐ[ℂ] BosonicAlgebra M ⊗[ℂ] BosonicAlgebra N :=
+  (SymmetricAlgebra.congr (JetComponentSpace.prodEquiv M N h)).trans SymmetricAlgebra.prodEquiv
 
 end StandardModel

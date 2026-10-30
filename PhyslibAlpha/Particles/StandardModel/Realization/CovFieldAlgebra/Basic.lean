@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Jinzheng Li, Nathaneal Sajan, Joseph Tooby-Smith
 -/
 module
+
 public import PhyslibAlpha.Particles.StandardModel.Realization.CovariantDeriv
 /-!
 # The covariant field algebra
@@ -57,9 +58,9 @@ open TensorProduct Matrix MatrixGroups Lorentz
 
 namespace AlgebraRealization
 
-variable {B : Type} [Ring B] [Algebra ℂ B]
-  {repJet : Representation ℂ JetGaugeGroupI B}
-  {repLorentz : Representation ℂ SL(2,ℂ) B}
+variable
+  {B : Type} [Ring B] [Algebra ℂ B]
+  {repJet : Representation ℂ JetGaugeGroupI B} {repLorentz : Representation ℂ (SL(2,ℂ)) B}
   {massWeightPoly : B →ₐ[ℂ] Polynomial B}
   (h : AlgebraRealization B repJet repLorentz massWeightPoly)
 
@@ -74,51 +75,66 @@ the field-strength tower in that indexing, and the matter towers already carry i
 
 -/
 
-/-- The covariant derivatives of the field strength in the ordered-tuple indexing used
-  by the covariant form of the theory. -/
-noncomputable def covF (h : AlgebraRealization B repJet repLorentz massWeightPoly) {n : ℕ}
-    (l : Fin n → (Fin 1 ⊕ Fin 3))
-    (μ ν : Fin 1 ⊕ Fin 3) : Module.Dual ℝ GaugeAlgebra →ₗ[ℝ] B :=
+/--
+The covariant derivatives of the field strength in the ordered-tuple indexing used
+by the covariant form of the theory.
+-/
+noncomputable def covF
+    (h : AlgebraRealization B repJet repLorentz massWeightPoly)
+    {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3))
+    (μ ν : Fin 1 ⊕ Fin 3)
+    : Module.Dual ℝ GaugeAlgebra →ₗ[ℝ] B :=
   h.covDerivFieldStrength (List.ofFn l) μ ν
 
-/-- The field-strength tower is antisymmetric in its two covector indices: the
-  ordered-tuple indexing of `covDerivFieldStrength_swap`. -/
-lemma covF_swap (h : AlgebraRealization B repJet repLorentz massWeightPoly) {n : ℕ}
-    (l : Fin n → (Fin 1 ⊕ Fin 3))
-    (μ ν : Fin 1 ⊕ Fin 3) (φ : Module.Dual ℝ GaugeAlgebra) :
-    h.covF l ν μ φ = - h.covF l μ ν φ :=
+/--
+The field-strength tower is antisymmetric in its two covector indices: the
+ordered-tuple indexing of `covDerivFieldStrength_swap`.
+-/
+lemma covF_swap
+    (h : AlgebraRealization B repJet repLorentz massWeightPoly)
+    {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3))
+    (μ ν : Fin 1 ⊕ Fin 3) (φ : Module.Dual ℝ GaugeAlgebra)
+    : h.covF l ν μ φ = - h.covF l μ ν φ :=
   h.covDerivFieldStrength_swap (List.ofFn l) μ ν φ
 
-/-- At a dual vector vanishing on every bracket, such as the hypercharge coordinate, the
-  field-strength tower is symmetric in its derivative slots, at every order: there the
-  covariant derivatives are the ordinary ones, which commute. The components along the
-  non-abelian factors have no such symmetry. -/
-lemma covF_comp_perm_of_map_lie (h : AlgebraRealization B repJet repLorentz massWeightPoly)
-    {φ : Module.Dual ℝ GaugeAlgebra} (hφ : ∀ x y : GaugeAlgebra, φ ⁅x, y⁆ = 0) {n : ℕ}
-    (σ : Equiv.Perm (Fin n)) (l : Fin n → (Fin 1 ⊕ Fin 3)) (μ ν : Fin 1 ⊕ Fin 3) :
-    h.covF (l ∘ σ) μ ν φ = h.covF l μ ν φ :=
-  GaugeAlgebraRealization.iteratedCovDerivAdjoint_apply_perm_of_map_lie hφ _ _
-    (σ.ofFn_comp_perm l) 0
+/--
+At a dual vector vanishing on every bracket, such as the hypercharge coordinate, the
+field-strength tower is symmetric in its derivative slots, at every order: there the
+covariant derivatives are the ordinary ones, which commute. The components along the
+non-abelian factors have no such symmetry.
+-/
+lemma covF_comp_perm_of_map_lie
+    (h : AlgebraRealization B repJet repLorentz massWeightPoly)
+    {φ : Module.Dual ℝ GaugeAlgebra} (hφ : ∀ x y : GaugeAlgebra, φ ⁅x, y⁆ = 0)
+    {n : ℕ} (σ : Equiv.Perm (Fin n)) (l : Fin n → (Fin 1 ⊕ Fin 3))
+    (μ ν : Fin 1 ⊕ Fin 3)
+    : h.covF (l ∘ σ) μ ν φ = h.covF l μ ν φ :=
+  GaugeAlgebraRealization.iteratedCovDerivAdjoint_apply_perm_of_map_lie hφ _ _ (σ.ofFn_comp_perm l)
+    0
 
-/-- The covariant generators of the Standard Model: the field-strength tower, the Higgs
-  towers and their conjugates, and the ten fermion towers and their conjugates. -/
-noncomputable def covGenerators (h : AlgebraRealization B repJet repLorentz massWeightPoly) :
-    Set B :=
+/--
+The covariant generators of the Standard Model: the field-strength tower, the Higgs
+towers and their conjugates, and the ten fermion towers and their conjugates.
+-/
+noncomputable def covGenerators (h : AlgebraRealization B repJet repLorentz massWeightPoly)
+    : Set B :=
   (⋃ (n : ℕ) (l : Fin n → Fin 1 ⊕ Fin 3) (μ : Fin 1 ⊕ Fin 3) (ν : Fin 1 ⊕ Fin 3),
-      Set.range (h.covF l μ ν)) ∪
-    (⋃ (n : ℕ) (l : Fin n → Fin 1 ⊕ Fin 3),
-      Set.range (h.covDerivH l) ∪ Set.range (h.covDerivBarH l)) ∪
-    (⋃ (i : Fin 3) (n : ℕ) (l : Fin n → Fin 1 ⊕ Fin 3),
-      Set.range (h.covDerivD i l) ∪ Set.range (h.covDerivBarD i l) ∪
-      Set.range (h.covDerivU i l) ∪ Set.range (h.covDerivBarU i l) ∪
-      Set.range (h.covDerivQ i l) ∪ Set.range (h.covDerivBarQ i l) ∪
-      Set.range (h.covDerivL i l) ∪ Set.range (h.covDerivBarL i l) ∪
-      Set.range (h.covDerivE i l) ∪ Set.range (h.covDerivBarE i l))
+      Set.range (h.covF l μ ν))
+    ∪ (⋃ (n : ℕ) (l : Fin n → Fin 1 ⊕ Fin 3),
+        Set.range (h.covDerivH l) ∪ Set.range (h.covDerivBarH l))
+    ∪ (⋃ (i : Fin 3) (n : ℕ) (l : Fin n → Fin 1 ⊕ Fin 3),
+        Set.range (h.covDerivD i l) ∪ Set.range (h.covDerivBarD i l) ∪
+        Set.range (h.covDerivU i l) ∪ Set.range (h.covDerivBarU i l) ∪
+        Set.range (h.covDerivQ i l) ∪ Set.range (h.covDerivBarQ i l) ∪
+        Set.range (h.covDerivL i l) ∪ Set.range (h.covDerivBarL i l) ∪
+        Set.range (h.covDerivE i l) ∪ Set.range (h.covDerivBarE i l))
 
-/-- The covariant subalgebra: the algebra generated by the covariant towers. This is
-  the `CovAlgebraRealization.fieldAlgebra` of the covariant form of the theory. -/
-noncomputable def covAlgebra (h : AlgebraRealization B repJet repLorentz massWeightPoly) :
-    Subalgebra ℂ B :=
+/--
+The covariant subalgebra: the algebra generated by the covariant towers. This is
+the `CovAlgebraRealization.fieldAlgebra` of the covariant form of the theory.
+-/
+noncomputable def covAlgebra (h : AlgebraRealization B repJet repLorentz massWeightPoly)
+    : Subalgebra ℂ B :=
   Algebra.adjoin ℂ h.covGenerators
 
 /-!
@@ -131,20 +147,22 @@ generating sets coincide.
 
 -/
 
-/-- The covariant generating set, with the field-strength tower indexed by lists rather
-  than by ordered tuples. -/
-noncomputable def covGeneratorsList (h : AlgebraRealization B repJet repLorentz massWeightPoly) :
-    Set B :=
+/--
+The covariant generating set, with the field-strength tower indexed by lists rather
+than by ordered tuples.
+-/
+noncomputable def covGeneratorsList (h : AlgebraRealization B repJet repLorentz massWeightPoly)
+    : Set B :=
   (⋃ (l : List (Fin 1 ⊕ Fin 3)) (μ : Fin 1 ⊕ Fin 3) (ν : Fin 1 ⊕ Fin 3),
-      Set.range (h.covDerivFieldStrength l μ ν)) ∪
-    (⋃ (n : ℕ) (l : Fin n → Fin 1 ⊕ Fin 3),
-      Set.range (h.covDerivH l) ∪ Set.range (h.covDerivBarH l)) ∪
-    (⋃ (i : Fin 3) (n : ℕ) (l : Fin n → Fin 1 ⊕ Fin 3),
-      Set.range (h.covDerivD i l) ∪ Set.range (h.covDerivBarD i l) ∪
-      Set.range (h.covDerivU i l) ∪ Set.range (h.covDerivBarU i l) ∪
-      Set.range (h.covDerivQ i l) ∪ Set.range (h.covDerivBarQ i l) ∪
-      Set.range (h.covDerivL i l) ∪ Set.range (h.covDerivBarL i l) ∪
-      Set.range (h.covDerivE i l) ∪ Set.range (h.covDerivBarE i l))
+      Set.range (h.covDerivFieldStrength l μ ν))
+    ∪ (⋃ (n : ℕ) (l : Fin n → Fin 1 ⊕ Fin 3),
+        Set.range (h.covDerivH l) ∪ Set.range (h.covDerivBarH l))
+    ∪ (⋃ (i : Fin 3) (n : ℕ) (l : Fin n → Fin 1 ⊕ Fin 3),
+        Set.range (h.covDerivD i l) ∪ Set.range (h.covDerivBarD i l) ∪
+        Set.range (h.covDerivU i l) ∪ Set.range (h.covDerivBarU i l) ∪
+        Set.range (h.covDerivQ i l) ∪ Set.range (h.covDerivBarQ i l) ∪
+        Set.range (h.covDerivL i l) ∪ Set.range (h.covDerivBarL i l) ∪
+        Set.range (h.covDerivE i l) ∪ Set.range (h.covDerivBarE i l))
 
 /-- The two indexings of the covariant generating set agree. -/
 lemma covGenerators_eq_covGeneratorsList : h.covGenerators = h.covGeneratorsList := by
@@ -166,49 +184,75 @@ lemma covGenerators_eq_covGeneratorsList : h.covGenerators = h.covGeneratorsList
 
 -/
 
-/-- The classification of gauge invariants of the field algebra: a `repJet`-invariant
-  element of the field algebra lies in the covariant subalgebra — it is a polynomial in
-  the covariant derivatives of the field strength and the covariant derivatives of the
-  matter fields. -/
-lemma invariant_mem_adjoin_covDeriv {x : B}
-    (hx : x ∈ h.fieldAlgebra)
-    (hinv : ∀ U : JetGaugeGroupI, repJet U x = x) :
-    x ∈ h.covAlgebra := by
+/--
+The classification of gauge invariants of the field algebra: a `repJet`-invariant
+element of the field algebra lies in the covariant subalgebra — it is a polynomial in
+the covariant derivatives of the field strength and the covariant derivatives of the
+matter fields.
+-/
+lemma invariant_mem_adjoin_covDeriv
+    {x : B} (hx : x ∈ h.fieldAlgebra) (hinv : ∀ U : JetGaugeGroupI, repJet U x = x)
+    : x ∈ h.covAlgebra := by
   rw [covAlgebra, covGenerators_eq_covGeneratorsList, covGeneratorsList]
   -- the matter towers commute with the gauge-field symbols
-  have hcS : ∀ (p : Multiset (Fin 1 ⊕ Fin 3)) (μ : Fin 1 ⊕ Fin 3) (ψ : Module.Dual ℝ GaugeAlgebra),
-      ∀ y ∈ h.matterTowers, Commute y (h.A p μ ψ) := by
+  have hcS
+      : ∀ (p : Multiset (Fin 1 ⊕ Fin 3)) (μ : Fin 1 ⊕ Fin 3) (ψ : Module.Dual ℝ GaugeAlgebra),
+        ∀ y ∈ h.matterTowers,
+          Commute y (h.A p μ ψ) := by
     intro p μ ψ y hy
-    refine h.matterTowers_induction (fun y => Commute y (h.A p μ ψ)) hy
-      ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_
+    refine h.matterTowers_induction
+      (fun y => Commute y (h.A p μ ψ))
+      hy ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_
     · exact fun n l φ =>
         GaugeAlgebraRealization.commute_covDerivIter _ _ h.A_comm_A h.A_comm_H n l φ p μ ψ
     · exact fun n l φ =>
         GaugeAlgebraRealization.commute_covDerivIter _ _ h.A_comm_A h.A_comm_barH n l φ p μ ψ
-    · exact fun i n l φ => GaugeAlgebraRealization.commute_covDerivIter _ _ h.A_comm_A
-        (fun s μ ψ s' φ => h.A_comm_d s μ ψ i s' φ) n l φ p μ ψ
-    · exact fun i n l φ => GaugeAlgebraRealization.commute_covDerivIter _ _ h.A_comm_A
-        (fun s μ ψ s' φ => h.A_comm_bard s μ ψ i s' φ) n l φ p μ ψ
-    · exact fun i n l φ => GaugeAlgebraRealization.commute_covDerivIter _ _ h.A_comm_A
-        (fun s μ ψ s' φ => h.A_comm_u s μ ψ i s' φ) n l φ p μ ψ
-    · exact fun i n l φ => GaugeAlgebraRealization.commute_covDerivIter _ _ h.A_comm_A
-        (fun s μ ψ s' φ => h.A_comm_baru s μ ψ i s' φ) n l φ p μ ψ
-    · exact fun i n l φ => GaugeAlgebraRealization.commute_covDerivIter _ _ h.A_comm_A
-        (fun s μ ψ s' φ => h.A_comm_Q s μ ψ i s' φ) n l φ p μ ψ
-    · exact fun i n l φ => GaugeAlgebraRealization.commute_covDerivIter _ _ h.A_comm_A
-        (fun s μ ψ s' φ => h.A_comm_barQ s μ ψ i s' φ) n l φ p μ ψ
-    · exact fun i n l φ => GaugeAlgebraRealization.commute_covDerivIter _ _ h.A_comm_A
-        (fun s μ ψ s' φ => h.A_comm_L s μ ψ i s' φ) n l φ p μ ψ
-    · exact fun i n l φ => GaugeAlgebraRealization.commute_covDerivIter _ _ h.A_comm_A
-        (fun s μ ψ s' φ => h.A_comm_barL s μ ψ i s' φ) n l φ p μ ψ
-    · exact fun i n l φ => GaugeAlgebraRealization.commute_covDerivIter _ _ h.A_comm_A
-        (fun s μ ψ s' φ => h.A_comm_e s μ ψ i s' φ) n l φ p μ ψ
-    · exact fun i n l φ => GaugeAlgebraRealization.commute_covDerivIter _ _ h.A_comm_A
-        (fun s μ ψ s' φ => h.A_comm_bare s μ ψ i s' φ) n l φ p μ ψ
+    · exact fun i n l φ =>
+        GaugeAlgebraRealization.commute_covDerivIter _ _ h.A_comm_A
+          (fun s μ ψ s' φ => h.A_comm_d s μ ψ i s' φ)
+          n l φ p μ ψ
+    · exact fun i n l φ =>
+        GaugeAlgebraRealization.commute_covDerivIter _ _ h.A_comm_A
+          (fun s μ ψ s' φ => h.A_comm_bard s μ ψ i s' φ)
+          n l φ p μ ψ
+    · exact fun i n l φ =>
+        GaugeAlgebraRealization.commute_covDerivIter _ _ h.A_comm_A
+          (fun s μ ψ s' φ => h.A_comm_u s μ ψ i s' φ)
+          n l φ p μ ψ
+    · exact fun i n l φ =>
+        GaugeAlgebraRealization.commute_covDerivIter _ _ h.A_comm_A
+          (fun s μ ψ s' φ => h.A_comm_baru s μ ψ i s' φ)
+          n l φ p μ ψ
+    · exact fun i n l φ =>
+        GaugeAlgebraRealization.commute_covDerivIter _ _ h.A_comm_A
+          (fun s μ ψ s' φ => h.A_comm_Q s μ ψ i s' φ)
+          n l φ p μ ψ
+    · exact fun i n l φ =>
+        GaugeAlgebraRealization.commute_covDerivIter _ _ h.A_comm_A
+          (fun s μ ψ s' φ => h.A_comm_barQ s μ ψ i s' φ)
+          n l φ p μ ψ
+    · exact fun i n l φ =>
+        GaugeAlgebraRealization.commute_covDerivIter _ _ h.A_comm_A
+          (fun s μ ψ s' φ => h.A_comm_L s μ ψ i s' φ)
+          n l φ p μ ψ
+    · exact fun i n l φ =>
+        GaugeAlgebraRealization.commute_covDerivIter _ _ h.A_comm_A
+          (fun s μ ψ s' φ => h.A_comm_barL s μ ψ i s' φ)
+          n l φ p μ ψ
+    · exact fun i n l φ =>
+        GaugeAlgebraRealization.commute_covDerivIter _ _ h.A_comm_A
+          (fun s μ ψ s' φ => h.A_comm_e s μ ψ i s' φ)
+          n l φ p μ ψ
+    · exact fun i n l φ =>
+        GaugeAlgebraRealization.commute_covDerivIter _ _ h.A_comm_A
+          (fun s μ ψ s' φ => h.A_comm_bare s μ ψ i s' φ)
+          n l φ p μ ψ
   -- the matter towers are fixed by pure gauge jets
   have hS : ∀ y ∈ h.matterTowers, ∀ U : localGaugeData.truncationKer 0, repJet U.1 y = y := by
     intro y hy U
-    exact h.matterTowers_induction (fun y => repJet U.1 y = y) hy
+    exact h.matterTowers_induction
+      (fun y => repJet U.1 y = y)
+      hy
       (fun _ l φ => h.repJet_covDerivH_of_mem_truncationKer_zero l U φ)
       (fun _ l φ => h.repJet_covDerivBarH_of_mem_truncationKer_zero l U φ)
       (fun i _ l φ => h.repJet_covDerivD_of_mem_truncationKer_zero i l U φ)
@@ -222,8 +266,11 @@ lemma invariant_mem_adjoin_covDeriv {x : B}
       (fun i _ l φ => h.repJet_covDerivE_of_mem_truncationKer_zero i l U φ)
       (fun i _ l φ => h.repJet_covDerivBarE_of_mem_truncationKer_zero i l U φ)
   -- the invariant lies in the algebra of the gauge-field symbols over the matter towers
-  have hx' : x ∈ Algebra.adjoin ℂ ({b : B | ∃ (p : Multiset (Fin 1 ⊕ Fin 3)) (μ : Fin 1 ⊕ Fin 3)
-      (ψ : Module.Dual ℝ GaugeAlgebra), b = h.A p μ ψ} ∪ h.matterTowers) := by
+  have hx'
+      : x ∈ Algebra.adjoin ℂ
+        ({b : B | ∃ (p : Multiset (Fin 1 ⊕ Fin 3)) (μ : Fin 1 ⊕ Fin 3)
+            (ψ : Module.Dual ℝ GaugeAlgebra), b = h.A p μ ψ}
+          ∪ h.matterTowers) := by
     rw [h.fieldAlgebra_eq_covDeriv, Set.union_assoc] at hx
     refine Algebra.adjoin_mono ?_ hx
     rintro b (hA | hb)
@@ -234,11 +281,11 @@ lemma invariant_mem_adjoin_covDeriv {x : B}
   -- the abstract classification
   rw [Set.union_assoc]
   refine Algebra.adjoin_mono ?_
-    (GaugeAlgebraRealization.invariant_mem_adjoin_fieldStrength h.gaugeRealization
-      h.matterTowers hcS hS hx' hinv)
+    (GaugeAlgebraRealization.invariant_mem_adjoin_fieldStrength h.gaugeRealization h.matterTowers
+      hcS hS hx' hinv)
   rintro b (⟨l, ν, lam, φ, rfl⟩ | hb)
-  · exact Or.inl (Set.mem_iUnion_of_mem l (Set.mem_iUnion_of_mem ν
-      (Set.mem_iUnion_of_mem lam ⟨φ, rfl⟩)))
+  · exact Or.inl (Set.mem_iUnion_of_mem l
+      (Set.mem_iUnion_of_mem ν (Set.mem_iUnion_of_mem lam ⟨φ, rfl⟩)))
   · exact Or.inr hb
 
 end AlgebraRealization

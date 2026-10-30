@@ -66,43 +66,48 @@ section RealScalars
 
 variable [Module ℝ B] [SMulCommClass ℝ B B] [IsScalarTower ℝ B B]
 
-/-- The field strength `F_μν = ∂_μ A_ν − ∂_ν A_μ + ⁅A_μ, A_ν⁆` of a family of
-  gauge-field symbols, as a family of derivative symbols: the `s`-th derivative has
-  the derivative terms through the shifted symbols `A (μ ::ₘ s) ν`, the commutator
-  term through the Leibniz convolution `commutatorFam`. This is the physicists'
-  `F_μν^a = ∂_μ A_ν^a − ∂_ν A_μ^a + f^a_{bc} A_μ^b A_ν^c`: the gauge-algebra bracket
-  already carries the physicists' factor of `i`, so no explicit factor appears — the
-  same normalization as in the structural equation of the Maurer–Cartan form, which
-  is exactly what makes the field strength transform without inhomogeneous terms
-  (`repGauge_fieldStrength`). -/
+/--
+The field strength `F_μν = ∂_μ A_ν − ∂_ν A_μ + ⁅A_μ, A_ν⁆` of a family of
+gauge-field symbols, as a family of derivative symbols: the `s`-th derivative has
+the derivative terms through the shifted symbols `A (μ ::ₘ s) ν`, the commutator
+term through the Leibniz convolution `commutatorFam`. This is the physicists'
+`F_μν^a = ∂_μ A_ν^a − ∂_ν A_μ^a + f^a_{bc} A_μ^b A_ν^c`: the gauge-algebra bracket
+already carries the physicists' factor of `i`, so no explicit factor appears — the
+same normalization as in the structural equation of the Maurer–Cartan form, which
+is exactly what makes the field strength transform without inhomogeneous terms
+(`repGauge_fieldStrength`).
+-/
 noncomputable def fieldStrength
-    (A : Multiset (Fin 1 ⊕ Fin 3) → (Fin 1 ⊕ Fin 3) → Module.Dual ℝ 𝔤 →ₗ[ℝ] B)
-    (μ ν : Fin 1 ⊕ Fin 3) (s : Multiset (Fin 1 ⊕ Fin 3)) :
-    Module.Dual ℝ 𝔤 →ₗ[ℝ] B :=
+    (A : Multiset (Fin 1 ⊕ Fin 3) → (Fin 1 ⊕ Fin 3) → Module.Dual ℝ 𝔤 →ₗ[ℝ] B) (μ ν : Fin 1 ⊕ Fin 3)
+    (s : Multiset (Fin 1 ⊕ Fin 3))
+    : Module.Dual ℝ 𝔤 →ₗ[ℝ] B :=
   A (μ ::ₘ s) ν - A (ν ::ₘ s) μ + commutatorFam A μ ν s
 
 @[simp]
 lemma fieldStrength_apply
-    (A : Multiset (Fin 1 ⊕ Fin 3) → (Fin 1 ⊕ Fin 3) → Module.Dual ℝ 𝔤 →ₗ[ℝ] B)
-    (μ ν : Fin 1 ⊕ Fin 3) (s : Multiset (Fin 1 ⊕ Fin 3)) (φ : Module.Dual ℝ 𝔤) :
-    fieldStrength A μ ν s φ = A (μ ::ₘ s) ν φ - A (ν ::ₘ s) μ φ + commutatorFam A μ ν s φ :=
+    (A : Multiset (Fin 1 ⊕ Fin 3) → (Fin 1 ⊕ Fin 3) → Module.Dual ℝ 𝔤 →ₗ[ℝ] B) (μ ν : Fin 1 ⊕ Fin 3)
+    (s : Multiset (Fin 1 ⊕ Fin 3)) (φ : Module.Dual ℝ 𝔤)
+    : fieldStrength A μ ν s φ = A (μ ::ₘ s) ν φ - A (ν ::ₘ s) μ φ + commutatorFam A μ ν s φ :=
   rfl
 
-/-- The underived field strength: derivative symbols on singletons, plus the plain
-  commutator. -/
+/--
+The underived field strength: derivative symbols on singletons, plus the plain
+commutator.
+-/
 lemma fieldStrength_zero
-    (A : Multiset (Fin 1 ⊕ Fin 3) → (Fin 1 ⊕ Fin 3) → Module.Dual ℝ 𝔤 →ₗ[ℝ] B)
-    (μ ν : Fin 1 ⊕ Fin 3) :
-    fieldStrength A μ ν 0 = A {μ} ν - A {ν} μ + commutator A μ ν := by
+    (A : Multiset (Fin 1 ⊕ Fin 3) → (Fin 1 ⊕ Fin 3) → Module.Dual ℝ 𝔤 →ₗ[ℝ] B) (μ ν : Fin 1 ⊕ Fin 3)
+    : fieldStrength A μ ν 0 = A {μ} ν - A {ν} μ + commutator A μ ν := by
   rw [fieldStrength, commutatorFam_zero]
   rfl
 
-/-- The antisymmetrized pair of derivative symbols is the field strength minus its
-  commutator term. -/
+/--
+The antisymmetrized pair of derivative symbols is the field strength minus its
+commutator term.
+-/
 lemma pair_eq_fieldStrength_sub_commutatorFam
-    (A : Multiset (Fin 1 ⊕ Fin 3) → (Fin 1 ⊕ Fin 3) → Module.Dual ℝ 𝔤 →ₗ[ℝ] B)
-    (ν μ : Fin 1 ⊕ Fin 3) (s : Multiset (Fin 1 ⊕ Fin 3)) :
-    A (ν ::ₘ s) μ - A (μ ::ₘ s) ν = fieldStrength A ν μ s - commutatorFam A ν μ s := by
+    (A : Multiset (Fin 1 ⊕ Fin 3) → (Fin 1 ⊕ Fin 3) → Module.Dual ℝ 𝔤 →ₗ[ℝ] B) (ν μ : Fin 1 ⊕ Fin 3)
+    (s : Multiset (Fin 1 ⊕ Fin 3))
+    : A (ν ::ₘ s) μ - A (μ ::ₘ s) ν = fieldStrength A ν μ s - commutatorFam A ν μ s := by
   rw [fieldStrength, add_sub_cancel_right]
 
 /-!
@@ -116,145 +121,165 @@ bracket, once the two factors of each product may be exchanged.
 
 -/
 
-/-- The bracket of two component families with commuting values is antisymmetric: in
-  the basis expansion the structure constants are antisymmetric in the two gauge
-  indices, and the two field factors of each term may be exchanged. -/
-lemma bracketFam_swap_of_commute {f g : Module.Dual ℝ 𝔤 →ₗ[ℝ] B}
-    (hfg : ∀ φ ψ, Commute (f φ) (g ψ)) :
-    bracketFam g f = - bracketFam f g := by
+/--
+The bracket of two component families with commuting values is antisymmetric: in
+the basis expansion the structure constants are antisymmetric in the two gauge
+indices, and the two field factors of each term may be exchanged.
+-/
+lemma bracketFam_swap_of_commute {f g : Module.Dual ℝ 𝔤 →ₗ[ℝ] B} (hfg : ∀ φ ψ, Commute (f φ) (g ψ))
+    : bracketFam g f = - bracketFam f g := by
   refine LinearMap.ext fun φ => ?_
   rw [LinearMap.neg_apply, bracketFam_apply_eq_sum, bracketFam_apply_eq_sum]
   set bv := Module.Free.chooseBasis ℝ 𝔤 with hbv
-  have hstep : ∀ j k, φ ⁅bv j, bv k⁆ • (g (bv.coord j) * f (bv.coord k)) =
-      -(φ ⁅bv k, bv j⁆ • (f (bv.coord k) * g (bv.coord j))) := by
+  have hstep
+      : ∀ j k,
+        φ ⁅bv j, bv k⁆ • (g (bv.coord j) * f (bv.coord k))
+          = -(φ ⁅bv k, bv j⁆ • (f (bv.coord k) * g (bv.coord j))) := by
     intro j k
-    rw [(hfg (bv.coord k) (bv.coord j)).eq, ← lie_skew (bv k) (bv j), map_neg,
-      neg_smul, neg_neg]
+    rw [(hfg (bv.coord k) (bv.coord j)).eq, ← lie_skew (bv k) (bv j), map_neg, neg_smul, neg_neg]
   rw [Finset.sum_congr rfl fun j _ => Finset.sum_congr rfl fun k _ => hstep j k]
   simp only [Finset.sum_neg_distrib]
   exact congrArg Neg.neg Finset.sum_comm
 
-/-- The derived commutator term is antisymmetric in its two directions when the symbols
-  of the gauge field commute: swapping the two parts of the antidiagonal matches the
-  Leibniz convolution with the swapped one termwise. -/
+/--
+The derived commutator term is antisymmetric in its two directions when the symbols
+of the gauge field commute: swapping the two parts of the antidiagonal matches the
+Leibniz convolution with the swapped one termwise.
+-/
 lemma commutatorFam_swap
     (A : Multiset (Fin 1 ⊕ Fin 3) → (Fin 1 ⊕ Fin 3) → Module.Dual ℝ 𝔤 →ₗ[ℝ] B)
-    (hA : ∀ (s s' : Multiset (Fin 1 ⊕ Fin 3)) (μ μ' : Fin 1 ⊕ Fin 3)
-      (ψ ψ' : Module.Dual ℝ 𝔤), Commute (A s μ ψ) (A s' μ' ψ'))
-    (μ ν : Fin 1 ⊕ Fin 3) (s : Multiset (Fin 1 ⊕ Fin 3)) :
-    commutatorFam A ν μ s = - commutatorFam A μ ν s := by
+    (hA : ∀ (s s' : Multiset (Fin 1 ⊕ Fin 3)) (μ μ' : Fin 1 ⊕ Fin 3) (ψ ψ' : Module.Dual ℝ 𝔤),
+      Commute (A s μ ψ) (A s' μ' ψ'))
+    (μ ν : Fin 1 ⊕ Fin 3) (s : Multiset (Fin 1 ⊕ Fin 3))
+    : commutatorFam A ν μ s = - commutatorFam A μ ν s := by
   rw [commutatorFam, commutatorFam,
     Multiset.sum_antidiagonal_swap s (fun a b => bracketFam (A a ν) (A b μ)),
     ← Multiset.sum_map_neg'']
-  exact congrArg Multiset.sum (Multiset.map_congr rfl fun p _ =>
-    bracketFam_swap_of_commute fun φ ψ => hA _ _ _ _ _ _)
+  exact congrArg Multiset.sum
+    (Multiset.map_congr rfl fun p _ => bracketFam_swap_of_commute fun φ ψ => hA _ _ _ _ _ _)
 
-/-- The field strength is antisymmetric in its two covector indices when the symbols of
-  the gauge field commute: the two derivative terms swap outright, the commutator term
-  by `commutatorFam_swap`. -/
+/--
+The field strength is antisymmetric in its two covector indices when the symbols of
+the gauge field commute: the two derivative terms swap outright, the commutator term
+by `commutatorFam_swap`.
+-/
 lemma fieldStrength_swap
     (A : Multiset (Fin 1 ⊕ Fin 3) → (Fin 1 ⊕ Fin 3) → Module.Dual ℝ 𝔤 →ₗ[ℝ] B)
-    (hA : ∀ (s s' : Multiset (Fin 1 ⊕ Fin 3)) (μ μ' : Fin 1 ⊕ Fin 3)
-      (ψ ψ' : Module.Dual ℝ 𝔤), Commute (A s μ ψ) (A s' μ' ψ'))
-    (μ ν : Fin 1 ⊕ Fin 3) (s : Multiset (Fin 1 ⊕ Fin 3)) :
-    fieldStrength A ν μ s = - fieldStrength A μ ν s := by
+    (hA : ∀ (s s' : Multiset (Fin 1 ⊕ Fin 3)) (μ μ' : Fin 1 ⊕ Fin 3) (ψ ψ' : Module.Dual ℝ 𝔤),
+      Commute (A s μ ψ) (A s' μ' ψ'))
+    (μ ν : Fin 1 ⊕ Fin 3) (s : Multiset (Fin 1 ⊕ Fin 3))
+    : fieldStrength A ν μ s = - fieldStrength A μ ν s := by
   rw [fieldStrength, fieldStrength, commutatorFam_swap A hA μ ν s]
   abel
 
-/-- The field strength is natural in the algebra: a multiplicative linear map carries the
-  field strength of a family to the field strength of its image. -/
-lemma fieldStrength_map {B' : Type} [Ring B'] [Module ℝ B'] [SMulCommClass ℝ B' B']
-    [IsScalarTower ℝ B' B'] (Φ : B →ₗ[ℝ] B') (hΦ : ∀ b₁ b₂, Φ (b₁ * b₂) = Φ b₁ * Φ b₂)
-    (A : Multiset (Fin 1 ⊕ Fin 3) → (Fin 1 ⊕ Fin 3) → Module.Dual ℝ 𝔤 →ₗ[ℝ] B)
-    (μ ν : Fin 1 ⊕ Fin 3) (s : Multiset (Fin 1 ⊕ Fin 3)) :
-    fieldStrength (fun p ρ => Φ ∘ₗ A p ρ) μ ν s = Φ ∘ₗ fieldStrength A μ ν s := by
-  rw [fieldStrength, fieldStrength, commutatorFam_map Φ hΦ, LinearMap.comp_add,
-    LinearMap.comp_sub]
+/--
+The field strength is natural in the algebra: a multiplicative linear map carries the
+field strength of a family to the field strength of its image.
+-/
+lemma fieldStrength_map
+    {B' : Type} [Ring B'] [Module ℝ B'] [SMulCommClass ℝ B' B'] [IsScalarTower ℝ B' B']
+    (Φ : B →ₗ[ℝ] B') (hΦ : ∀ b₁ b₂, Φ (b₁ * b₂) = Φ b₁ * Φ b₂)
+    (A : Multiset (Fin 1 ⊕ Fin 3) → (Fin 1 ⊕ Fin 3) → Module.Dual ℝ 𝔤 →ₗ[ℝ] B) (μ ν : Fin 1 ⊕ Fin 3)
+    (s : Multiset (Fin 1 ⊕ Fin 3))
+    : fieldStrength (fun p ρ => Φ ∘ₗ A p ρ) μ ν s = Φ ∘ₗ fieldStrength A μ ν s := by
+  rw [fieldStrength, fieldStrength, commutatorFam_map Φ hΦ, LinearMap.comp_add, LinearMap.comp_sub]
 
 end RealScalars
 
 section ComplexScalars
 
-variable [Algebra ℂ B] {repLorentz : Representation ℂ SL(2,ℂ) B}
-  {repGauge : Representation ℂ GJ B}
+variable
+  [Algebra ℂ B]
+  {repLorentz : Representation ℂ (SL(2,ℂ)) B} {repGauge : Representation ℂ GJ B}
   {A : Multiset (Fin 1 ⊕ Fin 3) → (Fin 1 ⊕ Fin 3) → Module.Dual ℝ 𝔤 →ₗ[ℝ] B}
   (h : GaugeAlgebraRealization jets B repGauge repLorentz)
 
-/-- **The field strength transforms in the adjoint, at every derivative order**: under
-  a gauge jet `U` every derivative symbol of `F_μν` transforms by the pure Leibniz
-  convolution of the dual adjoint action over the multiset antidiagonal — the exact
-  analogue of `gauge_apply_deriv` with *no* Maurer–Cartan shift, since the field
-  strength transforms homogeneously. The `κ`-into-the-adjoint splittings of the
-  derivative terms (`repGauge_cons_apply`) cancel the `ad` cross-term convolutions of
-  the commutator (`repGauge_commutatorFam`) through the coassociativity and swap of
-  the antidiagonal, and the derived Maurer–Cartan shifts cancel the bracket-shift
-  convolution through the all-orders structural equation. -/
+/--
+**The field strength transforms in the adjoint, at every derivative order**: under
+a gauge jet `U` every derivative symbol of `F_μν` transforms by the pure Leibniz
+convolution of the dual adjoint action over the multiset antidiagonal — the exact
+analogue of `gauge_apply_deriv` with *no* Maurer–Cartan shift, since the field
+strength transforms homogeneously. The `κ`-into-the-adjoint splittings of the
+derivative terms (`repGauge_cons_apply`) cancel the `ad` cross-term convolutions of
+the commutator (`repGauge_commutatorFam`) through the coassociativity and swap of
+the antidiagonal, and the derived Maurer–Cartan shifts cancel the bracket-shift
+convolution through the all-orders structural equation.
+-/
 lemma repGauge_fieldStrength
-    (U : GJ) (s : Multiset (Fin 1 ⊕ Fin 3)) (μ ν : Fin 1 ⊕ Fin 3)
-    (φ : Module.Dual ℝ 𝔤) :
-    repGauge U (fieldStrength h.A μ ν s φ) =
-      (s.antidiagonal.map fun p =>
+    (U : GJ) (s : Multiset (Fin 1 ⊕ Fin 3)) (μ ν : Fin 1 ⊕ Fin 3) (φ : Module.Dual ℝ 𝔤)
+    : repGauge U (fieldStrength h.A μ ν s φ)
+      = (s.antidiagonal.map fun p =>
         fieldStrength h.A μ ν p.2 (jets.adjointDualCoeff U⁻¹ p.1 φ)).sum := by
-  have hL : repGauge U (fieldStrength h.A μ ν s φ) =
-      repGauge U (h.A (μ ::ₘ s) ν φ) - repGauge U (h.A (ν ::ₘ s) μ φ)
-      + repGauge U (commutatorFam h.A μ ν s φ) := by
+  have hL
+      : repGauge U (fieldStrength h.A μ ν s φ)
+        = repGauge U (h.A (μ ::ₘ s) ν φ) - repGauge U (h.A (ν ::ₘ s) μ φ)
+          + repGauge U (commutatorFam h.A μ ν s φ) := by
     rw [fieldStrength_apply, map_add, map_sub]
-  have hR : (s.antidiagonal.map fun p =>
-      fieldStrength h.A μ ν p.2 (jets.adjointDualCoeff U⁻¹ p.1 φ)).sum =
-      (s.antidiagonal.map fun p =>
-        h.A (μ ::ₘ p.2) ν (jets.adjointDualCoeff U⁻¹ p.1 φ)).sum
-      - (s.antidiagonal.map fun p =>
-        h.A (ν ::ₘ p.2) μ (jets.adjointDualCoeff U⁻¹ p.1 φ)).sum
-      + (s.antidiagonal.map fun p =>
-        commutatorFam h.A μ ν p.2 (jets.adjointDualCoeff U⁻¹ p.1 φ)).sum := by
+  have hR
+      : (s.antidiagonal.map fun p =>
+          fieldStrength h.A μ ν p.2 (jets.adjointDualCoeff U⁻¹ p.1 φ)).sum
+        = (s.antidiagonal.map fun p => h.A (μ ::ₘ p.2) ν (jets.adjointDualCoeff U⁻¹ p.1 φ)).sum
+          - (s.antidiagonal.map fun p => h.A (ν ::ₘ p.2) μ (jets.adjointDualCoeff U⁻¹ p.1 φ)).sum
+          + (s.antidiagonal.map fun p =>
+            commutatorFam h.A μ ν p.2 (jets.adjointDualCoeff U⁻¹ p.1 φ)).sum := by
     rw [← Multiset.sum_map_sub, ← Multiset.sum_map_add]
     refine congrArg Multiset.sum (Multiset.map_congr rfl fun p hp => ?_)
     rw [fieldStrength_apply]
-  have hcancel₁ : (s.antidiagonal.map fun p =>
-      (p.1.antidiagonal.map fun q =>
-        h.A p.2 ν (jets.adjointDualCoeff U⁻¹ q.2
-          (φ ∘ₗ LieAlgebra.ad ℝ 𝔤 (jets.evalLie
-            (jets.iteratedDeriv q.1 (jets.maurerCartan U⁻¹ μ)))))).sum).sum =
-    (s.antidiagonal.map fun p =>
-      (p.2.antidiagonal.map fun r =>
-        h.A r.2 ν (jets.adjointDualCoeff U⁻¹ r.1
-          (φ ∘ₗ LieAlgebra.ad ℝ 𝔤 (jets.evalLie
-            (jets.iteratedDeriv p.1 (jets.maurerCartan U⁻¹ μ)))))).sum).sum :=
+  have hcancel₁
+      : (s.antidiagonal.map fun p =>
+          (p.1.antidiagonal.map fun q =>
+            h.A p.2 ν
+              (jets.adjointDualCoeff U⁻¹ q.2
+                (φ ∘ₗ LieAlgebra.ad ℝ 𝔤
+                  (jets.evalLie (jets.iteratedDeriv q.1 (jets.maurerCartan U⁻¹ μ)))))).sum).sum
+        = (s.antidiagonal.map fun p =>
+          (p.2.antidiagonal.map fun r =>
+            h.A r.2 ν
+              (jets.adjointDualCoeff U⁻¹ r.1
+                (φ ∘ₗ LieAlgebra.ad ℝ 𝔤
+                  (jets.evalLie (jets.iteratedDeriv p.1 (jets.maurerCartan U⁻¹ μ)))))).sum).sum :=
     Multiset.sum_antidiagonal_assoc s (fun a b c =>
-      h.A c ν (jets.adjointDualCoeff U⁻¹ b
-        (φ ∘ₗ LieAlgebra.ad ℝ 𝔤 (jets.evalLie
-          (jets.iteratedDeriv a (jets.maurerCartan U⁻¹ μ))))))
-  have hcancel₂ : (s.antidiagonal.map fun p =>
-      (p.1.antidiagonal.map fun q =>
-        h.A p.2 μ (jets.adjointDualCoeff U⁻¹ q.2
-          (φ ∘ₗ LieAlgebra.ad ℝ 𝔤 (jets.evalLie
-            (jets.iteratedDeriv q.1 (jets.maurerCartan U⁻¹ ν)))))).sum).sum =
-    (s.antidiagonal.map fun p =>
-      (p.1.antidiagonal.map fun q =>
-        h.A q.2 μ (jets.adjointDualCoeff U⁻¹ q.1
-          (φ ∘ₗ LieAlgebra.ad ℝ 𝔤 (jets.evalLie
-            (jets.iteratedDeriv p.2 (jets.maurerCartan U⁻¹ ν)))))).sum).sum := by
+      h.A c ν
+        (jets.adjointDualCoeff U⁻¹ b
+          (φ ∘ₗ LieAlgebra.ad ℝ 𝔤 (jets.evalLie (jets.iteratedDeriv a (jets.maurerCartan U⁻¹ μ))))))
+  have hcancel₂
+      : (s.antidiagonal.map fun p =>
+          (p.1.antidiagonal.map fun q =>
+            h.A p.2 μ
+              (jets.adjointDualCoeff U⁻¹ q.2
+                (φ ∘ₗ LieAlgebra.ad ℝ 𝔤
+                  (jets.evalLie (jets.iteratedDeriv q.1 (jets.maurerCartan U⁻¹ ν)))))).sum).sum
+        = (s.antidiagonal.map fun p =>
+          (p.1.antidiagonal.map fun q =>
+            h.A q.2 μ
+              (jets.adjointDualCoeff U⁻¹ q.1
+                (φ ∘ₗ LieAlgebra.ad ℝ 𝔤
+                  (jets.evalLie (jets.iteratedDeriv p.2
+                    (jets.maurerCartan U⁻¹ ν)))))).sum).sum := by
     refine (Multiset.sum_antidiagonal_assoc s (fun a b c =>
-      h.A c μ (jets.adjointDualCoeff U⁻¹ b
-        (φ ∘ₗ LieAlgebra.ad ℝ 𝔤 (jets.evalLie
-          (jets.iteratedDeriv a (jets.maurerCartan U⁻¹ ν))))))).trans ?_
+        h.A c μ
+          (jets.adjointDualCoeff U⁻¹ b
+            (φ ∘ₗ LieAlgebra.ad ℝ 𝔤
+              (jets.evalLie (jets.iteratedDeriv a (jets.maurerCartan U⁻¹ ν))))))).trans
+      ?_
     exact Multiset.sum_antidiagonal_swap s (fun a b =>
       (b.antidiagonal.map fun q =>
-        h.A q.2 μ (jets.adjointDualCoeff U⁻¹ q.1
-          (φ ∘ₗ LieAlgebra.ad ℝ 𝔤 (jets.evalLie
-            (jets.iteratedDeriv a (jets.maurerCartan U⁻¹ ν)))))).sum)
+        h.A q.2 μ
+          (jets.adjointDualCoeff U⁻¹ q.1
+            (φ ∘ₗ LieAlgebra.ad ℝ 𝔤
+              (jets.evalLie (jets.iteratedDeriv a (jets.maurerCartan U⁻¹ ν)))))).sum)
   set Θ : 𝔤 →+ B := ((algebraMap ℂ B).toAddMonoidHom.comp
     ((Complex.ofRealHom : ℝ →+* ℂ).toAddMonoidHom.comp φ.toAddMonoidHom)) with hΘdef
   have hΘ : ∀ z : 𝔤, algebraMap ℂ B ((φ z : ℝ) : ℂ) = Θ z := fun z => rfl
-  have hconst : Θ (jets.evalLie (jets.iteratedDeriv (μ ::ₘ s)
-      (jets.maurerCartan U⁻¹ ν))) =
-    Θ (jets.evalLie (jets.iteratedDeriv (ν ::ₘ s)
-      (jets.maurerCartan U⁻¹ μ)))
-    - (s.antidiagonal.map fun p =>
-        Θ ⁅jets.evalLie (jets.iteratedDeriv p.1
-            (jets.maurerCartan U⁻¹ μ)),
-          jets.evalLie (jets.iteratedDeriv p.2
-            (jets.maurerCartan U⁻¹ ν))⁆).sum := by
+  have hconst
+      : Θ (jets.evalLie (jets.iteratedDeriv (μ ::ₘ s) (jets.maurerCartan U⁻¹ ν)))
+        = Θ (jets.evalLie (jets.iteratedDeriv (ν ::ₘ s) (jets.maurerCartan U⁻¹ μ)))
+          - (s.antidiagonal.map fun p =>
+            Θ
+              ⁅jets.evalLie (jets.iteratedDeriv p.1
+                (jets.maurerCartan U⁻¹ μ)),
+              jets.evalLie (jets.iteratedDeriv p.2
+                (jets.maurerCartan U⁻¹ ν))⁆).sum := by
     rw [jets.evalLie_iteratedDeriv_maurerCartan_structure U⁻¹ s μ ν, map_sub, map_multiset_sum,
       Multiset.map_map]
     congr 1
@@ -264,24 +289,26 @@ lemma repGauge_fieldStrength
   rw [hconst, hcancel₁, hcancel₂]
   abel
 
-/-- **The field strength is an adjoint gauge tensor**: the packaging of
-  `repGauge_fieldStrength` as `TransformsInAdjoint` — the base case of the
-  covariant-derivative recursion `TransformsInAdjoint.covDerivAdjoint`. -/
-lemma transformsInAdjoint_fieldStrength
-    (μ ν : Fin 1 ⊕ Fin 3) : TransformsInAdjoint jets repGauge (fieldStrength h.A μ ν) :=
-  fun U φ s => h.repGauge_fieldStrength U s μ ν φ
+/--
+**The field strength is an adjoint gauge tensor**: the packaging of
+`repGauge_fieldStrength` as `TransformsInAdjoint` — the base case of the
+covariant-derivative recursion `TransformsInAdjoint.covDerivAdjoint`.
+-/
+lemma transformsInAdjoint_fieldStrength (μ ν : Fin 1 ⊕ Fin 3)
+    : TransformsInAdjoint jets repGauge (fieldStrength h.A μ ν) := fun U φ s =>
+  h.repGauge_fieldStrength U s μ ν φ
 
-/-- The underived transformation law: at `s = 0` the Leibniz convolution collapses to
-  the homogeneous law — the field strength transforms by the base-point dual adjoint
-  action of `U⁻¹` on the adjoint index. -/
-lemma repGauge_fieldStrength_zero
-    (U : GJ) (μ ν : Fin 1 ⊕ Fin 3) (φ : Module.Dual ℝ 𝔤) :
-    repGauge U (fieldStrength h.A μ ν 0 φ) =
-      fieldStrength h.A μ ν 0 (jets.adjointDualCoeff U⁻¹ 0 φ) := by
-  rw [h.repGauge_fieldStrength U 0 μ ν φ, Multiset.antidiagonal_zero,
-    Multiset.map_singleton, Multiset.sum_singleton]
+/--
+The underived transformation law: at `s = 0` the Leibniz convolution collapses to
+the homogeneous law — the field strength transforms by the base-point dual adjoint
+action of `U⁻¹` on the adjoint index.
+-/
+lemma repGauge_fieldStrength_zero (U : GJ) (μ ν : Fin 1 ⊕ Fin 3) (φ : Module.Dual ℝ 𝔤)
+    : repGauge U (fieldStrength h.A μ ν 0 φ)
+      = fieldStrength h.A μ ν 0 (jets.adjointDualCoeff U⁻¹ 0 φ) := by
+  rw [h.repGauge_fieldStrength U 0 μ ν φ, Multiset.antidiagonal_zero, Multiset.map_singleton,
+    Multiset.sum_singleton]
 
 end ComplexScalars
 
 end GaugeAlgebraRealization
-

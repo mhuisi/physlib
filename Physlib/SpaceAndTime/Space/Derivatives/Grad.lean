@@ -69,8 +69,8 @@ namespace Space
 -/
 
 /-- The vector calculus operator `grad`. -/
-noncomputable def grad {d} (f : Space d → ℝ) :
-  Space d → EuclideanSpace ℝ (Fin d) := fun x => WithLp.toLp 2 fun i => ∂[i] f x
+noncomputable def grad {d} (f : Space d → ℝ) : Space d → EuclideanSpace ℝ (Fin d) := fun x =>
+  WithLp.toLp 2 fun i => ∂[i] f x
 
 @[inherit_doc grad]
 scoped[Space] notation "∇" => grad
@@ -94,9 +94,8 @@ lemma grad_zero : ∇ (0 : Space d → ℝ) = 0 := by
 -/
 
 @[to_fun]
-lemma grad_add (f1 f2 : Space d → ℝ)
-    (hf1 : Differentiable ℝ f1) (hf2 : Differentiable ℝ f2) :
-    ∇ (f1 + f2) = ∇ f1 + ∇ f2 := by
+lemma grad_add (f1 f2 : Space d → ℝ) (hf1 : Differentiable ℝ f1) (hf2 : Differentiable ℝ f2)
+    : ∇ (f1 + f2) = ∇ f1 + ∇ f2 := by
   unfold grad
   ext x i
   simp only [Pi.add_apply]
@@ -104,8 +103,7 @@ lemma grad_add (f1 f2 : Space d → ℝ)
   rfl
 
 @[simp]
-lemma grad_fun_add_const (f : Space d → ℝ) (c : ℝ) :
-    ∇ (fun x => f x + c) = ∇ f := by
+lemma grad_fun_add_const (f : Space d → ℝ) (c : ℝ) : ∇ (fun x => f x + c) = ∇ f := by
   ext x i
   simp [grad, deriv]
 
@@ -128,9 +126,7 @@ lemma grad_const : ∇ (fun _ : Space d => c) = 0 := by
 -/
 
 @[to_fun]
-lemma grad_smul (f : Space d → ℝ) (k : ℝ)
-    (hf : Differentiable ℝ f) :
-    ∇ (k • f) = k • ∇ f := by
+lemma grad_smul (f : Space d → ℝ) (k : ℝ) (hf : Differentiable ℝ f) : ∇ (k • f) = k • ∇ f := by
   unfold grad
   ext x i
   simp only [Pi.smul_apply]
@@ -144,8 +140,7 @@ lemma grad_smul (f : Space d → ℝ) (k : ℝ)
 -/
 
 @[to_fun]
-lemma grad_neg (f : Space d → ℝ) :
-    ∇ (- f) = - ∇ f := by
+lemma grad_neg (f : Space d → ℝ) : ∇ (-f) = - ∇ f := by
   unfold grad
   ext x i
   simp only [Pi.neg_apply]
@@ -158,12 +153,12 @@ lemma grad_neg (f : Space d → ℝ) :
 
 -/
 
-lemma grad_eq_sum {d} (f : Space d → ℝ) (x : Space d) :
-    ∇ f x = ∑ i, ∂[i] f x • EuclideanSpace.single i 1 := by
+lemma grad_eq_sum {d} (f : Space d → ℝ) (x : Space d)
+    : ∇ f x = ∑ i, ∂[i] f x • EuclideanSpace.single i 1 := by
   ext j
   simp only [grad, PiLp.toLp_apply, WithLp.ofLp_sum, WithLp.ofLp_smul, PiLp.ofLp_single,
     Finset.sum_apply, Pi.smul_apply, Pi.single_apply, smul_eq_mul, mul_ite, mul_one, mul_zero,
-    Finset.sum_ite_eq, Finset.mem_univ, ↓reduceIte]
+    Finset.sum_ite_eq, Finset.mem_univ, ↓ reduceIte]
 
 /-!
 
@@ -171,9 +166,7 @@ lemma grad_eq_sum {d} (f : Space d → ℝ) (x : Space d) :
 
 -/
 
-lemma grad_apply {d} (f : Space d → ℝ) (x : Space d) (i : Fin d) :
-    (∇ f x) i = ∂[i] f x := by
-  rfl
+lemma grad_apply {d} (f : Space d → ℝ) (x : Space d) (i : Fin d) : (∇ f x) i = ∂[i] f x := by rfl
 
 /-!
 
@@ -183,24 +176,24 @@ lemma grad_apply {d} (f : Space d → ℝ) (x : Space d) (i : Fin d) :
 
 open InnerProductSpace
 
-lemma grad_inner_single {d} (f : Space d → ℝ) (x : Space d) (i : Fin d) :
-    ⟪∇ f x, EuclideanSpace.single i 1⟫_ℝ = ∂[i] f x := by
+lemma grad_inner_single {d} (f : Space d → ℝ) (x : Space d) (i : Fin d)
+    : ⟪∇ f x, EuclideanSpace.single i 1⟫_ℝ = ∂[i] f x := by
   simp [EuclideanSpace.inner_single_right, grad_apply]
 
-lemma grad_inner_eq {d} (f : Space d → ℝ) (x : Space d) (y : EuclideanSpace ℝ (Fin d)) :
-    ⟪∇ f x, y⟫_ℝ = ∑ i, y i * ∂[i] f x:= by
+lemma grad_inner_eq {d} (f : Space d → ℝ) (x : Space d) (y : EuclideanSpace ℝ (Fin d))
+    : ⟪∇ f x, y⟫_ℝ = ∑ i, y i * ∂[i] f x := by
   simp [PiLp.inner_apply, RCLike.inner_apply, conj_trivial, grad_apply, mul_comm]
 
-lemma inner_grad_eq {d} (f : Space d → ℝ) (x : EuclideanSpace ℝ (Fin d)) (y : Space d) :
-    ⟪x, ∇ f y⟫_ℝ = ∑ i, x i * ∂[i] f y :=
+lemma inner_grad_eq {d} (f : Space d → ℝ) (x : EuclideanSpace ℝ (Fin d)) (y : Space d)
+    : ⟪x, ∇ f y⟫_ℝ = ∑ i, x i * ∂[i] f y :=
   (real_inner_comm (∇ f y) x).trans (grad_inner_eq f y x)
 
-lemma grad_inner_repr_eq {d} (f : Space d → ℝ) (x y : Space d) :
-    ⟪∇ f x, (Space.basis).repr y⟫_ℝ = fderiv ℝ f x y := by
+lemma grad_inner_repr_eq {d} (f : Space d → ℝ) (x y : Space d)
+    : ⟪∇ f x, (Space.basis).repr y⟫_ℝ = fderiv ℝ f x y := by
   simp [grad_inner_eq f x, fderiv_eq_sum_deriv]
 
-lemma repr_grad_inner_eq {d} (f : Space d → ℝ) (x y : Space d) :
-    ⟪(Space.basis).repr x, ∇ f y⟫_ℝ = fderiv ℝ f y x :=
+lemma repr_grad_inner_eq {d} (f : Space d → ℝ) (x y : Space d)
+    : ⟪(Space.basis).repr x, ∇ f y⟫_ℝ = fderiv ℝ f y x :=
   (real_inner_comm (∇ f y) ((Space.basis).repr x)).trans (grad_inner_repr_eq f y x)
 
 /-!
@@ -209,30 +202,28 @@ lemma repr_grad_inner_eq {d} (f : Space d → ℝ) (x y : Space d) :
 
 -/
 
-lemma grad_eq_gradient {d} (f : Space d → ℝ) :
-    ∇ f = basis.repr ∘ gradient f := by
+lemma grad_eq_gradient {d} (f : Space d → ℝ) : ∇ f = basis.repr ∘ gradient f := by
   funext x
   refine ext_inner_right (𝕜 := ℝ) fun y => ?_
   rw [Function.comp_apply, gradient, basis_repr_inner_eq, toDual_symm_apply]
   simp [grad_inner_eq f x, fderiv_eq_sum_deriv]
 
-lemma gradient_eq_grad {d} (f : Space d → ℝ) :
-    gradient f = basis.repr.symm ∘ ∇ f := by
+lemma gradient_eq_grad {d} (f : Space d → ℝ) : gradient f = basis.repr.symm ∘ ∇ f := by
   rw [grad_eq_gradient f]
   ext x
   simp
 
-lemma gradient_apply_eq_grad {d} (f : Space d → ℝ) (x : Space d) :
-    gradient f x = basis.repr.symm (∇ f x) := by
+lemma gradient_apply_eq_grad {d} (f : Space d → ℝ) (x : Space d)
+    : gradient f x = basis.repr.symm (∇ f x) := by
   rw [grad_eq_gradient f]
   simp
 
-lemma gradient_eq_sum {d} (f : Space d → ℝ) (x : Space d) :
-    gradient f x = ∑ i, ∂[i] f x • basis i := by
+lemma gradient_eq_sum {d} (f : Space d → ℝ) (x : Space d)
+    : gradient f x = ∑ i, ∂[i] f x • basis i := by
   simp [gradient_eq_grad, grad_eq_sum f x]
 
-lemma euclid_gradient_eq_sum {d} (f : EuclideanSpace ℝ (Fin d) → ℝ) (x : EuclideanSpace ℝ (Fin d)) :
-    gradient f x = ∑ i, fderiv ℝ f x (EuclideanSpace.single i 1) • EuclideanSpace.single i 1 := by
+lemma euclid_gradient_eq_sum {d} (f : EuclideanSpace ℝ (Fin d) → ℝ) (x : EuclideanSpace ℝ (Fin d))
+    : gradient f x = ∑ i, fderiv ℝ f x (EuclideanSpace.single i 1) • EuclideanSpace.single i 1 := by
   apply ext_inner_right (𝕜 := ℝ) fun y => ?_
   simp [gradient]
   have hy : y = ∑ i, y i • EuclideanSpace.single i 1 := by
@@ -241,9 +232,9 @@ lemma euclid_gradient_eq_sum {d} (f : EuclideanSpace ℝ (Fin d) → ℝ) (x : E
   conv_lhs => rw [hy]
   simp [sum_inner, inner_smul_left, EuclideanSpace.inner_single_left, mul_comm]
 
-lemma _root_.DifferentiableAt.hasGradientAt_grad {d} {f : Space d → ℝ} (x : Space d)
-    (hf : DifferentiableAt ℝ f x) :
-    HasGradientAt f (basis.repr.symm (∇ f x)) x := by
+lemma _root_.DifferentiableAt.hasGradientAt_grad
+    {d} {f : Space d → ℝ} (x : Space d) (hf : DifferentiableAt ℝ f x)
+    : HasGradientAt f (basis.repr.symm (∇ f x)) x := by
   rw [← gradient_apply_eq_grad]
   exact DifferentiableAt.hasGradientAt hf
 
@@ -254,14 +245,15 @@ lemma _root_.DifferentiableAt.hasGradientAt_grad {d} {f : Space d → ℝ} (x : 
 -/
 
 /-- The gradient in the direction of the space position. -/
-lemma grad_inner_space_unit_vector {d} (x : Space d) (f : Space d → ℝ) (hd : Differentiable ℝ f) :
-    ⟪∇ f x, ‖x‖⁻¹ • basis.repr x⟫_ℝ = _root_.deriv (fun r => f (r • ‖x‖⁻¹ • x)) ‖x‖ := by
+lemma grad_inner_space_unit_vector {d} (x : Space d) (f : Space d → ℝ) (hd : Differentiable ℝ f)
+    : ⟪∇ f x, ‖x‖⁻¹ • basis.repr x⟫_ℝ = _root_.deriv (fun r => f (r • ‖x‖⁻¹ • x)) ‖x‖ := by
   by_cases hx : x = 0
   · subst hx
     simp
   symm
-  calc _
-    _ = fderiv ℝ (f ∘ (fun r => r • ‖x‖⁻¹ • x)) ‖x‖ 1 := by rfl
+  calc
+    _
+    _ = fderiv ℝ (f ∘ (fun r => r • ‖x‖⁻¹ • x)) (‖x‖) 1 := by rfl
     _ = (fderiv ℝ f (‖x‖ • ‖x‖⁻¹ • x)) (_root_.deriv (fun r => r • ‖x‖⁻¹ • x) ‖x‖) := by
       rw [fderiv_comp _ (by fun_prop) (by fun_prop)]
       simp
@@ -274,8 +266,8 @@ lemma grad_inner_space_unit_vector {d} (x : Space d) (f : Space d → ℝ) (hd :
     PiLp.smul_apply, basis_repr_apply]
   ring_nf
 
-lemma grad_inner_space {d} (x : Space d) (f : Space d → ℝ) (hd : Differentiable ℝ f) :
-    ⟪∇ f x, basis.repr x⟫_ℝ = ‖x‖ * _root_.deriv (fun r => f (r • ‖x‖⁻¹ • x)) ‖x‖ := by
+lemma grad_inner_space {d} (x : Space d) (f : Space d → ℝ) (hd : Differentiable ℝ f)
+    : ⟪∇ f x, basis.repr x⟫_ℝ = ‖x‖ * _root_.deriv (fun r => f (r • ‖x‖⁻¹ • x)) ‖x‖ := by
   rw [← grad_inner_space_unit_vector _ _ hd, inner_smul_right]
   by_cases hx : x = 0
   · subst hx
@@ -283,13 +275,14 @@ lemma grad_inner_space {d} (x : Space d) (f : Space d → ℝ) (hd : Differentia
   have hx : ‖x‖ ≠ 0 := norm_ne_zero_iff.mpr hx
   field_simp
 
-lemma grad_smul_inner_space {d} (x : Space d) (f : Space d → ℝ) (hd : Differentiable ℝ f) (t : ℝ)
-    (ht : 0 < t) :
-    ⟪∇ f (t • x), basis.repr x⟫_ℝ = _root_.deriv (fun r => f (r • x)) t := by
+lemma grad_smul_inner_space
+    {d} (x : Space d) (f : Space d → ℝ) (hd : Differentiable ℝ f) (t : ℝ) (ht : 0 < t)
+    : ⟪∇ f (t • x), basis.repr x⟫_ℝ = _root_.deriv (fun r => f (r • x)) t := by
   by_cases hx : ‖x‖ = 0
   · simp at hx
     simp [hx]
-  calc _
+  calc
+    _
     _ = ‖x‖ * ⟪∇ f (t • x), ‖x‖⁻¹ • basis.repr x⟫_ℝ := by
       simp [inner_smul_right]
       grind
@@ -313,9 +306,8 @@ lemma grad_smul_inner_space {d} (x : Space d) (f : Space d → ℝ) (hd : Differ
       grind
 
 open MeasureTheory
-lemma eq_integral_grad {f : Space → ℝ} (hf : ContDiff ℝ 1 f) :
-    f = (fun x => ∫ t in (0 : ℝ)..1, ⟪∇ f (t • x), basis.repr x⟫_ℝ ∂(volume)
-      + f 0) := by
+lemma eq_integral_grad {f : Space → ℝ} (hf : ContDiff ℝ 1 f)
+    : f = (fun x => ∫ t in (0 : ℝ)..1, ⟪∇ f (t • x), basis.repr x⟫_ℝ ∂(volume) + f 0) := by
   ext x
   have h' := (hf.differentiable (by simp))
   by_cases hx : ‖x‖ = 0
@@ -323,7 +315,8 @@ lemma eq_integral_grad {f : Space → ℝ} (hf : ContDiff ℝ 1 f) :
     subst hx
     simp
   symm
-  calc _
+  calc
+    _
     _ = ∫ (t : ℝ) in 0..1, (_root_.deriv (fun r => f (r • x)) t) ∂volume + f 0 := by
       congr 1
       refine intervalIntegral.integral_congr_ae_restrict ?_
@@ -348,8 +341,7 @@ lemma eq_integral_grad {f : Space → ℝ} (hf : ContDiff ℝ 1 f) :
 
 -/
 
-lemma grad_norm_sq (x : Space d) :
-    ∇ (fun x => ‖x‖ ^ 2) x = (2 : ℝ) • basis.repr x := by
+lemma grad_norm_sq (x : Space d) : ∇ (fun x => ‖x‖ ^ 2) x = (2 : ℝ) • basis.repr x := by
   ext i
   rw [grad_apply, deriv_norm_sq]
   simp
@@ -361,19 +353,18 @@ lemma grad_norm_sq (x : Space d) :
 -/
 
 /-- The gradient of the inner product is given by `2 • x`. -/
-lemma grad_inner {d : ℕ} :
-    ∇ (fun y : Space d => ⟪y, y⟫_ℝ) = fun z => (2 : ℝ) • basis.repr z := by
+lemma grad_inner {d : ℕ} : ∇ (fun y : Space d => ⟪y, y⟫_ℝ) = fun z => (2 : ℝ) • basis.repr z := by
   ext z i
   rw [grad_apply, deriv_eq_inner_self]
   simp
 
-lemma grad_inner_left {d : ℕ} (x : Space d) :
-    ∇ (fun y : Space d => ⟪y, x⟫_ℝ) = fun _ => basis.repr x := by
+lemma grad_inner_left {d : ℕ} (x : Space d)
+    : ∇ (fun y : Space d => ⟪y, x⟫_ℝ) = fun _ => basis.repr x := by
   ext z i
   simp [Space.grad]
 
-lemma grad_inner_right {d : ℕ} (x : Space d) :
-    ∇ (fun y : Space d => ⟪x, y⟫_ℝ) = fun _ => basis.repr x := by
+lemma grad_inner_right {d : ℕ} (x : Space d)
+    : ∇ (fun y : Space d => ⟪x, y⟫_ℝ) = fun _ => basis.repr x := by
   simp_rw [← real_inner_comm x]
   exact grad_inner_left x
 
@@ -385,21 +376,23 @@ lemma grad_inner_right {d : ℕ} (x : Space d) :
 
 open InnerProductSpace Distribution SchwartzMap MeasureTheory
 
-/- The quantity `⟪f x, Space.grad η x⟫_ℝ` is integrable for `f` bounded
-  and `η` a Schwartz map. -/
-lemma integrable_isDistBounded_inner_grad_schwartzMap {d : ℕ}
-    {f : Space d → EuclideanSpace ℝ (Fin d)}
-    (hf : IsDistBounded f) (η : 𝓢(Space d, ℝ)) :
-    Integrable (fun x => ⟪f x, Space.grad η x⟫_ℝ) volume := by
+/-
+The quantity `⟪f x, Space.grad η x⟫_ℝ` is integrable for `f` bounded
+and `η` a Schwartz map.
+-/
+lemma integrable_isDistBounded_inner_grad_schwartzMap
+    {d : ℕ} {f : Space d → EuclideanSpace ℝ (Fin d)} (hf : IsDistBounded f) (η : 𝓢(Space d, ℝ))
+    : Integrable (fun x => ⟪f x, Space.grad η x⟫_ℝ) volume := by
   conv =>
     enter [1, x]
     rw [grad_eq_sum, inner_sum]
   apply MeasureTheory.integrable_finsetSum
   intro i _
   simp [inner_smul_right]
-  have integrable_lemma (i j : Fin d) :
-      Integrable (fun x => (((SchwartzMap.evalCLM ℝ (Space d) ℝ (basis i))
-        ((fderivCLM ℝ (Space d) ℝ) η)) x • f x) j) volume := by
+  have integrable_lemma (i j : Fin d) : Integrable
+      (fun x =>
+        (((SchwartzMap.evalCLM ℝ (Space d) ℝ (basis i)) ((fderivCLM ℝ (Space d) ℝ) η)) x • f x) j)
+      volume := by
     simp only [PiLp.smul_apply]
     exact (hf.pi_comp j).integrable_space _
   convert! integrable_lemma i i using 2
@@ -409,13 +402,12 @@ lemma integrable_isDistBounded_inner_grad_schwartzMap {d : ℕ}
   left
   rw [deriv_eq_fderiv_basis]
 
-lemma integrable_isDistBounded_inner_grad_schwartzMap_spherical {d : ℕ}
-    {f : Space d → EuclideanSpace ℝ (Fin d)}
-    (hf : IsDistBounded f) (η : 𝓢(Space d, ℝ)) :
-    Integrable ((fun x => ⟪f x.1, Space.grad η x.1⟫_ℝ)
-      ∘ (homeomorphUnitSphereProd (Space d)).symm)
+lemma integrable_isDistBounded_inner_grad_schwartzMap_spherical
+    {d : ℕ} {f : Space d → EuclideanSpace ℝ (Fin d)} (hf : IsDistBounded f) (η : 𝓢(Space d, ℝ))
+    : Integrable
+      ((fun x => ⟪f x.1, Space.grad η x.1⟫_ℝ) ∘ (homeomorphUnitSphereProd (Space d)).symm)
       ((volume (α := Space d)).toSphere.prod
-      (Measure.volumeIoiPow (Module.finrank ℝ (Space d) - 1))) := by
+        (Measure.volumeIoiPow (Module.finrank ℝ (Space d) - 1))) := by
   have h1 : Integrable ((fun x => ⟪f x.1, Space.grad η x.1⟫_ℝ))
       (.comap (Subtype.val (p := fun x => x ∈ ({0}ᶜ : Set _))) volume) := by
     change Integrable ((fun x => ⟪f x, Space.grad η x⟫_ℝ) ∘ Subtype.val)
@@ -423,8 +415,8 @@ lemma integrable_isDistBounded_inner_grad_schwartzMap_spherical {d : ℕ}
     rw [← MeasureTheory.integrableOn_iff_comap_subtypeVal]
     · exact (integrable_isDistBounded_inner_grad_schwartzMap hf η).integrableOn
     simp
-  have he := (MeasureTheory.Measure.measurePreserving_homeomorphUnitSphereProd
-    (volume (α := Space d)))
+  have he :=
+    (MeasureTheory.Measure.measurePreserving_homeomorphUnitSphereProd (volume (α := Space d)))
   rw [← he.integrable_comp_emb]
   · convert h1
     simp only [Function.comp_apply, Homeomorph.symm_apply_apply]
@@ -439,8 +431,8 @@ lemma integrable_isDistBounded_inner_grad_schwartzMap_spherical {d : ℕ}
 open ContDiff
 
 @[fun_prop]
-lemma contDiff_grad {n} {f : Space → ℝ} (hf : ContDiff ℝ (n + 1) f) :
-    ContDiff ℝ n (fun x => ∇ f x) := by
+lemma contDiff_grad {n} {f : Space → ℝ} (hf : ContDiff ℝ (n + 1) f)
+    : ContDiff ℝ n (fun x => ∇ f x) := by
   unfold grad
   apply ContDiff.fun_comp
   · fun_prop
@@ -458,12 +450,15 @@ lemma contDiff_grad {n} {f : Space → ℝ} (hf : ContDiff ℝ (n + 1) f) :
 
 -/
 
-/-- The gradient of a distribution `(Space d) →d[ℝ] ℝ` as a distribution
-  `(Space d) →d[ℝ] (EuclideanSpace ℝ (Fin d))`. -/
-noncomputable def distGrad {d} :
-    ((Space d) →d[ℝ] ℝ) →ₗ[ℝ] (Space d) →d[ℝ] (EuclideanSpace ℝ (Fin d)) where
-  toFun f := basis.repr.toContinuousLinearMap ∘L
-    ((InnerProductSpace.toDual ℝ (Space d)).symm.toContinuousLinearMap).comp (fderivD ℝ f)
+/--
+The gradient of a distribution `(Space d) →d[ℝ] ℝ` as a distribution
+`(Space d) →d[ℝ] (EuclideanSpace ℝ (Fin d))`.
+-/
+noncomputable def distGrad {d}
+    : ((Space d) →d[ℝ] ℝ) →ₗ[ℝ] (Space d) →d[ℝ] (EuclideanSpace ℝ (Fin d)) where
+  toFun f :=
+    basis.repr.toContinuousLinearMap
+      ∘L ((InnerProductSpace.toDual ℝ (Space d)).symm.toContinuousLinearMap).comp (fderivD ℝ f)
   map_add' f1 f2 := by
     ext x
     simp
@@ -480,18 +475,19 @@ scoped[Space] notation "∇ᵈ" => distGrad
 
 -/
 
-lemma distGrad_inner_eq {d} (f : (Space d) →d[ℝ] ℝ) (η : 𝓢(Space d, ℝ))
-    (y : EuclideanSpace ℝ (Fin d)) : ⟪∇ᵈ f η, y⟫_ℝ = fderivD ℝ f η (basis.repr.symm y) := by
+lemma distGrad_inner_eq
+    {d} (f : (Space d) →d[ℝ] ℝ) (η : 𝓢(Space d, ℝ)) (y : EuclideanSpace ℝ (Fin d))
+    : ⟪∇ᵈ f η, y⟫_ℝ = fderivD ℝ f η (basis.repr.symm y) := by
   rw [distGrad]
   simp only [LinearIsometryEquiv.toLinearEquiv_symm, LinearMap.coe_mk, AddHom.coe_mk,
     ContinuousLinearMap.coe_comp, LinearMap.coe_toContinuousLinearMap', LinearEquiv.coe_coe,
     LinearIsometryEquiv.coe_toLinearEquiv, LinearIsometryEquiv.coe_symm_toLinearEquiv,
     Function.comp_apply, basis_repr_inner_eq, toDual_symm_apply]
 
-lemma distGrad_eq_of_inner {d} (f : (Space d) →d[ℝ] ℝ)
-    (g : (Space d) →d[ℝ] EuclideanSpace ℝ (Fin d))
-    (h : ∀ η y, fderivD ℝ f η y = ⟪g η, basis.repr y⟫_ℝ) :
-    ∇ᵈ f = g := by
+lemma distGrad_eq_of_inner
+    {d} (f : (Space d) →d[ℝ] ℝ) (g : (Space d) →d[ℝ] EuclideanSpace ℝ (Fin d))
+    (h : ∀ η y, fderivD ℝ f η y = ⟪g η, basis.repr y⟫_ℝ)
+    : ∇ᵈ f = g := by
   ext1 η
   apply ext_inner_right (𝕜 := ℝ) fun v => ?_
   simp [distGrad_inner_eq, h]
@@ -502,14 +498,15 @@ lemma distGrad_eq_of_inner {d} (f : (Space d) →d[ℝ] ℝ)
 
 -/
 
-lemma distGrad_eq_sum_basis {d} (f : (Space d) →d[ℝ] ℝ) (η : 𝓢(Space d, ℝ)) :
-    ∇ᵈ f η =
-      ∑ i, - f (SchwartzMap.evalCLM ℝ (Space d) ℝ (basis i) (fderivCLM ℝ (Space d) ℝ η)) •
-      EuclideanSpace.single i 1 := by
+lemma distGrad_eq_sum_basis {d} (f : (Space d) →d[ℝ] ℝ) (η : 𝓢(Space d, ℝ))
+    : ∇ᵈ f η
+      = ∑ i, - f (SchwartzMap.evalCLM ℝ (Space d) ℝ (basis i) (fderivCLM ℝ (Space d) ℝ η)) •
+        EuclideanSpace.single i 1 := by
   refine ext_inner_right (𝕜 := ℝ) fun y => ?_
-  have h1 : ⟪∑ i, - f (SchwartzMap.evalCLM ℝ (Space d) ℝ (basis i) (fderivCLM ℝ (Space d) ℝ η)) •
-        EuclideanSpace.single i 1, y⟫_ℝ =
-      fderivD ℝ f η (basis.repr.symm y) := by
+  have h1
+      : ⟪∑ i, - f (SchwartzMap.evalCLM ℝ (Space d) ℝ (basis i) (fderivCLM ℝ (Space d) ℝ η)) •
+          EuclideanSpace.single i 1, y⟫_ℝ
+        = fderivD ℝ f η (basis.repr.symm y) := by
     have hy : y = ∑ i, y i • EuclideanSpace.single i 1 := by
       conv_lhs => rw [← OrthonormalBasis.sum_repr (EuclideanSpace.basisFun (Fin d) ℝ) y]
       simp
@@ -524,14 +521,14 @@ lemma distGrad_eq_sum_basis {d} (f : (Space d) →d[ℝ] ℝ) (η : 𝓢(Space d
 
 -/
 
-lemma distGrad_toFun_eq_distDeriv {d} (f : (Space d) →d[ℝ] ℝ) :
-    (∇ᵈ f).toFun = fun ε => WithLp.toLp 2 fun i => ∂ᵈ[i] f ε := by
+lemma distGrad_toFun_eq_distDeriv {d} (f : (Space d) →d[ℝ] ℝ)
+    : (∇ᵈ f).toFun = fun ε => WithLp.toLp 2 fun i => ∂ᵈ[i] f ε := by
   ext ε i
   simp only [AddHom.toFun_eq_coe, LinearMap.coe_toAddHom, ContinuousLinearMap.coe_coe]
   rw [distGrad_eq_sum_basis]
   simp only [neg_smul, Finset.sum_neg_distrib, PiLp.neg_apply, WithLp.ofLp_sum, WithLp.ofLp_smul,
-    PiLp.ofLp_single, Finset.sum_apply, Pi.smul_apply, Pi.single_apply, smul_eq_mul,
-    mul_ite, mul_one, mul_zero, Finset.sum_ite_eq, Finset.mem_univ, ↓reduceIte]
+    PiLp.ofLp_single, Finset.sum_apply, Pi.smul_apply, Pi.single_apply, smul_eq_mul, mul_ite,
+    mul_one, mul_zero, Finset.sum_ite_eq, Finset.mem_univ, ↓ reduceIte]
   rfl
 
 /-!
@@ -540,8 +537,8 @@ lemma distGrad_toFun_eq_distDeriv {d} (f : (Space d) →d[ℝ] ℝ) :
 
 -/
 
-lemma distGrad_apply {d} (f : (Space d) →d[ℝ] ℝ) (ε : 𝓢(Space d, ℝ)) :
-    (∇ᵈ f) ε = fun i => ∂ᵈ[i] f ε := by
+lemma distGrad_apply {d} (f : (Space d) →d[ℝ] ℝ) (ε : 𝓢(Space d, ℝ))
+    : (∇ᵈ f) ε = fun i => ∂ᵈ[i] f ε := by
   change (∇ᵈ f).toFun ε = fun i => ∂ᵈ[i] f ε
   rw [distGrad_toFun_eq_distDeriv]
 
@@ -552,8 +549,7 @@ lemma distGrad_apply {d} (f : (Space d) →d[ℝ] ℝ) (ε : 𝓢(Space d, ℝ))
 -/
 
 @[simp]
-lemma distGrad_const {d} (c : ℝ) :
-    ∇ᵈ (Distribution.const ℝ (Space d) c) = 0 := by
+lemma distGrad_const {d} (c : ℝ) : ∇ᵈ (Distribution.const ℝ (Space d) c) = 0 := by
   ext ε i
   simp [distGrad_apply, distDeriv_apply, Distribution.fderivD_const]
 
@@ -565,13 +561,13 @@ lemma distGrad_const {d} (c : ℝ) :
 
 /-- The gradient on Scwhwartz maps. -/
 noncomputable def gradSchwartz {d} : 𝓢(Space d, ℝ) →L[ℝ] 𝓢(Space d, EuclideanSpace ℝ (Fin d)) :=
-    ∑ i, SchwartzMap.bilinLeftCLM (ContinuousLinearMap.lsmul ℝ ℝ)
-          (.const (EuclideanSpace.single i (1 : ℝ)))
-      ∘L SchwartzMap.evalCLM ℝ (Space d) ℝ (basis i)
-      ∘L SchwartzMap.fderivCLM ℝ (Space d) ℝ
+  ∑ i, SchwartzMap.bilinLeftCLM (ContinuousLinearMap.lsmul ℝ ℝ)
+        (.const (EuclideanSpace.single i (1 : ℝ)))
+    ∘L SchwartzMap.evalCLM ℝ (Space d) ℝ (basis i)
+    ∘L SchwartzMap.fderivCLM ℝ (Space d) ℝ
 
-lemma gradSchwartz_apply_eq_grad {d} (η : 𝓢(Space d, ℝ)) (x : Space d) :
-    gradSchwartz η x = ∇ η x := by
+lemma gradSchwartz_apply_eq_grad {d} (η : 𝓢(Space d, ℝ)) (x : Space d)
+    : gradSchwartz η x = ∇ η x := by
   simp [gradSchwartz, grad_eq_sum]
   rfl
 

@@ -76,11 +76,12 @@ def autCont (p : P) : Multiplicative G →ₜ* Multiplicative G where
 def dualAct (p : P) : PontryaginDual (Multiplicative G) →ₜ* PontryaginDual (Multiplicative G) :=
   PontryaginDual.map (autCont φ p⁻¹)
 
-lemma dualAct_apply (p : P) (χ : PontryaginDual (Multiplicative G)) (g : Multiplicative G) :
-    dualAct φ p χ g = χ (φ p⁻¹ g) := rfl
+lemma dualAct_apply (p : P) (χ : PontryaginDual (Multiplicative G)) (g : Multiplicative G)
+    : dualAct φ p χ g = χ (φ p⁻¹ g) :=
+  rfl
 
-lemma dualAct_mul (p q : P) (χ : PontryaginDual (Multiplicative G)) :
-    dualAct φ (p * q) χ = dualAct φ p (dualAct φ q χ) := by
+lemma dualAct_mul (p q : P) (χ : PontryaginDual (Multiplicative G))
+    : dualAct φ (p * q) χ = dualAct φ p (dualAct φ q χ) := by
   refine ContinuousMonoidHom.ext fun g => ?_
   show χ (φ (p * q)⁻¹ g) = χ (φ q⁻¹ (φ p⁻¹ g))
   rw [mul_inv_rev, map_mul]
@@ -93,8 +94,8 @@ lemma dualAct_one (χ : PontryaginDual (Multiplicative G)) : dualAct φ 1 χ = �
   rfl
 
 /-- The action of `p` on the characters is a bijection. -/
-def dualActEquiv (p : P) :
-    PontryaginDual (Multiplicative G) ≃ PontryaginDual (Multiplicative G) where
+def dualActEquiv (p : P)
+    : PontryaginDual (Multiplicative G) ≃ PontryaginDual (Multiplicative G) where
   toFun := dualAct φ p
   invFun := dualAct φ p⁻¹
   left_inv χ := by rw [← dualAct_mul, inv_mul_cancel, dualAct_one]
@@ -106,13 +107,15 @@ section Covariance
 
 variable {H : Type*} [NormedAddCommGroup H] [InnerProductSpace ℂ H] [CompleteSpace H]
 variable (π : Multiplicative G →* unitary (H →L[ℂ] H)) (ρ : P →* unitary (H →L[ℂ] H))
-variable [MeasurableSpace (PontryaginDual (Multiplicative G))]
+variable
+  [MeasurableSpace (PontryaginDual (Multiplicative G))]
   [BorelSpace (PontryaginDual (Multiplicative G))]
 
-/-- The representation `ρ` of `P` is covariant with respect to the translations `π` and the
-action `φ`: `ρ(p) π(g) = π(φ(p) g) ρ(p)`. -/
-def IsCovariantRep : Prop :=
-  ∀ (p : P) (g : Multiplicative G), ρ p * π g = π (φ p g) * ρ p
+/--
+The representation `ρ` of `P` is covariant with respect to the translations `π` and the
+action `φ`: `ρ(p) π(g) = π(φ(p) g) ρ(p)`.
+-/
+def IsCovariantRep : Prop := ∀ (p : P) (g : Multiplicative G), ρ p * π g = π (φ p g) * ρ p
 
 lemma measurable_dualAct (p : P) : Measurable (dualAct φ p) :=
   (dualAct φ p).continuous_toFun.measurable
@@ -121,12 +124,16 @@ omit [DiscreteTopology G] in
 omit [BorelSpace (PontryaginDual (Multiplicative G))] in
 omit [MeasurableSpace (PontryaginDual (Multiplicative G))] in
 omit [TopologicalSpace G] in
-/-- A representation of a group `Q` acting on the translations, restricted to the translations,
-is covariant when the group relation `s t(a) = t(φ(s) a) s` holds. -/
-lemma isCovariantRep_comp {Q : Type*} [Group Q] (φ : Q →* MulAut (Multiplicative G))
-    (U : Q →* unitary (H →L[ℂ] H)) (τ : Multiplicative G →* Q)
-    (h : ∀ (s : Q) (a : Multiplicative G), s * τ a = τ (φ s a) * s) :
-    IsCovariantRep φ (U.comp τ) U := fun s a => by
+/--
+A representation of a group `Q` acting on the translations, restricted to the translations,
+is covariant when the group relation `s t(a) = t(φ(s) a) s` holds.
+-/
+lemma isCovariantRep_comp
+    {Q : Type*} [Group Q]
+    (φ : Q →* MulAut (Multiplicative G))
+    (U : Q →* unitary (H →L[ℂ] H))
+    (τ : Multiplicative G →* Q) (h : ∀ (s : Q) (a : Multiplicative G), s * τ a = τ (φ s a) * s)
+    : IsCovariantRep φ (U.comp τ) U := fun s a => by
   simp only [MonoidHom.comp_apply, ← map_mul, h]
 
 variable {π ρ φ}
@@ -136,15 +143,15 @@ omit [BorelSpace (PontryaginDual (Multiplicative G))] in
 omit [MeasurableSpace (PontryaginDual (Multiplicative G))] in
 omit [TopologicalSpace G] in
 /-- The matrix coefficient of the translated vector. -/
-lemma inner_rho_translation (hcov : IsCovariantRep φ π ρ) (p : P) (g : Multiplicative G)
-    (ξ : H) :
-    ⟪((ρ p : unitary (H →L[ℂ] H)) : H →L[ℂ] H) ξ,
-        ((π g : unitary (H →L[ℂ] H)) : H →L[ℂ] H) (((ρ p : unitary (H →L[ℂ] H)) : H →L[ℂ] H) ξ)⟫_ℂ
+lemma inner_rho_translation (hcov : IsCovariantRep φ π ρ) (p : P) (g : Multiplicative G) (ξ : H)
+    : ⟪((ρ p : unitary (H →L[ℂ] H)) : H →L[ℂ] H) ξ,
+          ((π g : unitary (H →L[ℂ] H)) : H →L[ℂ] H) (((ρ p : unitary (H →L[ℂ] H)) : H →L[ℂ] H) ξ)⟫_ℂ
       = ⟪ξ, ((π (φ p⁻¹ g) : unitary (H →L[ℂ] H)) : H →L[ℂ] H) ξ⟫_ℂ := by
   have h1 : ρ p⁻¹ * π g * ρ p = π (φ p⁻¹ g) := by
     rw [hcov p⁻¹ g, mul_assoc, ← map_mul, inv_mul_cancel, map_one, mul_one]
-  have h2 : ((ρ p⁻¹ : unitary (H →L[ℂ] H)) : H →L[ℂ] H) = star ((ρ p : unitary (H →L[ℂ] H)) :
-      H →L[ℂ] H) := by
+  have h2
+      : ((ρ p⁻¹ : unitary (H →L[ℂ] H)) : H →L[ℂ] H)
+        = star ((ρ p : unitary (H →L[ℂ] H)) : H →L[ℂ] H) := by
     rw [map_inv]; rfl
   have h3 := congrArg (fun u : unitary (H →L[ℂ] H) => (u : H →L[ℂ] H) ξ) h1
   simp only [Submonoid.coe_mul, mul_apply_eq_comp, h2] at h3
@@ -152,45 +159,53 @@ lemma inner_rho_translation (hcov : IsCovariantRep φ π ρ) (p : P) (g : Multip
 
 variable [Countable G]
 
-/-- **The spectral measure of `ρ(p) ξ` is the pushforward of that of `ξ`** under the action of `p`
-on the characters. -/
-lemma vectorMeasure_rho (hcov : IsCovariantRep φ π ρ) (p : P) (ξ : H) :
-    vectorMeasure π (((ρ p : unitary (H →L[ℂ] H)) : H →L[ℂ] H) ξ) =
-      Measure.map (dualAct φ p) (vectorMeasure π ξ) := by
+/--
+**The spectral measure of `ρ(p) ξ` is the pushforward of that of `ξ`** under the action of `p`
+on the characters.
+-/
+lemma vectorMeasure_rho (hcov : IsCovariantRep φ π ρ) (p : P) (ξ : H)
+    : vectorMeasure π (((ρ p : unitary (H →L[ℂ] H)) : H →L[ℂ] H) ξ)
+      = Measure.map (dualAct φ p) (vectorMeasure π ξ) := by
   symm
   refine eq_vectorMeasure_of_transform_eq π _ _ (fun g => ?_)
   rw [integral_map (measurable_dualAct φ p).aemeasurable
-    (TauCeti.PontryaginDual.continuous_coe_eval_const (G := Multiplicative G) g
-      ).aestronglyMeasurable]
+    (TauCeti.PontryaginDual.continuous_coe_eval_const (G := Multiplicative G)
+      g).aestronglyMeasurable]
   simp only [dualAct_apply]
   rw [inner_rho_translation hcov p g ξ, ← inner_eq_integral_vectorMeasure π ξ (φ p⁻¹ g)]
 
 omit [Countable G] in
-lemma norm_sq_projection (S : Set (PontryaginDual (Multiplicative G))) (hS : MeasurableSet S)
-    (η : H) : ‖projection π S η‖ ^ 2 = (vectorMeasure π η S).toReal := by
+lemma norm_sq_projection
+    (S : Set (PontryaginDual (Multiplicative G))) (hS : MeasurableSet S) (η : H)
+    : ‖projection π S η‖ ^ 2 = (vectorMeasure π η S).toReal := by
   rw [vectorMeasure_apply π η hS, ENNReal.toReal_ofReal (sq_nonneg _)]
   rfl
 
 omit [Countable G] in
-lemma inner_projection_self (S : Set (PontryaginDual (Multiplicative G))) (η : H) :
-    ⟪projection π S η, η⟫_ℂ = ((‖projection π S η‖ ^ 2 : ℝ) : ℂ) := by
+lemma inner_projection_self (S : Set (PontryaginDual (Multiplicative G))) (η : H)
+    : ⟪projection π S η, η⟫_ℂ = ((‖projection π S η‖ ^ 2 : ℝ) : ℂ) := by
   have h := projection_isStarProjection π S
   have : projection π S η = (projection π S) (projection π S η) := by
     conv_lhs => rw [← h.isIdempotentElem.eq]
     rfl
-  calc ⟪projection π S η, η⟫_ℂ = ⟪(projection π S) (projection π S η), η⟫_ℂ := by rw [← this]
+  calc
+    ⟪projection π S η, η⟫_ℂ
+      = ⟪(projection π S) (projection π S η), η⟫_ℂ := by rw [← this]
     _ = ⟪projection π S η, projection π S η⟫_ℂ := by
       rw [← ContinuousLinearMap.adjoint_inner_left, ← ContinuousLinearMap.star_eq_adjoint,
         h.isSelfAdjoint.star_eq]
     _ = _ := by rw [inner_self_eq_norm_sq_to_K]; norm_cast
 
-/-- **The spectral projections are covariant**: `ρ(p) P(S) = P(p • S) ρ(p)` for every measurable
+/--
+**The spectral projections are covariant**: `ρ(p) P(S) = P(p • S) ρ(p)` for every measurable
 set `S` of characters. The unitary `ρ(p)` carries the sector of momenta in `S` onto the sector of
-momenta in `p • S`. -/
-lemma rho_mul_projection (hcov : IsCovariantRep φ π ρ) (p : P)
-    {S : Set (PontryaginDual (Multiplicative G))} (hS : MeasurableSet S) :
-    ((ρ p : unitary (H →L[ℂ] H)) : H →L[ℂ] H) * projection π S =
-      projection π (dualAct φ p '' S) * ((ρ p : unitary (H →L[ℂ] H)) : H →L[ℂ] H) := by
+momenta in `p • S`.
+-/
+lemma rho_mul_projection
+    (hcov : IsCovariantRep φ π ρ) (p : P)
+    {S : Set (PontryaginDual (Multiplicative G))} (hS : MeasurableSet S)
+    : ((ρ p : unitary (H →L[ℂ] H)) : H →L[ℂ] H) * projection π S
+      = projection π (dualAct φ p '' S) * ((ρ p : unitary (H →L[ℂ] H)) : H →L[ℂ] H) := by
   set R : H →L[ℂ] H := ((ρ p : unitary (H →L[ℂ] H)) : H →L[ℂ] H) with hR
   have hRR : star R * R = 1 := Unitary.coe_star_mul_self (ρ p)
   have hRR' : R * star R = 1 := Unitary.coe_mul_star_self (ρ p)
@@ -200,7 +215,8 @@ lemma rho_mul_projection (hcov : IsCovariantRep φ π ρ) (p : P)
       constructor
       · rintro ⟨ψ, hψ, rfl⟩
         change dualAct φ p⁻¹ (dualAct φ p ψ) ∈ S
-        rw [← dualAct_mul, inv_mul_cancel, dualAct_one]; exact hψ
+        rw [← dualAct_mul, inv_mul_cancel, dualAct_one]
+        exact hψ
       · intro h
         refine ⟨dualAct φ p⁻¹ χ, h, ?_⟩
         rw [← dualAct_mul, mul_inv_cancel, dualAct_one]
@@ -208,25 +224,31 @@ lemma rho_mul_projection (hcov : IsCovariantRep φ π ρ) (p : P)
     exact measurable_dualAct φ p⁻¹ hS
   have key : R * projection π S * star R = projection π (dualAct φ p '' S) := by
     refine sub_eq_zero.1 (ContinuousLinearMap.ext fun x =>
-      LinearMap.congr_fun ((inner_map_self_eq_zero
-        (R * projection π S * star R - projection π
-          (dualAct φ p '' S)).toLinearMap).1 fun η => ?_) x)
+      LinearMap.congr_fun
+        ((inner_map_self_eq_zero
+            (R * projection π S * star R - projection π (dualAct φ p '' S)).toLinearMap).1
+          fun η => ?_)
+        x)
     set ξ := star R η with hξ
     have hη : R ξ = η := by
       have := congrArg (fun T : H →L[ℂ] H => T η) hRR'
       simpa [hξ, mul_apply_eq_comp] using this
     have e1 : ⟪(R * projection π S * star R) η, η⟫_ℂ = ((‖projection π S ξ‖ ^ 2 : ℝ) : ℂ) := by
-      calc ⟪(R * projection π S * star R) η, η⟫_ℂ = ⟪R (projection π S ξ), η⟫_ℂ := rfl
+      calc
+        ⟪(R * projection π S * star R) η, η⟫_ℂ
+          = ⟪R (projection π S ξ), η⟫_ℂ := rfl
         _ = ⟪projection π S ξ, ξ⟫_ℂ := by
           rw [hξ, ContinuousLinearMap.star_eq_adjoint, ContinuousLinearMap.adjoint_inner_right]
         _ = _ := inner_projection_self S ξ
     have e3 : ‖projection π (dualAct φ p '' S) η‖ ^ 2 = ‖projection π S ξ‖ ^ 2 := by
-      rw [norm_sq_projection _ hmeas, norm_sq_projection S hS, ← hη,
-        vectorMeasure_rho hcov p ξ, Measure.map_apply (measurable_dualAct φ p) hmeas,
+      rw [norm_sq_projection _ hmeas, norm_sq_projection S hS, ← hη, vectorMeasure_rho hcov p ξ,
+        Measure.map_apply (measurable_dualAct φ p) hmeas,
         (show Function.Injective (dualAct φ p) from (dualActEquiv φ p).injective).preimage_image S]
     change ⟪(R * projection π S * star R - projection π (dualAct φ p '' S)) η, η⟫_ℂ = 0
     rw [sub_apply, inner_sub_left, e1, inner_projection_self, e3, sub_self]
-  calc R * projection π S = R * projection π S * (star R * R) := by rw [hRR, mul_one]
+  calc
+    R * projection π S
+      = R * projection π S * (star R * R) := by rw [hRR, mul_one]
     _ = (R * projection π S * star R) * R := by simp only [mul_assoc]
     _ = _ := by rw [key]
 

@@ -34,19 +34,16 @@ open SchwartzMap InnerProductSpace
 def schwartzIncl : 𝓢(ℝ, ℂ) →L[ℂ] HilbertSpace :=
   SchwartzMap.toLpCLM ℂ (E := ℝ) ℂ 2 MeasureTheory.volume
 
-lemma schwartzIncl_injective : Function.Injective schwartzIncl :=
-  SchwartzMap.injective_toLp _ _
+lemma schwartzIncl_injective : Function.Injective schwartzIncl := SchwartzMap.injective_toLp _ _
 
-lemma schwartzIncl_coe_ae (ψ : 𝓢(ℝ, ℂ)) :
-    ψ.1 =ᶠ[ae volume] (schwartzIncl ψ) := (SchwartzMap.coeFn_toLp _ 2 volume).symm
+lemma schwartzIncl_coe_ae (ψ : 𝓢(ℝ, ℂ)) : ψ.1 =ᶠ[ae volume] (schwartzIncl ψ) :=
+  (SchwartzMap.coeFn_toLp _ 2 volume).symm
 
-lemma schwartzIncl_inner (ψ1 ψ2 : 𝓢(ℝ, ℂ)) :
-    ⟪schwartzIncl ψ1, schwartzIncl ψ2⟫_ℂ = ∫ x : ℝ, starRingEnd ℂ (ψ1 x) * ψ2 x := by
+lemma schwartzIncl_inner (ψ1 ψ2 : 𝓢(ℝ, ℂ))
+    : ⟪schwartzIncl ψ1, schwartzIncl ψ2⟫_ℂ = ∫ x : ℝ, starRingEnd ℂ (ψ1 x) * ψ2 x := by
   apply MeasureTheory.integral_congr_ae
-  have h1 : ψ1.1 =ᶠ[ae volume] (schwartzIncl ψ1) :=
-    schwartzIncl_coe_ae ψ1
-  have h2 : ψ2.1 =ᶠ[ae volume] (schwartzIncl ψ2) :=
-    schwartzIncl_coe_ae ψ2
+  have h1 : ψ1.1 =ᶠ[ae volume] (schwartzIncl ψ1) := schwartzIncl_coe_ae ψ1
+  have h2 : ψ2.1 =ᶠ[ae volume] (schwartzIncl ψ2) := schwartzIncl_coe_ae ψ2
   filter_upwards [h1, h2] with _ h1 h2
   rw [← h1, ← h2]
   simp only [RCLike.inner_apply]

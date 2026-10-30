@@ -71,23 +71,23 @@ noncomputable def absIntoRange (T : H →L[ℂ] H) : H →ₗ[ℂ] rangeClosure 
     exact Submodule.le_topologicalClosure _ (LinearMap.mem_range_self _ x))
 
 /-- The inclusion of `range |T|` into its closed range, bundled continuously. -/
-noncomputable def rangeInClosure (T : H →L[ℂ] H) :
-    (LinearMap.range (absOperator T).toLinearMap) →L[ℂ] rangeClosure T :=
-  (LinearMap.range (absOperator T).toLinearMap).subtypeL.codRestrict
-    (rangeClosure T) (by
-      intro x
-      exact Submodule.le_topologicalClosure _ x.property)
+noncomputable def rangeInClosure (T : H →L[ℂ] H)
+    : (LinearMap.range (absOperator T).toLinearMap) →L[ℂ] rangeClosure T :=
+  (LinearMap.range (absOperator T).toLinearMap).subtypeL.codRestrict (rangeClosure T) (by
+    intro x
+    exact Submodule.le_topologicalClosure _ x.property)
 
-lemma rangeInClosure_apply (T : H →L[ℂ] H) (x : LinearMap.range (absOperator T).toLinearMap) :
-    (rangeInClosure T x : H) = x := rfl
+lemma rangeInClosure_apply (T : H →L[ℂ] H) (x : LinearMap.range (absOperator T).toLinearMap)
+    : (rangeInClosure T x : H) = x :=
+  rfl
 
 lemma denseRange_rangeInClosure (T : H →L[ℂ] H) : DenseRange (rangeInClosure T) := by
   rw [denseRange_iff_closure_range]
   ext y
   rw [closure_subtype]
-  have hrange :
-      (Subtype.val '' Set.range (rangeInClosure T)) =
-        (LinearMap.range (absOperator T).toLinearMap : Set H) := by
+  have hrange
+      : (Subtype.val '' Set.range (rangeInClosure T))
+        = (LinearMap.range (absOperator T).toLinearMap : Set H) := by
     ext x
     constructor
     · rintro ⟨z, ⟨y, hy⟩, rfl⟩
@@ -103,22 +103,22 @@ lemma denseRange_rangeInClosure (T : H →L[ℂ] H) : DenseRange (rangeInClosure
   simp only [Set.mem_univ, iff_true]
   exact y.property
 
-lemma absIntoRange_factor (T : H →L[ℂ] H) (x : H) :
-    absIntoRange T x = rangeInClosure T ⟨absOperator T x, LinearMap.mem_range_self _ x⟩ := rfl
+lemma absIntoRange_factor (T : H →L[ℂ] H) (x : H)
+    : absIntoRange T x = rangeInClosure T ⟨absOperator T x, LinearMap.mem_range_self _ x⟩ :=
+  rfl
 
 lemma denseRange_absIntoRange (T : H →L[ℂ] H) : DenseRange (absIntoRange T) := by
   let r : H →L[ℂ] (LinearMap.range (absOperator T).toLinearMap) :=
     (absOperator T).toLinearMap.codRestrict (LinearMap.range (absOperator T).toLinearMap)
-      (fun x => LinearMap.mem_range_self _ x) |>.mkContinuous
-        ‖absOperator T‖ (by intro x; exact (absOperator T).le_opNorm x)
+        (fun x => LinearMap.mem_range_self _ x)
+      |>.mkContinuous (‖absOperator T‖) (by intro x; exact (absOperator T).le_opNorm x)
   have hr : DenseRange r := by
     apply Function.Surjective.denseRange
     intro y
     rcases y with ⟨y, ⟨x, hx⟩⟩
     exact ⟨x, Subtype.ext hx⟩
   have hcomp := DenseRange.comp (denseRange_rangeInClosure T) hr (rangeInClosure T).continuous
-  have heq : (rangeInClosure T ∘ r) = absIntoRange T := by
-    funext x; exact Subtype.ext rfl
+  have heq : (rangeInClosure T ∘ r) = absIntoRange T := by funext x; exact Subtype.ext rfl
   rwa [heq] at hcomp
 
 lemma absIntoRange_apply (T : H →L[ℂ] H) (x : H) : (absIntoRange T x : H) = absOperator T x := rfl
@@ -146,13 +146,15 @@ lemma norm_apply_eq_norm_abs_apply (T : H →L[ℂ] H) (x : H) : ‖T x‖ = ‖
           (ContinuousLinearMap.star_eq_adjoint (absOperator T)).symm.trans habsSelf]
   exact (sq_eq_sq₀ (norm_nonneg _) (norm_nonneg _)).mp hsq
 
-lemma norm_absIntoRange_apply (T : H →L[ℂ] H) (x : H) :
-    ‖absIntoRange T x‖ = ‖absOperator T x‖ := rfl
+lemma norm_absIntoRange_apply (T : H →L[ℂ] H) (x : H) : ‖absIntoRange T x‖ = ‖absOperator T x‖ :=
+  rfl
 
-/-- The closed-range subspace is complete, so it admits the orthogonal projection used to define
-the bounded polar factor. -/
-noncomputable instance instCompleteSpaceRangeClosure (T : H →L[ℂ] H) :
-    CompleteSpace (rangeClosure T) := by
+/--
+The closed-range subspace is complete, so it admits the orthogonal projection used to define
+the bounded polar factor.
+-/
+noncomputable instance instCompleteSpaceRangeClosure (T : H →L[ℂ] H)
+    : CompleteSpace (rangeClosure T) := by
   let : IsClosed (rangeClosure T : Set H) := Submodule.isClosed_topologicalClosure _
   exact IsClosed.completeSpace_coe
 
@@ -160,8 +162,7 @@ noncomputable instance instCompleteSpaceRangeClosure (T : H →L[ℂ] H) :
 noncomputable def polarOnRange (T : H →L[ℂ] H) : rangeClosure T →L[ℂ] H :=
   T.toLinearMap.extendOfNorm (absIntoRange T)
 
-lemma polarOnRange_eq_on_abs (T : H →L[ℂ] H) (x : H) :
-    polarOnRange T (absIntoRange T x) = T x := by
+lemma polarOnRange_eq_on_abs (T : H →L[ℂ] H) (x : H) : polarOnRange T (absIntoRange T x) = T x := by
   unfold polarOnRange
   apply LinearMap.extendOfNorm_eq (denseRange_absIntoRange T)
   refine ⟨1, fun y => ?_⟩
@@ -174,11 +175,13 @@ lemma polarOnRange_norm_le (T : H →L[ℂ] H) (x : rangeClosure T) : ‖polarOn
     rw [one_mul, norm_absIntoRange_apply]
     exact (norm_apply_eq_norm_abs_apply T y).le
   change ‖T.toLinearMap.extendOfNorm (absIntoRange T) x‖ ≤ ‖x‖
-  simpa only [one_mul] using LinearMap.norm_extendOfNorm_apply_le (denseRange_absIntoRange T) 1
-    hnorm x
+  simpa only [one_mul] using
+    LinearMap.norm_extendOfNorm_apply_le (denseRange_absIntoRange T) 1 hnorm x
 
-/-- The bounded polar factor, obtained by extending the range isometry by zero on the orthogonal
-complement of `closure (range |T|)`. -/
+/--
+The bounded polar factor, obtained by extending the range isometry by zero on the orthogonal
+complement of `closure (range |T|)`.
+-/
 noncomputable def polarFactor (T : H →L[ℂ] H) : H →L[ℂ] H :=
   polarOnRange T ∘L (rangeClosure T).orthogonalProjectionOnto
 
@@ -195,8 +198,8 @@ lemma polarFactor_norm_le (T : H →L[ℂ] H) (x : H) : ‖polarFactor T x‖ �
   unfold polarFactor
   rw [ContinuousLinearMap.comp_apply]
   calc
-    ‖polarOnRange T ((rangeClosure T).orthogonalProjectionOnto x)‖ ≤
-        ‖(rangeClosure T).orthogonalProjectionOnto x‖ := polarOnRange_norm_le T _
+    ‖polarOnRange T ((rangeClosure T).orthogonalProjectionOnto x)‖
+      ≤ ‖(rangeClosure T).orthogonalProjectionOnto x‖ := polarOnRange_norm_le T _
     _ ≤ ‖x‖ := (rangeClosure T).norm_orthogonalProjectionOnto_apply_le x
 
 lemma polarFactor_opNorm_le (T : H →L[ℂ] H) : ‖polarFactor T‖ ≤ 1 := by
@@ -208,34 +211,34 @@ lemma polarFactor_mul_absOperator (T : H →L[ℂ] H) : polarFactor T * absOpera
 
 /-! ### A.1. The partial-isometry adjoint identity -/
 
-lemma polarOnRange_norm_eq (T : H →L[ℂ] H) (y : rangeClosure T) :
-    ‖polarOnRange T y‖ = ‖y‖ := by
-  have heq : (fun y : rangeClosure T => ‖polarOnRange T y‖) ∘ (absIntoRange T) =
-      (fun y : rangeClosure T => ‖y‖) ∘ (absIntoRange T) := by
+lemma polarOnRange_norm_eq (T : H →L[ℂ] H) (y : rangeClosure T) : ‖polarOnRange T y‖ = ‖y‖ := by
+  have heq
+      : (fun y : rangeClosure T => ‖polarOnRange T y‖) ∘ (absIntoRange T)
+        = (fun y : rangeClosure T => ‖y‖) ∘ (absIntoRange T) := by
     funext x
     show ‖polarOnRange T (absIntoRange T x)‖ = ‖absIntoRange T x‖
     rw [polarOnRange_eq_on_abs, norm_apply_eq_norm_abs_apply, norm_absIntoRange_apply]
-  have hres := (denseRange_absIntoRange T).equalizer ((polarOnRange T).continuous.norm)
-    continuous_norm heq
+  have hres :=
+    (denseRange_absIntoRange T).equalizer ((polarOnRange T).continuous.norm) continuous_norm heq
   exact congrFun hres y
 
 /-- `polarOnRange T` is an isometry: its adjoint is a left inverse. -/
-lemma adjoint_polarOnRange_comp_self (T : H →L[ℂ] H) :
-    ContinuousLinearMap.adjoint (polarOnRange T) ∘L polarOnRange T = 1 :=
-  (ContinuousLinearMap.norm_map_iff_adjoint_comp_self (polarOnRange T)).mp
-    (polarOnRange_norm_eq T)
+lemma adjoint_polarOnRange_comp_self (T : H →L[ℂ] H)
+    : ContinuousLinearMap.adjoint (polarOnRange T) ∘L polarOnRange T = 1 :=
+  (ContinuousLinearMap.norm_map_iff_adjoint_comp_self (polarOnRange T)).mp (polarOnRange_norm_eq T)
 
-/-- `star (polarFactor T) * polarFactor T` is exactly the orthogonal projection onto
-`rangeClosure T`. -/
-lemma star_polarFactor_mul_polarFactor (T : H →L[ℂ] H) :
-    star (polarFactor T) * polarFactor T = (rangeClosure T).starProjection := by
+/--
+`star (polarFactor T) * polarFactor T` is exactly the orthogonal projection onto
+`rangeClosure T`.
+-/
+lemma star_polarFactor_mul_polarFactor (T : H →L[ℂ] H)
+    : star (polarFactor T) * polarFactor T = (rangeClosure T).starProjection := by
   rw [ContinuousLinearMap.star_eq_adjoint]
   show ContinuousLinearMap.adjoint
       (polarOnRange T ∘L (rangeClosure T).orthogonalProjectionOnto) *
     (polarOnRange T ∘L (rangeClosure T).orthogonalProjectionOnto) =
       (rangeClosure T).starProjection
-  rw [ContinuousLinearMap.adjoint_comp, ContinuousLinearMap.mul_def,
-    ContinuousLinearMap.comp_assoc,
+  rw [ContinuousLinearMap.adjoint_comp, ContinuousLinearMap.mul_def, ContinuousLinearMap.comp_assoc,
     ← ContinuousLinearMap.comp_assoc (ContinuousLinearMap.adjoint (polarOnRange T)),
     adjoint_polarOnRange_comp_self, ContinuousLinearMap.one_def,
     Submodule.adjoint_orthogonalProjectionOnto]
@@ -247,16 +250,16 @@ lemma star_polarFactor_mul_self (T : H →L[ℂ] H) : star (polarFactor T) * T =
   have hT : polarFactor T * absOperator T = T := polarFactor_mul_absOperator T
   have hproj : star (polarFactor T) * T = (rangeClosure T).starProjection * absOperator T := by
     calc
-      star (polarFactor T) * T = star (polarFactor T) * (polarFactor T * absOperator T) := by
-        rw [hT]
+      star (polarFactor T) * T
+        = star (polarFactor T) * (polarFactor T * absOperator T) := by rw [hT]
       _ = (star (polarFactor T) * polarFactor T) * absOperator T := by rw [mul_assoc]
       _ = (rangeClosure T).starProjection * absOperator T := by
         rw [star_polarFactor_mul_polarFactor]
   rw [hproj]
   ext x
   show (rangeClosure T).starProjection (absOperator T x) = absOperator T x
-  exact Submodule.starProjection_eq_self_iff.mpr
-    (Submodule.le_topologicalClosure _ (LinearMap.mem_range_self _ x))
+  exact Submodule.starProjection_eq_self_iff.mpr (Submodule.le_topologicalClosure _
+    (LinearMap.mem_range_self _ x))
 
 end Polar
 

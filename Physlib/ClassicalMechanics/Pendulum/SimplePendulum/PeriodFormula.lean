@@ -129,11 +129,13 @@ so nothing is claimed there.
 
 -/
 
-/-- The classical formula `4 √(ℓ/g) K(sin² (θ₀/2))` for the period of libration of the simple
-  gravity pendulum with amplitude `θ₀` (Landau & Lifshitz, §11, Problem 1, where it is written
-  `T = 4 √(l/g) K(sin ½φ₀)` in the modulus convention). Its identification with the return
-  time of a solution of the nonlinear equation of motion is not yet formalized (see the
-  TODO). -/
+/--
+The classical formula `4 √(ℓ/g) K(sin² (θ₀/2))` for the period of libration of the simple
+gravity pendulum with amplitude `θ₀` (Landau & Lifshitz, §11, Problem 1, where it is written
+`T = 4 √(l/g) K(sin ½φ₀)` in the modulus convention). Its identification with the return
+time of a solution of the nonlinear equation of motion is not yet formalized (see the
+TODO).
+-/
 noncomputable def periodFormula (θ₀ : ℝ) : ℝ :=
   4 * √(S.ℓ / S.g) * Real.completeEllipticK (Real.sin (θ₀ / 2) ^ 2)
 
@@ -160,8 +162,10 @@ TODO "Prove that `periodFormula θ₀` is the period of the motion of the simple
   periodic with period `periodFormula θ₀`, which needs the motion to be defined for all time —
   only local existence (`SimplePendulum.exists_local_solution`) is formalized so far."
 
-/-- The period formula is even in the amplitude, `periodFormula (-θ₀) = periodFormula θ₀`: its
-  parameter `sin² (θ₀/2)` is even in `θ₀`. -/
+/--
+The period formula is even in the amplitude, `periodFormula (-θ₀) = periodFormula θ₀`: its
+parameter `sin² (θ₀/2)` is even in `θ₀`.
+-/
 lemma periodFormula_neg (θ₀ : ℝ) : S.periodFormula (-θ₀) = S.periodFormula θ₀ := by
   simp only [periodFormula, neg_div, Real.sin_neg, neg_sq]
 
@@ -178,17 +182,21 @@ theory of `SimplePendulum.SmallAngle` is the limit of the classical formula.
 
 -/
 
-/-- At zero amplitude the period formula is the small-angle period: `K 0 = π/2` turns
-  `4 √(ℓ/g) K 0` into `2π √(ℓ/g)`. -/
+/--
+At zero amplitude the period formula is the small-angle period: `K 0 = π/2` turns
+`4 √(ℓ/g) K 0` into `2π √(ℓ/g)`.
+-/
 @[simp]
 lemma periodFormula_zero : S.periodFormula 0 = S.smallAnglePeriod := by
   rw [periodFormula, smallAnglePeriod_eq, zero_div, Real.sin_zero, zero_pow two_ne_zero,
     Real.completeEllipticK_zero]
   ring
 
-/-- The period formula is continuous on the libration range `(-π, π)`: `completeEllipticK` is
-  continuous at every parameter `m < 1`, and the parameter `sin² (θ₀/2)` is continuous in `θ₀`
-  and below `1` for `|θ₀| < π`. -/
+/--
+The period formula is continuous on the libration range `(-π, π)`: `completeEllipticK` is
+continuous at every parameter `m < 1`, and the parameter `sin² (θ₀/2)` is continuous in `θ₀`
+and below `1` for `|θ₀| < π`.
+-/
 lemma continuousOn_periodFormula : ContinuousOn S.periodFormula (Set.Ioo (-Real.pi) Real.pi) := by
   refine continuousOn_of_forall_continuousAt fun θ₀ hθ₀ => ?_
   have hp : ContinuousAt (fun θ : ℝ => Real.sin (θ / 2) ^ 2) θ₀ := by fun_prop
@@ -198,13 +206,14 @@ lemma continuousOn_periodFormula : ContinuousOn S.periodFormula (Set.Ioo (-Real.
 
 /-- The period formula is continuous at zero amplitude, an interior point of `(-π, π)`. -/
 lemma continuousAt_periodFormula_zero : ContinuousAt S.periodFormula 0 :=
-  S.continuousOn_periodFormula.continuousAt
-    (Ioo_mem_nhds (by linarith [Real.pi_pos]) Real.pi_pos)
+  S.continuousOn_periodFormula.continuousAt (Ioo_mem_nhds (by linarith [Real.pi_pos]) Real.pi_pos)
 
-/-- The period formula tends to the small-angle period as the amplitude tends to zero: it is
-  continuous at `0`, where its value is the small-angle period. -/
-lemma periodFormula_tendsto_smallAnglePeriod :
-    Filter.Tendsto S.periodFormula (nhds 0) (nhds S.smallAnglePeriod) := by
+/--
+The period formula tends to the small-angle period as the amplitude tends to zero: it is
+continuous at `0`, where its value is the small-angle period.
+-/
+lemma periodFormula_tendsto_smallAnglePeriod
+    : Filter.Tendsto S.periodFormula (nhds 0) (nhds S.smallAnglePeriod) := by
   rw [← S.periodFormula_zero]
   exact S.continuousAt_periodFormula_zero.tendsto
 
@@ -232,45 +241,48 @@ of `K`. Both are restated as bundled `MonotoneOn` and `StrictMonoOn` facts on `[
 
 -/
 
-/-- The period formula is increasing in the amplitude on `[0, π)`: for `0 ≤ θ₁ ≤ θ₂ < π`,
-  `periodFormula θ₁ ≤ periodFormula θ₂`. Classically this is the statement that the pendulum is
-  not isochronous — the period of libration grows with the amplitude — once `periodFormula` is
-  identified with the period (see the TODO). -/
-lemma periodFormula_mono {θ₁ θ₂ : ℝ} (h0 : 0 ≤ θ₁) (h12 : θ₁ ≤ θ₂) (hπ : θ₂ < Real.pi) :
-    S.periodFormula θ₁ ≤ S.periodFormula θ₂ := by
+/--
+The period formula is increasing in the amplitude on `[0, π)`: for `0 ≤ θ₁ ≤ θ₂ < π`,
+`periodFormula θ₁ ≤ periodFormula θ₂`. Classically this is the statement that the pendulum is
+not isochronous — the period of libration grows with the amplitude — once `periodFormula` is
+identified with the period (see the TODO).
+-/
+lemma periodFormula_mono {θ₁ θ₂ : ℝ} (h0 : 0 ≤ θ₁) (h12 : θ₁ ≤ θ₂) (hπ : θ₂ < Real.pi)
+    : S.periodFormula θ₁ ≤ S.periodFormula θ₂ := by
   have hπ0 := Real.pi_pos
   have hs : Real.sin (θ₁ / 2) ≤ Real.sin (θ₂ / 2) :=
     Real.sin_le_sin_of_le_of_le_pi_div_two (by linarith) (by linarith) (by linarith)
-  have hs0 : 0 ≤ Real.sin (θ₁ / 2) :=
-    Real.sin_nonneg_of_nonneg_of_le_pi (by linarith) (by linarith)
+  have hs0 : 0 ≤ Real.sin (θ₁ / 2) := Real.sin_nonneg_of_nonneg_of_le_pi (by linarith) (by linarith)
   have hm : Real.sin (θ₂ / 2) ^ 2 < 1 := Real.sin_half_sq_lt_one (abs_lt.2 ⟨by linarith, hπ⟩)
   simp only [periodFormula]
-  exact mul_le_mul_of_nonneg_left
-    (Real.completeEllipticK_mono (pow_le_pow_left₀ hs0 hs 2) hm) (by positivity)
+  exact mul_le_mul_of_nonneg_left (Real.completeEllipticK_mono (pow_le_pow_left₀ hs0 hs 2) hm)
+    (by positivity)
 
-/-- The period formula is strictly increasing in the amplitude on `[0, π)`: for
-  `0 ≤ θ₁ < θ₂ < π`, `periodFormula θ₁ < periodFormula θ₂`. -/
-lemma periodFormula_strictMono {θ₁ θ₂ : ℝ} (h0 : 0 ≤ θ₁) (h12 : θ₁ < θ₂) (hπ : θ₂ < Real.pi) :
-    S.periodFormula θ₁ < S.periodFormula θ₂ := by
+/--
+The period formula is strictly increasing in the amplitude on `[0, π)`: for
+`0 ≤ θ₁ < θ₂ < π`, `periodFormula θ₁ < periodFormula θ₂`.
+-/
+lemma periodFormula_strictMono {θ₁ θ₂ : ℝ} (h0 : 0 ≤ θ₁) (h12 : θ₁ < θ₂) (hπ : θ₂ < Real.pi)
+    : S.periodFormula θ₁ < S.periodFormula θ₂ := by
   have hπ0 := Real.pi_pos
   have hs : Real.sin (θ₁ / 2) < Real.sin (θ₂ / 2) :=
     Real.sin_lt_sin_of_lt_of_le_pi_div_two (by linarith) (by linarith) (by linarith)
-  have hs0 : 0 ≤ Real.sin (θ₁ / 2) :=
-    Real.sin_nonneg_of_nonneg_of_le_pi (by linarith) (by linarith)
+  have hs0 : 0 ≤ Real.sin (θ₁ / 2) := Real.sin_nonneg_of_nonneg_of_le_pi (by linarith) (by linarith)
   have hm : Real.sin (θ₂ / 2) ^ 2 < 1 := Real.sin_half_sq_lt_one (abs_lt.2 ⟨by linarith, hπ⟩)
   have hℓ := S.ℓ_pos
   have hg := S.g_pos
   simp only [periodFormula]
   exact mul_lt_mul_of_pos_left
-    (Real.completeEllipticK_strictMono (pow_lt_pow_left₀ hs hs0 two_ne_zero) hm)
-    (by positivity)
+    (Real.completeEllipticK_strictMono (pow_lt_pow_left₀ hs hs0 two_ne_zero) hm) (by positivity)
 
 /-- The period formula is monotone on `[0, π)`, as a bundled `MonotoneOn` statement. -/
 lemma monotoneOn_periodFormula : MonotoneOn S.periodFormula (Set.Ico 0 Real.pi) :=
   fun _ h₁ _ h₂ h => S.periodFormula_mono h₁.1 h h₂.2
 
-/-- The period formula is strictly increasing on `[0, π)`, as a bundled `StrictMonoOn`
-  statement. -/
+/--
+The period formula is strictly increasing on `[0, π)`, as a bundled `StrictMonoOn`
+statement.
+-/
 lemma strictMonoOn_periodFormula : StrictMonoOn S.periodFormula (Set.Ico 0 Real.pi) :=
   fun _ h₁ _ h₂ h => S.periodFormula_strictMono h₁.1 h h₂.2
 
@@ -287,49 +299,59 @@ amplitude approaches the inverted position.
 
 -/
 
-/-- The period formula is at least the small-angle period: for `sin² (θ₀/2) < 1`,
-  `smallAnglePeriod ≤ periodFormula θ₀`, since `π/2 ≤ K m` on `[0, 1)`. -/
-lemma smallAnglePeriod_le_periodFormula {θ₀ : ℝ} (h : Real.sin (θ₀ / 2) ^ 2 < 1) :
-    S.smallAnglePeriod ≤ S.periodFormula θ₀ := by
+/--
+The period formula is at least the small-angle period: for `sin² (θ₀/2) < 1`,
+`smallAnglePeriod ≤ periodFormula θ₀`, since `π/2 ≤ K m` on `[0, 1)`.
+-/
+lemma smallAnglePeriod_le_periodFormula {θ₀ : ℝ} (h : Real.sin (θ₀ / 2) ^ 2 < 1)
+    : S.smallAnglePeriod ≤ S.periodFormula θ₀ := by
   rw [smallAnglePeriod_eq, periodFormula]
-  calc 2 * Real.pi * √(S.ℓ / S.g)
+  calc
+    2 * Real.pi * √(S.ℓ / S.g)
       = 4 * √(S.ℓ / S.g) * (Real.pi / 2) := by ring
     _ ≤ 4 * √(S.ℓ / S.g) * Real.completeEllipticK (Real.sin (θ₀ / 2) ^ 2) :=
-        mul_le_mul_of_nonneg_left (Real.pi_div_two_le_completeEllipticK (sq_nonneg _) h)
-          (by positivity)
+      mul_le_mul_of_nonneg_left (Real.pi_div_two_le_completeEllipticK (sq_nonneg _) h)
+        (by positivity)
 
-/-- The period formula is positive for `sin² (θ₀/2) < 1`: it is at least the small-angle
-  period, which is positive. -/
+/--
+The period formula is positive for `sin² (θ₀/2) < 1`: it is at least the small-angle
+period, which is positive.
+-/
 lemma periodFormula_pos {θ₀ : ℝ} (h : Real.sin (θ₀ / 2) ^ 2 < 1) : 0 < S.periodFormula θ₀ :=
   S.smallAnglePeriod_pos.trans_le (S.smallAnglePeriod_le_periodFormula h)
 
-/-- The period formula is at most `2π √(ℓ/g) / cos (θ₀/2)` for `|θ₀| < π`: the bound
-  `K m ≤ (π/2) (1 - m)^(-1/2)` at `m = sin² (θ₀/2)`, where `1 - sin² (θ₀/2) = cos² (θ₀/2)`
-  and `cos (θ₀/2) > 0`. -/
-lemma periodFormula_le {θ₀ : ℝ} (h : |θ₀| < Real.pi) :
-    S.periodFormula θ₀ ≤ 2 * Real.pi * √(S.ℓ / S.g) / Real.cos (θ₀ / 2) := by
+/--
+The period formula is at most `2π √(ℓ/g) / cos (θ₀/2)` for `|θ₀| < π`: the bound
+`K m ≤ (π/2) (1 - m)^(-1/2)` at `m = sin² (θ₀/2)`, where `1 - sin² (θ₀/2) = cos² (θ₀/2)`
+and `cos (θ₀/2) > 0`.
+-/
+lemma periodFormula_le {θ₀ : ℝ} (h : |θ₀| < Real.pi)
+    : S.periodFormula θ₀ ≤ 2 * Real.pi * √(S.ℓ / S.g) / Real.cos (θ₀ / 2) := by
   obtain ⟨h₁, h₂⟩ := abs_lt.1 h
   have hc : 0 < Real.cos (θ₀ / 2) := Real.cos_pos_of_mem_Ioo ⟨by linarith, by linarith⟩
   have hpow : (1 - Real.sin (θ₀ / 2) ^ 2) ^ (-(1 / 2 : ℝ)) = (Real.cos (θ₀ / 2))⁻¹ := by
     rw [← Real.cos_sq', ← Real.rpow_two, ← Real.rpow_mul hc.le,
       show (2 : ℝ) * -(1 / 2) = -1 by norm_num, Real.rpow_neg_one]
   rw [periodFormula]
-  calc 4 * √(S.ℓ / S.g) * Real.completeEllipticK (Real.sin (θ₀ / 2) ^ 2)
-      ≤ 4 * √(S.ℓ / S.g) * (Real.pi / 2 * (1 - Real.sin (θ₀ / 2) ^ 2) ^ (-(1 / 2 : ℝ))) :=
-        mul_le_mul_of_nonneg_left
-          (Real.completeEllipticK_le (sq_nonneg _) (Real.sin_half_sq_lt_one h)) (by positivity)
+  calc
+    4 * √(S.ℓ / S.g) * Real.completeEllipticK (Real.sin (θ₀ / 2) ^ 2)
+        ≤ 4 * √(S.ℓ / S.g) * (Real.pi / 2 * (1 - Real.sin (θ₀ / 2) ^ 2) ^ (-(1 / 2 : ℝ))) :=
+      mul_le_mul_of_nonneg_left
+        (Real.completeEllipticK_le (sq_nonneg _) (Real.sin_half_sq_lt_one h)) (by positivity)
     _ = 2 * Real.pi * √(S.ℓ / S.g) / Real.cos (θ₀ / 2) := by
-        rw [hpow]
-        ring
+      rw [hpow]
+      ring
 
-/-- The period formula is at most the small-angle period divided by `cos (θ₀/2)`, for
-  `|θ₀| < π`: `periodFormula_le` with `2π √(ℓ/g) = smallAnglePeriod`. Together with
-  `smallAnglePeriod_le_periodFormula` this sandwiches the formula,
-  `smallAnglePeriod ≤ periodFormula θ₀ ≤ smallAnglePeriod / cos (θ₀/2)`; the lower bound holds
-  under the more general hypothesis `sin² (θ₀/2) < 1`, which `|θ₀| < π` implies
-  (`Real.sin_half_sq_lt_one`). -/
-lemma periodFormula_le' {θ₀ : ℝ} (h : |θ₀| < Real.pi) :
-    S.periodFormula θ₀ ≤ S.smallAnglePeriod / Real.cos (θ₀ / 2) := by
+/--
+The period formula is at most the small-angle period divided by `cos (θ₀/2)`, for
+`|θ₀| < π`: `periodFormula_le` with `2π √(ℓ/g) = smallAnglePeriod`. Together with
+`smallAnglePeriod_le_periodFormula` this sandwiches the formula,
+`smallAnglePeriod ≤ periodFormula θ₀ ≤ smallAnglePeriod / cos (θ₀/2)`; the lower bound holds
+under the more general hypothesis `sin² (θ₀/2) < 1`, which `|θ₀| < π` implies
+(`Real.sin_half_sq_lt_one`).
+-/
+lemma periodFormula_le' {θ₀ : ℝ} (h : |θ₀| < Real.pi)
+    : S.periodFormula θ₀ ≤ S.smallAnglePeriod / Real.cos (θ₀ / 2) := by
   rw [smallAnglePeriod_eq]
   exact S.periodFormula_le h
 

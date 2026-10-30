@@ -57,18 +57,18 @@ variable {H : Type*} [NormedAddCommGroup H] [InnerProductSpace ℂ H] [CompleteS
 
 -/
 
-/-- The real spectral measure of a bounded self-adjoint operator: the spectral measure on its
-complex spectrum, pushed forward along `Complex.re`. -/
-noncomputable def boundedSelfAdjointSpectralMeasure
-    (A : H →L[ℂ] H) (hA : IsSelfAdjoint A) :
-    QuantumMechanics.WOTSpectralMeasure ℝ H :=
-  (cfcSpectralMeasure A hA.isStarNormal).map
-    (fun z : spectrum ℂ A => z.1.re) (by fun_prop)
+/--
+The real spectral measure of a bounded self-adjoint operator: the spectral measure on its
+complex spectrum, pushed forward along `Complex.re`.
+-/
+noncomputable def boundedSelfAdjointSpectralMeasure (A : H →L[ℂ] H) (hA : IsSelfAdjoint A)
+    : QuantumMechanics.WOTSpectralMeasure ℝ H :=
+  (cfcSpectralMeasure A hA.isStarNormal).map (fun z : spectrum ℂ A => z.1.re) (by fun_prop)
 
 lemma boundedSelfAdjointSpectralMeasure_reconstruction
-    (A : H →L[ℂ] H) (hA : IsSelfAdjoint A) (x y : H) :
-    (boundedSelfAdjointSpectralMeasure A hA).complexWeakIntegral
-        (fun r : ℝ => (r : ℂ)) x y = ⟪y, A x⟫_ℂ := by
+    (A : H →L[ℂ] H) (hA : IsSelfAdjoint A) (x y : H)
+    : (boundedSelfAdjointSpectralMeasure A hA).complexWeakIntegral (fun r : ℝ => (r : ℂ)) x y
+      = ⟪y, A x⟫_ℂ := by
   let E := cfcSpectralMeasure A hA.isStarNormal
   let f : spectrum ℂ A → ℝ := fun z => z.1.re
   have hf : Measurable f := by fun_prop
@@ -77,21 +77,22 @@ lemma boundedSelfAdjointSpectralMeasure_reconstruction
     exact polarizedCfcScalarMeasure_isFiniteMeasure A hA.isStarNormal x y
   let := hfinite
   have hgi : (E.scalarMeasure x y).Integrable (fun z => ((f z : ℝ) : ℂ)) := by
-    have hcont : Continuous (fun z : spectrum ℂ A => ((f z : ℝ) : ℂ)) := by
-      fun_prop
+    have hcont : Continuous (fun z : spectrum ℂ A => ((f z : ℝ) : ℂ)) := by fun_prop
     have hbdd : BddAbove ((fun z : ℂ => ‖z‖) '' (spectrum ℂ A)) :=
       (spectrum.isCompact A).bddAbove_image continuous_norm.continuousOn
     rcases hbdd with ⟨C, hC⟩
     apply MeasureTheory.Integrable.of_bound hcont.aestronglyMeasurable C
     filter_upwards [] with z
     calc
-      ‖((f z : ℝ) : ℂ)‖ = |f z| := by simp
+      ‖((f z : ℝ) : ℂ)‖
+        = |f z| := by simp
       _ = |z.1.re| := rfl
       _ ≤ ‖z.1‖ := Complex.abs_re_le_norm _
       _ ≤ C := hC ⟨z.1, z.property, rfl⟩
-  have hmap := QuantumMechanics.WOTSpectralMeasure.complexWeakIntegral_map
-    (μS := E) f hf (fun r : ℝ => (r : ℂ)) x y
-    Complex.continuous_ofReal.aestronglyMeasurable hgi
+  have hmap :=
+    QuantumMechanics.WOTSpectralMeasure.complexWeakIntegral_map (μS := E) f hf
+      (fun r : ℝ => (r : ℂ))
+      x y Complex.continuous_ofReal.aestronglyMeasurable hgi
   change (E.map f hf).complexWeakIntegral (fun r : ℝ => (r : ℂ)) x y = _
   rw [hmap]
   have hreal : ((fun r : ℝ => (r : ℂ)) ∘ f) = (fun z : spectrum ℂ A => z.1) := by
@@ -108,13 +109,16 @@ lemma boundedSelfAdjointSpectralMeasure_reconstruction
 
 -/
 
-/-- The spectral projections of a bounded self-adjoint operator commute with every unitary that
-commutes with it. -/
+/--
+The spectral projections of a bounded self-adjoint operator commute with every unitary that
+commutes with it.
+-/
 lemma boundedSelfAdjointSpectralMeasure_commute_of_commute
-    (A : H →L[ℂ] H) (hA : IsSelfAdjoint A) {T : H →L[ℂ] H} (hAT : Commute A T)
-    (hTunit : T ∈ unitary (H →L[ℂ] H)) (E : Set ℝ) :
-    boundedSelfAdjointSpectralMeasure A hA E * ContinuousLinearMapWOT.ofCLM T =
-      ContinuousLinearMapWOT.ofCLM T * boundedSelfAdjointSpectralMeasure A hA E := by
+    (A : H →L[ℂ] H) (hA : IsSelfAdjoint A)
+    {T : H →L[ℂ] H} (hAT : Commute A T) (hTunit : T ∈ unitary (H →L[ℂ] H))
+    (E : Set ℝ)
+    : boundedSelfAdjointSpectralMeasure A hA E * ContinuousLinearMapWOT.ofCLM T
+      = ContinuousLinearMapWOT.ofCLM T * boundedSelfAdjointSpectralMeasure A hA E := by
   have hAT' : Commute (star A) T := by rwa [hA.star_eq]
   by_cases hE : MeasurableSet E
   · show (cfcSpectralMeasure A hA.isStarNormal).map (fun z : spectrum ℂ A => z.1.re) (by fun_prop) E
@@ -122,15 +126,14 @@ lemma boundedSelfAdjointSpectralMeasure_commute_of_commute
       ContinuousLinearMapWOT.ofCLM T *
         (cfcSpectralMeasure A hA.isStarNormal).map (fun z : spectrum ℂ A => z.1.re) (by fun_prop) E
     rw [(cfcSpectralMeasure A hA.isStarNormal).map_apply
-      (fun z : spectrum ℂ A => z.1.re) (by fun_prop) hE]
+      (fun z : spectrum ℂ A => z.1.re)
+      (by fun_prop) hE]
     exact cfcSpectralMeasure_commute_of_commute_unitary A hA.isStarNormal hAT hAT' hTunit _
   · rw [(boundedSelfAdjointSpectralMeasure A hA).apply_eq_zero_of_not_measurableSet hE]
     simp
 
-lemma exists_boundedSelfAdjointSpectralSupport
-    (A : H →L[ℂ] H) (hA : IsSelfAdjoint A) :
-    ∃ C : ℝ, HasBoundedSpectralSupport
-      (boundedSelfAdjointSpectralMeasure A hA) C := by
+lemma exists_boundedSelfAdjointSpectralSupport (A : H →L[ℂ] H) (hA : IsSelfAdjoint A)
+    : ∃ C : ℝ, HasBoundedSpectralSupport (boundedSelfAdjointSpectralMeasure A hA) C := by
   let E := cfcSpectralMeasure A hA.isStarNormal
   let f : spectrum ℂ A → ℝ := fun z => z.1.re
   have hbdd : BddAbove ((fun z : ℂ => ‖z‖) '' (spectrum ℂ A)) :=
@@ -145,11 +148,11 @@ lemma exists_boundedSelfAdjointSpectralSupport
     · intro hz
       have habs : |f z| ≤ C := by
         calc
-          |f z| ≤ ‖z.1‖ := Complex.abs_re_le_norm _
+          |f z|
+            ≤ ‖z.1‖ := Complex.abs_re_le_norm _
           _ ≤ B := hB ⟨z.1, z.property, rfl⟩
           _ ≤ C := le_max_right _ _
-      have hzIcc : f z ∈ Set.Icc (-C) C :=
-        (abs_le.mp habs)
+      have hzIcc : f z ∈ Set.Icc (-C) C := (abs_le.mp habs)
       exact (Set.disjoint_left.1 hdisj hz) hzIcc
     · simp
   change (E.map f (by fun_prop)) S = 0

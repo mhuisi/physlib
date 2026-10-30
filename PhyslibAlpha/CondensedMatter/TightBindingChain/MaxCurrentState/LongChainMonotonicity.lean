@@ -89,21 +89,23 @@ private lemma sin_le_taylor {x : ℝ} (hx : 0 ≤ x) : Real.sin x ≤ x - x ^ 3 
 
 /-- The remainder of the derivative: a polynomial in `x` and `p = π`, of degree three in `p`. -/
 private noncomputable def remainder (x p : ℝ) : ℝ :=
-  (5 * x ^ 12 - 180 * x ^ 10 + 1880 * x ^ 8 - 7552 * x ^ 6 + 6720 * x ^ 4 + 34560 * x ^ 2 +
-      69120) +
-    (-384 * x ^ 5 + 7680 * x ^ 3 - 46080 * x) * p +
-    (-160 * x ^ 6 + 2048 * x ^ 4 - 5760 * x ^ 2 - 11520) * p ^ 2 +
-    (160 * x ^ 5 - 2144 * x ^ 3 + 7680 * x) * p ^ 3
+  (5 * x ^ 12 - 180 * x ^ 10 + 1880 * x ^ 8 - 7552 * x ^ 6 + 6720 * x ^ 4 + 34560 * x ^ 2 + 69120)
+    + (-384 * x ^ 5 + 7680 * x ^ 3 - 46080 * x) * p
+    + (-160 * x ^ 6 + 2048 * x ^ 4 - 5760 * x ^ 2 - 11520) * p ^ 2
+    + (160 * x ^ 5 - 2144 * x ^ 3 + 7680 * x) * p ^ 3
 
-/-- The remainder with `π` replaced by rational bounds, `3.141592` in the terms of degree one and
+/--
+The remainder with `π` replaced by rational bounds, `3.141592` in the terms of degree one and
 two in `p` and `3.141593` in the term of degree three, is negative on `0 ≤ x ≤ 1571 / 2500`:
-all thirteen Bernstein coefficients are negative. -/
-private lemma bound_poly_neg {x : ℝ} (hx0 : 0 ≤ x) (hx1 : x ≤ 1571 / 2500) :
-    (5 * x ^ 12 - 180 * x ^ 10 + 1880 * x ^ 8 - 7552 * x ^ 6 + 6720 * x ^ 4 + 34560 * x ^ 2 +
-        69120) +
-      (-384 * x ^ 5 + 7680 * x ^ 3 - 46080 * x) * (3141592 / 1000000) +
-      (-160 * x ^ 6 + 2048 * x ^ 4 - 5760 * x ^ 2 - 11520) * (3141592 / 1000000) ^ 2 +
-      (160 * x ^ 5 - 2144 * x ^ 3 + 7680 * x) * (3141593 / 1000000) ^ 3 < 0 := by
+all thirteen Bernstein coefficients are negative.
+-/
+private lemma bound_poly_neg {x : ℝ} (hx0 : 0 ≤ x) (hx1 : x ≤ 1571 / 2500)
+    : (5 * x ^ 12 - 180 * x ^ 10 + 1880 * x ^ 8 - 7552 * x ^ 6 + 6720 * x ^ 4 + 34560 * x ^ 2
+          + 69120)
+        + (-384 * x ^ 5 + 7680 * x ^ 3 - 46080 * x) * (3141592 / 1000000)
+        + (-160 * x ^ 6 + 2048 * x ^ 4 - 5760 * x ^ 2 - 11520) * (3141592 / 1000000) ^ 2
+        + (160 * x ^ 5 - 2144 * x ^ 3 + 7680 * x) * (3141593 / 1000000) ^ 3
+      < 0 := by
   let u : ℝ := 2500 / 1571 * x
   have hu0 : 0 ≤ u := by positivity
   have hu1 : 0 ≤ 1 - u := by dsimp only [u]; linarith
@@ -125,9 +127,10 @@ private lemma bound_poly_neg {x : ℝ} (hx0 : 0 ≤ x) (hx1 : x ≤ 1571 / 2500)
   linarith [hb0, hb1, hb2, hb3, hb4, hb5, hb6, hb7, hb8, hb9, hb10, hb11, hb12]
 
 /-- The remainder `P(x, π)` of the derivative is negative for `0 ≤ x ≤ 1571 / 2500`. -/
-private lemma remainder_neg {x p : ℝ} (hx0 : 0 ≤ x) (hx1 : x ≤ 1571 / 2500)
-    (hp0 : 3141592 / 1000000 ≤ p) (hp1 : p ≤ 3141593 / 1000000) :
-    remainder x p < 0 := by
+private lemma remainder_neg
+    {x p : ℝ} (hx0 : 0 ≤ x) (hx1 : x ≤ 1571 / 2500) (hp0 : 3141592 / 1000000 ≤ p)
+    (hp1 : p ≤ 3141593 / 1000000)
+    : remainder x p < 0 := by
   unfold remainder
   have hx2 : x ^ 2 ≤ 1 / 2 := by nlinarith
   have hB : -384 * x ^ 5 + 7680 * x ^ 3 - 46080 * x ≤ 0 := by nlinarith [sq_nonneg (x ^ 2)]
@@ -148,11 +151,11 @@ private lemma remainder_neg {x p : ℝ} (hx0 : 0 ≤ x) (hx1 : x ≤ 1571 / 2500
 
 /-- The closed form of `C²` in the angle `x = π / n`. -/
 private noncomputable def angleForm (x : ℝ) : ℝ :=
-  ((Real.pi ^ 2 / x ^ 2 - 2 * Real.pi / x - 4 + 8 * x / Real.pi) / 3) * Real.tan x ^ 2 - 2 +
-    4 * x / Real.pi
+  ((Real.pi ^ 2 / x ^ 2 - 2 * Real.pi / x - 4 + 8 * x / Real.pi) / 3) * Real.tan x ^ 2 - 2
+    + 4 * x / Real.pi
 
-private lemma uncertaintyRatioSqForm_eq_angleForm {n : ℝ} (hn : 2 < n) :
-    uncertaintyRatioSqForm n = angleForm (Real.pi / n) := by
+private lemma uncertaintyRatioSqForm_eq_angleForm {n : ℝ} (hn : 2 < n)
+    : uncertaintyRatioSqForm n = angleForm (Real.pi / n) := by
   have hn0 : n ≠ 0 := by positivity
   have hx : Real.pi / n ≠ 0 := div_ne_zero Real.pi_ne_zero hn0
   have hx0 : 0 < Real.pi / n := by positivity
@@ -166,26 +169,31 @@ private lemma uncertaintyRatioSqForm_eq_angleForm {n : ℝ} (hn : 2 < n) :
   field_simp
   ring
 
-private lemma hasDerivAt_angleForm {x : ℝ} (hx : x ≠ 0) (hcos : Real.cos x ≠ 0) :
-    HasDerivAt angleForm
-      (((-2 * Real.pi ^ 2 / x ^ 3 + 2 * Real.pi / x ^ 2 + 8 / Real.pi) * Real.sin x ^ 2 *
-          Real.cos x + 2 * (Real.pi ^ 2 / x ^ 2 - 2 * Real.pi / x - 4 + 8 * x / Real.pi) *
-          Real.sin x + 12 / Real.pi * Real.cos x ^ 3) / (3 * Real.cos x ^ 3)) x := by
+private lemma hasDerivAt_angleForm {x : ℝ} (hx : x ≠ 0) (hcos : Real.cos x ≠ 0)
+    : HasDerivAt angleForm
+      (((-2 * Real.pi ^ 2 / x ^ 3 + 2 * Real.pi / x ^ 2 + 8 / Real.pi) * Real.sin x ^ 2 * Real.cos x
+          + 2 * (Real.pi ^ 2 / x ^ 2 - 2 * Real.pi / x - 4 + 8 * x / Real.pi) * Real.sin x
+          + 12 / Real.pi * Real.cos x ^ 3)
+        / (3 * Real.cos x ^ 3))
+      x := by
   unfold angleForm
   have da := (hasDerivAt_const x (Real.pi ^ 2)).div ((hasDerivAt_id x).pow 2) (pow_ne_zero 2 hx)
   have db := (hasDerivAt_const x (2 * Real.pi)).div (hasDerivAt_id x) hx
   have dd := ((hasDerivAt_const x (8 : ℝ)).mul (hasDerivAt_id x)).div_const Real.pi
   have de := ((hasDerivAt_const x (4 : ℝ)).mul (hasDerivAt_id x)).div_const Real.pi
-  have h := (((((da.sub db).sub (hasDerivAt_const x (4 : ℝ))).add dd).div_const 3).mul
-    ((Real.hasDerivAt_tan hcos).pow 2)).sub (hasDerivAt_const x (2 : ℝ)) |>.add de
+  have h :=
+    (((((da.sub db).sub (hasDerivAt_const x (4 : ℝ))).add dd).div_const 3).mul
+          ((Real.hasDerivAt_tan hcos).pow 2)).sub
+        (hasDerivAt_const x (2 : ℝ))
+      |>.add de
   refine h.congr_deriv ?_
   simp only [id_eq, Pi.pow_apply, Pi.mul_apply, Pi.sub_apply, Pi.add_apply, Pi.div_apply]
   field_simp
   rw [show Real.sin x = Real.tan x * Real.cos x by rw [Real.tan_eq_sin_div_cos]; field_simp]
   ring
 
-private lemma deriv_angleForm_neg {x : ℝ} (hx0 : 0 < x) (hx5 : x ≤ Real.pi / 5) :
-    deriv angleForm x < 0 := by
+private lemma deriv_angleForm_neg {x : ℝ} (hx0 : 0 < x) (hx5 : x ≤ Real.pi / 5)
+    : deriv angleForm x < 0 := by
   have hpL : (3141592 / 1000000 : ℝ) ≤ Real.pi := by linarith [Real.pi_gt_d6]
   have hpU : Real.pi ≤ 3141593 / 1000000 := by linarith [Real.pi_lt_d6]
   have hx1 : x ≤ 1571 / 2500 := by linarith
@@ -196,14 +204,17 @@ private lemma deriv_angleForm_neg {x : ℝ} (hx0 : 0 < x) (hx5 : x ≤ Real.pi /
   set q := Real.pi ^ 2 / x ^ 2 - 2 * Real.pi / x - 4 + 8 * x / Real.pi with hq
   set qp := -2 * Real.pi ^ 2 / x ^ 3 + 2 * Real.pi / x ^ 2 + 8 / Real.pi with hqp
   have hqpos : 0 < q := by
-    rw [hq, show Real.pi ^ 2 / x ^ 2 - 2 * Real.pi / x - 4 + 8 * x / Real.pi =
-      (Real.pi ^ 3 - 2 * Real.pi ^ 2 * x - 4 * Real.pi * x ^ 2 + 8 * x ^ 3) /
-        (x ^ 2 * Real.pi) by field_simp]
+    rw [hq,
+      show Real.pi ^ 2 / x ^ 2 - 2 * Real.pi / x - 4 + 8 * x / Real.pi
+          = (Real.pi ^ 3 - 2 * Real.pi ^ 2 * x - 4 * Real.pi * x ^ 2 + 8 * x ^ 3)
+            / (x ^ 2 * Real.pi) by
+        field_simp]
     apply div_pos _ (by positivity)
     nlinarith [mul_pos hx0 Real.pi_pos, sq_nonneg x]
   have hqpneg : qp < 0 := by
-    rw [hqp, show -2 * Real.pi ^ 2 / x ^ 3 + 2 * Real.pi / x ^ 2 + 8 / Real.pi =
-      (-2 * Real.pi ^ 3 + 2 * Real.pi ^ 2 * x + 8 * x ^ 3) / (x ^ 3 * Real.pi) by
+    rw [hqp,
+      show -2 * Real.pi ^ 2 / x ^ 3 + 2 * Real.pi / x ^ 2 + 8 / Real.pi
+          = (-2 * Real.pi ^ 3 + 2 * Real.pi ^ 2 * x + 8 * x ^ 3) / (x ^ 3 * Real.pi) by
         field_simp]
     apply div_neg_of_neg_of_pos _ (by positivity)
     nlinarith [mul_pos hx0 Real.pi_pos, sq_nonneg x]
@@ -213,24 +224,28 @@ private lemma deriv_angleForm_neg {x : ℝ} (hx0 : 0 < x) (hx5 : x ≤ Real.pi /
   have hcu := cos_le_taylor hx0.le
   have hprod : (x - x ^ 3 / 6) ^ 2 * (1 - x ^ 2 / 2) ≤ Real.sin x ^ 2 * Real.cos x :=
     mul_le_mul (pow_le_pow_left₀ hsin0.le hsl 2) hcl hcl0.le (sq_nonneg _)
-  have hupper : qp * (Real.sin x ^ 2 * Real.cos x) + 2 * q * Real.sin x +
-      12 / Real.pi * Real.cos x ^ 3 ≤ qp * ((x - x ^ 3 / 6) ^ 2 * (1 - x ^ 2 / 2)) +
-        2 * q * (x - x ^ 3 / 6 + x ^ 5 / 120) +
-        12 / Real.pi * (1 - x ^ 2 / 2 + x ^ 4 / 24) ^ 3 := by
+  have hupper
+      : qp * (Real.sin x ^ 2 * Real.cos x) + 2 * q * Real.sin x + 12 / Real.pi * Real.cos x ^ 3
+        ≤ qp * ((x - x ^ 3 / 6) ^ 2 * (1 - x ^ 2 / 2)) + 2 * q * (x - x ^ 3 / 6 + x ^ 5 / 120)
+          + 12 / Real.pi * (1 - x ^ 2 / 2 + x ^ 4 / 24) ^ 3 := by
     have h1 := mul_le_mul_of_nonpos_left hprod hqpneg.le
     have h2 := mul_le_mul_of_nonneg_left hsu (by positivity : 0 ≤ 2 * q)
-    have h3 := mul_le_mul_of_nonneg_left (pow_le_pow_left₀ hcospos.le hcu 3)
-      (by positivity : 0 ≤ 12 / Real.pi)
+    have h3 :=
+      mul_le_mul_of_nonneg_left (pow_le_pow_left₀ hcospos.le hcu 3)
+        (by positivity : 0 ≤ 12 / Real.pi)
     linarith
-  have hrem : Real.pi * (qp * ((x - x ^ 3 / 6) ^ 2 * (1 - x ^ 2 / 2)) +
-      2 * q * (x - x ^ 3 / 6 + x ^ 5 / 120) + 12 / Real.pi * (1 - x ^ 2 / 2 + x ^ 4 / 24) ^ 3) =
-      remainder x Real.pi / 5760 := by
+  have hrem
+      : Real.pi
+          * (qp * ((x - x ^ 3 / 6) ^ 2 * (1 - x ^ 2 / 2)) + 2 * q * (x - x ^ 3 / 6 + x ^ 5 / 120)
+            + 12 / Real.pi * (1 - x ^ 2 / 2 + x ^ 4 / 24) ^ 3)
+        = remainder x Real.pi / 5760 := by
     rw [hq, hqp, remainder]
     field_simp
     ring
   have hneg := remainder_neg hx0.le hx1 hpL hpU
-  have hnum : qp * (Real.sin x ^ 2 * Real.cos x) + 2 * q * Real.sin x +
-      12 / Real.pi * Real.cos x ^ 3 < 0 := by
+  have hnum
+      : qp * (Real.sin x ^ 2 * Real.cos x) + 2 * q * Real.sin x + 12 / Real.pi * Real.cos x ^ 3
+        < 0 := by
     refine hupper.trans_lt (neg_of_mul_neg_right ?_ Real.pi_pos.le)
     rw [hrem]
     linarith
@@ -270,21 +285,22 @@ lemma uncertaintyRatioSqForm_strictMonoOn : StrictMonoOn uncertaintyRatioSqForm 
   · exact div_lt_div_of_pos_left Real.pi_pos (by linarith) hmn
 
 /-- **Monotonicity.** From four sites on, `C` strictly increases with the number of sites. -/
-lemma uncertaintyRatio_lt_uncertaintyRatio {T T' : TightBindingChain} (ht : T.t ≠ 0)
-    (ht' : T'.t ≠ 0) (hN : 4 ≤ T.N) (hNN' : T.N < T'.N) :
-    T.uncertaintyRatio < T'.uncertaintyRatio := by
+lemma uncertaintyRatio_lt_uncertaintyRatio
+    {T T' : TightBindingChain} (ht : T.t ≠ 0) (ht' : T'.t ≠ 0) (hN : 4 ≤ T.N) (hNN' : T.N < T'.N)
+    : T.uncertaintyRatio < T'.uncertaintyRatio := by
   have h4 : (5 : ℝ) ≤ T.N + 1 := by
     have : (4 : ℝ) ≤ T.N := by exact_mod_cast hN
     linarith
   have hlt : (T.N : ℝ) + 1 < T'.N + 1 := by exact_mod_cast Nat.succ_lt_succ hNN'
   have h := uncertaintyRatioSqForm_strictMonoOn h4 (show (5 : ℝ) ≤ T'.N + 1 by linarith) hlt
   rw [← uncertaintyRatio_sq_eq_uncertaintyRatioSqForm T ht (by omega),
-    ← uncertaintyRatio_sq_eq_uncertaintyRatioSqForm T' ht' (by omega)] at h
+      ← uncertaintyRatio_sq_eq_uncertaintyRatioSqForm T' ht' (by omega)]
+    at h
   exact lt_of_pow_lt_pow_left₀ 2 (uncertaintyRatio_nonneg _) h
 
 /-- From four sites on, `C` stays strictly below its long chain limit `√(π² / 3 - 2)`. -/
-lemma uncertaintyRatio_lt_sqrt_pi_sq_div_three_sub_two (ht : T.t ≠ 0) (hN : 4 ≤ T.N) :
-    T.uncertaintyRatio < √(Real.pi ^ 2 / 3 - 2) := by
+lemma uncertaintyRatio_lt_sqrt_pi_sq_div_three_sub_two (ht : T.t ≠ 0) (hN : 4 ≤ T.N)
+    : T.uncertaintyRatio < √(Real.pi ^ 2 / 3 - 2) := by
   have h5 : (5 : ℝ) ≤ T.N + 1 := by
     have : (4 : ℝ) ≤ T.N := by exact_mod_cast hN
     linarith
@@ -292,8 +308,9 @@ lemma uncertaintyRatio_lt_sqrt_pi_sq_div_three_sub_two (ht : T.t ≠ 0) (hN : 4 
     refine ge_of_tendsto tendsto_uncertaintyRatioSqForm ?_
     filter_upwards [eventually_ge_atTop ((T.N : ℝ) + 2)] with n hn
     exact uncertaintyRatioSqForm_strictMonoOn.monotoneOn (by simp; linarith) (by simp; linarith) hn
-  have hlt := uncertaintyRatioSqForm_strictMonoOn h5 (show (5 : ℝ) ≤ T.N + 2 by linarith)
-    (by linarith : (T.N : ℝ) + 1 < T.N + 2)
+  have hlt :=
+    uncertaintyRatioSqForm_strictMonoOn h5 (show (5 : ℝ) ≤ T.N + 2 by linarith)
+      (by linarith : (T.N : ℝ) + 1 < T.N + 2)
   rw [← uncertaintyRatio_sq_eq_uncertaintyRatioSqForm T ht (by omega)] at hlt
   rw [← Real.sqrt_sq (uncertaintyRatio_nonneg T)]
   exact Real.sqrt_lt_sqrt (sq_nonneg _) (hlt.trans_le hle)

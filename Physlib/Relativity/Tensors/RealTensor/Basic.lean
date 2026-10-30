@@ -65,12 +65,18 @@ TODO "Replace Lorentz.ContrMod and Lorentz.CoMod in the definition of realLorent
 noncomputable section
 open realLorentzTensor in
 /-- The tensor structure for real Lorentz tensors. -/
-def realLorentzTensor (d : ℕ := 3) : TensorSpecies
-    ℝ realLorentzTensor.Color (LorentzGroup d)
-    (fun | Color.up => Lorentz.ContrMod d | Color.down => Lorentz.CoMod d)
-    (fun _ => Fin 1 ⊕ Fin d)
-    (fun | Color.up => Lorentz.ContrMod.rep | Color.down => Lorentz.CoMod.rep)
-    (fun | Color.up => Lorentz.contrBasis d | Color.down => Lorentz.coBasis d) where
+def realLorentzTensor (d : ℕ := 3)
+    : TensorSpecies ℝ realLorentzTensor.Color (LorentzGroup d)
+      (fun
+        | Color.up => Lorentz.ContrMod d
+        | Color.down => Lorentz.CoMod d)
+      (fun _ => Fin 1 ⊕ Fin d)
+      (fun
+        | Color.up => Lorentz.ContrMod.rep
+        | Color.down => Lorentz.CoMod.rep)
+      (fun
+        | Color.up => Lorentz.contrBasis d
+        | Color.down => Lorentz.coBasis d) where
   τ := fun c =>
     match c with
     | Color.up => Color.down
@@ -100,14 +106,20 @@ def realLorentzTensor (d : ℕ := 3) : TensorSpecies
     | Color.up => Lorentz.ContrMod.unit_symm
     | Color.down => Lorentz.CoMod.unit_symm
 
-
 open realLorentzTensor in
-/-- The real Lorentz tensors as a conjugation species: over `ℝ` conjugation is trivial, so every
-  colour is its own conjugate. -/
-def realLorentzConjTensor (d : ℕ := 3) : ConjTensorSpecies ℝ Color (LorentzGroup d)
-    (modules d) (fun _ => Fin 1 ⊕ Fin d)
-    (fun | Color.up => Lorentz.ContrMod.rep | Color.down => Lorentz.CoMod.rep)
-    (fun | Color.up => Lorentz.contrBasis d | Color.down => Lorentz.coBasis d) where
+/--
+The real Lorentz tensors as a conjugation species: over `ℝ` conjugation is trivial, so every
+colour is its own conjugate.
+-/
+def realLorentzConjTensor (d : ℕ := 3)
+    : ConjTensorSpecies ℝ Color (LorentzGroup d) (modules d)
+      (fun _ => Fin 1 ⊕ Fin d)
+      (fun
+        | Color.up => Lorentz.ContrMod.rep
+        | Color.down => Lorentz.CoMod.rep)
+      (fun
+        | Color.up => Lorentz.contrBasis d
+        | Color.down => Lorentz.coBasis d) where
   toTensorSpecies := realLorentzTensor d
   bar := id
   bar_involution _ := rfl
@@ -134,11 +146,10 @@ syntax (name := realLorentzTensorSyntax) "ℝT[" term,* "]" : term
 
 macro_rules
   | `(ℝT[$termDim:term, $term:term, $terms:term,*]) =>
-      `(((realLorentzTensor $termDim).Tensor (vecCons $term ![$terms,*])))
-  | `(ℝT[$termDim:term, $term:term]) =>
-    `(((realLorentzTensor $termDim).Tensor (vecCons $term ![])))
-  | `(ℝT[$termDim:term]) =>`(((realLorentzTensor $termDim).Tensor (vecEmpty)))
-  | `(ℝT[]) =>`(((realLorentzTensor 3).Tensor (vecEmpty)))
+    `(((realLorentzTensor $termDim).Tensor (vecCons $term ![$terms,*])))
+  | `(ℝT[$termDim:term, $term:term]) => `(((realLorentzTensor $termDim).Tensor (vecCons $term ![])))
+  | `(ℝT[$termDim:term]) => `(((realLorentzTensor $termDim).Tensor (vecEmpty)))
+  | `(ℝT[]) => `(((realLorentzTensor 3).Tensor (vecEmpty)))
 
 set_option quotPrecheck false in
 /-- Notation for a real Lorentz tensor. -/
@@ -153,9 +164,9 @@ These re-express fields of `realLorentzTensor d` in terms of `Lorentz` data.
 
 -/
 
-lemma basisIdxCongr_apply {d : ℕ} {c1 c2 : realLorentzTensor.Color} (h : c1 = c2)
-    (i : Fin 1 ⊕ Fin d) :
-    TensorSpecies.basisIdxCongr (basisIdx := fun _ => Fin 1 ⊕ Fin d) h i = i := by
+lemma basisIdxCongr_apply
+    {d : ℕ} {c1 c2 : realLorentzTensor.Color} (h : c1 = c2) (i : Fin 1 ⊕ Fin d)
+    : TensorSpecies.basisIdxCongr (basisIdx := fun _ => Fin 1 ⊕ Fin d) h i = i := by
   simp
 
 /-!
@@ -164,11 +175,9 @@ lemma basisIdxCongr_apply {d : ℕ} {c1 c2 : realLorentzTensor.Color} (h : c1 = 
 
 -/
 
-@[simp]
-lemma τ_up_eq_down {d : ℕ} : (realLorentzTensor d).τ Color.up = Color.down := rfl
+@[simp] lemma τ_up_eq_down {d : ℕ} : (realLorentzTensor d).τ Color.up = Color.down := rfl
 
-@[simp]
-lemma τ_down_eq_up {d : ℕ} : (realLorentzTensor d).τ Color.down = Color.up := rfl
+@[simp] lemma τ_down_eq_up {d : ℕ} : (realLorentzTensor d).τ Color.down = Color.up := rfl
 
 /-!
 
@@ -179,10 +188,12 @@ lemma τ_down_eq_up {d : ℕ} : (realLorentzTensor d).τ Color.down = Color.up :
 attribute [-simp] Fintype.sum_sum_type
 open TensorSpecies Tensor
 
-/-- At every real Lorentz color, the bases at the color and its dual are dual bases, with
-labels matched by the identity. -/
-lemma isContrDualMatching_refl (c : realLorentzTensor.Color) :
-    IsContrDualMatching (realLorentzTensor d) c (Equiv.refl _) := by
+/--
+At every real Lorentz color, the bases at the color and its dual are dual bases, with
+labels matched by the identity.
+-/
+lemma isContrDualMatching_refl (c : realLorentzTensor.Color)
+    : IsContrDualMatching (realLorentzTensor d) c (Equiv.refl _) := by
   intro x₁ x₂
   cases c
   · exact Lorentz.ContrMod.contr_basis x₁ x₂
@@ -194,29 +205,32 @@ instance : HasContrDualBases (realLorentzTensor d) where
 
 /-- The dual-label matching of real Lorentz tensors is the identity. -/
 @[simp]
-lemma contrDualIdxEquiv_eq_refl (c : realLorentzTensor.Color) :
-    HasContrDualBases.contrDualIdxEquiv (realLorentzTensor d) c = Equiv.refl _ :=
+lemma contrDualIdxEquiv_eq_refl (c : realLorentzTensor.Color)
+    : HasContrDualBases.contrDualIdxEquiv (realLorentzTensor d) c = Equiv.refl _ :=
   HasContrDualBases.contrDualIdxEquiv_eq_of_isContrDualMatching (isContrDualMatching_refl c)
 
-lemma contrPCoeff_basis {d n : ℕ} {c : Fin n → realLorentzTensor.Color} (i j : Fin n)
-    (hij : i ≠ j ∧ (realLorentzTensor d).τ (c i) = c j)
-    (b : ComponentIdx (S := realLorentzTensor d) c) :
-    Pure.contrPCoeff i j hij (Pure.basisVector c b) = if b i = b j then 1 else 0 := by
+lemma contrPCoeff_basis
+    {d n : ℕ} {c : Fin n → realLorentzTensor.Color}
+    (i j : Fin n) (hij : i ≠ j ∧ (realLorentzTensor d).τ (c i) = c j)
+    (b : ComponentIdx (S := realLorentzTensor d) c)
+    : Pure.contrPCoeff i j hij (Pure.basisVector c b) = if b i = b j then 1 else 0 := by
   rw [Pure.contrPCoeff_basisVector, contrDualIdxEquiv_eq_refl]
   rfl
 
-lemma contrT_eq_sum_evalT {n} {d} (c : Fin (n + 1 + 1) → Color) (i j : Fin (n + 1 + 1))
-    (h : i ≠ j ∧ (realLorentzTensor d).τ (c i) = c j) (t : ℝT(d, c)) :
-    contrT n i j h t = ∑ (μ : Fin 1 ⊕ Fin d), permT id (by
-      simp [Fin.succSuccAbove_eq_predAbove h.1])
-      (evalT ((Fin.predAbove 0 i).predAbove j) μ (evalT i μ t)) := by
+lemma contrT_eq_sum_evalT
+    {n} {d} (c : Fin (n + 1 + 1) → Color) (i j : Fin (n + 1 + 1))
+    (h : i ≠ j ∧ (realLorentzTensor d).τ (c i) = c j) (t : ℝT(d, c))
+    : contrT n i j h t
+      = ∑ (μ : Fin 1 ⊕ Fin d), permT id (by
+        simp [Fin.succSuccAbove_eq_predAbove h.1])
+        (evalT ((Fin.predAbove 0 i).predAbove j) μ (evalT i μ t)) := by
   induction' t using Tensor.induction_on_basis with b r t h t1 t2 h1 h2
   · rw [contrT_basis]
     simp only [contrPCoeff_basis, ite_smul, one_smul, zero_smul]
     conv_rhs =>
       enter [2, μ];
       simp only [evalT_basis, Fin.zero_succAbove, apply_ite, Fin.succ_zero_eq_one, map_zero]
-    simp only [Finset.sum_ite_eq, Finset.mem_univ, ↓reduceIte]
+    simp only [Finset.sum_ite_eq, Finset.mem_univ, ↓ reduceIte]
     have h0 : i.succAbove ((Fin.predAbove 0 i).predAbove j) = j := by
       rcases i.eq_zero_or_eq_succ with rfl | ⟨k, rfl⟩
       · exact Fin.succAbove_predAbove (Ne.symm h.1)
@@ -237,9 +251,9 @@ lemma contrT_eq_sum_evalT {n} {d} (c : Fin (n + 1 + 1) → Color) (i j : Fin (n 
   · simp [Finset.smul_sum, h]
   · simp [h1, h2, Finset.sum_add_distrib]
 
-lemma contrT_toScalar {d} (c : Fin 2 → Color)
-    (h : 0 ≠ 1 ∧ (realLorentzTensor d).τ (c 0) = c 1) (t : ℝT(d, c)) :
-    (contrT 0 0 1 h t).toScalar = ∑ (μ : Fin 1 ⊕ Fin d), {t | [μ] [μ]}ᵀ.toScalar := by
+lemma contrT_toScalar
+    {d} (c : Fin 2 → Color) (h : 0 ≠ 1 ∧ (realLorentzTensor d).τ (c 0) = c 1) (t : ℝT(d, c))
+    : (contrT 0 0 1 h t).toScalar = ∑ (μ : Fin 1 ⊕ Fin d), {t | [μ] [μ]}ᵀ.toScalar := by
   rw [contrT_eq_sum_evalT, map_sum]
   congr
   ext μ
@@ -247,13 +261,13 @@ lemma contrT_toScalar {d} (c : Fin 2 → Color)
   rfl
 
 open ComponentIdx in
-lemma contrT_basis_repr_apply_eq_fin {n d: ℕ} {c : Fin (n + 1 + 1) → realLorentzTensor.Color}
-    {i j : Fin (n + 1 + 1)}
+lemma contrT_basis_repr_apply_eq_fin
+    {n d : ℕ} {c : Fin (n + 1 + 1) → realLorentzTensor.Color} {i j : Fin (n + 1 + 1)}
     {h : i ≠ j ∧ (realLorentzTensor d).τ (c i) = c j}
-    (t : ℝT(d,c)) (b : ComponentIdx (c ∘ Fin.succSuccAbove i j)) :
-    (basis (c ∘ Fin.succSuccAbove i j)).repr (contrT n i j h t) b =
-    ∑ (x : Fin 1 ⊕ Fin d), ((basis c).repr t
-    (DropPairSection.ofFinEquiv h.1 b ⟨x, x⟩)) := by
+    (t : ℝT(d,c)) (b : ComponentIdx (c ∘ Fin.succSuccAbove i j))
+    : (basis (c ∘ Fin.succSuccAbove i j)).repr (contrT n i j h t) b
+      = ∑ (x : Fin 1 ⊕ Fin d), ((basis c).repr t
+        (DropPairSection.ofFinEquiv h.1 b ⟨x, x⟩)) := by
   rw [contrT_basis_repr_apply_eq_sum_dual, contrDualIdxEquiv_eq_refl]
   rfl
 

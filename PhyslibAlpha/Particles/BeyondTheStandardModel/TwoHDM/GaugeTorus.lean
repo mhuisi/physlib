@@ -53,32 +53,37 @@ open Matrix Complex
 -/
 
 /-- The Cartan `SU(2)` gauge element `diag(a, ā)`, for `a` a phase. -/
-noncomputable def gaugeCartan (a : unitary ℂ) : GaugeGroupI :=
-  (1,
-  ⟨!![(a : ℂ), 0; 0, (star a : ℂ)], by
-    have h1 : (starRingEnd ℂ) (a : ℂ) * (a : ℂ) = 1 := a.2.1
-    have h2 : (a : ℂ) * (starRingEnd ℂ) (a : ℂ) = 1 := a.2.2
-    simp only [SetLike.mem_coe]
-    rw [mem_unitaryGroup_iff']
-    funext i j
-    rw [Matrix.mul_apply]
-    fin_cases i <;> fin_cases j <;>
-      simp [Fin.sum_univ_two, h1, h2], by
-    simp only [RCLike.star_def, SetLike.mem_coe, MonoidHom.mem_mker, coe_detMonoidHom,
-      det_fin_two_of, mul_zero, sub_zero]
-    simpa using a.2.2⟩, 1)
+noncomputable def gaugeCartan (a : unitary ℂ) : GaugeGroupI := (
+  1,
+  ⟨
+    !![(a : ℂ), 0; 0, (star a : ℂ)],
+    by
+      have h1 : (starRingEnd ℂ) (a : ℂ) * (a : ℂ) = 1 := a.2.1
+      have h2 : (a : ℂ) * (starRingEnd ℂ) (a : ℂ) = 1 := a.2.2
+      simp only [SetLike.mem_coe]
+      rw [mem_unitaryGroup_iff']
+      funext i j
+      rw [Matrix.mul_apply]
+      fin_cases i <;> fin_cases j <;> simp [Fin.sum_univ_two, h1, h2],
+    by
+      simp only [RCLike.star_def, SetLike.mem_coe, MonoidHom.mem_mker, coe_detMonoidHom,
+        det_fin_two_of, mul_zero, sub_zero]
+      simpa using a.2.2
+  ⟩,
+  1
+)
+
+@[simp] lemma gaugeCartan_toU1 (a : unitary ℂ) : (gaugeCartan a).toU1 = 1 := rfl
 
 @[simp]
-lemma gaugeCartan_toU1 (a : unitary ℂ) : (gaugeCartan a).toU1 = 1 := rfl
-
-@[simp]
-lemma gaugeCartan_toSU2_coe (a : unitary ℂ) :
-    ((gaugeCartan a).toSU2 : Matrix (Fin 2) (Fin 2) ℂ) = !![(a : ℂ), 0; 0, (star a : ℂ)] := rfl
+lemma gaugeCartan_toSU2_coe (a : unitary ℂ)
+    : ((gaugeCartan a).toSU2 : Matrix (Fin 2) (Fin 2) ℂ) = !![(a : ℂ), 0; 0, (star a : ℂ)] :=
+  rfl
 
 /-- The Cartan element acts as the diagonal matrix `diag(a, ā)`. -/
-lemma gaugeCartan_smul_eq (a : unitary ℂ) (φ : HiggsVec) :
-    HiggsVec.repGaugeGroupI (gaugeCartan a) φ =
-      WithLp.toLp 2 (!![(a : ℂ), 0; 0, (star a : ℂ)] *ᵥ φ.ofLp) := by
+lemma gaugeCartan_smul_eq (a : unitary ℂ) (φ : HiggsVec)
+    : HiggsVec.repGaugeGroupI (gaugeCartan a) φ
+      = WithLp.toLp 2 (!![(a : ℂ), 0; 0, (star a : ℂ)] *ᵥ φ.ofLp) := by
   rw [HiggsVec.repGaugeGroupI_apply, gaugeCartan_toU1, one_pow, one_smul, gaugeCartan_toSU2_coe]
 
 end GaugeGroupI

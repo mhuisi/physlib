@@ -57,11 +57,14 @@ variable {E : Type*} [AddCommGroup E] [PartialOrder E] [IsOrderedAddMonoid E] [M
 /-! ## A. The bidual -/
 
 variable (E) in
-/-- Functions on positive functionals that are additive, positively homogeneous, and dominated by
-an element of `E`. -/
+/--
+Functions on positive functionals that are additive, positively homogeneous, and dominated by
+an element of `E`.
+-/
 def bidualSubmodule : Submodule ℝ ((E →ₚ[ℝ] ℝ) → ℝ) where
-  carrier := {x | (∀ φ ψ, x (φ + ψ) = x φ + x ψ) ∧ (∀ (c : ℝ≥0) φ, x (c • φ) = c * x φ) ∧
-    ∃ f : E, ∀ φ, |x φ| ≤ φ f}
+  carrier :=
+    {x | (∀ φ ψ, x (φ + ψ) = x φ + x ψ) ∧ (∀ (c : ℝ≥0) φ, x (c • φ) = c * x φ) ∧
+      ∃ f : E, ∀ φ, |x φ| ≤ φ f}
   add_mem' := by
     rintro x y ⟨hx₁, hx₂, f, hf⟩ ⟨hy₁, hy₂, g, hg⟩
     refine ⟨fun φ ψ => ?_, fun c φ => ?_, f + g, fun φ => ?_⟩
@@ -89,9 +92,10 @@ instance : AddCommGroup (Bidual E) := inferInstanceAs (AddCommGroup (bidualSubmo
 instance : Module ℝ (Bidual E) := inferInstanceAs (Module ℝ (bidualSubmodule E))
 
 /-- The element of the bidual given by an additive, positively homogeneous, bounded function. -/
-def mk (x : (E →ₚ[ℝ] ℝ) → ℝ) (h₁ : ∀ φ ψ, x (φ + ψ) = x φ + x ψ)
-    (h₂ : ∀ (c : ℝ≥0) φ, x (c • φ) = c * x φ) (h₃ : ∃ f : E, ∀ φ, |x φ| ≤ φ f) :
-    Bidual E :=
+def mk
+    (x : (E →ₚ[ℝ] ℝ) → ℝ) (h₁ : ∀ φ ψ, x (φ + ψ) = x φ + x ψ)
+    (h₂ : ∀ (c : ℝ≥0) φ, x (c • φ) = c * x φ) (h₃ : ∃ f : E, ∀ φ, |x φ| ≤ φ f)
+    : Bidual E :=
   (⟨x, h₁, h₂, h₃⟩ : bidualSubmodule E)
 
 /-- An element of the bidual as an element of the submodule. -/
@@ -99,30 +103,25 @@ def toSub (x : Bidual E) : bidualSubmodule E := x
 
 instance : CoeFun (Bidual E) fun _ => (E →ₚ[ℝ] ℝ) → ℝ := ⟨fun x => x.toSub.1⟩
 
-@[simp] lemma mk_apply (x : (E →ₚ[ℝ] ℝ) → ℝ) (h₁ h₂ h₃) (φ : E →ₚ[ℝ] ℝ) :
-    mk x h₁ h₂ h₃ φ = x φ := rfl
+@[simp]
+lemma mk_apply (x : (E →ₚ[ℝ] ℝ) → ℝ) (h₁ h₂ h₃) (φ : E →ₚ[ℝ] ℝ) : mk x h₁ h₂ h₃ φ = x φ := rfl
 
-@[ext]
-lemma ext {x y : Bidual E} (h : ∀ φ, x φ = y φ) : x = y :=
-  Subtype.ext (funext h)
+@[ext] lemma ext {x y : Bidual E} (h : ∀ φ, x φ = y φ) : x = y := Subtype.ext (funext h)
 
-lemma map_add (x : Bidual E) (φ ψ : E →ₚ[ℝ] ℝ) : x (φ + ψ) = x φ + x ψ :=
-  x.toSub.2.1 φ ψ
+lemma map_add (x : Bidual E) (φ ψ : E →ₚ[ℝ] ℝ) : x (φ + ψ) = x φ + x ψ := x.toSub.2.1 φ ψ
 
-lemma map_nnsmul (x : Bidual E) (c : ℝ≥0) (φ : E →ₚ[ℝ] ℝ) : x (c • φ) = c * x φ :=
-  x.toSub.2.2.1 c φ
+lemma map_nnsmul (x : Bidual E) (c : ℝ≥0) (φ : E →ₚ[ℝ] ℝ) : x (c • φ) = c * x φ := x.toSub.2.2.1 c φ
 
-lemma exists_bound (x : Bidual E) : ∃ f : E, ∀ φ, |x φ| ≤ φ f :=
-  x.toSub.2.2.2
+lemma exists_bound (x : Bidual E) : ∃ f : E, ∀ φ, |x φ| ≤ φ f := x.toSub.2.2.2
 
 /-- A dominating element has nonnegative values on positive functionals. -/
-lemma apply_nonneg_of_bound {x : Bidual E} {f : E} (hf : ∀ φ, |x φ| ≤ φ f)
-    (φ : E →ₚ[ℝ] ℝ) : 0 ≤ φ f :=
+lemma apply_nonneg_of_bound {x : Bidual E} {f : E} (hf : ∀ φ, |x φ| ≤ φ f) (φ : E →ₚ[ℝ] ℝ)
+    : 0 ≤ φ f :=
   (abs_nonneg _).trans (hf φ)
 
 @[simp] lemma coe_add (x y : Bidual E) (φ : E →ₚ[ℝ] ℝ) : (x + y) φ = x φ + y φ := rfl
 @[simp] lemma coe_sub (x y : Bidual E) (φ : E →ₚ[ℝ] ℝ) : (x - y) φ = x φ - y φ := rfl
-@[simp] lemma coe_neg (x : Bidual E) (φ : E →ₚ[ℝ] ℝ) : (-x) φ = -x φ := rfl
+@[simp] lemma coe_neg (x : Bidual E) (φ : E →ₚ[ℝ] ℝ) : (-x) φ = - x φ := rfl
 @[simp] lemma coe_zero (φ : E →ₚ[ℝ] ℝ) : (0 : Bidual E) φ = 0 := rfl
 @[simp] lemma coe_smul (c : ℝ) (x : Bidual E) (φ : E →ₚ[ℝ] ℝ) : (c • x) φ = c * x φ := rfl
 
@@ -131,8 +130,8 @@ lemma map_zero (x : Bidual E) : x 0 = 0 := by
   rw [zero_add] at this
   linarith
 
-lemma map_sum {ι : Type*} (x : Bidual E) (s : Finset ι) (φ : ι → E →ₚ[ℝ] ℝ) :
-    x (∑ i ∈ s, φ i) = ∑ i ∈ s, x (φ i) := by
+lemma map_sum {ι : Type*} (x : Bidual E) (s : Finset ι) (φ : ι → E →ₚ[ℝ] ℝ)
+    : x (∑ i ∈ s, φ i) = ∑ i ∈ s, x (φ i) := by
   classical
   induction s using Finset.induction_on with
   | empty => simpa using x.map_zero
@@ -144,8 +143,7 @@ lemma map_sum {ι : Type*} (x : Bidual E) (s : Finset ι) (φ : ι → E →ₚ[
 instance : PartialOrder (Bidual E) :=
   PartialOrder.lift (fun x : Bidual E => (x : (E →ₚ[ℝ] ℝ) → ℝ)) fun _ _ h => ext (congrFun h)
 
-lemma le_def {x y : Bidual E} : x ≤ y ↔ ∀ φ, x φ ≤ y φ :=
-  Iff.rfl
+lemma le_def {x y : Bidual E} : x ≤ y ↔ ∀ φ, x φ ≤ y φ := Iff.rfl
 
 instance : IsOrderedAddMonoid (Bidual E) where
   add_le_add_left _ _ h z φ := by simpa using add_le_add_right (h φ) (z φ)
@@ -161,12 +159,13 @@ variable [IsDirectedOrder E]
 
 /-- An element of `E` as an element of the bidual: its value on each positive functional. -/
 def ofE : E →ₗ[ℝ] Bidual E where
-  toFun A := mk (fun φ => φ A) (fun _ _ => rfl) (fun _ _ => rfl) (by
-    obtain ⟨f, hAf, hAf'⟩ := exists_ge_ge A (-A)
-    refine ⟨f, fun φ => abs_le.2 ⟨?_, OrderHomClass.mono φ hAf⟩⟩
-    have := OrderHomClass.mono φ hAf'
-    rw [map_neg] at this
-    linarith)
+  toFun A :=
+    mk (fun φ => φ A) (fun _ _ => rfl) (fun _ _ => rfl) (by
+      obtain ⟨f, hAf, hAf'⟩ := exists_ge_ge A (-A)
+      refine ⟨f, fun φ => abs_le.2 ⟨?_, OrderHomClass.mono φ hAf⟩⟩
+      have := OrderHomClass.mono φ hAf'
+      rw [map_neg] at this
+      linarith)
   map_add' _ _ := ext fun φ => _root_.map_add φ _ _
   map_smul' _ _ := ext fun φ => _root_.map_smul φ _ _
 
@@ -174,19 +173,22 @@ def ofE : E →ₗ[ℝ] Bidual E where
 
 lemma ofE_mono {A B : E} (h : A ≤ B) : ofE A ≤ ofE B := fun φ => φ.monotone' h
 
-/-- The bidual of a directed space is directed: `ofE (f + g)` lies above `x` and `y` when `f`
-dominates `x` and `g` dominates `y`. -/
-instance : IsDirectedOrder (Bidual E) :=
-  ⟨fun x y => by
-    obtain ⟨f, hf⟩ := x.exists_bound
-    obtain ⟨g, hg⟩ := y.exists_bound
-    refine ⟨ofE (f + g), fun φ => ?_, fun φ => ?_⟩
-    · have := apply_nonneg_of_bound hg φ
-      change x φ ≤ φ (f + g)
-      rw [_root_.map_add]; linarith [le_abs_self (x φ), hf φ]
-    · have := apply_nonneg_of_bound hf φ
-      change y φ ≤ φ (f + g)
-      rw [_root_.map_add]; linarith [le_abs_self (y φ), hg φ]⟩
+/--
+The bidual of a directed space is directed: `ofE (f + g)` lies above `x` and `y` when `f`
+dominates `x` and `g` dominates `y`.
+-/
+instance : IsDirectedOrder (Bidual E) := ⟨fun x y => by
+  obtain ⟨f, hf⟩ := x.exists_bound
+  obtain ⟨g, hg⟩ := y.exists_bound
+  refine ⟨ofE (f + g), fun φ => ?_, fun φ => ?_⟩
+  · have := apply_nonneg_of_bound hg φ
+    change x φ ≤ φ (f + g)
+    rw [_root_.map_add]
+    linarith [le_abs_self (x φ), hf φ]
+  · have := apply_nonneg_of_bound hf φ
+    change y φ ≤ φ (f + g)
+    rw [_root_.map_add]
+    linarith [le_abs_self (y φ), hg φ]⟩
 
 /-- A positive functional extended to the bidual by evaluation. -/
 def eval (φ : E →ₚ[ℝ] ℝ) : Bidual E →ₚ[ℝ] ℝ :=
@@ -208,8 +210,10 @@ end Directed
 
 section Directed
 
-variable {ι : Type*} [Nonempty ι] {x : ι → Bidual E} (hx : Directed (· ≤ ·) x) {b : Bidual E}
-  (hb : ∀ i, x i ≤ b)
+variable
+  {ι : Type*} [Nonempty ι]
+  {x : ι → Bidual E} (hx : Directed (· ≤ ·) x)
+  {b : Bidual E} (hb : ∀ i, x i ≤ b)
 include hx hb
 
 omit [Nonempty ι] hx in
@@ -218,32 +222,40 @@ lemma bddAbove_apply (φ : E →ₚ[ℝ] ℝ) : BddAbove (Set.range fun i => x i
 
 /-- The pointwise supremum of a bounded directed family. -/
 noncomputable def ciSup : Bidual E :=
-  mk (fun φ => ⨆ i, x i φ) (fun φ ψ => by
-    simp only [map_add]
-    exact Real.ciSup_add (bddAbove_apply hb φ) (bddAbove_apply hb ψ) fun i j =>
-      (hx i j).imp fun _ h => ⟨h.1 φ, h.2 ψ⟩)
+  mk
+    (fun φ => ⨆ i, x i φ)
+    (fun φ ψ => by
+      simp only [map_add]
+      exact Real.ciSup_add (bddAbove_apply hb φ) (bddAbove_apply hb ψ) fun i j =>
+        (hx i j).imp fun _ h => ⟨h.1 φ, h.2 ψ⟩)
     (fun c φ => by
-    simp only [map_nnsmul]
-    exact (Real.mul_iSup_of_nonneg c.2 _).symm) (by
-    obtain ⟨f, hf⟩ := b.exists_bound
-    obtain ⟨g, hg⟩ := (x (Classical.arbitrary ι)).exists_bound
-    refine ⟨f + g, fun φ => abs_le.2 ⟨?_, ?_⟩⟩
-    · have := (abs_le.1 (hg φ)).1
-      have h := apply_nonneg_of_bound hf φ
-      refine le_trans ?_ (le_ciSup (bddAbove_apply hb φ) (Classical.arbitrary ι))
-      rw [_root_.map_add]; linarith
-    · have := (abs_le.1 (hf φ)).2
-      have h := apply_nonneg_of_bound hg φ
-      refine (ciSup_le fun i => hb i φ).trans ?_
-      rw [_root_.map_add]; linarith)
+      simp only [map_nnsmul]
+      exact (Real.mul_iSup_of_nonneg c.2 _).symm)
+    (by
+      obtain ⟨f, hf⟩ := b.exists_bound
+      obtain ⟨g, hg⟩ := (x (Classical.arbitrary ι)).exists_bound
+      refine ⟨f + g, fun φ => abs_le.2 ⟨?_, ?_⟩⟩
+      · have := (abs_le.1 (hg φ)).1
+        have h := apply_nonneg_of_bound hf φ
+        refine le_trans ?_ (le_ciSup (bddAbove_apply hb φ) (Classical.arbitrary ι))
+        rw [_root_.map_add]
+        linarith
+      · have := (abs_le.1 (hf φ)).2
+        have h := apply_nonneg_of_bound hg φ
+        refine (ciSup_le fun i => hb i φ).trans ?_
+        rw [_root_.map_add]
+        linarith)
 
 @[simp] lemma ciSup_apply (φ : E →ₚ[ℝ] ℝ) : ciSup hx hb φ = ⨆ i, x i φ := rfl
 
-/-- **Monotone completeness**: a bounded directed family in the bidual has its pointwise supremum
-as least upper bound. -/
-lemma isLUB_ciSup : IsLUB (Set.range x) (ciSup hx hb) :=
-  ⟨Set.forall_mem_range.2 fun i φ => le_ciSup (bddAbove_apply hb φ) i,
-    fun _ hy φ => ciSup_le fun i => hy ⟨i, rfl⟩ φ⟩
+/--
+**Monotone completeness**: a bounded directed family in the bidual has its pointwise supremum
+as least upper bound.
+-/
+lemma isLUB_ciSup : IsLUB (Set.range x) (ciSup hx hb) := ⟨
+  Set.forall_mem_range.2 fun i φ => le_ciSup (bddAbove_apply hb φ) i,
+  fun _ hy φ => ciSup_le fun i => hy ⟨i, rfl⟩ φ
+⟩
 
 end Directed
 

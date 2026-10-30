@@ -52,9 +52,10 @@ namespace ProbabilisticTheory
 -/
 
 /-- A positive linear map preserving `1`. -/
-structure UnitalPositiveLinearMap (R E F : Type*) [Semiring R]
-    [AddCommMonoid E] [PartialOrder E] [AddCommMonoid F] [PartialOrder F]
-    [Module R E] [Module R F] [One E] [One F] extends E →ₚ[R] F where
+structure UnitalPositiveLinearMap
+    (R E F : Type*) [Semiring R] [AddCommMonoid E] [PartialOrder E] [AddCommMonoid F]
+    [PartialOrder F] [Module R E] [Module R F] [One E] [One F]
+    extends E →ₚ[R] F where
   /-- A unital positive linear map preserves the order unit. -/
   map_one' : toPositiveLinearMap 1 = 1
 
@@ -63,8 +64,8 @@ notation:25 E " →ₚ₁[" R:25 "] " F:0 => UnitalPositiveLinearMap R E F
 
 namespace UnitalPositiveLinearMap
 
-variable {R E F : Type*} [Semiring R]
-  [AddCommMonoid E] [PartialOrder E] [AddCommMonoid F] [PartialOrder F]
+variable
+  {R E F : Type*} [Semiring R] [AddCommMonoid E] [PartialOrder E] [AddCommMonoid F] [PartialOrder F]
   [Module R E] [Module R F] [One E] [One F]
 
 instance : FunLike (E →ₚ₁[R] F) E F where
@@ -85,9 +86,7 @@ instance : OrderHomClass (E →ₚ₁[R] F) E F where
 instance : OneHomClass (E →ₚ₁[R] F) E F where
   map_one f := f.map_one'
 
-@[ext]
-lemma ext {f g : E →ₚ₁[R] F} (h : ∀ x, f x = g x) : f = g :=
-  DFunLike.ext f g h
+@[ext] lemma ext {f g : E →ₚ₁[R] F} (h : ∀ x, f x = g x) : f = g := DFunLike.ext f g h
 
 /-- Unital positive linear maps are determined by their underlying linear map. -/
 lemma toLinearMap_injective : Function.Injective (fun f : E →ₚ₁[R] F => f.toLinearMap) :=
@@ -97,10 +96,9 @@ end UnitalPositiveLinearMap
 
 namespace UnitalPositiveLinearMap
 
-variable {R E F : Type*} [Semiring R]
-  [AddCommGroup E] [PartialOrder E] [IsOrderedAddMonoid E]
-  [AddCommGroup F] [PartialOrder F] [IsOrderedAddMonoid F]
-  [Module R E] [Module R F] [One E] [One F]
+variable
+  {R E F : Type*} [Semiring R] [AddCommGroup E] [PartialOrder E] [IsOrderedAddMonoid E]
+  [AddCommGroup F] [PartialOrder F] [IsOrderedAddMonoid F] [Module R E] [Module R F] [One E] [One F]
 
 /-!
 
@@ -117,10 +115,10 @@ end UnitalPositiveLinearMap
 
 namespace UnitalPositiveLinearMap
 
-variable {R E F G : Type*} [Semiring R]
-  [AddCommMonoid E] [PartialOrder E] [AddCommMonoid F] [PartialOrder F]
-  [AddCommMonoid G] [PartialOrder G] [Module R E] [Module R F] [Module R G]
-  [One E] [One F] [One G]
+variable
+  {R E F G : Type*}
+  [Semiring R] [AddCommMonoid E] [PartialOrder E] [AddCommMonoid F] [PartialOrder F]
+  [AddCommMonoid G] [PartialOrder G] [Module R E] [Module R F] [Module R G] [One E] [One F] [One G]
 
 /-!
 
@@ -134,28 +132,24 @@ protected def id : E →ₚ₁[R] E where
   toPositiveLinearMap := .id R E
   map_one' := rfl
 
-@[simp]
-lemma id_apply (x : E) : UnitalPositiveLinearMap.id R E x = x := rfl
+@[simp] lemma id_apply (x : E) : UnitalPositiveLinearMap.id R E x = x := rfl
 
 /-- The composite of two channels. -/
 def comp (g : F →ₚ₁[R] G) (f : E →ₚ₁[R] F) : E →ₚ₁[R] G where
   toPositiveLinearMap := g.toPositiveLinearMap.comp f.toPositiveLinearMap
   map_one' := (congrArg g f.map_one').trans g.map_one'
 
-@[simp]
-lemma comp_apply (g : F →ₚ₁[R] G) (f : E →ₚ₁[R] F) (x : E) : g.comp f x = g (f x) := rfl
+@[simp] lemma comp_apply (g : F →ₚ₁[R] G) (f : E →ₚ₁[R] F) (x : E) : g.comp f x = g (f x) := rfl
+
+@[simp] lemma comp_id (f : E →ₚ₁[R] F) : f.comp (.id R E) = f := ext fun _ => rfl
 
 @[simp]
-lemma comp_id (f : E →ₚ₁[R] F) : f.comp (.id R E) = f :=
-  ext fun _ => rfl
+lemma id_comp (f : E →ₚ₁[R] F) : (UnitalPositiveLinearMap.id R F).comp f = f := ext fun _ => rfl
 
-@[simp]
-lemma id_comp (f : E →ₚ₁[R] F) : (UnitalPositiveLinearMap.id R F).comp f = f :=
-  ext fun _ => rfl
-
-lemma comp_assoc {H : Type*} [AddCommMonoid H] [PartialOrder H] [Module R H] [One H]
-    (h : G →ₚ₁[R] H) (g : F →ₚ₁[R] G) (f : E →ₚ₁[R] F) :
-    h.comp (g.comp f) = (h.comp g).comp f :=
+lemma comp_assoc
+    {H : Type*} [AddCommMonoid H] [PartialOrder H] [Module R H] [One H]
+    (h : G →ₚ₁[R] H) (g : F →ₚ₁[R] G) (f : E →ₚ₁[R] F)
+    : h.comp (g.comp f) = (h.comp g).comp f :=
   ext fun _ => rfl
 
 /-- Positive unital endomorphisms form a monoid under composition. -/

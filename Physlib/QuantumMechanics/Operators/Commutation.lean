@@ -57,28 +57,28 @@ variable {d : ℕ} (i j k : Fin d) (ε : ℝˣ) (s t : ℝ)
 
 -/
 
-lemma leibniz_lie (A B C : 𝓢(Space d, ℂ) →L[ℂ] 𝓢(Space d, ℂ)) :
-    ⁅A ∘L B, C⁆ = A ∘L ⁅B, C⁆ + ⁅A, C⁆ ∘L B := by
+lemma leibniz_lie (A B C : 𝓢(Space d, ℂ) →L[ℂ] 𝓢(Space d, ℂ))
+    : ⁅A ∘L B, C⁆ = A ∘L ⁅B, C⁆ + ⁅A, C⁆ ∘L B := by
   dsimp only [Bracket.bracket]
   simp only [ContinuousLinearMap.mul_def, comp_assoc, comp_sub, sub_comp, sub_add_sub_cancel]
 
-lemma lie_leibniz (A B C : 𝓢(Space d, ℂ) →L[ℂ] 𝓢(Space d, ℂ)) :
-    ⁅A, B ∘L C⁆ = B ∘L ⁅A, C⁆ + ⁅A, B⁆ ∘L C := by
+lemma lie_leibniz (A B C : 𝓢(Space d, ℂ) →L[ℂ] 𝓢(Space d, ℂ))
+    : ⁅A, B ∘L C⁆ = B ∘L ⁅A, C⁆ + ⁅A, B⁆ ∘L C := by
   dsimp only [Bracket.bracket]
   simp only [ContinuousLinearMap.mul_def, comp_assoc, comp_sub, sub_comp, sub_add_sub_cancel']
 
-lemma comp_eq_comp_add_commute (A B : 𝓢(Space d, ℂ) →L[ℂ] 𝓢(Space d, ℂ)) :
-    A ∘L B = B ∘L A + ⁅A, B⁆ := by
+lemma comp_eq_comp_add_commute (A B : 𝓢(Space d, ℂ) →L[ℂ] 𝓢(Space d, ℂ))
+    : A ∘L B = B ∘L A + ⁅A, B⁆ := by
   dsimp only [Bracket.bracket]
   simp only [ContinuousLinearMap.mul_def, add_sub_cancel]
 
 /-- The identity commutes with everything. -/
-lemma id_commutation (A : 𝓢(Space d, ℂ) →L[ℂ] 𝓢(Space d, ℂ)) :
-    ⁅ContinuousLinearMap.id ℂ 𝓢(Space d, ℂ), A⁆ = 0 := by
+lemma id_commutation (A : 𝓢(Space d, ℂ) →L[ℂ] 𝓢(Space d, ℂ))
+    : ⁅ContinuousLinearMap.id ℂ 𝓢(Space d, ℂ), A⁆ = 0 := by
   rw [Ring.lie_def, ← ContinuousLinearMap.one_def, one_mul, mul_one, sub_self]
 
-lemma comp_eq_comp_sub_commute (A B : 𝓢(Space d, ℂ) →L[ℂ] 𝓢(Space d, ℂ)) :
-    A ∘L B = B ∘L A - ⁅B, A⁆ := by
+lemma comp_eq_comp_sub_commute (A B : 𝓢(Space d, ℂ) →L[ℂ] 𝓢(Space d, ℂ))
+    : A ∘L B = B ∘L A - ⁅B, A⁆ := by
   dsimp only [Bracket.bracket]
   simp only [ContinuousLinearMap.mul_def, sub_sub_cancel]
 
@@ -149,8 +149,8 @@ lemma momentumSqr_comp_momentum_commute : (𝐩 ⬝ᵥ 𝐩) ∘L 𝐩 i = 𝐩 
 -/
 
 /-- The canonical commutation relations: `[xᵢ, pⱼ] = iℏ δᵢⱼ𝟙`. -/
-lemma position_commutation_momentum : ⁅𝐱 i, 𝐩 j⁆ =
-    (I * ℏ) • δ[i,j] • ContinuousLinearMap.id ℂ 𝓢(Space d, ℂ) := by
+lemma position_commutation_momentum
+    : ⁅𝐱 i, 𝐩 j⁆ = (I * ℏ) • δ[i,j] • ContinuousLinearMap.id ℂ 𝓢(Space d, ℂ) := by
   ext ψ x
   show 𝐱 i (𝐩 j ψ) x - 𝐩 j (𝐱 i ψ) x = _
   trans (I * ℏ) * (-x i * ∂[j] ψ x + ∂[j] ((fun x : Space d ↦ x i) • ⇑ψ) x)
@@ -163,23 +163,25 @@ lemma position_commutation_momentum : ⁅𝐱 i, 𝐩 j⁆ =
   · simp [eq_zero_of_ne hne, hne.symm]
 
 /-- The canonical commutation relations, pointwise: `xᵢ (pᵢ ψ)(x) - (pᵢ (xᵢ ψ))(x) = iℏ ψ(x)`. -/
-lemma position_commutation_momentum_apply (ψ : 𝓢(Space d, ℂ)) (x : Space d) :
-    ((x i : ℝ) : ℂ) * 𝐩 i ψ x - 𝐩 i (𝐱 i ψ) x = I * ℏ * ψ x := by
-  have h := congrArg (fun T : 𝓢(Space d, ℂ) →L[ℂ] 𝓢(Space d, ℂ) => T ψ x)
-    (position_commutation_momentum (d := d) i i)
+lemma position_commutation_momentum_apply (ψ : 𝓢(Space d, ℂ)) (x : Space d)
+    : ((x i : ℝ) : ℂ) * 𝐩 i ψ x - 𝐩 i (𝐱 i ψ) x = I * ℏ * ψ x := by
+  have h :=
+    congrArg
+      (fun T : 𝓢(Space d, ℂ) →L[ℂ] 𝓢(Space d, ℂ) => T ψ x)
+      (position_commutation_momentum (d := d) i i)
   simpa [Ring.lie_def, eq_one_of_same] using h
 
-lemma momentum_comp_position_eq : 𝐩 j ∘L 𝐱 i =
-    𝐱 i ∘L 𝐩 j - (I * ℏ) • δ[i,j] • ContinuousLinearMap.id ℂ 𝓢(Space d, ℂ) := by
+lemma momentum_comp_position_eq
+    : 𝐩 j ∘L 𝐱 i = 𝐱 i ∘L 𝐩 j - (I * ℏ) • δ[i,j] • ContinuousLinearMap.id ℂ 𝓢(Space d, ℂ) := by
   rw [comp_eq_comp_sub_commute, position_commutation_momentum]
 
-lemma position_position_commutation_momentum : ⁅𝐱 i ∘L 𝐱 j, 𝐩 k⁆ =
-    (I * ℏ) • (δ[i,k] • 𝐱 j + δ[j,k] • 𝐱 i) := by
+lemma position_position_commutation_momentum
+    : ⁅𝐱 i ∘L 𝐱 j, 𝐩 k⁆ = (I * ℏ) • (δ[i,k] • 𝐱 j + δ[j,k] • 𝐱 i) := by
   simp only [leibniz_lie, position_commutation_momentum, comp_smul, smul_comp, comp_id, id_comp,
     smul_add, add_comm]
 
-lemma position_commutation_momentum_momentum : ⁅𝐱 i, 𝐩 j ∘L 𝐩 k⁆ =
-    (I * ℏ) • (δ[i,k] • 𝐩 j + δ[i,j] • 𝐩 k) := by
+lemma position_commutation_momentum_momentum
+    : ⁅𝐱 i, 𝐩 j ∘L 𝐩 k⁆ = (I * ℏ) • (δ[i,k] • 𝐩 j + δ[i,j] • 𝐩 k) := by
   simp only [lie_leibniz, position_commutation_momentum, comp_smul, smul_comp, comp_id, id_comp,
     smul_add]
 
@@ -187,8 +189,7 @@ lemma position_commutation_momentumSqr : ⁅𝐱 i, 𝐩 ⬝ᵥ 𝐩⁆ = (2 * I
   simp only [dotProduct, mul_def, lie_sum, lie_leibniz, position_commutation_momentum, comp_smul,
     smul_comp, comp_id, id_comp, ← two_smul ℂ, smul_smul, mul_assoc, ← Finset.smul_sum, sum_smul]
 
-lemma radiusRegPow_commutation_momentum :
-    ⁅𝐫₀[d] ε s, 𝐩 i⁆ = (s * I * ℏ) • 𝐫₀ ε (s-2) ∘L 𝐱 i := by
+lemma radiusRegPow_commutation_momentum : ⁅𝐫₀[d] ε s, 𝐩 i⁆ = (s * I * ℏ) • 𝐫₀ ε (s - 2) ∘L 𝐱 i := by
   ext ψ x
   have hne := Ne.symm (ne_of_lt <| Space.norm_sq_add_unit_sq_pos ε x)
   have hdiff1 : DifferentiableAt ℝ (fun x => (‖x‖ ^ 2 + ↑ε ^ 2) ^ (s / 2)) x := by
@@ -200,21 +201,22 @@ lemma radiusRegPow_commutation_momentum :
   show 𝐫₀ ε s (𝐩 i ψ) x - 𝐩 i (𝐫₀ ε s ψ) x = (s * I * ℏ) * 𝐫₀ ε (s-2) (𝐱 i ψ) x
   simp only [momentumCLM_apply, positionCLM_apply, radiusRegPowCLM_apply_fun]
   rw [← Pi.smul_def', Space.deriv_smul hdiff1 (by fun_prop)]
-  suffices ∂[i] (fun x ↦ (‖x‖ ^ 2 + ε ^ 2) ^ (s / 2)) x =
-      s * (‖x‖ ^ 2 + ε ^ 2) ^ (s / 2 - 1) * x i by
+  suffices ∂[i] (fun x ↦ (‖x‖ ^ 2 + ε ^ 2) ^ (s / 2)) x
+      = s * (‖x‖ ^ 2 + ε ^ 2) ^ (s / 2 - 1) * x i by
     simp only [this, real_smul, ofReal_mul]
     ring_nf
   change ∂[i] ((fun r ↦ r ^ (s / 2)) ∘ (fun x ↦ ‖x‖ ^ 2 + ε ^ 2)) x = _
   rw [Space.deriv_eq, fderiv_comp x hdiff2 hdiff3, fderiv_add_const, fderiv_norm_sq_apply]
   simp [Real.deriv_rpow_const, mul_comm, ← mul_assoc, mul_div_cancel₀ s (NeZero.ne' 2).symm]
 
-lemma momentum_comp_radiusRegPow_eq :
-    𝐩 i ∘L 𝐫₀ ε s = 𝐫₀ ε s ∘L 𝐩 i - (s * I * ℏ) • 𝐫₀ ε (s-2) ∘L 𝐱 i := by
+lemma momentum_comp_radiusRegPow_eq
+    : 𝐩 i ∘L 𝐫₀ ε s = 𝐫₀ ε s ∘L 𝐩 i - (s * I * ℏ) • 𝐫₀ ε (s - 2) ∘L 𝐱 i := by
   rw [comp_eq_comp_sub_commute, radiusRegPow_commutation_momentum]
 
-lemma radiusRegPow_commutation_momentumSqr :
-    ⁅𝐫₀[d] ε s, 𝐩[d] ⬝ᵥ 𝐩⁆ = (2 * s * I * ℏ) • 𝐫₀ ε (s-2) ∘L (𝐱 ⬝ᵥ 𝐩)
-    + (s * (d + s - 2) * ℏ ^ 2) • 𝐫₀ ε (s-2) - (ε ^ 2 * s * (s - 2) * ℏ ^ 2) • 𝐫₀ ε (s-4) := by
+lemma radiusRegPow_commutation_momentumSqr
+    : ⁅𝐫₀[d] ε s, 𝐩[d] ⬝ᵥ 𝐩⁆
+      = (2 * s * I * ℏ) • 𝐫₀ ε (s - 2) ∘L (𝐱 ⬝ᵥ 𝐩) + (s * (d + s - 2) * ℏ ^ 2) • 𝐫₀ ε (s - 2)
+        - (ε ^ 2 * s * (s - 2) * ℏ ^ 2) • 𝐫₀ ε (s - 4) := by
   calc
     _ = (s * I * ℏ) • ∑ i, ((𝐩 i ∘L 𝐫₀ ε (s-2)) ∘L 𝐱 i + 𝐫₀ ε (s-2) ∘L 𝐱 i ∘L 𝐩 i) := by
       simp [dotProduct, mul_def, lie_sum, lie_leibniz, radiusRegPow_commutation_momentum,
@@ -226,12 +228,13 @@ lemma radiusRegPow_commutation_momentumSqr :
     _ = (s * I * ℏ) • ∑ i, ((2 : ℂ) • 𝐫₀ ε (s-2) ∘L 𝐱 i ∘L 𝐩 i - (I * ℏ) • 𝐫₀ ε (s-2)
         - ((s - 2) * I * ℏ) • 𝐫₀ ε (s-4) ∘L 𝐱 i ∘L 𝐱 i) := by
       simp [momentum_comp_position_eq, sub_add_eq_add_sub, ← two_smul ℂ]
-    _ = (s * I * ℏ) • ((2 : ℂ) • 𝐫₀ ε (s-2) ∘L (𝐱 ⬝ᵥ 𝐩) - (d * I * ℏ) • 𝐫₀ ε (s-2)
-        - ((s - 2) * I * ℏ) • 𝐫₀ ε (s-4) ∘L ∑ i, 𝐱 i ∘L 𝐱 i) := by
-      simp [Finset.sum_sub_distrib, ← Finset.smul_sum, ← comp_finsetSum,
-        ← Nat.cast_smul_eq_nsmul ℂ, smul_smul, dotProduct, mul_def, mul_assoc]
-    _ = (2 * s * I * ℏ) • 𝐫₀ ε (s-2) ∘L (𝐱 ⬝ᵥ 𝐩) + (s * (d + s - 2) * ℏ ^ 2) • 𝐫₀ ε (s-2)
-        - (ε ^ 2 * s * (s - 2) * ℏ ^ 2) • 𝐫₀ ε (s-4) := by
+    _ = (s * I * ℏ)
+        • ((2 : ℂ) • 𝐫₀ ε (s - 2) ∘L (𝐱 ⬝ᵥ 𝐩) - (d * I * ℏ) • 𝐫₀ ε (s - 2)
+          - ((s - 2) * I * ℏ) • 𝐫₀ ε (s - 4) ∘L ∑ i, 𝐱 i ∘L 𝐱 i) := by
+      simp [Finset.sum_sub_distrib, ← Finset.smul_sum, ← comp_finsetSum, ← Nat.cast_smul_eq_nsmul ℂ,
+        smul_smul, dotProduct, mul_def, mul_assoc]
+    _ = (2 * s * I * ℏ) • 𝐫₀ ε (s - 2) ∘L (𝐱 ⬝ᵥ 𝐩) + (s * (d + s - 2) * ℏ ^ 2) • 𝐫₀ ε (s - 2)
+        - (ε ^ 2 * s * (s - 2) * ℏ ^ 2) • 𝐫₀ ε (s - 4) := by
       simp_rw [positionSqCLM_eq ε, comp_sub, comp_smul, comp_id, radiusRegPowCLM_comp_eq]
       simp only [smul_sub, smul_smul, ← Complex.coe_smul, ofReal_mul, ofReal_add, ofReal_sub,
         ofReal_pow, ofReal_ofNat, ofReal_natCast]

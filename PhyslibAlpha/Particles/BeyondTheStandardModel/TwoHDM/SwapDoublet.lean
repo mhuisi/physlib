@@ -57,9 +57,11 @@ namespace EffectivePotential
 ## A. The doublet-swap map and its components
 -/
 
-/-- Swapping the two doublets, as an `ℝ`-linear map. It commutes with the gauge action, so it sends
-  gauge-invariant polynomial potentials to gauge-invariant polynomial potentials, but turns the
-  alignment of `Φ1` into the alignment of `Φ2`. -/
+/--
+Swapping the two doublets, as an `ℝ`-linear map. It commutes with the gauge action, so it sends
+gauge-invariant polynomial potentials to gauge-invariant polynomial potentials, but turns the
+alignment of `Φ1` into the alignment of `Φ2`.
+-/
 def swapDoublet : TwoHiggsDoublet →ₗ[ℝ] TwoHiggsDoublet where
   toFun φ := { Φ1 := φ.Φ2, Φ2 := φ.Φ1 }
   map_add' _ _ := rfl
@@ -68,56 +70,64 @@ def swapDoublet : TwoHiggsDoublet →ₗ[ℝ] TwoHiggsDoublet where
 @[simp] lemma swapDoublet_Φ1 (φ : TwoHiggsDoublet) : (swapDoublet φ).Φ1 = φ.Φ2 := rfl
 @[simp] lemma swapDoublet_Φ2 (φ : TwoHiggsDoublet) : (swapDoublet φ).Φ2 = φ.Φ1 := rfl
 
-@[simp] lemma swapDoublet_swapDoublet (φ : TwoHiggsDoublet) : swapDoublet (swapDoublet φ) = φ := by
+@[simp]
+lemma swapDoublet_swapDoublet (φ : TwoHiggsDoublet) : swapDoublet (swapDoublet φ) = φ := by
   apply ext_of_fst_snd <;> rfl
 
 /-!
 ## B. Commutation with the gauge action
 -/
 
-lemma swapDoublet_smul (g : StandardModel.GaugeGroupI) (φ : TwoHiggsDoublet) :
-    swapDoublet (g • φ) = g • swapDoublet φ := by
+lemma swapDoublet_smul (g : StandardModel.GaugeGroupI) (φ : TwoHiggsDoublet)
+    : swapDoublet (g • φ) = g • swapDoublet φ := by
   apply ext_of_fst_snd <;> simp
 
 /-!
 ## C. The action on the Gram vector
 -/
 
-/-- Swapping the doublets sends the gram vector through the sign flip of the imaginary and
-  difference components. -/
-lemma gramVector_swapDoublet_inl (φ : TwoHiggsDoublet) :
-    (swapDoublet φ).gramVector (Sum.inl 0) = φ.gramVector (Sum.inl 0) := by
+/--
+Swapping the doublets sends the gram vector through the sign flip of the imaginary and
+difference components.
+-/
+lemma gramVector_swapDoublet_inl (φ : TwoHiggsDoublet)
+    : (swapDoublet φ).gramVector (Sum.inl 0) = φ.gramVector (Sum.inl 0) := by
   rw [gramVector_inl_zero_eq, gramVector_inl_zero_eq, swapDoublet_Φ1, swapDoublet_Φ2]; ring
 
-lemma gramVector_swapDoublet_inr0 (φ : TwoHiggsDoublet) :
-    (swapDoublet φ).gramVector (Sum.inr 0) = φ.gramVector (Sum.inr 0) := by
+lemma gramVector_swapDoublet_inr0 (φ : TwoHiggsDoublet)
+    : (swapDoublet φ).gramVector (Sum.inr 0) = φ.gramVector (Sum.inr 0) := by
   rw [gramVector_inr_zero_eq, gramVector_inr_zero_eq, swapDoublet_Φ1, swapDoublet_Φ2,
     ← inner_conj_symm, Complex.conj_re]
 
-lemma gramVector_swapDoublet_inr1 (φ : TwoHiggsDoublet) :
-    (swapDoublet φ).gramVector (Sum.inr 1) = -φ.gramVector (Sum.inr 1) := by
+lemma gramVector_swapDoublet_inr1 (φ : TwoHiggsDoublet)
+    : (swapDoublet φ).gramVector (Sum.inr 1) = - φ.gramVector (Sum.inr 1) := by
   rw [gramVector_inr_one_eq, gramVector_inr_one_eq, swapDoublet_Φ1, swapDoublet_Φ2,
-    ← inner_conj_symm, Complex.conj_im]; ring
+    ← inner_conj_symm, Complex.conj_im]
+  ring
 
-lemma gramVector_swapDoublet_inr2 (φ : TwoHiggsDoublet) :
-    (swapDoublet φ).gramVector (Sum.inr 2) = -φ.gramVector (Sum.inr 2) := by
+lemma gramVector_swapDoublet_inr2 (φ : TwoHiggsDoublet)
+    : (swapDoublet φ).gramVector (Sum.inr 2) = - φ.gramVector (Sum.inr 2) := by
   rw [gramVector_inr_two_eq, gramVector_inr_two_eq, swapDoublet_Φ1, swapDoublet_Φ2]; ring
 
 /-!
 ## D. Effect on gauge invariance and mass dimension
 -/
 
-lemma HasMaxMassDimLE.comp_swapDoublet {V : EffectivePotential} {n : ℕ}
-    (h : HasMaxMassDimLE V n) : HasMaxMassDimLE (fun φ => V (swapDoublet φ)) n := by
+lemma HasMaxMassDimLE.comp_swapDoublet {V : EffectivePotential} {n : ℕ} (h : HasMaxMassDimLE V n)
+    : HasMaxMassDimLE (fun φ => V (swapDoublet φ)) n := by
   obtain ⟨p, hp, hdeg⟩ := h
-  refine ⟨MvPolynomial.rename
-    (fun i : Module.Dual ℝ TwoHiggsDoublet => i.comp swapDoublet) p, fun φ => ?_, ?_⟩
+  refine ⟨
+    MvPolynomial.rename (fun i : Module.Dual ℝ TwoHiggsDoublet => i.comp swapDoublet) p,
+    fun φ => ?_,
+    ?_
+  ⟩
   · change V (swapDoublet φ) = _
-    rw [MvPolynomial.eval_rename, hp (swapDoublet φ)]; rfl
+    rw [MvPolynomial.eval_rename, hp (swapDoublet φ)]
+    rfl
   · exact le_trans (MvPolynomial.totalDegree_rename_le _ _) hdeg
 
-lemma IsInvariant.comp_swapDoublet {V : EffectivePotential} (hI : IsInvariant V) :
-    IsInvariant (fun φ => V (swapDoublet φ)) := by
+lemma IsInvariant.comp_swapDoublet {V : EffectivePotential} (hI : IsInvariant V)
+    : IsInvariant (fun φ => V (swapDoublet φ)) := by
   intro g φ
   show V (swapDoublet (g • φ)) = V (swapDoublet φ)
   rw [swapDoublet_smul, hI g]

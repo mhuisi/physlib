@@ -83,11 +83,14 @@ attribute [-simp] Nat.succ_eq_add_one
 
 -/
 
-/-- The potential energy from the interaction of the electromagnetic potential
-  with the free current `J`. -/
-noncomputable def freeCurrentPotential (A : ElectromagneticPotential d)
-    (J : LorentzCurrentDensity d)
-    (x : SpaceTime d) : ℝ := ⟪A x, J x⟫ₘ
+/--
+The potential energy from the interaction of the electromagnetic potential
+with the free current `J`.
+-/
+noncomputable def freeCurrentPotential
+    (A : ElectromagneticPotential d) (J : LorentzCurrentDensity d) (x : SpaceTime d)
+    : ℝ :=
+  ⟪A x, J x⟫ₘ
 
 /-!
 
@@ -95,9 +98,10 @@ noncomputable def freeCurrentPotential (A : ElectromagneticPotential d)
 
 -/
 
-lemma freeCurrentPotential_add_const (A : ElectromagneticPotential d)
-    (J : LorentzCurrentDensity d) (c : Lorentz.Vector d) (x : SpaceTime d) :
-    freeCurrentPotential ⟨fun x => A x + c⟩ J x = freeCurrentPotential A J x + ⟪c, J x⟫ₘ := by
+lemma freeCurrentPotential_add_const
+    (A : ElectromagneticPotential d) (J : LorentzCurrentDensity d) (c : Lorentz.Vector d)
+    (x : SpaceTime d)
+    : freeCurrentPotential ⟨fun x => A x + c⟩ J x = freeCurrentPotential A J x + ⟪c, J x⟫ₘ := by
   simp [freeCurrentPotential]
 
 /-!
@@ -106,11 +110,12 @@ lemma freeCurrentPotential_add_const (A : ElectromagneticPotential d)
 
 -/
 
-lemma freeCurrentPotential_hasVarGradientAt (A : ElectromagneticPotential d)
-    (hA : ContDiff ℝ ∞ A) (J : LorentzCurrentDensity d)
-    (hJ : ContDiff ℝ ∞ J) :
-    HasVarGradientAt (fun A => freeCurrentPotential ⟨A⟩ J)
-    (((∑ μ, fun x => (η μ μ * J x μ) • Lorentz.Vector.basis μ))) A := by
+lemma freeCurrentPotential_hasVarGradientAt
+    (A : ElectromagneticPotential d) (hA : ContDiff ℝ ∞ A)
+    (J : LorentzCurrentDensity d) (hJ : ContDiff ℝ ∞ J)
+    : HasVarGradientAt
+      (fun A => freeCurrentPotential ⟨A⟩ J)
+      (((∑ μ, fun x => (η μ μ * J x μ) • Lorentz.Vector.basis μ))) A := by
   conv =>
     enter [1, q', x]
     rw [freeCurrentPotential, minkowskiProduct_toCoord_minkowskiMatrix]
@@ -120,8 +125,9 @@ lemma freeCurrentPotential_hasVarGradientAt (A : ElectromagneticPotential d)
   have h2' : ContDiff ℝ ∞ fun x => η μ μ * J x μ :=
     ContDiff.mul (by fun_prop) ((Lorentz.Vector.contDiff_apply _).mpr hJ μ)
   have h2 := HasVarAdjDerivAt.fun_mul h2' _ _ A h1
-  have h3' : (fun (φ : SpaceTime d → Lorentz.Vector d) x => η μ μ * J x μ * φ x μ) =
-    (fun (φ : SpaceTime d → Lorentz.Vector d) x => η μ μ * φ x μ * J x μ) := by
+  have h3'
+      : (fun (φ : SpaceTime d → Lorentz.Vector d) x => η μ μ * J x μ * φ x μ)
+        = (fun (φ : SpaceTime d → Lorentz.Vector d) x => η μ μ * φ x μ * J x μ) := by
     funext φ x
     ring
   rw [h3'] at h2
@@ -135,12 +141,11 @@ lemma freeCurrentPotential_hasVarGradientAt (A : ElectromagneticPotential d)
 -/
 
 lemma freeCurrentPotential_eq_sum_scalarPotential_vectorPotential
-    (𝓕 : FreeSpace) (A : ElectromagneticPotential d)
-    (J : LorentzCurrentDensity d) (x : SpaceTime d) :
-    A.freeCurrentPotential J x =
-    A.scalarPotential 𝓕.c (x.time 𝓕.c) x.space * J.chargeDensity 𝓕.c (x.time 𝓕.c) x.space
-    - ∑ i, A.vectorPotential 𝓕.c (x.time 𝓕.c) x.space i *
-        J.currentDensity 𝓕.c (x.time 𝓕.c) x.space i := by
+    (𝓕 : FreeSpace) (A : ElectromagneticPotential d) (J : LorentzCurrentDensity d) (x : SpaceTime d)
+    : A.freeCurrentPotential J x
+      = A.scalarPotential 𝓕.c (x.time 𝓕.c) x.space * J.chargeDensity 𝓕.c (x.time 𝓕.c) x.space
+        - ∑ i, A.vectorPotential 𝓕.c (x.time 𝓕.c) x.space i *
+            J.currentDensity 𝓕.c (x.time 𝓕.c) x.space i := by
   rw [freeCurrentPotential, minkowskiProduct_toCoord_minkowskiMatrix]
   simp [Fintype.sum_sum_type, scalarPotential, vectorPotential, LorentzCurrentDensity.chargeDensity,
     LorentzCurrentDensity.currentDensity, timeSlice]
@@ -154,35 +159,40 @@ lemma freeCurrentPotential_eq_sum_scalarPotential_vectorPotential
 -/
 
 /-- The variational gradient of the free current potential. -/
-noncomputable def gradFreeCurrentPotential {d} (A : ElectromagneticPotential d)
-    (J : LorentzCurrentDensity d) : SpaceTime d → Lorentz.Vector d :=
+noncomputable def gradFreeCurrentPotential
+    {d} (A : ElectromagneticPotential d) (J : LorentzCurrentDensity d)
+    : SpaceTime d → Lorentz.Vector d :=
   (δ (q':=A), ∫ x, freeCurrentPotential ⟨q'⟩ J x)
 
-lemma gradFreeCurrentPotential_eq_sum_basis {d} (A : ElectromagneticPotential d)
-    (hA : ContDiff ℝ ∞ A) (J : LorentzCurrentDensity d)
-    (hJ : ContDiff ℝ ∞ J) :
-    A.gradFreeCurrentPotential J = (∑ μ, fun x => (η μ μ * J x μ) • Lorentz.Vector.basis μ) := by
+lemma gradFreeCurrentPotential_eq_sum_basis
+    {d} (A : ElectromagneticPotential d) (hA : ContDiff ℝ ∞ A) (J : LorentzCurrentDensity d)
+    (hJ : ContDiff ℝ ∞ J)
+    : A.gradFreeCurrentPotential J = (∑ μ, fun x => (η μ μ * J x μ) • Lorentz.Vector.basis μ) := by
   exact (freeCurrentPotential_hasVarGradientAt A hA J hJ).varGradient
 
-lemma gradFreeCurrentPotential_eq_chargeDensity_currentDensity {d}
-    (𝓕 : FreeSpace) (A : ElectromagneticPotential d)
-    (hA : ContDiff ℝ ∞ A) (J : LorentzCurrentDensity d)
-    (hJ : ContDiff ℝ ∞ J) (x : SpaceTime d) :
-    A.gradFreeCurrentPotential J x =
-      (𝓕.c * J.chargeDensity 𝓕.c (x.time 𝓕.c) x.space) • Lorentz.Vector.basis (Sum.inl 0) +
-      (∑ i, - J.currentDensity 𝓕.c (x.time 𝓕.c) x.space i • Lorentz.Vector.basis (Sum.inr i)) := by
-  rw [gradFreeCurrentPotential_eq_sum_basis A hA J hJ]
-  rw [Fintype.sum_sum_type]
-  simp only [Finset.univ_unique, Fin.default_eq_zero, Fin.isValue, Finset.sum_singleton,
-    inl_0_inl_0, one_mul, inr_i_inr_i, neg_mul, _root_.neg_smul, Pi.add_apply, Finset.sum_apply]
-  congr <;>
-    simp [LorentzCurrentDensity.chargeDensity, LorentzCurrentDensity.currentDensity]
+lemma gradFreeCurrentPotential_eq_chargeDensity_currentDensity
+    {d}
+    (𝓕 : FreeSpace)
+    (A : ElectromagneticPotential d) (hA : ContDiff ℝ ∞ A)
+    (J : LorentzCurrentDensity d) (hJ : ContDiff ℝ ∞ J)
+    (x : SpaceTime d)
+    : A.gradFreeCurrentPotential J x
+      = (𝓕.c * J.chargeDensity 𝓕.c (x.time 𝓕.c) x.space) • Lorentz.Vector.basis (Sum.inl 0)
+        + (∑ i, - J.currentDensity 𝓕.c (x.time 𝓕.c) x.space i • Lorentz.Vector.basis (Sum.inr i)) :=
+  by
+    rw [gradFreeCurrentPotential_eq_sum_basis A hA J hJ]
+    rw [Fintype.sum_sum_type]
+    simp only [Finset.univ_unique, Fin.default_eq_zero, Fin.isValue, Finset.sum_singleton,
+      inl_0_inl_0, one_mul, inr_i_inr_i, neg_mul, _root_.neg_smul, Pi.add_apply, Finset.sum_apply]
+    congr <;> simp [LorentzCurrentDensity.chargeDensity, LorentzCurrentDensity.currentDensity]
 
-lemma gradFreeCurrentPotential_eq_tensor {d} (A : ElectromagneticPotential d)
-    (hA : ContDiff ℝ ∞ A) (J : LorentzCurrentDensity d)
-    (hJ : ContDiff ℝ ∞ J) (x : SpaceTime d) (ν : Fin 1 ⊕ Fin d) :
-    A.gradFreeCurrentPotential J x ν = η ν ν * ((Tensorial.toTensor (M := Lorentz.Vector d)).symm
-    (permT id (IsReindexing.auto) {J x | ν'}ᵀ)) ν := by
+lemma gradFreeCurrentPotential_eq_tensor
+    {d} (A : ElectromagneticPotential d) (hA : ContDiff ℝ ∞ A) (J : LorentzCurrentDensity d)
+    (hJ : ContDiff ℝ ∞ J) (x : SpaceTime d) (ν : Fin 1 ⊕ Fin d)
+    : A.gradFreeCurrentPotential J x ν
+      = η ν ν * ((Tensorial.toTensor (M := Lorentz.Vector d)).symm
+          (permT id (IsReindexing.auto) {J x | ν'}ᵀ))
+        ν := by
   trans η ν ν * (Lorentz.Vector.basis.repr ((Tensorial.toTensor (M := Lorentz.Vector d)).symm
     (permT id (IsReindexing.auto) {J x | ν'}ᵀ))) ν
   swap
@@ -200,10 +210,13 @@ The lagrangian density for the electromagnetic field in presence of a current de
 
 -/
 
-/-- The lagrangian density associated with a electromagnetic potential and a Lorentz
-  current density. -/
-noncomputable def lagrangian (𝓕 : FreeSpace) (A : ElectromagneticPotential d)
-    (J : LorentzCurrentDensity d) (x : SpaceTime d) : ℝ :=
+/--
+The lagrangian density associated with a electromagnetic potential and a Lorentz
+current density.
+-/
+noncomputable def lagrangian
+    (𝓕 : FreeSpace) (A : ElectromagneticPotential d) (J : LorentzCurrentDensity d) (x : SpaceTime d)
+    : ℝ :=
   A.kineticTerm 𝓕 x - A.freeCurrentPotential J x
 
 /-!
@@ -212,9 +225,10 @@ noncomputable def lagrangian (𝓕 : FreeSpace) (A : ElectromagneticPotential d)
 
 -/
 
-lemma lagrangian_add_const {d} {𝓕 : FreeSpace} (A : ElectromagneticPotential d)
-    (J : LorentzCurrentDensity d) (c : Lorentz.Vector d) (x : SpaceTime d) :
-    lagrangian 𝓕 ⟨fun x => A x + c⟩ J x = lagrangian 𝓕 A J x - ⟪c, J x⟫ₘ := by
+lemma lagrangian_add_const
+    {d} {𝓕 : FreeSpace} (A : ElectromagneticPotential d) (J : LorentzCurrentDensity d)
+    (c : Lorentz.Vector d) (x : SpaceTime d)
+    : lagrangian 𝓕 ⟨fun x => A x + c⟩ J x = lagrangian 𝓕 A J x - ⟪c, J x⟫ₘ := by
   rw [lagrangian, lagrangian, kineticTerm_add_const, freeCurrentPotential_add_const]
   ring
 
@@ -224,15 +238,18 @@ lemma lagrangian_add_const {d} {𝓕 : FreeSpace} (A : ElectromagneticPotential 
 
 -/
 
-/-- The Lagrangian is equal to `1/2 * (ε₀ E^2 - 1/μ₀ B^2) - φρ + A · j`-/
-lemma lagrangian_eq_electric_magnetic {d} {𝓕 : FreeSpace}
-    (A : ElectromagneticPotential d) (hA : ContDiff ℝ 2 A)
-    (J : LorentzCurrentDensity d) (x : SpaceTime d) :
-    A.lagrangian 𝓕 J x = 1 / 2 * (𝓕.ε₀ * ‖A.electricField 𝓕.c (x.time 𝓕.c) x.space‖ ^ 2 -
-    (1 / (2 * 𝓕.μ₀)) * ∑ i, ∑ j, ‖A.magneticFieldMatrix 𝓕.c (x.time 𝓕.c) x.space (i, j)‖ ^ 2)
-    - A.scalarPotential 𝓕.c (x.time 𝓕.c) x.space * J.chargeDensity 𝓕.c (x.time 𝓕.c) x.space
-    + ∑ i, A.vectorPotential 𝓕.c (x.time 𝓕.c) x.space i *
-        J.currentDensity 𝓕.c (x.time 𝓕.c) x.space i := by
+/-- The Lagrangian is equal to `1/2 * (ε₀ E^2 - 1/μ₀ B^2) - φρ + A · j` -/
+lemma lagrangian_eq_electric_magnetic
+    {d} {𝓕 : FreeSpace} (A : ElectromagneticPotential d) (hA : ContDiff ℝ 2 A)
+    (J : LorentzCurrentDensity d) (x : SpaceTime d)
+    : A.lagrangian 𝓕 J x
+      = 1 / 2
+          * (𝓕.ε₀ * ‖A.electricField 𝓕.c (x.time 𝓕.c) x.space‖ ^ 2
+            - (1 / (2 * 𝓕.μ₀))
+              * ∑ i, ∑ j, ‖A.magneticFieldMatrix 𝓕.c (x.time 𝓕.c) x.space (i, j)‖ ^ 2)
+        - A.scalarPotential 𝓕.c (x.time 𝓕.c) x.space * J.chargeDensity 𝓕.c (x.time 𝓕.c) x.space
+        + ∑ i, A.vectorPotential 𝓕.c (x.time 𝓕.c) x.space i *
+            J.currentDensity 𝓕.c (x.time 𝓕.c) x.space i := by
   rw [lagrangian,
     kineticTerm_eq_electricMatrix_magneticFieldMatrix _ _ (hA.differentiable (by simp)),
     freeCurrentPotential_eq_sum_scalarPotential_vectorPotential 𝓕 A J x]
@@ -249,11 +266,13 @@ lemma lagrangian_eq_electric_magnetic {d} {𝓕 : FreeSpace}
 
 -/
 
-lemma lagrangian_hasVarGradientAt_eq_add_gradKineticTerm {𝓕 : FreeSpace}
-    (A : ElectromagneticPotential d) (hA : ContDiff ℝ ∞ A) (J : LorentzCurrentDensity d)
-    (hJ : ContDiff ℝ ∞ J) :
-    HasVarGradientAt (fun A => lagrangian 𝓕 ⟨A⟩ J)
-    (A.gradKineticTerm 𝓕 - A.gradFreeCurrentPotential J) A := by
+lemma lagrangian_hasVarGradientAt_eq_add_gradKineticTerm
+    {𝓕 : FreeSpace}
+    (A : ElectromagneticPotential d) (hA : ContDiff ℝ ∞ A)
+    (J : LorentzCurrentDensity d) (hJ : ContDiff ℝ ∞ J)
+    : HasVarGradientAt
+      (fun A => lagrangian 𝓕 ⟨A⟩ J)
+      (A.gradKineticTerm 𝓕 - A.gradFreeCurrentPotential J) A := by
   conv =>
     enter [1, q', x]
     rw [lagrangian]
@@ -270,8 +289,9 @@ lemma lagrangian_hasVarGradientAt_eq_add_gradKineticTerm {𝓕 : FreeSpace}
 -/
 
 /-- The variational gradient of the lagrangian of electromagnetic field. -/
-noncomputable def gradLagrangian {d} (𝓕 : FreeSpace) (A : ElectromagneticPotential d)
-    (J : LorentzCurrentDensity d) : SpaceTime d → Lorentz.Vector d :=
+noncomputable def gradLagrangian
+    {d} (𝓕 : FreeSpace) (A : ElectromagneticPotential d) (J : LorentzCurrentDensity d)
+    : SpaceTime d → Lorentz.Vector d :=
   (δ (q':=A), ∫ x, lagrangian 𝓕 ⟨q'⟩ J x)
 
 /-!
@@ -280,10 +300,11 @@ noncomputable def gradLagrangian {d} (𝓕 : FreeSpace) (A : ElectromagneticPote
 
 -/
 
-lemma gradLagrangian_eq_kineticTerm_sub {𝓕 : FreeSpace} (A : ElectromagneticPotential d)
-    (hA : ContDiff ℝ ∞ A) (J : LorentzCurrentDensity d)
-    (hJ : ContDiff ℝ ∞ J) :
-    A.gradLagrangian 𝓕 J = A.gradKineticTerm 𝓕 - A.gradFreeCurrentPotential J := by
+lemma gradLagrangian_eq_kineticTerm_sub
+    {𝓕 : FreeSpace}
+    (A : ElectromagneticPotential d) (hA : ContDiff ℝ ∞ A)
+    (J : LorentzCurrentDensity d) (hJ : ContDiff ℝ ∞ J)
+    : A.gradLagrangian 𝓕 J = A.gradKineticTerm 𝓕 - A.gradFreeCurrentPotential J := by
   exact (lagrangian_hasVarGradientAt_eq_add_gradKineticTerm A hA J hJ).varGradient
 
 /-!
@@ -291,10 +312,11 @@ lemma gradLagrangian_eq_kineticTerm_sub {𝓕 : FreeSpace} (A : ElectromagneticP
 ### C.4. The lagrangian density has the variational gradient equal to `gradLagrangian`
 
 -/
-lemma lagrangian_hasVarGradientAt_gradLagrangian {𝓕 : FreeSpace}
-    (A : ElectromagneticPotential d)
-    (hA : ContDiff ℝ ∞ A) (J : LorentzCurrentDensity d) (hJ : ContDiff ℝ ∞ J) :
-    HasVarGradientAt (fun A => lagrangian 𝓕 ⟨A⟩ J) (A.gradLagrangian 𝓕 J) A := by
+lemma lagrangian_hasVarGradientAt_gradLagrangian
+    {𝓕 : FreeSpace}
+    (A : ElectromagneticPotential d) (hA : ContDiff ℝ ∞ A)
+    (J : LorentzCurrentDensity d) (hJ : ContDiff ℝ ∞ J)
+    : HasVarGradientAt (fun A => lagrangian 𝓕 ⟨A⟩ J) (A.gradLagrangian 𝓕 J) A := by
   rw [gradLagrangian_eq_kineticTerm_sub A hA J hJ]
   apply lagrangian_hasVarGradientAt_eq_add_gradKineticTerm A hA J hJ
 
@@ -304,11 +326,15 @@ lemma lagrangian_hasVarGradientAt_gradLagrangian {𝓕 : FreeSpace}
 
 -/
 
-lemma gradLagrangian_eq_sum_toFieldStrength_eval {𝓕 : FreeSpace} (A : ElectromagneticPotential d)
-    (hA : ContDiff ℝ ∞ A) (J : LorentzCurrentDensity d) (hJ : ContDiff ℝ ∞ J) :
-    A.gradLagrangian 𝓕 J = fun x => ∑ ν,
-      (η ν ν • (1 / 𝓕.μ₀ * ∑ μ, ∂_ μ (fun x => toScalar {A.toFieldStrength x | [μ] [ν]}ᵀ) x
-      - J x ν) • Lorentz.Vector.basis ν) := by
+lemma gradLagrangian_eq_sum_toFieldStrength_eval
+    {𝓕 : FreeSpace}
+    (A : ElectromagneticPotential d) (hA : ContDiff ℝ ∞ A)
+    (J : LorentzCurrentDensity d) (hJ : ContDiff ℝ ∞ J)
+    : A.gradLagrangian 𝓕 J
+      = fun x =>
+        ∑ ν,
+          (η ν ν • (1 / 𝓕.μ₀ * ∑ μ, ∂_ μ (fun x => toScalar {A.toFieldStrength x | [μ] [ν]}ᵀ) x
+          - J x ν) • Lorentz.Vector.basis ν) := by
   rw [gradLagrangian_eq_kineticTerm_sub A hA J hJ]
   funext x
   simp only [Pi.sub_apply]
@@ -326,22 +352,23 @@ lemma gradLagrangian_eq_sum_toFieldStrength_eval {𝓕 : FreeSpace} (A : Electro
 -/
 
 open Time LorentzCurrentDensity
-lemma gradLagrangian_eq_electricField_magneticField {𝓕 : FreeSpace}
-    (A : ElectromagneticPotential d)
-    (hA : ContDiff ℝ ∞ A) (J : LorentzCurrentDensity d)
-    (hJ : ContDiff ℝ ∞ J) (x : SpaceTime d) :
-    A.gradLagrangian 𝓕 J x = (1 / (𝓕.μ₀ * 𝓕.c.val) *
-        Space.div (electricField 𝓕.c A ((time 𝓕.c) x)) (space x) +
-        - 𝓕.c * J.chargeDensity 𝓕.c (x.time 𝓕.c) x.space) •
-      Lorentz.Vector.basis (Sum.inl 0) +
-    ∑ i, (𝓕.μ₀⁻¹ * (𝓕.ε₀ * 𝓕.μ₀ * ∂ₜ (electricField 𝓕.c A · x.space) ((time 𝓕.c) x) i -
-      ∑ j, ∂[j] (magneticFieldMatrix 𝓕.c A (x.time 𝓕.c) · (j, i)) x.space) +
-      J.currentDensity 𝓕.c (x.time 𝓕.c) x.space i) •
-        Lorentz.Vector.basis (Sum.inr i) := by
+lemma gradLagrangian_eq_electricField_magneticField
+    {𝓕 : FreeSpace}
+    (A : ElectromagneticPotential d) (hA : ContDiff ℝ ∞ A)
+    (J : LorentzCurrentDensity d) (hJ : ContDiff ℝ ∞ J)
+    (x : SpaceTime d)
+    : A.gradLagrangian 𝓕 J x
+      = (1 / (𝓕.μ₀ * 𝓕.c.val) * Space.div (electricField 𝓕.c A ((time 𝓕.c) x)) (space x)
+            + -𝓕.c * J.chargeDensity 𝓕.c (x.time 𝓕.c) x.space)
+          • Lorentz.Vector.basis (Sum.inl 0)
+        + ∑ i, (𝓕.μ₀⁻¹ * (𝓕.ε₀ * 𝓕.μ₀ * ∂ₜ (electricField 𝓕.c A · x.space) ((time 𝓕.c) x) i -
+            ∑ j, ∂[j] (magneticFieldMatrix 𝓕.c A (x.time 𝓕.c) · (j, i)) x.space) +
+            J.currentDensity 𝓕.c (x.time 𝓕.c) x.space i) •
+              Lorentz.Vector.basis (Sum.inr i) := by
   rw [gradLagrangian_eq_kineticTerm_sub A hA J hJ, Pi.sub_apply,
     gradKineticTerm_eq_electric_magnetic _ _ hA,
-    gradFreeCurrentPotential_eq_chargeDensity_currentDensity 𝓕 A hA J hJ x,
-    add_sub_add_comm, ← Finset.sum_sub_distrib]
+    gradFreeCurrentPotential_eq_chargeDensity_currentDensity 𝓕 A hA J hJ x, add_sub_add_comm,
+    ← Finset.sum_sub_distrib]
   congr 1
   · module
   · refine Finset.sum_congr rfl fun i _ => ?_
@@ -354,22 +381,23 @@ lemma gradLagrangian_eq_electricField_magneticField {𝓕 : FreeSpace}
 
 -/
 attribute [-simp] Nat.reduceAdd Nat.reduceSucc Fin.isValue in
-lemma gradLagrangian_eq_tensor {𝓕 : FreeSpace}
-    (A : ElectromagneticPotential d)
-    (hA : ContDiff ℝ ∞ A) (J : LorentzCurrentDensity d)
-    (hJ : ContDiff ℝ ∞ J) (x : SpaceTime d) (ν : Fin 1 ⊕ Fin d) :
-    A.gradLagrangian 𝓕 J x ν =
-    η ν ν * ((Tensorial.toTensor (M := Lorentz.Vector d)).symm
-    (permT id (IsReindexing.auto) {((1/ 𝓕.μ₀ : ℝ) • tensorDeriv A.toFieldStrength x | κ κ ν') +
-    - (J x | ν')}ᵀ)) ν := by
+lemma gradLagrangian_eq_tensor
+    {𝓕 : FreeSpace}
+    (A : ElectromagneticPotential d) (hA : ContDiff ℝ ∞ A)
+    (J : LorentzCurrentDensity d) (hJ : ContDiff ℝ ∞ J)
+    (x : SpaceTime d) (ν : Fin 1 ⊕ Fin d)
+    : A.gradLagrangian 𝓕 J x ν
+      = η ν ν * ((Tensorial.toTensor (M := Lorentz.Vector d)).symm
+          (permT id (IsReindexing.auto)
+            {((1/ 𝓕.μ₀ : ℝ) • tensorDeriv A.toFieldStrength x | κ κ ν') +
+              - (J x | ν')}ᵀ))
+        ν := by
   rw [gradLagrangian_eq_kineticTerm_sub _ hA _ hJ]
-  simp only [Pi.sub_apply, apply_sub, one_div, map_smul,
-    map_neg, map_add, permT_permT, CompTriple.comp_eq, apply_add, apply_smul,
-    Lorentz.Vector.neg_apply]
+  simp only [Pi.sub_apply, apply_sub, one_div, map_smul, map_neg, map_add, permT_permT,
+    CompTriple.comp_eq, apply_add, apply_smul, Lorentz.Vector.neg_apply]
   rw [gradKineticTerm_eq_tensorDeriv A x hA]
   rw [gradFreeCurrentPotential_eq_tensor A hA J hJ x ν]
-  simp only [one_div, map_smul, apply_smul,
-    permT_id_self, LinearEquiv.symm_apply_apply]
+  simp only [one_div, map_smul, apply_smul, permT_id_self, LinearEquiv.symm_apply_apply]
   ring_nf
   congr
   rw [permT_congr_eq_id]

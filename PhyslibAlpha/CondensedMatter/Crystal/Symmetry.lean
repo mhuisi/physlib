@@ -63,9 +63,12 @@ namespace CondensedMatter.Crystal
 
 /-! ## A. The group of cell symmetries -/
 
-/-- A symmetry of the translation structure of a crystal with unit-cell labels `F` and cell
-translations `G`: `(A, σ, b)` sends site `i` of cell `n` to site `σ i` of cell `A n + b i`. -/
-@[ext] structure CellSymmetry (G F : Type*) [AddCommGroup G] where
+/--
+A symmetry of the translation structure of a crystal with unit-cell labels `F` and cell
+translations `G`: `(A, σ, b)` sends site `i` of cell `n` to site `σ i` of cell `A n + b i`.
+-/
+@[ext]
+structure CellSymmetry (G F : Type*) [AddCommGroup G] where
   /-- The action on cell indices. -/
   linear : G ≃+ G
   /-- The permutation of the labels within a unit cell. -/
@@ -78,27 +81,33 @@ namespace CellSymmetry
 variable {G F : Type*} [AddCommGroup G]
 
 instance : Mul (CellSymmetry G F) where
-  mul s t := ⟨t.linear.trans s.linear, t.perm.trans s.perm,
-    fun i => s.linear (t.shift i) + s.shift (t.perm i)⟩
+  mul s t := ⟨
+    t.linear.trans s.linear,
+    t.perm.trans s.perm,
+    fun i => s.linear (t.shift i) + s.shift (t.perm i)
+  ⟩
 
 instance : One (CellSymmetry G F) := ⟨⟨AddEquiv.refl G, Equiv.refl F, fun _ => 0⟩⟩
 
 instance : Inv (CellSymmetry G F) where
-  inv s := ⟨s.linear.symm, s.perm.symm, fun j => -s.linear.symm (s.shift (s.perm.symm j))⟩
+  inv s := ⟨s.linear.symm, s.perm.symm, fun j => - s.linear.symm (s.shift (s.perm.symm j))⟩
 
-@[simp] lemma linear_mul (s t : CellSymmetry G F) (x : G) :
-    (s * t).linear x = s.linear (t.linear x) := rfl
-@[simp] lemma perm_mul (s t : CellSymmetry G F) (i : F) :
-    (s * t).perm i = s.perm (t.perm i) := rfl
-@[simp] lemma shift_mul (s t : CellSymmetry G F) (i : F) :
-    (s * t).shift i = s.linear (t.shift i) + s.shift (t.perm i) := rfl
+@[simp]
+lemma linear_mul (s t : CellSymmetry G F) (x : G) : (s * t).linear x = s.linear (t.linear x) := rfl
+@[simp] lemma perm_mul (s t : CellSymmetry G F) (i : F) : (s * t).perm i = s.perm (t.perm i) := rfl
+@[simp]
+lemma shift_mul (s t : CellSymmetry G F) (i : F)
+    : (s * t).shift i = s.linear (t.shift i) + s.shift (t.perm i) :=
+  rfl
 @[simp] lemma linear_one (x : G) : (1 : CellSymmetry G F).linear x = x := rfl
 @[simp] lemma perm_one (i : F) : (1 : CellSymmetry G F).perm i = i := rfl
 @[simp] lemma shift_one (i : F) : (1 : CellSymmetry G F).shift i = 0 := rfl
 @[simp] lemma linear_inv (s : CellSymmetry G F) (x : G) : (s⁻¹).linear x = s.linear.symm x := rfl
 @[simp] lemma perm_inv (s : CellSymmetry G F) (i : F) : (s⁻¹).perm i = s.perm.symm i := rfl
-@[simp] lemma shift_inv (s : CellSymmetry G F) (j : F) :
-    (s⁻¹).shift j = -s.linear.symm (s.shift (s.perm.symm j)) := rfl
+@[simp]
+lemma shift_inv (s : CellSymmetry G F) (j : F)
+    : (s⁻¹).shift j = - s.linear.symm (s.shift (s.perm.symm j)) :=
+  rfl
 
 instance : Group (CellSymmetry G F) where
   mul_assoc s t u := by ext <;> simp [add_assoc]
@@ -109,34 +118,35 @@ instance : Group (CellSymmetry G F) where
 instance : SMul (CellSymmetry G F) (CellSite G F) where
   smul s x := ⟨s.linear x.cell + s.shift x.label, s.perm x.label⟩
 
-lemma smul_def (s : CellSymmetry G F) (x : CellSite G F) :
-    s • x = ⟨s.linear x.cell + s.shift x.label, s.perm x.label⟩ := rfl
+lemma smul_def (s : CellSymmetry G F) (x : CellSite G F)
+    : s • x = ⟨s.linear x.cell + s.shift x.label, s.perm x.label⟩ :=
+  rfl
 
 /-- The site `σ i` of cell `A n + b i` to which a symmetry sends the site `i` of cell `n`. -/
 instance : MulAction (CellSymmetry G F) (CellSite G F) where
   one_smul x := by
     rw [smul_def]
     simp
-  mul_smul s t x := by
-    simp only [smul_def, linear_mul, perm_mul, shift_mul, map_add, add_assoc]
+  mul_smul s t x := by simp only [smul_def, linear_mul, perm_mul, shift_mul, map_add, add_assoc]
 
 /-! ## B. Translations form a normal subgroup -/
 
 /-- Translation by `a`: it moves every cell by `a` and fixes the labels. -/
 def translation (a : G) : CellSymmetry G F := ⟨AddEquiv.refl G, Equiv.refl F, fun _ => a⟩
 
-@[simp] lemma translation_smul (a : G) (x : CellSite G F) :
-    (translation a : CellSymmetry G F) • x = a +ᵥ x := by
+@[simp]
+lemma translation_smul (a : G) (x : CellSite G F)
+    : (translation a : CellSymmetry G F) • x = a +ᵥ x := by
   change CellSite.mk (x.cell + a) x.label = CellSite.mk (a + x.cell) x.label
   rw [add_comm]
 
-lemma translation_mul (a b : G) :
-    (translation a : CellSymmetry G F) * translation b = translation (a + b) := by
+lemma translation_mul (a b : G)
+    : (translation a : CellSymmetry G F) * translation b = translation (a + b) := by
   ext <;> simp [translation, add_comm]
 
 /-- Conjugating a translation by a symmetry gives the translation by the transformed vector. -/
-lemma mul_translation_mul_inv (s : CellSymmetry G F) (a : G) :
-    s * translation a * s⁻¹ = translation (s.linear a) := by
+lemma mul_translation_mul_inv (s : CellSymmetry G F) (a : G)
+    : s * translation a * s⁻¹ = translation (s.linear a) := by
   ext j <;> simp [translation, add_comm]
 
 /-- The subgroup of translations. -/
@@ -174,8 +184,8 @@ def Bonded (g : PeriodicGraph (Crystal.ofUnitCell G F)) (i j : F) (d : G) : Prop
   g.toSimpleGraph.Adj ⟨0, i⟩ ⟨d, j⟩
 
 /-- Bonds between any two cells are the translates of bonds to the reference cell. -/
-lemma adj_iff_bonded (g : PeriodicGraph (Crystal.ofUnitCell G F)) (n m : G) (i j : F) :
-    g.toSimpleGraph.Adj ⟨n, i⟩ ⟨m, j⟩ ↔ g.Bonded i j (m - n) := by
+lemma adj_iff_bonded (g : PeriodicGraph (Crystal.ofUnitCell G F)) (n m : G) (i j : F)
+    : g.toSimpleGraph.Adj ⟨n, i⟩ ⟨m, j⟩ ↔ g.Bonded i j (m - n) := by
   have h := g.adj_vadd (-n) ⟨n, i⟩ ⟨m, j⟩
   have h1 : (-n +ᵥ (⟨n, i⟩ : CellSite G F)) = ⟨0, i⟩ := by
     change CellSite.mk (-n + n) i = _
@@ -183,27 +193,29 @@ lemma adj_iff_bonded (g : PeriodicGraph (Crystal.ofUnitCell G F)) (n m : G) (i j
   have h2 : (-n +ᵥ (⟨m, j⟩ : CellSite G F)) = ⟨m - n, j⟩ := by
     change CellSite.mk (-n + m) j = _
     rw [neg_add_eq_sub]
-  change (g.toSimpleGraph.Adj (-n +ᵥ (⟨n, i⟩ : CellSite G F)) (-n +ᵥ (⟨m,
-    j⟩ : CellSite G F))) ↔ _ at h
+  change (g.toSimpleGraph.Adj (-n +ᵥ (⟨n, i⟩ : CellSite G F)) (-n +ᵥ (⟨m, j⟩ : CellSite G F))) ↔ _
+    at h
   rw [h1, h2] at h
   exact h.symm
 
 /-- A symmetry preserves the bonds of the graph. -/
 def symmetries (g : PeriodicGraph (Crystal.ofUnitCell G F)) : Subgroup (CellSymmetry G F) where
-  carrier := {s : CellSymmetry G F | ∀ x y : CellSite G F, g.toSimpleGraph.Adj (s • x) (s • y) ↔
-    g.toSimpleGraph.Adj x y}
+  carrier :=
+    {s : CellSymmetry G F | ∀ x y : CellSite G F, g.toSimpleGraph.Adj (s • x) (s • y) ↔
+      g.toSimpleGraph.Adj x y}
   one_mem' x y := by simp
-  mul_mem' {s t} hs ht x y := by
-    rw [mul_smul, mul_smul, hs, ht]
-  inv_mem' {s} hs x y := by
-    rw [← hs (s⁻¹ • x) (s⁻¹ • y), smul_inv_smul, smul_inv_smul]
+  mul_mem' {s t} hs ht x y := by rw [mul_smul, mul_smul, hs, ht]
+  inv_mem' {s} hs x y := by rw [← hs (s⁻¹ • x) (s⁻¹ • y), smul_inv_smul, smul_inv_smul]
 
-/-- **A finite criterion for bond-preserving symmetries.** The data `(A, σ, b)` is a symmetry of
+/--
+**A finite criterion for bond-preserving symmetries.** The data `(A, σ, b)` is a symmetry of
 the crystal graph exactly when site `i` is bonded to site `j` in the cell `d` if and only if site
-`σ i` is bonded to site `σ j` in the cell `A d + b j - b i`. -/
-lemma mem_symmetries_iff (g : PeriodicGraph (Crystal.ofUnitCell G F)) (s : CellSymmetry G F) :
-    s ∈ g.symmetries ↔ ∀ i j d, g.Bonded i j d ↔
-      g.Bonded (s.perm i) (s.perm j) (s.linear d + s.shift j - s.shift i) := by
+`σ i` is bonded to site `σ j` in the cell `A d + b j - b i`.
+-/
+lemma mem_symmetries_iff (g : PeriodicGraph (Crystal.ofUnitCell G F)) (s : CellSymmetry G F)
+    : s ∈ g.symmetries
+      ↔ ∀ i j d,
+        g.Bonded i j d ↔ g.Bonded (s.perm i) (s.perm j) (s.linear d + s.shift j - s.shift i) := by
   constructor
   · intro h i j d
     have := h ⟨0, i⟩ ⟨d, j⟩
@@ -213,20 +225,20 @@ lemma mem_symmetries_iff (g : PeriodicGraph (Crystal.ofUnitCell G F)) (s : CellS
   · intro h x y
     rw [CellSymmetry.smul_def, CellSymmetry.smul_def, adj_iff_bonded, adj_iff_bonded,
       h x.label y.label (y.cell - x.cell)]
-    have : s.linear y.cell + s.shift y.label - (s.linear x.cell + s.shift x.label) =
-        s.linear (y.cell - x.cell) + s.shift y.label - s.shift x.label := by
+    have : s.linear y.cell + s.shift y.label - (s.linear x.cell + s.shift x.label)
+        = s.linear (y.cell - x.cell) + s.shift y.label - s.shift x.label := by
       rw [map_sub]; abel
     rw [this]
 
 /-- A bond-preserving symmetry is an automorphism of the bond graph. -/
-def symmetryIso (g : PeriodicGraph (Crystal.ofUnitCell G F)) (s : g.symmetries) :
-    g.toSimpleGraph ≃g g.toSimpleGraph where
+def symmetryIso (g : PeriodicGraph (Crystal.ofUnitCell G F)) (s : g.symmetries)
+    : g.toSimpleGraph ≃g g.toSimpleGraph where
   toEquiv := MulAction.toPerm (s : CellSymmetry G F)
   map_rel_iff' := (s.2 _ _)
 
 /-- Translations are bond-preserving symmetries. -/
-lemma translation_mem_symmetries (g : PeriodicGraph (Crystal.ofUnitCell G F)) (a : G) :
-    CellSymmetry.translation a ∈ g.symmetries := by
+lemma translation_mem_symmetries (g : PeriodicGraph (Crystal.ofUnitCell G F)) (a : G)
+    : CellSymmetry.translation a ∈ g.symmetries := by
   intro x y
   rw [CellSymmetry.translation_smul, CellSymmetry.translation_smul]
   exact g.adj_vadd a x y
@@ -235,13 +247,15 @@ lemma translation_mem_symmetries (g : PeriodicGraph (Crystal.ofUnitCell G F)) (a
 abbrev pointGroup (g : PeriodicGraph (Crystal.ofUnitCell G F)) :=
   g.symmetries ⧸ (CellSymmetry.translations G F).subgroupOf g.symmetries
 
-/-- **Every automorphism of the bond graph that normalises the translations is a cell symmetry.**
+/--
+**Every automorphism of the bond graph that normalises the translations is a cell symmetry.**
 If `φ` is a graph automorphism and `A` an automorphism of the translation group with
-`φ (a +ᵥ x) = A a +ᵥ φ x`, then `φ` acts as a bond-preserving cell symmetry with linear part `A`. -/
-lemma exists_symmetry_of_equivariant (g : PeriodicGraph (Crystal.ofUnitCell G F))
-    (φ : g.toSimpleGraph ≃g g.toSimpleGraph) (A : G ≃+ G)
-    (hφ : ∀ (a : G) (x : CellSite G F), φ (a +ᵥ x) = A a +ᵥ φ x) :
-    ∃ s ∈ g.symmetries, s.linear = A ∧ ∀ x, s • x = φ x := by
+`φ (a +ᵥ x) = A a +ᵥ φ x`, then `φ` acts as a bond-preserving cell symmetry with linear part `A`.
+-/
+lemma exists_symmetry_of_equivariant
+    (g : PeriodicGraph (Crystal.ofUnitCell G F)) (φ : g.toSimpleGraph ≃g g.toSimpleGraph)
+    (A : G ≃+ G) (hφ : ∀ (a : G) (x : CellSite G F), φ (a +ᵥ x) = A a +ᵥ φ x)
+    : ∃ s ∈ g.symmetries, s.linear = A ∧ ∀ x, s • x = φ x := by
   classical
   let f : F → F := fun i => (φ ⟨0, i⟩).label
   have hφx : ∀ n i, φ ⟨n, i⟩ = ⟨A n + (φ ⟨0, i⟩).cell, (φ ⟨0, i⟩).label⟩ := by

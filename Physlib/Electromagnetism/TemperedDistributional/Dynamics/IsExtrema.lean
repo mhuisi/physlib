@@ -52,22 +52,26 @@ functions. We now look at the case where the electromagnetic potential is a dist
 
 namespace TempDistElectromagneticPotential
 
-/-- The proposition on an electromagnetic potential, corresponding to the statement that
-  it is an extrema of the lagrangian. -/
-def IsExtrema {d} (𝓕 : FreeSpace)
-    (A : TempDistElectromagneticPotential d)
-    (J : TempDistLorentzCurrentDensity d) : Prop := A.gradLagrangian 𝓕 J = 0
+/--
+The proposition on an electromagnetic potential, corresponding to the statement that
+it is an extrema of the lagrangian.
+-/
+def IsExtrema
+    {d}
+    (𝓕 : FreeSpace) (A : TempDistElectromagneticPotential d) (J : TempDistLorentzCurrentDensity d)
+    : Prop :=
+  A.gradLagrangian 𝓕 J = 0
 
-lemma isExtrema_iff_gradLagrangian {𝓕 : FreeSpace}
-    (A : TempDistElectromagneticPotential d)
-    (J : TempDistLorentzCurrentDensity d) :
-    IsExtrema 𝓕 A J ↔ A.gradLagrangian 𝓕 J = 0 := by rfl
+lemma isExtrema_iff_gradLagrangian
+    {𝓕 : FreeSpace} (A : TempDistElectromagneticPotential d) (J : TempDistLorentzCurrentDensity d)
+    : IsExtrema 𝓕 A J ↔ A.gradLagrangian 𝓕 J = 0 := by
+  rfl
 
-lemma isExtrema_iff_components {𝓕 : FreeSpace}
-    (A : TempDistElectromagneticPotential d)
-    (J : TempDistLorentzCurrentDensity d) :
-    IsExtrema 𝓕 A J ↔ (∀ ε, A.gradLagrangian 𝓕 J ε (Sum.inl 0) = 0)
-    ∧ (∀ ε i, A.gradLagrangian 𝓕 J ε (Sum.inr i) = 0) := by
+lemma isExtrema_iff_components
+    {𝓕 : FreeSpace} (A : TempDistElectromagneticPotential d) (J : TempDistLorentzCurrentDensity d)
+    : IsExtrema 𝓕 A J
+      ↔ (∀ ε, A.gradLagrangian 𝓕 J ε (Sum.inl 0) = 0)
+        ∧ (∀ ε i, A.gradLagrangian 𝓕 J ε (Sum.inr i) = 0) := by
   rw [isExtrema_iff_gradLagrangian]
   refine ⟨fun h => by simp [h], fun h => ?_⟩
   ext1 ε
@@ -90,25 +94,28 @@ Here $\mathbf{B}$ is the magnetic field matrix.
 
 -/
 open Space
-lemma isExtrema_iff_space_time {𝓕 : FreeSpace}
-    (A : TempDistElectromagneticPotential d)
-    (J : TempDistLorentzCurrentDensity d) :
-    IsExtrema 𝓕 A J ↔
-      (∀ ε, distSpaceDiv (A.electricField 𝓕.c) ε = (1/𝓕.ε₀) * (J.chargeDensity 𝓕.c) ε) ∧
-      (∀ ε i, 𝓕.μ₀ * 𝓕.ε₀ * (Space.distTimeDeriv (A.electricField 𝓕.c)) ε i -
-      ∑ j, ((PiLp.basisFun 2 ℝ (Fin d)).tensorProduct (PiLp.basisFun 2 ℝ (Fin d))).repr
-        ((Space.distSpaceDeriv j (A.magneticFieldMatrix 𝓕.c)) ε) (j, i) +
-      𝓕.μ₀ * J.currentDensity 𝓕.c ε i = 0) := by
+lemma isExtrema_iff_space_time
+    {𝓕 : FreeSpace} (A : TempDistElectromagneticPotential d) (J : TempDistLorentzCurrentDensity d)
+    : IsExtrema 𝓕 A J
+      ↔ (∀ ε, distSpaceDiv (A.electricField 𝓕.c) ε = (1 / 𝓕.ε₀) * (J.chargeDensity 𝓕.c) ε)
+        ∧ (∀ ε i,
+          𝓕.μ₀ * 𝓕.ε₀ * (Space.distTimeDeriv (A.electricField 𝓕.c)) ε i
+              - ∑ j, ((PiLp.basisFun 2 ℝ (Fin d)).tensorProduct (PiLp.basisFun 2 ℝ (Fin d))).repr
+                  ((Space.distSpaceDeriv j (A.magneticFieldMatrix 𝓕.c)) ε) (j, i)
+              + 𝓕.μ₀ * J.currentDensity 𝓕.c ε i
+            = 0) := by
   rw [isExtrema_iff_components]
   have hsurj : Function.Surjective (SchwartzMap.compCLMOfContinuousLinearEquiv (F := ℝ) ℝ
       (SpaceTime.toTimeAndSpace 𝓕.c (d := d)).symm) := by
     intro f
-    refine ⟨SchwartzMap.compCLMOfContinuousLinearEquiv ℝ
-      (SpaceTime.toTimeAndSpace 𝓕.c (d := d)).symm.symm f, ?_⟩
+    refine ⟨
+      SchwartzMap.compCLMOfContinuousLinearEquiv ℝ (SpaceTime.toTimeAndSpace 𝓕.c (d := d)).symm.symm
+        f,
+      ?_
+    ⟩
     ext x
     simp
-  have hgauss : ∀ a b : ℝ,
-      1 / (𝓕.μ₀ * 𝓕.c.val) * a - 𝓕.c.val * b = 0 ↔ a = 1 / 𝓕.ε₀ * b := by
+  have hgauss : ∀ a b : ℝ, 1 / (𝓕.μ₀ * 𝓕.c.val) * a - 𝓕.c.val * b = 0 ↔ a = 1 / 𝓕.ε₀ * b := by
     intro a b
     have c_sq_mul_eq : 𝓕.c.val * b * (𝓕.μ₀ * 𝓕.c.val) = 1 / 𝓕.ε₀ * b := by
       have hcb : 𝓕.c.val * b * (𝓕.μ₀ * 𝓕.c.val) = 𝓕.μ₀ * 𝓕.c.val ^ 2 * b := by ring
@@ -116,11 +123,12 @@ lemma isExtrema_iff_space_time {𝓕 : FreeSpace}
       field_simp
     rw [sub_eq_zero, div_mul_eq_mul_div, one_mul,
       div_eq_iff (mul_ne_zero 𝓕.μ₀_ne_zero 𝓕.c.val_ne_zero), c_sq_mul_eq]
-  have hampere : ∀ T S C : ℝ, 𝓕.μ₀⁻¹ * (1 / 𝓕.c.val ^ 2 * T - S) + C = 0 ↔
-      𝓕.μ₀ * 𝓕.ε₀ * T - S + 𝓕.μ₀ * C = 0 := by
+  have hampere
+      : ∀ T S C : ℝ,
+        𝓕.μ₀⁻¹ * (1 / 𝓕.c.val ^ 2 * T - S) + C = 0 ↔ 𝓕.μ₀ * 𝓕.ε₀ * T - S + 𝓕.μ₀ * C = 0 := by
     intro T S C
-    have mu0_factor_eq : 𝓕.μ₀ * 𝓕.ε₀ * T - S + 𝓕.μ₀ * C
-        = 𝓕.μ₀ * (𝓕.μ₀⁻¹ * (1 / 𝓕.c.val ^ 2 * T - S) + C) := by
+    have mu0_factor_eq
+        : 𝓕.μ₀ * 𝓕.ε₀ * T - S + 𝓕.μ₀ * C = 𝓕.μ₀ * (𝓕.μ₀⁻¹ * (1 / 𝓕.c.val ^ 2 * T - S) + C) := by
       rw [𝓕.c_sq]
       field_simp
     rw [mu0_factor_eq, mul_eq_zero, or_iff_right 𝓕.μ₀_ne_zero]
@@ -147,21 +155,23 @@ $$\mu_0 \varepsilon_0 \frac{\partial \mathbf{E}_i}{\partial t} -
 
 -/
 
-lemma isExtrema_iff_vectorPotential {𝓕 : FreeSpace}
-    (A : TempDistElectromagneticPotential d)
-    (J : TempDistLorentzCurrentDensity d) :
-    IsExtrema 𝓕 A J ↔
-      (∀ ε, distSpaceDiv (A.electricField 𝓕.c) ε = (1/𝓕.ε₀) * (J.chargeDensity 𝓕.c) ε) ∧
-      (∀ ε i, 𝓕.μ₀ * 𝓕.ε₀ * distTimeDeriv (A.electricField 𝓕.c) ε i -
-      (∑ x, -(distSpaceDeriv x (distSpaceDeriv x (A.vectorPotential 𝓕.c)) ε i
-        - distSpaceDeriv x (distSpaceDeriv i (A.vectorPotential 𝓕.c)) ε x)) +
-      𝓕.μ₀ * J.currentDensity 𝓕.c ε i = 0) := by
+lemma isExtrema_iff_vectorPotential
+    {𝓕 : FreeSpace} (A : TempDistElectromagneticPotential d) (J : TempDistLorentzCurrentDensity d)
+    : IsExtrema 𝓕 A J
+      ↔ (∀ ε, distSpaceDiv (A.electricField 𝓕.c) ε = (1 / 𝓕.ε₀) * (J.chargeDensity 𝓕.c) ε)
+        ∧ (∀ ε i,
+          𝓕.μ₀ * 𝓕.ε₀ * distTimeDeriv (A.electricField 𝓕.c) ε i
+              - (∑ x, -(distSpaceDeriv x (distSpaceDeriv x (A.vectorPotential 𝓕.c)) ε i
+                  - distSpaceDeriv x (distSpaceDeriv i (A.vectorPotential 𝓕.c)) ε x))
+              + 𝓕.μ₀ * J.currentDensity 𝓕.c ε i
+            = 0) := by
   rw [isExtrema_iff_space_time]
   refine and_congr (by rfl) ?_
-  suffices ∀ ε i, ∑ x, -(distSpaceDeriv x (distSpaceDeriv x (A.vectorPotential 𝓕.c)) ε i
-        - distSpaceDeriv x (distSpaceDeriv i (A.vectorPotential 𝓕.c)) ε x) =
-        ∑ j, ((PiLp.basisFun 2 ℝ (Fin d)).tensorProduct (PiLp.basisFun 2 ℝ (Fin d))).repr
-          ((Space.distSpaceDeriv j (A.magneticFieldMatrix 𝓕.c)) ε) (j, i) by
+  suffices ∀ ε i,
+      ∑ x, -(distSpaceDeriv x (distSpaceDeriv x (A.vectorPotential 𝓕.c)) ε i
+          - distSpaceDeriv x (distSpaceDeriv i (A.vectorPotential 𝓕.c)) ε x)
+        = ∑ j, ((PiLp.basisFun 2 ℝ (Fin d)).tensorProduct (PiLp.basisFun 2 ℝ (Fin d))).repr
+            ((Space.distSpaceDeriv j (A.magneticFieldMatrix 𝓕.c)) ε) (j, i) by
     conv_lhs => enter [2, 2]; rw [← this]
   intro ε i
   congr
@@ -180,18 +190,21 @@ holds.
 -/
 open SpaceTime minkowskiMatrix
 set_option maxHeartbeats 600000 in
-lemma isExterma_iff_tensor {𝓕 : FreeSpace}
-    (A : TempDistElectromagneticPotential d)
-    (J : TempDistLorentzCurrentDensity d) :
-    IsExtrema 𝓕 A J ↔ ∀ ε,
-    {((1/ 𝓕.μ₀ : ℝ) • distTensorDeriv A.fieldStrength ε | κ κ ν') + - (J ε | ν')}ᵀ = 0 := by
+lemma isExterma_iff_tensor
+    {𝓕 : FreeSpace} (A : TempDistElectromagneticPotential d) (J : TempDistLorentzCurrentDensity d)
+    : IsExtrema 𝓕 A J
+      ↔ ∀ ε,
+        {((1/ 𝓕.μ₀ : ℝ) • distTensorDeriv A.fieldStrength ε | κ κ ν') + - (J ε | ν')}ᵀ = 0 := by
   apply Iff.intro
   · intro h
     simp only [IsExtrema] at h
     intro x
-    have h1 : ((Tensorial.toTensor (M := Lorentz.Vector d)).symm
-        (permT id (IsReindexing.auto) {((1/ 𝓕.μ₀ : ℝ) •
-          distTensorDeriv A.fieldStrength x | κ κ ν') + - (J x | ν')}ᵀ)) = 0 := by
+    have h1
+        : ((Tensorial.toTensor (M := Lorentz.Vector d)).symm
+            (permT id (IsReindexing.auto)
+              {((1/ 𝓕.μ₀ : ℝ) •
+                distTensorDeriv A.fieldStrength x | κ κ ν') + - (J x | ν')}ᵀ))
+          = 0 := by
       funext ν
       have h2 : gradLagrangian 𝓕 A J x ν = 0 := by simp [h]
       rw [gradLagrangian_eq_tensor A J] at h2
@@ -219,10 +232,11 @@ A natural consequence of this is that the speed of light is the same in all iner
 
 -/
 
-lemma isExterma_equivariant {𝓕 : FreeSpace}
-    (A : TempDistElectromagneticPotential d)
-    (J : TempDistLorentzCurrentDensity d) (Λ : LorentzGroup d) :
-    IsExtrema 𝓕 (Λ • A) (Λ • J) ↔ IsExtrema 𝓕 A J := by
+lemma isExterma_equivariant
+    {𝓕 : FreeSpace}
+    (A : TempDistElectromagneticPotential d) (J : TempDistLorentzCurrentDensity d)
+    (Λ : LorentzGroup d)
+    : IsExtrema 𝓕 (Λ • A) (Λ • J) ↔ IsExtrema 𝓕 A J := by
   rw [isExterma_iff_tensor]
   conv_lhs =>
     enter [x, 1, 1, 2, 2, 2]
@@ -240,10 +254,11 @@ lemma isExterma_equivariant {𝓕 : FreeSpace}
     rw [isExterma_iff_tensor A J]
     intro x
     apply MulAction.injective Λ
-    simp only [one_div, map_smul, map_neg,
-      _root_.smul_add, actionT_smul, _root_.smul_neg, _root_.smul_zero]
-    simpa only [Fin.isValue, schwartzAction_mul_apply, inv_mul_cancel, map_one,
-      one_apply_eq_self, smul_add, actionT_smul, smul_neg] using h (schwartzAction Λ x)
+    simp only [one_div, map_smul, map_neg, _root_.smul_add, actionT_smul, _root_.smul_neg,
+      _root_.smul_zero]
+    simpa only [Fin.isValue, schwartzAction_mul_apply, inv_mul_cancel, map_one, one_apply_eq_self,
+        smul_add, actionT_smul, smul_neg]
+      using h (schwartzAction Λ x)
   · intro h x
     rw [isExterma_iff_tensor A J] at h
     specialize h (schwartzAction Λ⁻¹ x)

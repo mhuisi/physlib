@@ -116,8 +116,10 @@ local notation "ℝ³" => Fin 3 → ℝ
 
 -/
 
-/-- An element `Z = (ω, β, γ, ε)` of the Lie algebra of the Galilean group, in Souriau's
-parametrisation (12.74), (12.118). -/
+/--
+An element `Z = (ω, β, γ, ε)` of the Lie algebra of the Galilean group, in Souriau's
+parametrisation (12.74), (12.118).
+-/
 @[ext]
 structure GalileanAlgebra where
   /-- The infinitesimal rotation, as an axial vector. -/
@@ -135,11 +137,12 @@ instance : Zero GalileanAlgebra := ⟨⟨0, 0, 0, 0⟩⟩
 
 instance : Add GalileanAlgebra := ⟨fun Z Z' => ⟨Z.ω + Z'.ω, Z.β + Z'.β, Z.γ + Z'.γ, Z.ε + Z'.ε⟩⟩
 
-/-- Souriau's bracket on the Galilean Lie algebra. It is the bracket of the vector fields (12.119)
-in the convention (6.12 b), (2.45), see `EvolutionSpace.vectorField_bracket`. -/
+/--
+Souriau's bracket on the Galilean Lie algebra. It is the bracket of the vector fields (12.119)
+in the convention (6.12 b), (2.45), see `EvolutionSpace.vectorField_bracket`.
+-/
 def bracket (Z Z' : GalileanAlgebra) : GalileanAlgebra :=
-  ⟨Z'.ω ⨯₃ Z.ω, Z'.ω ⨯₃ Z.β - Z.ω ⨯₃ Z'.β,
-    Z'.ω ⨯₃ Z.γ - Z.ω ⨯₃ Z'.γ + Z.ε • Z'.β - Z'.ε • Z.β, 0⟩
+  ⟨Z'.ω ⨯₃ Z.ω, Z'.ω ⨯₃ Z.β - Z.ω ⨯₃ Z'.β, Z'.ω ⨯₃ Z.γ - Z.ω ⨯₃ Z'.γ + Z.ε • Z'.β - Z'.ε • Z.β, 0⟩
 
 /-- The bracket is antisymmetric. -/
 lemma bracket_antisymm (Z Z' : GalileanAlgebra) : bracket Z Z' + bracket Z' Z = 0 := by
@@ -148,26 +151,30 @@ lemma bracket_antisymm (Z Z' : GalileanAlgebra) : bracket Z Z' + bracket Z' Z = 
     simp
   · change (Z'.ω ⨯₃ Z.β - Z.ω ⨯₃ Z'.β) + (Z.ω ⨯₃ Z'.β - Z'.ω ⨯₃ Z.β) = 0
     abel
-  · change (Z'.ω ⨯₃ Z.γ - Z.ω ⨯₃ Z'.γ + Z.ε • Z'.β - Z'.ε • Z.β) +
-      (Z.ω ⨯₃ Z'.γ - Z'.ω ⨯₃ Z.γ + Z'.ε • Z.β - Z.ε • Z'.β) = 0
+  · change (Z'.ω ⨯₃ Z.γ - Z.ω ⨯₃ Z'.γ + Z.ε • Z'.β - Z'.ε • Z.β)
+        + (Z.ω ⨯₃ Z'.γ - Z'.ω ⨯₃ Z.γ + Z'.ε • Z.β - Z.ε • Z'.β)
+      = 0
     abel
   · change (0 : ℝ) + 0 = 0
     simp
 
 /-- The Jacobi identity for Souriau's bracket. -/
-lemma bracket_jacobi (Z Z' Z'' : GalileanAlgebra) :
-    bracket Z (bracket Z' Z'') + bracket Z' (bracket Z'' Z) + bracket Z'' (bracket Z Z') = 0 := by
+lemma bracket_jacobi (Z Z' Z'' : GalileanAlgebra)
+    : bracket Z (bracket Z' Z'') + bracket Z' (bracket Z'' Z) + bracket Z'' (bracket Z Z') = 0 := by
   apply GalileanAlgebra.ext
   · change (bracket Z (bracket Z' Z'')).ω + (bracket Z' (bracket Z'' Z)).ω
-      + (bracket Z'' (bracket Z Z')).ω = 0
+        + (bracket Z'' (bracket Z Z')).ω
+      = 0
     funext i
     fin_cases i <;> simp [bracket, cross_apply, vecHead, vecTail] <;> ring
   · change (bracket Z (bracket Z' Z'')).β + (bracket Z' (bracket Z'' Z)).β
-      + (bracket Z'' (bracket Z Z')).β = 0
+        + (bracket Z'' (bracket Z Z')).β
+      = 0
     funext i
     fin_cases i <;> simp [bracket, cross_apply, vecHead, vecTail] <;> ring
   · change (bracket Z (bracket Z' Z'')).γ + (bracket Z' (bracket Z'' Z)).γ
-      + (bracket Z'' (bracket Z Z')).γ = 0
+        + (bracket Z'' (bracket Z Z')).γ
+      = 0
     funext i
     fin_cases i <;> simp [bracket, cross_apply, vecHead, vecTail] <;> ring
   · change (0 : ℝ) + 0 + 0 = 0
@@ -198,8 +205,10 @@ structure GalileanTorsor where
   /-- The energy part. -/
   E : ℝ
 
-/-- The pairing (12.122) of a torsor with an element of the Lie algebra,
-`μ(Z) = ⟨l, ω⟩ - ⟨g, β⟩ + ⟨p, γ⟩ - E ε`. -/
+/--
+The pairing (12.122) of a torsor with an element of the Lie algebra,
+`μ(Z) = ⟨l, ω⟩ - ⟨g, β⟩ + ⟨p, γ⟩ - E ε`.
+-/
 def GalileanTorsor.pair (μ : GalileanTorsor) (Z : GalileanAlgebra) : ℝ :=
   μ.l ⬝ᵥ Z.ω - μ.g ⬝ᵥ Z.β + μ.p ⬝ᵥ Z.γ - μ.E * Z.ε
 
@@ -215,13 +224,13 @@ namespace GalileanAlgebra
 def cocycle (Z Z' : GalileanAlgebra) : ℝ := Z.β ⬝ᵥ Z'.γ - Z'.β ⬝ᵥ Z.γ
 
 /-- `f₀` is antisymmetric. -/
-lemma cocycle_antisymm (Z Z' : GalileanAlgebra) : cocycle Z Z' = -cocycle Z' Z := by
+lemma cocycle_antisymm (Z Z' : GalileanAlgebra) : cocycle Z Z' = - cocycle Z' Z := by
   simp only [cocycle]
   ring
 
 /-- (12.129): `f₀(Z)([Z', Z'']) + f₀(Z')([Z'', Z]) + f₀(Z'')([Z, Z']) = 0`. -/
-lemma cocycle_cyclic (Z Z' Z'' : GalileanAlgebra) :
-    cocycle Z (bracket Z' Z'') + cocycle Z' (bracket Z'' Z) + cocycle Z'' (bracket Z Z') = 0 := by
+lemma cocycle_cyclic (Z Z' Z'' : GalileanAlgebra)
+    : cocycle Z (bracket Z' Z'') + cocycle Z' (bracket Z'' Z) + cocycle Z'' (bracket Z Z') = 0 := by
   rw [cocycle, cocycle, cocycle, add_assoc, bracket, bracket, bracket]
   simp only [cross_apply, vec3_dotProduct]
   simp only [Fin.isValue, Nat.succ_eq_add_one, Nat.reduceAdd, sub_cons, head_cons, tail_cons,
@@ -233,27 +242,30 @@ lemma cocycle_cyclic (Z Z' Z'' : GalileanAlgebra) :
     Function.comp_apply, Fin.succ_zero_eq_one, Fin.succ_one_eq_two]
   ring_nf
 
-/-- `f₀` is not zero: its value on a change of velocity and a space translation along the same
-axis is `1`. -/
-lemma cocycle_boost_translation :
-    cocycle ⟨0, ![1, 0, 0], 0, 0⟩ ⟨0, 0, ![1, 0, 0], 0⟩ = 1 := by
+/--
+`f₀` is not zero: its value on a change of velocity and a space translation along the same
+axis is `1`.
+-/
+lemma cocycle_boost_translation : cocycle ⟨0, ![1, 0, 0], 0, 0⟩ ⟨0, 0, ![1, 0, 0], 0⟩ = 1 := by
   rw [cocycle]
   simp
 
-/-- `M f₀` is a coboundary of the algebra, `M f₀(Z)(Z') = μ₀[Z, Z']` for some torsor `μ₀` ((11.24)
+/--
+`M f₀` is a coboundary of the algebra, `M f₀(Z)(Z') = μ₀[Z, Z']` for some torsor `μ₀` ((11.24)
 with `Z_{g*}(μ) = μ ∘ Ad(Z)` (11.16) and `Ad(Z)(Z') = [Z, Z']` (6.13 b); by p. 116, note (1), this
-is also the derivative of the group coboundary `Δ(μ₀)` of (11.19)), if and only if `M = 0`. -/
-lemma smul_cocycle_isCoboundary_iff (M : ℝ) :
-    (∃ μ₀ : GalileanTorsor, ∀ Z Z' : GalileanAlgebra, M * cocycle Z Z' = μ₀.pair (bracket Z Z'))
+is also the derivative of the group coboundary `Δ(μ₀)` of (11.19)), if and only if `M = 0`.
+-/
+lemma smul_cocycle_isCoboundary_iff (M : ℝ)
+    : (∃ μ₀ : GalileanTorsor, ∀ Z Z' : GalileanAlgebra, M * cocycle Z Z' = μ₀.pair (bracket Z Z'))
       ↔ M = 0 := by
   constructor
   · rintro ⟨μ₀, h⟩
     have h1 := h ⟨0, ![1, 0, 0], 0, 0⟩ ⟨0, 0, ![1, 0, 0], 0⟩
-    rw [bracket_boost_translation ![1, 0, 0] ![1, 0, 0]] at h1
-    change M * cocycle ⟨0, ![1, 0, 0], 0, 0⟩ ⟨0, 0, ![1, 0, 0], 0⟩ =
-      μ₀.l ⬝ᵥ 0 - μ₀.g ⬝ᵥ 0 + μ₀.p ⬝ᵥ 0 - μ₀.E * 0 at h1
-    simp only [dotProduct, Pi.zero_apply, mul_zero, Finset.sum_const_zero, sub_zero,
-      add_zero] at h1
+    rw [bracket_boost_translation (![1, 0, 0]) ![1, 0, 0]] at h1
+    change M * cocycle ⟨0, ![1, 0, 0], 0, 0⟩ ⟨0, 0, ![1, 0, 0], 0⟩
+        = μ₀.l ⬝ᵥ 0 - μ₀.g ⬝ᵥ 0 + μ₀.p ⬝ᵥ 0 - μ₀.E * 0
+      at h1
+    simp only [dotProduct, Pi.zero_apply, mul_zero, Finset.sum_const_zero, sub_zero, add_zero] at h1
     rw [cocycle_boost_translation] at h1
     simpa using h1
   · intro hM
@@ -261,13 +273,15 @@ lemma smul_cocycle_isCoboundary_iff (M : ℝ) :
     rw [hM, GalileanTorsor.pair]
     simp
 
-/-- `f₀` is not a coboundary of the algebra: no torsor `μ₀` satisfies `f₀(Z)(Z') = μ₀[Z, Z']` for
-all `Z`, `Z'`. -/
-lemma cocycle_not_coboundary :
-    ¬ ∃ μ₀ : GalileanTorsor, ∀ Z Z' : GalileanAlgebra, cocycle Z Z' = μ₀.pair (bracket Z Z') := by
+/--
+`f₀` is not a coboundary of the algebra: no torsor `μ₀` satisfies `f₀(Z)(Z') = μ₀[Z, Z']` for
+all `Z`, `Z'`.
+-/
+lemma cocycle_not_coboundary
+    : ¬ ∃ μ₀ : GalileanTorsor, ∀ Z Z' : GalileanAlgebra, cocycle Z Z' = μ₀.pair (bracket Z Z') := by
   rintro ⟨μ₀, h⟩
-  exact one_ne_zero <| (smul_cocycle_isCoboundary_iff 1).mp
-    ⟨μ₀, fun Z Z' => by rw [one_mul]; exact h Z Z'⟩
+  exact one_ne_zero <|
+    (smul_cocycle_isCoboundary_iff 1).mp ⟨μ₀, fun Z Z' => by rw [one_mul]; exact h Z Z'⟩
 
 end GalileanAlgebra
 
@@ -277,8 +291,10 @@ end GalileanAlgebra
 
 -/
 
-/-- A point, or a tangent vector, of the evolution space of `N` material points,
-`y = (t, r_j, v_j)` (12.76). -/
+/--
+A point, or a tangent vector, of the evolution space of `N` material points,
+`y = (t, r_j, v_j)` (12.76).
+-/
 @[ext]
 structure EvolutionSpace (N : ℕ) where
   /-- The time. -/
@@ -296,49 +312,59 @@ instance : Sub (EvolutionSpace N) := ⟨fun y y' => ⟨y.t - y'.t, y.r - y'.r, y
 
 open GalileanAlgebra
 
-/-- The vector field `Z_V` of `Z` on the evolution space (12.119): `δt = ε`,
-`δr_j = ω × r_j + β t + γ`, `δv_j = ω × v_j + β`. -/
+/--
+The vector field `Z_V` of `Z` on the evolution space (12.119): `δt = ε`,
+`δr_j = ω × r_j + β t + γ`, `δv_j = ω × v_j + β`.
+-/
 def vectorField (Z : GalileanAlgebra) (y : EvolutionSpace N) : EvolutionSpace N :=
   ⟨Z.ε, fun j => Z.ω ⨯₃ y.r j + y.t • Z.β + Z.γ, fun j => Z.ω ⨯₃ y.v j + Z.β⟩
 
-/-- The differential of the affine vector field `Z_V` (its linear part), applied to a tangent vector
-`w`. -/
+/--
+The differential of the affine vector field `Z_V` (its linear part), applied to a tangent vector
+`w`.
+-/
 def linearPart (Z : GalileanAlgebra) (w : EvolutionSpace N) : EvolutionSpace N :=
   ⟨0, fun j => Z.ω ⨯₃ w.r j + w.t • Z.β, fun j => Z.ω ⨯₃ w.v j⟩
 
-/-- Souriau's bracket is the bracket of the vector fields in the convention (6.12 b), (2.45):
-`[Z, Z']_V = DZ'_V(Z_V) - DZ_V(Z'_V)`. -/
-lemma vectorField_bracket (Z Z' : GalileanAlgebra) (y : EvolutionSpace N) :
-    vectorField (bracket Z Z') y
+/--
+Souriau's bracket is the bracket of the vector fields in the convention (6.12 b), (2.45):
+`[Z, Z']_V = DZ'_V(Z_V) - DZ_V(Z'_V)`.
+-/
+lemma vectorField_bracket (Z Z' : GalileanAlgebra) (y : EvolutionSpace N)
+    : vectorField (bracket Z Z') y
       = linearPart Z' (vectorField Z y) - linearPart Z (vectorField Z' y) := by
   apply EvolutionSpace.ext
   · change (0 : ℝ) = 0 - 0
     simp
   · funext j
-    change (bracket Z Z').ω ⨯₃ y.r j + y.t • (bracket Z Z').β + (bracket Z Z').γ =
-      (linearPart Z' (vectorField Z y)).r j - (linearPart Z (vectorField Z' y)).r j
+    change (bracket Z Z').ω ⨯₃ y.r j + y.t • (bracket Z Z').β + (bracket Z Z').γ
+      = (linearPart Z' (vectorField Z y)).r j - (linearPart Z (vectorField Z' y)).r j
     funext i
     fin_cases i <;> simp [bracket, linearPart, vectorField, cross_apply, vecHead, vecTail] <;> ring
   · funext j
-    change (bracket Z Z').ω ⨯₃ y.v j + (bracket Z Z').β =
-      (linearPart Z' (vectorField Z y)).v j - (linearPart Z (vectorField Z' y)).v j
+    change (bracket Z Z').ω ⨯₃ y.v j + (bracket Z Z').β
+      = (linearPart Z' (vectorField Z y)).v j - (linearPart Z (vectorField Z' y)).v j
     funext i
     fin_cases i <;> simp [bracket, linearPart, vectorField, cross_apply, vecHead, vecTail] <;> ring
 
-/-- The Lagrange form of `N` free material points of masses `m j` at `y`, (12.40) with `F_j = 0`:
-`σ(dy)(δy) = Σ_j ⟨m_j dv_j, δr_j - v_j δt⟩ - ⟨m_j δv_j, dr_j - v_j dt⟩`. -/
+/--
+The Lagrange form of `N` free material points of masses `m j` at `y`, (12.40) with `F_j = 0`:
+`σ(dy)(δy) = Σ_j ⟨m_j dv_j, δr_j - v_j δt⟩ - ⟨m_j δv_j, dr_j - v_j dt⟩`.
+-/
 def lagrangeForm (m : Fin N → ℝ) (y dy δy : EvolutionSpace N) : ℝ :=
   ∑ j, (m j * (dy.v j ⬝ᵥ (δy.r j - δy.t • y.v j)) - m j * (δy.v j ⬝ᵥ (dy.r j - dy.t • y.v j)))
 
 /-- `σ` is antisymmetric. -/
-lemma lagrangeForm_antisymm (m : Fin N → ℝ) (y dy δy : EvolutionSpace N) :
-    lagrangeForm m y dy δy = -lagrangeForm m y δy dy := by
+lemma lagrangeForm_antisymm (m : Fin N → ℝ) (y dy δy : EvolutionSpace N)
+    : lagrangeForm m y dy δy = - lagrangeForm m y δy dy := by
   simp [lagrangeForm]
 
-/-- (12.41)-(12.43): the velocity `(1, v_j, 0)` of the free motion through `y` lies in the kernel
-of `σ` (one direction of (12.48)). -/
-lemma lagrangeForm_motion (m : Fin N → ℝ) (y δy : EvolutionSpace N) :
-    lagrangeForm m y ⟨1, y.v, 0⟩ δy = 0 := by
+/--
+(12.41)-(12.43): the velocity `(1, v_j, 0)` of the free motion through `y` lies in the kernel
+of `σ` (one direction of (12.48)).
+-/
+lemma lagrangeForm_motion (m : Fin N → ℝ) (y δy : EvolutionSpace N)
+    : lagrangeForm m y ⟨1, y.v, 0⟩ δy = 0 := by
   simp [lagrangeForm]
 
 /-!
@@ -347,12 +373,17 @@ lemma lagrangeForm_motion (m : Fin N → ℝ) (y δy : EvolutionSpace N) :
 
 -/
 
-/-- The moment of `N` free material points ((12.125) for one point of unit mass; (12.135) for `N`
+/--
+The moment of `N` free material points ((12.125) for one point of unit mass; (12.135) for `N`
 points, with `E_j = 0` in its last line and the additive constant of `E` chosen to be `0`):
-`l = Σ m_j r_j × v_j`, `g = Σ m_j (r_j - v_j t)`, `p = Σ m_j v_j`, `E = ½ Σ m_j ‖v_j‖²`. -/
-def moment (m : Fin N → ℝ) (y : EvolutionSpace N) : GalileanTorsor :=
-  ⟨∑ j, m j • (y.r j ⨯₃ y.v j), ∑ j, m j • (y.r j - y.t • y.v j), ∑ j, m j • y.v j,
-    (1 / 2 : ℝ) * ∑ j, m j * (y.v j ⬝ᵥ y.v j)⟩
+`l = Σ m_j r_j × v_j`, `g = Σ m_j (r_j - v_j t)`, `p = Σ m_j v_j`, `E = ½ Σ m_j ‖v_j‖²`.
+-/
+def moment (m : Fin N → ℝ) (y : EvolutionSpace N) : GalileanTorsor := ⟨
+  ∑ j, m j • (y.r j ⨯₃ y.v j),
+  ∑ j, m j • (y.r j - y.t • y.v j),
+  ∑ j, m j • y.v j,
+  (1 / 2 : ℝ) * ∑ j, m j * (y.v j ⬝ᵥ y.v j)
+⟩
 
 /-- The line `s ↦ y + s dy` of the evolution space. -/
 def line (y dy : EvolutionSpace N) (s : ℝ) : EvolutionSpace N :=
@@ -363,9 +394,10 @@ def motion (y : EvolutionSpace N) (s : ℝ) : EvolutionSpace N :=
   ⟨y.t + s, fun j => y.r j + s • y.v j, y.v⟩
 
 /-- `μ(Z)` as a sum over the material points. -/
-lemma pair_moment (m : Fin N → ℝ) (y : EvolutionSpace N) (Z : GalileanAlgebra) :
-    (moment m y).pair Z = ∑ j, m j * ((y.r j ⨯₃ y.v j) ⬝ᵥ Z.ω - (y.r j - y.t • y.v j) ⬝ᵥ Z.β
-      + y.v j ⬝ᵥ Z.γ - (1 / 2 : ℝ) * Z.ε * (y.v j ⬝ᵥ y.v j)) := by
+lemma pair_moment (m : Fin N → ℝ) (y : EvolutionSpace N) (Z : GalileanAlgebra)
+    : (moment m y).pair Z
+      = ∑ j, m j * ((y.r j ⨯₃ y.v j) ⬝ᵥ Z.ω - (y.r j - y.t • y.v j) ⬝ᵥ Z.β
+        + y.v j ⬝ᵥ Z.γ - (1 / 2 : ℝ) * Z.ε * (y.v j ⬝ᵥ y.v j)) := by
   simp only [GalileanTorsor.pair, moment, sum_dotProduct, smul_dotProduct, smul_eq_mul]
   rw [Finset.mul_sum, Finset.sum_mul, ← Finset.sum_sub_distrib, ← Finset.sum_add_distrib,
     ← Finset.sum_sub_distrib]
@@ -373,51 +405,64 @@ lemma pair_moment (m : Fin N → ℝ) (y : EvolutionSpace N) (Z : GalileanAlgebr
   ring
 
 /-- The `j`th term of `μ(Z)` along `y + s dy`, as a polynomial of degree two in `s`. -/
-private lemma pair_term_line (m t dt s : ℝ) (r v dr dv : ℝ³) (Z : GalileanAlgebra) :
-    m * (((r + s • dr) ⨯₃ (v + s • dv)) ⬝ᵥ Z.ω - ((r + s • dr) - (t + s * dt) • (v + s • dv)) ⬝ᵥ Z.β
-        + (v + s • dv) ⬝ᵥ Z.γ - (1 / 2 : ℝ) * Z.ε * ((v + s • dv) ⬝ᵥ (v + s • dv)))
-    = m * ((r ⨯₃ v) ⬝ᵥ Z.ω - (r - t • v) ⬝ᵥ Z.β + v ⬝ᵥ Z.γ - (1 / 2 : ℝ) * Z.ε * (v ⬝ᵥ v))
-      + s * (m * (dv ⬝ᵥ ((Z.ω ⨯₃ r + t • Z.β + Z.γ) - Z.ε • v))
-             - m * ((Z.ω ⨯₃ v + Z.β) ⬝ᵥ (dr - dt • v)))
-      + s ^ 2 * (m * ((dr ⨯₃ dv) ⬝ᵥ Z.ω + dt * (dv ⬝ᵥ Z.β) - (1 / 2 : ℝ) * Z.ε * (dv ⬝ᵥ dv))) := by
-  simp only [dotProduct, Fin.sum_univ_three, cross_apply, Pi.add_apply, Pi.sub_apply,
-    Pi.smul_apply, smul_eq_mul, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_two,
-    Matrix.head_cons, Matrix.tail_cons]
+private lemma pair_term_line (m t dt s : ℝ) (r v dr dv : ℝ³) (Z : GalileanAlgebra)
+    : m * (((r + s • dr) ⨯₃ (v + s • dv)) ⬝ᵥ Z.ω
+        - ((r + s • dr) - (t + s * dt) • (v + s • dv)) ⬝ᵥ Z.β + (v + s • dv) ⬝ᵥ Z.γ
+        - (1 / 2 : ℝ) * Z.ε * ((v + s • dv) ⬝ᵥ (v + s • dv)))
+      = m * ((r ⨯₃ v) ⬝ᵥ Z.ω - (r - t • v) ⬝ᵥ Z.β + v ⬝ᵥ Z.γ - (1 / 2 : ℝ) * Z.ε * (v ⬝ᵥ v))
+        + s
+          * (m * (dv ⬝ᵥ ((Z.ω ⨯₃ r + t • Z.β + Z.γ) - Z.ε • v))
+            - m * ((Z.ω ⨯₃ v + Z.β) ⬝ᵥ (dr - dt • v)))
+        + s ^ 2
+          * (m * ((dr ⨯₃ dv) ⬝ᵥ Z.ω + dt * (dv ⬝ᵥ Z.β) - (1 / 2 : ℝ) * Z.ε * (dv ⬝ᵥ dv))) := by
+  simp only [dotProduct, Fin.sum_univ_three, cross_apply, Pi.add_apply, Pi.sub_apply, Pi.smul_apply,
+    smul_eq_mul, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_two, Matrix.head_cons,
+    Matrix.tail_cons]
   ring
 
 /-- The derivative at `0` of a polynomial of degree two. -/
-private lemma hasDerivAt_quadratic (a b c : ℝ) :
-    HasDerivAt (fun s : ℝ => a + s * b + s ^ 2 * c) b 0 := by
-  have h := (((hasDerivAt_id' (0 : ℝ)).mul_const b).const_add a).fun_add
-    ((hasDerivAt_pow 2 (0 : ℝ)).mul_const c)
+private lemma hasDerivAt_quadratic (a b c : ℝ)
+    : HasDerivAt (fun s : ℝ => a + s * b + s ^ 2 * c) b 0 := by
+  have h :=
+    (((hasDerivAt_id' (0 : ℝ)).mul_const b).const_add a).fun_add
+      ((hasDerivAt_pow 2 (0 : ℝ)).mul_const c)
   simpa using h
 
-/-- (12.124): `σ(dy)(Z_V(y)) = dμ(Z)(dy)`, stated as the derivative at `s = 0` of
-`s ↦ μ(y + s dy)(Z)`; `μ` is a moment of the action (12.120). -/
-lemma hasDerivAt_moment (m : Fin N → ℝ) (y dy : EvolutionSpace N) (Z : GalileanAlgebra) :
-    HasDerivAt (fun s => (moment m (line y dy s)).pair Z) (lagrangeForm m y dy (vectorField Z y))
-      0 := by
-  have hfun : (fun s => (moment m (line y dy s)).pair Z) = fun s => ∑ j,
-      (m j * ((y.r j ⨯₃ y.v j) ⬝ᵥ Z.ω - (y.r j - y.t • y.v j) ⬝ᵥ Z.β + y.v j ⬝ᵥ Z.γ
-          - (1 / 2 : ℝ) * Z.ε * (y.v j ⬝ᵥ y.v j))
-        + s * (m j * (dy.v j ⬝ᵥ ((Z.ω ⨯₃ y.r j + y.t • Z.β + Z.γ) - Z.ε • y.v j))
-               - m j * ((Z.ω ⨯₃ y.v j + Z.β) ⬝ᵥ (dy.r j - dy.t • y.v j)))
-        + s ^ 2 * (m j * ((dy.r j ⨯₃ dy.v j) ⬝ᵥ Z.ω + dy.t * (dy.v j ⬝ᵥ Z.β)
-          - (1 / 2 : ℝ) * Z.ε * (dy.v j ⬝ᵥ dy.v j)))) := by
+/--
+(12.124): `σ(dy)(Z_V(y)) = dμ(Z)(dy)`, stated as the derivative at `s = 0` of
+`s ↦ μ(y + s dy)(Z)`; `μ` is a moment of the action (12.120).
+-/
+lemma hasDerivAt_moment (m : Fin N → ℝ) (y dy : EvolutionSpace N) (Z : GalileanAlgebra)
+    : HasDerivAt
+      (fun s => (moment m (line y dy s)).pair Z)
+      (lagrangeForm m y dy (vectorField Z y)) 0 := by
+  have hfun
+      : (fun s => (moment m (line y dy s)).pair Z)
+        = fun s =>
+          ∑ j,
+            (m j * ((y.r j ⨯₃ y.v j) ⬝ᵥ Z.ω - (y.r j - y.t • y.v j) ⬝ᵥ Z.β + y.v j ⬝ᵥ Z.γ
+                - (1 / 2 : ℝ) * Z.ε * (y.v j ⬝ᵥ y.v j))
+              + s * (m j * (dy.v j ⬝ᵥ ((Z.ω ⨯₃ y.r j + y.t • Z.β + Z.γ) - Z.ε • y.v j))
+                     - m j * ((Z.ω ⨯₃ y.v j + Z.β) ⬝ᵥ (dy.r j - dy.t • y.v j)))
+              + s ^ 2 * (m j * ((dy.r j ⨯₃ dy.v j) ⬝ᵥ Z.ω + dy.t * (dy.v j ⬝ᵥ Z.β)
+                - (1 / 2 : ℝ) * Z.ε * (dy.v j ⬝ᵥ dy.v j)))) := by
     funext s
     rw [pair_moment]
     refine Finset.sum_congr rfl (fun j _ => ?_)
     exact pair_term_line (m j) y.t dy.t s (y.r j) (y.v j) (dy.r j) (dy.v j) Z
   rw [hfun]
-  have hL : lagrangeForm m y dy (vectorField Z y) = ∑ j,
-      (m j * (dy.v j ⬝ᵥ ((Z.ω ⨯₃ y.r j + y.t • Z.β + Z.γ) - Z.ε • y.v j))
-        - m j * ((Z.ω ⨯₃ y.v j + Z.β) ⬝ᵥ (dy.r j - dy.t • y.v j))) := rfl
+  have hL
+      : lagrangeForm m y dy (vectorField Z y)
+        = ∑ j,
+          (m j * (dy.v j ⬝ᵥ ((Z.ω ⨯₃ y.r j + y.t • Z.β + Z.γ) - Z.ε • y.v j))
+            - m j * ((Z.ω ⨯₃ y.v j + Z.β) ⬝ᵥ (dy.r j - dy.t • y.v j))) :=
+    rfl
   rw [hL]
   exact HasDerivAt.fun_sum (fun j _ => hasDerivAt_quadratic _ _ _)
 
 /-- (12.121): the moment is constant along every free motion. -/
-lemma moment_motion (m : Fin N → ℝ) (y : EvolutionSpace N) (s : ℝ) :
-    moment m (motion y s) = moment m y := by
+lemma moment_motion (m : Fin N → ℝ) (y : EvolutionSpace N) (s : ℝ)
+    : moment m (motion y s) = moment m y := by
   simp [moment, motion]
   congr
   ext j
@@ -432,32 +477,35 @@ lemma moment_motion (m : Fin N → ℝ) (y : EvolutionSpace N) (s : ℝ) :
 /-- The total mass `m = Σ_j m_j` (12.135). -/
 def totalMass (m : Fin N → ℝ) : ℝ := ∑ j, m j
 
-/-- The centre of gravity `R = (Σ_j m_j r_j) / m`, named in (12.141) (the formula is the usual one,
-not printed there); for `m = 0` the value is `0`, by the convention `0⁻¹ = 0`. -/
-def centerOfMass (m : Fin N → ℝ) (y : EvolutionSpace N) : ℝ³ :=
-  (totalMass m)⁻¹ • ∑ j, m j • y.r j
+/--
+The centre of gravity `R = (Σ_j m_j r_j) / m`, named in (12.141) (the formula is the usual one,
+not printed there); for `m = 0` the value is `0`, by the convention `0⁻¹ = 0`.
+-/
+def centerOfMass (m : Fin N → ℝ) (y : EvolutionSpace N) : ℝ³ := (totalMass m)⁻¹ • ∑ j, m j • y.r j
 
 /-- (12.134) with `m = Σ_j m_j` (12.135): `σ(Z_V(y))(Z'_V(y)) = μ[Z, Z'] + m f₀(Z)(Z')`. -/
-lemma lagrangeForm_vectorField (m : Fin N → ℝ) (y : EvolutionSpace N) (Z Z' : GalileanAlgebra) :
-    lagrangeForm m y (vectorField Z y) (vectorField Z' y)
+lemma lagrangeForm_vectorField (m : Fin N → ℝ) (y : EvolutionSpace N) (Z Z' : GalileanAlgebra)
+    : lagrangeForm m y (vectorField Z y) (vectorField Z' y)
       = (moment m y).pair (bracket Z Z') + totalMass m * cocycle Z Z' := by
   simp [lagrangeForm, GalileanTorsor.pair, moment, cocycle, totalMass, bracket, vectorField,
-    sum_dotProduct, smul_dotProduct, vec3_dotProduct, cross_apply, vecHead, vecTail,
-    Finset.sum_mul, ← Finset.sum_sub_distrib, ← Finset.sum_add_distrib]
+    sum_dotProduct, smul_dotProduct, vec3_dotProduct, cross_apply, vecHead, vecTail, Finset.sum_mul,
+    ← Finset.sum_sub_distrib, ← Finset.sum_add_distrib]
   apply Finset.sum_congr rfl
   intro j _
   ring
 
-/-- (12.136) at the level of the algebra: for a non-zero total mass, the cocycle `m f₀` of the
-system is not a coboundary of the algebra. -/
-lemma totalMass_cocycle_not_coboundary (m : Fin N → ℝ) (hM : totalMass m ≠ 0) :
-    ¬ ∃ μ₀ : GalileanTorsor, ∀ Z Z' : GalileanAlgebra,
-      totalMass m * cocycle Z Z' = μ₀.pair (bracket Z Z') :=
-  fun h => hM ((smul_cocycle_isCoboundary_iff (totalMass m)).mp h)
+/--
+(12.136) at the level of the algebra: for a non-zero total mass, the cocycle `m f₀` of the
+system is not a coboundary of the algebra.
+-/
+lemma totalMass_cocycle_not_coboundary (m : Fin N → ℝ) (hM : totalMass m ≠ 0)
+    : ¬ ∃ μ₀ : GalileanTorsor, ∀ Z Z' : GalileanAlgebra,
+      totalMass m * cocycle Z Z' = μ₀.pair (bracket Z Z') := fun h =>
+  hM ((smul_cocycle_isCoboundary_iff (totalMass m)).mp h)
 
 /-- (12.141): `g = m R - p t`, with `R` the centre of gravity, for a non-zero total mass. -/
-lemma moment_g (m : Fin N → ℝ) (hM : totalMass m ≠ 0) (y : EvolutionSpace N) :
-    (moment m y).g = totalMass m • centerOfMass m y - y.t • (moment m y).p := by
+lemma moment_g (m : Fin N → ℝ) (hM : totalMass m ≠ 0) (y : EvolutionSpace N)
+    : (moment m y).g = totalMass m • centerOfMass m y - y.t • (moment m y).p := by
   simp [moment, smul_sub]
   simp only [centerOfMass, Finset.smul_sum]
   congr 1
@@ -465,11 +513,13 @@ lemma moment_g (m : Fin N → ℝ) (hM : totalMass m ≠ 0) (y : EvolutionSpace 
   congr! with i
   field_simp [hM]
 
-/-- Along a free motion the centre of gravity moves uniformly with velocity `p / m` (p. 153, after
+/--
+Along a free motion the centre of gravity moves uniformly with velocity `p / m` (p. 153, after
 (12.141)). Souriau deduces this for any isolated system from the constancy of `g` and `p`; here it
-is proved directly from the free motion. For `m = 0` both sides are `0`. -/
-lemma centerOfMass_motion (m : Fin N → ℝ) (y : EvolutionSpace N) (s : ℝ) :
-    centerOfMass m (motion y s) = centerOfMass m y + s • ((totalMass m)⁻¹ • (moment m y).p) := by
+is proved directly from the free motion. For `m = 0` both sides are `0`.
+-/
+lemma centerOfMass_motion (m : Fin N → ℝ) (y : EvolutionSpace N) (s : ℝ)
+    : centerOfMass m (motion y s) = centerOfMass m y + s • ((totalMass m)⁻¹ • (moment m y).p) := by
   simp [centerOfMass, motion, smul_smul]
   simp [moment, mul_smul, Finset.smul_sum, Finset.sum_add_distrib, smul_add]
   congr

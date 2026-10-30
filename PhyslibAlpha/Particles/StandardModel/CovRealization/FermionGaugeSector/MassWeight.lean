@@ -68,9 +68,9 @@ open TensorProduct Matrix MatrixGroups Lorentz Lorentz.Invariants
 
 namespace CovAlgebraRealization
 
-variable {B : Type} [Ring B] [Algebra ℂ B]
-  {repGauge : Representation ℂ GaugeGroupI B}
-  {repLorentz : Representation ℂ SL(2,ℂ) B}
+variable
+  {B : Type} [Ring B] [Algebra ℂ B]
+  {repGauge : Representation ℂ GaugeGroupI B} {repLorentz : Representation ℂ (SL(2,ℂ)) B}
   {massWeightPoly : B →ₐ[ℂ] Polynomial B}
   (h : CovAlgebraRealization B repGauge repLorentz massWeightPoly)
 
@@ -85,14 +85,16 @@ fermion ones carry `-1`, the Weyl-spinor value index doing the work. The Lorentz
 
 -/
 
-/-- A field-strength derivative submodule against a fermion one is of half-integer spin:
-  `+1` times `-1`. -/
-private lemma gaugeFermion_le_centreEigenspace (a b : ℕ) :
-    h.isGaugeSector.derivSubmodule a * h.isFermionSector.derivSubmodule b
+/--
+A field-strength derivative submodule against a fermion one is of half-integer spin:
+`+1` times `-1`.
+-/
+private lemma gaugeFermion_le_centreEigenspace (a b : ℕ)
+    : h.isGaugeSector.derivSubmodule a * h.isFermionSector.derivSubmodule b
       ≤ centreEigenspace repLorentz (-1) := by
-  simpa using mul_le_centreEigenspace h.repLorentz_mul
-    (h.isGaugeSector.derivSubmodule_le_centreEigenspace a)
-    (h.isFermionSector.derivSubmodule_le_centreEigenspace b)
+  simpa using
+    mul_le_centreEigenspace h.repLorentz_mul (h.isGaugeSector.derivSubmodule_le_centreEigenspace a)
+      (h.isFermionSector.derivSubmodule_le_centreEigenspace b)
 
 /-!
 
@@ -104,14 +106,17 @@ underived fermion towers. It has exactly one fermion factor, so section A gives 
 
 -/
 
-/-- Mass weight seven carries no Lorentz invariant modulo a Lorentz-stable submodule: a
-  Lorentz invariant of `sectorMassWeight {gauge, fermion} 7 ⊔ S` lies in `S`. The weight is
-  the underived field strength against the underived fermion towers, of half-integer
-  spin. -/
-lemma mem_of_lorentz_invariant_sectorMassWeight_gauge_fermion_seven_sup (S : Submodule ℂ B)
-    (hSL : ∀ g : SL(2,ℂ), ∀ y ∈ S, repLorentz g y ∈ S) {x : B}
-    (hx : x ∈ h.sectorMassWeight {GeneratorClass.gauge, GeneratorClass.fermion} 7 ⊔ S)
-    (hL : ∀ g : SL(2,ℂ), repLorentz g x = x) : x ∈ S := by
+/--
+Mass weight seven carries no Lorentz invariant modulo a Lorentz-stable submodule: a
+Lorentz invariant of `sectorMassWeight {gauge, fermion} 7 ⊔ S` lies in `S`. The weight is
+the underived field strength against the underived fermion towers, of half-integer
+spin.
+-/
+lemma mem_of_lorentz_invariant_sectorMassWeight_gauge_fermion_seven_sup
+    (S : Submodule ℂ B) (hSL : ∀ g : SL(2,ℂ), ∀ y ∈ S, repLorentz g y ∈ S)
+    {x : B} (hx : x ∈ h.sectorMassWeight {GeneratorClass.gauge, GeneratorClass.fermion} 7 ⊔ S)
+    (hL : ∀ g : SL(2,ℂ), repLorentz g x = x)
+    : x ∈ S := by
   rw [h.sectorMassWeight_gauge_fermion_seven] at hx
   exact mem_of_invariant_of_mem_sup_centreEigenspace_neg_one
     (h.gaugeFermion_le_centreEigenspace 0 0) S hSL hx hL
@@ -133,53 +138,68 @@ gauge-sector statement, never appear.
 
 -/
 
-/-- Below mass weight nine the gauge-fermion sector carries no Lorentz invariant: a
-  Lorentz invariant of `sectorMassWeight {gauge, fermion} w ⊔ S` for `w < 9` lies in `S`.
-  Weights below seven and weight eight are trivial submodules, and weight seven is section
-  B. -/
-lemma mem_of_invariant_sectorMassWeight_gauge_fermion_lt_nine_sup (w : ℕ) (hw : w < 9)
-    (S : Submodule ℂ B) (hSL : ∀ g : SL(2,ℂ), ∀ y ∈ S, repLorentz g y ∈ S) {x : B}
-    (hx : x ∈ h.sectorMassWeight {GeneratorClass.gauge, GeneratorClass.fermion} w ⊔ S)
-    (hL : ∀ g : SL(2,ℂ), repLorentz g x = x) : x ∈ S := by
+/--
+Below mass weight nine the gauge-fermion sector carries no Lorentz invariant: a
+Lorentz invariant of `sectorMassWeight {gauge, fermion} w ⊔ S` for `w < 9` lies in `S`.
+Weights below seven and weight eight are trivial submodules, and weight seven is section
+B.
+-/
+lemma mem_of_invariant_sectorMassWeight_gauge_fermion_lt_nine_sup
+    (w : ℕ) (hw : w < 9)
+    (S : Submodule ℂ B) (hSL : ∀ g : SL(2,ℂ), ∀ y ∈ S, repLorentz g y ∈ S)
+    {x : B} (hx : x ∈ h.sectorMassWeight {GeneratorClass.gauge, GeneratorClass.fermion} w ⊔ S)
+    (hL : ∀ g : SL(2,ℂ), repLorentz g x = x)
+    : x ∈ S := by
   rcases lt_or_ge w 7 with hw7 | hw7
   · rwa [h.sectorMassWeight_gauge_fermion_eq_bot_of_lt_seven hw7, bot_sup_eq] at hx
   interval_cases w
   · exact h.mem_of_lorentz_invariant_sectorMassWeight_gauge_fermion_seven_sup S hSL hx hL
   · rwa [h.sectorMassWeight_gauge_fermion_eight, bot_sup_eq] at hx
 
-/-- The classification below mass weight nine as an equivalence, in the shape of the gauge-
-  and Yukawa-sector statements: an element of `sectorMassWeight {gauge, fermion} w ⊔ S` for
-  `w < 9` is fixed by both groups exactly when it is itself an element of `S` fixed by both
-  groups. Gauge stability of `S` is not needed, and neither is gauge invariance of `x`: the
-  forward direction is the boost-weight parity argument, which uses the Lorentz group
-  alone. -/
+/--
+The classification below mass weight nine as an equivalence, in the shape of the gauge-
+and Yukawa-sector statements: an element of `sectorMassWeight {gauge, fermion} w ⊔ S` for
+`w < 9` is fixed by both groups exactly when it is itself an element of `S` fixed by both
+groups. Gauge stability of `S` is not needed, and neither is gauge invariance of `x`: the
+forward direction is the boost-weight parity argument, which uses the Lorentz group
+alone.
+-/
 lemma mem_sectorMassWeight_gauge_fermion_lt_nine_sup_and_gauge_lorentz_invariant_iff
-    (w : ℕ) (hw : w < 9) (S : Submodule ℂ B)
-    (hSL : ∀ g : SL(2,ℂ), ∀ y ∈ S, repLorentz g y ∈ S) (x : B) :
-    (x ∈ h.sectorMassWeight {GeneratorClass.gauge, GeneratorClass.fermion} w ⊔ S
+    (w : ℕ) (hw : w < 9)
+    (S : Submodule ℂ B) (hSL : ∀ g : SL(2,ℂ), ∀ y ∈ S, repLorentz g y ∈ S)
+    (x : B)
+    : (x ∈ h.sectorMassWeight {GeneratorClass.gauge, GeneratorClass.fermion} w ⊔ S
         ∧ (∀ g : GaugeGroupI, repGauge g x = x) ∧ ∀ g : SL(2,ℂ), repLorentz g x = x)
-      ↔ ∃ y ∈ S, (∀ g : GaugeGroupI, repGauge g y = y)
-          ∧ (∀ g : SL(2,ℂ), repLorentz g y = y)
-          ∧ x = y := by
+      ↔ ∃ y ∈ S,
+        (∀ g : GaugeGroupI, repGauge g y = y) ∧ (∀ g : SL(2,ℂ), repLorentz g y = y) ∧ x = y := by
   constructor
   · rintro ⟨hx, hG, hL⟩
-    exact ⟨x, h.mem_of_invariant_sectorMassWeight_gauge_fermion_lt_nine_sup w hw S hSL hx hL,
-      hG, hL, rfl⟩
+    exact ⟨
+      x,
+      h.mem_of_invariant_sectorMassWeight_gauge_fermion_lt_nine_sup w hw S hSL hx hL,
+      hG,
+      hL,
+      rfl
+    ⟩
   · rintro ⟨y, hyS, hyG, hyL, rfl⟩
     exact ⟨Submodule.mem_sup_right hyS, hyG, hyL⟩
 
-/-- The same classification without the existential: below mass weight nine an element of
-  `sectorMassWeight {gauge, fermion} w ⊔ S` fixed by both groups is an element of `S` fixed
-  by both groups, and conversely. -/
+/--
+The same classification without the existential: below mass weight nine an element of
+`sectorMassWeight {gauge, fermion} w ⊔ S` fixed by both groups is an element of `S` fixed
+by both groups, and conversely.
+-/
 lemma mem_sectorMassWeight_gauge_fermion_lt_nine_sup_and_gauge_lorentz_invariant_iff_mem
-    (w : ℕ) (hw : w < 9) (S : Submodule ℂ B)
-    (hSL : ∀ g : SL(2,ℂ), ∀ y ∈ S, repLorentz g y ∈ S) (x : B) :
-    (x ∈ h.sectorMassWeight {GeneratorClass.gauge, GeneratorClass.fermion} w ⊔ S
+    (w : ℕ) (hw : w < 9)
+    (S : Submodule ℂ B) (hSL : ∀ g : SL(2,ℂ), ∀ y ∈ S, repLorentz g y ∈ S)
+    (x : B)
+    : (x ∈ h.sectorMassWeight {GeneratorClass.gauge, GeneratorClass.fermion} w ⊔ S
         ∧ (∀ g : GaugeGroupI, repGauge g x = x) ∧ ∀ g : SL(2,ℂ), repLorentz g x = x)
-      ↔ (x ∈ S ∧ (∀ g : GaugeGroupI, repGauge g x = x)
-          ∧ ∀ g : SL(2,ℂ), repLorentz g x = x) :=
-  ⟨fun hx => ⟨h.mem_of_invariant_sectorMassWeight_gauge_fermion_lt_nine_sup w hw S hSL
-    hx.1 hx.2.2, hx.2⟩, fun hx => ⟨Submodule.mem_sup_right hx.1, hx.2⟩⟩
+      ↔ (x ∈ S ∧ (∀ g : GaugeGroupI, repGauge g x = x) ∧ ∀ g : SL(2,ℂ), repLorentz g x = x) := ⟨
+  fun hx =>
+    ⟨h.mem_of_invariant_sectorMassWeight_gauge_fermion_lt_nine_sup w hw S hSL hx.1 hx.2.2, hx.2⟩,
+  fun hx => ⟨Submodule.mem_sup_right hx.1, hx.2⟩
+⟩
 
 end CovAlgebraRealization
 

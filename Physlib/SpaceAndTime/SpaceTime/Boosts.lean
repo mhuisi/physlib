@@ -49,26 +49,28 @@ We show that boosting in the `x`-direction takes `(t, x, y, z)` to
 
 -/
 
-lemma boost_x_smul (β : ℝ) (hβ : |β| < 1) (x : SpaceTime) :
-    LorentzGroup.boost (d := 3) 0 β hβ • x =
-      fun | Sum.inl 0 => γ β * (x (Sum.inl 0) - β * x (Sum.inr 0))
-          | Sum.inr 0 => γ β * (x (Sum.inr 0) - β * x (Sum.inl 0))
-          | Sum.inr 1=> x (Sum.inr 1)
-          | Sum.inr 2=> x (Sum.inr 2) := by
+lemma boost_x_smul (β : ℝ) (hβ : |β| < 1) (x : SpaceTime)
+    : LorentzGroup.boost (d := 3) 0 β hβ • x
+      = fun
+        | Sum.inl 0 => γ β * (x (Sum.inl 0) - β * x (Sum.inr 0))
+        | Sum.inr 0 => γ β * (x (Sum.inr 0) - β * x (Sum.inl 0))
+        | Sum.inr 1 => x (Sum.inr 1)
+        | Sum.inr 2 => x (Sum.inr 2) := by
   funext i
-  fin_cases i <;>
-    simp [Lorentz.Vector.smul_eq_sum, Fin.sum_univ_three, boost_inl_0_inr_other,
-      boost_inr_other_inr, boost_inr_inr_other, boost_inr_other_inl_0] <;>
-    ring
+  fin_cases i
+    <;> simp [Lorentz.Vector.smul_eq_sum, Fin.sum_univ_three, boost_inl_0_inr_other,
+      boost_inr_other_inr, boost_inr_inr_other, boost_inr_other_inl_0]
+    <;> ring
 
-lemma boost_zero_apply_time_space {d : ℕ} {β : ℝ} (hβ : |β| < 1) (c : SpeedOfLight)
-    (t : Time) (x : Space d.succ) :
-    ((boost (0 : Fin d.succ) β hβ)⁻¹ • (SpaceTime.toTimeAndSpace c).symm (t, x)) =
-    (SpaceTime.toTimeAndSpace c).symm
-    (γ β * (t.val + β /c * x 0),
-    ⟨fun
-      | (0 : Fin d.succ) => γ β * (x 0 + c * β * t.val)
-      | ⟨Nat.succ n, ih⟩ => x ⟨Nat.succ n, ih⟩⟩) := by
+lemma boost_zero_apply_time_space
+    {d : ℕ} {β : ℝ} (hβ : |β| < 1) (c : SpeedOfLight) (t : Time) (x : Space d.succ)
+    : ((boost (0 : Fin d.succ) β hβ)⁻¹ • (SpaceTime.toTimeAndSpace c).symm (t, x))
+      = (SpaceTime.toTimeAndSpace c).symm (
+        γ β * (t.val + β / c * x 0),
+        ⟨fun
+          | (0 : Fin d.succ) => γ β * (x 0 + c * β * t.val)
+          | ⟨Nat.succ n, ih⟩ => x ⟨Nat.succ n, ih⟩⟩
+      ) := by
   funext μ
   rw [boost_inverse, Lorentz.Vector.smul_eq_sum]
   simp only [Nat.succ_eq_add_one, Fintype.sum_sum_type, Finset.univ_unique, Fin.default_eq_zero,
@@ -85,8 +87,7 @@ lemma boost_zero_apply_time_space {d : ℕ} {β : ℝ} (hβ : |β| < 1) (c : Spe
   | Sum.inr ⟨Nat.succ n, h⟩ =>
     simp only [Nat.succ_eq_add_one, Fin.isValue, boost_zero_inr_nat_succ_inl_0, zero_mul,
       boost_zero_inr_nat_succ_inr_0, zero_add, toTimeAndSpace_symm_apply_inr]
-    rw [Finset.sum_eq_single ⟨n, by omega⟩] <;>
-      simp +contextual [boost_inr_inr_other, Fin.ext_iff]
+    rw [Finset.sum_eq_single ⟨n, by omega⟩] <;> simp +contextual [boost_inr_inr_other, Fin.ext_iff]
 
 end SpaceTime
 

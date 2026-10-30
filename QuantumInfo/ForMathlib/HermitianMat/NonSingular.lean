@@ -16,8 +16,8 @@ namespace Matrix
 variable {d R S F 𝕜 : Type*} [Fintype d] [DecidableEq d]
 variable [CommSemiring R] [Semiring S] [Algebra R S] [Field F] [RCLike 𝕜]
 
-lemma isUnit_smul {c : R} (hA : IsUnit c) {M : Matrix d d S} (hM : IsUnit M) :
-    IsUnit (c • M : Matrix d d S) := by
+lemma isUnit_smul {c : R} (hA : IsUnit c) {M : Matrix d d S} (hM : IsUnit M)
+    : IsUnit (c • M : Matrix d d S) := by
   obtain ⟨d, rfl⟩ := hA
   obtain ⟨M', rfl⟩ := hM
   use d • M'
@@ -26,8 +26,8 @@ lemma isUnit_smul {c : R} (hA : IsUnit c) {M : Matrix d d S} (hM : IsUnit M) :
 lemma isUnit_natCast {n : ℕ} (hn : n ≠ 0) [CharZero F] : IsUnit (n : Matrix d d F) := by
   exact (IsUnit.mk0 (n : F) (mod_cast hn)).map (algebraMap F _)
 
-lemma isUnit_real_smul {r : ℝ} (hr : r ≠ 0) {M : Matrix d d 𝕜} (hM : IsUnit M) :
-    IsUnit (r • M : Matrix d d 𝕜) :=
+lemma isUnit_real_smul {r : ℝ} (hr : r ≠ 0) {M : Matrix d d 𝕜} (hM : IsUnit M)
+    : IsUnit (r • M : Matrix d d 𝕜) :=
   isUnit_smul hr.isUnit hM
 
 lemma isUnit_real_cast {r : ℝ} (hr : r ≠ 0) : IsUnit (r • 1 : Matrix d d 𝕜) := by
@@ -44,30 +44,23 @@ variable (A : HermitianMat n R) (B : HermitianMat m R)
 class NonSingular (A : HermitianMat n R) : Prop where
   isUnit : IsUnit A.mat
 
-@[simp]
-lemma isUnit_mat_of_nonSingular [NonSingular A] : IsUnit A.mat :=
-  NonSingular.isUnit
+@[simp] lemma isUnit_mat_of_nonSingular [NonSingular A] : IsUnit A.mat := NonSingular.isUnit
 
 lemma nonsingular_iff_isUnit : NonSingular A ↔ IsUnit A.mat := by
   exact Iff.intro (fun h ↦ h.isUnit) NonSingular.mk
 
-instance instHasInv_of_invertible [i : Invertible A.mat] : NonSingular A :=
-  ⟨isUnit_of_invertible _⟩
+instance instHasInv_of_invertible [i : Invertible A.mat] : NonSingular A := ⟨isUnit_of_invertible _⟩
 
-instance instInvertible_of_hasInv [h : NonSingular A] : Invertible A.mat :=
-  h.isUnit.invertible
+instance instInvertible_of_hasInv [h : NonSingular A] : Invertible A.mat := h.isUnit.invertible
 
-instance : NonSingular (1 : HermitianMat n R) :=
-  instHasInv_of_invertible (i := invertibleOne)
+instance : NonSingular (1 : HermitianMat n R) := instHasInv_of_invertible (i := invertibleOne)
 
 variable {A : HermitianMat n 𝕜} {B : HermitianMat m 𝕜} {C : Matrix n n 𝕜}
 open ComplexOrder
 
-lemma nonSingular_of_posDef (hA : A.mat.PosDef) : NonSingular A :=
-  ⟨hA.isUnit⟩
+lemma nonSingular_of_posDef (hA : A.mat.PosDef) : NonSingular A := ⟨hA.isUnit⟩
 
-lemma nonSingular_iff_posDef_of_PSD (hA : 0 ≤ A) :
-    NonSingular A ↔ A.mat.PosDef := by
+lemma nonSingular_iff_posDef_of_PSD (hA : 0 ≤ A) : NonSingular A ↔ A.mat.PosDef := by
   refine ⟨fun h ↦ ?_, fun hA₂ ↦ nonSingular_of_posDef hA₂⟩
   have : IsUnit A.mat := h.isUnit
   grind [zero_le_iff]
@@ -85,7 +78,7 @@ lemma nonSingular_iff_det_ne_zero : NonSingular A ↔ A.mat.det ≠ 0 := by
   simp [Matrix.isUnit_iff_isUnit_det, nonsingular_iff_isUnit]
 
 lemma nonSingular_iff_ker_bot : NonSingular A ↔ A.ker = ⊥ := by
-  rw [nonSingular_iff_det_ne_zero];
+  rw [nonSingular_iff_det_ne_zero]
   have h_det_nonzero_to_ker_trivial : A.mat.det ≠ 0 → A.ker = ⊥ := by
     intro h_det_nonzero
     rw [Submodule.eq_bot_iff]
@@ -116,17 +109,24 @@ lemma nonSingular_iff_support_top : NonSingular A ↔ A.support = ⊤ := by
   · intro x
     have hA_inv : IsUnit A.mat := hA.isUnit
     rcases hA_inv.exists_right_inv with ⟨y, hy⟩
-    exact ⟨WithLp.toLp 2 (y.mulVec x.ofLp), by
-      apply PiLp.ext; intro i
-      simp [lin, Matrix.toLpLin_apply, Matrix.mulVec_mulVec, hy]⟩
+    exact ⟨
+      WithLp.toLp 2 (y.mulVec x.ofLp),
+      by
+        apply PiLp.ext
+        intro i
+        simp [lin, Matrix.toLpLin_apply, Matrix.mulVec_mulVec, hy]
+    ⟩
   · constructor
     have : Function.Surjective A.mat.mulVec := by
       intro y
       obtain ⟨x, hx⟩ := hA (WithLp.toLp 2 y)
-      exact ⟨x.ofLp, by
-        have := congr_arg WithLp.ofLp hx
-        simp [lin, Matrix.toLpLin_apply] at this
-        exact this⟩
+      exact ⟨
+        x.ofLp,
+        by
+          have := congr_arg WithLp.ofLp hx
+          simp [lin, Matrix.toLpLin_apply] at this
+          exact this
+      ⟩
     exact Matrix.mulVec_surjective_iff_isUnit.mp this
 
 @[simp]
@@ -139,8 +139,8 @@ lemma nonSingular_iff_inv : NonSingular (A⁻¹) ↔ NonSingular A := by
   exact Matrix.isUnit_nonsing_inv_iff
 
 @[simp]
-lemma nonSingular_iff_kronecker [Nonempty n] [Nonempty m] :
-    NonSingular (A ⊗ₖ B) ↔ NonSingular A ∧ NonSingular B := by
+lemma nonSingular_iff_kronecker [Nonempty n] [Nonempty m]
+    : NonSingular (A ⊗ₖ B) ↔ NonSingular A ∧ NonSingular B := by
   simp [nonSingular_iff_det_ne_zero, Matrix.det_kronecker]
 
 lemma nonSingular_iff_conj (hC : IsUnit C) : NonSingular (A.conj C) ↔ NonSingular A := by
@@ -162,31 +162,23 @@ lemma nonSingular_empty [IsEmpty n] : NonSingular A := by
 
 variable [NonSingular A] [NonSingular B]
 
-lemma nonSingular_det_ne_zero : A.mat.det ≠ 0 := by
-  rwa [← nonSingular_iff_det_ne_zero]
+lemma nonSingular_det_ne_zero : A.mat.det ≠ 0 := by rwa [← nonSingular_iff_det_ne_zero]
 
-@[simp]
-lemma nonSingular_ker_bot : A.ker = ⊥ := by
-  rwa [← nonSingular_iff_ker_bot]
+@[simp] lemma nonSingular_ker_bot : A.ker = ⊥ := by rwa [← nonSingular_iff_ker_bot]
 
-@[simp]
-lemma nonSingular_support_top : A.support = ⊤ := by
-  rwa [← nonSingular_iff_support_top]
+@[simp] lemma nonSingular_support_top : A.support = ⊤ := by rwa [← nonSingular_iff_support_top]
 
-instance nonSingular_neg : NonSingular (-A) := by
-  rwa [nonSingular_iff_neg]
+instance nonSingular_neg : NonSingular (-A) := by rwa [nonSingular_iff_neg]
 
-instance nonSingular_inv : NonSingular (A⁻¹) := by
-  rwa [nonSingular_iff_inv]
+instance nonSingular_inv : NonSingular (A⁻¹) := by rwa [nonSingular_iff_inv]
 
 instance nonSingular_kron [Nonempty n] [Nonempty m] : NonSingular (A ⊗ₖ B) :=
   nonSingular_iff_kronecker.mpr ⟨inferInstance, inferInstance⟩
 
-lemma nonSingular_conj (hC : IsUnit C) : NonSingular (A.conj C) := by
-  rwa [nonSingular_iff_conj hC]
+lemma nonSingular_conj (hC : IsUnit C) : NonSingular (A.conj C) := by rwa [nonSingular_iff_conj hC]
 
-instance nonSingular_conj_isometry {B : HermitianMat n 𝕜} [NonSingular B] :
-    NonSingular (A.conj B.mat) := by
+instance nonSingular_conj_isometry {B : HermitianMat n 𝕜} [NonSingular B]
+    : NonSingular (A.conj B.mat) := by
   simpa [nonSingular_iff_conj]
 
 lemma nonSingular_zero_notMem_spectrum : 0 ∉ spectrum ℝ A.mat := by

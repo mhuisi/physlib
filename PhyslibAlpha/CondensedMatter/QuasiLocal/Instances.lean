@@ -62,8 +62,10 @@ variable (Ω : S → Type*) [∀ s, Fintype (Ω s)] [∀ s, DecidableEq (Ω s)]
 
 /-! ## A. The quantum net -/
 
-/-- **The quantum net**: the matrices on the configurations of each region, with `M ↦ M ⊗ 1` as
-inclusion. -/
+/--
+**The quantum net**: the matrices on the configurations of each region, with `M ↦ M ⊗ 1` as
+inclusion.
+-/
 def quantumNet : AlgebraNet S where
   A X := Alg Ω X
   incl h := inclStarAlg h
@@ -109,13 +111,15 @@ def diagonalInclusion (X : Finset S) : CAlg Ω X →⋆ₐ[ℂ] Alg Ω X where
     · subst h; simp
     · simp [h, Ne.symm h]
 
-/-- **The classical net is a subnet of the quantum net**: the diagonal inclusion commutes with the
-inclusions of regions. -/
-lemma diagonalInclusion_incl {X Y : Finset S} (h : X ≤ Y) (f : CAlg Ω X) :
-    inclMat h (diagonalInclusion Ω X f) = diagonalInclusion Ω Y (classicalIncl Ω h f) := by
+/--
+**The classical net is a subnet of the quantum net**: the diagonal inclusion commutes with the
+inclusions of regions.
+-/
+lemma diagonalInclusion_incl {X Y : Finset S} (h : X ≤ Y) (f : CAlg Ω X)
+    : inclMat h (diagonalInclusion Ω X f) = diagonalInclusion Ω Y (classicalIncl Ω h f) := by
   ext c c'
-  simp only [inclMat_apply, diagonalInclusion, StarAlgHom.coe_mk,
-    Matrix.diagonal_apply, classicalIncl]
+  simp only [inclMat_apply, diagonalInclusion, StarAlgHom.coe_mk, Matrix.diagonal_apply,
+    classicalIncl]
   by_cases hc : c = c'
   · subst hc
     simp [agree_refl h c]

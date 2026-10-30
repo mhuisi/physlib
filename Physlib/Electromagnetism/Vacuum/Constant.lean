@@ -67,13 +67,15 @@ open Matrix
 set_option linter.unusedVariables false
 /-- An electric potential which gives a given constant E-field and B-field. -/
 @[nolint unusedArguments]
-noncomputable def constantEB {d : ℕ} (c : SpeedOfLight)
-    (E₀ : EuclideanSpace ℝ (Fin d)) (B₀ : Fin d × Fin d → ℝ)
-    (B₀_antisymm : ∀ i j, B₀ (i, j) = - B₀ (j, i)) : ElectromagneticPotential d where
+noncomputable def constantEB
+    {d : ℕ}
+    (c : SpeedOfLight) (E₀ : EuclideanSpace ℝ (Fin d))
+    (B₀ : Fin d × Fin d → ℝ) (B₀_antisymm : ∀ i j, B₀ (i, j) = - B₀ (j, i))
+    : ElectromagneticPotential d where
   val := fun x μ =>
-  match μ with
-  | Sum.inl _ => - (1/c) * ⟪E₀, Space.basis.repr x.space⟫_ℝ
-  | Sum.inr i => (1/2) * ∑ j, B₀ (i, j) * x.space j
+    match μ with
+    | Sum.inl _ => -(1 / c) * ⟪E₀, Space.basis.repr x.space⟫_ℝ
+    | Sum.inr i => (1 / 2) * ∑ j, B₀ (i, j) * x.space j
 
 /-!
 
@@ -83,30 +85,30 @@ The potential is smooth.
 
 -/
 
-lemma constantEB_smooth {c : SpeedOfLight}
-    {E₀ : EuclideanSpace ℝ (Fin d)} {B₀ : Fin d × Fin d → ℝ}
-    {B₀_antisymm : ∀ i j, B₀ (i, j) = - B₀ (j, i)} :
-    ContDiff ℝ ∞ (constantEB c E₀ B₀ B₀_antisymm) := by
+lemma constantEB_smooth
+    {c : SpeedOfLight} {E₀ : EuclideanSpace ℝ (Fin d)} {B₀ : Fin d × Fin d → ℝ}
+    {B₀_antisymm : ∀ i j, B₀ (i, j) = - B₀ (j, i)}
+    : ContDiff ℝ ∞ (constantEB c E₀ B₀ B₀_antisymm) := by
   rw [← Lorentz.Vector.contDiff_apply]
   intro μ
   match μ with
   | Sum.inl _ =>
-      simp [constantEB]
-      apply ContDiff.neg
-      apply ContDiff.mul
-      · fun_prop
-      apply ContDiff.inner
-      · fun_prop
-      · fun_prop
+    simp [constantEB]
+    apply ContDiff.neg
+    apply ContDiff.mul
+    · fun_prop
+    apply ContDiff.inner
+    · fun_prop
+    · fun_prop
   | Sum.inr i =>
-      simp [constantEB]
+    simp [constantEB]
+    apply ContDiff.mul
+    · fun_prop
+    · apply ContDiff.sum
+      intro j _
       apply ContDiff.mul
       · fun_prop
-      · apply ContDiff.sum
-        intro j _
-        apply ContDiff.mul
-        · fun_prop
-        fun_prop
+      fun_prop
 
 /-!
 
@@ -116,14 +118,14 @@ The scalar potential of the electromagnetic potential is given by `-⟪E₀, x�
 
 -/
 
-lemma constantEB_scalarPotential {c : SpeedOfLight}
-    {E₀ : EuclideanSpace ℝ (Fin d)} {B₀ : Fin d × Fin d → ℝ}
-    {B₀_antisymm : ∀ i j, B₀ (i, j) = - B₀ (j, i)} :
-    (constantEB c E₀ B₀ B₀_antisymm).scalarPotential c = fun _ x =>
-      -⟪E₀, Space.basis.repr x⟫_ℝ := by
+lemma constantEB_scalarPotential
+    {c : SpeedOfLight} {E₀ : EuclideanSpace ℝ (Fin d)} {B₀ : Fin d × Fin d → ℝ}
+    {B₀_antisymm : ∀ i j, B₀ (i, j) = - B₀ (j, i)}
+    : (constantEB c E₀ B₀ B₀_antisymm).scalarPotential c
+      = fun _ x => - ⟪E₀, Space.basis.repr x⟫_ℝ := by
   ext t x
-  simp [scalarPotential, timeSlice, constantEB, Equiv.coe_fn_mk,
-    Function.curry_apply, Function.comp_apply]
+  simp [scalarPotential, timeSlice, constantEB, Equiv.coe_fn_mk, Function.curry_apply,
+    Function.comp_apply]
 
 /-!
 
@@ -133,14 +135,14 @@ The vector potential of the electromagnetic potential is `(1 / 2) * ∑ j, B₀ 
 
 -/
 
-lemma constantEB_vectorPotential {c : SpeedOfLight}
-    {E₀ : EuclideanSpace ℝ (Fin d)} {B₀ : Fin d × Fin d → ℝ}
-    {B₀_antisymm : ∀ i j, B₀ (i, j) = - B₀ (j, i)} :
-    (constantEB c E₀ B₀ B₀_antisymm).vectorPotential c = fun _ x => WithLp.toLp 2 fun i =>
-      (1 / 2) * ∑ j, B₀ (i, j) * x j := by
+lemma constantEB_vectorPotential
+    {c : SpeedOfLight} {E₀ : EuclideanSpace ℝ (Fin d)} {B₀ : Fin d × Fin d → ℝ}
+    {B₀_antisymm : ∀ i j, B₀ (i, j) = - B₀ (j, i)}
+    : (constantEB c E₀ B₀ B₀_antisymm).vectorPotential c
+      = fun _ x => WithLp.toLp 2 fun i => (1 / 2) * ∑ j, B₀ (i, j) * x j := by
   ext t x i
-  simp [vectorPotential, timeSlice, constantEB, Equiv.coe_fn_mk,
-    Function.curry_apply, Function.comp_apply]
+  simp [vectorPotential, timeSlice, constantEB, Equiv.coe_fn_mk, Function.curry_apply,
+    Function.comp_apply]
 
 /-!
 
@@ -150,10 +152,11 @@ lemma constantEB_vectorPotential {c : SpeedOfLight}
 open Time
 
 @[simp]
-lemma constantEB_vectorPotential_time_deriv {c : SpeedOfLight}
-    {E₀ : EuclideanSpace ℝ (Fin d)} {B₀ : Fin d × Fin d → ℝ}
-    {B₀_antisymm : ∀ i j, B₀ (i, j) = - B₀ (j, i)} (t : Time) (x : Space d) :
-    ∂ₜ ((constantEB c E₀ B₀ B₀_antisymm).vectorPotential c · x) t = 0 := by
+lemma constantEB_vectorPotential_time_deriv
+    {c : SpeedOfLight} {E₀ : EuclideanSpace ℝ (Fin d)} {B₀ : Fin d × Fin d → ℝ}
+    {B₀_antisymm : ∀ i j, B₀ (i, j) = - B₀ (j, i)}
+    (t : Time) (x : Space d)
+    : ∂ₜ ((constantEB c E₀ B₀ B₀_antisymm).vectorPotential c · x) t = 0 := by
   rw [constantEB_vectorPotential]
   simp
 
@@ -163,17 +166,18 @@ lemma constantEB_vectorPotential_time_deriv {c : SpeedOfLight}
 
 -/
 
-lemma constantEB_vectorPotential_space_deriv {c : SpeedOfLight}
-    {E₀ : EuclideanSpace ℝ (Fin d)} {B₀ : Fin d × Fin d → ℝ}
-    {B₀_antisymm : ∀ i j, B₀ (i, j) = - B₀ (j, i)} (t : Time) (x : Space d) (i j : Fin d) :
-    Space.deriv i ((constantEB c E₀ B₀ B₀_antisymm).vectorPotential c t · j) x =
-    (1 / 2) * B₀ (j, i) := by
+lemma constantEB_vectorPotential_space_deriv
+    {c : SpeedOfLight} {E₀ : EuclideanSpace ℝ (Fin d)} {B₀ : Fin d × Fin d → ℝ}
+    {B₀_antisymm : ∀ i j, B₀ (i, j) = - B₀ (j, i)}
+    (t : Time) (x : Space d) (i j : Fin d)
+    : Space.deriv i ((constantEB c E₀ B₀ B₀_antisymm).vectorPotential c t · j) x
+      = (1 / 2) * B₀ (j, i) := by
   rw [constantEB_vectorPotential]
   rw [Space.deriv_eq]
   rw [fderiv_const_mul (by fun_prop)]
   rw [fderiv_fun_sum (by fun_prop)]
-  simp only [one_div, FunLike.coe_smul, FunLike.coe_sum, Pi.smul_apply,
-    Finset.sum_apply, smul_eq_mul, mul_eq_mul_left_iff, inv_eq_zero, OfNat.ofNat_ne_zero, or_false]
+  simp only [one_div, FunLike.coe_smul, FunLike.coe_sum, Pi.smul_apply, Finset.sum_apply,
+    smul_eq_mul, mul_eq_mul_left_iff, inv_eq_zero, OfNat.ofNat_ne_zero, or_false]
   rw [Finset.sum_eq_single i]
   · rw [fderiv_const_mul (by fun_prop)]
     simp [← Space.deriv_eq]
@@ -192,14 +196,14 @@ lemma constantEB_vectorPotential_space_deriv {c : SpeedOfLight}
 -/
 
 @[simp]
-lemma constantEB_electricField {c : SpeedOfLight}
-    {E₀ : EuclideanSpace ℝ (Fin d)} {B₀ : Fin d × Fin d → ℝ}
-    {B₀_antisymm : ∀ i j, B₀ (i, j) = - B₀ (j, i)} :
-    (constantEB c E₀ B₀ B₀_antisymm).electricField c = fun _ _ => E₀ := by
+lemma constantEB_electricField
+    {c : SpeedOfLight} {E₀ : EuclideanSpace ℝ (Fin d)} {B₀ : Fin d × Fin d → ℝ}
+    {B₀_antisymm : ∀ i j, B₀ (i, j) = - B₀ (j, i)}
+    : (constantEB c E₀ B₀ B₀_antisymm).electricField c = fun _ _ => E₀ := by
   funext t x
   rw [electricField_eq]
   simp [constantEB_scalarPotential]
-  rw[Space.fun_grad_neg]
+  rw [Space.fun_grad_neg]
   simp only
   conv_lhs =>
     enter [1, 1, 1, x]
@@ -214,21 +218,21 @@ lemma constantEB_electricField {c : SpeedOfLight}
 -/
 
 @[simp]
-lemma constantEB_magneticFieldMatrix {c : SpeedOfLight}
-    {E₀ : EuclideanSpace ℝ (Fin d)} {B₀ : Fin d × Fin d → ℝ}
-    {B₀_antisymm : ∀ i j, B₀ (i, j) = - B₀ (j, i)} :
-    (constantEB c E₀ B₀ B₀_antisymm).magneticFieldMatrix c = fun _ _ => B₀ := by
+lemma constantEB_magneticFieldMatrix
+    {c : SpeedOfLight} {E₀ : EuclideanSpace ℝ (Fin d)} {B₀ : Fin d × Fin d → ℝ}
+    {B₀_antisymm : ∀ i j, B₀ (i, j) = - B₀ (j, i)}
+    : (constantEB c E₀ B₀ B₀_antisymm).magneticFieldMatrix c = fun _ _ => B₀ := by
   funext t x
   funext i
   match i with
   | (i, j) =>
-  rw [magneticFieldMatrix_eq_vectorPotential]
-  rw [constantEB_vectorPotential_space_deriv, constantEB_vectorPotential_space_deriv]
-  conv_lhs =>
-    enter [2]
-    rw [B₀_antisymm]
-  ring
-  apply constantEB_smooth.differentiable (by simp)
+    rw [magneticFieldMatrix_eq_vectorPotential]
+    rw [constantEB_vectorPotential_space_deriv, constantEB_vectorPotential_space_deriv]
+    conv_lhs =>
+      enter [2]
+      rw [B₀_antisymm]
+    ring
+    apply constantEB_smooth.differentiable (by simp)
 
 /-!
 
@@ -236,10 +240,10 @@ lemma constantEB_magneticFieldMatrix {c : SpeedOfLight}
 
 -/
 
-lemma constantEB_isExtrema {𝓕 : FreeSpace}
-    {E₀ : EuclideanSpace ℝ (Fin d)} {B₀ : Fin d × Fin d → ℝ}
-    {B₀_antisymm : ∀ i j, B₀ (i, j) = - B₀ (j, i)} :
-    IsExtrema 𝓕 (constantEB 𝓕.c E₀ B₀ B₀_antisymm) 0 := by
+lemma constantEB_isExtrema
+    {𝓕 : FreeSpace} {E₀ : EuclideanSpace ℝ (Fin d)} {B₀ : Fin d × Fin d → ℝ}
+    {B₀_antisymm : ∀ i j, B₀ (i, j) = - B₀ (j, i)}
+    : IsExtrema 𝓕 (constantEB 𝓕.c E₀ B₀ B₀_antisymm) 0 := by
   rw [isExtrema_iff_gauss_ampere_magneticFieldMatrix]
   · intro t x
     simp

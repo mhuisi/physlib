@@ -57,17 +57,25 @@ open Matrix MatrixGroups SL2C Invariants TensorSpecies Tensor complexLorentzTens
 
 -/
 
-/-- A family with a left- and a right-handed Weyl index `T^{α α'}`: an equivariant linear map
-  out of `ℂT[.upL, .upR]`. -/
-abbrev IsLeftRightWeyl (B : Type*) [AddCommMonoid B] [Module ℂ B]
-    (repLorentz : Representation ℂ SL(2,ℂ) B) (f : ℂT[.upL, .upR] →ₗ[ℂ] B) : Prop :=
-  complexLorentzTensor.IsEquivariant ![.upL, .upR] repLorentz f
+/--
+A family with a left- and a right-handed Weyl index `T^{α α'}`: an equivariant linear map
+out of `ℂT[.upL, .upR]`.
+-/
+abbrev IsLeftRightWeyl
+    (B : Type*) [AddCommMonoid B] [Module ℂ B]
+    (repLorentz : Representation ℂ (SL(2,ℂ)) B) (f : ℂT[.upL, .upR] →ₗ[ℂ] B)
+    : Prop :=
+  complexLorentzTensor.IsEquivariant (![.upL, .upR]) repLorentz f
 
-/-- A family with a dual left- and a dual right-handed Weyl index `T_{α α'}`: an equivariant
-  linear map out of `ℂT[.downL, .downR]`. -/
-abbrev IsDualLeftRightWeyl (B : Type*) [AddCommMonoid B] [Module ℂ B]
-    (repLorentz : Representation ℂ SL(2,ℂ) B) (f : ℂT[.downL, .downR] →ₗ[ℂ] B) : Prop :=
-  complexLorentzTensor.IsEquivariant ![.downL, .downR] repLorentz f
+/--
+A family with a dual left- and a dual right-handed Weyl index `T_{α α'}`: an equivariant
+linear map out of `ℂT[.downL, .downR]`.
+-/
+abbrev IsDualLeftRightWeyl
+    (B : Type*) [AddCommMonoid B] [Module ℂ B]
+    (repLorentz : Representation ℂ (SL(2,ℂ)) B) (f : ℂT[.downL, .downR] →ₗ[ℂ] B)
+    : Prop :=
+  complexLorentzTensor.IsEquivariant (![.downL, .downR]) repLorentz f
 
 /-!
 
@@ -75,17 +83,23 @@ abbrev IsDualLeftRightWeyl (B : Type*) [AddCommMonoid B] [Module ℂ B]
 
 -/
 
-/-- An invariant tensor with a left- and a right-handed Weyl index, or with their duals, is
-  zero. The inverse boost along `z` scales the two diagonal components by `4⁻¹` and `4`, and the
-  inverse half turn about `z` negates the two mixed ones; for the dual colours the inverse
-  cancels against the inverse in the matrix of the colour. -/
-lemma eq_zero_of_invariant_leftRight {k k' : complexLorentzTensor.Color}
-    (hk : (k = .upL ∧ k' = .upR) ∨ (k = .downL ∧ k' = .downR)) {t : ℂT[k, k']}
-    (ht : ∀ g : SL(2,ℂ), g • t = t) : t = 0 := by
+/--
+An invariant tensor with a left- and a right-handed Weyl index, or with their duals, is
+zero. The inverse boost along `z` scales the two diagonal components by `4⁻¹` and `4`, and the
+inverse half turn about `z` negates the two mixed ones; for the dual colours the inverse
+cancels against the inverse in the matrix of the colour.
+-/
+lemma eq_zero_of_invariant_leftRight
+    {k k' : complexLorentzTensor.Color} (hk : (k = .upL ∧ k' = .upR) ∨ (k = .downL ∧ k' = .downR))
+    {t : ℂT[k, k']} (ht : ∀ g : SL(2,ℂ), g • t = t)
+    : t = 0 := by
   have hinv : ∀ g : SL(2,ℂ), (g⁻¹).1⁻¹ = g.1 := fun g => by rw [SL2C.inverse_coe, inv_inv]
-  have h := fun (g : SL(2,ℂ)) (x : basisIdx k) (y : basisIdx k') => congrArg (fun s : ℂT[k, k'] =>
-    (Tensor.basis (S := complexLorentzTensor) _).repr s
-      ((piFinTwoEquiv fun j : Fin 2 => basisIdx (![k, k'] j)).symm (x, y))) (ht g)
+  have h := fun (g : SL(2,ℂ)) (x : basisIdx k) (y : basisIdx k') =>
+    congrArg
+      (fun s : ℂT[k, k'] =>
+        (Tensor.basis (S := complexLorentzTensor) _).repr s
+          ((piFinTwoEquiv fun j : Fin 2 => basisIdx (![k, k'] j)).symm (x, y)))
+      (ht g)
   rcases hk with ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩
   all_goals
     have h1 := h (SL2C.boostAxis 2 2 two_ne_zero)⁻¹ 0 0
@@ -94,20 +108,21 @@ lemma eq_zero_of_invariant_leftRight {k k' : complexLorentzTensor.Color}
     have h4 := h (SL2C.halfTurn 2)⁻¹ 1 0
     rw [basis_repr_smul_pair] at h1 h2 h3 h4
     first
-      | rw [toMatrix_rep_upL, toMatrix_rep_upR] at h1 h2 h3 h4
-      | rw [toMatrix_rep_downL, toMatrix_rep_downR] at h1 h2 h3 h4
+    | rw [toMatrix_rep_upL, toMatrix_rep_upR] at h1 h2 h3 h4
+    | rw [toMatrix_rep_downL, toMatrix_rep_downR] at h1 h2 h3 h4
     try simp only [hinv] at h1 h2 h3 h4
     simp [Fin.sum_univ_two, Matrix.adjugate_fin_two, map_ofNat] at h1 h2 h3 h4
     apply (Tensor.basis (S := complexLorentzTensor) _).repr.injective
     ext φ
-    obtain ⟨⟨a, b⟩, rfl⟩ :=
-      (piFinTwoEquiv fun j : Fin 2 => basisIdx (![_, _] j)).symm.surjective φ
+    obtain ⟨⟨a, b⟩, rfl⟩ := (piFinTwoEquiv fun j : Fin 2 => basisIdx (![_, _] j)).symm.surjective φ
     revert a b
     change ∀ a b : Fin 2, _
     simp only [Fin.forall_fin_two, map_zero, Finsupp.coe_zero, Pi.zero_apply]
-    exact ⟨⟨(mul_left_eq_self₀.1 h1).resolve_left (by norm_num),
-      CharZero.neg_eq_self_iff.1 h3⟩, CharZero.neg_eq_self_iff.1 h4,
-      (mul_left_eq_self₀.1 h2).resolve_left (by norm_num)⟩
+    exact ⟨
+      ⟨(mul_left_eq_self₀.1 h1).resolve_left (by norm_num), CharZero.neg_eq_self_iff.1 h3⟩,
+      CharZero.neg_eq_self_iff.1 h4,
+      (mul_left_eq_self₀.1 h2).resolve_left (by norm_num)
+    ⟩
 
 /-!
 
@@ -115,36 +130,44 @@ lemma eq_zero_of_invariant_leftRight {k k' : complexLorentzTensor.Color}
 
 -/
 
-variable {B : Type*} [AddCommGroup B] [Module ℂ B] {repLorentz : Representation ℂ SL(2,ℂ) B}
+variable {B : Type*} [AddCommGroup B] [Module ℂ B] {repLorentz : Representation ℂ (SL(2,ℂ)) B}
 
-/-- The invariants of the range of a left-right family reduce to `⊥`: a Lorentz invariant of
-  `LinearMap.range f ⊔ S`, for `S` a Lorentz-stable submodule, lies in `S`. -/
-lemma IsLeftRightWeyl.reducesInvariantsTo_bot {f : ℂT[.upL, .upR] →ₗ[ℂ] B}
-    (hf : IsLeftRightWeyl B repLorentz f) :
-    ReducesInvariantsTo (fun g : SL(2,ℂ) => repLorentz g) (LinearMap.range f) ⊥ :=
+/--
+The invariants of the range of a left-right family reduce to `⊥`: a Lorentz invariant of
+`LinearMap.range f ⊔ S`, for `S` a Lorentz-stable submodule, lies in `S`.
+-/
+lemma IsLeftRightWeyl.reducesInvariantsTo_bot
+    {f : ℂT[.upL, .upR] →ₗ[ℂ] B} (hf : IsLeftRightWeyl B repLorentz f)
+    : ReducesInvariantsTo (fun g : SL(2,ℂ) => repLorentz g) (LinearMap.range f) ⊥ :=
   TensorSpecies.IsEquivariant.reducesInvariantsTo_bot hf (complexLorentzTensor.isAdjointClosed _)
     fun _ ht => eq_zero_of_invariant_leftRight (Or.inl ⟨rfl, rfl⟩) ht
 
 /-- Every Lorentz invariant in the range of a left-right family is zero. -/
-lemma IsLeftRightWeyl.eq_zero_of_invariant {f : ℂT[.upL, .upR] →ₗ[ℂ] B}
-    (hf : IsLeftRightWeyl B repLorentz f) {x : B} (hx : x ∈ LinearMap.range f)
-    (hinv : ∀ g : SL(2,ℂ), repLorentz g x = x) : x = 0 :=
+lemma IsLeftRightWeyl.eq_zero_of_invariant
+    {f : ℂT[.upL, .upR] →ₗ[ℂ] B} (hf : IsLeftRightWeyl B repLorentz f)
+    {x : B} (hx : x ∈ LinearMap.range f) (hinv : ∀ g : SL(2,ℂ), repLorentz g x = x)
+    : x = 0 :=
   TensorSpecies.IsEquivariant.eq_zero_of_invariant hf (complexLorentzTensor.isAdjointClosed _)
-    (fun _ ht => eq_zero_of_invariant_leftRight (Or.inl ⟨rfl, rfl⟩) ht) hx hinv
+    (fun _ ht => eq_zero_of_invariant_leftRight (Or.inl ⟨rfl, rfl⟩) ht)
+    hx hinv
 
-/-- The invariants of the range of a dual left-right family reduce to `⊥`: a Lorentz invariant
-  of `LinearMap.range f ⊔ S`, for `S` a Lorentz-stable submodule, lies in `S`. -/
-lemma IsDualLeftRightWeyl.reducesInvariantsTo_bot {f : ℂT[.downL, .downR] →ₗ[ℂ] B}
-    (hf : IsDualLeftRightWeyl B repLorentz f) :
-    ReducesInvariantsTo (fun g : SL(2,ℂ) => repLorentz g) (LinearMap.range f) ⊥ :=
+/--
+The invariants of the range of a dual left-right family reduce to `⊥`: a Lorentz invariant
+of `LinearMap.range f ⊔ S`, for `S` a Lorentz-stable submodule, lies in `S`.
+-/
+lemma IsDualLeftRightWeyl.reducesInvariantsTo_bot
+    {f : ℂT[.downL, .downR] →ₗ[ℂ] B} (hf : IsDualLeftRightWeyl B repLorentz f)
+    : ReducesInvariantsTo (fun g : SL(2,ℂ) => repLorentz g) (LinearMap.range f) ⊥ :=
   TensorSpecies.IsEquivariant.reducesInvariantsTo_bot hf (complexLorentzTensor.isAdjointClosed _)
     fun _ ht => eq_zero_of_invariant_leftRight (Or.inr ⟨rfl, rfl⟩) ht
 
 /-- Every Lorentz invariant in the range of a dual left-right family is zero. -/
-lemma IsDualLeftRightWeyl.eq_zero_of_invariant {f : ℂT[.downL, .downR] →ₗ[ℂ] B}
-    (hf : IsDualLeftRightWeyl B repLorentz f) {x : B} (hx : x ∈ LinearMap.range f)
-    (hinv : ∀ g : SL(2,ℂ), repLorentz g x = x) : x = 0 :=
+lemma IsDualLeftRightWeyl.eq_zero_of_invariant
+    {f : ℂT[.downL, .downR] →ₗ[ℂ] B} (hf : IsDualLeftRightWeyl B repLorentz f)
+    {x : B} (hx : x ∈ LinearMap.range f) (hinv : ∀ g : SL(2,ℂ), repLorentz g x = x)
+    : x = 0 :=
   TensorSpecies.IsEquivariant.eq_zero_of_invariant hf (complexLorentzTensor.isAdjointClosed _)
-    (fun _ ht => eq_zero_of_invariant_leftRight (Or.inr ⟨rfl, rfl⟩) ht) hx hinv
+    (fun _ ht => eq_zero_of_invariant_leftRight (Or.inr ⟨rfl, rfl⟩) ht)
+    hx hinv
 
 end Lorentz

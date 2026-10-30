@@ -60,8 +60,8 @@ variable (T : TightBindingChain)
 -/
 
 /-- A hermitian operator of the chain as an observable. -/
-noncomputable def toObservable (A : T.HilbertSpace →ₗ[ℂ] T.HilbertSpace) (hA : A.IsSymmetric) :
-    Observable (T.HilbertSpace →L[ℂ] T.HilbertSpace) :=
+noncomputable def toObservable (A : T.HilbertSpace →ₗ[ℂ] T.HilbertSpace) (hA : A.IsSymmetric)
+    : Observable (T.HilbertSpace →L[ℂ] T.HilbertSpace) :=
   ⟨LinearMap.toContinuousLinearMap A, isSelfAdjoint_iff_isSymmetric.mpr hA⟩
 
 /-- The Hamiltonian with open boundary conditions as an observable. -/
@@ -78,22 +78,27 @@ noncomputable abbrev positionObservable := T.toObservable T.position T.position_
 -/
 
 /-- The bracket `⁅H, X⁆` only connects sites joined by hopping, weighted by their distance. -/
-lemma inner_bracket_openHamiltonian_position (m n : Fin T.N) :
-    ⟪|m⟩, ((⁅T.openHamiltonianObservable, T.positionObservable⁆ : Observable _) :
-      _ →L[ℂ] _) |n⟩⟫_ℂ =
-      -(Complex.I / 2) * ((T.a * ((n : ℕ) - (m : ℕ)) : ℝ) : ℂ) *
-        ⟪|m⟩, T.openHamiltonian |n⟩⟫_ℂ := by
-  rw [selfAdjoint.coe_bracket, smul_apply, inner_smul_right, mul_assoc,
-    ← inner_commutator_position]
+lemma inner_bracket_openHamiltonian_position (m n : Fin T.N)
+    : ⟪|m⟩, ((⁅T.openHamiltonianObservable, T.positionObservable⁆ : Observable _) :
+        _ →L[ℂ] _) |n⟩⟫_ℂ
+      = -(Complex.I / 2) * ((T.a * ((n : ℕ) - (m : ℕ)) : ℝ) : ℂ)
+        * ⟪|m⟩, T.openHamiltonian |n⟩⟫_ℂ := by
+  rw [selfAdjoint.coe_bracket, smul_apply, inner_smul_right, mul_assoc, ← inner_commutator_position]
   rfl
 
-/-- The bracket `⁅H, X⁆` moves the particle exactly one site, a distance `a`, with amplitude
-`± i a t / 2`; every other matrix element vanishes. -/
-lemma inner_bracket_openHamiltonian_position_eq (m n : Fin T.N) :
-    ⟪|m⟩, ((⁅T.openHamiltonianObservable, T.positionObservable⁆ : Observable _) :
-      _ →L[ℂ] _) |n⟩⟫_ℂ =
-      if (m : ℕ) + 1 = n then Complex.I * (T.a * T.t / 2 : ℝ)
-      else if (n : ℕ) + 1 = m then -(Complex.I * (T.a * T.t / 2 : ℝ)) else 0 := by
+/--
+The bracket `⁅H, X⁆` moves the particle exactly one site, a distance `a`, with amplitude
+`± i a t / 2`; every other matrix element vanishes.
+-/
+lemma inner_bracket_openHamiltonian_position_eq (m n : Fin T.N)
+    : ⟪|m⟩, ((⁅T.openHamiltonianObservable, T.positionObservable⁆ : Observable _) :
+        _ →L[ℂ] _) |n⟩⟫_ℂ
+      = if (m : ℕ) + 1 = n then
+          Complex.I * (T.a * T.t / 2 : ℝ)
+        else if (n : ℕ) + 1 = m then
+          -(Complex.I * (T.a * T.t / 2 : ℝ))
+        else
+          0 := by
   rw [inner_bracket_openHamiltonian_position, inner_openHamiltonian]
   by_cases hA : (m : ℕ) + 1 = n
   · have hn : ((n : ℕ) : ℂ) = (m : ℕ) + 1 := by exact_mod_cast hA.symm
@@ -113,13 +118,14 @@ lemma inner_bracket_openHamiltonian_position_eq (m n : Fin T.N) :
 
 -/
 
-/-- **Energy–position uncertainty of the open tight binding chain.** In every state `ω`,
-`Cov(H, X)² + ⟨⁅H, X⁆⟩² ≤ Var H · Var X`. -/
-lemma robertson_schrodinger_openHamiltonian_position
-    (ω : 𝓢[ℂ, T.HilbertSpace →L[ℂ] T.HilbertSpace]) :
-    covariance ω T.openHamiltonianObservable T.positionObservable ^ 2 +
-        ω⟨⁅T.openHamiltonianObservable, T.positionObservable⁆⟩ ^ 2 ≤
-      variance ω T.openHamiltonianObservable * variance ω T.positionObservable :=
+/--
+**Energy–position uncertainty of the open tight binding chain.** In every state `ω`,
+`Cov(H, X)² + ⟨⁅H, X⁆⟩² ≤ Var H · Var X`.
+-/
+lemma robertson_schrodinger_openHamiltonian_position (ω : 𝓢[ℂ, T.HilbertSpace →L[ℂ] T.HilbertSpace])
+    : covariance ω T.openHamiltonianObservable T.positionObservable ^ 2
+        + ω⟨⁅T.openHamiltonianObservable, T.positionObservable⁆⟩ ^ 2
+      ≤ variance ω T.openHamiltonianObservable * variance ω T.positionObservable :=
   robertson_schrodinger ω _ _
 
 end TightBindingChain

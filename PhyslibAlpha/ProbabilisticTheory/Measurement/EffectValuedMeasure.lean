@@ -66,10 +66,11 @@ structure EffectValuedMeasure (Ω : Type*) [MeasurableSpace Ω] (E : Type*) [Ord
   /-- The certain event gets `1`. -/
   map_univ' : toFun .univ .univ = 1
   /-- The effects of countably many disjoint events add up to the effect of their union. -/
-  countably_additive' : ∀ (s : ℕ → Set Ω) (hs : ∀ n, MeasurableSet (s n)),
-    Pairwise (Disjoint on s) →
-      IsLUB (Set.range fun N => ∑ n ∈ Finset.range N, (toFun (s n) (hs n) : E))
-        (toFun (⋃ n, s n) (.iUnion hs) : E)
+  countably_additive'
+    : ∀ (s : ℕ → Set Ω) (hs : ∀ n, MeasurableSet (s n)),
+      Pairwise (Disjoint on s)
+        → IsLUB (Set.range fun N => ∑ n ∈ Finset.range N, (toFun (s n) (hs n) : E))
+          (toFun (⋃ n, s n) (.iUnion hs) : E)
 
 namespace EffectValuedMeasure
 
@@ -80,15 +81,14 @@ instance : CoeFun (EffectValuedMeasure Ω E) fun _ => ∀ s : Set Ω, Measurable
 lemma ext {μ ν : EffectValuedMeasure Ω E} (h : ∀ s hs, μ s hs = ν s hs) : μ = ν := by
   cases μ; cases ν; congr; exact funext fun s => funext (h s)
 
-@[simp]
-lemma map_empty (μ : EffectValuedMeasure Ω E) : μ ∅ .empty = 0 := μ.map_empty'
+@[simp] lemma map_empty (μ : EffectValuedMeasure Ω E) : μ ∅ .empty = 0 := μ.map_empty'
 
-@[simp]
-lemma map_univ (μ : EffectValuedMeasure Ω E) : μ .univ .univ = 1 := μ.map_univ'
+@[simp] lemma map_univ (μ : EffectValuedMeasure Ω E) : μ .univ .univ = 1 := μ.map_univ'
 
-lemma countably_additive (μ : EffectValuedMeasure Ω E) {s : ℕ → Set Ω}
-    (hs : ∀ n, MeasurableSet (s n)) (hd : Pairwise (Disjoint on s)) :
-    IsLUB (Set.range fun N => ∑ n ∈ Finset.range N, (μ (s n) (hs n) : E))
+lemma countably_additive
+    (μ : EffectValuedMeasure Ω E)
+    {s : ℕ → Set Ω} (hs : ∀ n, MeasurableSet (s n)) (hd : Pairwise (Disjoint on s))
+    : IsLUB (Set.range fun N => ∑ n ∈ Finset.range N, (μ (s n) (hs n) : E))
       (μ (⋃ n, s n) (.iUnion hs) : E) :=
   μ.countably_additive' s hs hd
 
@@ -96,8 +96,8 @@ end EffectValuedMeasure
 
 namespace EffectValuedMeasure
 
-variable {Ω E : Type*} [Fintype Ω] [MeasurableSpace Ω] [MeasurableSingletonClass Ω]
-  [OrderUnitSpace E]
+variable
+  {Ω E : Type*} [Fintype Ω] [MeasurableSpace Ω] [MeasurableSingletonClass Ω] [OrderUnitSpace E]
 
 /-! ## B. Atomic effect sums -/
 
@@ -107,16 +107,14 @@ noncomputable def eventFinset (s : Set Ω) : Finset Ω := by
   exact Finset.univ.filter (· ∈ s)
 
 /-- The sum of the atomic effects belonging to an event. -/
-noncomputable def atomSum (a : Ω → Effect E) (s : Set Ω) : E :=
-  ∑ x ∈ eventFinset s, (a x : E)
+noncomputable def atomSum (a : Ω → Effect E) (s : Set Ω) : E := ∑ x ∈ eventFinset s, (a x : E)
 
 omit [MeasurableSpace Ω] [MeasurableSingletonClass Ω] in
 lemma atomSum_nonneg (a : Ω → Effect E) (s : Set Ω) : 0 ≤ atomSum a s := by
   exact Finset.sum_nonneg fun x _ => (a x).2.1
 
 omit [MeasurableSpace Ω] [MeasurableSingletonClass Ω] in
-lemma atomSum_mono (a : Ω → Effect E) {s t : Set Ω} (hst : s ⊆ t) :
-    atomSum a s ≤ atomSum a t := by
+lemma atomSum_mono (a : Ω → Effect E) {s t : Set Ω} (hst : s ⊆ t) : atomSum a s ≤ atomSum a t := by
   apply Finset.sum_le_sum_of_subset_of_nonneg
   · intro x hx
     simp only [eventFinset, Finset.mem_filter, Finset.mem_univ, true_and] at hx ⊢
@@ -128,9 +126,8 @@ lemma atomSum_univ (a : Ω → Effect E) : atomSum a Set.univ = ∑ x, (a x : E)
   simp [atomSum, eventFinset]
 
 omit [MeasurableSpace Ω] [MeasurableSingletonClass Ω] in
-lemma atomSum_partialSums (a : Ω → Effect E) (s : ℕ → Set Ω)
-    (hd : Pairwise (Disjoint on s)) (N : ℕ) :
-    (∑ n ∈ Finset.range N, atomSum a (s n)) = atomSum a (⋃ n < N, s n) := by
+lemma atomSum_partialSums (a : Ω → Effect E) (s : ℕ → Set Ω) (hd : Pairwise (Disjoint on s)) (N : ℕ)
+    : (∑ n ∈ Finset.range N, atomSum a (s n)) = atomSum a (⋃ n < N, s n) := by
   classical
   let t : ℕ → Finset Ω := fun n => eventFinset (s n)
   have ht : Set.PairwiseDisjoint (↑(Finset.range N) : Set ℕ) t := by
@@ -149,35 +146,43 @@ lemma atomSum_partialSums (a : Ω → Effect E) (s : ℕ → Set Ω)
     rfl
 
 omit [Fintype Ω] [MeasurableSpace Ω] [MeasurableSingletonClass Ω] in
-/-- On a finite outcome space, the union of a sequence of events is already the union of an initial
-segment. -/
-lemma exists_partialUnion_eq_iUnion [Finite Ω] (s : ℕ → Set Ω) :
-    ∃ N, ⋃ n < N, s n = ⋃ n, s n := by
-  let P : ℕ →o Set Ω := ⟨fun N => ⋃ n < N, s n, fun _ _ h =>
-    Set.iUnion₂_subset fun n hn => Set.subset_iUnion₂_of_subset n (lt_of_lt_of_le hn h) le_rfl⟩
+/--
+On a finite outcome space, the union of a sequence of events is already the union of an initial
+segment.
+-/
+lemma exists_partialUnion_eq_iUnion [Finite Ω] (s : ℕ → Set Ω) : ∃ N, ⋃ n < N, s n = ⋃ n, s n := by
+  let P : ℕ →o Set Ω := ⟨
+    fun N => ⋃ n < N, s n,
+    fun _ _ h =>
+      Set.iUnion₂_subset fun n hn => Set.subset_iUnion₂_of_subset n (lt_of_lt_of_le hn h) le_rfl
+  ⟩
   obtain ⟨N, hN⟩ := WellFoundedGT.monotone_chain_condition P
-  refine ⟨N, (Set.iUnion₂_subset fun n _ => Set.subset_iUnion s n).antisymm
-    (Set.iUnion_subset fun n => ?_)⟩
+  refine ⟨
+    N,
+    (Set.iUnion₂_subset fun n _ => Set.subset_iUnion s n).antisymm (Set.iUnion_subset fun n => ?_)
+  ⟩
   rw [show (⋃ k < N, s k) = P (max N (n + 1)) from hN _ (le_max_left _ _)]
   exact Set.subset_iUnion₂ (s := fun k (_ : k < max N (n + 1)) => s k) n (by omega)
 
 /-! ## C. Finite-outcome effect-valued measures -/
 
 /-- A normalized finite family of atomic effects as an effect-valued measure. -/
-noncomputable def ofFintype (a : Ω → Effect E) (ha : ∑ x, (a x : E) = 1) :
-    EffectValuedMeasure Ω E where
-  toFun s _ := ⟨atomSum a s, atomSum_nonneg a s, by
-    rw [← ha, ← atomSum_univ]
-    exact atomSum_mono a (Set.subset_univ s)⟩
+noncomputable def ofFintype (a : Ω → Effect E) (ha : ∑ x, (a x : E) = 1)
+    : EffectValuedMeasure Ω E where
+  toFun s _ := ⟨
+    atomSum a s,
+    atomSum_nonneg a s,
+    by
+      rw [← ha, ← atomSum_univ]
+      exact atomSum_mono a (Set.subset_univ s)
+  ⟩
   map_empty' := Subtype.ext (by simp [atomSum, eventFinset])
   map_univ' := Subtype.ext (atomSum_univ a |>.trans ha)
   countably_additive' s _ hd := by
-    change IsLUB (Set.range fun n => ∑ k ∈ Finset.range n, atomSum a (s k))
-      (atomSum a (⋃ k, s k))
+    change IsLUB (Set.range fun n => ∑ k ∈ Finset.range n, atomSum a (s k)) (atomSum a (⋃ k, s k))
     obtain ⟨N, hN⟩ := exists_partialUnion_eq_iUnion s
-    have hpartial (n : ℕ) :
-        (∑ k ∈ Finset.range n, atomSum a (s k)) =
-          atomSum a (⋃ k < n, s k) := atomSum_partialSums a s hd n
+    have hpartial (n : ℕ) : (∑ k ∈ Finset.range n, atomSum a (s k)) = atomSum a (⋃ k < n, s k) :=
+      atomSum_partialSums a s hd n
     refine ⟨Set.forall_mem_range.2 fun n => ?_, fun b hb => ?_⟩
     · rw [hpartial]
       exact atomSum_mono a (Set.iUnion₂_subset fun k hk => Set.subset_iUnion s k)
@@ -188,64 +193,78 @@ noncomputable def ofFintype (a : Ω → Effect E) (ha : ∑ x, (a x : E) = 1) :
 
 omit [MeasurableSingletonClass Ω] in
 @[simp]
-lemma coe_ofFintype_apply (a : Ω → Effect E) (ha : ∑ x, (a x : E) = 1)
-    (s : Set Ω) (hs : MeasurableSet s) : ((ofFintype a ha) s hs : E) = atomSum a s :=
+lemma coe_ofFintype_apply
+    (a : Ω → Effect E) (ha : ∑ x, (a x : E) = 1) (s : Set Ω) (hs : MeasurableSet s)
+    : ((ofFintype a ha) s hs : E) = atomSum a s :=
   rfl
 
 omit [MeasurableSingletonClass Ω] in
 @[simp, nolint simpNF]
-lemma coe_ofFintype_singleton (a : Ω → Effect E) (ha : ∑ x, (a x : E) = 1) (x : Ω)
-    (hx : MeasurableSet {x}) : ((ofFintype a ha) {x} hx : E) = a x := by
-  rw [coe_ofFintype_apply, atomSum, show eventFinset ({x} : Set Ω) = {x} by
-    ext; simp [eventFinset], Finset.sum_singleton]
+lemma coe_ofFintype_singleton
+    (a : Ω → Effect E) (ha : ∑ x, (a x : E) = 1) (x : Ω) (hx : MeasurableSet {x})
+    : ((ofFintype a ha) {x} hx : E) = a x := by
+  rw [coe_ofFintype_apply, atomSum, show eventFinset ({x} : Set Ω) = {x} by ext; simp [eventFinset],
+    Finset.sum_singleton]
 
 /-! ## D. Finite additivity and atomic reconstruction -/
 
 omit [Fintype Ω] [MeasurableSingletonClass Ω] in
 /-- An effect-valued measure is additive on two disjoint events. -/
-lemma map_union_of_disjoint (M : EffectValuedMeasure Ω E) {s t : Set Ω}
-    (hs : MeasurableSet s) (ht : MeasurableSet t) (hd : Disjoint s t) :
-    (M (s ∪ t) (hs.union ht) : E) = M s hs + M t ht := by
-  let u : ℕ → Set Ω := fun n => if n = 0 then s else if n = 1 then t else ∅
+lemma map_union_of_disjoint
+    (M : EffectValuedMeasure Ω E)
+    {s t : Set Ω} (hs : MeasurableSet s) (ht : MeasurableSet t) (hd : Disjoint s t)
+    : (M (s ∪ t) (hs.union ht) : E) = M s hs + M t ht := by
+  let u : ℕ → Set Ω := fun n =>
+    if n = 0 then
+      s
+    else if n = 1 then
+      t
+    else
+      ∅
   have hu (n : ℕ) : MeasurableSet (u n) := by unfold u; split_ifs <;> simp [hs, ht]
   have hud : Pairwise (Disjoint on u) := fun i j hij => by
     simp only [Function.onFun, u]; split_ifs <;> simp_all [hd.symm]
   have hU : ⋃ n, u n = s ∪ t := by
-    ext x; simp only [Set.mem_iUnion, Set.mem_union, u]
-    exact ⟨fun ⟨n, hn⟩ => by split_ifs at hn <;> simp_all,
-      fun h => h.elim (fun h => ⟨0, by simpa⟩) fun h => ⟨1, by simpa⟩⟩
+    ext x
+    simp only [Set.mem_iUnion, Set.mem_union, u]
+    exact ⟨
+      fun ⟨n, hn⟩ => by split_ifs at hn <;> simp_all,
+      fun h => h.elim (fun h => ⟨0, by simpa⟩) fun h => ⟨1, by simpa⟩
+    ⟩
   have hsum (n : ℕ) : ∑ k ∈ Finset.range (n + 2), (M (u k) (hu k) : E) = M s hs + M t ht := by
     simp [Finset.sum_range_succ', u, add_comm]
   have hmono : Monotone fun n => ∑ k ∈ Finset.range n, (M (u k) (hu k) : E) :=
     (Finset.sum_mono_set_of_nonneg fun k => (M (u k) (hu k)).2.1).comp Finset.range_mono
   have hlub := M.countably_additive hu hud
   simp only [hU] at hlub
-  exact hlub.unique (IsGreatest.isLUB ⟨⟨2, hsum 0⟩, Set.forall_mem_range.2 fun n =>
-    (hmono (Nat.le_add_right n 2)).trans (hsum n).le⟩)
+  exact hlub.unique (IsGreatest.isLUB
+    ⟨⟨2, hsum 0⟩, Set.forall_mem_range.2 fun n => (hmono (Nat.le_add_right n 2)).trans (hsum n).le⟩)
 
 omit [Fintype Ω] in
 /-- The effect of a finite event is the sum of the effects of its outcomes. -/
-lemma coe_apply_finset (M : EffectValuedMeasure Ω E) (t : Finset Ω) :
-    (M t t.measurableSet : E) = ∑ x ∈ t, (M {x} (measurableSet_singleton x) : E) := by
+lemma coe_apply_finset (M : EffectValuedMeasure Ω E) (t : Finset Ω)
+    : (M t t.measurableSet : E) = ∑ x ∈ t, (M {x} (measurableSet_singleton x) : E) := by
   classical
   induction t using Finset.induction_on with
   | empty => simp
   | @insert x t hxt ih =>
-    rw [Finset.sum_insert hxt, ← ih, ← map_union_of_disjoint M (measurableSet_singleton x)
-      t.measurableSet (Set.disjoint_singleton_left.2 hxt)]
+    rw [Finset.sum_insert hxt, ← ih,
+      ← map_union_of_disjoint M (measurableSet_singleton x) t.measurableSet
+        (Set.disjoint_singleton_left.2 hxt)]
     simp only [Finset.coe_insert, Set.insert_eq]
 
 /-- On a finite discrete outcome space, a measurement is the sum of its singleton effects. -/
-lemma coe_apply_eq_atomSum (M : EffectValuedMeasure Ω E) (s : Set Ω) (hs : MeasurableSet s) :
-    (M s hs : E) = atomSum (fun x => M {x} (measurableSet_singleton x)) s := by
+lemma coe_apply_eq_atomSum (M : EffectValuedMeasure Ω E) (s : Set Ω) (hs : MeasurableSet s)
+    : (M s hs : E) = atomSum (fun x => M {x} (measurableSet_singleton x)) s := by
   have hevent : (eventFinset s : Set Ω) = s := by ext; simp [eventFinset]
   rw [atomSum, ← coe_apply_finset]
   simp only [hevent]
 
 /-- Two measurements on a finite discrete space agree when all singleton effects agree. -/
-lemma ext_of_singleton {M N : EffectValuedMeasure Ω E}
-    (h : ∀ x, M {x} (measurableSet_singleton x) = N {x} (measurableSet_singleton x)) :
-    M = N := by
+lemma ext_of_singleton
+    {M N : EffectValuedMeasure Ω E}
+    (h : ∀ x, M {x} (measurableSet_singleton x) = N {x} (measurableSet_singleton x))
+    : M = N := by
   apply EffectValuedMeasure.ext
   intro s hs
   apply Subtype.ext
@@ -263,19 +282,23 @@ variable {Ω Ω' E : Type*} [MeasurableSpace Ω] [MeasurableSpace Ω'] [OrderUni
 /-! ## E. Relabeling outcomes -/
 
 /-- Relabel the outcomes of an effect-valued measure along a measurable map. -/
-def mapOutcome (N : EffectValuedMeasure Ω' E) (f : Ω' → Ω) (hf : Measurable f) :
-    EffectValuedMeasure Ω E where
+def mapOutcome (N : EffectValuedMeasure Ω' E) (f : Ω' → Ω) (hf : Measurable f)
+    : EffectValuedMeasure Ω E where
   toFun s hs := N (f ⁻¹' s) (hf hs)
   map_empty' := by simp
   map_univ' := by simp
   countably_additive' s hs hd := by
-    simpa only [Set.preimage_iUnion] using N.countably_additive (fun n => hf (hs n))
-      fun i j hij => Set.disjoint_left.2 fun x hxi hxj =>
-        Set.disjoint_left.1 (hd hij) hxi hxj
+    simpa only [Set.preimage_iUnion] using
+      N.countably_additive
+        (fun n => hf (hs n))
+        fun i j hij => Set.disjoint_left.2 fun x hxi hxj => Set.disjoint_left.1 (hd hij) hxi hxj
 
 @[simp]
-lemma coe_mapOutcome_apply (N : EffectValuedMeasure Ω' E) (f : Ω' → Ω) (hf : Measurable f)
-    (s : Set Ω) (hs : MeasurableSet s) : (N.mapOutcome f hf s hs : E) = N (f ⁻¹' s) (hf hs) :=
+lemma coe_mapOutcome_apply
+    (N : EffectValuedMeasure Ω' E)
+    (f : Ω' → Ω) (hf : Measurable f)
+    (s : Set Ω) (hs : MeasurableSet s)
+    : (N.mapOutcome f hf s hs : E) = N (f ⁻¹' s) (hf hs) :=
   rfl
 
 end EffectValuedMeasure

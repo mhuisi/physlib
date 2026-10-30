@@ -20,8 +20,10 @@ public import Physlib.Meta.Informal.Basic
 namespace Physlib
 open Lean
 
-/-- A `HTMLNote` is a structure containing the html information from
-  individual contributions (commands, informal commands, note ..) etc. to a note file. -/
+/--
+A `HTMLNote` is a structure containing the html information from
+individual contributions (commands, informal commands, note ..) etc. to a note file.
+-/
 structure HTMLNote where
   /-- The name of the file the contribution came from. -/
   fileName : Name
@@ -31,20 +33,20 @@ structure HTMLNote where
   line : Nat
 
 /-- Converts a note info into a HTMLNote. -/
-def HTMLNote.ofNodeInfo (ni : NoteInfo) : HTMLNote :=
-  { ni with }
+def HTMLNote.ofNodeInfo (ni : NoteInfo) : HTMLNote := { ni with }
 
 /-- An formal definition or lemma to html for a note. -/
 def HTMLNote.ofFormal (name : Name) : CoreM HTMLNote := do
   let line ← name.lineNumber
   let fileName ← name.fileName
   return {
-    fileName, line,
-    content := s!"
-<div class=\"code-block-container\">
-  <a href=\"{fileName.toGitHubLink line}\" class=\"code-button\">View/Improve</a>
-  <pre><code>{← name.getDeclString}</code></pre>
-</div>"
+    fileName
+    line
+    content :=
+      s!"\n<div class=\"code-block-container\">\
+        \n  <a href=\"{fileName.toGitHubLink line}\" class=\"code-button\">View/Improve</a>\
+        \n  <pre><code>{← name.getDeclString}</code></pre>\
+        \n</div>"
   }
 
 /-- An informal definition or lemma to html for a note. -/
@@ -60,23 +62,23 @@ unsafe def HTMLNote.ofInformal (name : Name) : CoreM HTMLNote := do
     -- let X ← Informal.constantInfoToInformalDefinition constInfo
     -- let fragment := X.math.replace "\n" "<br>"
     let fragment := doc.replace "\n" "<br>"
-    content := s!"
-<div class=\"informal-def\">
-  <a href=\"{webAddress}\" class=\"button\">Improve/Formalize</a>
-  <b>Informal definition:</b> {name}<br>
-  {fragment}
-</div>"
+    content :=
+      s!"\n<div class=\"informal-def\">\
+        \n  <a href=\"{webAddress}\" class=\"button\">Improve/Formalize</a>\
+        \n  <b>Informal definition:</b> {name}<br>\
+        \n  {fragment}\
+        \n</div>"
   else if constInfo.type.isConstOf ``InformalLemma then
     -- let X ← Informal.constantInfoToInformalLemma constInfo
     -- let fragment := X.math.replace "\n" "<br>"
     let doc ← name.getDocString
     let fragment := doc.replace "\n" "<br>"
-    content := s!"
-<div class=\"informal-def\">
-  <a href=\"{webAddress}\" class=\"button\">Improve/Formalize</a>
-  <b>Informal lemma:</b> {name}<br>
-  {fragment}
-</div>"
+    content :=
+      s!"\n<div class=\"informal-def\">\
+        \n  <a href=\"{webAddress}\" class=\"button\">Improve/Formalize</a>\
+        \n  <b>Informal lemma:</b> {name}<br>\
+        \n  {fragment}\
+        \n</div>"
   return { content, fileName, line }
 
 end Physlib

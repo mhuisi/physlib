@@ -58,8 +58,10 @@ open StandardSl2Module
 
 variable {K : Type*} [Field K] {a b n : ℕ}
 
-/-- A linear map between standard modules is an intertwiner if it commutes with the raising,
-lowering and weight operators. -/
+/--
+A linear map between standard modules is an intertwiner if it commutes with the raising,
+lowering and weight operators.
+-/
 structure IsIntertwiner (φ : StandardSl2Module K a →ₗ[K] StandardSl2Module K b) : Prop where
   comm_ρE : φ ∘ₗ ρE = ρE ∘ₗ φ
   comm_ρF : φ ∘ₗ ρF = ρF ∘ₗ φ
@@ -78,12 +80,12 @@ lemma apply_ρF (hφ : IsIntertwiner φ) (x : StandardSl2Module K a) : φ (ρF x
 lemma apply_ρH (hφ : IsIntertwiner φ) (x : StandardSl2Module K a) : φ (ρH x) = ρH (φ x) :=
   LinearMap.congr_fun hφ.comm_ρH x
 
-lemma apply_ρF_pow (hφ : IsIntertwiner φ) (l : ℕ) (x : StandardSl2Module K a) :
-    φ ((ρF ^ l) x) = (ρF ^ l) (φ x) := by
+lemma apply_ρF_pow (hφ : IsIntertwiner φ) (l : ℕ) (x : StandardSl2Module K a)
+    : φ ((ρF ^ l) x) = (ρF ^ l) (φ x) := by
   induction l with
   | zero => rfl
-  | succ l ih => rw [pow_succ', Module.End.mul_apply, hφ.apply_ρF, ih, pow_succ',
-      Module.End.mul_apply]
+  | succ l ih =>
+    rw [pow_succ', Module.End.mul_apply, hφ.apply_ρF, ih, pow_succ', Module.End.mul_apply]
 
 /-- The identity is an intertwiner. -/
 lemma id : IsIntertwiner (LinearMap.id : StandardSl2Module K n →ₗ[K] StandardSl2Module K n) :=
@@ -110,16 +112,17 @@ end IsIntertwiner
 -/
 
 /-- The lowering string of `v_0` runs through the coordinate vectors: `f^l v_0 = v_l`. -/
-lemma ρF_pow_vNat_zero (l : ℕ) :
-    ((ρF : Module.End K (StandardSl2Module K n)) ^ l) (vNat n 0) = vNat n l := by
+lemma ρF_pow_vNat_zero (l : ℕ)
+    : ((ρF : Module.End K (StandardSl2Module K n)) ^ l) (vNat n 0) = vNat n l := by
   induction l with
   | zero => rfl
   | succ l ih => rw [pow_succ', Module.End.mul_apply, ih, ρF_vNat]
 
 /-- Two linear maps out of a standard module agree if they agree on all `v_l`. -/
-lemma StandardSl2Module.linearMap_ext_vNat {M : Type*} [AddCommGroup M]
-    [Module K M] {α β : StandardSl2Module K a →ₗ[K] M} (h : ∀ l, α (vNat a l) = β (vNat a l)) :
-    α = β := by
+lemma StandardSl2Module.linearMap_ext_vNat
+    {M : Type*} [AddCommGroup M] [Module K M]
+    {α β : StandardSl2Module K a →ₗ[K] M} (h : ∀ l, α (vNat a l) = β (vNat a l))
+    : α = β := by
   refine (Pi.basisFun K (Fin (a + 1))).ext fun k => ?_
   have hk : (Pi.basisFun K (Fin (a + 1))) k = vNat a k := by
     rw [Pi.basisFun_apply, vNat_eq_v (Nat.lt_succ_iff.mp k.isLt)]
@@ -128,9 +131,10 @@ lemma StandardSl2Module.linearMap_ext_vNat {M : Type*} [AddCommGroup M]
   exact h k
 
 /-- A vector of `V(n)` killed by the raising operator is a multiple of `v_0`. -/
-lemma eq_smul_vNat_zero_of_ρE_eq_zero [CharZero K] {w : StandardSl2Module K n}
-    (hw : (ρE : Module.End K (StandardSl2Module K n)) w = 0) :
-    w = w ⟨0, Nat.succ_pos n⟩ • vNat n 0 := by
+lemma eq_smul_vNat_zero_of_ρE_eq_zero
+    [CharZero K]
+    {w : StandardSl2Module K n} (hw : (ρE : Module.End K (StandardSl2Module K n)) w = 0)
+    : w = w ⟨0, Nat.succ_pos n⟩ • vNat n 0 := by
   funext k
   rcases k with ⟨_ | j, hk⟩
   · simp [vNat_apply]
@@ -160,27 +164,30 @@ namespace IsIntertwiner
 variable [CharZero K] {φ : StandardSl2Module K a →ₗ[K] StandardSl2Module K b}
 
 /-- The image of `v_0` under an intertwiner is a multiple of `v_0`. -/
-lemma apply_vNat_zero (hφ : IsIntertwiner φ) :
-    φ (vNat a 0) = φ (vNat a 0) ⟨0, Nat.succ_pos b⟩ • vNat b 0 := by
+lemma apply_vNat_zero (hφ : IsIntertwiner φ)
+    : φ (vNat a 0) = φ (vNat a 0) ⟨0, Nat.succ_pos b⟩ • vNat b 0 := by
   apply eq_smul_vNat_zero_of_ρE_eq_zero
   rw [← hφ.apply_ρE, ρE_vNat_zero, map_zero]
 
-/-- An intertwiner sends every coordinate vector `v_l` to the same multiple `c • v_l`, where `c`
-is the `v_0`-coordinate of the image of `v_0`. -/
-lemma apply_vNat (hφ : IsIntertwiner φ) (l : ℕ) :
-    φ (vNat a l) = φ (vNat a 0) ⟨0, Nat.succ_pos b⟩ • vNat b l := by
+/--
+An intertwiner sends every coordinate vector `v_l` to the same multiple `c • v_l`, where `c`
+is the `v_0`-coordinate of the image of `v_0`.
+-/
+lemma apply_vNat (hφ : IsIntertwiner φ) (l : ℕ)
+    : φ (vNat a l) = φ (vNat a 0) ⟨0, Nat.succ_pos b⟩ • vNat b l := by
   rw [← ρF_pow_vNat_zero l, hφ.apply_ρF_pow]
   conv_lhs => rw [hφ.apply_vNat_zero]
   rw [map_smul, ρF_pow_vNat_zero]
 
 /-- The scalar of an intertwiner vanishes unless the two highest weights agree. -/
-lemma coeff_eq_zero_of_ne (hφ : IsIntertwiner φ) (hab : a ≠ b) :
-    φ (vNat a 0) ⟨0, Nat.succ_pos b⟩ = 0 := by
+lemma coeff_eq_zero_of_ne (hφ : IsIntertwiner φ) (hab : a ≠ b)
+    : φ (vNat a 0) ⟨0, Nat.succ_pos b⟩ = 0 := by
   set c := φ (vNat a 0) ⟨0, Nat.succ_pos b⟩
   have h := congrFun (hφ.apply_ρH (vNat a 0)) ⟨0, Nat.succ_pos b⟩
   rw [ρH_vNat, map_smul, hφ.apply_vNat_zero, map_smul, ρH_vNat] at h
   simp only [Pi.smul_apply, smul_eq_mul, vNat_apply, CharP.cast_eq_zero, mul_zero, sub_zero,
-    ite_true, mul_one] at h
+      ite_true, mul_one]
+    at h
   have hab' : (a : K) ≠ b := by exact_mod_cast hab
   rcases mul_eq_zero.mp (by linear_combination h : ((a : K) - b) * c = 0) with h' | h'
   · exact absurd (sub_eq_zero.mp h') hab'
@@ -191,10 +198,12 @@ lemma eq_zero_of_ne (hφ : IsIntertwiner φ) (hab : a ≠ b) : φ = 0 :=
   StandardSl2Module.linearMap_ext_vNat fun l => by
     rw [hφ.apply_vNat, hφ.coeff_eq_zero_of_ne hab, zero_smul, LinearMap.zero_apply]
 
-/-- **Schur's lemma**, second half: an intertwiner `V(n) → V(n)` is a scalar multiple of the
-identity. -/
-lemma eq_smul_id {φ : StandardSl2Module K n →ₗ[K] StandardSl2Module K n} (hφ : IsIntertwiner φ) :
-    φ = φ (vNat n 0) ⟨0, Nat.succ_pos n⟩ • LinearMap.id :=
+/--
+**Schur's lemma**, second half: an intertwiner `V(n) → V(n)` is a scalar multiple of the
+identity.
+-/
+lemma eq_smul_id {φ : StandardSl2Module K n →ₗ[K] StandardSl2Module K n} (hφ : IsIntertwiner φ)
+    : φ = φ (vNat n 0) ⟨0, Nat.succ_pos n⟩ • LinearMap.id :=
   StandardSl2Module.linearMap_ext_vNat fun l => by
     rw [hφ.apply_vNat, LinearMap.smul_apply, LinearMap.id_apply]
 

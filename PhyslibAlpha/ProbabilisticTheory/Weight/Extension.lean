@@ -54,18 +54,23 @@ namespace IsFinite
 
 -/
 
-/-- `A` shifted into the cone by `r` copies of the order unit, minus the corresponding multiple
-of the weight of the order unit. -/
+/--
+`A` shifted into the cone by `r` copies of the order unit, minus the corresponding multiple
+of the weight of the order unit.
+-/
 noncomputable def rawValue (w : Weight E) (A : E) (r : ℝ) (h : 0 ≤ r • (1 : E) + A) : ℝ :=
   (w ⟨r • (1 : E) + A, h⟩).toReal - r * (w 1).toReal
 
 /-- Shifting by a larger `s` gives the same value as shifting by `r`. -/
-lemma rawValue_of_le (hw : w.IsFinite) (A : E) {r s : ℝ} (hr : 0 ≤ r • (1 : E) + A)
-    (hs : 0 ≤ s • (1 : E) + A) (hrs : r ≤ s) : rawValue w A s hs = rawValue w A r hr := by
+lemma rawValue_of_le
+    (hw : w.IsFinite)
+    (A : E)
+    {r s : ℝ} (hr : 0 ≤ r • (1 : E) + A) (hs : 0 ≤ s • (1 : E) + A) (hrs : r ≤ s)
+    : rawValue w A s hs = rawValue w A r hr := by
   set t : ℝ≥0 := (s - r).toNNReal
   have ht : (t : ℝ) = s - r := Real.coe_toNNReal _ (by linarith)
-  have hcone : (⟨s • (1 : E) + A, hs⟩ : PosCone E) =
-      ⟨r • (1 : E) + A, hr⟩ + t • (1 : PosCone E) := by
+  have hcone
+      : (⟨s • (1 : E) + A, hs⟩ : PosCone E) = ⟨r • (1 : E) + A, hr⟩ + t • (1 : PosCone E) := by
     apply Subtype.ext
     show s • (1 : E) + A = (r • (1 : E) + A) + (t : ℝ) • (1 : E)
     rw [ht]
@@ -75,8 +80,9 @@ lemma rawValue_of_le (hw : w.IsFinite) (A : E) {r s : ℝ} (hr : 0 ≤ r • (1 
   ring
 
 /-- The shifted value of a finite weight does not depend on the chosen shift. -/
-lemma rawValue_indep (hw : w.IsFinite) (A : E) {r s : ℝ} (hr : 0 ≤ r • (1 : E) + A)
-    (hs : 0 ≤ s • (1 : E) + A) : rawValue w A r hr = rawValue w A s hs :=
+lemma rawValue_indep
+    (hw : w.IsFinite) (A : E) {r s : ℝ} (hr : 0 ≤ r • (1 : E) + A) (hs : 0 ≤ s • (1 : E) + A)
+    : rawValue w A r hr = rawValue w A s hs :=
   (le_total r s).elim (fun h => (rawValue_of_le hw A hr hs h).symm) (rawValue_of_le hw A hs hr)
 
 /-!
@@ -92,14 +98,13 @@ noncomputable def toFun (w : Weight E) (A : E) : ℝ :=
     (OrderUnitSpace.exists_real_shift_nonneg A).choose_spec
 
 /-- The extension can be computed with any shift `r` making `r • 1 + A` nonnegative. -/
-lemma toFun_eq (hw : w.IsFinite) (A : E) {r : ℝ} (h : 0 ≤ r • (1 : E) + A) :
-    toFun w A = rawValue w A r h :=
+lemma toFun_eq (hw : w.IsFinite) (A : E) {r : ℝ} (h : 0 ≤ r • (1 : E) + A)
+    : toFun w A = rawValue w A r h :=
   rawValue_indep hw A _ h
 
 @[simp]
 lemma toFun_of_nonneg (hw : w.IsFinite) (A : PosCone E) : toFun w (A : E) = (w A).toReal := by
-  have h0 : (0 : E) ≤ (0 : ℝ) • (1 : E) + (A : E) := by
-    rw [zero_smul, zero_add]; exact A.2
+  have h0 : (0 : E) ≤ (0 : ℝ) • (1 : E) + (A : E) := by rw [zero_smul, zero_add]; exact A.2
   rw [toFun_eq hw (A : E) h0, rawValue]
   simp
 
@@ -111,11 +116,11 @@ lemma toFun_zero (hw : w.IsFinite) : toFun w (0 : E) = 0 := by
 lemma toFun_add (hw : w.IsFinite) (A B : E) : toFun w (A + B) = toFun w A + toFun w B := by
   obtain ⟨r, hr⟩ := OrderUnitSpace.exists_real_shift_nonneg A
   obtain ⟨s, hs⟩ := OrderUnitSpace.exists_real_shift_nonneg B
-  have hrs : (0 : E) ≤ (r + s) • (1 : E) + (A + B) := by
-    convert add_nonneg hr hs using 1; module
+  have hrs : (0 : E) ≤ (r + s) • (1 : E) + (A + B) := by convert add_nonneg hr hs using 1; module
   rw [toFun_eq hw A hr, toFun_eq hw B hs, toFun_eq hw (A + B) hrs]
-  have hcone : (⟨(r + s) • (1 : E) + (A + B), hrs⟩ : PosCone E) =
-      ⟨r • (1 : E) + A, hr⟩ + ⟨s • (1 : E) + B, hs⟩ := by
+  have hcone
+      : (⟨(r + s) • (1 : E) + (A + B), hrs⟩ : PosCone E)
+        = ⟨r • (1 : E) + A, hr⟩ + ⟨s • (1 : E) + B, hs⟩ := by
     apply Subtype.ext
     show (r + s) • (1 : E) + (A + B) = (r • (1 : E) + A) + (s • (1 : E) + B)
     module
@@ -124,20 +129,20 @@ lemma toFun_add (hw : w.IsFinite) (A B : E) : toFun w (A + B) = toFun w A + toFu
   ring
 
 /-- The extension of a finite weight is odd. -/
-lemma toFun_neg (hw : w.IsFinite) (A : E) : toFun w (-A) = -toFun w A := by
+lemma toFun_neg (hw : w.IsFinite) (A : E) : toFun w (-A) = - toFun w A := by
   have h := toFun_add hw A (-A)
   rw [add_neg_cancel, toFun_zero hw] at h
   linarith
 
 /-- Nonnegative real homogeneity of the finite-weight extension. -/
-lemma toFun_real_nonneg_smul (hw : w.IsFinite) {t : ℝ} (ht : 0 ≤ t) (A : E) :
-    toFun w (t • A) = t * toFun w A := by
+lemma toFun_real_nonneg_smul (hw : w.IsFinite) {t : ℝ} (ht : 0 ≤ t) (A : E)
+    : toFun w (t • A) = t * toFun w A := by
   obtain ⟨r, hr⟩ := OrderUnitSpace.exists_real_shift_nonneg A
-  have hcr : (0 : E) ≤ (t * r) • (1 : E) + t • A := by
-    convert smul_nonneg ht hr using 1; module
+  have hcr : (0 : E) ≤ (t * r) • (1 : E) + t • A := by convert smul_nonneg ht hr using 1; module
   rw [toFun_eq hw A hr, toFun_eq hw (t • A) hcr]
-  have hcone : (⟨(t * r) • (1 : E) + t • A, hcr⟩ : PosCone E) =
-      t.toNNReal • (⟨r • (1 : E) + A, hr⟩ : PosCone E) := by
+  have hcone
+      : (⟨(t * r) • (1 : E) + t • A, hcr⟩ : PosCone E)
+        = t.toNNReal • (⟨r • (1 : E) + A, hr⟩ : PosCone E) := by
     apply Subtype.ext
     show (t * r) • (1 : E) + t • A = (t.toNNReal : ℝ) • (r • (1 : E) + A)
     rw [Real.coe_toNNReal t ht]
@@ -160,8 +165,7 @@ noncomputable def toLinearMap (hw : w.IsFinite) : E →ₗ[ℝ] ℝ where
   map_smul' := toFun_smul hw
 
 /-- The linear extension agrees with `toFun` by construction. -/
-@[simp]
-lemma toLinearMap_apply (hw : w.IsFinite) (A : E) : toLinearMap hw A = toFun w A := rfl
+@[simp] lemma toLinearMap_apply (hw : w.IsFinite) (A : E) : toLinearMap hw A = toFun w A := rfl
 
 /-- The positive linear extension of a finite weight. -/
 noncomputable def toPositiveLinearMap (hw : w.IsFinite) : E →ₚ[ℝ] ℝ :=
@@ -171,12 +175,12 @@ noncomputable def toPositiveLinearMap (hw : w.IsFinite) : E →ₚ[ℝ] ℝ :=
 
 /-- The positive extension agrees with the underlying finite-weight extension. -/
 @[simp]
-lemma toPositiveLinearMap_apply (hw : w.IsFinite) (A : E) :
-    hw.toPositiveLinearMap A = toFun w A := rfl
+lemma toPositiveLinearMap_apply (hw : w.IsFinite) (A : E) : hw.toPositiveLinearMap A = toFun w A :=
+  rfl
 
 /-- On positive elements, the positive extension is the real value of the weight. -/
-lemma toPositiveLinearMap_apply_of_nonneg (hw : w.IsFinite) (A : PosCone E) :
-    hw.toPositiveLinearMap (A : E) = (w A).toReal := by
+lemma toPositiveLinearMap_apply_of_nonneg (hw : w.IsFinite) (A : PosCone E)
+    : hw.toPositiveLinearMap (A : E) = (w A).toReal := by
   rw [toPositiveLinearMap_apply, hw.toFun_of_nonneg]
 
 end IsFinite

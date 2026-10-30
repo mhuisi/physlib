@@ -71,21 +71,26 @@ lemma mem_resolventSet_of_im_ne_zero {z : ℂ} (hz : z.im ≠ 0) : z ∈ ρ T :=
   rw [resolventSet_eq_regularityDomain hT]
   exact (isSymmetric hT).mem_regularityDomain_of_im_ne_zero hz
 
-/-- A self-adjoint operator has `T - z • 1` surjective for every non-real `z`: off the real
-axis a self-adjoint operator has `z` in its resolvent set, so `T - z • 1` has full range. -/
+/--
+A self-adjoint operator has `T - z • 1` surjective for every non-real `z`: off the real
+axis a self-adjoint operator has `z` in its resolvent set, so `T - z • 1` has full range.
+-/
 lemma sub_smul_surjective {z : ℂ} (hz : z.im ≠ 0) : Function.Surjective (T - z • 1).toFun :=
   LinearMap.range_eq_top.mp (mem_resolventSet_iff.mp (mem_resolventSet_of_im_ne_zero hT hz)).2.1
 
-/-- `(T - z • 1).range = ⊤` is a sufficient condition for `z ∈ ρ T`
-  (and it is a necessary condition by definition of `ρ`). -/
+/--
+`(T - z • 1).range = ⊤` is a sufficient condition for `z ∈ ρ T`
+(and it is a necessary condition by definition of `ρ`).
+-/
 lemma mem_resolventSet_of_range_eq_top {z : ℂ} (h : (T - z • 1).toFun.range = ⊤) : z ∈ ρ T := by
   by_cases hz_im : z.im = 0
   · rw [(isClosed hT).resolventSet_eq]
     refine ⟨?_, h⟩
     have h_orthog := (isUnbounded hT).orthogonal_closure_sub_range z
     rwa [isSelfAdjoint_def.mp hT, (isClosed hT).closure_eq, conj_eq_iff_im.mpr hz_im, h,
-      Submodule.top_orthogonal_eq_bot, Eq.comm, ← LinearMap.le_ker_iff_map, Submodule.ker_subtype,
-      le_bot_iff] at h_orthog
+        Submodule.top_orthogonal_eq_bot, Eq.comm, ← LinearMap.le_ker_iff_map, Submodule.ker_subtype,
+        le_bot_iff]
+      at h_orthog
   · exact mem_resolventSet_of_im_ne_zero hT hz_im
 
 /-!
@@ -99,8 +104,9 @@ lemma spectrum_real : σ T ⊆ range ofReal := by
 
 /-- The residual spectrum of a self-adjoint operator is empty. -/
 lemma residualSpectrum_eq_empty : σʳ T = ∅ :=
-  eq_empty_iff_forall_notMem.mpr fun _ hz ↦ T.residualSpectrum_subset_spectrum hz
-    (resolventSet_eq_regularityDomain hT ▸ T.residualSpectrum_subset_regularityDomain hz)
+  eq_empty_iff_forall_notMem.mpr fun _ hz ↦
+    T.residualSpectrum_subset_spectrum hz
+      (resolventSet_eq_regularityDomain hT ▸ T.residualSpectrum_subset_regularityDomain hz)
 
 end IsSelfAdjoint
 
@@ -110,18 +116,20 @@ end IsSelfAdjoint
 
 open Complex
 
-variable {H H' : Type*}
-  [NormedAddCommGroup H] [InnerProductSpace ℂ H] [CompleteSpace H]
+variable
+  {H H' : Type*} [NormedAddCommGroup H] [InnerProductSpace ℂ H] [CompleteSpace H]
   [NormedAddCommGroup H'] [InnerProductSpace ℂ H'] [CompleteSpace H']
 
-/-- Unitary conjugation preserves self-adjointness: if `A` is a self-adjoint operator on `H` and
+/--
+Unitary conjugation preserves self-adjointness: if `A` is a self-adjoint operator on `H` and
 `u : H ≃ₗᵢ[ℂ] H'` is unitary, then `u A u⁻¹` is self-adjoint on `H'`. Symmetry, dense domain, and
-the two deficiency surjectivities of `A` all transfer through `u`. -/
-lemma unitaryConj_isSelfAdjoint (u : H ≃ₗᵢ[ℂ] H') {A : H →ₗ.[ℂ] H} (hA : IsSelfAdjoint A) :
-    IsSelfAdjoint (A.unitaryConj u) := by
+the two deficiency surjectivities of `A` all transfer through `u`.
+-/
+lemma unitaryConj_isSelfAdjoint (u : H ≃ₗᵢ[ℂ] H') {A : H →ₗ.[ℂ] H} (hA : IsSelfAdjoint A)
+    : IsSelfAdjoint (A.unitaryConj u) := by
   have hrange {z : ℂ} (hz : z.im ≠ 0) : (A.unitaryConj u - z • 1).toFun.range = ⊤ :=
-    LinearMap.range_eq_top.mpr
-      (unitaryConj_sub_smul_surjective (IsSelfAdjoint.sub_smul_surjective hA hz))
+    LinearMap.range_eq_top.mpr (unitaryConj_sub_smul_surjective (IsSelfAdjoint.sub_smul_surjective
+      hA hz))
   refine IsSymmetric.isSelfAdjoint_of_range_eq_top
     (IsFormalAdjoint.unitaryConj (IsSelfAdjoint.isSymmetric hA))
     (HasDenseDomain.unitaryConj_dense_domain (IsSelfAdjoint.dense_domain hA)) ?_ ?_

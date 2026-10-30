@@ -84,23 +84,26 @@ variable {Λ K M : Type*} [AddCommGroup Λ] [CommRing K] [AddCommGroup M] [Modul
 /-- Translation of finitely supported configurations: `(T a ψ) m = ψ (m - a)`. -/
 noncomputable def translation : Multiplicative Λ →* Module.End K (Λ →₀ M) where
   toFun a := Finsupp.lmapDomain M K (· + Multiplicative.toAdd a)
-  map_one' := LinearMap.ext fun ψ => by
-    have : (fun m : Λ => m + Multiplicative.toAdd (1 : Multiplicative Λ)) = id := by
-      funext m; simp
-    show Finsupp.mapDomain (fun m : Λ => m + Multiplicative.toAdd (1 : Multiplicative Λ)) ψ = ψ
-    rw [this]; exact Finsupp.mapDomain_id
-  map_mul' a b := LinearMap.ext fun ψ => by
-    show Finsupp.mapDomain (fun m : Λ => m + Multiplicative.toAdd (a * b)) ψ
-      = Finsupp.mapDomain (fun m : Λ => m + Multiplicative.toAdd a)
-          (Finsupp.mapDomain (fun m : Λ => m + Multiplicative.toAdd b) ψ)
-    rw [← Finsupp.mapDomain_comp]
-    congr 1
-    funext m
-    simp only [Function.comp, toAdd_mul]
-    abel
+  map_one' :=
+    LinearMap.ext fun ψ => by
+      have : (fun m : Λ => m + Multiplicative.toAdd (1 : Multiplicative Λ)) = id := by
+        funext m; simp
+      show Finsupp.mapDomain (fun m : Λ => m + Multiplicative.toAdd (1 : Multiplicative Λ)) ψ = ψ
+      rw [this]
+      exact Finsupp.mapDomain_id
+  map_mul' a b :=
+    LinearMap.ext fun ψ => by
+      show Finsupp.mapDomain (fun m : Λ => m + Multiplicative.toAdd (a * b)) ψ
+        = Finsupp.mapDomain (fun m : Λ => m + Multiplicative.toAdd a)
+            (Finsupp.mapDomain (fun m : Λ => m + Multiplicative.toAdd b) ψ)
+      rw [← Finsupp.mapDomain_comp]
+      congr 1
+      funext m
+      simp only [Function.comp, toAdd_mul]
+      abel
 
-lemma translation_single (a : Multiplicative Λ) (m : Λ) (v : M) :
-    translation (K := K) a (Finsupp.single m v)
+lemma translation_single (a : Multiplicative Λ) (m : Λ) (v : M)
+    : translation (K := K) a (Finsupp.single m v)
       = Finsupp.single (m + Multiplicative.toAdd a) v := by
   simp [translation, Finsupp.mapDomain_single]
 
@@ -111,12 +114,12 @@ def charFun (χ : AddChar Λ K) : Multiplicative Λ → K := fun g => χ (Multip
 noncomputable def ev (χ : AddChar Λ K) : (Λ →₀ M) →ₗ[K] M :=
   Finsupp.lsum K fun m => χ m • (LinearMap.id : M →ₗ[K] M)
 
-@[simp] lemma ev_single (χ : AddChar Λ K) (m : Λ) (v : M) :
-    ev χ (Finsupp.single m v) = χ m • v := by
+@[simp]
+lemma ev_single (χ : AddChar Λ K) (m : Λ) (v : M) : ev χ (Finsupp.single m v) = χ m • v := by
   simp [ev]
 
-lemma ev_translation (χ : AddChar Λ K) (a : Multiplicative Λ) (ψ : Λ →₀ M) :
-    ev χ (translation (K := K) a ψ) = charFun χ a • ev χ ψ := by
+lemma ev_translation (χ : AddChar Λ K) (a : Multiplicative Λ) (ψ : Λ →₀ M)
+    : ev χ (translation (K := K) a ψ) = charFun χ a • ev χ ψ := by
   induction ψ using Finsupp.induction_linear with
   | zero => simp
   | add f g hf hg => simp [hf, hg, smul_add]
@@ -126,8 +129,8 @@ lemma ev_translation (χ : AddChar Λ K) (a : Multiplicative Λ) (ψ : Λ →₀
 
 lemma ev_single_zero (χ : AddChar Λ K) (v : M) : ev χ (Finsupp.single 0 v) = v := by simp
 
-lemma ev_surjective (χ : AddChar Λ K) : Function.Surjective (ev (M := M) χ) :=
-  fun v => ⟨Finsupp.single 0 v, ev_single_zero χ v⟩
+lemma ev_surjective (χ : AddChar Λ K) : Function.Surjective (ev (M := M) χ) := fun v =>
+  ⟨Finsupp.single 0 v, ev_single_zero χ v⟩
 
 /-!
 
@@ -135,10 +138,12 @@ lemma ev_surjective (χ : AddChar Λ K) : Function.Surjective (ev (M := M) χ) :
 
 -/
 
-/-- Every configuration is congruent, modulo the fiber relations, to its Fourier evaluation
-placed in the origin cell. -/
-lemma sub_single_ev_mem_cobound (χ : AddChar Λ K) (ψ : Λ →₀ M) :
-    ψ - Finsupp.single 0 (ev χ ψ)
+/--
+Every configuration is congruent, modulo the fiber relations, to its Fourier evaluation
+placed in the origin cell.
+-/
+lemma sub_single_ev_mem_cobound (χ : AddChar Λ K) (ψ : Λ →₀ M)
+    : ψ - Finsupp.single 0 (ev χ ψ)
       ∈ cobound (translation (K := K) (Λ := Λ) (M := M)) (charFun χ) := by
   induction ψ using Finsupp.induction_linear with
   | zero => simp
@@ -148,13 +153,14 @@ lemma sub_single_ev_mem_cobound (χ : AddChar Λ K) (ψ : Λ →₀ M) :
     simp only [map_add, Finsupp.single_add]
     abel
   | single m v =>
-    have h := sub_smul_mem_cobound (translation (K := K) (Λ := Λ) (M := M)) (charFun χ)
-      (Multiplicative.ofAdd m) (Finsupp.single 0 v)
+    have h :=
+      sub_smul_mem_cobound (translation (K := K) (Λ := Λ) (M := M)) (charFun χ)
+        (Multiplicative.ofAdd m) (Finsupp.single 0 v)
     simpa [translation_single, charFun, Finsupp.smul_single] using h
 
 /-- The kernel of Fourier evaluation is exactly the span defining the momentum fiber. -/
-lemma ker_ev (χ : AddChar Λ K) :
-    LinearMap.ker (ev (M := M) χ)
+lemma ker_ev (χ : AddChar Λ K)
+    : LinearMap.ker (ev (M := M) χ)
       = cobound (translation (K := K) (Λ := Λ) (M := M)) (charFun χ) := by
   apply le_antisymm
   · intro ψ hψ
@@ -164,15 +170,18 @@ lemma ker_ev (χ : AddChar Λ K) :
     rintro _ ⟨g, v, rfl⟩
     simp [ev_translation]
 
-/-- The momentum fiber of the translation action at `χ` is canonically the unit-cell space
-`M`. -/
-noncomputable def fiberEquiv (χ : AddChar Λ K) :
-    Fiber (translation (K := K) (Λ := Λ) (M := M)) (charFun χ) ≃ₗ[K] M :=
+/--
+The momentum fiber of the translation action at `χ` is canonically the unit-cell space
+`M`.
+-/
+noncomputable def fiberEquiv (χ : AddChar Λ K)
+    : Fiber (translation (K := K) (Λ := Λ) (M := M)) (charFun χ) ≃ₗ[K] M :=
   (Submodule.quotEquivOfEq _ _ (ker_ev χ).symm).trans
     (LinearMap.quotKerEquivOfSurjective (ev χ) (ev_surjective χ))
 
-@[simp] lemma fiberEquiv_mk (χ : AddChar Λ K) (ψ : Λ →₀ M) :
-    fiberEquiv χ (Fiber.mk (translation (K := K)) (charFun χ) ψ) = ev χ ψ := by
+@[simp]
+lemma fiberEquiv_mk (χ : AddChar Λ K) (ψ : Λ →₀ M)
+    : fiberEquiv χ (Fiber.mk (translation (K := K)) (charFun χ) ψ) = ev χ ψ := by
   simp [fiberEquiv, Fiber.mk]
 
 /-!
@@ -181,51 +190,65 @@ noncomputable def fiberEquiv (χ : AddChar Λ K) :
 
 -/
 
-/-- The Bloch matrix of a linear map `D` at the character `χ`: apply `D` to the unit cell at the
-origin and Fourier-evaluate. -/
-noncomputable def symbol (χ : AddChar Λ K) (D : (Λ →₀ M) →ₗ[K] (Λ →₀ M)) :
-    M →ₗ[K] M :=
+/--
+The Bloch matrix of a linear map `D` at the character `χ`: apply `D` to the unit cell at the
+origin and Fourier-evaluate.
+-/
+noncomputable def symbol (χ : AddChar Λ K) (D : (Λ →₀ M) →ₗ[K] (Λ →₀ M)) : M →ₗ[K] M :=
   ev χ ∘ₗ D ∘ₗ Finsupp.lsingle 0
 
-lemma symbol_apply (χ : AddChar Λ K) (D : (Λ →₀ M) →ₗ[K] (Λ →₀ M)) (v : M) :
-    symbol χ D v = ev χ (D (Finsupp.single 0 v)) := rfl
+lemma symbol_apply (χ : AddChar Λ K) (D : (Λ →₀ M) →ₗ[K] (Λ →₀ M)) (v : M)
+    : symbol χ D v = ev χ (D (Finsupp.single 0 v)) :=
+  rfl
 
-/-- **Bloch theorem.** Fourier evaluation intertwines a translation-equivariant linear map with
-its Bloch matrix. -/
-lemma ev_apply {D : (Λ →₀ M) →ₗ[K] (Λ →₀ M)}
+/--
+**Bloch theorem.** Fourier evaluation intertwines a translation-equivariant linear map with
+its Bloch matrix.
+-/
+lemma ev_apply
+    {D : (Λ →₀ M) →ₗ[K] (Λ →₀ M)}
     (hD : IsEquivariant (translation (K := K)) (translation (K := K)) D)
-    (χ : AddChar Λ K) (ψ : Λ →₀ M) : ev χ (D ψ) = symbol χ D (ev χ ψ) := by
+    (χ : AddChar Λ K) (ψ : Λ →₀ M)
+    : ev χ (D ψ) = symbol χ D (ev χ ψ) := by
   have h1 := hD.cobound_le_comap (charFun χ) (sub_single_ev_mem_cobound χ ψ)
   rw [← ker_ev, Submodule.mem_comap, LinearMap.mem_ker] at h1
   simp only [map_sub] at h1
   exact sub_eq_zero.1 h1
 
 /-- The Bloch matrix of the identity is the identity. -/
-@[simp] lemma symbol_id (χ : AddChar Λ K) :
-    symbol χ (LinearMap.id : (Λ →₀ M) →ₗ[K] _) = .id := by
+@[simp]
+lemma symbol_id (χ : AddChar Λ K) : symbol χ (LinearMap.id : (Λ →₀ M) →ₗ[K] _) = .id := by
   ext v : 1; simp [symbol_apply]
 
 /-- The Bloch matrix is multiplicative: only the left factor needs to be equivariant. -/
-lemma symbol_comp {D₁ D₂ : (Λ →₀ M) →ₗ[K] (Λ →₀ M)}
+lemma symbol_comp
+    {D₁ D₂ : (Λ →₀ M) →ₗ[K] (Λ →₀ M)}
     (h₁ : IsEquivariant (translation (K := K)) (translation (K := K)) D₁)
-    (χ : AddChar Λ K) : symbol χ (D₁ ∘ₗ D₂) = symbol χ D₁ ∘ₗ symbol χ D₂ := by
+    (χ : AddChar Λ K)
+    : symbol χ (D₁ ∘ₗ D₂) = symbol χ D₁ ∘ₗ symbol χ D₂ := by
   ext v : 1
-  calc symbol χ (D₁ ∘ₗ D₂) v = ev χ (D₁ (D₂ (Finsupp.single 0 v))) := rfl
+  calc
+    symbol χ (D₁ ∘ₗ D₂) v
+      = ev χ (D₁ (D₂ (Finsupp.single 0 v))) := rfl
     _ = symbol χ D₁ (ev χ (D₂ (Finsupp.single 0 v))) := ev_apply h₁ χ _
     _ = (symbol χ D₁ ∘ₗ symbol χ D₂) v := rfl
 
 /-- The Bloch matrix is additive. -/
-lemma symbol_add (χ : AddChar Λ K) (D₁ D₂ : (Λ →₀ M) →ₗ[K] (Λ →₀ M)) :
-    symbol χ (D₁ + D₂) = symbol χ D₁ + symbol χ D₂ := by
+lemma symbol_add (χ : AddChar Λ K) (D₁ D₂ : (Λ →₀ M) →ₗ[K] (Λ →₀ M))
+    : symbol χ (D₁ + D₂) = symbol χ D₁ + symbol χ D₂ := by
   ext v : 1; simp [symbol_apply]
 
-/-- If an equivariant map is invertible by an equivariant map, its Bloch matrix is invertible a
-every momentum. -/
-lemma isUnit_symbol {D E : (Λ →₀ M) →ₗ[K] (Λ →₀ M)}
+/--
+If an equivariant map is invertible by an equivariant map, its Bloch matrix is invertible a
+every momentum.
+-/
+lemma isUnit_symbol
+    {D E : (Λ →₀ M) →ₗ[K] (Λ →₀ M)}
     (hD : IsEquivariant (translation (K := K)) (translation (K := K)) D)
     (hE : IsEquivariant (translation (K := K)) (translation (K := K)) E)
-    (h₁ : D ∘ₗ E = LinearMap.id) (h₂ : E ∘ₗ D = LinearMap.id) (χ : AddChar Λ K) :
-    IsUnit (symbol χ D) := by
+    (h₁ : D ∘ₗ E = LinearMap.id) (h₂ : E ∘ₗ D = LinearMap.id)
+    (χ : AddChar Λ K)
+    : IsUnit (symbol χ D) := by
   refine ⟨⟨symbol χ D, symbol χ E, ?_, ?_⟩, rfl⟩
   · show symbol χ D ∘ₗ symbol χ E = LinearMap.id
     rw [← symbol_comp hD, h₁, symbol_id]
@@ -242,13 +265,14 @@ lemma isUnit_symbol {D E : (Λ →₀ M) →ₗ[K] (Λ →₀ M)}
 noncomputable def hop (n : Λ) (Hn : M →ₗ[K] M) : (Λ →₀ M) →ₗ[K] (Λ →₀ M) :=
   translation (Multiplicative.ofAdd n) ∘ₗ Finsupp.mapRange.linearMap Hn
 
-/-- A finite-range hopping operator with hopping matrices `H n : M → M`:
-`(hopping H ψ) m = ∑ n, H n (ψ (m - n))`. -/
-noncomputable def hopping (H : Λ →₀ (M →ₗ[K] M)) : (Λ →₀ M) →ₗ[K] (Λ →₀ M) :=
-  H.sum hop
+/--
+A finite-range hopping operator with hopping matrices `H n : M → M`:
+`(hopping H ψ) m = ∑ n, H n (ψ (m - n))`.
+-/
+noncomputable def hopping (H : Λ →₀ (M →ₗ[K] M)) : (Λ →₀ M) →ₗ[K] (Λ →₀ M) := H.sum hop
 
-lemma isEquivariant_hop (n : Λ) (Hn : M →ₗ[K] M) :
-    IsEquivariant (translation (K := K)) (translation (K := K)) (hop n Hn) := by
+lemma isEquivariant_hop (n : Λ) (Hn : M →ₗ[K] M)
+    : IsEquivariant (translation (K := K)) (translation (K := K)) (hop n Hn) := by
   intro g ψ
   induction ψ using Finsupp.induction_linear with
   | zero => simp
@@ -258,15 +282,15 @@ lemma isEquivariant_hop (n : Λ) (Hn : M →ₗ[K] M) :
     congr 1
     abel
 
-lemma isEquivariant_hopping (H : Λ →₀ (M →ₗ[K] M)) :
-    IsEquivariant (translation (K := K)) (translation (K := K)) (hopping H) := by
+lemma isEquivariant_hopping (H : Λ →₀ (M →ₗ[K] M))
+    : IsEquivariant (translation (K := K)) (translation (K := K)) (hopping H) := by
   intro g ψ
   simp only [hopping, Finsupp.sum, LinearMap.sum_apply, map_sum]
   exact Finset.sum_congr rfl fun n _ => isEquivariant_hop n (H n) g ψ
 
 /-- **Bloch Hamiltonian.** The Bloch matrix of a hopping operator is `∑ n, χ n • H n`. -/
-lemma symbol_hopping (χ : AddChar Λ K) (H : Λ →₀ (M →ₗ[K] M)) :
-    symbol χ (hopping H) = H.sum fun n Hn => χ n • Hn := by
+lemma symbol_hopping (χ : AddChar Λ K) (H : Λ →₀ (M →ₗ[K] M))
+    : symbol χ (hopping H) = H.sum fun n Hn => χ n • Hn := by
   ext v : 1
   simp [symbol_apply, hopping, hop, Finsupp.sum, translation_single]
 

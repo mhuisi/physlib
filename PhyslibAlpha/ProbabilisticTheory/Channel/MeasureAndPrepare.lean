@@ -52,12 +52,15 @@ namespace UnitalPositiveLinearMap
 
 /-! ## A. Factorization through a finite classical system -/
 
-/-- A channel is measure-and-prepare when it factors through a finite classical system: measure,
+/--
+A channel is measure-and-prepare when it factors through a finite classical system: measure,
 then prepare a state for each outcome. This is the general-probabilistic-theory abstraction of an
-entanglement-breaking channel. -/
+entanglement-breaking channel.
+-/
 def IsMeasureAndPrepare (Φ : Channel E₂ E₁) : Prop :=
   ∃ (ι : Type) (_ : Fintype ι) (M : Channel (FiniteClassicalSystem ι) E₁)
-    (P : Channel E₂ (FiniteClassicalSystem ι)), Φ = M.comp P
+      (P : Channel E₂ (FiniteClassicalSystem ι)),
+    Φ = M.comp P
 
 end UnitalPositiveLinearMap
 

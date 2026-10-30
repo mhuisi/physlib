@@ -52,18 +52,18 @@ For the RHS:
 
 Both sides are now sums over the same thing and their terms equate by the nature of the
 lemmas used.
-
 -/
-theorem static_wick_theorem : (φs : List 𝓕.FieldOp) →
-    ofFieldOpList φs = ∑ (φsΛ : WickContraction φs.length), φsΛ.staticWickTerm
+theorem static_wick_theorem
+    : (φs : List 𝓕.FieldOp)
+      → ofFieldOpList φs = ∑ (φsΛ : WickContraction φs.length), φsΛ.staticWickTerm
   | [] => by
     simp only [ofFieldOpList, ofFieldOpListF_nil, map_one, List.length_nil]
     rw [sum_WickContraction_nil]
     rw [staticWickTerm_empty_nil]
   | φ :: φs => by
     rw [ofFieldOpList_cons, static_wick_theorem φs]
-    rw [show (φ :: φs) = φs.insertIdx (⟨0, Nat.zero_lt_succ φs.length⟩ : Fin φs.length.succ) φ
-      from rfl]
+    rw [show (φ :: φs) = φs.insertIdx (⟨0, Nat.zero_lt_succ φs.length⟩ : Fin φs.length.succ) φ from
+      rfl]
     conv_rhs => rw [insertLift_sum]
     rw [Finset.mul_sum]
     apply Finset.sum_congr rfl

@@ -62,31 +62,30 @@ variable {Ω₀ : Type*} [Fintype Ω₀] [DecidableEq Ω₀]
 
 open scoped Matrix.Norms.Operator in
 /-- Moving commutes with the exponential. -/
-lemma quantumIso_exp (γ : Γ) (X : Finset S) (a : Alg (fun _ : S => Ω₀) X) :
-    quantumIso γ X (NormedSpace.exp a) = NormedSpace.exp (quantumIso γ X a) :=
+lemma quantumIso_exp (γ : Γ) (X : Finset S) (a : Alg (fun _ : S => Ω₀) X)
+    : quantumIso γ X (NormedSpace.exp a) = NormedSpace.exp (quantumIso γ X a) :=
   NormedSpace.map_exp (quantumIso γ X)
     (LinearMap.continuous_of_finiteDimensional (quantumIso γ X).toAlgHom.toLinearMap) a
 
 /-- Moving preserves the trace. -/
-lemma quantumIso_trace (γ : Γ) (X : Finset S) (a : Alg (fun _ : S => Ω₀) X) :
-    (quantumIso γ X a).trace = a.trace := by
-  simp only [Matrix.trace, Matrix.diag, quantumIso, StarAlgHom.coe_mk,
-    Matrix.of_apply]
+lemma quantumIso_trace (γ : Γ) (X : Finset S) (a : Alg (fun _ : S => Ω₀) X)
+    : (quantumIso γ X a).trace = a.trace := by
+  simp only [Matrix.trace, Matrix.diag, quantumIso, StarAlgHom.coe_mk, Matrix.of_apply]
   exact Fintype.sum_equiv (cfgEquiv Γ Ω₀ γ X) _ _ (fun _ => rfl)
 
-lemma quantumIso_gibbsWeight (γ : Γ) (X : Finset S) (a : Alg (fun _ : S => Ω₀) X) :
-    quantumIso γ X (gibbsWeight a) = gibbsWeight (quantumIso γ X a) := by
+lemma quantumIso_gibbsWeight (γ : Γ) (X : Finset S) (a : Alg (fun _ : S => Ω₀) X)
+    : quantumIso γ X (gibbsWeight a) = gibbsWeight (quantumIso γ X a) := by
   rw [gibbsWeight, gibbsWeight, quantumIso_exp, map_neg]
 
-lemma quantumIso_partition (γ : Γ) (X : Finset S) (a : Alg (fun _ : S => Ω₀) X) :
-    partition (quantumIso γ X a) = partition a := by
+lemma quantumIso_partition (γ : Γ) (X : Finset S) (a : Alg (fun _ : S => Ω₀) X)
+    : partition (quantumIso γ X a) = partition a := by
   rw [partition, partition, ← quantumIso_gibbsWeight, quantumIso_trace]
 
 /-- **The Gibbs functional is covariant.** -/
-lemma gibbsFunctional_quantumIso (γ : Γ) (X : Finset S) (h b : Alg (fun _ : S => Ω₀) X) :
-    gibbsFunctional (quantumIso γ X h) (quantumIso γ X b) = gibbsFunctional h b := by
-  rw [gibbsFunctional_apply, gibbsFunctional_apply, quantumIso_partition,
-    ← quantumIso_gibbsWeight, ← map_mul, quantumIso_trace]
+lemma gibbsFunctional_quantumIso (γ : Γ) (X : Finset S) (h b : Alg (fun _ : S => Ω₀) X)
+    : gibbsFunctional (quantumIso γ X h) (quantumIso γ X b) = gibbsFunctional h b := by
+  rw [gibbsFunctional_apply, gibbsFunctional_apply, quantumIso_partition, ← quantumIso_gibbsWeight,
+    ← map_mul, quantumIso_trace]
 
 /-! ## B. Moving the Hamiltonian -/
 
@@ -97,17 +96,22 @@ def Interaction.IsInvariant (I : Interaction (fun _ : S => Ω₀)) (γ : Γ) : P
 /-- The bijection between the regions of a box and the regions of the moved box. -/
 def powersetSmul (γ : Γ) (Λ : Finset S) : Λ.powerset ≃ (γ • Λ).powerset where
   toFun X := ⟨γ • X.1, Finset.mem_powerset.2 (smul_mono γ (Finset.mem_powerset.1 X.2))⟩
-  invFun Y := ⟨γ⁻¹ • Y.1, Finset.mem_powerset.2 (by
-    have := smul_mono γ⁻¹ (Finset.mem_powerset.1 Y.2)
-    rwa [inv_smul_smul] at this)⟩
+  invFun Y := ⟨
+    γ⁻¹ • Y.1,
+    Finset.mem_powerset.2 (by
+      have := smul_mono γ⁻¹ (Finset.mem_powerset.1 Y.2)
+      rwa [inv_smul_smul] at this)
+  ⟩
   left_inv X := Subtype.ext (inv_smul_smul γ X.1)
   right_inv Y := Subtype.ext (smul_inv_smul γ Y.1)
 
-/-- **The Hamiltonian of a moved box**: for an invariant interaction, moving the Hamiltonian of a
-box gives the Hamiltonian of the moved box. -/
-lemma Interaction.hamiltonian_smul (I : Interaction (fun _ : S => Ω₀)) {γ : Γ}
-    (hI : I.IsInvariant γ) (Λ : Finset S) :
-    quantumIso γ Λ (I.hamiltonian Λ) = I.hamiltonian (γ • Λ) := by
+/--
+**The Hamiltonian of a moved box**: for an invariant interaction, moving the Hamiltonian of a
+box gives the Hamiltonian of the moved box.
+-/
+lemma Interaction.hamiltonian_smul
+    (I : Interaction (fun _ : S => Ω₀)) {γ : Γ} (hI : I.IsInvariant γ) (Λ : Finset S)
+    : quantumIso γ Λ (I.hamiltonian Λ) = I.hamiltonian (γ • Λ) := by
   rw [Interaction.hamiltonian, Interaction.hamiltonian, map_sum]
   refine Fintype.sum_equiv (powersetSmul γ Λ) _ _ (fun X => ?_)
   rw [quantumIso_incl, hI X.1]
@@ -117,14 +121,19 @@ lemma Interaction.hamiltonian_smul (I : Interaction (fun _ : S => Ω₀)) {γ : 
 
 variable [Nonempty Ω₀]
 
-/-- **The canonical ensemble is covariant**: the expectation of a moved observable in the
-ensemble of the moved box is the expectation of the observable in the ensemble of the box. -/
-lemma Interaction.canonicalState_smul (I : Interaction (fun _ : S => Ω₀)) {γ : Γ}
-    (hI : I.IsInvariant γ) (β : ℝ) (Λ : Finset S) (a : Alg (fun _ : S => Ω₀) Λ) :
-    I.canonicalState β (γ • Λ) (quantumIso γ Λ a) = I.canonicalState β Λ a := by
+/--
+**The canonical ensemble is covariant**: the expectation of a moved observable in the
+ensemble of the moved box is the expectation of the observable in the ensemble of the box.
+-/
+lemma Interaction.canonicalState_smul
+    (I : Interaction (fun _ : S => Ω₀))
+    {γ : Γ} (hI : I.IsInvariant γ)
+    (β : ℝ)
+    (Λ : Finset S) (a : Alg (fun _ : S => Ω₀) Λ)
+    : I.canonicalState β (γ • Λ) (quantumIso γ Λ a) = I.canonicalState β Λ a := by
   have hH := I.hamiltonian_smul hI Λ
-  change gibbsFunctional ((β : ℂ) • I.hamiltonian (γ • Λ)) (quantumIso γ Λ a) =
-    gibbsFunctional ((β : ℂ) • I.hamiltonian Λ) a
+  change gibbsFunctional ((β : ℂ) • I.hamiltonian (γ • Λ)) (quantumIso γ Λ a)
+    = gibbsFunctional ((β : ℂ) • I.hamiltonian Λ) a
   rw [← hH, ← map_smul]
   exact gibbsFunctional_quantumIso γ Λ _ a
 
@@ -137,40 +146,46 @@ def siteSmul (γ : Γ) (Λ : Finset S) : ↥Λ ≃ ↥(γ • Λ) where
 
 omit [Nonempty Ω₀] in
 /-- **A uniform charge is moved to the uniform charge of the moved box.** -/
-lemma chargeOp_smul (q₀ : Ω₀ → ℝ) (γ : Γ) (Λ : Finset S) :
-    quantumIso γ Λ (chargeOp (fun _ : S => q₀) Λ) = chargeOp (fun _ : S => q₀) (γ • Λ) := by
+lemma chargeOp_smul (q₀ : Ω₀ → ℝ) (γ : Γ) (Λ : Finset S)
+    : quantumIso γ Λ (chargeOp (fun _ : S => q₀) Λ) = chargeOp (fun _ : S => q₀) (γ • Λ) := by
   ext c c'
-  simp only [chargeOp, quantumIso, StarAlgHom.coe_mk,
-    Matrix.of_apply, Matrix.diagonal_apply]
+  simp only [chargeOp, quantumIso, StarAlgHom.coe_mk, Matrix.of_apply, Matrix.diagonal_apply]
   by_cases h : c = c'
   · subst h
     simp only [ite_true]
     congr 1
     refine Fintype.sum_equiv (siteSmul γ Λ) _ _ (fun x => rfl)
-  · have : cfgEquiv Γ Ω₀ γ Λ c ≠ cfgEquiv Γ Ω₀ γ Λ c' :=
-      fun e => h ((cfgEquiv Γ Ω₀ γ Λ).injective e)
+  · have : cfgEquiv Γ Ω₀ γ Λ c ≠ cfgEquiv Γ Ω₀ γ Λ c' := fun e =>
+      h ((cfgEquiv Γ Ω₀ γ Λ).injective e)
     simp [h, this]
 
 omit [Nonempty Ω₀] in
-/-- The charge of a moved box, as a statement about the operator whose weight is the grand
-canonical one. -/
-lemma grandCanonicalOp_quantumIso (γ : Γ) (Λ : Finset S) (β μ : ℝ) (H N : Alg (fun _ : S => Ω₀) Λ) :
-    quantumIso γ Λ (grandCanonicalOp β μ H N) =
-      grandCanonicalOp β μ (quantumIso γ Λ H) (quantumIso γ Λ N) := by
+/--
+The charge of a moved box, as a statement about the operator whose weight is the grand
+canonical one.
+-/
+lemma grandCanonicalOp_quantumIso (γ : Γ) (Λ : Finset S) (β μ : ℝ) (H N : Alg (fun _ : S => Ω₀) Λ)
+    : quantumIso γ Λ (grandCanonicalOp β μ H N)
+      = grandCanonicalOp β μ (quantumIso γ Λ H) (quantumIso γ Λ N) := by
   simp only [grandCanonicalOp, map_smul, map_sub]
 
-/-- **The grand canonical ensemble is covariant**, for an invariant interaction and a uniform
-charge. -/
-lemma Interaction.grandCanonicalState_smul (I : Interaction (fun _ : S => Ω₀)) {γ : Γ}
-    (hI : I.IsInvariant γ) (q₀ : Ω₀ → ℝ) (β μ : ℝ) (Λ : Finset S)
-    (a : Alg (fun _ : S => Ω₀) Λ) :
-    I.grandCanonicalState (fun _ : S => q₀) β μ (γ • Λ) (quantumIso γ Λ a) =
-      I.grandCanonicalState (fun _ : S => q₀) β μ Λ a := by
+/--
+**The grand canonical ensemble is covariant**, for an invariant interaction and a uniform
+charge.
+-/
+lemma Interaction.grandCanonicalState_smul
+    (I : Interaction (fun _ : S => Ω₀))
+    {γ : Γ} (hI : I.IsInvariant γ)
+    (q₀ : Ω₀ → ℝ) (β μ : ℝ)
+    (Λ : Finset S) (a : Alg (fun _ : S => Ω₀) Λ)
+    : I.grandCanonicalState (fun _ : S => q₀) β μ (γ • Λ) (quantumIso γ Λ a)
+      = I.grandCanonicalState (fun _ : S => q₀) β μ Λ a := by
   have hH := I.hamiltonian_smul hI Λ
   have hN := chargeOp_smul q₀ γ Λ
-  change gibbsFunctional (grandCanonicalOp β μ (I.hamiltonian (γ • Λ))
-      (chargeOp (fun _ : S => q₀) (γ • Λ))) (quantumIso γ Λ a) =
-    gibbsFunctional (grandCanonicalOp β μ (I.hamiltonian Λ) (chargeOp (fun _ : S => q₀) Λ)) a
+  change gibbsFunctional
+      (grandCanonicalOp β μ (I.hamiltonian (γ • Λ)) (chargeOp (fun _ : S => q₀) (γ • Λ)))
+      (quantumIso γ Λ a)
+    = gibbsFunctional (grandCanonicalOp β μ (I.hamiltonian Λ) (chargeOp (fun _ : S => q₀) Λ)) a
   rw [← hH, ← hN, ← grandCanonicalOp_quantumIso]
   exact gibbsFunctional_quantumIso γ Λ _ a
 

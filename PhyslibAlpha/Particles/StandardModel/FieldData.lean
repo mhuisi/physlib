@@ -72,9 +72,11 @@ namespace StandardModel
 
 -/
 
-/-- The fifteen fermion species of the Standard Model: each of the five fermion types in
-  each of the three generations, the generation `i : Fin 3` carried by the constructor.
-  Two generations of one type share a representation package but are distinct species. -/
+/--
+The fifteen fermion species of the Standard Model: each of the five fermion types in
+each of the three generations, the generation `i : Fin 3` carried by the constructor.
+Two generations of one type share a representation package but are distinct species.
+-/
 inductive FermionType where
   /-- The lepton doublet of generation `i`, `(1, 2)_{-3}`. -/
   | leptonDoublet (i : Fin 3) : FermionType
@@ -86,13 +88,14 @@ inductive FermionType where
   | upSinglet (i : Fin 3) : FermionType
   /-- The down-type quark singlet of generation `i`, `(3, 1)_{-2}`. -/
   | downSinglet (i : Fin 3) : FermionType
-
 deriving DecidableEq, Fintype
 
 namespace FermionType
 
-/-- The matter field of a fermion species, one of the five existing adapters. It is the
-  same in every generation. -/
+/--
+The matter field of a fermion species, one of the five existing adapters. It is the
+same in every generation.
+-/
 noncomputable def matterField : FermionType → MatterField localGaugeData
   | .leptonDoublet _ => LeptonDoubletV.matterField
   | .leptonSinglet _ => LeptonSinglet.matterField
@@ -101,24 +104,27 @@ noncomputable def matterField : FermionType → MatterField localGaugeData
   | .downSinglet _ => DownSinglet.matterField
 
 @[simp]
-lemma matterField_leptonDoublet (i : Fin 3) :
-    matterField (.leptonDoublet i) = LeptonDoubletV.matterField := rfl
+lemma matterField_leptonDoublet (i : Fin 3)
+    : matterField (.leptonDoublet i) = LeptonDoubletV.matterField :=
+  rfl
 
 @[simp]
-lemma matterField_leptonSinglet (i : Fin 3) :
-    matterField (.leptonSinglet i) = LeptonSinglet.matterField := rfl
+lemma matterField_leptonSinglet (i : Fin 3)
+    : matterField (.leptonSinglet i) = LeptonSinglet.matterField :=
+  rfl
 
 @[simp]
-lemma matterField_quarkDoublet (i : Fin 3) :
-    matterField (.quarkDoublet i) = QuarkDoublet.matterField := rfl
+lemma matterField_quarkDoublet (i : Fin 3)
+    : matterField (.quarkDoublet i) = QuarkDoublet.matterField :=
+  rfl
 
 @[simp]
-lemma matterField_upSinglet (i : Fin 3) :
-    matterField (.upSinglet i) = UpSinglet.matterField := rfl
+lemma matterField_upSinglet (i : Fin 3) : matterField (.upSinglet i) = UpSinglet.matterField := rfl
 
 @[simp]
-lemma matterField_downSinglet (i : Fin 3) :
-    matterField (.downSinglet i) = DownSinglet.matterField := rfl
+lemma matterField_downSinglet (i : Fin 3)
+    : matterField (.downSinglet i) = DownSinglet.matterField :=
+  rfl
 
 /-- Every Standard Model fermion carries mass weight three, in every generation. -/
 @[simp]
@@ -126,8 +132,8 @@ lemma matterField_massWeight (t : FermionType) : (matterField t).massWeight = 3 
   cases t <;> rfl
 
 /-- Pure gauge jets act trivially on every Standard Model fermion at the base point. -/
-lemma matterField_pureJetsActTrivially (t : FermionType) :
-    (matterField t).PureJetsActTrivially := by
+lemma matterField_pureJetsActTrivially (t : FermionType)
+    : (matterField t).PureJetsActTrivially := by
   cases t
   · exact LeptonDoubletV.matterField_pureJetsActTrivially
   · exact LeptonSinglet.matterField_pureJetsActTrivially
@@ -136,8 +142,8 @@ lemma matterField_pureJetsActTrivially (t : FermionType) :
   · exact DownSinglet.matterField_pureJetsActTrivially
 
 /-- The gauge and Lorentz actions on every Standard Model fermion commute. -/
-lemma matterField_gaugeLorentzCompatible (t : FermionType) :
-    (matterField t).GaugeLorentzCompatible := by
+lemma matterField_gaugeLorentzCompatible (t : FermionType)
+    : (matterField t).GaugeLorentzCompatible := by
   cases t
   · exact LeptonDoubletV.matterField_gaugeLorentzCompatible
   · exact LeptonSinglet.matterField_gaugeLorentzCompatible
@@ -153,31 +159,31 @@ end FermionType
 
 -/
 
-/-- The field data of the Standard Model: three generations of each of the five fermion
-  types and one Higgs multiplet, over the gauge context `StandardModel.localGaugeData`. -/
+/--
+The field data of the Standard Model: three generations of each of the five fermion
+types and one Higgs multiplet, over the gauge context `StandardModel.localGaugeData`.
+-/
 noncomputable def fieldData : GaugeFieldData localGaugeData where
   FermionSpecies := FermionType
   fermion := FermionType.matterField
   BosonSpecies := Unit
   boson := fun _ => HiggsVec.matterField
 
-@[simp]
-lemma fieldData_fermionSpecies : fieldData.FermionSpecies = FermionType := rfl
+@[simp] lemma fieldData_fermionSpecies : fieldData.FermionSpecies = FermionType := rfl
 
 /-- A fermionic species is the multiplet of its type, whichever generation it is in. -/
-@[simp]
-lemma fieldData_fermion (t : FermionType) : fieldData.fermion t = t.matterField := rfl
+@[simp] lemma fieldData_fermion (t : FermionType) : fieldData.fermion t = t.matterField := rfl
 
-@[simp]
-lemma fieldData_bosonSpecies : fieldData.BosonSpecies = Unit := rfl
+@[simp] lemma fieldData_bosonSpecies : fieldData.BosonSpecies = Unit := rfl
 
 /-- The one bosonic species is the Higgs multiplet. -/
 @[simp]
-lemma fieldData_boson (j : fieldData.BosonSpecies) :
-    fieldData.boson j = HiggsVec.matterField := rfl
+lemma fieldData_boson (j : fieldData.BosonSpecies) : fieldData.boson j = HiggsVec.matterField := rfl
 
-/-- Fifteen fermionic multiplets: each of the five types in each of the three
-  generations, exactly once. -/
+/--
+Fifteen fermionic multiplets: each of the five types in each of the three
+generations, exactly once.
+-/
 lemma card_fieldData_fermionSpecies : Nat.card fieldData.FermionSpecies = 15 := by
   show Nat.card FermionType = 15
   rw [Nat.card_eq_fintype_card]
@@ -200,24 +206,26 @@ species, and the datum therefore satisfies the conjunctions
 -/
 
 /-- Pure gauge jets act trivially on every fermionic species of the Standard Model. -/
-lemma fieldData_fermion_pureJetsActTrivially (t : FermionType) :
-    (fieldData.fermion t).PureJetsActTrivially :=
+lemma fieldData_fermion_pureJetsActTrivially (t : FermionType)
+    : (fieldData.fermion t).PureJetsActTrivially :=
   t.matterField_pureJetsActTrivially
 
 /-- Pure gauge jets act trivially on the bosonic species of the Standard Model. -/
-lemma fieldData_boson_pureJetsActTrivially (j : fieldData.BosonSpecies) :
-    (fieldData.boson j).PureJetsActTrivially :=
+lemma fieldData_boson_pureJetsActTrivially (j : fieldData.BosonSpecies)
+    : (fieldData.boson j).PureJetsActTrivially :=
   HiggsVec.matterField_pureJetsActTrivially
 
-/-- The gauge and Lorentz actions commute on every fermionic species of the Standard
-  Model. -/
-lemma fieldData_fermion_gaugeLorentzCompatible (t : FermionType) :
-    (fieldData.fermion t).GaugeLorentzCompatible :=
+/--
+The gauge and Lorentz actions commute on every fermionic species of the Standard
+Model.
+-/
+lemma fieldData_fermion_gaugeLorentzCompatible (t : FermionType)
+    : (fieldData.fermion t).GaugeLorentzCompatible :=
   t.matterField_gaugeLorentzCompatible
 
 /-- The gauge and Lorentz actions commute on the bosonic species of the Standard Model. -/
-lemma fieldData_boson_gaugeLorentzCompatible (j : fieldData.BosonSpecies) :
-    (fieldData.boson j).GaugeLorentzCompatible :=
+lemma fieldData_boson_gaugeLorentzCompatible (j : fieldData.BosonSpecies)
+    : (fieldData.boson j).GaugeLorentzCompatible :=
   HiggsVec.matterField_gaugeLorentzCompatible
 
 /-- Pure gauge jets act trivially on every species of the Standard Model. -/
@@ -240,42 +248,44 @@ third is already built into the generator spaces.
 
 /-- Every fermionic species of the datum carries mass weight three. -/
 @[simp]
-lemma fieldData_fermion_massWeight (j : fieldData.FermionSpecies) :
-    (fieldData.fermion j).massWeight = 3 :=
+lemma fieldData_fermion_massWeight (j : fieldData.FermionSpecies)
+    : (fieldData.fermion j).massWeight = 3 :=
   FermionType.matterField_massWeight j
 
 /-- The Higgs multiplet carries mass weight two. -/
 @[simp]
-lemma fieldData_boson_massWeight (j : fieldData.BosonSpecies) :
-    (fieldData.boson j).massWeight = 2 := rfl
+lemma fieldData_boson_massWeight (j : fieldData.BosonSpecies)
+    : (fieldData.boson j).massWeight = 2 :=
+  rfl
 
-/-- A fermionic component function `∂_s ψ_α` scales by `c ^ (3 + 2 |s|)`, whichever
-  species it belongs to. -/
-lemma fieldData_massWeightScaleFermion_inclFermion_basis_tmul (c : ℂ)
-    (j : fieldData.FermionSpecies) (s : Multiset (Fin 1 ⊕ Fin 3))
-    (φ : Module.Dual ℂ (fieldData.FermionValue j)) :
-    fieldData.massWeightScaleFermion c (fieldData.inclFermion j
-        ((SpaceTimeDerivAlgebraℂ.basis s ⊗ₜ[ℂ] φ, 0) :
-          JetComponentSpace (fieldData.fermion j)))
+/--
+A fermionic component function `∂_s ψ_α` scales by `c ^ (3 + 2 |s|)`, whichever
+species it belongs to.
+-/
+lemma fieldData_massWeightScaleFermion_inclFermion_basis_tmul
+    (c : ℂ)
+    (j : fieldData.FermionSpecies)
+    (s : Multiset (Fin 1 ⊕ Fin 3)) (φ : Module.Dual ℂ (fieldData.FermionValue j))
+    : fieldData.massWeightScaleFermion c
+        (fieldData.inclFermion j
+          ((SpaceTimeDerivAlgebraℂ.basis s ⊗ₜ[ℂ] φ, 0) : JetComponentSpace (fieldData.fermion j)))
       = c ^ (3 + 2 * Multiset.card s) • fieldData.inclFermion j
-          ((SpaceTimeDerivAlgebraℂ.basis s ⊗ₜ[ℂ] φ, 0) :
-            JetComponentSpace (fieldData.fermion j)) := by
-  have h := GaugeFieldData.massWeightScaleFermion_inclFermion_basis_tmul
-    (T := fieldData) c j s φ
+        ((SpaceTimeDerivAlgebraℂ.basis s ⊗ₜ[ℂ] φ, 0)
+          : JetComponentSpace (fieldData.fermion j)) := by
+  have h := GaugeFieldData.massWeightScaleFermion_inclFermion_basis_tmul (T := fieldData) c j s φ
   rwa [fieldData_fermion_massWeight] at h
 
 /-- A Higgs component function `∂_s H_α` scales by `c ^ (2 + 2 |s|)`. -/
-lemma fieldData_massWeightScaleBoson_inclBoson_basis_tmul (c : ℂ)
-    (j : fieldData.BosonSpecies) (s : Multiset (Fin 1 ⊕ Fin 3))
-    (φ : Module.Dual ℂ (fieldData.BosonValue j)) :
-    fieldData.massWeightScaleBoson c (fieldData.inclBoson j
-        ((SpaceTimeDerivAlgebraℂ.basis s ⊗ₜ[ℂ] φ, 0) :
-          JetComponentSpace (fieldData.boson j)))
+lemma fieldData_massWeightScaleBoson_inclBoson_basis_tmul
+    (c : ℂ)
+    (j : fieldData.BosonSpecies)
+    (s : Multiset (Fin 1 ⊕ Fin 3)) (φ : Module.Dual ℂ (fieldData.BosonValue j))
+    : fieldData.massWeightScaleBoson c
+        (fieldData.inclBoson j
+          ((SpaceTimeDerivAlgebraℂ.basis s ⊗ₜ[ℂ] φ, 0) : JetComponentSpace (fieldData.boson j)))
       = c ^ (2 + 2 * Multiset.card s) • fieldData.inclBoson j
-          ((SpaceTimeDerivAlgebraℂ.basis s ⊗ₜ[ℂ] φ, 0) :
-            JetComponentSpace (fieldData.boson j)) := by
-  have h := GaugeFieldData.massWeightScaleBoson_inclBoson_basis_tmul
-    (T := fieldData) c j s φ
+        ((SpaceTimeDerivAlgebraℂ.basis s ⊗ₜ[ℂ] φ, 0) : JetComponentSpace (fieldData.boson j)) := by
+  have h := GaugeFieldData.massWeightScaleBoson_inclBoson_basis_tmul (T := fieldData) c j s φ
   rwa [fieldData_boson_massWeight] at h
 
 end StandardModel

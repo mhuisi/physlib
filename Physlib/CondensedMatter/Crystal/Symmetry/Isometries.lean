@@ -60,8 +60,9 @@ variable {C : Crystal G} {E : Type*} [NormedAddCommGroup E] (R : Embedding C E) 
 
 /-- The crystal symmetries that preserve distances between all pairs of site positions. -/
 def isometries : Subgroup (Symmetry C) where
-  carrier := {φ | ∀ x y, dist (R.position (φ x)) (R.position (φ y)) =
-    dist (R.position x) (R.position y)}
+  carrier :=
+    {φ | ∀ x y, dist (R.position (φ x)) (R.position (φ y)) =
+      dist (R.position x) (R.position y)}
   one_mem' := by
     intro x y
     rfl
@@ -73,8 +74,9 @@ def isometries : Subgroup (Symmetry C) where
     simpa using (hφ (φ⁻¹ x) (φ⁻¹ y)).symm
 
 /-- A symmetry is an isometry exactly when it preserves every distance between site positions. -/
-lemma mem_isometries_iff : φ ∈ R.isometries ↔
-    ∀ x y, dist (R.position (φ x)) (R.position (φ y)) = dist (R.position x) (R.position y) := by
+lemma mem_isometries_iff
+    : φ ∈ R.isometries
+      ↔ ∀ x y, dist (R.position (φ x)) (R.position (φ y)) = dist (R.position x) (R.position y) := by
   rfl
 
 /-- Translating both sites by the same lattice vector preserves their distance. -/
@@ -85,14 +87,17 @@ lemma translations_le_isometries : Symmetry.translations C ≤ R.isometries := b
 /-! ## B. Distances to the reference cell -/
 
 /-- A site is the lattice translate of the site with the same label in the reference cell. -/
-lemma site_eq_vadd (x : C.Site) : x = x.cell +ᵥ (⟨0, x.label⟩ : C.Site) :=
-  Site.ext (by simp) rfl
+lemma site_eq_vadd (x : C.Site) : x = x.cell +ᵥ (⟨0, x.label⟩ : C.Site) := Site.ext (by simp) rfl
 
-/-- A symmetry is an isometry exactly when it preserves the distance from every site `(d, i)` to
-every site `(0, j)` of the reference cell. -/
-lemma mem_isometries_iff_reference : φ ∈ R.isometries ↔ ∀ (i j : C.UnitCell) (d : G),
-    dist (R.position (φ ⟨d, i⟩)) (R.position (φ ⟨0, j⟩)) =
-      dist (R.position ⟨d, i⟩) (R.position ⟨0, j⟩) := by
+/--
+A symmetry is an isometry exactly when it preserves the distance from every site `(d, i)` to
+every site `(0, j)` of the reference cell.
+-/
+lemma mem_isometries_iff_reference
+    : φ ∈ R.isometries
+      ↔ ∀ (i j : C.UnitCell) (d : G),
+        dist (R.position (φ ⟨d, i⟩)) (R.position (φ ⟨0, j⟩))
+          = dist (R.position ⟨d, i⟩) (R.position ⟨0, j⟩) := by
   constructor
   · intro h i j d
     exact h _ _

@@ -49,18 +49,21 @@ variable [Semiring R]
 
 variable (A R) in
 /-- Alias of LinearMap.id, but specifically as a MatrixMap. -/
-@[reducible]
-def id : MatrixMap A A R := LinearMap.id
+@[reducible] def id : MatrixMap A A R := LinearMap.id
 
-/-- Choi matrix of a given linear matrix map. Note that this is defined even for things that
-  aren't CPTP, it's just rarely talked about in those contexts. This is the inverse of
-  `MatrixMap.of_choi_matrix`. Compare with `MatrixMap.toMatrix`, which gives the transfer matrix. -/
-def choi_matrix (M : MatrixMap A B R) : Matrix (B × A) (B × A) R :=
-  fun (j₁,i₁) (j₂,i₂) ↦ M (Matrix.single i₁ i₂ 1) j₁ j₂
+/--
+Choi matrix of a given linear matrix map. Note that this is defined even for things that
+aren't CPTP, it's just rarely talked about in those contexts. This is the inverse of
+`MatrixMap.of_choi_matrix`. Compare with `MatrixMap.toMatrix`, which gives the transfer matrix.
+-/
+def choi_matrix (M : MatrixMap A B R) : Matrix (B × A) (B × A) R := fun (j₁, i₁) (j₂, i₂) ↦
+  M (Matrix.single i₁ i₂ 1) j₁ j₂
 
 set_option backward.isDefEq.respectTransparency false in
-/-- Given the Choi matrix, generate the corresponding R-linear map between matrices as a
-MatrixMap. This is the inverse of `MatrixMap.choi_matrix`. -/
+/--
+Given the Choi matrix, generate the corresponding R-linear map between matrices as a
+MatrixMap. This is the inverse of `MatrixMap.choi_matrix`.
+-/
 def of_choi_matrix (M : Matrix (B × A) (B × A) R) : MatrixMap A B R where
   toFun X := fun b₁ b₂ ↦ ∑ (a₁ : A), ∑ (a₂ : A), X a₁ a₂ * M (b₁, a₁) (b₂, a₂)
   map_add' x y := by funext b₁ b₂; simp [add_mul, Finset.sum_add_distrib]
@@ -72,7 +75,7 @@ set_option backward.isDefEq.respectTransparency false in
 /-- Proves that `MatrixMap.of_choi_matrix` and `MatrixMap.choi_matrix` inverses. -/
 @[simp]
 theorem map_choi_inv (M : Matrix (B × A) (B × A) R) : choi_matrix (of_choi_matrix M) = M := by
-  ext ⟨i₁,i₂⟩ ⟨j₁,j₂⟩
+  ext ⟨i₁, i₂⟩ ⟨j₁, j₂⟩
   simp [of_choi_matrix, choi_matrix, Matrix.single, ite_and]
 
 set_option backward.isDefEq.respectTransparency false in
@@ -81,15 +84,17 @@ set_option backward.isDefEq.respectTransparency false in
 theorem choi_map_inv (M : MatrixMap A B R) : of_choi_matrix (choi_matrix M) = M := by
   -- By definition of `MatrixMap.of_choi_matrix`, we know that applying it to the Choi matrix of `M`
   -- reconstructs `M`.
-  ext X b₁ b₂; simp [MatrixMap.of_choi_matrix, MatrixMap.choi_matrix];
+  ext X b₁ b₂
+  simp [MatrixMap.of_choi_matrix, MatrixMap.choi_matrix]
   -- By linearity of $M$, we can distribute $M$ over the sum.
   have h_linear : M X = ∑ x : A, ∑ x_1 : A, X x x_1 • M (Matrix.single x x_1 1) := by
     have h_linear : M X = M (∑ x : A, ∑ x_1 : A, X x x_1 • Matrix.single x x_1 1) := by
-      congr with i j ; simp ( config := { decide := Bool.true } ) [ Matrix.sum_apply ];
-      simp ( config := { decide := Bool.true } ) [ Matrix.single ];
-      rw [ Finset.sum_eq_single i ] <;> aesop;
-    simp +decide only [h_linear, map_sum, LinearMap.map_smulₛₗ];
-    simp +zetaDelta at *;
+      congr with i j
+      simp (config := { decide := Bool.true }) [Matrix.sum_apply]
+      simp (config := { decide := Bool.true }) [Matrix.single]
+      rw [Finset.sum_eq_single i] <;> aesop
+    simp +decide only [h_linear, map_sum, LinearMap.map_smulₛₗ]
+    simp +zetaDelta at *
   -- By linearity of $M$, we can distribute $M$ over the sum and then apply it to each term.
   simp [h_linear, Matrix.sum_apply]
 
@@ -98,10 +103,9 @@ theorem choi_matrix_inj : Function.Injective (@choi_matrix A B R _ _) := by
   intro _ _ h
   simpa only [choi_map_inv] using congrArg of_choi_matrix h
 
-
 variable {R : Type*} [CommSemiring R]
 
-/-- The linear equivalence between linear maps of matrices,and Choi matrices.-/
+/-- The linear equivalence between linear maps of matrices,and Choi matrices. -/
 @[simps]
 def choi_equiv : MatrixMap A B R ≃ₗ[R] Matrix (B × A) (B × A) R where
   toFun := choi_matrix
@@ -111,13 +115,19 @@ def choi_equiv : MatrixMap A B R ≃ₗ[R] Matrix (B × A) (B × A) R where
   map_add' _ _ := by ext; simp [choi_matrix]
   map_smul' _ _ := by ext; simp [choi_matrix]
 
-/-- The linear equivalence between MatrixMap's and transfer matrices on a larger space.
-Compare with `MatrixMap.choi_matrix`, which gives the Choi matrix instead of the transfer matrix. -/
+/--
+The linear equivalence between MatrixMap's and transfer matrices on a larger space.
+Compare with `MatrixMap.choi_matrix`, which gives the Choi matrix instead of the transfer matrix.
+-/
 noncomputable def toMatrix [Fintype B] : MatrixMap A B R ≃ₗ[R] Matrix (B × B) (A × A) R :=
   LinearMap.toMatrix (Matrix.stdBasis R A A) (Matrix.stdBasis R B B)
 
-/-- Multiplication of transfer matrices, `MatrixMap.toMatrix`, is equivalent to composition of maps. -/
-theorem toMatrix_comp [Fintype B] [Fintype C] [DecidableEq B] (M₁ : MatrixMap A B R) (M₂ : MatrixMap B C R) : toMatrix (M₂ ∘ₗ M₁) = (toMatrix M₂) * (toMatrix M₁) :=
+/--
+Multiplication of transfer matrices, `MatrixMap.toMatrix`, is equivalent to composition of maps.
+-/
+theorem toMatrix_comp
+    [Fintype B] [Fintype C] [DecidableEq B] (M₁ : MatrixMap A B R) (M₂ : MatrixMap B C R)
+    : toMatrix (M₂ ∘ₗ M₁) = (toMatrix M₂) * (toMatrix M₁) :=
   LinearMap.toMatrix_comp _ _ _ M₂ M₁
 
 end matrix
@@ -127,8 +137,10 @@ section kraus
 variable [Star R] [CommSemiring R]
 variable {κ : Type*} [Fintype κ]
 
-/-- Construct a matrix map out of families of matrices M N : Σ → Matrix B A R
-indexed by κ via X ↦ ∑ k : κ, (M k) * X * (N k)ᴴ -/
+/--
+Construct a matrix map out of families of matrices M N : Σ → Matrix B A R
+indexed by κ via X ↦ ∑ k : κ, (M k) * X * (N k)ᴴ
+-/
 def of_kraus (M N : κ → Matrix B A R) : MatrixMap A B R :=
   ∑ k : κ, {
     toFun X := M k * X * (N k).conjTranspose
@@ -142,8 +154,8 @@ section kraus_exists
 
 variable [CommSemiring R] [StarRing R] [Fintype B]
 
-lemma exists_kraus (Φ : MatrixMap A B R) :
-    ∃ r : ℕ, ∃ (M N : Fin r → Matrix B A R), Φ = of_kraus M N := by
+lemma exists_kraus (Φ : MatrixMap A B R)
+    : ∃ r : ℕ, ∃ (M N : Fin r → Matrix B A R), Φ = of_kraus M N := by
   classical
   let K := ((B × A) × A) × B
   let M₀ : K → Matrix B A R := fun (((b, a₁), a₂), b₂) =>
@@ -155,14 +167,14 @@ lemma exists_kraus (Φ : MatrixMap A B R) :
   ext ⟨j₁, i₁⟩ ⟨j₂, i₂⟩
   simp only [choi_matrix, of_kraus, LinearMap.coe_sum, LinearMap.coe_mk, AddHom.coe_mk,
     Finset.sum_apply]
-  have hsum_reindex :
-      (∑ x : Fin (Fintype.card K),
-          (M₀ ∘ e) x * Matrix.single i₁ i₂ (1 : R) * ((N₀ ∘ e) x).conjTranspose) j₁ j₂
-        =
-      ∑ y : K, (M₀ y * Matrix.single i₁ i₂ (1 : R) * (N₀ y).conjTranspose) j₁ j₂ := by
+  have hsum_reindex
+      : (∑ x : Fin (Fintype.card K),
+            (M₀ ∘ e) x * Matrix.single i₁ i₂ (1 : R) * ((N₀ ∘ e) x).conjTranspose)
+          j₁ j₂
+        = ∑ y : K, (M₀ y * Matrix.single i₁ i₂ (1 : R) * (N₀ y).conjTranspose) j₁ j₂ := by
     rw [Matrix.sum_apply]
-    exact e.sum_comp
-      (fun y : K => (M₀ y * Matrix.single i₁ i₂ (1 : R) * (N₀ y).conjTranspose) j₁ j₂)
+    exact e.sum_comp (fun y : K =>
+      (M₀ y * Matrix.single i₁ i₂ (1 : R) * (N₀ y).conjTranspose) j₁ j₂)
   rw [hsum_reindex, Fintype.sum_prod_type, Fintype.sum_prod_type, Fintype.sum_prod_type]
   simp [M₀, N₀, Matrix.mul_apply, Matrix.single, ite_and]
   rw [Finset.sum_eq_single i₂]
@@ -188,13 +200,11 @@ def submatrix (f : B → A) : MatrixMap A B R where
   map_add' := by simp [Matrix.submatrix_add]
   map_smul' := by simp [Matrix.submatrix_smul]
 
-@[simp]
-lemma submatrix_id : submatrix R _root_.id = id A R := by
-  ext1; simp
+@[simp] lemma submatrix_id : submatrix R _root_.id = id A R := by ext1; simp
 
 @[simp]
-lemma submatrix_comp (f : C → B) (g : B → A) :
-    submatrix R f ∘ₗ submatrix R g = submatrix R (g ∘ f) := by
+lemma submatrix_comp (f : C → B) (g : B → A)
+    : submatrix R f ∘ₗ submatrix R g = submatrix R (g ∘ f) := by
   ext1; simp
 
 end submatrix
@@ -205,15 +215,19 @@ open Kronecker
 variable {A B C D R : Type*} [Fintype A] [Fintype B] [Fintype C] [Fintype D]
 variable [DecidableEq A] [DecidableEq C]
 
-/-- The Kronecker product of MatrixMaps. Defined here using `TensorProduct.map M₁ M₂`, with
-  appropriate reindexing operations and `LinearMap.toMatrix`/`Matrix.toLin`. Notation `⊗ₖₘ`. -/
-noncomputable def kron [CommSemiring R] (M₁ : MatrixMap A B R) (M₂ : MatrixMap C D R) : MatrixMap (A × C) (B × D) R :=
-  let h₁ := (LinearMap.toMatrix (Module.Basis.tensorProduct  (Matrix.stdBasis R A A) (Matrix.stdBasis R C C))
-      (Module.Basis.tensorProduct  (Matrix.stdBasis R B B) (Matrix.stdBasis R D D)))
-    (TensorProduct.map M₁ M₂);
-  let r₁ := Equiv.prodProdProdComm B B D D;
-  let r₂ := Equiv.prodProdProdComm A A C C;
-  let h₂ := Matrix.reindex r₁ r₂ h₁;
+/--
+The Kronecker product of MatrixMaps. Defined here using `TensorProduct.map M₁ M₂`, with
+appropriate reindexing operations and `LinearMap.toMatrix`/`Matrix.toLin`. Notation `⊗ₖₘ`.
+-/
+noncomputable def kron [CommSemiring R] (M₁ : MatrixMap A B R) (M₂ : MatrixMap C D R)
+    : MatrixMap (A × C) (B × D) R :=
+  let h₁ :=
+    (LinearMap.toMatrix (Module.Basis.tensorProduct (Matrix.stdBasis R A A) (Matrix.stdBasis R C C))
+        (Module.Basis.tensorProduct (Matrix.stdBasis R B B) (Matrix.stdBasis R D D)))
+      (TensorProduct.map M₁ M₂)
+  let r₁ := Equiv.prodProdProdComm B B D D
+  let r₂ := Equiv.prodProdProdComm A A C C
+  let h₂ := Matrix.reindex r₁ r₂ h₁
   Matrix.toLin (Matrix.stdBasis R (A × C) (A × C)) (Matrix.stdBasis R (B × D) (B × D)) h₂
 
 scoped[MatrixMap] infixl:100 " ⊗ₖₘ " => MatrixMap.kron
@@ -283,37 +297,42 @@ theorem kron_def [CommSemiring R] (M₁ : MatrixMap A B R) (M₂ : MatrixMap C D
 section kron_lemmas
 variable [CommSemiring R]
 
-lemma add_kron (ML₁ ML₂ : MatrixMap A B R) (MR : MatrixMap C D R) : (ML₁ + ML₂) ⊗ₖₘ MR = ML₁ ⊗ₖₘ MR + ML₂ ⊗ₖₘ MR := by
+lemma add_kron (ML₁ ML₂ : MatrixMap A B R) (MR : MatrixMap C D R)
+    : (ML₁ + ML₂) ⊗ₖₘ MR = ML₁ ⊗ₖₘ MR + ML₂ ⊗ₖₘ MR := by
   simp [kron, TensorProduct.map_add_left, Matrix.submatrix_add]
 
-lemma kron_add (ML : MatrixMap A B R) (MR₁ MR₂ : MatrixMap C D R) : ML ⊗ₖₘ (MR₁ + MR₂) = ML ⊗ₖₘ MR₁ + ML ⊗ₖₘ  MR₂ := by
+lemma kron_add (ML : MatrixMap A B R) (MR₁ MR₂ : MatrixMap C D R)
+    : ML ⊗ₖₘ (MR₁ + MR₂) = ML ⊗ₖₘ MR₁ + ML ⊗ₖₘ MR₂ := by
   simp [kron, TensorProduct.map_add_right, Matrix.submatrix_add]
 
-lemma smul_kron (r : R) (ML : MatrixMap A B R) (MR : MatrixMap C D R) : (r • ML) ⊗ₖₘ MR = r • (ML ⊗ₖₘ MR) := by
+lemma smul_kron (r : R) (ML : MatrixMap A B R) (MR : MatrixMap C D R)
+    : (r • ML) ⊗ₖₘ MR = r • (ML ⊗ₖₘ MR) := by
   simp [kron, TensorProduct.map_smul_left, Matrix.submatrix_smul]
 
-lemma kron_smul (r : R) (ML : MatrixMap A B R) (MR : MatrixMap C D R) : ML ⊗ₖₘ (r • MR) = r • (ML ⊗ₖₘ MR) := by
+lemma kron_smul (r : R) (ML : MatrixMap A B R) (MR : MatrixMap C D R)
+    : ML ⊗ₖₘ (r • MR) = r • (ML ⊗ₖₘ MR) := by
   simp [kron, TensorProduct.map_smul_right, Matrix.submatrix_smul]
 
-@[simp]
-lemma zero_kron (MR : MatrixMap C D R) : (0 : MatrixMap A B R) ⊗ₖₘ MR = 0 := by
-  simp [kron]
+@[simp] lemma zero_kron (MR : MatrixMap C D R) : (0 : MatrixMap A B R) ⊗ₖₘ MR = 0 := by simp [kron]
 
-@[simp]
-lemma kron_zero (ML : MatrixMap A B R) : ML ⊗ₖₘ (0 : MatrixMap C D R) = 0 := by
-  simp [kron]
+@[simp] lemma kron_zero (ML : MatrixMap A B R) : ML ⊗ₖₘ (0 : MatrixMap C D R) = 0 := by simp [kron]
 
 variable [DecidableEq B] in
-lemma kron_id_id : (id A R ⊗ₖₘ id B R) = id (A × B) R := by
-  simp [kron]
+lemma kron_id_id : (id A R ⊗ₖₘ id B R) = id (A × B) R := by simp [kron]
 
-variable {Dl₁ Dl₂ Dl₃ Dr₁ Dr₂ Dr₃ : Type*}
+variable
+  {Dl₁ Dl₂ Dl₃ Dr₁ Dr₂ Dr₃ : Type*}
   [Fintype Dl₁] [Fintype Dl₂] [Fintype Dl₃] [Fintype Dr₁] [Fintype Dr₂] [Fintype Dr₃]
   [DecidableEq Dl₁] [DecidableEq Dl₂] [DecidableEq Dr₁] [DecidableEq Dr₂] in
-/-- For maps L₁, L₂, R₁, and R₂, the product (L₂ ∘ₗ L₁) ⊗ₖₘ (R₂ ∘ₗ R₁) = (L₂ ⊗ₖₘ R₂) ∘ₗ (L₁ ⊗ₖₘ R₁) -/
-theorem kron_comp_distrib (L₁ : MatrixMap Dl₁ Dl₂ R) (L₂ : MatrixMap Dl₂ Dl₃ R) (R₁ : MatrixMap Dr₁ Dr₂ R)
-    (R₂ : MatrixMap Dr₂ Dr₃ R) : (L₂ ∘ₗ L₁) ⊗ₖₘ (R₂ ∘ₗ R₁) = (L₂ ⊗ₖₘ R₂) ∘ₗ (L₁ ⊗ₖₘ R₁) := by
-  simp [kron, TensorProduct.map_comp, ← Matrix.toLin_mul, Matrix.submatrix_mul_equiv, ← LinearMap.toMatrix_comp]
+/--
+For maps L₁, L₂, R₁, and R₂, the product (L₂ ∘ₗ L₁) ⊗ₖₘ (R₂ ∘ₗ R₁) = (L₂ ⊗ₖₘ R₂) ∘ₗ (L₁ ⊗ₖₘ R₁)
+-/
+theorem kron_comp_distrib
+    (L₁ : MatrixMap Dl₁ Dl₂ R) (L₂ : MatrixMap Dl₂ Dl₃ R) (R₁ : MatrixMap Dr₁ Dr₂ R)
+    (R₂ : MatrixMap Dr₂ Dr₃ R)
+    : (L₂ ∘ₗ L₁) ⊗ₖₘ (R₂ ∘ₗ R₁) = (L₂ ⊗ₖₘ R₂) ∘ₗ (L₁ ⊗ₖₘ R₁) := by
+  simp [kron, TensorProduct.map_comp, ← Matrix.toLin_mul, Matrix.submatrix_mul_equiv,
+    ← LinearMap.toMatrix_comp]
 
 end kron_lemmas
 
@@ -324,9 +343,14 @@ end kron_lemmas
 --   Matrix ((A₁ × A₂) × (B₁ × B₂)) ((C₁ × C₂) × (D₁ × D₂)) R := Matrix.of fun ((a₁, a₂), (b₁, b₂))
 --   ((c₁, c₂), (d₁, d₂)) ↦ (M₁ (a₁, b₁) (c₁, d₁)) * (M₂ (a₂, b₂) (c₂, d₂))
 
-/-- The operational definition of the Kronecker product `MatrixMap.kron`, that it maps a Kronecker
-  product of inputs to the Kronecker product of outputs. It is the unique bilinear map doing so. -/
-theorem kron_map_of_kron_state [CommRing R] (M₁ : MatrixMap A B R) (M₂ : MatrixMap C D R) (MA : Matrix A A R) (MC : Matrix C C R) : (M₁ ⊗ₖₘ M₂) (MA ⊗ₖ MC) = (M₁ MA) ⊗ₖ (M₂ MC) := by
+/--
+The operational definition of the Kronecker product `MatrixMap.kron`, that it maps a Kronecker
+product of inputs to the Kronecker product of outputs. It is the unique bilinear map doing so.
+-/
+theorem kron_map_of_kron_state
+    [CommRing R]
+    (M₁ : MatrixMap A B R) (M₂ : MatrixMap C D R) (MA : Matrix A A R) (MC : Matrix C C R)
+    : (M₁ ⊗ₖₘ M₂) (MA ⊗ₖ MC) = (M₁ MA) ⊗ₖ (M₂ MC) := by
   ext bd₁ bd₂
   let (b₁, d₁) := bd₁
   let (b₂, d₂) := bd₂
@@ -336,12 +360,12 @@ theorem kron_map_of_kron_state [CommRing R] (M₁ : MatrixMap A B R) (M₂ : Mat
   simp_rw [mul_comm (M₂ _ _ _), mul_assoc, ← Finset.mul_sum, ← mul_assoc]
   simp_rw [← Finset.sum_mul]
   congr
-  --TODO: Cleanup, these two branches are nearly identical (separate lemma?)
+  -- TODO: Cleanup, these two branches are nearly identical (separate lemma?)
   · have h_linear : M₁ MA = ∑ i : A, ∑ i_1 : A, MA i i_1 • M₁ (Matrix.single i i_1 1) := by
       have h_linear : M₁ MA = M₁ (∑ i : A, ∑ i_1 : A, Matrix.single i i_1 (MA i i_1)) := by
-        congr;
+        congr
         exact Matrix.matrix_eq_sum_single MA
-      simp [ h_linear, Matrix.single]
+      simp [h_linear, Matrix.single]
       congr! 2 with i _ j _
       convert M₁.map_smul (MA i j) (Matrix.of fun i' j' ↦ if i = i' ∧ j = j' then 1 else 0) using 2
       ext
@@ -351,7 +375,7 @@ theorem kron_map_of_kron_state [CommRing R] (M₁ : MatrixMap A B R) (M₂ : Mat
       have h_expand : MC = ∑ i : C, ∑ j : C, MC i j • Matrix.single i j 1 := by
         ext i j
         simp [Matrix.sum_apply, Matrix.single]
-        rw [ Finset.sum_eq_single i ] <;> aesop
+        rw [Finset.sum_eq_single i] <;> aesop
       conv_lhs => rw [ h_expand ];
       simp [map_sum]
       congr! 2 with i _ j _
@@ -359,8 +383,10 @@ theorem kron_map_of_kron_state [CommRing R] (M₁ : MatrixMap A B R) (M₂ : Mat
       exact congr_arg _ (by ext; simp [Matrix.single])
     simp [h_expand, Matrix.sum_apply]
 
-lemma choi_matrix_state_rep {B : Type*} [Fintype B] [Nonempty A] (M : MatrixMap A B ℂ) :
-    M.choi_matrix = (↑(Fintype.card (α := A)) : ℂ) • (M ⊗ₖₘ (LinearMap.id : MatrixMap A A ℂ)) (MState.pure (Ket.MES A)).m := by
+lemma choi_matrix_state_rep {B : Type*} [Fintype B] [Nonempty A] (M : MatrixMap A B ℂ)
+    : M.choi_matrix
+      = (↑(Fintype.card (α := A)) : ℂ)
+        • (M ⊗ₖₘ (LinearMap.id : MatrixMap A A ℂ)) (MState.pure (Ket.MES A)).m := by
   ext i j
   simp [choi_matrix, kron_def M, Ket.MES, Ket.apply, Finset.mul_sum]
   conv =>
@@ -370,7 +396,7 @@ lemma choi_matrix_state_rep {B : Type*} [Fintype B] [Nonempty A] (M : MatrixMap 
       conv =>
         enter [2, a_2]
         simp [apply_ite]
-      simp only [Finset.sum_ite_eq, Finset.mem_univ, ↓reduceIte]
+      simp only [Finset.sum_ite_eq, Finset.mem_univ, ↓ reduceIte]
       rw [← mul_inv, ← Complex.ofReal_mul, ← Real.sqrt_mul (Fintype.card A).cast_nonneg',
         Real.sqrt_mul_self (Fintype.card A).cast_nonneg', mul_comm, mul_assoc]
       simp
@@ -385,18 +411,18 @@ lemma choi_matrix_state_rep {B : Type*} [Fintype B] [Nonempty A] (M : MatrixMap 
       simp [Finset.sum_ite]
     simp [Finset.sum_ite]
 
-lemma submatrix_kron_submatrix [CommSemiring R] (f : B → A) (g : D → C) :
-    submatrix R f ⊗ₖₘ submatrix R g = submatrix R (Prod.map f g) := by
+lemma submatrix_kron_submatrix [CommSemiring R] (f : B → A) (g : D → C)
+    : submatrix R f ⊗ₖₘ submatrix R g = submatrix R (Prod.map f g) := by
   ext m i j
   rw [kron_def]
   simp [Prod.map, Matrix.single, ite_and]
 
-lemma submatrix_kron_id [CommSemiring R] (f : B → A) :
-    submatrix R f ⊗ₖₘ id C R = submatrix R (Prod.map f _root_.id) := by
+lemma submatrix_kron_id [CommSemiring R] (f : B → A)
+    : submatrix R f ⊗ₖₘ id C R = submatrix R (Prod.map f _root_.id) := by
   simp [← submatrix_kron_submatrix]
 
-lemma id_kron_submatrix [CommSemiring R] (f : B → A) :
-    id C R ⊗ₖₘ submatrix R f = submatrix R (Prod.map _root_.id f) := by
+lemma id_kron_submatrix [CommSemiring R] (f : B → A)
+    : id C R ⊗ₖₘ submatrix R f = submatrix R (Prod.map _root_.id f) := by
   simp [← submatrix_kron_submatrix]
 
 end kron
@@ -404,32 +430,30 @@ end kron
 section pi
 variable {R : Type*} [CommSemiring R]
 variable {ι : Type u} [DecidableEq ι] [Fintype ι]
-variable {dI : ι → Type v} [∀i, Fintype (dI i)] [∀i, DecidableEq (dI i)]
-variable {dO : ι → Type w} [∀i, Fintype (dO i)] [∀i, DecidableEq (dO i)]
+variable {dI : ι → Type v} [∀ i, Fintype (dI i)] [∀ i, DecidableEq (dI i)]
+variable {dO : ι → Type w} [∀ i, Fintype (dO i)] [∀ i, DecidableEq (dO i)]
 
-/-- Finite Pi-type tensor product of MatrixMaps. Defined as `PiTensorProduct.tprod` of the
-  underlying Linear maps. Notation `⨂ₜₘ[R] i, f i`, eventually. -/
-noncomputable def piProd (Λi : ∀ i, MatrixMap (dI i) (dO i) R) : MatrixMap (∀i, dI i) (∀i, dO i) R :=
-  Matrix.toLin
-    (Matrix.stdBasis R ((i:ι) → dI i) ((i:ι) → dI i))
-    (Matrix.stdBasis R ((i:ι) → dO i) ((i:ι) → dO i))
-    (Matrix.reindex (Equiv.arrowProdEquivProdArrow _ dO dO)
-      (Equiv.arrowProdEquivProdArrow _ dI dI)
-      (LinearMap.toMatrix
-        (_root_.Basis.piTensorProduct (fun i ↦ Matrix.stdBasis R (dI i) (dI i)))
+/--
+Finite Pi-type tensor product of MatrixMaps. Defined as `PiTensorProduct.tprod` of the
+underlying Linear maps. Notation `⨂ₜₘ[R] i, f i`, eventually.
+-/
+noncomputable def piProd (Λi : ∀ i, MatrixMap (dI i) (dO i) R)
+    : MatrixMap (∀ i, dI i) (∀ i, dO i) R :=
+  Matrix.toLin (Matrix.stdBasis R ((i : ι) → dI i) ((i : ι) → dI i))
+    (Matrix.stdBasis R ((i : ι) → dO i) ((i : ι) → dO i))
+    (Matrix.reindex (Equiv.arrowProdEquivProdArrow _ dO dO) (Equiv.arrowProdEquivProdArrow _ dI dI)
+      (LinearMap.toMatrix (_root_.Basis.piTensorProduct (fun i ↦ Matrix.stdBasis R (dI i) (dI i)))
         (_root_.Basis.piTensorProduct (fun i ↦ Matrix.stdBasis R (dO i) (dO i)))
         (PiTensorProduct.map Λi)))
 
-lemma choi_matrix_piProd (Λi : ∀ i, MatrixMap (dI i) (dO i) R) :
-    (MatrixMap.piProd Λi).choi_matrix =
-      Matrix.reindex
-        (Equiv.arrowProdEquivProdArrow ι dO dI)
-        (Equiv.arrowProdEquivProdArrow ι dO dI)
-        (Matrix.piProd (fun i => (Λi i).choi_matrix)) := by
+lemma choi_matrix_piProd (Λi : ∀ i, MatrixMap (dI i) (dO i) R)
+    : (MatrixMap.piProd Λi).choi_matrix
+      = Matrix.reindex (Equiv.arrowProdEquivProdArrow ι dO dI)
+        (Equiv.arrowProdEquivProdArrow ι dO dI) (Matrix.piProd (fun i => (Λi i).choi_matrix)) := by
   ext x y
   simp [MatrixMap.choi_matrix, Matrix.piProd]
-  rw [MatrixMap.piProd, ← Matrix.stdBasis_eq_single (R := R) x.2 y.2,
-    Matrix.toLin_self, Matrix.sum_apply, Finset.sum_eq_single (x.1, y.1)]
+  rw [MatrixMap.piProd, ← Matrix.stdBasis_eq_single (R := R) x.2 y.2, Matrix.toLin_self,
+    Matrix.sum_apply, Finset.sum_eq_single (x.1, y.1)]
   · simp [Matrix.reindex_apply, LinearMap.toMatrix_apply, Matrix.stdBasis,
       ← Matrix.single_eq_of_single_single]
   · intro z _ hz
@@ -442,23 +466,17 @@ lemma choi_matrix_piProd (Λi : ∀ i, MatrixMap (dI i) (dO i) R) :
 -- notation3:100 "⨂ₜₘ "(...)", "r:(scoped f => tprod R f) => r
 -- syntax (name := bigsum) "∑ " bigOpBinders ("with " term)? ", " term:67 : term
 
-/--
-Composition of `MatrixMap.piProd` maps distributes over the tensor product.
--/
+/-- Composition of `MatrixMap.piProd` maps distributes over the tensor product. -/
 theorem piProd_comp
-  {d₁ d₂ d₃ : ι → Type*}
-  [∀ i, Fintype (d₁ i)] [∀ i, DecidableEq (d₁ i)]
-  [∀ i, Fintype (d₂ i)] [∀ i, DecidableEq (d₂ i)]
-  [∀ i, Fintype (d₃ i)] [∀ i, DecidableEq (d₃ i)]
-  (Λ₁ : ∀ i, MatrixMap (d₁ i) (d₂ i) R) (Λ₂ : ∀ i, MatrixMap (d₂ i) (d₃ i) R) :
-    piProd (fun i ↦ (Λ₂ i) ∘ₗ (Λ₁ i)) = (piProd Λ₂) ∘ₗ (piProd Λ₁) := by
+    {d₁ d₂ d₃ : ι → Type*} [∀ i, Fintype (d₁ i)] [∀ i, DecidableEq (d₁ i)] [∀ i, Fintype (d₂ i)]
+    [∀ i, DecidableEq (d₂ i)] [∀ i, Fintype (d₃ i)] [∀ i, DecidableEq (d₃ i)]
+    (Λ₁ : ∀ i, MatrixMap (d₁ i) (d₂ i) R) (Λ₂ : ∀ i, MatrixMap (d₂ i) (d₃ i) R)
+    : piProd (fun i ↦ (Λ₂ i) ∘ₗ (Λ₁ i)) = (piProd Λ₂) ∘ₗ (piProd Λ₁) := by
   simp [piProd, PiTensorProduct.map_comp, ← Matrix.toLin_mul, ← LinearMap.toMatrix_comp]
 
 @[simp]
-lemma piProd_id :
-    piProd (fun i ↦ (LinearMap.id : MatrixMap (dI i) (dI i) R)) = LinearMap.id := by
+lemma piProd_id : piProd (fun i ↦ (LinearMap.id : MatrixMap (dI i) (dI i) R)) = LinearMap.id := by
   simp [piProd, PiTensorProduct.map_id, LinearMap.toMatrix_id_eq_basis_toMatrix,
-    Module.Basis.toMatrix_self, Matrix.reindex_apply, Matrix.submatrix_one_equiv,
-    Matrix.toLin_one]
+    Module.Basis.toMatrix_self, Matrix.reindex_apply, Matrix.submatrix_one_equiv, Matrix.toLin_one]
 
 end pi

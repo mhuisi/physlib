@@ -44,8 +44,9 @@ namespace ProbabilisticTheory
 
 namespace JordanAlgebra
 
-variable {E F G : Type*} [NonAssocCommRing E] [Module ℝ E]
-  [NonAssocCommRing F] [Module ℝ F] [NonAssocCommRing G] [Module ℝ G]
+variable
+  {E F G : Type*} [NonAssocCommRing E] [Module ℝ E] [NonAssocCommRing F] [Module ℝ F]
+  [NonAssocCommRing G] [Module ℝ G]
 
 /-!
 
@@ -54,8 +55,9 @@ variable {E F G : Type*} [NonAssocCommRing E] [Module ℝ E]
 -/
 
 /-- A unital real-linear map preserving the Jordan product. -/
-structure JordanHom (E F : Type*) [NonAssocCommRing E] [Module ℝ E]
-    [NonAssocCommRing F] [Module ℝ F] extends E →ₗ[ℝ] F where
+structure JordanHom
+    (E F : Type*) [NonAssocCommRing E] [Module ℝ E] [NonAssocCommRing F] [Module ℝ F]
+    extends E →ₗ[ℝ] F where
   map_one' : toLinearMap 1 = 1
   map_mul' : ∀ x y, toLinearMap (x * y) = toLinearMap x * toLinearMap y
 
@@ -72,22 +74,17 @@ lemma ext {f g : JordanHom E F} (h : ∀ x, f x = g x) : f = g := by
   subst g
   rfl
 
-@[simp]
-lemma map_zero (f : JordanHom E F) : f 0 = 0 := f.toLinearMap.map_zero
+@[simp] lemma map_zero (f : JordanHom E F) : f 0 = 0 := f.toLinearMap.map_zero
 
 @[simp]
-lemma map_add (f : JordanHom E F) (x y : E) : f (x + y) = f x + f y :=
-  f.toLinearMap.map_add x y
+lemma map_add (f : JordanHom E F) (x y : E) : f (x + y) = f x + f y := f.toLinearMap.map_add x y
 
 lemma map_smul (f : JordanHom E F) (r : ℝ) (x : E) : f (r • x) = r • f x :=
   f.toLinearMap.map_smul r x
 
-@[simp]
-lemma map_one (f : JordanHom E F) : f 1 = 1 := f.map_one'
+@[simp] lemma map_one (f : JordanHom E F) : f 1 = 1 := f.map_one'
 
-@[simp]
-lemma map_mul (f : JordanHom E F) (x y : E) : f (x * y) = f x * f y :=
-  f.map_mul' x y
+@[simp] lemma map_mul (f : JordanHom E F) (x y : E) : f (x * y) = f x * f y := f.map_mul' x y
 
 /-!
 
@@ -107,12 +104,10 @@ def comp (g : JordanHom F G) (f : JordanHom E F) : JordanHom E G where
   map_one' := by simp
   map_mul' x y := by simp
 
-@[simp]
-lemma id_apply (x : E) : id x = x := rfl
+@[simp] lemma id_apply (x : E) : id x = x := rfl
 
 @[simp]
-lemma comp_apply (g : JordanHom F G) (f : JordanHom E F) (x : E) :
-    g.comp f x = g (f x) := rfl
+lemma comp_apply (g : JordanHom F G) (f : JordanHom E F) (x : E) : g.comp f x = g (f x) := rfl
 
 @[simp]
 lemma id_comp (f : JordanHom E F) : (id : JordanHom F F).comp f = f := by
@@ -124,8 +119,8 @@ lemma comp_id (f : JordanHom E F) : f.comp (id : JordanHom E E) = f := by
   ext x
   rfl
 
-lemma comp_assoc (h : JordanHom G E) (g : JordanHom F G) (f : JordanHom E F) :
-    (h.comp g).comp f = h.comp (g.comp f) := by
+lemma comp_assoc (h : JordanHom G E) (g : JordanHom F G) (f : JordanHom E F)
+    : (h.comp g).comp f = h.comp (g.comp f) := by
   ext x
   rfl
 

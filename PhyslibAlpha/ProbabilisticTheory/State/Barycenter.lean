@@ -54,8 +54,8 @@ namespace UnitalPositiveLinearMap
 -/
 
 /-- An expectation value is integrable against every probability measure on states. -/
-lemma integrable_apply (μ : ProbabilityMeasure (stateSpace E)) (A : E) :
-    Integrable (fun ω : stateSpace E => toState ω A) (μ : Measure (stateSpace E)) :=
+lemma integrable_apply (μ : ProbabilityMeasure (stateSpace E)) (A : E)
+    : Integrable (fun ω : stateSpace E => toState ω A) (μ : Measure (stateSpace E)) :=
   Integrable.of_bound (StateSpace.continuous_apply A).aestronglyMeasurable (orderUnitNorm A)
     (.of_forall fun ω => abs_apply_le_orderUnitNorm (toState ω) A)
 
@@ -65,23 +65,28 @@ lemma integrable_apply (μ : ProbabilityMeasure (stateSpace E)) (A : E) :
 
 -/
 
-/-- The barycenter of `μ`: the state predicting, for every observable, the `μ`-average of the
-predictions. -/
+/--
+The barycenter of `μ`: the state predicting, for every observable, the `μ`-average of the
+predictions.
+-/
 noncomputable def barycenter (μ : ProbabilityMeasure (stateSpace E)) : 𝓢[ℝ, E] :=
   ofLinearMap
-    { toFun A := ∫ ω : stateSpace E, toState ω A ∂(μ : Measure (stateSpace E))
+    {
+      toFun A := ∫ ω : stateSpace E, toState ω A ∂(μ : Measure (stateSpace E))
       map_add' A B := by
         simp only [map_add]
         exact integral_add (integrable_apply μ A) (integrable_apply μ B)
       map_smul' r A := by
         simp only [map_smul, smul_eq_mul, RingHom.id_apply]
-        exact integral_const_mul r _ }
+        exact integral_const_mul r _
+    }
     (fun _ hA => integral_nonneg fun ω => map_nonneg (toState ω) hA)
     (by simp)
 
 @[simp]
-lemma barycenter_apply (μ : ProbabilityMeasure (stateSpace E)) (A : E) :
-    barycenter μ A = ∫ ω : stateSpace E, toState ω A ∂(μ : Measure (stateSpace E)) := rfl
+lemma barycenter_apply (μ : ProbabilityMeasure (stateSpace E)) (A : E)
+    : barycenter μ A = ∫ ω : stateSpace E, toState ω A ∂(μ : Measure (stateSpace E)) :=
+  rfl
 
 end UnitalPositiveLinearMap
 

@@ -20,37 +20,38 @@ namespace WickContraction
 variable {n : ℕ} (c : WickContraction n)
 open Physlib.List
 
-/-- For a Wick contraction `c`, `c.uncontracted` is defined as the finset of elements of `Fin n`
-  which are not in any contracted pair. -/
+/--
+For a Wick contraction `c`, `c.uncontracted` is defined as the finset of elements of `Fin n`
+which are not in any contracted pair.
+-/
 def uncontracted : Finset (Fin n) := Finset.filter (fun i => c.getDual? i = none) (Finset.univ)
 
-lemma congr_uncontracted {n m : ℕ} (c : WickContraction n) (h : n = m) :
-    (c.congr h).uncontracted = Finset.map (finCongr h).toEmbedding c.uncontracted := by
+lemma congr_uncontracted {n m : ℕ} (c : WickContraction n) (h : n = m)
+    : (c.congr h).uncontracted = Finset.map (finCongr h).toEmbedding c.uncontracted := by
   subst h
   simp
 
-lemma getDual?_eq_none_iff_mem_uncontracted (i : Fin n) :
-    c.getDual? i = none ↔ i ∈ c.uncontracted := by
+lemma getDual?_eq_none_iff_mem_uncontracted (i : Fin n)
+    : c.getDual? i = none ↔ i ∈ c.uncontracted := by
   simp [uncontracted]
 
 /-- The equivalence of `Option c.uncontracted` for two propositionally equal Wick contractions. -/
-def uncontractedCongr {c c': WickContraction n} (h : c = c') :
-    Option c.uncontracted ≃ Option c'.uncontracted :=
-    Equiv.optionCongr (Equiv.subtypeEquivRight (by rw [h]; simp))
+def uncontractedCongr {c c' : WickContraction n} (h : c = c')
+    : Option c.uncontracted ≃ Option c'.uncontracted :=
+  Equiv.optionCongr (Equiv.subtypeEquivRight (by rw [h]; simp))
 
 @[simp]
-lemma uncontractedCongr_none {c c': WickContraction n} (h : c = c') :
-    (uncontractedCongr h) none = none := by
+lemma uncontractedCongr_none {c c' : WickContraction n} (h : c = c')
+    : (uncontractedCongr h) none = none := by
   simp [uncontractedCongr]
 
 @[simp]
-lemma uncontractedCongr_some {c c': WickContraction n} (h : c = c') (i : c.uncontracted) :
-    (uncontractedCongr h) (some i) = some (Equiv.subtypeEquivRight (by rw [h]; simp) i) := by
+lemma uncontractedCongr_some {c c' : WickContraction n} (h : c = c') (i : c.uncontracted)
+    : (uncontractedCongr h) (some i) = some (Equiv.subtypeEquivRight (by rw [h]; simp) i) := by
   simp [uncontractedCongr]
 
 set_option backward.isDefEq.respectTransparency false in
-lemma mem_uncontracted_iff_not_contracted (i : Fin n) :
-    i ∈ c.uncontracted ↔ ∀ p ∈ c.1, i ∉ p := by
+lemma mem_uncontracted_iff_not_contracted (i : Fin n) : i ∈ c.uncontracted ↔ ∀ p ∈ c.1, i ∉ p := by
   simp only [uncontracted, getDual?, Finset.mem_filter, Finset.mem_univ, true_and]
   apply Iff.intro
   · intro h p hp
@@ -86,16 +87,14 @@ lemma getDual?_empty_eq_none (i : Fin n) : empty.getDual? i = none := by
   simpa [uncontracted] using mem_uncontracted_empty i
 
 @[simp]
-lemma uncontracted_empty {n : ℕ} : (@empty n).uncontracted = Finset.univ := by
-  simp [uncontracted]
+lemma uncontracted_empty {n : ℕ} : (@empty n).uncontracted = Finset.univ := by simp [uncontracted]
 
 lemma uncontracted_card_le (c : WickContraction n) : c.uncontracted.card ≤ n := by
   simp only [uncontracted]
   apply le_of_le_of_eq (Finset.card_filter_le _ _)
   simp
 
-lemma uncontracted_card_eq_iff (c : WickContraction n) :
-    c.uncontracted.card = n ↔ c = empty := by
+lemma uncontracted_card_eq_iff (c : WickContraction n) : c.uncontracted.card = n ↔ c = empty := by
   apply Iff.intro
   · intro h
     have hc : c.uncontracted.card = (Finset.univ (α := Fin n)).card := by simpa using h

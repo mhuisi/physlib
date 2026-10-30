@@ -58,11 +58,13 @@ typed-unit safety.
 open NNReal
 open scoped BigOperators
 
-/-- A **menu of typed units** for a basis `B`: for each base dimension `b : B`, a *type*
-  `Unit b` of admissible units (a dimension may offer several — metre, kilometre, …) and a
-  *function* `mag` giving each its single positive-real magnitude. It lists the options and
-  picks none — a `UnitSystem` makes the pick. One catalog underlies many unit systems (SI,
-  CGS, …); the magnitude is the data `toScale` reads to drive rescaling. -/
+/--
+A **menu of typed units** for a basis `B`: for each base dimension `b : B`, a *type*
+`Unit b` of admissible units (a dimension may offer several — metre, kilometre, …) and a
+*function* `mag` giving each its single positive-real magnitude. It lists the options and
+picks none — a `UnitSystem` makes the pick. One catalog underlies many unit systems (SI,
+CGS, …); the magnitude is the data `toScale` reads to drive rescaling.
+-/
 class UnitMagnitudeCatalog (B : Type) where
   /-- The typed unit type at each base dimension. -/
   Unit : B → Type
@@ -71,30 +73,36 @@ class UnitMagnitudeCatalog (B : Type) where
   /-- Every typed unit has a positive magnitude. -/
   mag_pos : ∀ {b : B} (u : Unit b), 0 < mag u
 
-/-- A **unit system** over a basis `B` with a `UnitMagnitudeCatalog`: one typed unit chosen
-  per base dimension — the pick off the catalog's menu, and the formal counterpart of SI,
-  CGS, …. Over the default basis, `u .length : LengthUnit`, and a `MassUnit` cannot be
-  placed in the length slot. -/
+/--
+A **unit system** over a basis `B` with a `UnitMagnitudeCatalog`: one typed unit chosen
+per base dimension — the pick off the catalog's menu, and the formal counterpart of SI,
+CGS, …. Over the default basis, `u .length : LengthUnit`, and a `MassUnit` cannot be
+placed in the length slot.
+-/
 def UnitSystem (B : Type) [UnitMagnitudeCatalog B] := (b : B) → UnitMagnitudeCatalog.Unit b
 
 namespace UnitSystem
 
 variable {B : Type} [UnitMagnitudeCatalog B]
 
-/-- Two unit systems agree once they pick the same unit at every base dimension: `UnitSystem`
-  is extensional, as befits a choice-per-dimension. -/
-@[ext]
-theorem ext {u v : UnitSystem B} (h : ∀ b, u b = v b) : u = v := funext h
+/--
+Two unit systems agree once they pick the same unit at every base dimension: `UnitSystem`
+is extensional, as befits a choice-per-dimension.
+-/
+@[ext] theorem ext {u v : UnitSystem B} (h : ∀ b, u b = v b) : u = v := funext h
 
-/-- Forget a unit system to its magnitude layer `UnitScale B`: keep each chosen unit's
-  magnitude, drop its type — the layer where `UnitScale.dimScale` is already proved. -/
+/--
+Forget a unit system to its magnitude layer `UnitScale B`: keep each chosen unit's
+magnitude, drop its type — the layer where `UnitScale.dimScale` is already proved.
+-/
 noncomputable def toScale (u : UnitSystem B) : UnitScale B where
   scale b := UnitMagnitudeCatalog.mag (u b)
   scale_pos b := UnitMagnitudeCatalog.mag_pos (u b)
 
 @[simp]
-lemma toScale_scale (u : UnitSystem B) (b : B) :
-    (toScale u).scale b = UnitMagnitudeCatalog.mag (u b) := rfl
+lemma toScale_scale (u : UnitSystem B) (b : B)
+    : (toScale u).scale b = UnitMagnitudeCatalog.mag (u b) :=
+  rfl
 
 end UnitSystem
 
@@ -123,8 +131,10 @@ noncomputable instance : UnitMagnitudeCatalog LTMCTDimensionBase where
     match b with
     | .length | .time | .mass | .charge | .temperature => fun u => NNReal.coe_pos.mp u.property
 
-/-- Type-safety check: a unit system over `LTMCTDimensionBase` projects onto the named typed
-  unit types, so the length slot is a `LengthUnit` (and cannot hold a `MassUnit`). -/
+/--
+Type-safety check: a unit system over `LTMCTDimensionBase` projects onto the named typed
+unit types, so the length slot is a `LengthUnit` (and cannot hold a `MassUnit`).
+-/
 example (u : UnitSystem LTMCTDimensionBase) : LengthUnit := u .length
 
 example : UnitSystem LTMCTDimensionBase := fun
@@ -145,8 +155,10 @@ the same data.
 
 namespace LTMCTUnitChoices
 
-/-- The bespoke five-field `LTMCTUnitChoices` and the generic `UnitSystem LTMCTDimensionBase`
-  are the same data. -/
+/--
+The bespoke five-field `LTMCTUnitChoices` and the generic `UnitSystem LTMCTDimensionBase`
+are the same data.
+-/
 def equivUnitSystem : LTMCTUnitChoices ≃ UnitSystem LTMCTDimensionBase where
   toFun u := fun
     | .length => u.length
@@ -154,20 +166,22 @@ def equivUnitSystem : LTMCTUnitChoices ≃ UnitSystem LTMCTDimensionBase where
     | .mass => u.mass
     | .charge => u.charge
     | .temperature => u.temperature
-  invFun f :=
-    { length := f .length
-      time := f .time
-      mass := f .mass
-      charge := f .charge
-      temperature := f .temperature }
+  invFun f := {
+    length := f .length
+    time := f .time
+    mass := f .mass
+    charge := f .charge
+    temperature := f .temperature
+  }
   left_inv u := by cases u; rfl
   right_inv f := by funext b; cases b <;> rfl
 
-/-- The typed generic projection agrees with the bespoke `LTMCTUnitChoices.toScale`: reading
-  `LTMCTUnitChoices` as a `UnitSystem` and forgetting to the magnitude layer is the same as
-  the bespoke `toScale`. -/
-lemma toScale_equivUnitSystem (u : LTMCTUnitChoices) :
-    (equivUnitSystem u).toScale = u.toScale := by
+/--
+The typed generic projection agrees with the bespoke `LTMCTUnitChoices.toScale`: reading
+`LTMCTUnitChoices` as a `UnitSystem` and forgetting to the magnitude layer is the same as
+the bespoke `toScale`.
+-/
+lemma toScale_equivUnitSystem (u : LTMCTUnitChoices) : (equivUnitSystem u).toScale = u.toScale := by
   refine UnitScale.ext ?_
   funext b
   cases b <;> rfl
@@ -187,45 +201,49 @@ scaling law: there is one source of truth, the generic fold on `UnitScale B`.
 -/
 
 open Finset in
-/-- The product over the five default base quantities, in canonical enumeration order — a
-  reusable fact about the `Fintype` enumeration of `LTMCTDimensionBase`, for folding
-  `Finset.prod` over the default basis (e.g. in a hand-rolled scaling law). -/
-lemma prod_univ_LTMCTDimensionBase {M : Type} [CommMonoid M]
-    (f : LTMCTDimensionBase → M) :
-    ∏ b, f b = f .length * f .time * f .mass * f .charge * f .temperature := by
+/--
+The product over the five default base quantities, in canonical enumeration order — a
+reusable fact about the `Fintype` enumeration of `LTMCTDimensionBase`, for folding
+`Finset.prod` over the default basis (e.g. in a hand-rolled scaling law).
+-/
+lemma prod_univ_LTMCTDimensionBase {M : Type} [CommMonoid M] (f : LTMCTDimensionBase → M)
+    : ∏ b, f b = f .length * f .time * f .mass * f .charge * f .temperature := by
   rw [show (univ : Finset LTMCTDimensionBase)
-        = {.length, .time, .mass, .charge, .temperature} from by decide]
+      = {.length, .time, .mass, .charge, .temperature} from by
+    decide]
   rw [prod_insert (by decide), prod_insert (by decide), prod_insert (by decide),
     prod_insert (by decide), prod_singleton, ← mul_assoc, ← mul_assoc, ← mul_assoc]
 
 namespace LTMCTUnitChoices
 
-private lemma length_ratio (u1 u2 : LTMCTUnitChoices) :
-    u1.length / u2.length = u1.toScale.scale .length / u2.toScale.scale .length := by
+private lemma length_ratio (u1 u2 : LTMCTUnitChoices)
+    : u1.length / u2.length = u1.toScale.scale .length / u2.toScale.scale .length := by
   apply NNReal.eq; rw [PositiveRealUnitCore.div_eq_val, NNReal.coe_div]; rfl
 
-private lemma time_ratio (u1 u2 : LTMCTUnitChoices) :
-    u1.time / u2.time = u1.toScale.scale .time / u2.toScale.scale .time := by
+private lemma time_ratio (u1 u2 : LTMCTUnitChoices)
+    : u1.time / u2.time = u1.toScale.scale .time / u2.toScale.scale .time := by
   apply NNReal.eq; rw [PositiveRealUnitCore.div_eq_val, NNReal.coe_div]; rfl
 
-private lemma mass_ratio (u1 u2 : LTMCTUnitChoices) :
-    u1.mass / u2.mass = u1.toScale.scale .mass / u2.toScale.scale .mass := by
+private lemma mass_ratio (u1 u2 : LTMCTUnitChoices)
+    : u1.mass / u2.mass = u1.toScale.scale .mass / u2.toScale.scale .mass := by
   apply NNReal.eq; rw [PositiveRealUnitCore.div_eq_val, NNReal.coe_div]; rfl
 
-private lemma charge_ratio (u1 u2 : LTMCTUnitChoices) :
-    u1.charge / u2.charge = u1.toScale.scale .charge / u2.toScale.scale .charge := by
+private lemma charge_ratio (u1 u2 : LTMCTUnitChoices)
+    : u1.charge / u2.charge = u1.toScale.scale .charge / u2.toScale.scale .charge := by
   apply NNReal.eq; rw [PositiveRealUnitCore.div_eq_val, NNReal.coe_div]; rfl
 
-private lemma temperature_ratio (u1 u2 : LTMCTUnitChoices) :
-    u1.temperature / u2.temperature =
-      u1.toScale.scale .temperature / u2.toScale.scale .temperature := by
+private lemma temperature_ratio (u1 u2 : LTMCTUnitChoices)
+    : u1.temperature / u2.temperature
+      = u1.toScale.scale .temperature / u2.toScale.scale .temperature := by
   apply NNReal.eq; rw [PositiveRealUnitCore.div_eq_val, NNReal.coe_div]; rfl
 
-/-- The hand-rolled five-factor `LTMCTUnitChoices.dimScale` equals the basis-generic
-  `UnitScale.dimScale` fold at `LTMCTDimensionBase`, applied to `toScale`. The scaling law
-  therefore has a single source of truth on the magnitude layer `UnitScale B`. -/
-lemma dimScale_eq_toScale_dimScale (u1 u2 : LTMCTUnitChoices) (d : Dimension LTMCTDimensionBase) :
-    u1.dimScale u2 d = UnitScale.dimScale u1.toScale u2.toScale d := by
+/--
+The hand-rolled five-factor `LTMCTUnitChoices.dimScale` equals the basis-generic
+`UnitScale.dimScale` fold at `LTMCTDimensionBase`, applied to `toScale`. The scaling law
+therefore has a single source of truth on the magnitude layer `UnitScale B`.
+-/
+lemma dimScale_eq_toScale_dimScale (u1 u2 : LTMCTUnitChoices) (d : Dimension LTMCTDimensionBase)
+    : u1.dimScale u2 d = UnitScale.dimScale u1.toScale u2.toScale d := by
   rw [dimScale_apply, length_ratio, time_ratio, mass_ratio, charge_ratio, temperature_ratio,
     UnitScale.dimScale, MonoidHom.coe_mk, OneHom.coe_mk, prod_univ_LTMCTDimensionBase]
   simp only [Dimension.length, Dimension.time, Dimension.mass, Dimension.charge,

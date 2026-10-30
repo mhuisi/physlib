@@ -46,8 +46,10 @@ open scoped BigOperators
 
 -/
 
-/-- A unit of electric current — a choice of positive-real magnitude. The SI coherent
-  choice is the ampere. -/
+/--
+A unit of electric current — a choice of positive-real magnitude. The SI coherent
+choice is the ampere.
+-/
 structure CurrentUnit where
   /-- The underlying scale of the unit. -/
   val : ℝ
@@ -68,13 +70,14 @@ open PositiveRealUnitCore
 def amperes : CurrentUnit := ⟨1, by norm_num⟩
 
 /-- One milliampere, equal to `10⁻³` amperes. -/
-noncomputable def milliamperes : CurrentUnit :=
-  scale ((1 / 10) ^ 3) amperes
+noncomputable def milliamperes : CurrentUnit := scale ((1 / 10) ^ 3) amperes
 
 end CurrentUnit
 
-/-- A unit of amount of substance — a choice of positive-real magnitude. The SI coherent
-  choice is the mole. -/
+/--
+A unit of amount of substance — a choice of positive-real magnitude. The SI coherent
+choice is the mole.
+-/
 structure AmountUnit where
   /-- The underlying scale of the unit. -/
   val : ℝ
@@ -96,8 +99,10 @@ def moles : AmountUnit := ⟨1, by norm_num⟩
 
 end AmountUnit
 
-/-- A unit of luminous intensity — a choice of positive-real magnitude. The SI coherent
-  choice is the candela. -/
+/--
+A unit of luminous intensity — a choice of positive-real magnitude. The SI coherent
+choice is the candela.
+-/
 structure LuminousIntensityUnit where
   /-- The underlying scale of the unit. -/
   val : ℝ
@@ -139,12 +144,12 @@ noncomputable instance : UnitMagnitudeCatalog ISQDimensionBase where
     | .luminousIntensity => LuminousIntensityUnit
   mag {b} :=
     match b with
-    | .length | .mass | .time | .current | .temperature | .amount | .luminousIntensity =>
-        fun u => ⟨u.val, u.property.le⟩
+    | .length | .mass | .time | .current | .temperature | .amount | .luminousIntensity => fun u =>
+      ⟨u.val, u.property.le⟩
   mag_pos {b} :=
     match b with
-    | .length | .mass | .time | .current | .temperature | .amount | .luminousIntensity =>
-        fun u => NNReal.coe_pos.mp u.property
+    | .length | .mass | .time | .current | .temperature | .amount | .luminousIntensity => fun u =>
+      NNReal.coe_pos.mp u.property
 
 /-!
 
@@ -153,15 +158,18 @@ noncomputable instance : UnitMagnitudeCatalog ISQDimensionBase where
 -/
 
 open Finset in
-/-- The product over the seven ISQ base quantities, in canonical enumeration order — the
-  `ISQDimensionBase` companion to `prod_univ_LTMCTDimensionBase`, a reusable fact about the
-  `Fintype` enumeration for folding `Finset.prod` over the ISQ basis. -/
-lemma prod_univ_ISQDimensionBase {M : Type} [CommMonoid M] (f : ISQDimensionBase → M) :
-    ∏ b, f b = f .length * f .mass * f .time * f .current * f .temperature
-      * f .amount * f .luminousIntensity := by
-  rw [show (univ : Finset ISQDimensionBase) =
-        {.length, .mass, .time, .current, .temperature, .amount, .luminousIntensity} from by
-      decide]
+/--
+The product over the seven ISQ base quantities, in canonical enumeration order — the
+`ISQDimensionBase` companion to `prod_univ_LTMCTDimensionBase`, a reusable fact about the
+`Fintype` enumeration for folding `Finset.prod` over the ISQ basis.
+-/
+lemma prod_univ_ISQDimensionBase {M : Type} [CommMonoid M] (f : ISQDimensionBase → M)
+    : ∏ b, f b
+      = f .length * f .mass * f .time * f .current * f .temperature * f .amount
+        * f .luminousIntensity := by
+  rw [show (univ : Finset ISQDimensionBase)
+      = {.length, .mass, .time, .current, .temperature, .amount, .luminousIntensity} from by
+    decide]
   rw [prod_insert (by decide), prod_insert (by decide), prod_insert (by decide),
     prod_insert (by decide), prod_insert (by decide), prod_insert (by decide), prod_singleton,
     ← mul_assoc, ← mul_assoc, ← mul_assoc, ← mul_assoc, ← mul_assoc]
@@ -172,9 +180,11 @@ lemma prod_univ_ISQDimensionBase {M : Type} [CommMonoid M] (f : ISQDimensionBase
 
 -/
 
-/-- A **typed SI unit choice**: a typed unit at every ISQ base quantity. This is the
-  seven-slot, current-based sibling of the five-slot, charge-based `LTMCTUnitChoices`,
-  produced by the same basis-generic `UnitSystem` / `UnitMagnitudeCatalog` machinery. -/
+/--
+A **typed SI unit choice**: a typed unit at every ISQ base quantity. This is the
+seven-slot, current-based sibling of the five-slot, charge-based `LTMCTUnitChoices`,
+produced by the same basis-generic `UnitSystem` / `UnitMagnitudeCatalog` machinery.
+-/
 abbrev SIUnitChoices := UnitSystem ISQDimensionBase
 
 namespace SIUnitChoices
@@ -189,17 +199,21 @@ noncomputable def SI : SIUnitChoices := fun
   | .amount => AmountUnit.moles
   | .luminousIntensity => LuminousIntensityUnit.candelas
 
-/-- The dimension-scaling homomorphism over the ISQ basis, obtained *for free* from the
-  generic `UnitScale.dimScale` fold — no per-basis hand-rolling. -/
+/--
+The dimension-scaling homomorphism over the ISQ basis, obtained *for free* from the
+generic `UnitScale.dimScale` fold — no per-basis hand-rolling.
+-/
 noncomputable def dimScale (u1 u2 : SIUnitChoices) : Dimension ISQDimensionBase →* ℝ≥0 :=
   UnitScale.dimScale u1.toScale u2.toScale
 
-/-- Type-safety check: the current slot of a typed SI unit choice is a `CurrentUnit` —
-  a `MassUnit` cannot be placed there. -/
+/--
+Type-safety check: the current slot of a typed SI unit choice is a `CurrentUnit` —
+a `MassUnit` cannot be placed there.
+-/
 example (u : SIUnitChoices) : CurrentUnit := u .current
 
 /-- A quantity of ISQ dimension does not rescale between a unit choice and itself. -/
-lemma dimScale_self (u : SIUnitChoices) (d : Dimension ISQDimensionBase) :
-    dimScale u u d = 1 := UnitScale.dimScale_self _ d
+lemma dimScale_self (u : SIUnitChoices) (d : Dimension ISQDimensionBase) : dimScale u u d = 1 :=
+  UnitScale.dimScale_self _ d
 
 end SIUnitChoices

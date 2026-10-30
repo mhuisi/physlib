@@ -44,14 +44,17 @@ namespace JordanAlgebra
 
 open scoped JordanAlgebra
 
-variable {E : Type*} [NonAssocCommRing E] [PartialOrder E] [IsOrderedAddMonoid E]
-  [Module ℝ E] [SMulCommClass ℝ E E]
+variable
+  {E : Type*}
+  [NonAssocCommRing E] [PartialOrder E] [IsOrderedAddMonoid E] [Module ℝ E] [SMulCommClass ℝ E E]
 
 /-! ## A. Quadratically positive Jordan algebras -/
 
 /-- Every quadratic representation `U_a` preserves the positive cone. -/
-class IsQuadraticallyPositive (E : Type*) [NonAssocCommRing E] [PartialOrder E]
-    [IsOrderedAddMonoid E] [Module ℝ E] [SMulCommClass ℝ E E] : Prop where
+class IsQuadraticallyPositive
+    (E : Type*)
+    [NonAssocCommRing E] [PartialOrder E] [IsOrderedAddMonoid E] [Module ℝ E] [SMulCommClass ℝ E E]
+    : Prop where
   quadRep_nonneg : ∀ (a : E) {b : E}, 0 ≤ b → 0 ≤ U a b
 
 variable [IsQuadraticallyPositive E]
@@ -67,18 +70,14 @@ def quadRepPositiveLinearMap (a : E) : E →ₚ[ℝ] E :=
   PositiveLinearMap.mk₀ (U a) fun _ hb => quadRep_nonneg a hb
 
 @[simp]
-lemma coe_quadRepPositiveLinearMap (a : E) :
-    (quadRepPositiveLinearMap a : E →ₗ[ℝ] E) = U a :=
-  rfl
+lemma coe_quadRepPositiveLinearMap (a : E) : (quadRepPositiveLinearMap a : E →ₗ[ℝ] E) = U a := rfl
 
-@[simp]
-lemma quadRepPositiveLinearMap_apply (a b : E) : quadRepPositiveLinearMap a b = U a b :=
-  rfl
+@[simp] lemma quadRepPositiveLinearMap_apply (a b : E) : quadRepPositiveLinearMap a b = U a b := rfl
 
 /-- The unit has the identity quadratic operation. -/
 @[simp]
-lemma quadRepPositiveLinearMap_one :
-    quadRepPositiveLinearMap (1 : E) = PositiveLinearMap.id ℝ E := by
+lemma quadRepPositiveLinearMap_one
+    : quadRepPositiveLinearMap (1 : E) = PositiveLinearMap.id ℝ E := by
   apply PositiveLinearMap.ext
   intro x
   exact quadRep_one_apply x

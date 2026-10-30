@@ -76,8 +76,10 @@ A configuration is the angle of the rod from the downward vertical, taken modulo
 
 -/
 
-/-- The configuration space of the planar simple pendulum: the angle of the rod from the downward
-  vertical, modulo `2π`. -/
+/--
+The configuration space of the planar simple pendulum: the angle of the rod from the downward
+vertical, modulo `2π`.
+-/
 structure ConfigurationSpace where
   /-- The angle of the rod from the downward vertical, modulo `2π`. -/
   angle : Real.Angle
@@ -134,14 +136,18 @@ lemma circleHomeomorph_apply (q : ConfigurationSpace) : circleHomeomorph q = q.t
 /-- The configuration corresponding to a point of the unit circle. -/
 def ofCircle : Circle → ConfigurationSpace := circleHomeomorph.symm
 
-/-- The point of the unit circle of the configuration attached to a point of the unit circle is
-  that point. -/
+/--
+The point of the unit circle of the configuration attached to a point of the unit circle is
+that point.
+-/
 @[simp]
 lemma toCircle_ofCircle (z : Circle) : (ofCircle z).toCircle = z :=
   circleHomeomorph.apply_symm_apply z
 
-/-- The configuration attached to the point of the unit circle of a configuration is that
-  configuration. -/
+/--
+The configuration attached to the point of the unit circle of a configuration is that
+configuration.
+-/
 @[simp]
 lemma ofCircle_toCircle (q : ConfigurationSpace) : ofCircle q.toCircle = q :=
   circleHomeomorph.symm_apply_apply q
@@ -168,55 +174,72 @@ of the circle, hence analytic.
 
 -/
 
-/-- The charts of the configuration space: the identification with the unit circle followed by a
-  chart of the circle. -/
+/--
+The charts of the configuration space: the identification with the unit circle followed by a
+chart of the circle.
+-/
 instance instChartedSpace : ChartedSpace (EuclideanSpace ℝ (Fin 1)) ConfigurationSpace where
-  atlas := {circleHomeomorph.toOpenPartialHomeomorph.trans e |
-    e ∈ atlas (EuclideanSpace ℝ (Fin 1)) Circle}
-  chartAt q := circleHomeomorph.toOpenPartialHomeomorph.trans
-    (chartAt (EuclideanSpace ℝ (Fin 1)) (circleHomeomorph q))
+  atlas :=
+    {circleHomeomorph.toOpenPartialHomeomorph.trans e |
+      e ∈ atlas (EuclideanSpace ℝ (Fin 1)) Circle}
+  chartAt q :=
+    circleHomeomorph.toOpenPartialHomeomorph.trans (chartAt (EuclideanSpace ℝ (Fin 1))
+      (circleHomeomorph q))
   mem_chart_source q := by simp
   chart_mem_atlas q := ⟨_, chart_mem_atlas _ _, rfl⟩
 
-/-- The chart at a configuration is the identification with the unit circle followed by the chart
-  of the circle at the corresponding point. -/
-lemma chartAt_eq (q : ConfigurationSpace) :
-    chartAt (EuclideanSpace ℝ (Fin 1)) q =
-      circleHomeomorph.toOpenPartialHomeomorph.trans
-        (chartAt (EuclideanSpace ℝ (Fin 1)) q.toCircle) := rfl
+/--
+The chart at a configuration is the identification with the unit circle followed by the chart
+of the circle at the corresponding point.
+-/
+lemma chartAt_eq (q : ConfigurationSpace)
+    : chartAt (EuclideanSpace ℝ (Fin 1)) q
+      = circleHomeomorph.toOpenPartialHomeomorph.trans (chartAt (EuclideanSpace ℝ (Fin 1))
+        q.toCircle) :=
+  rfl
 
-/-- The domain of the chart at a configuration is the preimage under the identification with the
-  unit circle of the domain of the chart of the circle at the corresponding point. -/
-lemma chartAt_source (q : ConfigurationSpace) :
-    (chartAt (EuclideanSpace ℝ (Fin 1)) q).source =
-      circleHomeomorph ⁻¹' (chartAt (EuclideanSpace ℝ (Fin 1)) q.toCircle).source := by
+/--
+The domain of the chart at a configuration is the preimage under the identification with the
+unit circle of the domain of the chart of the circle at the corresponding point.
+-/
+lemma chartAt_source (q : ConfigurationSpace)
+    : (chartAt (EuclideanSpace ℝ (Fin 1)) q).source
+      = circleHomeomorph ⁻¹' (chartAt (EuclideanSpace ℝ (Fin 1)) q.toCircle).source := by
   rw [chartAt_eq, OpenPartialHomeomorph.trans_source]
   simp
 
-/-- The codomain of the chart at a configuration is the codomain of the chart of the circle at the
-  corresponding point. -/
-lemma chartAt_target (q : ConfigurationSpace) :
-    (chartAt (EuclideanSpace ℝ (Fin 1)) q).target =
-      (chartAt (EuclideanSpace ℝ (Fin 1)) q.toCircle).target := by
+/--
+The codomain of the chart at a configuration is the codomain of the chart of the circle at the
+corresponding point.
+-/
+lemma chartAt_target (q : ConfigurationSpace)
+    : (chartAt (EuclideanSpace ℝ (Fin 1)) q).target
+      = (chartAt (EuclideanSpace ℝ (Fin 1)) q.toCircle).target := by
   rw [chartAt_eq, OpenPartialHomeomorph.trans_target]
   simp
 
-/-- The configuration space is an analytic manifold: every change of charts is a change of charts
-  of the unit circle. -/
+/--
+The configuration space is an analytic manifold: every change of charts is a change of charts
+of the unit circle.
+-/
 instance instIsManifold : IsManifold (𝓡 1) ω ConfigurationSpace where
   compatible := by
     rintro _ _ ⟨e₁, he₁, rfl⟩ ⟨e₂, he₂, rfl⟩
     -- The identification `h` with the circle is global, so `h.symm ≫ₕ h` is the identity.
-    have hself : circleHomeomorph.toOpenPartialHomeomorph.symm.trans
-        circleHomeomorph.toOpenPartialHomeomorph = OpenPartialHomeomorph.refl Circle := by
+    have hself
+        : circleHomeomorph.toOpenPartialHomeomorph.symm.trans
+            circleHomeomorph.toOpenPartialHomeomorph
+          = OpenPartialHomeomorph.refl Circle := by
       rw [← Homeomorph.symm_toOpenPartialHomeomorph, ← Homeomorph.trans_toOpenPartialHomeomorph,
         Homeomorph.symm_trans_self, Homeomorph.refl_toOpenPartialHomeomorph]
     -- Hence it cancels in the change of charts, which is therefore that of the circle.
-    have hcancel : (circleHomeomorph.toOpenPartialHomeomorph.trans e₁).symm.trans
-        (circleHomeomorph.toOpenPartialHomeomorph.trans e₂) = e₁.symm.trans e₂ := by
+    have hcancel
+        : (circleHomeomorph.toOpenPartialHomeomorph.trans e₁).symm.trans
+            (circleHomeomorph.toOpenPartialHomeomorph.trans e₂)
+          = e₁.symm.trans e₂ := by
       rw [OpenPartialHomeomorph.trans_symm_eq_symm_trans_symm, OpenPartialHomeomorph.trans_assoc,
-        ← OpenPartialHomeomorph.trans_assoc circleHomeomorph.toOpenPartialHomeomorph.symm,
-        hself, OpenPartialHomeomorph.refl_trans]
+        ← OpenPartialHomeomorph.trans_assoc circleHomeomorph.toOpenPartialHomeomorph.symm, hself,
+        OpenPartialHomeomorph.refl_trans]
     rw [hcancel]
     exact HasGroupoid.compatible he₁ he₂
 
@@ -237,8 +260,7 @@ is `Circle.exp`, so it is analytic.
 def ofAngle (θ : ℝ) : ConfigurationSpace := ⟨θ⟩
 
 /-- The angle of the configuration at angle `θ` is `θ` modulo `2π`. -/
-@[simp]
-lemma ofAngle_angle (θ : ℝ) : (ofAngle θ).angle = θ := rfl
+@[simp] lemma ofAngle_angle (θ : ℝ) : (ofAngle θ).angle = θ := rfl
 
 /-- Adding a full turn to the angle leaves the configuration unchanged. -/
 lemma ofAngle_add_two_pi (θ : ℝ) : ofAngle (θ + 2 * Real.pi) = ofAngle θ := by
@@ -248,18 +270,20 @@ lemma ofAngle_add_two_pi (θ : ℝ) : ofAngle (θ + 2 * Real.pi) = ofAngle θ :=
 /-- The angular lift is periodic with period `2π`. -/
 lemma ofAngle_periodic : Function.Periodic ofAngle (2 * Real.pi) := ofAngle_add_two_pi
 
-/-- Two angles describe the same configuration exactly when they differ by a whole number of
-  turns. -/
-lemma ofAngle_eq_iff (θ₁ θ₂ : ℝ) :
-    ofAngle θ₁ = ofAngle θ₂ ↔ ∃ n : ℤ, θ₂ = θ₁ + n * (2 * Real.pi) := by
+/--
+Two angles describe the same configuration exactly when they differ by a whole number of
+turns.
+-/
+lemma ofAngle_eq_iff (θ₁ θ₂ : ℝ)
+    : ofAngle θ₁ = ofAngle θ₂ ↔ ∃ n : ℤ, θ₂ = θ₁ + n * (2 * Real.pi) := by
   constructor
   · intro h
     obtain ⟨k, hk⟩ :=
       Real.Angle.angle_eq_iff_two_pi_dvd_sub.mp (congrArg ConfigurationSpace.angle h)
     exact ⟨-k, by push_cast; linarith⟩
   · rintro ⟨n, rfl⟩
-    exact ConfigurationSpace.ext
-      (Real.Angle.angle_eq_iff_two_pi_dvd_sub.mpr ⟨-n, by push_cast; ring⟩)
+    exact ConfigurationSpace.ext (Real.Angle.angle_eq_iff_two_pi_dvd_sub.mpr
+      ⟨-n, by push_cast; ring⟩)
 
 /-- Every configuration is the configuration at some real angle: the lift is surjective. -/
 lemma ofAngle_surjective : Function.Surjective ofAngle := by
@@ -288,9 +312,11 @@ lemma toCircle_ofAngle (θ : ℝ) : (ofAngle θ).toCircle = Circle.exp θ := Rea
 lemma ofCircle_circleExp (θ : ℝ) : ofCircle (Circle.exp θ) = ofAngle θ := by
   rw [← toCircle_ofAngle, ofCircle_toCircle]
 
-/-- The angular lift is analytic: read in the charts pulled back from the circle it is
-  `Circle.exp`. -/
-lemma contMDiff_ofAngle : ContMDiff 𝓘(ℝ, ℝ) (𝓡 1) ω ofAngle := by
+/--
+The angular lift is analytic: read in the charts pulled back from the circle it is
+`Circle.exp`.
+-/
+lemma contMDiff_ofAngle : ContMDiff (𝓘(ℝ, ℝ)) (𝓡 1) ω ofAngle := by
   rw [contMDiff_iff]
   refine ⟨continuous_ofAngle, fun x y => ?_⟩
   have h := (contMDiff_iff.mp (contMDiff_circleExp (m := ω))).2 x y.toCircle
@@ -313,12 +339,10 @@ lemma cos_angle (q : ConfigurationSpace) : q.cos = Real.Angle.cos q.angle := rfl
 lemma sin_angle (q : ConfigurationSpace) : q.sin = Real.Angle.sin q.angle := rfl
 
 /-- The cosine of the configuration at angle `θ` is `cos θ`. -/
-@[simp]
-lemma cos_ofAngle (θ : ℝ) : (ofAngle θ).cos = Real.cos θ := Real.Angle.cos_coe θ
+@[simp] lemma cos_ofAngle (θ : ℝ) : (ofAngle θ).cos = Real.cos θ := Real.Angle.cos_coe θ
 
 /-- The sine of the configuration at angle `θ` is `sin θ`. -/
-@[simp]
-lemma sin_ofAngle (θ : ℝ) : (ofAngle θ).sin = Real.sin θ := Real.Angle.sin_coe θ
+@[simp] lemma sin_ofAngle (θ : ℝ) : (ofAngle θ).sin = Real.sin θ := Real.Angle.sin_coe θ
 
 /-- The Pythagorean identity for the angle of a configuration. -/
 lemma cos_sq_add_sin_sq (q : ConfigurationSpace) : q.cos ^ 2 + q.sin ^ 2 = 1 :=
@@ -346,24 +370,23 @@ injective, so the configuration is determined by the position.
 
 -/
 
-/-- The position of the bob in the plane, for a rod of length `ℓ`. `ℓ` is not assumed positive; the
-  bob is at distance `|ℓ|` from the pivot. -/
+/--
+The position of the bob in the plane, for a rod of length `ℓ`. `ℓ` is not assumed positive; the
+bob is at distance `|ℓ|` from the pivot.
+-/
 def toSpace (ℓ : ℝ) (q : ConfigurationSpace) : Space 2 := ⟨![ℓ * q.sin, -ℓ * q.cos]⟩
 
 /-- The horizontal coordinate of the bob, `ℓ * q.sin`. -/
-@[simp]
-lemma toSpace_apply_zero (ℓ : ℝ) (q : ConfigurationSpace) :
-    toSpace ℓ q 0 = ℓ * q.sin := rfl
+@[simp] lemma toSpace_apply_zero (ℓ : ℝ) (q : ConfigurationSpace) : toSpace ℓ q 0 = ℓ * q.sin := rfl
 
 /-- The vertical coordinate of the bob, `-(ℓ * q.cos)`. -/
 @[simp]
-lemma toSpace_apply_one (ℓ : ℝ) (q : ConfigurationSpace) :
-    toSpace ℓ q 1 = -(ℓ * q.cos) := neg_mul ℓ q.cos
+lemma toSpace_apply_one (ℓ : ℝ) (q : ConfigurationSpace) : toSpace ℓ q 1 = -(ℓ * q.cos) :=
+  neg_mul ℓ q.cos
 
 /-- The position of the bob for the configuration at angle `θ`. -/
 @[simp]
-lemma toSpace_ofAngle (ℓ θ : ℝ) :
-    toSpace ℓ (ofAngle θ) = ⟨![ℓ * Real.sin θ, -ℓ * Real.cos θ]⟩ := by
+lemma toSpace_ofAngle (ℓ θ : ℝ) : toSpace ℓ (ofAngle θ) = ⟨![ℓ * Real.sin θ, -ℓ * Real.cos θ]⟩ := by
   simp [toSpace]
 
 /-- The rod-length constraint: the bob is at distance `|ℓ|` from the pivot. -/
@@ -391,8 +414,8 @@ lemma toSpace_injective {ℓ : ℝ} (hℓ : ℓ ≠ 0) : Function.Injective (toS
   intro q₁ q₂ h
   have h0 : ℓ * q₁.sin = ℓ * q₂.sin := congrArg (fun p : Space 2 => p 0) h
   have h1 : -ℓ * q₁.cos = -ℓ * q₂.cos := congrArg (fun p : Space 2 => p 1) h
-  exact ConfigurationSpace.ext
-    (key _ _ (mul_left_cancel₀ (neg_ne_zero.mpr hℓ) h1) (mul_left_cancel₀ hℓ h0))
+  exact ConfigurationSpace.ext (key _ _ (mul_left_cancel₀ (neg_ne_zero.mpr hℓ) h1)
+    (mul_left_cancel₀ hℓ h0))
 
 /-- For `ℓ ≠ 0` the position map is a closed embedding of the configuration circle. -/
 lemma toSpace_isClosedEmbedding {ℓ : ℝ} (hℓ : ℓ ≠ 0) : Topology.IsClosedEmbedding (toSpace ℓ) :=

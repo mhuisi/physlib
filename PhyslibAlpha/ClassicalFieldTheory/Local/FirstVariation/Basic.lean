@@ -49,50 +49,54 @@ namespace Local
 -/
 
 /-- A single term in the linearized first-variation density before integration by parts. -/
-noncomputable def firstVariationDensityTerm (L : Lagrangian d m k)
-    (f : Space d → EuclideanSpace ℝ (Fin m))
-    (η : AdmissibleVariation d (EuclideanSpace ℝ (Fin m))) (I : DerivativeIndex d k)
-    (a : Fin m) :
-    Space d → ℝ :=
-  fun x => L.coordDeriv I a (jetAt k f x) * ∂^[I.1] (fun y => (η y) a) x
+noncomputable def firstVariationDensityTerm
+    (L : Lagrangian d m k) (f : Space d → EuclideanSpace ℝ (Fin m))
+    (η : AdmissibleVariation d (EuclideanSpace ℝ (Fin m))) (I : DerivativeIndex d k) (a : Fin m)
+    : Space d → ℝ := fun x =>
+  L.coordDeriv I a (jetAt k f x) * ∂^[I.1] (fun y => (η y) a) x
 
 /-- The pointwise linearized first-variation density before integration by parts. -/
-noncomputable def firstVariationDensity (L : Lagrangian d m k)
-    (f : Space d → EuclideanSpace ℝ (Fin m))
-    (η : AdmissibleVariation d (EuclideanSpace ℝ (Fin m))) : Space d → ℝ :=
-  fun x => ∑ I : DerivativeIndex d k, ∑ a : Fin m, firstVariationDensityTerm L f η I a x
+noncomputable def firstVariationDensity
+    (L : Lagrangian d m k) (f : Space d → EuclideanSpace ℝ (Fin m))
+    (η : AdmissibleVariation d (EuclideanSpace ℝ (Fin m)))
+    : Space d → ℝ := fun x =>
+  ∑ I : DerivativeIndex d k, ∑ a : Fin m, firstVariationDensityTerm L f η I a x
 
 /-- The value predicted by the first-variation formula for an admissible variation. -/
-noncomputable def firstVariationValue (L : Lagrangian d m k)
-    (f : Space d → EuclideanSpace ℝ (Fin m))
-    (η : AdmissibleVariation d (EuclideanSpace ℝ (Fin m))) : ℝ :=
+noncomputable def firstVariationValue
+    (L : Lagrangian d m k) (f : Space d → EuclideanSpace ℝ (Fin m))
+    (η : AdmissibleVariation d (EuclideanSpace ℝ (Fin m)))
+    : ℝ :=
   ∫ x, ⟪eulerLagrangeOp L f x, η x⟫_ℝ
 
 @[simp]
-lemma firstVariationDensityTerm_apply (L : Lagrangian d m k)
-    (f : Space d → EuclideanSpace ℝ (Fin m))
-    (η : AdmissibleVariation d (EuclideanSpace ℝ (Fin m))) (I : DerivativeIndex d k)
-    (a : Fin m) (x : Space d) :
-    firstVariationDensityTerm L f η I a x =
-      L.coordDeriv I a (jetAt k f x) * ∂^[I.1] (fun y => (η y) a) x := rfl
+lemma firstVariationDensityTerm_apply
+    (L : Lagrangian d m k) (f : Space d → EuclideanSpace ℝ (Fin m))
+    (η : AdmissibleVariation d (EuclideanSpace ℝ (Fin m))) (I : DerivativeIndex d k) (a : Fin m)
+    (x : Space d)
+    : firstVariationDensityTerm L f η I a x
+      = L.coordDeriv I a (jetAt k f x) * ∂^[I.1] (fun y => (η y) a) x :=
+  rfl
 
 @[simp]
-lemma firstVariationDensity_apply (L : Lagrangian d m k)
-    (f : Space d → EuclideanSpace ℝ (Fin m))
-    (η : AdmissibleVariation d (EuclideanSpace ℝ (Fin m))) (x : Space d) :
-    firstVariationDensity L f η x =
-      ∑ I : DerivativeIndex d k, ∑ a : Fin m, firstVariationDensityTerm L f η I a x := rfl
+lemma firstVariationDensity_apply
+    (L : Lagrangian d m k) (f : Space d → EuclideanSpace ℝ (Fin m))
+    (η : AdmissibleVariation d (EuclideanSpace ℝ (Fin m))) (x : Space d)
+    : firstVariationDensity L f η x
+      = ∑ I : DerivativeIndex d k, ∑ a : Fin m, firstVariationDensityTerm L f η I a x :=
+  rfl
 
 @[simp]
-lemma firstVariationValue_eq_integral (L : Lagrangian d m k)
-    (f : Space d → EuclideanSpace ℝ (Fin m))
-    (η : AdmissibleVariation d (EuclideanSpace ℝ (Fin m))) :
-    firstVariationValue L f η = ∫ x, ⟪eulerLagrangeOp L f x, η x⟫_ℝ := rfl
+lemma firstVariationValue_eq_integral
+    (L : Lagrangian d m k) (f : Space d → EuclideanSpace ℝ (Fin m))
+    (η : AdmissibleVariation d (EuclideanSpace ℝ (Fin m)))
+    : firstVariationValue L f η = ∫ x, ⟪eulerLagrangeOp L f x, η x⟫_ℝ :=
+  rfl
 
 lemma firstVariationValue_eq_zero_of_eulerLagrange_zero
     (L : Lagrangian d m k) (f : Space d → EuclideanSpace ℝ (Fin m))
-    (η : AdmissibleVariation d (EuclideanSpace ℝ (Fin m))) (hEuler : eulerLagrangeOp L f = 0) :
-    firstVariationValue L f η = 0 := by
+    (η : AdmissibleVariation d (EuclideanSpace ℝ (Fin m))) (hEuler : eulerLagrangeOp L f = 0)
+    : firstVariationValue L f η = 0 := by
   unfold firstVariationValue
   rw [hEuler]
   simp

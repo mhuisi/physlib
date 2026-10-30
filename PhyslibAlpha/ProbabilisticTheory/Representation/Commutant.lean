@@ -63,7 +63,8 @@ namespace UnitaryRep
 variable {G : Type*} [AddCommGroup G] [TopologicalSpace G] [DiscreteTopology G]
 variable {H : Type*} [NormedAddCommGroup H] [InnerProductSpace ℂ H] [CompleteSpace H]
 variable (π : Multiplicative G →* unitary (H →L[ℂ] H))
-variable [MeasurableSpace (PontryaginDual (Multiplicative G))]
+variable
+  [MeasurableSpace (PontryaginDual (Multiplicative G))]
   [BorelSpace (PontryaginDual (Multiplicative G))]
 
 /-! ## A. Spectral projections -/
@@ -72,26 +73,29 @@ variable [MeasurableSpace (PontryaginDual (Multiplicative G))]
 def projection (S : Set (PontryaginDual (Multiplicative G))) : H →L[ℂ] H :=
   ContinuousLinearMapWOT.toCLM (spectralMeasure π S)
 
-lemma projection_isStarProjection (S : Set (PontryaginDual (Multiplicative G))) :
-    IsStarProjection (projection π S) := by
+lemma projection_isStarProjection (S : Set (PontryaginDual (Multiplicative G)))
+    : IsStarProjection (projection π S) := by
   have h := (spectralMeasure π).isStarProjection S
   refine ⟨?_, ?_⟩
   · exact congrArg ContinuousLinearMapWOT.toCLM h.isIdempotentElem
   · exact congrArg ContinuousLinearMapWOT.toCLM h.isSelfAdjoint
 
-lemma projection_eq_zero_of_not_measurable {S : Set (PontryaginDual (Multiplicative G))}
-    (hS : ¬ MeasurableSet S) : projection π S = 0 := by
-  have h : spectralMeasure π S = 0 :=
-    (spectralMeasure π).toVectorMeasure.not_measurable hS
+lemma projection_eq_zero_of_not_measurable
+    {S : Set (PontryaginDual (Multiplicative G))} (hS : ¬ MeasurableSet S)
+    : projection π S = 0 := by
+  have h : spectralMeasure π S = 0 := (spectralMeasure π).toVectorMeasure.not_measurable hS
   simp [projection, h]
 
 /-! ## B. Commutation with the commutant -/
 
-/-- **The commutant is decomposable**: every bounded operator commuting with the representation
-commutes with every spectral projection. -/
-lemma projection_commute {T : H →L[ℂ] H}
-    (hT : ∀ g, Commute ((π g : unitary (H →L[ℂ] H)) : H →L[ℂ] H) T)
-    (S : Set (PontryaginDual (Multiplicative G))) : Commute (projection π S) T := by
+/--
+**The commutant is decomposable**: every bounded operator commuting with the representation
+commutes with every spectral projection.
+-/
+lemma projection_commute
+    {T : H →L[ℂ] H} (hT : ∀ g, Commute ((π g : unitary (H →L[ℂ] H)) : H →L[ℂ] H) T)
+    (S : Set (PontryaginDual (Multiplicative G)))
+    : Commute (projection π S) T := by
   by_cases hS : MeasurableSet S
   · have hT' : ∀ a ∈ (family π).carrier, Commute a T := by
       rintro _ ⟨g, rfl⟩
@@ -108,19 +112,24 @@ lemma projection_commute {T : H →L[ℂ] H}
 /-! ## C. Invariant subspaces -/
 
 omit [CompleteSpace H] in
-/-- An operator mapping a closed subspace and its orthogonal complement into themselves commutes
-with the orthogonal projection onto the subspace. -/
-lemma commute_starProjection_of_mapsTo (W : Submodule ℂ H) [W.HasOrthogonalProjection]
-    {T : H →L[ℂ] H} (hW : ∀ v ∈ W, T v ∈ W) (hWo : ∀ v ∈ Wᗮ, T v ∈ Wᗮ) :
-    Commute (W.starProjection : H →L[ℂ] H) T := by
+/--
+An operator mapping a closed subspace and its orthogonal complement into themselves commutes
+with the orthogonal projection onto the subspace.
+-/
+lemma commute_starProjection_of_mapsTo
+    (W : Submodule ℂ H) [W.HasOrthogonalProjection]
+    {T : H →L[ℂ] H} (hW : ∀ v ∈ W, T v ∈ W) (hWo : ∀ v ∈ Wᗮ, T v ∈ Wᗮ)
+    : Commute (W.starProjection : H →L[ℂ] H) T := by
   ext v
   have hv := Submodule.starProjection_apply_mem W v
   have hvo := Submodule.sub_starProjection_mem_orthogonal (K := W) v
-  have h := Submodule.eq_starProjection_of_mem_of_inner_eq_zero (K := W) (u := T v)
-    (v := T (W.starProjection v)) (hW _ hv) (fun w hw => by
-      have := hWo _ hvo
-      rw [Submodule.mem_orthogonal'] at this
-      simpa [map_sub] using this w hw)
+  have h :=
+    Submodule.eq_starProjection_of_mem_of_inner_eq_zero (K := W) (u := T v)
+      (v := T (W.starProjection v)) (hW _ hv)
+      (fun w hw => by
+        have := hWo _ hvo
+        rw [Submodule.mem_orthogonal'] at this
+        simpa [map_sub] using this w hw)
   change W.starProjection (T v) = T (W.starProjection v)
   exact h
 
@@ -128,23 +137,29 @@ omit [DiscreteTopology G] in
 omit [BorelSpace (PontryaginDual (Multiplicative G))] in
 omit [MeasurableSpace (PontryaginDual (Multiplicative G))] in
 omit [TopologicalSpace G] in
-lemma inner_unitary_left (g : Multiplicative G) (x w : H) :
-    ⟪((π g : unitary (H →L[ℂ] H)) : H →L[ℂ] H) x, w⟫_ℂ =
-      ⟪x, ((π g⁻¹ : unitary (H →L[ℂ] H)) : H →L[ℂ] H) w⟫_ℂ := by
-  have hadj : ContinuousLinearMap.adjoint ((π g : unitary (H →L[ℂ] H)) : H →L[ℂ] H) =
-      ((π g⁻¹ : unitary (H →L[ℂ] H)) : H →L[ℂ] H) := by
+lemma inner_unitary_left (g : Multiplicative G) (x w : H)
+    : ⟪((π g : unitary (H →L[ℂ] H)) : H →L[ℂ] H) x, w⟫_ℂ
+      = ⟪x, ((π g⁻¹ : unitary (H →L[ℂ] H)) : H →L[ℂ] H) w⟫_ℂ := by
+  have hadj
+      : ContinuousLinearMap.adjoint ((π g : unitary (H →L[ℂ] H)) : H →L[ℂ] H)
+        = ((π g⁻¹ : unitary (H →L[ℂ] H)) : H →L[ℂ] H) := by
     rw [← ContinuousLinearMap.star_eq_adjoint, map_inv, ← Unitary.star_eq_inv, Unitary.coe_star]
   rw [← hadj]
   exact (ContinuousLinearMap.adjoint_inner_right _ x w).symm
 
-/-- A closed subspace invariant under the representation is invariant under every spectral
-projection. -/
-lemma mapsTo_projection_of_invariant (W : Submodule ℂ H) [W.HasOrthogonalProjection]
+/--
+A closed subspace invariant under the representation is invariant under every spectral
+projection.
+-/
+lemma mapsTo_projection_of_invariant
+    (W : Submodule ℂ H) [W.HasOrthogonalProjection]
     (hW : ∀ g, ∀ v ∈ W, ((π g : unitary (H →L[ℂ] H)) : H →L[ℂ] H) v ∈ W)
-    (S : Set (PontryaginDual (Multiplicative G))) {v : H} (hv : v ∈ W) :
-    projection π S v ∈ W := by
-  have hcomm : ∀ g, Commute ((π g : unitary (H →L[ℂ] H)) : H →L[ℂ] H)
-      (W.starProjection : H →L[ℂ] H) := fun g =>
+    (S : Set (PontryaginDual (Multiplicative G)))
+    {v : H} (hv : v ∈ W)
+    : projection π S v ∈ W := by
+  have hcomm
+      : ∀ g,
+        Commute ((π g : unitary (H →L[ℂ] H)) : H →L[ℂ] H) (W.starProjection : H →L[ℂ] H) := fun g =>
     (commute_starProjection_of_mapsTo W (hW g) (fun u hu => by
       rw [Submodule.mem_orthogonal'] at hu ⊢
       intro w hw
@@ -157,32 +172,38 @@ lemma mapsTo_projection_of_invariant (W : Submodule ℂ H) [W.HasOrthogonalProje
   rw [← this]
   exact Submodule.starProjection_apply_mem W _
 
-/-- A closed subspace invariant under every spectral projection is invariant under the
-representation. -/
-lemma mapsTo_of_projection_invariant (W : Submodule ℂ H) [W.HasOrthogonalProjection]
+/--
+A closed subspace invariant under every spectral projection is invariant under the
+representation.
+-/
+lemma mapsTo_of_projection_invariant
+    (W : Submodule ℂ H) [W.HasOrthogonalProjection]
     (hW : ∀ (S : Set (PontryaginDual (Multiplicative G))), ∀ v ∈ W, projection π S v ∈ W)
-    (g : Multiplicative G) {v : H} (hv : v ∈ W) :
-    ((π g : unitary (H →L[ℂ] H)) : H →L[ℂ] H) v ∈ W := by
+    (g : Multiplicative G)
+    {v : H} (hv : v ∈ W)
+    : ((π g : unitary (H →L[ℂ] H)) : H →L[ℂ] H) v ∈ W := by
   have : Nonempty (PontryaginDual (Multiplicative G)) := ⟨1⟩
-  have hpc : ∀ S : Set (PontryaginDual (Multiplicative G)),
-      Commute (W.starProjection : H →L[ℂ] H) (projection π S) := fun S =>
+  have hpc
+      : ∀ S : Set (PontryaginDual (Multiplicative G)),
+        Commute (W.starProjection : H →L[ℂ] H) (projection π S) := fun S =>
     commute_starProjection_of_mapsTo W (hW S) (fun u hu => by
       rw [Submodule.mem_orthogonal'] at hu ⊢
       intro w hw
-      have hself : IsSelfAdjoint (projection π S) :=
-        (projection_isStarProjection π S).isSelfAdjoint
+      have hself : IsSelfAdjoint (projection π S) := (projection_isStarProjection π S).isSelfAdjoint
       exact (hself.isSymmetric u w).trans (hu _ (hW S w hw)))
-  have hT : ∀ S : Set (PontryaginDual (Multiplicative G)),
-      spectralMeasure π S * ContinuousLinearMapWOT.ofCLM (W.starProjection : H →L[ℂ] H) =
-        ContinuousLinearMapWOT.ofCLM (W.starProjection : H →L[ℂ] H) * spectralMeasure π S := by
+  have hT
+      : ∀ S : Set (PontryaginDual (Multiplicative G)),
+        spectralMeasure π S * ContinuousLinearMapWOT.ofCLM (W.starProjection : H →L[ℂ] H)
+          = ContinuousLinearMapWOT.ofCLM (W.starProjection : H →L[ℂ] H) * spectralMeasure π S := by
     intro S
     apply ContinuousLinearMapWOT.toCLM_injective
     rw [ContinuousLinearMapWOT.toCLM_mul, ContinuousLinearMapWOT.toCLM_mul,
       ContinuousLinearMapWOT.toCLM_ofCLM]
     exact (hpc S).symm.eq
-  have hbi := WOTSpectralMeasure.boundedIntegral_commute (spectralMeasure π) hT
-    (TauCeti.PontryaginDual.continuous_coe_eval_const (G := Multiplicative G) g).measurable
-    ⟨1, fun χ => by simp⟩
+  have hbi :=
+    WOTSpectralMeasure.boundedIntegral_commute (spectralMeasure π) hT
+      (TauCeti.PontryaginDual.continuous_coe_eval_const (G := Multiplicative G) g).measurable
+      ⟨1, fun χ => by simp⟩
   rw [boundedIntegral_character π g] at hbi
   have hv' : W.starProjection v = v := Submodule.starProjection_eq_self_iff.mpr hv
   have := congrArg (fun A : H →L[ℂ] H => A v) hbi
@@ -203,15 +224,18 @@ omit [DiscreteTopology G] in
 omit [BorelSpace (PontryaginDual (Multiplicative G))] in
 omit [MeasurableSpace (PontryaginDual (Multiplicative G))] in
 omit [TopologicalSpace G] in
-lemma toEnd_apply (g : Multiplicative G) (v : H) :
-    toEnd π g v = ((π g : unitary (H →L[ℂ] H)) : H →L[ℂ] H) v := rfl
+lemma toEnd_apply (g : Multiplicative G) (v : H)
+    : toEnd π g v = ((π g : unitary (H →L[ℂ] H)) : H →L[ℂ] H) v :=
+  rfl
 
-/-- The operator `π(g)` acts on the spectral projection of the single character `χ` as the scalar
-`χ(g)`. -/
-lemma character_mul_projection_singleton (χ : PontryaginDual (Multiplicative G))
-    (g : Multiplicative G) :
-    ((π g : unitary (H →L[ℂ] H)) : H →L[ℂ] H) * projection π {χ} =
-      ((χ g : Circle) : ℂ) • projection π {χ} := by
+/--
+The operator `π(g)` acts on the spectral projection of the single character `χ` as the scalar
+`χ(g)`.
+-/
+lemma character_mul_projection_singleton
+    (χ : PontryaginDual (Multiplicative G)) (g : Multiplicative G)
+    : ((π g : unitary (H →L[ℂ] H)) : H →L[ℂ] H) * projection π {χ}
+      = ((χ g : Circle) : ℂ) • projection π {χ} := by
   have : Nonempty (PontryaginDual (Multiplicative G)) := ⟨1⟩
   have hsing : MeasurableSet ({χ} : Set (PontryaginDual (Multiplicative G))) :=
     measurableSet_singleton χ
@@ -219,35 +243,49 @@ lemma character_mul_projection_singleton (χ : PontryaginDual (Multiplicative G)
     (TauCeti.PontryaginDual.continuous_coe_eval_const (G := Multiplicative G) g).measurable
   have hf1 : ∃ C, ∀ χ' : PontryaginDual (Multiplicative G), ‖((χ' g : Circle) : ℂ)‖ ≤ C :=
     ⟨1, fun χ' => by simp⟩
-  have hf2 : ∃ C, ∀ χ' : PontryaginDual (Multiplicative G),
-      ‖({χ} : Set _).indicator (fun _ => (1 : ℂ)) χ'‖ ≤ C :=
+  have hf2
+      : ∃ C, ∀ χ' : PontryaginDual (Multiplicative G),
+        ‖({χ} : Set _).indicator (fun _ => (1 : ℂ)) χ'‖ ≤ C :=
     ⟨1, fun χ' => by by_cases h : χ' ∈ ({χ} : Set _) <;> simp [h]⟩
-  have hmul := WOTSpectralMeasure.boundedIntegral_mul (spectralMeasure π) hmeas
-    (measurable_const.indicator hsing) hf1 hf2
-  have hsmul := WOTSpectralMeasure.boundedIntegral_smul (spectralMeasure π)
-    ((χ g : Circle) : ℂ) (measurable_const.indicator hsing) hf2
+  have hmul :=
+    WOTSpectralMeasure.boundedIntegral_mul (spectralMeasure π) hmeas
+      (measurable_const.indicator hsing) hf1 hf2
+  have hsmul :=
+    WOTSpectralMeasure.boundedIntegral_smul (spectralMeasure π) ((χ g : Circle) : ℂ)
+      (measurable_const.indicator hsing) hf2
   have hind := WOTSpectralMeasure.boundedIntegral_indicator (spectralMeasure π) hsing
   have hchar := boundedIntegral_character π g
-  have hcongr := WOTSpectralMeasure.boundedIntegral_congr (spectralMeasure π)
-    (f := (fun χ' : PontryaginDual (Multiplicative G) => ((χ' g : Circle) : ℂ)) *
-      ({χ} : Set _).indicator (fun _ => (1 : ℂ)))
-    (g := fun χ' => ((χ g : Circle) : ℂ) * ({χ} : Set _).indicator (fun _ => (1 : ℂ)) χ')
-    (hmeas.mul (measurable_const.indicator hsing))
-    (measurable_const.mul (measurable_const.indicator hsing))
-    (by obtain ⟨C₁, h₁⟩ := hf1; obtain ⟨C₂, h₂⟩ := hf2
-        exact ⟨C₁ * C₂, fun z => by
-          rw [Pi.mul_apply, norm_mul]
-          exact mul_le_mul (h₁ z) (h₂ z) (norm_nonneg _) ((norm_nonneg _).trans (h₁ z))⟩)
-    (by obtain ⟨C, hC⟩ := hf2
-        exact ⟨‖((χ g : Circle) : ℂ)‖ * C, fun z => by
-          rw [norm_mul]
-          exact mul_le_mul_of_nonneg_left (hC z) (norm_nonneg _)⟩)
-    (fun χ' => by
-      by_cases h : χ' ∈ ({χ} : Set _)
-      · rw [Set.mem_singleton_iff] at h
-        subst h
-        simp
-      · simp [h])
+  have hcongr :=
+    WOTSpectralMeasure.boundedIntegral_congr (spectralMeasure π)
+      (f :=
+        (fun χ' : PontryaginDual (Multiplicative G) => ((χ' g : Circle) : ℂ))
+          * ({χ} : Set _).indicator (fun _ => (1 : ℂ)))
+      (g := fun χ' => ((χ g : Circle) : ℂ) * ({χ} : Set _).indicator (fun _ => (1 : ℂ)) χ')
+      (hmeas.mul (measurable_const.indicator hsing))
+      (measurable_const.mul (measurable_const.indicator hsing))
+      (by
+        obtain ⟨C₁, h₁⟩ := hf1
+        obtain ⟨C₂, h₂⟩ := hf2
+        exact ⟨
+          C₁ * C₂,
+          fun z => by
+            rw [Pi.mul_apply, norm_mul]
+            exact mul_le_mul (h₁ z) (h₂ z) (norm_nonneg _) ((norm_nonneg _).trans (h₁ z))
+        ⟩)
+      (by
+        obtain ⟨C, hC⟩ := hf2
+        exact ⟨
+          ‖((χ g : Circle) : ℂ)‖ * C,
+          fun z => by
+            rw [norm_mul]
+            exact mul_le_mul_of_nonneg_left (hC z) (norm_nonneg _)
+        ⟩)
+      (fun χ' => by
+        by_cases h : χ' ∈ ({χ} : Set _)
+        · rw [Set.mem_singleton_iff] at h
+          subst h
+          simp
+        · simp [h])
   have key := hmul.symm.trans (hcongr.trans hsmul)
   have h2 := congrArg ContinuousLinearMapWOT.toCLM key
   rw [ContinuousLinearMapWOT.toCLM_mul, hchar, hind] at h2
@@ -257,17 +295,23 @@ section Countable
 
 variable [Countable G]
 
-/-- A vector of momentum `χ` is carried by the single character `χ`: its spectral measure is
-concentrated at `χ`. -/
-lemma ae_eq_of_mem_sector (χ : PontryaginDual (Multiplicative G)) {v : H}
-    (hv : v ∈ ProbabilisticTheory.Representation.sector (toEnd π) (fun g => ((χ g : Circle) : ℂ))) :
-    ∀ᵐ χ' ∂vectorMeasure π v, χ' = χ := by
+/--
+A vector of momentum `χ` is carried by the single character `χ`: its spectral measure is
+concentrated at `χ`.
+-/
+lemma ae_eq_of_mem_sector
+    (χ : PontryaginDual (Multiplicative G))
+    {v : H}
+    (hv : v ∈ ProbabilisticTheory.Representation.sector (toEnd π) (fun g => ((χ g : Circle) : ℂ)))
+    : ∀ᵐ χ' ∂vectorMeasure π v, χ' = χ := by
   have : Countable (Multiplicative G) := inferInstanceAs (Countable G)
   set ν := vectorMeasure π v
   have hall : ∀ g : Multiplicative G, ∀ᵐ χ' ∂ν, χ' g = χ g := by
     intro g
-    have hI : Integrable (fun χ' : PontryaginDual (Multiplicative G) =>
-        ((χ' g : Circle) : ℂ) * starRingEnd ℂ ((χ g : Circle) : ℂ)) ν :=
+    have hI : Integrable
+        (fun χ' : PontryaginDual (Multiplicative G) =>
+          ((χ' g : Circle) : ℂ) * starRingEnd ℂ ((χ g : Circle) : ℂ))
+        ν :=
       (TauCeti.PontryaginDual.integrable_coe_eval (μ := ν) g).mul_const _
     have hmean : ∫ χ', ((χ' g : Circle) : ℂ) ∂ν = ((χ g : Circle) : ℂ) * ((‖v‖ ^ 2 : ℝ) : ℂ) := by
       rw [← inner_eq_integral_vectorMeasure π v g]
@@ -279,38 +323,49 @@ lemma ae_eq_of_mem_sector (χ : PontryaginDual (Multiplicative G)) {v : H}
     have hmass : ν.real univ = ‖v‖ ^ 2 := by
       rw [measureReal_def, vectorMeasure_univ, ENNReal.toReal_ofReal (sq_nonneg _)]
     have hint : ∫ χ', ‖((χ' g : Circle) : ℂ) - ((χ g : Circle) : ℂ)‖ ^ 2 ∂ν = 0 := by
-      have hz : ∀ χ' : PontryaginDual (Multiplicative G), ‖((χ' g : Circle) : ℂ) -
-          ((χ g : Circle) : ℂ)‖ ^ 2 = 2 - 2 * (((χ' g : Circle) : ℂ) *
-            starRingEnd ℂ ((χ g : Circle) : ℂ)).re := by
+      have hz
+          : ∀ χ' : PontryaginDual (Multiplicative G),
+            ‖((χ' g : Circle) : ℂ) -
+                  ((χ g : Circle) : ℂ)‖
+                ^ 2
+              = 2 - 2 * (((χ' g : Circle) : ℂ) * starRingEnd ℂ ((χ g : Circle) : ℂ)).re := by
         intro χ'
         rw [← Complex.normSq_eq_norm_sq, Complex.normSq_sub]
         simp [Complex.normSq_eq_norm_sq]
         ring
-      have hIre : Integrable (fun χ' : PontryaginDual (Multiplicative G) =>
-          (((χ' g : Circle) : ℂ) * starRingEnd ℂ ((χ g : Circle) : ℂ)).re) ν := hI.re
-      have hre : ∫ χ' : PontryaginDual (Multiplicative G),
-          (((χ' g : Circle) : ℂ) * starRingEnd ℂ ((χ g : Circle) : ℂ)).re ∂ν =
-          (∫ χ' : PontryaginDual (Multiplicative G),
-            ((χ' g : Circle) : ℂ) * starRingEnd ℂ ((χ g : Circle) : ℂ) ∂ν).re := integral_re hI
+      have hIre : Integrable
+          (fun χ' : PontryaginDual (Multiplicative G) =>
+            (((χ' g : Circle) : ℂ) * starRingEnd ℂ ((χ g : Circle) : ℂ)).re)
+          ν :=
+        hI.re
+      have hre
+          : ∫ χ' : PontryaginDual (Multiplicative G),
+              (((χ' g : Circle) : ℂ) * starRingEnd ℂ ((χ g : Circle) : ℂ)).re ∂ν
+            = (∫ χ' : PontryaginDual (Multiplicative G),
+                ((χ' g : Circle) : ℂ) * starRingEnd ℂ ((χ g : Circle) : ℂ) ∂ν).re :=
+        integral_re hI
       simp_rw [hz]
-      rw [integral_sub (integrable_const _) (hIre.const_mul 2), integral_const,
-        integral_const_mul, hre, integral_mul_const, hmean, hmass]
+      rw [integral_sub (integrable_const _) (hIre.const_mul 2), integral_const, integral_const_mul,
+        hre, integral_mul_const, hmean, hmass]
       have hu : ((χ g : Circle) : ℂ) * starRingEnd ℂ ((χ g : Circle) : ℂ) = 1 := by
         rw [Complex.mul_conj, Complex.normSq_eq_norm_sq]
         simp
-      have : ((χ g : Circle) : ℂ) * ((‖v‖ ^ 2 : ℝ) : ℂ) * starRingEnd ℂ ((χ g : Circle) : ℂ) =
-          ((‖v‖ ^ 2 : ℝ) : ℂ) := by
+      have : ((χ g : Circle) : ℂ) * ((‖v‖ ^ 2 : ℝ) : ℂ) * starRingEnd ℂ ((χ g : Circle) : ℂ)
+          = ((‖v‖ ^ 2 : ℝ) : ℂ) := by
         rw [mul_right_comm, hu, one_mul]
       rw [this, Complex.ofReal_re]
       ring
     have hmeasf : Continuous fun χ' : PontryaginDual (Multiplicative G) =>
         ‖((χ' g : Circle) : ℂ) - ((χ g : Circle) : ℂ)‖ ^ 2 :=
       (((TauCeti.PontryaginDual.continuous_coe_eval_const (G := Multiplicative G) g).sub
-        continuous_const).norm).pow 2
-    have hint_int : Integrable (fun χ' : PontryaginDual (Multiplicative G) =>
-        ‖((χ' g : Circle) : ℂ) - ((χ g : Circle) : ℂ)‖ ^ 2) ν := by
-      refine Integrable.of_bound hmeasf.aestronglyMeasurable 4 (Filter.Eventually.of_forall
-        fun χ' => ?_)
+          continuous_const).norm).pow
+        2
+    have hint_int : Integrable
+        (fun χ' : PontryaginDual (Multiplicative G) =>
+          ‖((χ' g : Circle) : ℂ) - ((χ g : Circle) : ℂ)‖ ^ 2)
+        ν := by
+      refine Integrable.of_bound hmeasf.aestronglyMeasurable 4
+        (Filter.Eventually.of_forall fun χ' => ?_)
       rw [Real.norm_of_nonneg (sq_nonneg _)]
       have h1 := norm_sub_le ((χ' g : Circle) : ℂ) ((χ g : Circle) : ℂ)
       simp only [Circle.norm_coe] at h1
@@ -326,16 +381,17 @@ lemma ae_eq_of_mem_sector (χ : PontryaginDual (Multiplicative G)) {v : H}
   exact PontryaginDual.ext fun g => Circle.ext (congrArg Subtype.val (hχ' g))
 
 /-- **A vector of momentum `χ` lies in the range of the spectral projection of `χ`.** -/
-lemma projection_singleton_eq_self_of_mem_sector (χ : PontryaginDual (Multiplicative G)) {v : H}
-    (hv : v ∈ ProbabilisticTheory.Representation.sector (toEnd π) (fun g => ((χ g : Circle) : ℂ))) :
-    projection π {χ} v = v := by
+lemma projection_singleton_eq_self_of_mem_sector
+    (χ : PontryaginDual (Multiplicative G))
+    {v : H}
+    (hv : v ∈ ProbabilisticTheory.Representation.sector (toEnd π) (fun g => ((χ g : Circle) : ℂ)))
+    : projection π {χ} v = v := by
   have hsing : MeasurableSet ({χ} : Set (PontryaginDual (Multiplicative G))) :=
     measurableSet_singleton χ
   have hae := ae_eq_of_mem_sector π χ hv
   have hc : vectorMeasure π v ({χ}ᶜ) = 0 := by
     have h0 := ae_iff.mp hae
-    have hset : {a : PontryaginDual (Multiplicative G) | ¬ a = χ} = ({χ}ᶜ : Set _) := by
-      ext a; simp
+    have hset : {a : PontryaginDual (Multiplicative G) | ¬ a = χ} = ({χ}ᶜ : Set _) := by ext a; simp
     rwa [hset] at h0
   have hν : vectorMeasure π v {χ} = vectorMeasure π v Set.univ := by
     have := measure_add_measure_compl (μ := vectorMeasure π v) hsing
@@ -364,12 +420,14 @@ lemma projection_singleton_eq_self_of_mem_sector (χ : PontryaginDual (Multiplic
   have := norm_eq_zero.mp (pow_eq_zero_iff (two_ne_zero) |>.mp hsub)
   exact (sub_eq_zero.mp this).symm
 
-/-- **The spectral projection of a single character is the projection onto the sector of
+/--
+**The spectral projection of a single character is the projection onto the sector of
 definite momentum**: its range is the subspace of vectors on which the group acts through the
-character. -/
-lemma range_projection_singleton (χ : PontryaginDual (Multiplicative G)) :
-    LinearMap.range (projection π {χ} : H →L[ℂ] H).toLinearMap =
-      ProbabilisticTheory.Representation.sector (toEnd π) (fun g => ((χ g : Circle) : ℂ)) := by
+character.
+-/
+lemma range_projection_singleton (χ : PontryaginDual (Multiplicative G))
+    : LinearMap.range (projection π {χ} : H →L[ℂ] H).toLinearMap
+      = ProbabilisticTheory.Representation.sector (toEnd π) (fun g => ((χ g : Circle) : ℂ)) := by
   ext v
   constructor
   · rintro ⟨w, rfl⟩ g

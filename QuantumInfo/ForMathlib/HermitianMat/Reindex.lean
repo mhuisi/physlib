@@ -24,35 +24,26 @@ variable {d d₂ d₃ d₄ 𝕜 : Type*} [RCLike 𝕜]
 
 variable (A B : HermitianMat d 𝕜) (e : d ≃ d₂)
 
-def reindex (e : d ≃ d₂) : HermitianMat d₂ 𝕜 :=
-  ⟨A.mat.reindex e e, A.H.submatrix e.symm⟩
+def reindex (e : d ≃ d₂) : HermitianMat d₂ 𝕜 := ⟨A.mat.reindex e e, A.H.submatrix e.symm⟩
 
-@[simp]
-lemma mat_reindex : (A.reindex e).mat = A.mat.reindex e e := by
-  rfl
+@[simp] lemma mat_reindex : (A.reindex e).mat = A.mat.reindex e e := by rfl
 
 /-! Our simp-normal form for expressions involving `HermitianMat.reindex` is that we try to push
 the reindexing as far out as possible, so that it can be absorbed by `HermitianMat.trace`, or
 cancelled our in a `HermitianMat.inner`. In places where it commutes (like `HermitianMat.inner`)
 we push it to the right side. One downside is that we're not as likely to hit `reindex_one`. -/
 
-@[simp]
-lemma reindex_refl (A : HermitianMat d 𝕜) :
-    A.reindex (.refl _) = A := by
-  rfl
+@[simp] lemma reindex_refl (A : HermitianMat d 𝕜) : A.reindex (.refl _) = A := by rfl
 
 @[simp]
-lemma reindex_reindex (A : HermitianMat d 𝕜) (e : d ≃ d₂) (f : d₂ ≃ d₃) :
-    (A.reindex e).reindex f = A.reindex (e.trans f) := by
+lemma reindex_reindex (A : HermitianMat d 𝕜) (e : d ≃ d₂) (f : d₂ ≃ d₃)
+    : (A.reindex e).reindex f = A.reindex (e.trans f) := by
   ext1; simp
 
-@[simp]
-lemma reindex_zero : (0 : HermitianMat d 𝕜).reindex e = 0 := by
-  ext1; simp
+@[simp] lemma reindex_zero : (0 : HermitianMat d 𝕜).reindex e = 0 := by ext1; simp
 
 @[simp]
-lemma reindex_one [DecidableEq d] [DecidableEq d₂] :
-    (1 : HermitianMat d 𝕜).reindex e = 1 := by
+lemma reindex_one [DecidableEq d] [DecidableEq d₂] : (1 : HermitianMat d 𝕜).reindex e = 1 := by
   ext1
   simp [reindex]
 
@@ -61,20 +52,18 @@ lemma reindex_add : A.reindex e + B.reindex e = (A + B).reindex e := by
   ext1; simp [Matrix.submatrix_add]
 
 @[simp]
-lemma reindex_sub  : A.reindex e - B.reindex e = (A - B).reindex e := by
+lemma reindex_sub : A.reindex e - B.reindex e = (A - B).reindex e := by
   ext1; simp [Matrix.submatrix_sub]
 
-@[simp]
-lemma reindex_neg : (-A).reindex e = -(A.reindex e) := by
-  ext1; simp [Matrix.submatrix_neg]
+@[simp] lemma reindex_neg : (-A).reindex e = -(A.reindex e) := by ext1; simp [Matrix.submatrix_neg]
 
 @[simp]
 lemma reindex_smul (c : ℝ) : (c • A).reindex e = c • (A.reindex e) := by
   ext1; simp [Matrix.submatrix_smul]
 
 @[simp]
-lemma reindex_conj [Fintype d₂] [Fintype d] (B : Matrix d₃ d₂ 𝕜) :
-    (A.reindex e).conj B = A.conj (B.submatrix id e) := by
+lemma reindex_conj [Fintype d₂] [Fintype d] (B : Matrix d₃ d₂ 𝕜)
+    : (A.reindex e).conj B = A.conj (B.submatrix id e) := by
   ext1
   simp only [conj_apply, mat_reindex, Matrix.reindex_apply, mat_mk]
   rw [← Matrix.submatrix_id_mul_right, Matrix.mul_assoc]
@@ -84,30 +73,28 @@ lemma reindex_conj [Fintype d₂] [Fintype d] (B : Matrix d₃ d₂ 𝕜) :
 variable [Fintype d]
 
 set_option backward.isDefEq.respectTransparency false in
-lemma conj_submatrix (B : Matrix d₂ d₄ 𝕜) (e : d₃ ≃ d₂) (f : d → d₄) :
-    A.conj (B.submatrix e f) = (A.conj (B.submatrix id f)).reindex e.symm := by
+lemma conj_submatrix (B : Matrix d₂ d₄ 𝕜) (e : d₃ ≃ d₂) (f : d → d₄)
+    : A.conj (B.submatrix e f) = (A.conj (B.submatrix id f)).reindex e.symm := by
   ext1
   simp [conj_apply, ← Matrix.submatrix_mul_equiv (e₂ := .refl d)]
 
 set_option backward.isDefEq.respectTransparency false in
-lemma reindex_eq_conj [DecidableEq d] (e : d ≃ d₂) :
-    A.reindex e = A.conj (Matrix.reindex e (.refl d) 1) := by
+lemma reindex_eq_conj [DecidableEq d] (e : d ≃ d₂)
+    : A.reindex e = A.conj (Matrix.reindex e (.refl d) 1) := by
   ext : 3
-  simp [-mat_apply, reindex, conj_apply, Matrix.submatrix,
-    Matrix.mul_apply, Matrix.one_apply]
+  simp [-mat_apply, reindex, conj_apply, Matrix.submatrix, Matrix.mul_apply, Matrix.one_apply]
 
 variable [Fintype d₂] [DecidableEq d] [DecidableEq d₂]
 
 set_option backward.isDefEq.respectTransparency false in
-lemma ker_reindex :
-    (A.reindex e).ker = A.ker.comap (LinearEquiv.euclideanOfRelabel 𝕜 e).toLinearMap := by
+lemma ker_reindex
+    : (A.reindex e).ker = A.ker.comap (LinearEquiv.euclideanOfRelabel 𝕜 e).toLinearMap := by
   dsimp only [reindex, ker, lin]
   simp only [mat_mk]
   rw [Matrix.reindex_toEuclideanLin, LinearEquiv.ker_comp, LinearMap.ker_comp]
 
 @[simp]
-lemma ker_reindex_le_iff :
-    (A.reindex e).ker ≤ (B.reindex e).ker ↔ A.ker ≤ B.ker := by
+lemma ker_reindex_le_iff : (A.reindex e).ker ≤ (B.reindex e).ker ↔ A.ker ≤ B.ker := by
   rw [ker_reindex, ker_reindex]
   apply Submodule.comap_le_comap_iff_of_surjective
   exact LinearEquiv.surjective (LinearEquiv.euclideanOfRelabel 𝕜 e)

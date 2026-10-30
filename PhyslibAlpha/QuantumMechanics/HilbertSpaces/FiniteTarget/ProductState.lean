@@ -74,17 +74,18 @@ variable {α β : Type*} [Fintype α] [DecidableEq α] [Fintype β] [DecidableEq
 noncomputable def prodVec (ψ : 𝓗[α]) (φ : 𝓗[β]) : 𝓗[α × β] :=
   ⟨WithLp.toLp 2 fun p => ψ.val p.1 * φ.val p.2⟩
 
-lemma prodVec_val (ψ : 𝓗[α]) (φ : 𝓗[β]) (p : α × β) :
-    (prodVec ψ φ).val p = ψ.val p.1 * φ.val p.2 := rfl
+lemma prodVec_val (ψ : 𝓗[α]) (φ : 𝓗[β]) (p : α × β) : (prodVec ψ φ).val p = ψ.val p.1 * φ.val p.2 :=
+  rfl
 
 /-- `⟪ψ ⊗ φ, ψ' ⊗ φ'⟫ = ⟪ψ, ψ'⟫ ⟪φ, φ'⟫`. -/
-lemma inner_prodVec (ψ ψ' : 𝓗[α]) (φ φ' : 𝓗[β]) :
-    ⟪prodVec ψ φ, prodVec ψ' φ'⟫_ℂ = ⟪ψ, ψ'⟫_ℂ * ⟪φ, φ'⟫_ℂ := by
+lemma inner_prodVec (ψ ψ' : 𝓗[α]) (φ φ' : 𝓗[β])
+    : ⟪prodVec ψ φ, prodVec ψ' φ'⟫_ℂ = ⟪ψ, ψ'⟫_ℂ * ⟪φ, φ'⟫_ℂ := by
   rw [inner_eq_sum, Fintype.sum_prod_type, inner_eq_val ψ, inner_eq_val φ, PiLp.inner_apply,
     PiLp.inner_apply, Finset.sum_mul_sum]
-  exact Finset.sum_congr rfl fun _ _ => Finset.sum_congr rfl fun _ _ => by
-    simp only [prodVec_val, RCLike.inner_apply, map_mul]
-    ring
+  exact Finset.sum_congr rfl fun _ _ =>
+    Finset.sum_congr rfl fun _ _ => by
+      simp only [prodVec_val, RCLike.inner_apply, map_mul]
+      ring
 
 /-- `‖ψ ⊗ φ‖ = ‖ψ‖ ‖φ‖`. -/
 lemma norm_prodVec (ψ : 𝓗[α]) (φ : 𝓗[β]) : ‖prodVec ψ φ‖ = ‖ψ‖ * ‖φ‖ := by
@@ -94,40 +95,38 @@ lemma norm_prodVec (ψ : 𝓗[α]) (φ : 𝓗[β]) : ‖prodVec ψ φ‖ = ‖ψ
   exact (pow_left_inj₀ (norm_nonneg _) (by positivity) two_ne_zero).mp (by rw [h, mul_pow])
 
 /-- The product of two unit vectors is a unit vector. -/
-lemma norm_prodVec_eq_one {ψ : 𝓗[α]} {φ : 𝓗[β]} (hψ : ‖ψ‖ = 1) (hφ : ‖φ‖ = 1) :
-    ‖prodVec ψ φ‖ = 1 := by
+lemma norm_prodVec_eq_one {ψ : 𝓗[α]} {φ : 𝓗[β]} (hψ : ‖ψ‖ = 1) (hφ : ‖φ‖ = 1)
+    : ‖prodVec ψ φ‖ = 1 := by
   rw [norm_prodVec, hψ, hφ, one_mul]
 
-lemma prodVec_sub_left (ψ ψ' : 𝓗[α]) (φ : 𝓗[β]) :
-    prodVec (ψ - ψ') φ = prodVec ψ φ - prodVec ψ' φ := by
+lemma prodVec_sub_left (ψ ψ' : 𝓗[α]) (φ : 𝓗[β])
+    : prodVec (ψ - ψ') φ = prodVec ψ φ - prodVec ψ' φ := by
   ext p
   exact sub_mul _ _ _
 
-lemma prodVec_sub_right (ψ : 𝓗[α]) (φ φ' : 𝓗[β]) :
-    prodVec ψ (φ - φ') = prodVec ψ φ - prodVec ψ φ' := by
+lemma prodVec_sub_right (ψ : 𝓗[α]) (φ φ' : 𝓗[β])
+    : prodVec ψ (φ - φ') = prodVec ψ φ - prodVec ψ φ' := by
   ext p
   exact mul_sub _ _ _
 
-lemma prodVec_smul_left (r : ℝ) (ψ : 𝓗[α]) (φ : 𝓗[β]) :
-    prodVec (r • ψ) φ = r • prodVec ψ φ := by
+lemma prodVec_smul_left (r : ℝ) (ψ : 𝓗[α]) (φ : 𝓗[β]) : prodVec (r • ψ) φ = r • prodVec ψ φ := by
   ext p
   simp [prodVec_val, ← Complex.coe_smul, mul_assoc]
 
-lemma prodVec_smul_right (r : ℝ) (ψ : 𝓗[α]) (φ : 𝓗[β]) :
-    prodVec ψ (r • φ) = r • prodVec ψ φ := by
+lemma prodVec_smul_right (r : ℝ) (ψ : 𝓗[α]) (φ : 𝓗[β]) : prodVec ψ (r • φ) = r • prodVec ψ φ := by
   ext p
   simp [prodVec_val, ← Complex.coe_smul, mul_left_comm]
 
 /-- `(A ⊗ 1) (ψ ⊗ φ) = A ψ ⊗ φ`. -/
-lemma onFst_prodVec (A : 𝓗[α] →ₗ[ℂ] 𝓗[α]) (ψ : 𝓗[α]) (φ : 𝓗[β]) :
-    onFst A (prodVec ψ φ) = prodVec (A ψ) φ := by
+lemma onFst_prodVec (A : 𝓗[α] →ₗ[ℂ] 𝓗[α]) (ψ : 𝓗[α]) (φ : 𝓗[β])
+    : onFst A (prodVec ψ φ) = prodVec (A ψ) φ := by
   ext p
   simp only [onFst_val, prodVec_val, val_apply A ψ, Finset.sum_mul]
   exact Finset.sum_congr rfl fun _ _ => by ring
 
 /-- `(1 ⊗ B) (ψ ⊗ φ) = ψ ⊗ B φ`. -/
-lemma onSnd_prodVec (B : 𝓗[β] →ₗ[ℂ] 𝓗[β]) (ψ : 𝓗[α]) (φ : 𝓗[β]) :
-    onSnd B (prodVec ψ φ) = prodVec ψ (B φ) := by
+lemma onSnd_prodVec (B : 𝓗[β] →ₗ[ℂ] 𝓗[β]) (ψ : 𝓗[α]) (φ : 𝓗[β])
+    : onSnd B (prodVec ψ φ) = prodVec ψ (B φ) := by
   ext p
   simp only [onSnd_val, prodVec_val, val_apply B φ, Finset.mul_sum]
   exact Finset.sum_congr rfl fun _ _ => by ring
@@ -139,18 +138,20 @@ lemma onSnd_prodVec (B : 𝓗[β] →ₗ[ℂ] 𝓗[β]) (ψ : 𝓗[α]) (φ : �
 -/
 
 /-- An observable of the first coordinate as an observable of `𝓗[α × β]`. -/
-noncomputable def onFstObservable (a : Observable (𝓗[α] →L[ℂ] 𝓗[α])) :
-    Observable (𝓗[α × β] →L[ℂ] 𝓗[α × β]) :=
-  ⟨LinearMap.toContinuousLinearMap (onFst (a : 𝓗[α] →L[ℂ] 𝓗[α]).toLinearMap),
-    ContinuousLinearMap.isSelfAdjoint_iff_isSymmetric.mpr
-      (onFst_isSymmetric (ContinuousLinearMap.isSelfAdjoint_iff_isSymmetric.mp a.2))⟩
+noncomputable def onFstObservable (a : Observable (𝓗[α] →L[ℂ] 𝓗[α]))
+    : Observable (𝓗[α × β] →L[ℂ] 𝓗[α × β]) := ⟨
+  LinearMap.toContinuousLinearMap (onFst (a : 𝓗[α] →L[ℂ] 𝓗[α]).toLinearMap),
+  ContinuousLinearMap.isSelfAdjoint_iff_isSymmetric.mpr (onFst_isSymmetric
+    (ContinuousLinearMap.isSelfAdjoint_iff_isSymmetric.mp a.2))
+⟩
 
 /-- An observable of the second coordinate as an observable of `𝓗[α × β]`. -/
-noncomputable def onSndObservable (b : Observable (𝓗[β] →L[ℂ] 𝓗[β])) :
-    Observable (𝓗[α × β] →L[ℂ] 𝓗[α × β]) :=
-  ⟨LinearMap.toContinuousLinearMap (onSnd (b : 𝓗[β] →L[ℂ] 𝓗[β]).toLinearMap),
-    ContinuousLinearMap.isSelfAdjoint_iff_isSymmetric.mpr
-      (onSnd_isSymmetric (ContinuousLinearMap.isSelfAdjoint_iff_isSymmetric.mp b.2))⟩
+noncomputable def onSndObservable (b : Observable (𝓗[β] →L[ℂ] 𝓗[β]))
+    : Observable (𝓗[α × β] →L[ℂ] 𝓗[α × β]) := ⟨
+  LinearMap.toContinuousLinearMap (onSnd (b : 𝓗[β] →L[ℂ] 𝓗[β]).toLinearMap),
+  ContinuousLinearMap.isSelfAdjoint_iff_isSymmetric.mpr (onSnd_isSymmetric
+    (ContinuousLinearMap.isSelfAdjoint_iff_isSymmetric.mp b.2))
+⟩
 
 /-!
 
@@ -161,8 +162,8 @@ noncomputable def onSndObservable (b : Observable (𝓗[β] →L[ℂ] 𝓗[β]))
 variable {ψ : 𝓗[α]} {φ : 𝓗[β]} (hψ : ‖ψ‖ = 1) (hφ : ‖φ‖ = 1)
 
 /-- The mean of the first coordinate is that of `ψ`. -/
-lemma expectation_onFstObservable (a : Observable (𝓗[α] →L[ℂ] 𝓗[α])) :
-    (ofVec (norm_prodVec_eq_one hψ hφ))⟨onFstObservable a⟩ = (ofVec hψ)⟨a⟩ := by
+lemma expectation_onFstObservable (a : Observable (𝓗[α] →L[ℂ] 𝓗[α]))
+    : (ofVec (norm_prodVec_eq_one hψ hφ))⟨onFstObservable a⟩ = (ofVec hψ)⟨a⟩ := by
   apply Complex.ofReal_injective
   rw [← apply_observable_eq_expectation, ← apply_observable_eq_expectation, ofVec_apply,
     ofVec_apply]
@@ -172,29 +173,29 @@ lemma expectation_onFstObservable (a : Observable (𝓗[α] →L[ℂ] 𝓗[α]))
   rfl
 
 /-- The fluctuation of the first coordinate is that of `ψ`, tensored with `φ`. -/
-lemma fluctuation_onFstObservable (a : Observable (𝓗[α] →L[ℂ] 𝓗[α])) :
-    (onFstObservable (β := β) a : 𝓗[α × β] →L[ℂ] 𝓗[α × β]) (prodVec ψ φ) -
-        (ofVec (norm_prodVec_eq_one hψ hφ))⟨onFstObservable a⟩ • prodVec ψ φ =
-      prodVec ((a : 𝓗[α] →L[ℂ] 𝓗[α]) ψ - (ofVec hψ)⟨a⟩ • ψ) φ := by
+lemma fluctuation_onFstObservable (a : Observable (𝓗[α] →L[ℂ] 𝓗[α]))
+    : (onFstObservable (β := β) a : 𝓗[α × β] →L[ℂ] 𝓗[α × β]) (prodVec ψ φ)
+        - (ofVec (norm_prodVec_eq_one hψ hφ))⟨onFstObservable a⟩ • prodVec ψ φ
+      = prodVec ((a : 𝓗[α] →L[ℂ] 𝓗[α]) ψ - (ofVec hψ)⟨a⟩ • ψ) φ := by
   rw [expectation_onFstObservable hψ hφ, prodVec_sub_left, prodVec_smul_left]
   exact congrArg (· - _) (onFst_prodVec _ ψ φ)
 
-lemma variance_onFstObservable (a : Observable (𝓗[α] →L[ℂ] 𝓗[α])) :
-    variance (ofVec (norm_prodVec_eq_one hψ hφ)) (onFstObservable a) = variance (ofVec hψ) a := by
+lemma variance_onFstObservable (a : Observable (𝓗[α] →L[ℂ] 𝓗[α]))
+    : variance (ofVec (norm_prodVec_eq_one hψ hφ)) (onFstObservable a) = variance (ofVec hψ) a := by
   rw [variance_ofVec, variance_ofVec, fluctuation_onFstObservable hψ hφ, norm_prodVec, hφ, mul_one]
 
-lemma covariance_onFstObservable (a b : Observable (𝓗[α] →L[ℂ] 𝓗[α])) :
-    covariance (ofVec (norm_prodVec_eq_one hψ hφ)) (onFstObservable a) (onFstObservable b) =
-      covariance (ofVec hψ) a b := by
+lemma covariance_onFstObservable (a b : Observable (𝓗[α] →L[ℂ] 𝓗[α]))
+    : covariance (ofVec (norm_prodVec_eq_one hψ hφ)) (onFstObservable a) (onFstObservable b)
+      = covariance (ofVec hψ) a b := by
   rw [covariance_eq_re_apply_centered_mul, covariance_eq_re_apply_centered_mul,
     apply_centered_mul_centered_ofVec, apply_centered_mul_centered_ofVec,
     fluctuation_onFstObservable hψ hφ, fluctuation_onFstObservable hψ hφ, inner_prodVec,
     inner_self_eq_norm_sq_to_K, hφ]
   simp
 
-lemma centeredGramDefect_onFstObservable (a b : Observable (𝓗[α] →L[ℂ] 𝓗[α])) :
-    centeredGramDefect (ofVec (norm_prodVec_eq_one hψ hφ)) (onFstObservable a)
-      (onFstObservable b) = centeredGramDefect (ofVec hψ) a b := by
+lemma centeredGramDefect_onFstObservable (a b : Observable (𝓗[α] →L[ℂ] 𝓗[α]))
+    : centeredGramDefect (ofVec (norm_prodVec_eq_one hψ hφ)) (onFstObservable a) (onFstObservable b)
+      = centeredGramDefect (ofVec hψ) a b := by
   rw [centeredGramDefect_ofVec, centeredGramDefect_ofVec, fluctuation_onFstObservable hψ hφ,
     fluctuation_onFstObservable hψ hφ, inner_prodVec, inner_self_eq_norm_sq_to_K, norm_prodVec,
     norm_prodVec, hφ]
@@ -207,8 +208,8 @@ lemma centeredGramDefect_onFstObservable (a b : Observable (𝓗[α] →L[ℂ] �
 -/
 
 /-- The mean of the second coordinate is that of `φ`. -/
-lemma expectation_onSndObservable (b : Observable (𝓗[β] →L[ℂ] 𝓗[β])) :
-    (ofVec (norm_prodVec_eq_one hψ hφ))⟨onSndObservable b⟩ = (ofVec hφ)⟨b⟩ := by
+lemma expectation_onSndObservable (b : Observable (𝓗[β] →L[ℂ] 𝓗[β]))
+    : (ofVec (norm_prodVec_eq_one hψ hφ))⟨onSndObservable b⟩ = (ofVec hφ)⟨b⟩ := by
   apply Complex.ofReal_injective
   rw [← apply_observable_eq_expectation, ← apply_observable_eq_expectation, ofVec_apply,
     ofVec_apply]
@@ -218,29 +219,29 @@ lemma expectation_onSndObservable (b : Observable (𝓗[β] →L[ℂ] 𝓗[β]))
   rfl
 
 /-- The fluctuation of the second coordinate is `ψ` tensored with that of `φ`. -/
-lemma fluctuation_onSndObservable (b : Observable (𝓗[β] →L[ℂ] 𝓗[β])) :
-    (onSndObservable (α := α) b : 𝓗[α × β] →L[ℂ] 𝓗[α × β]) (prodVec ψ φ) -
-        (ofVec (norm_prodVec_eq_one hψ hφ))⟨onSndObservable b⟩ • prodVec ψ φ =
-      prodVec ψ ((b : 𝓗[β] →L[ℂ] 𝓗[β]) φ - (ofVec hφ)⟨b⟩ • φ) := by
+lemma fluctuation_onSndObservable (b : Observable (𝓗[β] →L[ℂ] 𝓗[β]))
+    : (onSndObservable (α := α) b : 𝓗[α × β] →L[ℂ] 𝓗[α × β]) (prodVec ψ φ)
+        - (ofVec (norm_prodVec_eq_one hψ hφ))⟨onSndObservable b⟩ • prodVec ψ φ
+      = prodVec ψ ((b : 𝓗[β] →L[ℂ] 𝓗[β]) φ - (ofVec hφ)⟨b⟩ • φ) := by
   rw [expectation_onSndObservable hψ hφ, prodVec_sub_right, prodVec_smul_right]
   exact congrArg (· - _) (onSnd_prodVec _ ψ φ)
 
-lemma variance_onSndObservable (b : Observable (𝓗[β] →L[ℂ] 𝓗[β])) :
-    variance (ofVec (norm_prodVec_eq_one hψ hφ)) (onSndObservable b) = variance (ofVec hφ) b := by
+lemma variance_onSndObservable (b : Observable (𝓗[β] →L[ℂ] 𝓗[β]))
+    : variance (ofVec (norm_prodVec_eq_one hψ hφ)) (onSndObservable b) = variance (ofVec hφ) b := by
   rw [variance_ofVec, variance_ofVec, fluctuation_onSndObservable hψ hφ, norm_prodVec, hψ, one_mul]
 
-lemma covariance_onSndObservable (a b : Observable (𝓗[β] →L[ℂ] 𝓗[β])) :
-    covariance (ofVec (norm_prodVec_eq_one hψ hφ)) (onSndObservable a) (onSndObservable b) =
-      covariance (ofVec hφ) a b := by
+lemma covariance_onSndObservable (a b : Observable (𝓗[β] →L[ℂ] 𝓗[β]))
+    : covariance (ofVec (norm_prodVec_eq_one hψ hφ)) (onSndObservable a) (onSndObservable b)
+      = covariance (ofVec hφ) a b := by
   rw [covariance_eq_re_apply_centered_mul, covariance_eq_re_apply_centered_mul,
     apply_centered_mul_centered_ofVec, apply_centered_mul_centered_ofVec,
     fluctuation_onSndObservable hψ hφ, fluctuation_onSndObservable hψ hφ, inner_prodVec,
     inner_self_eq_norm_sq_to_K, hψ]
   simp
 
-lemma centeredGramDefect_onSndObservable (a b : Observable (𝓗[β] →L[ℂ] 𝓗[β])) :
-    centeredGramDefect (ofVec (norm_prodVec_eq_one hψ hφ)) (onSndObservable a)
-      (onSndObservable b) = centeredGramDefect (ofVec hφ) a b := by
+lemma centeredGramDefect_onSndObservable (a b : Observable (𝓗[β] →L[ℂ] 𝓗[β]))
+    : centeredGramDefect (ofVec (norm_prodVec_eq_one hψ hφ)) (onSndObservable a) (onSndObservable b)
+      = centeredGramDefect (ofVec hφ) a b := by
   rw [centeredGramDefect_ofVec, centeredGramDefect_ofVec, fluctuation_onSndObservable hψ hφ,
     fluctuation_onSndObservable hψ hφ, inner_prodVec, inner_self_eq_norm_sq_to_K, norm_prodVec,
     norm_prodVec, hψ]
@@ -253,20 +254,24 @@ lemma centeredGramDefect_onSndObservable (a b : Observable (𝓗[β] →L[ℂ] �
 -/
 
 /-- The fluctuation vector of an observable is orthogonal to the state. -/
-lemma inner_fluctuation {γ : Type*} [Fintype γ] [DecidableEq γ] {χ : 𝓗[γ]} (hχ : ‖χ‖ = 1)
-    (c : Observable (𝓗[γ] →L[ℂ] 𝓗[γ])) :
-    ⟪χ, (c : 𝓗[γ] →L[ℂ] 𝓗[γ]) χ - (ofVec hχ)⟨c⟩ • χ⟫_ℂ = 0 := by
+lemma inner_fluctuation
+    {γ : Type*} [Fintype γ] [DecidableEq γ]
+    {χ : 𝓗[γ]} (hχ : ‖χ‖ = 1)
+    (c : Observable (𝓗[γ] →L[ℂ] 𝓗[γ]))
+    : ⟪χ, (c : 𝓗[γ] →L[ℂ] 𝓗[γ]) χ - (ofVec hχ)⟨c⟩ • χ⟫_ℂ = 0 := by
   have h := apply_observable_eq_expectation (ofVec hχ) c
   rw [ofVec_apply] at h
-  rw [inner_sub_right, ← Complex.coe_smul, inner_smul_right, inner_self_eq_norm_sq_to_K, hχ,
-    ← h]
+  rw [inner_sub_right, ← Complex.coe_smul, inner_smul_right, inner_self_eq_norm_sq_to_K, hχ, ← h]
   simp
 
-/-- In a product state, an observable of the first coordinate and one of the second are
-uncorrelated. -/
-lemma covariance_onFstObservable_onSndObservable (a : Observable (𝓗[α] →L[ℂ] 𝓗[α]))
-    (b : Observable (𝓗[β] →L[ℂ] 𝓗[β])) :
-    covariance (ofVec (norm_prodVec_eq_one hψ hφ)) (onFstObservable a) (onSndObservable b) = 0 := by
+/--
+In a product state, an observable of the first coordinate and one of the second are
+uncorrelated.
+-/
+lemma covariance_onFstObservable_onSndObservable
+    (a : Observable (𝓗[α] →L[ℂ] 𝓗[α])) (b : Observable (𝓗[β] →L[ℂ] 𝓗[β]))
+    : covariance (ofVec (norm_prodVec_eq_one hψ hφ)) (onFstObservable a) (onSndObservable b)
+      = 0 := by
   rw [covariance_eq_re_apply_centered_mul, apply_centered_mul_centered_ofVec,
     fluctuation_onFstObservable hψ hφ, fluctuation_onSndObservable hψ hφ, inner_prodVec,
     inner_fluctuation hφ, mul_zero, Complex.zero_re]
@@ -281,18 +286,18 @@ section piProdVec
 
 variable {ι : Type*} [Fintype ι] [DecidableEq ι]
 
-/-- The product vector `(⊗ i, v i) k = ∏ i, v i (k i)` of a finite family of vectors,
-describing independently prepared copies of a system. -/
+/--
+The product vector `(⊗ i, v i) k = ∏ i, v i (k i)` of a finite family of vectors,
+describing independently prepared copies of a system.
+-/
 noncomputable def piProdVec (v : ι → 𝓗[α]) : 𝓗[ι → α] :=
   ⟨WithLp.toLp 2 fun k => ∏ i, (v i).val (k i)⟩
 
 /-- The components of a product vector are the products of the components. -/
-lemma piProdVec_val (v : ι → 𝓗[α]) (k : ι → α) :
-    (piProdVec v).val k = ∏ i, (v i).val (k i) := rfl
+lemma piProdVec_val (v : ι → 𝓗[α]) (k : ι → α) : (piProdVec v).val k = ∏ i, (v i).val (k i) := rfl
 
 /-- `⟪⊗ v, ⊗ w⟫ = ∏ i, ⟪v i, w i⟫`. -/
-lemma inner_piProdVec (v w : ι → 𝓗[α]) :
-    ⟪piProdVec v, piProdVec w⟫_ℂ = ∏ i, ⟪v i, w i⟫_ℂ := by
+lemma inner_piProdVec (v w : ι → 𝓗[α]) : ⟪piProdVec v, piProdVec w⟫_ℂ = ∏ i, ⟪v i, w i⟫_ℂ := by
   simp only [inner_eq_val, PiLp.inner_apply, RCLike.inner_apply, piProdVec_val, map_prod,
     ← Finset.prod_mul_distrib]
   exact (Fintype.prod_sum fun i a => (w i).val a * (starRingEnd ℂ) ((v i).val a)).symm
@@ -302,8 +307,8 @@ lemma norm_piProdVec (v : ι → 𝓗[α]) : ‖piProdVec v‖ = ∏ i, ‖v i�
   have h := inner_piProdVec v v
   simp only [inner_self_eq_norm_sq_to_K] at h
   norm_cast at h
-  exact (pow_left_inj₀ (norm_nonneg _) (Finset.prod_nonneg fun i _ => norm_nonneg _)
-    two_ne_zero).mp (by rw [h, Finset.prod_pow])
+  exact (pow_left_inj₀ (norm_nonneg _) (Finset.prod_nonneg fun i _ => norm_nonneg _) two_ne_zero).mp
+    (by rw [h, Finset.prod_pow])
 
 /-- The product of unit vectors is a unit vector. -/
 lemma norm_piProdVec_eq_one {v : ι → 𝓗[α]} (hv : ∀ i, ‖v i‖ = 1) : ‖piProdVec v‖ = 1 := by

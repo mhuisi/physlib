@@ -26,36 +26,32 @@ namespace Constants
 def ℏ : Subtype fun x : ℝ => 0 < x := ⟨1.054571817e-34, by norm_num⟩
 
 /-- reduced Planck's constant is positive. -/
-@[simp]
-lemma ℏ_pos : 0 < (ℏ : ℝ) := ℏ.2
+@[simp] lemma ℏ_pos : 0 < (ℏ : ℝ) := ℏ.2
 
 /-- reduced Planck's constant is non-negative. -/
-@[simp]
-lemma ℏ_nonneg : 0 ≤ (ℏ : ℝ) := le_of_lt ℏ.2
+@[simp] lemma ℏ_nonneg : 0 ≤ (ℏ : ℝ) := le_of_lt ℏ.2
 
 /-- reduced Planck's constant is not equal to zero. -/
-@[simp]
-lemma ℏ_ne_zero : (ℏ : ℝ) ≠ 0 := ne_of_gt ℏ.2
+@[simp] lemma ℏ_ne_zero : (ℏ : ℝ) ≠ 0 := ne_of_gt ℏ.2
 
 /-- reduced Planck's constant is not equal to zero, as a complex number. -/
 lemma ℏ_ofReal_ne_zero : ((ℏ : ℝ) : ℂ) ≠ 0 := by exact_mod_cast ℏ_ne_zero
 
-/-- The definition of Planck's constant in terms of Reduced Planck's constant,
- defined as `2 π ℏ` -/
-noncomputable def h : Subtype fun x : ℝ => 0 < x := ⟨2 * Real.pi * (ℏ : ℝ),
-mul_pos (mul_pos (by norm_num) Real.pi_pos) ℏ_pos⟩
+/--
+The definition of Planck's constant in terms of Reduced Planck's constant,
+defined as `2 π ℏ`
+-/
+noncomputable def h : Subtype fun x : ℝ => 0 < x :=
+  ⟨2 * Real.pi * (ℏ : ℝ), mul_pos (mul_pos (by norm_num) Real.pi_pos) ℏ_pos⟩
 
 /-- Planck's constant is positive. -/
-@[simp]
-lemma h_pos : 0 < (h : ℝ) := h.2
+@[simp] lemma h_pos : 0 < (h : ℝ) := h.2
 
 /-- Planck's constant is non-negative. -/
-@[simp]
-lemma h_nonneg : 0 ≤ (h : ℝ) := le_of_lt h.2
+@[simp] lemma h_nonneg : 0 ≤ (h : ℝ) := le_of_lt h.2
 
 /-- Planck's constnat is not equal to zero. -/
-@[simp]
-lemma h_ne_zero : (h : ℝ) ≠ 0 := ne_of_gt h.2
+@[simp] lemma h_ne_zero : (h : ℝ) ≠ 0 := ne_of_gt h.2
 
 /-- Planck's constant is `2 π` times the reduced Planck's constant. -/
 lemma h_eq_two_pi_hbar : (h : ℝ) = 2 * Real.pi * (ℏ : ℝ) := rfl

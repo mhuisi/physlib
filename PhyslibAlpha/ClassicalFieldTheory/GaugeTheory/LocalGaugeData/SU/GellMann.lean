@@ -61,17 +61,26 @@ namespace GellMann
 
 -/
 
-/-- The labels of the generalized Gell-Mann matrices: a pair `j < k` for each symmetric and each
-  antisymmetric matrix, and `l : Fin (N - 1)` for the diagonal matrix of size `n = l + 1`. -/
+/--
+The labels of the generalized Gell-Mann matrices: a pair `j < k` for each symmetric and each
+antisymmetric matrix, and `l : Fin (N - 1)` for the diagonal matrix of size `n = l + 1`.
+-/
 abbrev Index (N : ℕ) : Type :=
   {p : Fin N × Fin N // p.1 < p.2} ⊕ {p : Fin N × Fin N // p.1 < p.2} ⊕ Fin (N - 1)
 
 variable {N : ℕ}
 
-/-- The diagonal profile of size `n = l + 1`: `1` on the first `n` entries, `-n` on the next, and
-  `0` beyond. -/
+/--
+The diagonal profile of size `n = l + 1`: `1` on the first `n` entries, `-n` on the next, and
+`0` beyond.
+-/
 def diagProfile (l : Fin (N - 1)) (m : Fin N) : ℂ :=
-  if m.val < l.val + 1 then 1 else if m.val = l.val + 1 then -((l.val + 1 : ℕ) : ℂ) else 0
+  if m.val < l.val + 1 then
+    1
+  else if m.val = l.val + 1 then
+    -((l.val + 1 : ℕ) : ℂ)
+  else
+    0
 
 /-- The normalization `√(2 / (n (n + 1)))` of the diagonal matrix of size `n = l + 1`. -/
 noncomputable def diagNorm (l : Fin (N - 1)) : ℂ :=
@@ -90,15 +99,21 @@ noncomputable def matrix : Index N → Matrix (Fin N) (Fin N) ℂ
 -/
 
 /-- The profile as a function of the position, `1` below `n`, `-n` at `n`, `0` above. -/
-private def profile (n m : ℕ) : ℂ := if m < n then 1 else if m = n then -(n : ℂ) else 0
+private def profile (n m : ℕ) : ℂ :=
+  if m < n then
+    1
+  else if m = n then
+    -(n : ℂ)
+  else
+    0
 
-private lemma sum_range_profile {n : ℕ} :
-    ∀ M, n < M → ∑ m ∈ Finset.range M, profile n m = 0 := by
+private lemma sum_range_profile {n : ℕ} : ∀ M, n < M → ∑ m ∈ Finset.range M, profile n m = 0 := by
   intro M hM
   induction M, hM using Nat.le_induction with
   | base =>
-    rw [Finset.sum_range_succ, Finset.sum_congr rfl fun m hm => (show profile n m = 1 by
-      simp [profile, Finset.mem_range.1 hm])]
+    rw [Finset.sum_range_succ,
+      Finset.sum_congr rfl fun m hm =>
+        (show profile n m = 1 by simp [profile, Finset.mem_range.1 hm])]
     simp [profile]
   | succ M hM ih =>
     rw [Finset.sum_range_succ, ih]
@@ -109,8 +124,8 @@ lemma sum_diagProfile (l : Fin (N - 1)) : ∑ m, diagProfile l m = 0 := by
   rw [Fin.sum_univ_eq_sum_range (fun m => profile (l.val + 1) m)]
   exact sum_range_profile N (by omega)
 
-private lemma profile_mul_of_lt {n n' : ℕ} (h : n < n') (m : ℕ) :
-    profile n m * profile n' m = profile n m := by
+private lemma profile_mul_of_lt {n n' : ℕ} (h : n < n') (m : ℕ)
+    : profile n m * profile n' m = profile n m := by
   unfold profile
   by_cases h1 : m < n
   · simp [h1, show m < n' by omega]
@@ -118,8 +133,9 @@ private lemma profile_mul_of_lt {n n' : ℕ} (h : n < n') (m : ℕ) :
     · simp [h2, h]
     · simp [h1, h2]
 
-private lemma profile_mul_self (n m : ℕ) :
-    profile n m * profile n m = (if m < n then 1 else 0) + (if m = n then (n : ℂ) ^ 2 else 0) := by
+private lemma profile_mul_self (n m : ℕ)
+    : profile n m * profile n m
+      = (if m < n then 1 else 0) + (if m = n then (n : ℂ) ^ 2 else 0) := by
   unfold profile
   by_cases h1 : m < n
   · simp [h1, show m ≠ n by omega]
@@ -128,21 +144,20 @@ private lemma profile_mul_self (n m : ℕ) :
       ring
     · simp [h1, h2]
 
-private lemma sum_range_indicator_lt {n : ℕ} :
-    ∀ M, n ≤ M → ∑ m ∈ Finset.range M, (if m < n then (1 : ℂ) else 0) = n := by
+private lemma sum_range_indicator_lt {n : ℕ}
+    : ∀ M, n ≤ M → ∑ m ∈ Finset.range M, (if m < n then (1 : ℂ) else 0) = n := by
   intro M hM
   induction M, hM using Nat.le_induction with
   | base =>
-    rw [Finset.sum_congr rfl (g := fun _ => (1 : ℂ)) fun m hm => by
-      simp [Finset.mem_range.1 hm]]
+    rw [Finset.sum_congr rfl (g := fun _ => (1 : ℂ)) fun m hm => by simp [Finset.mem_range.1 hm]]
     simp
   | succ M hM ih =>
     rw [Finset.sum_range_succ, ih]
     simp [show ¬ M < n by omega]
 
 /-- The diagonal profiles are orthogonal, with `∑ d_l (m)² = n (n + 1)` for `n = l + 1`. -/
-lemma sum_diagProfile_mul (l l' : Fin (N - 1)) :
-    ∑ m, diagProfile l m * diagProfile l' m
+lemma sum_diagProfile_mul (l l' : Fin (N - 1))
+    : ∑ m, diagProfile l m * diagProfile l' m
       = if l = l' then ((l.val + 1 : ℕ) : ℂ) * ((l.val + 2 : ℕ) : ℂ) else 0 := by
   change ∑ m : Fin N, profile (l.val + 1) m.val * profile (l'.val + 1) m.val = _
   rw [Fin.sum_univ_eq_sum_range (fun m => profile (l.val + 1) m * profile (l'.val + 1) m)]
@@ -150,26 +165,28 @@ lemma sum_diagProfile_mul (l l' : Fin (N - 1)) :
   have hl' := l'.isLt
   rcases lt_trichotomy l l' with h | rfl | h
   · have h' := Fin.lt_def.1 h
-    simp only [h.ne, ↓reduceIte]
+    simp only [h.ne, ↓ reduceIte]
     simp_rw [profile_mul_of_lt (show l.val + 1 < l'.val + 1 by omega)]
     exact sum_range_profile N (by omega)
-  · simp only [↓reduceIte]
+  · simp only [↓ reduceIte]
     simp_rw [profile_mul_self, Finset.sum_add_distrib,
       sum_range_indicator_lt (n := l.val + 1) N (by omega), Finset.sum_ite_eq',
       Finset.mem_range, (show l.val + 1 < N by omega)]
-    simp only [↓reduceIte]
+    simp only [↓ reduceIte]
     push_cast
     ring
   · have h' := Fin.lt_def.1 h
-    simp only [h.ne', ↓reduceIte]
+    simp only [h.ne', ↓ reduceIte]
     simp_rw [mul_comm (profile (l.val + 1) _),
       profile_mul_of_lt (show l'.val + 1 < l.val + 1 by omega)]
     exact sum_range_profile N (by omega)
 
-/-- The square of the normalization of the diagonal matrix of size `n = l + 1` is
-  `2 / (n (n + 1))`. -/
-lemma diagNorm_mul_self (l : Fin (N - 1)) :
-    diagNorm l * diagNorm l * (((l.val + 1 : ℕ) : ℂ) * ((l.val + 2 : ℕ) : ℂ)) = 2 := by
+/--
+The square of the normalization of the diagonal matrix of size `n = l + 1` is
+`2 / (n (n + 1))`.
+-/
+lemma diagNorm_mul_self (l : Fin (N - 1))
+    : diagNorm l * diagNorm l * (((l.val + 1 : ℕ) : ℂ) * ((l.val + 2 : ℕ) : ℂ)) = 2 := by
   rw [diagNorm, ← Complex.ofReal_mul, Real.mul_self_sqrt (by positivity)]
   have h1 : ((l.val : ℂ) + 1) ≠ 0 := by norm_cast
   have h2 : ((l.val : ℂ) + 2) ≠ 0 := by norm_cast
@@ -183,111 +200,109 @@ lemma diagNorm_mul_self (l : Fin (N - 1)) :
 -/
 
 /-- The trace of a symmetric Gell-Mann matrix against `X`. -/
-lemma trace_matrix_inl_mul (p : {p : Fin N × Fin N // p.1 < p.2}) (X : Matrix (Fin N) (Fin N) ℂ) :
-    (matrix (.inl p) * X).trace = X p.1.2 p.1.1 + X p.1.1 p.1.2 := by
+lemma trace_matrix_inl_mul (p : {p : Fin N × Fin N // p.1 < p.2}) (X : Matrix (Fin N) (Fin N) ℂ)
+    : (matrix (.inl p) * X).trace = X p.1.2 p.1.1 + X p.1.1 p.1.2 := by
   simp [matrix, Matrix.add_mul, trace_add, trace_single_mul]
 
 /-- The trace of an antisymmetric Gell-Mann matrix against `X`. -/
-lemma trace_matrix_inr_inl_mul (p : {p : Fin N × Fin N // p.1 < p.2})
-    (X : Matrix (Fin N) (Fin N) ℂ) :
-    (matrix (.inr (.inl p)) * X).trace
+lemma trace_matrix_inr_inl_mul (p : {p : Fin N × Fin N // p.1 < p.2}) (X : Matrix (Fin N) (Fin N) ℂ)
+    : (matrix (.inr (.inl p)) * X).trace
       = -Complex.I * X p.1.2 p.1.1 + Complex.I * X p.1.1 p.1.2 := by
   simp [matrix, Matrix.add_mul, trace_add, trace_single_mul]
 
 /-- The trace of a diagonal Gell-Mann matrix against `X`. -/
-lemma trace_matrix_inr_inr_mul (l : Fin (N - 1)) (X : Matrix (Fin N) (Fin N) ℂ) :
-    (matrix (.inr (.inr l)) * X).trace = diagNorm l * ∑ m, diagProfile l m * X m m := by
+lemma trace_matrix_inr_inr_mul (l : Fin (N - 1)) (X : Matrix (Fin N) (Fin N) ℂ)
+    : (matrix (.inr (.inr l)) * X).trace = diagNorm l * ∑ m, diagProfile l m * X m m := by
   simp [matrix, trace, diagonal_mul, Finset.mul_sum]
 
 /-- The entries of a symmetric Gell-Mann matrix. -/
-lemma matrix_inl_apply (p : {p : Fin N × Fin N // p.1 < p.2}) (m n : Fin N) :
-    matrix (.inl p) m n
+lemma matrix_inl_apply (p : {p : Fin N × Fin N // p.1 < p.2}) (m n : Fin N)
+    : matrix (.inl p) m n
       = (if p.1.1 = m ∧ p.1.2 = n then 1 else 0) + (if p.1.2 = m ∧ p.1.1 = n then 1 else 0) := by
   simp [matrix, single_apply]
 
 /-- The entries of an antisymmetric Gell-Mann matrix. -/
-lemma matrix_inr_inl_apply (p : {p : Fin N × Fin N // p.1 < p.2}) (m n : Fin N) :
-    matrix (.inr (.inl p)) m n = (if p.1.1 = m ∧ p.1.2 = n then -Complex.I else 0)
-      + (if p.1.2 = m ∧ p.1.1 = n then Complex.I else 0) := by
+lemma matrix_inr_inl_apply (p : {p : Fin N × Fin N // p.1 < p.2}) (m n : Fin N)
+    : matrix (.inr (.inl p)) m n
+      = (if p.1.1 = m ∧ p.1.2 = n then -Complex.I else 0)
+        + (if p.1.2 = m ∧ p.1.1 = n then Complex.I else 0) := by
   simp [matrix, single_apply]
 
 /-- The entries of a diagonal Gell-Mann matrix. -/
-lemma matrix_inr_inr_apply (l : Fin (N - 1)) (m n : Fin N) :
-    matrix (.inr (.inr l)) m n = if m = n then diagNorm l * diagProfile l m else 0 := by
+lemma matrix_inr_inr_apply (l : Fin (N - 1)) (m n : Fin N)
+    : matrix (.inr (.inr l)) m n = if m = n then diagNorm l * diagProfile l m else 0 := by
   simp [matrix, diagonal_apply]
 
 /-- Two ordered pairs `j < k` and `j' < k'` never match crosswise. -/
-private lemma not_cross {j k j' k' : Fin N} (h : j < k) (h' : j' < k') :
-    ¬ (j' = k ∧ k' = j) ∧ ¬ (k' = j ∧ j' = k) :=
+private lemma not_cross {j k j' k' : Fin N} (h : j < k) (h' : j' < k')
+    : ¬(j' = k ∧ k' = j) ∧ ¬(k' = j ∧ j' = k) :=
   ⟨by rintro ⟨rfl, rfl⟩; exact lt_asymm h h', by rintro ⟨rfl, rfl⟩; exact lt_asymm h h'⟩
 
 /-- The symmetric Gell-Mann matrices are orthogonal to all others and have norm `2`. -/
-lemma trace_matrix_inl_mul_matrix (p : {p : Fin N × Fin N // p.1 < p.2}) (b : Index N) :
-    (matrix (.inl p) * matrix b).trace = if .inl p = b then 2 else 0 := by
+lemma trace_matrix_inl_mul_matrix (p : {p : Fin N × Fin N // p.1 < p.2}) (b : Index N)
+    : (matrix (.inl p) * matrix b).trace = if .inl p = b then 2 else 0 := by
   obtain ⟨⟨j, k⟩, hjk⟩ := p
-  rcases b with ⟨⟨j', k'⟩, hjk'⟩ | ⟨⟨j', k'⟩, hjk'⟩ | l' <;>
-  simp only [trace_matrix_inl_mul, matrix_inl_apply, matrix_inr_inl_apply,
-    matrix_inr_inr_apply, Sum.inl.injEq, reduceCtorEq, Subtype.mk.injEq, Prod.mk.injEq,
-    ↓reduceIte]
+  rcases b with ⟨⟨j', k'⟩, hjk'⟩ | ⟨⟨j', k'⟩, hjk'⟩ | l' <;> simp only [trace_matrix_inl_mul,
+    matrix_inl_apply, matrix_inr_inl_apply, matrix_inr_inr_apply, Sum.inl.injEq, reduceCtorEq,
+    Subtype.mk.injEq, Prod.mk.injEq, ↓ reduceIte]
   · simp only at hjk hjk'
     obtain ⟨e1, e2⟩ := not_cross hjk hjk'
     by_cases h : j = j' ∧ k = k'
     · obtain ⟨rfl, rfl⟩ := h
-      simp only [e1, e2, and_self, ↓reduceIte]
+      simp only [e1, e2, and_self, ↓ reduceIte]
       ring_nf
-    · have h3 : ¬ (k' = k ∧ j' = j) := fun h' => h ⟨h'.2.symm, h'.1.symm⟩
-      have h4 : ¬ (j' = j ∧ k' = k) := fun h' => h ⟨h'.1.symm, h'.2.symm⟩
+    · have h3 : ¬(k' = k ∧ j' = j) := fun h' => h ⟨h'.2.symm, h'.1.symm⟩
+      have h4 : ¬(j' = j ∧ k' = k) := fun h' => h ⟨h'.1.symm, h'.2.symm⟩
       simp [e1, e2, h3, h4]
       exact fun h1 h2 => h ⟨h1, h2⟩
   · simp only at hjk hjk'
     obtain ⟨e1, e2⟩ := not_cross hjk hjk'
     by_cases h : j = j' ∧ k = k'
     · obtain ⟨rfl, rfl⟩ := h
-      simp only [e1, e2, and_self, ↓reduceIte]
+      simp only [e1, e2, and_self, ↓ reduceIte]
       ring_nf
-    · have h3 : ¬ (k' = k ∧ j' = j) := fun h' => h ⟨h'.2.symm, h'.1.symm⟩
-      have h4 : ¬ (j' = j ∧ k' = k) := fun h' => h ⟨h'.1.symm, h'.2.symm⟩
+    · have h3 : ¬(k' = k ∧ j' = j) := fun h' => h ⟨h'.2.symm, h'.1.symm⟩
+      have h4 : ¬(j' = j ∧ k' = k) := fun h' => h ⟨h'.1.symm, h'.2.symm⟩
       simp [e1, e2, h3, h4]
   · simp only at hjk
     simp [hjk.ne, hjk.ne']
 
 /-- The antisymmetric Gell-Mann matrices are orthogonal to all others and have norm `2`. -/
-lemma trace_matrix_inr_inl_mul_matrix (p : {p : Fin N × Fin N // p.1 < p.2}) (b : Index N) :
-    (matrix (.inr (.inl p)) * matrix b).trace = if .inr (.inl p) = b then 2 else 0 := by
+lemma trace_matrix_inr_inl_mul_matrix (p : {p : Fin N × Fin N // p.1 < p.2}) (b : Index N)
+    : (matrix (.inr (.inl p)) * matrix b).trace = if .inr (.inl p) = b then 2 else 0 := by
   obtain ⟨⟨j, k⟩, hjk⟩ := p
-  rcases b with ⟨⟨j', k'⟩, hjk'⟩ | ⟨⟨j', k'⟩, hjk'⟩ | l' <;>
-  simp only [trace_matrix_inr_inl_mul, matrix_inl_apply, matrix_inr_inl_apply,
-    matrix_inr_inr_apply, Sum.inl.injEq, Sum.inr.injEq, reduceCtorEq, Subtype.mk.injEq,
-    Prod.mk.injEq, ↓reduceIte]
+  rcases b with ⟨⟨j', k'⟩, hjk'⟩ | ⟨⟨j', k'⟩, hjk'⟩ | l' <;> simp only [trace_matrix_inr_inl_mul,
+    matrix_inl_apply, matrix_inr_inl_apply, matrix_inr_inr_apply, Sum.inl.injEq, Sum.inr.injEq,
+    reduceCtorEq, Subtype.mk.injEq, Prod.mk.injEq, ↓ reduceIte]
   · simp only at hjk hjk'
     obtain ⟨e1, e2⟩ := not_cross hjk hjk'
     by_cases h : j = j' ∧ k = k'
     · obtain ⟨rfl, rfl⟩ := h
-      simp only [e1, e2, and_self, ↓reduceIte]
+      simp only [e1, e2, and_self, ↓ reduceIte]
       ring_nf
-    · have h3 : ¬ (k' = k ∧ j' = j) := fun h' => h ⟨h'.2.symm, h'.1.symm⟩
-      have h4 : ¬ (j' = j ∧ k' = k) := fun h' => h ⟨h'.1.symm, h'.2.symm⟩
+    · have h3 : ¬(k' = k ∧ j' = j) := fun h' => h ⟨h'.2.symm, h'.1.symm⟩
+      have h4 : ¬(j' = j ∧ k' = k) := fun h' => h ⟨h'.1.symm, h'.2.symm⟩
       simp [e1, e2, h3, h4]
   · simp only at hjk hjk'
     obtain ⟨e1, e2⟩ := not_cross hjk hjk'
     by_cases h : j = j' ∧ k = k'
     · obtain ⟨rfl, rfl⟩ := h
-      simp only [e1, e2, and_self, ↓reduceIte]
+      simp only [e1, e2, and_self, ↓ reduceIte]
       ring_nf
       simp
-    · have h3 : ¬ (k' = k ∧ j' = j) := fun h' => h ⟨h'.2.symm, h'.1.symm⟩
-      have h4 : ¬ (j' = j ∧ k' = k) := fun h' => h ⟨h'.1.symm, h'.2.symm⟩
+    · have h3 : ¬(k' = k ∧ j' = j) := fun h' => h ⟨h'.2.symm, h'.1.symm⟩
+      have h4 : ¬(j' = j ∧ k' = k) := fun h' => h ⟨h'.1.symm, h'.2.symm⟩
       simp [e1, e2, h3, h4]
       exact fun h1 h2 => h ⟨h1, h2⟩
   · simp only at hjk
     simp [hjk.ne, hjk.ne']
 
 /-- The diagonal Gell-Mann matrices are orthogonal to all others and have norm `2`. -/
-lemma trace_matrix_inr_inr_mul_matrix (l : Fin (N - 1)) (b : Index N) :
-    (matrix (.inr (.inr l)) * matrix b).trace = if .inr (.inr l) = b then 2 else 0 := by
-  rcases b with ⟨⟨j', k'⟩, hjk'⟩ | ⟨⟨j', k'⟩, hjk'⟩ | l' <;>
-  simp only [trace_matrix_inr_inr_mul, matrix_inl_apply, matrix_inr_inl_apply,
-    matrix_inr_inr_apply, Sum.inr.injEq, reduceCtorEq, ↓reduceIte]
+lemma trace_matrix_inr_inr_mul_matrix (l : Fin (N - 1)) (b : Index N)
+    : (matrix (.inr (.inr l)) * matrix b).trace = if .inr (.inr l) = b then 2 else 0 := by
+  rcases b with ⟨⟨j', k'⟩, hjk'⟩ | ⟨⟨j', k'⟩, hjk'⟩ | l'
+    <;> simp only [trace_matrix_inr_inr_mul, matrix_inl_apply, matrix_inr_inl_apply,
+      matrix_inr_inr_apply, Sum.inr.injEq, reduceCtorEq, ↓ reduceIte]
   · simp only at hjk'
     rw [Finset.sum_eq_zero fun x _ => ?_, mul_zero]
     by_cases h1 : j' = x
@@ -300,22 +315,25 @@ lemma trace_matrix_inr_inr_mul_matrix (l : Fin (N - 1)) (b : Index N) :
     · subst h1
       simp [hjk'.ne']
     · simp [h1]
-  · have hs : ∑ x, diagProfile l x * (diagNorm l' * diagProfile l' x)
-        = diagNorm l' * ∑ x, diagProfile l x * diagProfile l' x := by
+  · have hs
+        : ∑ x, diagProfile l x * (diagNorm l' * diagProfile l' x)
+          = diagNorm l' * ∑ x, diagProfile l x * diagProfile l' x := by
       rw [Finset.mul_sum]
       exact Finset.sum_congr rfl fun x _ => by ring
     rw [hs, sum_diagProfile_mul]
     by_cases h : l = l'
     · subst h
-      simp only [↓reduceIte]
+      simp only [↓ reduceIte]
       rw [← diagNorm_mul_self l]
       ring
     · simp [h]
 
-/-- The generalized Gell-Mann matrices are orthogonal under the trace form:
-  `tr (λ_a λ_b) = 2 δ_ab`. -/
-lemma trace_matrix_mul_matrix (a b : Index N) :
-    (matrix a * matrix b).trace = if a = b then 2 else 0 := by
+/--
+The generalized Gell-Mann matrices are orthogonal under the trace form:
+`tr (λ_a λ_b) = 2 δ_ab`.
+-/
+lemma trace_matrix_mul_matrix (a b : Index N)
+    : (matrix a * matrix b).trace = if a = b then 2 else 0 := by
   rcases a with p | p | l
   · exact trace_matrix_inl_mul_matrix p b
   · exact trace_matrix_inr_inl_mul_matrix p b
@@ -352,39 +370,48 @@ lemma conjTranspose_matrix (a : Index N) : (matrix a)ᴴ = matrix a := by
     · simp [h, Ne.symm h]
 
 /-- The generalized Gell-Mann matrices as traceless matrices. -/
-noncomputable def traceless (a : Index N) :
-    ↥(LinearMap.ker (Matrix.traceLinearMap (Fin N) ℂ ℂ)) :=
+noncomputable def traceless (a : Index N) : ↥(LinearMap.ker (Matrix.traceLinearMap (Fin N) ℂ ℂ)) :=
   ⟨matrix a, trace_matrix a⟩
 
 /-- The generalized Gell-Mann matrices are linearly independent, by orthogonality. -/
 lemma linearIndependent_traceless : LinearIndependent ℂ (traceless (N := N)) := by
   rw [Fintype.linearIndependent_iff]
   intro g hg a
-  have h := congrArg (fun x : ↥(LinearMap.ker (Matrix.traceLinearMap (Fin N) ℂ ℂ)) =>
-    (matrix a * x.1).trace) hg
-  simp only [Submodule.coe_sum, Submodule.coe_smul, traceless, Matrix.mul_sum,
-    Matrix.mul_smul, trace_sum, trace_smul, trace_matrix_mul_matrix, smul_eq_mul, mul_ite,
-    mul_zero, Finset.sum_ite_eq, Finset.mem_univ, ↓reduceIte, ZeroMemClass.coe_zero,
-    trace_zero] at h
+  have h :=
+    congrArg
+      (fun x : ↥(LinearMap.ker (Matrix.traceLinearMap (Fin N) ℂ ℂ)) => (matrix a * x.1).trace)
+      hg
+  simp only [Submodule.coe_sum, Submodule.coe_smul, traceless, Matrix.mul_sum, Matrix.mul_smul,
+      trace_sum, trace_smul, trace_matrix_mul_matrix, smul_eq_mul, mul_ite, mul_zero,
+      Finset.sum_ite_eq, Finset.mem_univ, ↓ reduceIte, ZeroMemClass.coe_zero, trace_zero]
+    at h
   simpa using h
 
-/-- There are `N² - 1` ordered pairs with `j < k`, counted twice, and `N - 1` diagonal labels:
-  `2 #{j < k} + N = N²`. -/
-lemma two_mul_card_lt_add :
-    2 * Fintype.card {p : Fin N × Fin N // p.1 < p.2} + N = N * N := by
-  have h1 : Fintype.card {p : Fin N × Fin N // p.1 < p.2}
-      = Fintype.card {p : Fin N × Fin N // p.2 < p.1} :=
+/--
+There are `N² - 1` ordered pairs with `j < k`, counted twice, and `N - 1` diagonal labels:
+`2 #{j < k} + N = N²`.
+-/
+lemma two_mul_card_lt_add : 2 * Fintype.card {p : Fin N × Fin N // p.1 < p.2} + N = N * N := by
+  have h1
+      : Fintype.card {p : Fin N × Fin N // p.1 < p.2}
+        = Fintype.card {p : Fin N × Fin N // p.2 < p.1} :=
     Fintype.card_congr ((Equiv.prodComm _ _).subtypeEquiv fun _ => Iff.rfl)
   have h2 : Fintype.card {p : Fin N × Fin N // p.1 = p.2} = N := by
-    rw [Fintype.card_subtype, show (Finset.univ.filter fun p : Fin N × Fin N => p.1 = p.2)
-      = Finset.univ.diag by ext; simp [Finset.mem_diag], Finset.diag_card, Finset.card_univ,
-      Fintype.card_fin]
-  have h3 : Fintype.card {p : Fin N × Fin N // p.1 < p.2}
-      + Fintype.card {p : Fin N × Fin N // p.2 < p.1}
-      + Fintype.card {p : Fin N × Fin N // p.1 = p.2} = N * N := by
+    rw [Fintype.card_subtype,
+      show (Finset.univ.filter fun p : Fin N × Fin N => p.1 = p.2) = Finset.univ.diag by
+        ext; simp [Finset.mem_diag],
+      Finset.diag_card, Finset.card_univ, Fintype.card_fin]
+  have h3
+      : Fintype.card {p : Fin N × Fin N // p.1 < p.2}
+          + Fintype.card {p : Fin N × Fin N // p.2 < p.1}
+          + Fintype.card {p : Fin N × Fin N // p.1 = p.2}
+        = N * N := by
     simp only [Fintype.card_subtype, Finset.card_filter, ← Finset.sum_add_distrib]
-    rw [Finset.sum_congr rfl fun p _ => (show ((if p.1 < p.2 then 1 else 0) +
-      (if p.2 < p.1 then 1 else 0) + (if p.1 = p.2 then 1 else 0) : ℕ) = 1 by
+    rw [Finset.sum_congr rfl fun p _ =>
+      (show ((if p.1 < p.2 then 1 else 0) + (if p.2 < p.1 then 1 else 0)
+              + (if p.1 = p.2 then 1 else 0)
+            : ℕ)
+          = 1 by
         rcases lt_trichotomy p.1 p.2 with h | h | h
         · simp [h, lt_asymm h, h.ne]
         · simp [h]
@@ -393,19 +420,20 @@ lemma two_mul_card_lt_add :
   omega
 
 /-- The traceless `N × N` matrices have dimension `N² - 1`. -/
-lemma finrank_traceless :
-    finrank ℂ ↥(LinearMap.ker (Matrix.traceLinearMap (Fin N) ℂ ℂ)) = N * N - 1 := by
+lemma finrank_traceless
+    : finrank ℂ ↥(LinearMap.ker (Matrix.traceLinearMap (Fin N) ℂ ℂ)) = N * N - 1 := by
   rcases Nat.eq_zero_or_pos N with rfl | hN
   · exact Nat.le_zero.1 ((Submodule.finrank_le _).trans (by rw [Module.finrank_matrix]; simp))
   · have hsurj : LinearMap.range (Matrix.traceLinearMap (Fin N) ℂ ℂ) = ⊤ :=
       LinearMap.range_eq_top.2 fun c => ⟨single ⟨0, hN⟩ ⟨0, hN⟩ c, by simp⟩
     have h := LinearMap.finrank_range_add_finrank_ker (Matrix.traceLinearMap (Fin N) ℂ ℂ)
     rw [hsurj, finrank_top, Module.finrank_self, Module.finrank_matrix, Module.finrank_self,
-      Fintype.card_fin] at h
+        Fintype.card_fin]
+      at h
     omega
 
-lemma card_index : Fintype.card (Index N)
-    = finrank ℂ ↥(LinearMap.ker (Matrix.traceLinearMap (Fin N) ℂ ℂ)) := by
+lemma card_index
+    : Fintype.card (Index N) = finrank ℂ ↥(LinearMap.ker (Matrix.traceLinearMap (Fin N) ℂ ℂ)) := by
   have h := two_mul_card_lt_add (N := N)
   rw [finrank_traceless, Fintype.card_sum, Fintype.card_sum, Fintype.card_fin]
   rcases Nat.eq_zero_or_pos N with rfl | hN
@@ -416,18 +444,18 @@ lemma card_index : Fintype.card (Index N)
 noncomputable def basis : Basis (Index N) ℂ ↥(LinearMap.ker (Matrix.traceLinearMap (Fin N) ℂ ℂ)) :=
   basisOfLinearIndependentOfCardEqFinrank' _ linearIndependent_traceless card_index
 
-@[simp]
-lemma basis_apply_val (a : Index N) : (basis a).1 = matrix a := by
-  simp [basis, traceless]
+@[simp] lemma basis_apply_val (a : Index N) : (basis a).1 = matrix a := by simp [basis, traceless]
 
-/-- The coordinates of a traceless matrix in the Gell-Mann basis are read off by the trace form,
-  `x = ∑ (tr (λ_a x) / 2) λ_a`. -/
-lemma basis_repr_apply (x : ↥(LinearMap.ker (Matrix.traceLinearMap (Fin N) ℂ ℂ))) (a : Index N) :
-    basis.repr x a = (matrix a * x.1).trace / 2 := by
+/--
+The coordinates of a traceless matrix in the Gell-Mann basis are read off by the trace form,
+`x = ∑ (tr (λ_a x) / 2) λ_a`.
+-/
+lemma basis_repr_apply (x : ↥(LinearMap.ker (Matrix.traceLinearMap (Fin N) ℂ ℂ))) (a : Index N)
+    : basis.repr x a = (matrix a * x.1).trace / 2 := by
   conv_rhs => rw [← basis.sum_repr x]
   simp only [Submodule.coe_sum, Submodule.coe_smul, basis_apply_val, Matrix.mul_sum,
-    Matrix.mul_smul, trace_sum, trace_smul, trace_matrix_mul_matrix, smul_eq_mul, mul_ite,
-    mul_zero, Finset.sum_ite_eq, Finset.mem_univ, ↓reduceIte]
+    Matrix.mul_smul, trace_sum, trace_smul, trace_matrix_mul_matrix, smul_eq_mul, mul_ite, mul_zero,
+    Finset.sum_ite_eq, Finset.mem_univ, ↓ reduceIte]
   ring
 
 /-!
@@ -446,22 +474,25 @@ lemma linearIndependent_hermitian : LinearIndependent ℝ (hermitian (N := N)) :
   intro g hg a
   have h := congrArg (fun x : SUAlgebraOver ℂ N => (matrix a * x.1).trace) hg
   simp only [Submodule.coe_sum, Submodule.coe_smul, hermitian, SUAlgebraOver.ofMatrix_val,
-    Matrix.mul_sum, Matrix.mul_smul, trace_sum, trace_smul, trace_matrix_mul_matrix, smul_ite,
-    smul_zero, Finset.sum_ite_eq, Finset.mem_univ, ↓reduceIte, ZeroMemClass.coe_zero,
-    Matrix.mul_zero, trace_zero] at h
+      Matrix.mul_sum, Matrix.mul_smul, trace_sum, trace_smul, trace_matrix_mul_matrix, smul_ite,
+      smul_zero, Finset.sum_ite_eq, Finset.mem_univ, ↓ reduceIte, ZeroMemClass.coe_zero,
+      Matrix.mul_zero, trace_zero]
+    at h
   simpa [Complex.real_smul] using h
 
 /-- The trace pairing of two hermitian matrices is real. -/
-lemma trace_mul_ofReal_re {A H : Matrix (Fin N) (Fin N) ℂ} (hA : Aᴴ = A) (hH : Hᴴ = H) :
-    (((A * H).trace.re : ℝ) : ℂ) = (A * H).trace := by
+lemma trace_mul_ofReal_re {A H : Matrix (Fin N) (Fin N) ℂ} (hA : Aᴴ = A) (hH : Hᴴ = H)
+    : (((A * H).trace.re : ℝ) : ℂ) = (A * H).trace := by
   refine Complex.conj_eq_iff_re.1 ?_
   change star (A * H).trace = _
   rw [← trace_conjTranspose, conjTranspose_mul, hA, hH, trace_mul_comm]
 
-/-- A traceless hermitian matrix is the real combination `∑ (tr (λ_a H) / 2) λ_a` of the
-  generalized Gell-Mann matrices. -/
-lemma eq_sum_re_trace_smul_hermitian (H : SUAlgebraOver ℂ N) :
-    ∑ a, ((matrix a * H.1).trace.re / 2) • hermitian a = H := by
+/--
+A traceless hermitian matrix is the real combination `∑ (tr (λ_a H) / 2) λ_a` of the
+generalized Gell-Mann matrices.
+-/
+lemma eq_sum_re_trace_smul_hermitian (H : SUAlgebraOver ℂ N)
+    : ∑ a, ((matrix a * H.1).trace.re / 2) • hermitian a = H := by
   refine SUAlgebraOver.ext ?_
   have hH : H.1 ∈ LinearMap.ker (Matrix.traceLinearMap (Fin N) ℂ ℂ) := H.trace_val
   have h := congrArg Subtype.val (basis.sum_repr ⟨H.1, hH⟩)
@@ -469,8 +500,8 @@ lemma eq_sum_re_trace_smul_hermitian (H : SUAlgebraOver ℂ N) :
   simp only [Submodule.coe_sum, Submodule.coe_smul, hermitian, SUAlgebraOver.ofMatrix_val]
   conv_rhs => rw [← h]
   refine Finset.sum_congr rfl fun a _ => ?_
-  rw [← Complex.coe_smul, Complex.ofReal_div, trace_mul_ofReal_re (conjTranspose_matrix a)
-    H.star_val]
+  rw [← Complex.coe_smul, Complex.ofReal_div,
+    trace_mul_ofReal_re (conjTranspose_matrix a) H.star_val]
   rfl
 
 /-- **The generalized Gell-Mann basis** of the real Lie algebra `su(N)`. -/

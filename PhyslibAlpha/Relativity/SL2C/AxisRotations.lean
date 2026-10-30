@@ -64,8 +64,10 @@ The rotations from the `z`-axis to a coordinate axis are in
 
 namespace Lorentz
 
-/-- The cyclic permutation of Lorentz direction labels: time is fixed and the spatial
-directions rotate as `x → y → z → x`. -/
+/--
+The cyclic permutation of Lorentz direction labels: time is fixed and the spatial
+directions rotate as `x → y → z → x`.
+-/
 def cycDir : Fin 1 ⊕ Fin 3 → Fin 1 ⊕ Fin 3 := Sum.map id (· + 1)
 
 /-- The cyclic permutation fixes the time direction. -/
@@ -75,14 +77,13 @@ def cycDir : Fin 1 ⊕ Fin 3 → Fin 1 ⊕ Fin 3 := Sum.map id (· + 1)
 @[simp] lemma cycDir_inr (m : Fin 3) : cycDir (Sum.inr m) = Sum.inr (m + 1) := rfl
 
 /-- Composing the cyclic permutation with a two-slot index vector rotates both entries. -/
-lemma cycDir_comp_two (μ ν : Fin 1 ⊕ Fin 3) :
-    (fun j => cycDir (![μ, ν] j)) = ![cycDir μ, cycDir ν] := by
+lemma cycDir_comp_two (μ ν : Fin 1 ⊕ Fin 3)
+    : (fun j => cycDir (![μ, ν] j)) = ![cycDir μ, cycDir ν] := by
   funext j
   fin_cases j <;> rfl
 
 /-- Composing the cyclic permutation with a one-slot index vector rotates its entry. -/
-lemma cycDir_comp_one (μ : Fin 1 ⊕ Fin 3) :
-    (fun j => cycDir (![μ] j)) = ![cycDir μ] := by
+lemma cycDir_comp_one (μ : Fin 1 ⊕ Fin 3) : (fun j => cycDir (![μ] j)) = ![cycDir μ] := by
   funext j
   fin_cases j
   rfl
@@ -99,19 +100,21 @@ lemma cycDir_cycDir_cycDir (μ : Fin 1 ⊕ Fin 3) : cycDir (cycDir (cycDir μ)) 
   · simp only [cycDir, Sum.map_inr]
     congr 1
     calc
-      (μ + 1 + 1) + 1 = μ + ((1 + 1 + 1) : Fin 3) := by ac_rfl
+      (μ + 1 + 1) + 1
+        = μ + ((1 + 1 + 1) : Fin 3) := by ac_rfl
       _ = μ + 0 := rfl
       _ = μ := add_zero μ
 
-/-- The cyclic permutation of Lorentz direction labels is injective: applying it twice
-more returns the original label. -/
+/--
+The cyclic permutation of Lorentz direction labels is injective: applying it twice
+more returns the original label.
+-/
 lemma cycDir_injective : Function.Injective cycDir :=
   Function.LeftInverse.injective (g := fun μ => cycDir (cycDir μ)) cycDir_cycDir_cycDir
 
 /-- An index not fixed by the rotation has three distinct rotations. -/
-lemma cycDir_orbit_distinct {ι : Type*} (d : ι → Fin 1 ⊕ Fin 3)
-    (hd : (fun s => cycDir (d s)) ≠ d) :
-    (fun s => cycDir (cycDir (d s))) ≠ d
+lemma cycDir_orbit_distinct {ι : Type*} (d : ι → Fin 1 ⊕ Fin 3) (hd : (fun s => cycDir (d s)) ≠ d)
+    : (fun s => cycDir (cycDir (d s))) ≠ d
       ∧ (fun s => cycDir (cycDir (d s))) ≠ (fun s => cycDir (d s)) := by
   constructor
   · refine fun h => hd (funext fun s => ?_)
@@ -124,25 +127,30 @@ namespace SL2C
 
 open Matrix MatrixGroups
 
-/-- The cyclic rotation `x → y → z → x` in `SL(2,ℂ)`, realized as the rotation by
-`2π/3` about the diagonal spatial axis. -/
-noncomputable def rotationCycle : SL(2,ℂ) :=
-  ⟨(2 : ℂ)⁻¹ • !![1 - Complex.I, -(1 + Complex.I); 1 - Complex.I, 1 + Complex.I], by
+/--
+The cyclic rotation `x → y → z → x` in `SL(2,ℂ)`, realized as the rotation by
+`2π/3` about the diagonal spatial axis.
+-/
+noncomputable def rotationCycle : SL(2,ℂ) := ⟨
+  (2 : ℂ)⁻¹ • !![1 - Complex.I, -(1 + Complex.I); 1 - Complex.I, 1 + Complex.I],
+  by
     rw [Matrix.det_smul, Matrix.det_fin_two_of, Fintype.card_fin]
     simp [Complex.ext_iff]
-    norm_num⟩
+    norm_num
+⟩
 
-/-- The Lorentz matrix of `rotationCycle`: it is the permutation matrix associated with
-`cycDir`. -/
-lemma toLorentzGroup_rotationCycle_apply (a b : Fin 1 ⊕ Fin 3) :
-    (toLorentzGroup rotationCycle).1 a b = if a = cycDir b then 1 else 0 := by
+/--
+The Lorentz matrix of `rotationCycle`: it is the permutation matrix associated with
+`cycDir`.
+-/
+lemma toLorentzGroup_rotationCycle_apply (a b : Fin 1 ⊕ Fin 3)
+    : (toLorentzGroup rotationCycle).1 a b = if a = cycDir b then 1 else 0 := by
   refine Complex.ofReal_injective ?_
   rw [toLorentzGroup_eq_trace, PauliMatrix.trace_pauliSelfAdjoint'_mul_apply]
-  rcases a with a | a <;> rcases b with b | b <;> fin_cases a <;> fin_cases b <;>
-    simp [rotationCycle, cycDir, PauliMatrix.pauliSelfAdjoint', PauliMatrix.pauliMatrix,
-      Matrix.mul_apply, Matrix.conjTranspose_apply, Fin.sum_univ_two,
-      Complex.ext_iff] <;>
-    norm_num
+  rcases a with a | a <;> rcases b with b | b <;> fin_cases a <;> fin_cases b
+    <;> simp [rotationCycle, cycDir, PauliMatrix.pauliSelfAdjoint', PauliMatrix.pauliMatrix,
+      Matrix.mul_apply, Matrix.conjTranspose_apply, Fin.sum_univ_two, Complex.ext_iff]
+    <;> norm_num
 
 end SL2C
 
@@ -163,8 +171,10 @@ the signs recorded by `halfTurnSign`.
 
 namespace Lorentz
 
-/-- The sign the half turn about the axis `k` gives a direction: `1` on time and on the axis,
-`-1` on the two transverse directions. -/
+/--
+The sign the half turn about the axis `k` gives a direction: `1` on time and on the axis,
+`-1` on the two transverse directions.
+-/
 def halfTurnSign (k : Fin 3) (μ : Fin 1 ⊕ Fin 3) : ℤ :=
   if μ = Sum.inl 0 ∨ μ = Sum.inr k then 1 else -1
 
@@ -172,44 +182,63 @@ namespace SL2C
 
 open Matrix MatrixGroups
 
-/-- The half turn about the axis `k`, the rotation by `π` about it, as the element `-i σ_k` of
-`SL(2,ℂ)`. The other lift `i σ_k` is `-halfTurn k`. -/
+/--
+The half turn about the axis `k`, the rotation by `π` about it, as the element `-i σ_k` of
+`SL(2,ℂ)`. The other lift `i σ_k` is `-halfTurn k`.
+-/
 noncomputable def halfTurn : Fin 3 → SL(2,ℂ)
-  | 0 => ⟨!![0, -Complex.I; -Complex.I, 0], by
+  | 0 => ⟨
+    !![0, -Complex.I; -Complex.I, 0],
+    by
       rw [Matrix.det_fin_two_of]
-      simp [Complex.I_mul_I]⟩
-  | 1 => ⟨!![0, -1; 1, 0], by
+      simp [Complex.I_mul_I]
+  ⟩
+  | 1 => ⟨
+    !![0, -1; 1, 0],
+    by
       rw [Matrix.det_fin_two_of]
-      simp⟩
-  | 2 => ⟨!![-Complex.I, 0; 0, Complex.I], by
+      simp
+  ⟩
+  | 2 => ⟨
+    !![-Complex.I, 0; 0, Complex.I],
+    by
       rw [Matrix.det_fin_two_of]
-      simp [Complex.I_mul_I]⟩
+      simp [Complex.I_mul_I]
+  ⟩
 
 /-- The matrix entries of the half turn about the `x`-axis, `-i σ_x`. -/
-@[simp] lemma halfTurn_zero_apply (j k : Fin 2) :
-    (halfTurn 0).1 j k = (!![0, -Complex.I; -Complex.I, 0]) j k := rfl
+@[simp]
+lemma halfTurn_zero_apply (j k : Fin 2)
+    : (halfTurn 0).1 j k = (!![0, -Complex.I; -Complex.I, 0]) j k :=
+  rfl
 
 /-- The matrix entries of the half turn about the `y`-axis, `-i σ_y`. -/
-@[simp] lemma halfTurn_one_apply (j k : Fin 2) :
-    (halfTurn 1).1 j k = (!![0, -1; 1, 0] : Matrix (Fin 2) (Fin 2) ℂ) j k := rfl
+@[simp]
+lemma halfTurn_one_apply (j k : Fin 2)
+    : (halfTurn 1).1 j k = (!![0, -1; 1, 0] : Matrix (Fin 2) (Fin 2) ℂ) j k :=
+  rfl
 
 /-- The matrix entries of the half turn about the `z`-axis, `-i σ_z`. -/
-@[simp] lemma halfTurn_two_apply (j k : Fin 2) :
-    (halfTurn 2).1 j k = (!![-Complex.I, 0; 0, Complex.I]) j k := rfl
+@[simp]
+lemma halfTurn_two_apply (j k : Fin 2)
+    : (halfTurn 2).1 j k = (!![-Complex.I, 0; 0, Complex.I]) j k :=
+  rfl
 
-/-- The Lorentz matrix of the half turn about the axis `k` is diagonal, with the signs
-`halfTurnSign k`: it fixes time and the axis and negates the two transverse directions. -/
-lemma toLorentzGroup_halfTurn_apply (k : Fin 3) (a b : Fin 1 ⊕ Fin 3) :
-    (toLorentzGroup (halfTurn k)).1 a b = if a = b then (halfTurnSign k a : ℝ) else 0 := by
+/--
+The Lorentz matrix of the half turn about the axis `k` is diagonal, with the signs
+`halfTurnSign k`: it fixes time and the axis and negates the two transverse directions.
+-/
+lemma toLorentzGroup_halfTurn_apply (k : Fin 3) (a b : Fin 1 ⊕ Fin 3)
+    : (toLorentzGroup (halfTurn k)).1 a b = if a = b then (halfTurnSign k a : ℝ) else 0 := by
   refine Complex.ofReal_injective ?_
   rw [toLorentzGroup_eq_trace, PauliMatrix.trace_pauliSelfAdjoint'_mul_apply]
-  fin_cases k <;> rcases a with a | a <;> rcases b with b | b <;> fin_cases a <;> fin_cases b <;>
-    simp [halfTurnSign, PauliMatrix.pauliSelfAdjoint', PauliMatrix.pauliMatrix,
+  fin_cases k <;> rcases a with a | a <;> rcases b with b | b <;> fin_cases a <;> fin_cases b
+    <;> simp [halfTurnSign, PauliMatrix.pauliSelfAdjoint', PauliMatrix.pauliMatrix,
       Matrix.mul_apply, Matrix.conjTranspose_apply, Fin.sum_univ_two, Complex.ext_iff]
 
 /-- The Lorentz matrix of the half turn is diagonal, hence symmetric. -/
-lemma toLorentzGroup_halfTurn_symm (k : Fin 3) (a b : Fin 1 ⊕ Fin 3) :
-    (toLorentzGroup (halfTurn k)).1 a b = (toLorentzGroup (halfTurn k)).1 b a := by
+lemma toLorentzGroup_halfTurn_symm (k : Fin 3) (a b : Fin 1 ⊕ Fin 3)
+    : (toLorentzGroup (halfTurn k)).1 a b = (toLorentzGroup (halfTurn k)).1 b a := by
   rw [toLorentzGroup_halfTurn_apply, toLorentzGroup_halfTurn_apply]
   by_cases h : a = b
   · rw [h]

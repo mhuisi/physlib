@@ -63,7 +63,7 @@ inductive FactorSpec
   | U1
   /-- The factor `SU(n)`. -/
   | SU (n : ℕ)
-  deriving DecidableEq, Repr
+deriving DecidableEq, Repr
 
 namespace FactorSpec
 
@@ -300,22 +300,23 @@ instance instFreeTrivial : trivial.Free where
   exists_radial_eq _ _ := ⟨1, rfl⟩
 
 open OfFactors in
-/-- **The local gauge data of a list of factors**: the product, in the order of the list,
-  of the local gauge data of the factors. -/
+/--
+**The local gauge data of a list of factors**: the product, in the order of the list,
+of the local gauge data of the factors.
+-/
 noncomputable def ofFactors : (Γ : List FactorSpec) → LocalGaugeData (G₀ Γ) (𝔤 Γ) (G Γ) (𝔤J Γ)
   | [] => trivial
   | [f] => f.data
   | f :: g :: gs => f.data.prod (ofFactors (g :: gs))
 
-@[simp]
-lemma ofFactors_nil : ofFactors [] = trivial := rfl
+@[simp] lemma ofFactors_nil : ofFactors [] = trivial := rfl
+
+@[simp] lemma ofFactors_singleton (f : FactorSpec) : ofFactors [f] = f.data := rfl
 
 @[simp]
-lemma ofFactors_singleton (f : FactorSpec) : ofFactors [f] = f.data := rfl
-
-@[simp]
-lemma ofFactors_cons_cons (f g : FactorSpec) (gs : List FactorSpec) :
-    ofFactors (f :: g :: gs) = f.data.prod (ofFactors (g :: gs)) := rfl
+lemma ofFactors_cons_cons (f g : FactorSpec) (gs : List FactorSpec)
+    : ofFactors (f :: g :: gs) = f.data.prod (ofFactors (g :: gs)) :=
+  rfl
 
 /-- The local gauge data of a list of factors is faithful. -/
 noncomputable instance instFaithfulOfFactors : (Γ : List FactorSpec) → (ofFactors Γ).Faithful
@@ -343,7 +344,6 @@ noncomputable instance instFreeOfFactors : (Γ : List FactorSpec) → (ofFactors
 noncomputable abbrev Factors.factors : (Γ : List FactorSpec) → Factors (ofFactors Γ)
   | [] => []
   | [f] => [f.factor]
-  | f :: g :: gs =>
-    f.factor.comap Hom.fst :: (Factors.factors (g :: gs)).comap Hom.snd
+  | f :: g :: gs => f.factor.comap Hom.fst :: (Factors.factors (g :: gs)).comap Hom.snd
 
 end LocalGaugeData

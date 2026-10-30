@@ -10,25 +10,29 @@ public import Physlib.Meta.Informal.Basic
 
 @[expose] public section
 
---Classical capacity
+-- Classical capacity
 -- * Define "code"
 -- * Define (Shannon) capacity of a (iid, memoryless) channel
 -- * Prove Shannon's capacity theorems
 
 variable (A I O : Type*)
 
-/-- Here we define a *Code* by an encdoder and a decoder. The encoder is a function that takes
- strings (`List`s) of any length over an alphabet `A`, and returns strings over `I`;
- the decoder takes `O` and gives back strings over `A`. The idea is that a channel
- would map from strings of `I` to `O`. Important special cases are where `I=O` (the channel doesn't
- change the symbol set), and `FixedLengthCode` where the output lengths only depend on input
- lengths. -/
+/--
+Here we define a *Code* by an encdoder and a decoder. The encoder is a function that takes
+strings (`List`s) of any length over an alphabet `A`, and returns strings over `I`;
+the decoder takes `O` and gives back strings over `A`. The idea is that a channel
+would map from strings of `I` to `O`. Important special cases are where `I=O` (the channel doesn't
+change the symbol set), and `FixedLengthCode` where the output lengths only depend on input
+lengths.
+-/
 structure Code where
   encoder : List A → List I
   decoder : List O → List A
 
-/-- A `FixedLengthCode` is a `Code` whose output lengths don't depend on the input content, only
- the input length. -/
+/--
+A `FixedLengthCode` is a `Code` whose output lengths don't depend on the input content, only
+the input length.
+-/
 structure FixedLengthCode extends Code A I O where
   enc_length : ℕ → ℕ
   enc_maps_length : ∀ as, (encoder as).length = enc_length (as.length)

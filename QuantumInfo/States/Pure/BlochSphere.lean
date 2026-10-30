@@ -51,11 +51,10 @@ def blochVecRaw (α θ : ℝ) : Fin 3 → ℝ :=
   ![Real.sin α * Real.cos θ, Real.sin α * Real.sin θ, Real.cos α]
 
 /-- The Bloch vector has unit norm: sin²α(cos²θ + sin²θ) + cos²α = 1. -/
-lemma blochVecRaw_norm (α θ : ℝ) :
-    Real.sqrt ((blochVecRaw α θ 0) ^ 2 + (blochVecRaw α θ 1) ^ 2 +
-      (blochVecRaw α θ 2) ^ 2) = 1 := by
-  have : (blochVecRaw α θ 0) ^ 2 + (blochVecRaw α θ 1) ^ 2 +
-    (blochVecRaw α θ 2) ^ 2 = 1 := by
+lemma blochVecRaw_norm (α θ : ℝ)
+    : Real.sqrt ((blochVecRaw α θ 0) ^ 2 + (blochVecRaw α θ 1) ^ 2 + (blochVecRaw α θ 2) ^ 2)
+      = 1 := by
+  have : (blochVecRaw α θ 0) ^ 2 + (blochVecRaw α θ 1) ^ 2 + (blochVecRaw α θ 2) ^ 2 = 1 := by
     simp [blochVecRaw]
     have h1 := Real.sin_sq_add_cos_sq α
     have h2 := Real.sin_sq_add_cos_sq θ
@@ -64,25 +63,31 @@ lemma blochVecRaw_norm (α θ : ℝ) :
       sq_abs (Real.sin α), sq_abs (Real.cos θ)]
   rw [this, Real.sqrt_one]
 
-/-- A point on the Bloch sphere parameterized by polar angle `α` and
-    azimuthal angle `θ`. -/
-def blochPoint (α θ : ℝ) : BlochSphere :=
-  ⟨(WithLp.equiv 2 _).symm (blochVecRaw α θ), by
+/--
+A point on the Bloch sphere parameterized by polar angle `α` and
+azimuthal angle `θ`.
+-/
+def blochPoint (α θ : ℝ) : BlochSphere := ⟨
+  (WithLp.equiv 2 _).symm (blochVecRaw α θ),
+  by
     rw [Metric.mem_sphere, dist_comm, EuclideanSpace.dist_eq]
-    simp [Fin.sum_univ_three, blochVecRaw_norm α θ]⟩
+    simp [Fin.sum_univ_three, blochVecRaw_norm α θ]
+⟩
 
 /-- The underlying vector of a `blochPoint`. -/
-lemma blochPoint_val (α θ : ℝ) :
-    (blochPoint α θ : EuclideanSpace ℝ (Fin 3)) =
-    (WithLp.equiv 2 _).symm (blochVecRaw α θ) := rfl
+lemma blochPoint_val (α θ : ℝ)
+    : (blochPoint α θ : EuclideanSpace ℝ (Fin 3)) = (WithLp.equiv 2 _).symm (blochVecRaw α θ) :=
+  rfl
 
 /-! ## Solid angle via Van Vleck formula -/
 
-/-- Solid angle of a geodesic triangle on the Bloch sphere, computed via
-    the Van Vleck formula using `Complex.arg` for full-quadrant support.
+/--
+Solid angle of a geodesic triangle on the Bloch sphere, computed via
+the Van Vleck formula using `Complex.arg` for full-quadrant support.
 
-    `Ω = 2 · arg(den + num · i)` where
-    `den = 1 + n₁·n₂ + n₂·n₃ + n₃·n₁` and `num = n₁ · (n₂ × n₃)`. -/
+`Ω = 2 · arg(den + num · i)` where
+`den = 1 + n₁·n₂ + n₂·n₃ + n₃·n₁` and `num = n₁ · (n₂ × n₃)`.
+-/
 def solidAngle (p₁ p₂ p₃ : BlochSphere) : ℝ :=
   let n₁ := (p₁ : EuclideanSpace ℝ (Fin 3))
   let n₂ := (p₂ : EuclideanSpace ℝ (Fin 3))
@@ -94,14 +99,12 @@ def solidAngle (p₁ p₂ p₃ : BlochSphere) : ℝ :=
 /-! ## Dot product of Bloch vectors -/
 
 /-- The dot product of two Bloch points expressed in angle differences. -/
-lemma dot_blochPoint (α₁ θ₁ α₂ θ₂ : ℝ) :
-    (blochPoint α₁ θ₁ : EuclideanSpace ℝ (Fin 3)) ⬝ᵥ
-    (blochPoint α₂ θ₂ : EuclideanSpace ℝ (Fin 3)) =
-    Real.sin α₁ * Real.sin α₂ * Real.cos (θ₂ - θ₁) +
-    Real.cos α₁ * Real.cos α₂ := by
+lemma dot_blochPoint (α₁ θ₁ α₂ θ₂ : ℝ)
+    : (blochPoint α₁ θ₁ : EuclideanSpace ℝ (Fin 3)) ⬝ᵥ (blochPoint α₂ θ₂ : EuclideanSpace ℝ (Fin 3))
+      = Real.sin α₁ * Real.sin α₂ * Real.cos (θ₂ - θ₁) + Real.cos α₁ * Real.cos α₂ := by
   simp [blochPoint_val, dotProduct, blochVecRaw, Fin.sum_univ_three, WithLp.equiv]
-  rw [show Real.cos (θ₂ - θ₁) = Real.cos θ₁ * Real.cos θ₂ +
-    Real.sin θ₁ * Real.sin θ₂ from by rw [Real.cos_sub]; ring]
+  rw [show Real.cos (θ₂ - θ₁) = Real.cos θ₁ * Real.cos θ₂ + Real.sin θ₁ * Real.sin θ₂ from by
+    rw [Real.cos_sub]; ring]
   ring
 
 end BlochSphere

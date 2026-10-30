@@ -99,10 +99,12 @@ velocities and momenta.
 
 -/
 
-/-- The canonical momentum of the simple pendulum, `p = ∂L/∂θ̇ = I θ̇`, as a linear
-  equivalence between velocities and momenta in the angular chart. -/
-noncomputable def canonicalMomentum (t : Time) (x : EuclideanSpace ℝ (Fin 1)) :
-    EuclideanSpace ℝ (Fin 1) ≃ₗ[ℝ] EuclideanSpace ℝ (Fin 1) where
+/--
+The canonical momentum of the simple pendulum, `p = ∂L/∂θ̇ = I θ̇`, as a linear
+equivalence between velocities and momenta in the angular chart.
+-/
+noncomputable def canonicalMomentum (t : Time) (x : EuclideanSpace ℝ (Fin 1))
+    : EuclideanSpace ℝ (Fin 1) ≃ₗ[ℝ] EuclideanSpace ℝ (Fin 1) where
   toFun v := gradient (S.lagrangian t x ·) v
   invFun p := (1 / S.inertia) • p
   left_inv v := by simp [S.gradient_lagrangian_velocity_eq, smul_smul, S.inertia_ne_zero]
@@ -110,10 +112,12 @@ noncomputable def canonicalMomentum (t : Time) (x : EuclideanSpace ℝ (Fin 1)) 
   map_add' v1 v2 := by simp [S.gradient_lagrangian_velocity_eq]
   map_smul' c v := by simp [S.gradient_lagrangian_velocity_eq]; module
 
-/-- The canonical momentum of the simple pendulum is the angular momentum `I θ̇` about the
-  pivot. -/
-lemma canonicalMomentum_eq (t : Time) (x v : EuclideanSpace ℝ (Fin 1)) :
-    S.canonicalMomentum t x v = S.inertia • v :=
+/--
+The canonical momentum of the simple pendulum is the angular momentum `I θ̇` about the
+pivot.
+-/
+lemma canonicalMomentum_eq (t : Time) (x v : EuclideanSpace ℝ (Fin 1))
+    : S.canonicalMomentum t x v = S.inertia • v :=
   S.gradient_lagrangian_velocity_eq t x v
 
 /-!
@@ -130,12 +134,13 @@ canonical momentum.
 
 -/
 
-/-- The Hamiltonian of the simple pendulum as a function of time, momentum and angle: the
-  Legendre transform `H(t, p, θ) = ⟪p, θ̇⟫ - L(t, θ, θ̇)` of the Lagrangian, the angular
-  velocity `θ̇` being recovered from the momentum by inverting the canonical momentum. -/
+/--
+The Hamiltonian of the simple pendulum as a function of time, momentum and angle: the
+Legendre transform `H(t, p, θ) = ⟪p, θ̇⟫ - L(t, θ, θ̇)` of the Lagrangian, the angular
+velocity `θ̇` being recovered from the momentum by inverting the canonical momentum.
+-/
 noncomputable def hamiltonian (t : Time) (p x : EuclideanSpace ℝ (Fin 1)) : ℝ :=
-  ⟪p, (S.canonicalMomentum t x).symm p⟫_ℝ -
-    S.lagrangian t x ((S.canonicalMomentum t x).symm p)
+  ⟪p, (S.canonicalMomentum t x).symm p⟫_ℝ - S.lagrangian t x ((S.canonicalMomentum t x).symm p)
 
 /-!
 
@@ -146,11 +151,13 @@ energy written in terms of the momentum, plus the potential energy.
 
 -/
 
-/-- The Hamiltonian of the simple pendulum is the kinetic energy written in terms of the
-  momentum, `½ (1/I) ‖p‖²`, plus the potential energy. -/
-lemma hamiltonian_eq :
-    S.hamiltonian = fun _ p x =>
-      (1 / (2 : ℝ)) * (1 / S.inertia) * ⟪p, p⟫_ℝ + S.potentialEnergy x := by
+/--
+The Hamiltonian of the simple pendulum is the kinetic energy written in terms of the
+momentum, `½ (1/I) ‖p‖²`, plus the potential energy.
+-/
+lemma hamiltonian_eq
+    : S.hamiltonian
+      = fun _ p x => (1 / (2 : ℝ)) * (1 / S.inertia) * ⟪p, p⟫_ℝ + S.potentialEnergy x := by
   funext t p x
   simp only [hamiltonian, canonicalMomentum, lagrangian, one_div, LinearEquiv.coe_symm_mk',
     inner_smul_right, inner_smul_left, starRingEnd_apply, star_trivial]
@@ -165,8 +172,10 @@ We show that the Hamiltonian is smooth in all its arguments jointly.
 
 -/
 
-/-- The Hamiltonian of the simple pendulum is a smooth function of the time, the momentum and
-  the angle jointly. -/
+/--
+The Hamiltonian of the simple pendulum is a smooth function of the time, the momentum and
+the angle jointly.
+-/
 @[fun_prop]
 lemma hamiltonian_contDiff (n : WithTop ℕ∞) : ContDiff ℝ n ↿S.hamiltonian := by
   rw [hamiltonian_eq]
@@ -181,29 +190,34 @@ These are the two sides of Hamilton's equations.
 
 -/
 
-/-- The gradient of the Hamiltonian of the simple pendulum in the angle is the gradient of the
-  potential energy, that is minus the torque. -/
-lemma gradient_hamiltonian_position_eq (t : Time) (x p : EuclideanSpace ℝ (Fin 1)) :
-    gradient (S.hamiltonian t p) x = gradient S.potentialEnergy x := by
-  have h : (fun y : EuclideanSpace ℝ (Fin 1) => S.hamiltonian t p y) =
-      fun y => S.potentialEnergy y + (1 / (2 : ℝ)) * (1 / S.inertia) * ⟪p, p⟫_ℝ := by
+/--
+The gradient of the Hamiltonian of the simple pendulum in the angle is the gradient of the
+potential energy, that is minus the torque.
+-/
+lemma gradient_hamiltonian_position_eq (t : Time) (x p : EuclideanSpace ℝ (Fin 1))
+    : gradient (S.hamiltonian t p) x = gradient S.potentialEnergy x := by
+  have h
+      : (fun y : EuclideanSpace ℝ (Fin 1) => S.hamiltonian t p y)
+        = fun y => S.potentialEnergy y + (1 / (2 : ℝ)) * (1 / S.inertia) * ⟪p, p⟫_ℝ := by
     funext y
     simp only [hamiltonian_eq]
     ring
-  change gradient (fun y : EuclideanSpace ℝ (Fin 1) => S.hamiltonian t p y) x =
-    gradient S.potentialEnergy x
+  change gradient (fun y : EuclideanSpace ℝ (Fin 1) => S.hamiltonian t p y) x
+    = gradient S.potentialEnergy x
   rw [h, gradient_add_const]
 
-/-- The gradient of the Hamiltonian of the simple pendulum in the momentum is the angular
-  velocity `(1/I) p` recovered from the momentum. -/
-lemma gradient_hamiltonian_momentum_eq (t : Time) (x p : EuclideanSpace ℝ (Fin 1)) :
-    gradient (S.hamiltonian t · x) p = (1 / S.inertia) • p := by
-  have h : (fun y : EuclideanSpace ℝ (Fin 1) => S.hamiltonian t y x) =
-      fun y => ((1 / (2 : ℝ)) * (1 / S.inertia)) * ⟪y, y⟫_ℝ + S.potentialEnergy x := by
+/--
+The gradient of the Hamiltonian of the simple pendulum in the momentum is the angular
+velocity `(1/I) p` recovered from the momentum.
+-/
+lemma gradient_hamiltonian_momentum_eq (t : Time) (x p : EuclideanSpace ℝ (Fin 1))
+    : gradient (S.hamiltonian t · x) p = (1 / S.inertia) • p := by
+  have h
+      : (fun y : EuclideanSpace ℝ (Fin 1) => S.hamiltonian t y x)
+        = fun y => ((1 / (2 : ℝ)) * (1 / S.inertia)) * ⟪y, y⟫_ℝ + S.potentialEnergy x := by
     funext y
     simp only [hamiltonian_eq]
-  change gradient (fun y : EuclideanSpace ℝ (Fin 1) => S.hamiltonian t y x) p =
-    (1 / S.inertia) • p
+  change gradient (fun y : EuclideanSpace ℝ (Fin 1) => S.hamiltonian t y x) p = (1 / S.inertia) • p
   rw [h, gradient_add_const, gradient_const_mul_inner_self]
   module
 
@@ -217,11 +231,13 @@ motion or not.
 
 -/
 
-/-- Along any lift of the angle, the Hamiltonian of the simple pendulum evaluated on the
-  canonical momentum of the lift is the energy of the lift. This holds whether or not the lift
-  satisfies the equation of motion. -/
-lemma hamiltonian_eq_energy (θ : Time → EuclideanSpace ℝ (Fin 1)) :
-    (fun t => S.hamiltonian t (S.canonicalMomentum t (θ t) (∂ₜ θ t)) (θ t)) = S.energy θ := by
+/--
+Along any lift of the angle, the Hamiltonian of the simple pendulum evaluated on the
+canonical momentum of the lift is the energy of the lift. This holds whether or not the lift
+satisfies the equation of motion.
+-/
+lemma hamiltonian_eq_energy (θ : Time → EuclideanSpace ℝ (Fin 1))
+    : (fun t => S.hamiltonian t (S.canonicalMomentum t (θ t) (∂ₜ θ t)) (θ t)) = S.energy θ := by
   funext t
   rw [hamiltonian_eq]
   unfold energy kineticEnergy
@@ -238,9 +254,11 @@ Hamilton's equations.
 
 -/
 
-/-- The Hamilton-equations operator of the Hamiltonian of the simple pendulum, on
-  momentum-angle phase space; its vanishing is equivalent to Hamilton's equations for the
-  momentum and the angle. -/
+/--
+The Hamilton-equations operator of the Hamiltonian of the simple pendulum, on
+momentum-angle phase space; its vanishing is equivalent to Hamilton's equations for the
+momentum and the angle.
+-/
 noncomputable def hamiltonEqOp (p θ : Time → EuclideanSpace ℝ (Fin 1)) :=
   ClassicalMechanics.hamiltonEqOp S.hamiltonian p θ
 
@@ -256,17 +274,19 @@ angular momentum against the torque.
 
 -/
 
-/-- For a smooth lift of the angle the equation of motion of the simple pendulum holds if and
-  only if Hamilton's equations hold for the lift and its canonical momentum, that is if and
-  only if the Hamilton-equations operator vanishes on the pair. -/
-lemma equationOfMotion_iff_hamiltonEqOp_eq_zero (θ : Time → EuclideanSpace ℝ (Fin 1))
-    (hθ : ContDiff ℝ ∞ θ) :
-    S.EquationOfMotion θ ↔
-      S.hamiltonEqOp (fun t => S.canonicalMomentum t (θ t) (∂ₜ θ t)) θ = 0 := by
+/--
+For a smooth lift of the angle the equation of motion of the simple pendulum holds if and
+only if Hamilton's equations hold for the lift and its canonical momentum, that is if and
+only if the Hamilton-equations operator vanishes on the pair.
+-/
+lemma equationOfMotion_iff_hamiltonEqOp_eq_zero
+    (θ : Time → EuclideanSpace ℝ (Fin 1)) (hθ : ContDiff ℝ ∞ θ)
+    : S.EquationOfMotion θ
+      ↔ S.hamiltonEqOp (fun t => S.canonicalMomentum t (θ t) (∂ₜ θ t)) θ = 0 := by
   rw [hamiltonEqOp, hamiltonEqOp_eq_zero_iff_hamiltons_equations,
     S.equationOfMotion_iff_newtons_2nd_law θ]
-  simp only [canonicalMomentum_eq, gradient_hamiltonian_momentum_eq, one_div, smul_smul,
-    ne_eq, S.inertia_ne_zero, not_false_eq_true, inv_mul_cancel₀, one_smul, implies_true,
+  simp only [canonicalMomentum_eq, gradient_hamiltonian_momentum_eq, one_div, smul_smul, ne_eq,
+    S.inertia_ne_zero, not_false_eq_true, inv_mul_cancel₀, one_smul, implies_true,
     Time.deriv_smul _ S.inertia (deriv_differentiable_of_contDiff θ hθ),
     gradient_hamiltonian_position_eq, true_and, eq_neg_iff_add_eq_zero]
 
@@ -285,33 +305,36 @@ fourth entry states the same variational principle through the variational calcu
 
 -/
 
-/-- For a smooth lift of the angle the following formulations of the dynamics of the simple
-  pendulum are equivalent:
-  1. the equation of motion, the pointwise rotational Newton law balancing the rate of change
-    of the angular momentum against the torque;
-  2. the scalar mass-independent form `θ̈ + ω² sin θ = 0` of the equation of motion;
-  3. Hamilton's equations for the lift and its canonical momentum, as the vanishing of the
-    Hamilton-equations operator;
-  4. the Lagrangian variational principle, the vanishing of the variational gradient of the
-    action integral of the Lagrangian, written through the variational calculus directly; the
-    same principle, through the variational derivative of the action, is recorded standalone
-    as `equationOfMotion_iff_gradLagrangian_zero` in the `Basic` module;
-  5. the Hamiltonian variational principle, the vanishing of the variational gradient of the
-    phase-space action on the pair of the canonical momentum and the lift. -/
-lemma equationOfMotion_tfae (θ : Time → EuclideanSpace ℝ (Fin 1)) (hθ : ContDiff ℝ ∞ θ) :
-    List.TFAE [S.EquationOfMotion θ,
+/--
+For a smooth lift of the angle the following formulations of the dynamics of the simple
+pendulum are equivalent:
+1. the equation of motion, the pointwise rotational Newton law balancing the rate of change
+  of the angular momentum against the torque;
+2. the scalar mass-independent form `θ̈ + ω² sin θ = 0` of the equation of motion;
+3. Hamilton's equations for the lift and its canonical momentum, as the vanishing of the
+  Hamilton-equations operator;
+4. the Lagrangian variational principle, the vanishing of the variational gradient of the
+  action integral of the Lagrangian, written through the variational calculus directly; the
+  same principle, through the variational derivative of the action, is recorded standalone
+  as `equationOfMotion_iff_gradLagrangian_zero` in the `Basic` module;
+5. the Hamiltonian variational principle, the vanishing of the variational gradient of the
+  phase-space action on the pair of the canonical momentum and the lift.
+-/
+lemma equationOfMotion_tfae (θ : Time → EuclideanSpace ℝ (Fin 1)) (hθ : ContDiff ℝ ∞ θ)
+    : List.TFAE [
+      S.EquationOfMotion θ,
       ∀ t, ∂ₜ (∂ₜ θ) t 0 + S.ω ^ 2 * Real.sin (θ t 0) = 0,
       S.hamiltonEqOp (fun t => S.canonicalMomentum t (θ t) (∂ₜ θ t)) θ = 0,
       (δ (q':=θ), ∫ t, S.lagrangian t (q' t) (fderiv ℝ q' t 1)) = 0,
       (δ (pq':= fun t => (S.canonicalMomentum t (θ t) (∂ₜ θ t), θ t)),
         ∫ t, ⟪(pq' t).1, ∂ₜ (Prod.snd ∘ pq') t⟫_ℝ -
-          S.hamiltonian t (pq' t).1 (pq' t).2) = 0] := by
-  rw [← S.equationOfMotion_iff_hamiltonEqOp_eq_zero θ hθ,
-    ← S.equationOfMotion_iff_scalar θ]
+          S.hamiltonian t (pq' t).1 (pq' t).2)
+        = 0
+    ] := by
+  rw [← S.equationOfMotion_iff_hamiltonEqOp_eq_zero θ hθ, ← S.equationOfMotion_iff_scalar θ]
   rw [hamiltons_equations_varGradient, euler_lagrange_varGradient]
   simp only [List.tfae_cons_of_mem, List.mem_cons_self]
-  rw [← S.gradLagrangian_eq_eulerLagrangeOp θ hθ,
-    ← S.equationOfMotion_iff_gradLagrangian_zero θ hθ]
+  rw [← S.gradLagrangian_eq_eulerLagrangeOp θ hθ, ← S.equationOfMotion_iff_gradLagrangian_zero θ hθ]
   simp only [List.tfae_cons_of_mem, List.mem_cons_self]
   show List.TFAE [S.EquationOfMotion θ,
     S.hamiltonEqOp (fun t => S.canonicalMomentum t (θ t) (∂ₜ θ t)) θ = 0]

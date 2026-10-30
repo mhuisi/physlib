@@ -75,8 +75,8 @@ variable {Γ Ω₀}
 /-! ## B. The moved operators -/
 
 /-- The operator of `γ • X` that acts as `M` after moving the configurations back to `X`. -/
-def quantumIso (γ : Γ) (X : Finset S) :
-    Alg (fun _ : S => Ω₀) X →⋆ₐ[ℂ] Alg (fun _ : S => Ω₀) (γ • X) where
+def quantumIso (γ : Γ) (X : Finset S)
+    : Alg (fun _ : S => Ω₀) X →⋆ₐ[ℂ] Alg (fun _ : S => Ω₀) (γ • X) where
   toFun M := Matrix.of fun c c' => M (cfgEquiv Γ Ω₀ γ X c) (cfgEquiv Γ Ω₀ γ X c')
   map_one' := by
     ext c c'
@@ -103,15 +103,14 @@ lemma smul_mono (γ : Γ) {X Y : Finset S} (h : X ≤ Y) : γ • X ≤ γ • Y
 
 omit [Fintype Ω₀] in
 omit [DecidableEq Ω₀] in
-lemma restr_cfgEquiv (γ : Γ) {X Y : Finset S} (h : X ≤ Y)
-    (c : Cfg (fun _ : S => Ω₀) (γ • Y)) :
-    restr h (cfgEquiv Γ Ω₀ γ Y c) = cfgEquiv Γ Ω₀ γ X (restr (smul_mono γ h) c) := rfl
+lemma restr_cfgEquiv (γ : Γ) {X Y : Finset S} (h : X ≤ Y) (c : Cfg (fun _ : S => Ω₀) (γ • Y))
+    : restr h (cfgEquiv Γ Ω₀ γ Y c) = cfgEquiv Γ Ω₀ γ X (restr (smul_mono γ h) c) :=
+  rfl
 
 omit [Fintype Ω₀] in
 omit [DecidableEq Ω₀] in
-lemma agree_cfgEquiv (γ : Γ) {X Y : Finset S} (h : X ≤ Y)
-    (c c' : Cfg (fun _ : S => Ω₀) (γ • Y)) :
-    Agree h (cfgEquiv Γ Ω₀ γ Y c) (cfgEquiv Γ Ω₀ γ Y c') ↔ Agree (smul_mono γ h) c c' := by
+lemma agree_cfgEquiv (γ : Γ) {X Y : Finset S} (h : X ≤ Y) (c c' : Cfg (fun _ : S => Ω₀) (γ • Y))
+    : Agree h (cfgEquiv Γ Ω₀ γ Y c) (cfgEquiv Γ Ω₀ γ Y c') ↔ Agree (smul_mono γ h) c c' := by
   constructor
   · intro hc y hy
     obtain ⟨y₀, hy₀, hyy⟩ := Finset.mem_smul_finset.1 y.2
@@ -124,11 +123,10 @@ lemma agree_cfgEquiv (γ : Γ) {X Y : Finset S} (h : X ≤ Y)
     exact (Finset.smul_mem_smul_finset_iff γ).1 hx
 
 /-- **Naturality**: moving operators commutes with extending them by the identity. -/
-lemma quantumIso_incl (γ : Γ) {X Y : Finset S} (h : X ≤ Y) (M : Alg (fun _ : S => Ω₀) X) :
-    quantumIso γ Y (inclMat h M) = inclMat (smul_mono γ h) (quantumIso γ X M) := by
+lemma quantumIso_incl (γ : Γ) {X Y : Finset S} (h : X ≤ Y) (M : Alg (fun _ : S => Ω₀) X)
+    : quantumIso γ Y (inclMat h M) = inclMat (smul_mono γ h) (quantumIso γ X M) := by
   ext c c'
-  simp only [quantumIso, StarAlgHom.coe_mk,
-    Matrix.of_apply, inclMat_apply]
+  simp only [quantumIso, StarAlgHom.coe_mk, Matrix.of_apply, inclMat_apply]
   by_cases hc : Agree (smul_mono γ h) c c'
   · rw [ite_eq_left ((agree_cfgEquiv γ h c c').2 hc), ite_eq_left hc, restr_cfgEquiv,
       restr_cfgEquiv]
@@ -137,108 +135,123 @@ lemma quantumIso_incl (γ : Γ) {X Y : Finset S} (h : X ≤ Y) (M : Alg (fun _ :
 /-! ## C. The action on the quasi-local algebra -/
 
 /-- Transport of configurations along an equality of regions. -/
-def cfgCast {X Y : Finset S} (e : X = Y) (c : Cfg (fun _ : S => Ω₀) Y) :
-    Cfg (fun _ : S => Ω₀) X :=
+def cfgCast {X Y : Finset S} (e : X = Y) (c : Cfg (fun _ : S => Ω₀) Y) : Cfg (fun _ : S => Ω₀) X :=
   fun x => c ⟨x.1, e ▸ x.2⟩
 
 /-- Transport of operators along an equality of regions. -/
-def regionIso {X Y : Finset S} (e : X = Y) :
-    Alg (fun _ : S => Ω₀) X →⋆ₐ[ℂ] Alg (fun _ : S => Ω₀) Y := by
+def regionIso {X Y : Finset S} (e : X = Y)
+    : Alg (fun _ : S => Ω₀) X →⋆ₐ[ℂ] Alg (fun _ : S => Ω₀) Y := by
   subst e
   exact StarAlgHom.id ℂ _
 
-lemma regionIso_apply {X Y : Finset S} (e : X = Y) (M : Alg (fun _ : S => Ω₀) X)
-    (c c' : Cfg (fun _ : S => Ω₀) Y) :
-    regionIso e M c c' = M (cfgCast e c) (cfgCast e c') := by
+lemma regionIso_apply
+    {X Y : Finset S} (e : X = Y) (M : Alg (fun _ : S => Ω₀) X) (c c' : Cfg (fun _ : S => Ω₀) Y)
+    : regionIso e M c c' = M (cfgCast e c) (cfgCast e c') := by
   subst e; rfl
 
 /-- The quantum net of a system whose sites all carry the same finite configuration space. -/
 abbrev uniformNet (Ω₀ : Type*) [Fintype Ω₀] [DecidableEq Ω₀] : AlgebraNet S :=
   quantumNet (fun _ : S => Ω₀)
 
-lemma of_regionIso {X Y : Finset S} (e : X = Y) (M : Alg (fun _ : S => Ω₀) X) :
-    (uniformNet Ω₀).of Y (regionIso e M) = (uniformNet Ω₀).of X M := by
+lemma of_regionIso {X Y : Finset S} (e : X = Y) (M : Alg (fun _ : S => Ω₀) X)
+    : (uniformNet Ω₀).of Y (regionIso e M) = (uniformNet Ω₀).of X M := by
   subst e; rfl
 
-/-- **The action of a site symmetry on the quasi-local algebra**: an endomorphism that moves the
-observables of a region `X` to those of `γ • X`. -/
-def symAct (γ : Γ) :
-    (uniformNet (S := S) Ω₀).Quasilocal →⋆ₐ[ℂ] (uniformNet (S := S) Ω₀).Quasilocal :=
-  (uniformNet (S := S) Ω₀).moveHom (fun X => γ • X) (fun _ _ h => smul_mono γ h)
-    (fun X => quantumIso γ X) (fun h a => quantumIso_incl γ h a)
+/--
+**The action of a site symmetry on the quasi-local algebra**: an endomorphism that moves the
+observables of a region `X` to those of `γ • X`.
+-/
+def symAct (γ : Γ)
+    : (uniformNet (S := S) Ω₀).Quasilocal →⋆ₐ[ℂ] (uniformNet (S := S) Ω₀).Quasilocal :=
+  (uniformNet (S := S) Ω₀).moveHom
+    (fun X => γ • X)
+    (fun _ _ h => smul_mono γ h)
+    (fun X => quantumIso γ X)
+    (fun h a => quantumIso_incl γ h a)
 
-lemma symAct_of (γ : Γ) (X : Finset S) (M : Alg (fun _ : S => Ω₀) X) :
-    symAct (Ω₀ := Ω₀) γ ((uniformNet Ω₀).of X M) = (uniformNet Ω₀).of (γ • X) (quantumIso γ X M) :=
+lemma symAct_of (γ : Γ) (X : Finset S) (M : Alg (fun _ : S => Ω₀) X)
+    : symAct (Ω₀ := Ω₀) γ ((uniformNet Ω₀).of X M)
+      = (uniformNet Ω₀).of (γ • X) (quantumIso γ X M) :=
   rfl
 
-lemma quantumIso_mul (γ₁ γ₂ : Γ) (X : Finset S) (M : Alg (fun _ : S => Ω₀) X) :
-    regionIso (mul_smul γ₁ γ₂ X) (quantumIso (γ₁ * γ₂) X M) =
-      quantumIso γ₁ (γ₂ • X) (quantumIso γ₂ X M) := by
+lemma quantumIso_mul (γ₁ γ₂ : Γ) (X : Finset S) (M : Alg (fun _ : S => Ω₀) X)
+    : regionIso (mul_smul γ₁ γ₂ X) (quantumIso (γ₁ * γ₂) X M)
+      = quantumIso γ₁ (γ₂ • X) (quantumIso γ₂ X M) := by
   ext c c'
   rw [regionIso_apply]
-  have key : ∀ c : Cfg (fun _ : S => Ω₀) (γ₁ • γ₂ • X),
-      cfgEquiv Γ Ω₀ (γ₁ * γ₂) X (cfgCast (mul_smul γ₁ γ₂ X) c) =
-        cfgEquiv Γ Ω₀ γ₂ X (cfgEquiv Γ Ω₀ γ₁ (γ₂ • X) c) := fun c => by
+  have key
+      : ∀ c : Cfg (fun _ : S => Ω₀) (γ₁ • γ₂ • X),
+        cfgEquiv Γ Ω₀ (γ₁ * γ₂) X (cfgCast (mul_smul γ₁ γ₂ X) c)
+          = cfgEquiv Γ Ω₀ γ₂ X (cfgEquiv Γ Ω₀ γ₁ (γ₂ • X) c) := fun c => by
     funext x
     exact congrArg c (Subtype.ext (mul_smul γ₁ γ₂ x.1))
-  simp only [quantumIso, StarAlgHom.coe_mk,
-    Matrix.of_apply, key]
+  simp only [quantumIso, StarAlgHom.coe_mk, Matrix.of_apply, key]
 
-lemma quantumIso_one (X : Finset S) (M : Alg (fun _ : S => Ω₀) X) :
-    regionIso (one_smul Γ X) (quantumIso (1 : Γ) X M) = M := by
+lemma quantumIso_one (X : Finset S) (M : Alg (fun _ : S => Ω₀) X)
+    : regionIso (one_smul Γ X) (quantumIso (1 : Γ) X M) = M := by
   ext c c'
   rw [regionIso_apply]
-  have key : ∀ c : Cfg (fun _ : S => Ω₀) X,
-      cfgEquiv Γ Ω₀ 1 X (cfgCast (one_smul Γ X) c) = c := fun c => by
+  have key
+      : ∀ c : Cfg (fun _ : S => Ω₀) X,
+        cfgEquiv Γ Ω₀ 1 X (cfgCast (one_smul Γ X) c) = c := fun c => by
     funext x
     exact congrArg c (Subtype.ext (one_smul Γ x.1))
-  simp only [quantumIso, StarAlgHom.coe_mk,
-    Matrix.of_apply, key]
+  simp only [quantumIso, StarAlgHom.coe_mk, Matrix.of_apply, key]
 
 /-- The action of site symmetries is multiplicative. -/
-lemma symAct_mul (γ₁ γ₂ : Γ) :
-    symAct (Ω₀ := Ω₀) (S := S) (γ₁ * γ₂) = (symAct γ₁).comp (symAct γ₂) := by
+lemma symAct_mul (γ₁ γ₂ : Γ)
+    : symAct (Ω₀ := Ω₀) (S := S) (γ₁ * γ₂) = (symAct γ₁).comp (symAct γ₂) := by
   refine StarAlgHom.ext fun x => ?_
   obtain ⟨X, a, rfl⟩ := (uniformNet (S := S) Ω₀).exists_of x
-  calc symAct (Ω₀ := Ω₀) (γ₁ * γ₂) ((uniformNet Ω₀).of X a)
+  calc
+    symAct (Ω₀ := Ω₀) (γ₁ * γ₂) ((uniformNet Ω₀).of X a)
       = (uniformNet Ω₀).of ((γ₁ * γ₂) • X) (quantumIso (γ₁ * γ₂) X a) := symAct_of _ _ _
     _ = (uniformNet Ω₀).of (γ₁ • γ₂ • X)
-          (regionIso (mul_smul γ₁ γ₂ X) (quantumIso (γ₁ * γ₂) X a)) :=
-        (of_regionIso (S := S) (Ω₀ := Ω₀) _ _).symm
+        (regionIso (mul_smul γ₁ γ₂ X) (quantumIso (γ₁ * γ₂) X a)) :=
+      (of_regionIso (S := S) (Ω₀ := Ω₀) _ _).symm
     _ = (uniformNet Ω₀).of (γ₁ • γ₂ • X) (quantumIso γ₁ (γ₂ • X) (quantumIso γ₂ X a)) := by
-        exact congrArg ((uniformNet (S := S) Ω₀).of (γ₁ • γ₂ • X)) (quantumIso_mul γ₁ γ₂ X a)
+      exact congrArg ((uniformNet (S := S) Ω₀).of (γ₁ • γ₂ • X)) (quantumIso_mul γ₁ γ₂ X a)
     _ = symAct (Ω₀ := Ω₀) γ₁ ((uniformNet Ω₀).of (γ₂ • X) (quantumIso γ₂ X a)) :=
-        (symAct_of _ _ _).symm
+      (symAct_of _ _ _).symm
     _ = ((symAct (Ω₀ := Ω₀) γ₁).comp (symAct γ₂)) ((uniformNet Ω₀).of X a) := by
-        rw [StarAlgHom.comp_apply, symAct_of γ₂ X a]
+      rw [StarAlgHom.comp_apply, symAct_of γ₂ X a]
 
 lemma symAct_one : symAct (Ω₀ := Ω₀) (S := S) (1 : Γ) = StarAlgHom.id ℂ _ := by
   refine StarAlgHom.ext fun x => ?_
   obtain ⟨X, a, rfl⟩ := (uniformNet (S := S) Ω₀).exists_of x
-  calc symAct (Ω₀ := Ω₀) (1 : Γ) ((uniformNet Ω₀).of X a)
+  calc
+    symAct (Ω₀ := Ω₀) (1 : Γ) ((uniformNet Ω₀).of X a)
       = (uniformNet Ω₀).of ((1 : Γ) • X) (quantumIso 1 X a) := symAct_of _ _ _
     _ = (uniformNet Ω₀).of X (regionIso (one_smul Γ X) (quantumIso (1 : Γ) X a)) :=
-        (of_regionIso (S := S) (Ω₀ := Ω₀) _ _).symm
+      (of_regionIso (S := S) (Ω₀ := Ω₀) _ _).symm
     _ = (uniformNet Ω₀).of X a := congrArg ((uniformNet (S := S) Ω₀).of X) (quantumIso_one X a)
 
 /-- **A group acting on the sites acts on the quasi-local algebra by automorphisms.** -/
-def symEquiv (γ : Γ) : (uniformNet (S := S) Ω₀).Quasilocal ≃⋆ₐ[ℂ]
-    (uniformNet (S := S) Ω₀).Quasilocal :=
+def symEquiv (γ : Γ)
+    : (uniformNet (S := S) Ω₀).Quasilocal ≃⋆ₐ[ℂ]
+      (uniformNet (S := S) Ω₀).Quasilocal :=
   StarAlgEquiv.ofStarAlgHom (symAct γ) (symAct γ⁻¹)
     (by rw [← symAct_mul, inv_mul_cancel, symAct_one])
     (by rw [← symAct_mul, mul_inv_cancel, symAct_one])
 
-/-- **The symmetry action** of a group on the sites, as a homomorphism to the automorphisms of the
-quasi-local algebra. -/
-def symAction : Γ →* ((uniformNet (S := S) Ω₀).Quasilocal ≃⋆ₐ[ℂ]
-    (uniformNet (S := S) Ω₀).Quasilocal) where
+/--
+**The symmetry action** of a group on the sites, as a homomorphism to the automorphisms of the
+quasi-local algebra.
+-/
+def symAction
+    : Γ →* ((uniformNet (S := S) Ω₀).Quasilocal ≃⋆ₐ[ℂ]
+      (uniformNet (S := S) Ω₀).Quasilocal) where
   toFun := symEquiv
-  map_one' := StarAlgEquiv.ext fun x => by
-    change symAct (1 : Γ) x = x
-    rw [symAct_one]; rfl
-  map_mul' γ₁ γ₂ := StarAlgEquiv.ext fun x => by
-    change symAct (γ₁ * γ₂) x = symAct γ₁ (symAct γ₂ x)
-    rw [symAct_mul]; rfl
+  map_one' :=
+    StarAlgEquiv.ext fun x => by
+      change symAct (1 : Γ) x = x
+      rw [symAct_one]
+      rfl
+  map_mul' γ₁ γ₂ :=
+    StarAlgEquiv.ext fun x => by
+      change symAct (γ₁ * γ₂) x = symAct γ₁ (symAct γ₂ x)
+      rw [symAct_mul]
+      rfl
 
 end QuasiLocal
 

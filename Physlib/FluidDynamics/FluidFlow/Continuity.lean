@@ -50,36 +50,40 @@ namespace FluidFlow
 
 -/
 
-/-- Classical conservation of mass in conservative form, `partial_t rho + div (rho u) = 0`.
+/--
+Classical conservation of mass in conservative form, `partial_t rho + div (rho u) = 0`.
 
 The equation is asserted at points where the time derivative of `rho` and the spatial
 divergence of `rho u` are classical derivatives.
 -/
 def ClassicalContinuityEquation (d : ℕ) (fluid : FluidFlow d) : Prop :=
-  ∀ t x, DifferentiableAt ℝ (fluid.rho · x) t →
-      DifferentiableAt ℝ (fun x' => fluid.rho t x' • fluid.velocity t x') x →
-        ∂ₜ (fluid.rho · x) t + (∇ ⬝ fun x' => fluid.rho t x' • fluid.velocity t x') x = 0
+  ∀ t x,
+    DifferentiableAt ℝ (fluid.rho · x) t
+      → DifferentiableAt ℝ (fun x' => fluid.rho t x' • fluid.velocity t x') x
+      → ∂ₜ (fluid.rho · x) t + (∇ ⬝ fun x' => fluid.rho t x' • fluid.velocity t x') x = 0
 
-/-- The scalar continuity-equation residual
-`partial_t rho + div (rho u)`. -/
+/--
+The scalar continuity-equation residual
+`partial_t rho + div (rho u)`.
+-/
 noncomputable def continuityResidual (d : ℕ) (fluid : FluidFlow d) : Time → Space d → ℝ :=
   fun t x => ∂ₜ (fluid.rho · x) t + (∇ ⬝ fun x' => fluid.rho t x' • fluid.velocity t x') x
 
-/-- A stronger continuity equation for globally differentiable fields.
+/--
+A stronger continuity equation for globally differentiable fields.
 
 This version records the first-order regularity needed by the classical continuity equation:
 the density is differentiable in time, the mass flux `rho u` is differentiable in space, and
 the continuity residual vanishes everywhere.
 -/
 def SmoothContinuityEquation (d : ℕ) (fluid : FluidFlow d) : Prop :=
-  (∀ x, Differentiable ℝ (fluid.rho · x)) ∧
-    (∀ t, Differentiable ℝ (fun x => fluid.rho t x • fluid.velocity t x)) ∧
-      ∀ t x, continuityResidual d fluid t x = 0
+  (∀ x, Differentiable ℝ (fluid.rho · x))
+    ∧ (∀ t, Differentiable ℝ (fun x => fluid.rho t x • fluid.velocity t x))
+    ∧ ∀ t x, continuityResidual d fluid t x = 0
 
 /-- A smooth continuity equation satisfies the guarded classical continuity equation. -/
-lemma classicalContinuityEquation_of_smoothContinuityEquation
-    (d : ℕ) (fluid : FluidFlow d) :
-    SmoothContinuityEquation d fluid → ClassicalContinuityEquation d fluid := by
+lemma classicalContinuityEquation_of_smoothContinuityEquation (d : ℕ) (fluid : FluidFlow d)
+    : SmoothContinuityEquation d fluid → ClassicalContinuityEquation d fluid := by
   intro hSmooth t x _ _
   simpa [continuityResidual] using hSmooth.2.2 t x
 

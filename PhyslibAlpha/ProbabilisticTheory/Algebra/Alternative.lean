@@ -76,28 +76,28 @@ variable {A : Type*} [NonUnitalNonAssocRing A]
 /-- The failure of associativity. -/
 def associator (x y z : A) : A := (x * y) * z - x * (y * z)
 
-lemma associator_add_left (x y z w : A) :
-    associator (x + y) z w = associator x z w + associator y z w := by
+lemma associator_add_left (x y z w : A)
+    : associator (x + y) z w = associator x z w + associator y z w := by
   unfold associator
   simp only [add_mul]
   abel
 
-lemma associator_add_mid (x y z w : A) :
-    associator x (y + z) w = associator x y w + associator x z w := by
+lemma associator_add_mid (x y z w : A)
+    : associator x (y + z) w = associator x y w + associator x z w := by
   unfold associator
   simp only [add_mul, mul_add]
   abel
 
-lemma associator_add_right (x y z w : A) :
-    associator x y (z + w) = associator x y z + associator x y w := by
+lemma associator_add_right (x y z w : A)
+    : associator x y (z + w) = associator x y z + associator x y w := by
   unfold associator
   simp only [mul_add]
   abel
 
 /-- Teichmüller's identity holds before alternativity is assumed. -/
-lemma teichmuller (x y z w : A) :
-    associator (x * y) z w - associator x (y * z) w + associator x y (z * w) =
-      associator x y z * w + x * associator y z w := by
+lemma teichmuller (x y z w : A)
+    : associator (x * y) z w - associator x (y * z) w + associator x y (z * w)
+      = associator x y z * w + x * associator y z w := by
   unfold associator
   simp only [sub_mul, mul_sub]
   abel
@@ -121,21 +121,22 @@ lemma associator_right_self (x y : A) : associator y x x = 0 := by
   abel
 
 /-- The associator is skew under an adjacent swap. -/
-lemma associator_swap_first (x y z : A) : associator x y z = -associator y x z := by
+lemma associator_swap_first (x y z : A) : associator x y z = - associator y x z := by
   have h : associator (x + y) (x + y) z = 0 := associator_self_left (x + y) z
-  rw [associator_add_left, associator_add_mid, associator_add_mid,
-    associator_self_left x z, associator_self_left y z] at h
+  rw [associator_add_left, associator_add_mid, associator_add_mid, associator_self_left x z,
+      associator_self_left y z]
+    at h
   have h' : associator x y z + associator y x z = 0 := by
     abel_nf
     rwa [zero_add, add_zero] at h
   exact eq_neg_iff_add_eq_zero.mpr h'
 
-lemma associator_swap_last (x y z : A) : associator x y z = -associator x z y := by
+lemma associator_swap_last (x y z : A) : associator x y z = - associator x z y := by
   have h : associator x (y + z) (y + z) = 0 := associator_right_self (y + z) x
-  rw [associator_add_mid, associator_add_right, associator_add_right,
-    associator_right_self y x, associator_right_self z x] at h
-  have h' : associator x y z + associator x z y = 0 := by
-    rwa [add_zero, zero_add] at h
+  rw [associator_add_mid, associator_add_right, associator_add_right, associator_right_self y x,
+      associator_right_self z x]
+    at h
+  have h' : associator x y z + associator x z y = 0 := by rwa [add_zero, zero_add] at h
   rw [add_comm] at h'
   exact (neg_eq_iff_add_eq_zero.mpr h').symm
 
@@ -154,8 +155,9 @@ lemma mul_flexible (x y : A) : x * (y * x) = (x * y) * x := by
 /-- The left Moufang identity. -/
 lemma moufang_left (x y z : A) : (x * (z * x)) * y = x * (z * (x * y)) := by
   rw [← sub_eq_zero]
-  have hstart : (x * (z * x)) * y - x * (z * (x * y)) =
-      associator (x * z) x y + associator x z (x * y) := by
+  have hstart
+      : (x * (z * x)) * y - x * (z * (x * y))
+        = associator (x * z) x y + associator x z (x * y) := by
     rw [mul_flexible x z]
     unfold associator
     abel
@@ -176,9 +178,9 @@ lemma moufang_left (x y z : A) : (x * (z * x)) * y = x * (z * (x * y)) := by
   have e4 : (x * x * y) * z = associator (x * x) y z + (x * x) * (y * z) := by
     unfold associator; abel
   rw [e3, e4, ← mul_alternative_left x (z * y), ← mul_alternative_left x (y * z)]
-  have key : -(x * (x * (z * y))) + x * ((x * z) * y) +
-      (-(x * (x * (y * z))) + x * ((x * y) * z)) =
-      x * (associator x z y + associator x y z) := by
+  have key
+      : -(x * (x * (z * y))) + x * ((x * z) * y) + (-(x * (x * (y * z))) + x * ((x * y) * z))
+        = x * (associator x z y + associator x y z) := by
     unfold associator
     simp only [mul_add, mul_sub]
     abel
@@ -193,8 +195,9 @@ lemma left_bumping (x y z : A) : associator x y (z * x) = x * associator y z x :
     rw [moufang_left]
   rw [e1]
   have cyc : associator y z x = associator z x y := associator_cyclic y z x
-  have key : -(x * (z * (x * y)) - x * ((z * x) * y)) - x * associator y z x =
-      x * (associator z x y - associator y z x) := by
+  have key
+      : -(x * (z * (x * y)) - x * ((z * x) * y)) - x * associator y z x
+        = x * (associator z x y - associator y z x) := by
     unfold associator
     simp only [mul_sub]
     abel

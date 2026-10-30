@@ -38,7 +38,6 @@ is a continuous linear functional on the observables with the order-unit norm.
 
 @[expose] public section
 
-
 namespace PositiveLinearMap
 open ProbabilisticTheory
 open ArchimedeanOrderUnitSpace
@@ -51,10 +50,12 @@ variable {E : Type*} [ArchimedeanOrderUnitSpace E]
 
 -/
 
-/-- A positive functional is order-unit-norm bounded, with bound given by its value at the order
-unit.  For a normalized positive functional this specializes to the contractive state bound. -/
-lemma abs_apply_le_apply_one_mul_orderUnitNorm (f : E →ₚ[ℝ] ℝ) (x : E) :
-    |f x| ≤ f 1 * orderUnitNorm x := by
+/--
+A positive functional is order-unit-norm bounded, with bound given by its value at the order
+unit.  For a normalized positive functional this specializes to the contractive state bound.
+-/
+lemma abs_apply_le_apply_one_mul_orderUnitNorm (f : E →ₚ[ℝ] ℝ) (x : E)
+    : |f x| ≤ f 1 * orderUnitNorm x := by
   have hb := orderUnitNorm_mem_orderUnitBounds x
   have hl := f.monotone' hb.2.1
   have hu := f.monotone' hb.2.2
@@ -70,16 +71,16 @@ lemma abs_apply_le_apply_one_mul_orderUnitNorm (f : E →ₚ[ℝ] ℝ) (x : E) :
   exact abs_le.mpr ⟨hl', hu'⟩
 
 /-- A positive functional as a continuous functional on the canonical order-unit-norm copy. -/
-noncomputable def toOrderUnitContinuousLinearMap (f : E →ₚ[ℝ] ℝ) :
-    WithOrderUnitNorm E →L[ℝ] ℝ :=
+noncomputable def toOrderUnitContinuousLinearMap (f : E →ₚ[ℝ] ℝ) : WithOrderUnitNorm E →L[ℝ] ℝ :=
   (f.toLinearMap.comp WithOrderUnitNorm.linearEquiv.symm.toLinearMap).mkContinuous (f 1) fun x => by
     change |f (show E from x)| ≤ f 1 * ‖x‖
     rw [WithOrderUnitNorm.norm_eq_orderUnitNorm]
     exact f.abs_apply_le_apply_one_mul_orderUnitNorm (show E from x)
 
 @[simp]
-lemma toOrderUnitContinuousLinearMap_apply (f : E →ₚ[ℝ] ℝ) (x : E) :
-    f.toOrderUnitContinuousLinearMap x = f x := rfl
+lemma toOrderUnitContinuousLinearMap_apply (f : E →ₚ[ℝ] ℝ) (x : E)
+    : f.toOrderUnitContinuousLinearMap x = f x :=
+  rfl
 
 end PositiveLinearMap
 
@@ -98,13 +99,14 @@ variable {E : Type*} [ArchimedeanOrderUnitSpace E]
 namespace Weight.IsFinite
 
 /-- The canonical continuous linear extension of a finite weight to the order-unit-norm copy. -/
-noncomputable def toOrderUnitContinuousLinearMap {w : Weight E} (hw : w.IsFinite) :
-    WithOrderUnitNorm E →L[ℝ] ℝ := hw.toPositiveLinearMap.toOrderUnitContinuousLinearMap
+noncomputable def toOrderUnitContinuousLinearMap {w : Weight E} (hw : w.IsFinite)
+    : WithOrderUnitNorm E →L[ℝ] ℝ :=
+  hw.toPositiveLinearMap.toOrderUnitContinuousLinearMap
 
 @[simp]
-lemma toOrderUnitContinuousLinearMap_apply_of_nonneg {w : Weight E} (hw : w.IsFinite)
-    (x : PosCone E) :
-    hw.toOrderUnitContinuousLinearMap (x : E) = (w x).toReal := by
+lemma toOrderUnitContinuousLinearMap_apply_of_nonneg
+    {w : Weight E} (hw : w.IsFinite) (x : PosCone E)
+    : hw.toOrderUnitContinuousLinearMap (x : E) = (w x).toReal := by
   rw [toOrderUnitContinuousLinearMap, PositiveLinearMap.toOrderUnitContinuousLinearMap_apply,
     toPositiveLinearMap_apply_of_nonneg]
 

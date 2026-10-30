@@ -61,8 +61,10 @@ variable {V : Type*} [AddCommGroup V] [Module ℝ V] {S : Set V} (hS : Convex �
 def mix (x y : S) (t : unitInterval) : S :=
   ⟨(t : ℝ) • (x : V) + (1 - (t : ℝ)) • (y : V), hS x.2 y.2 t.2.1 (sub_nonneg.2 t.2.2) (by ring)⟩
 
-@[simp] lemma coe_mix (x y : S) (t : unitInterval) :
-    (mix hS x y t : V) = (t : ℝ) • (x : V) + (1 - (t : ℝ)) • (y : V) := rfl
+@[simp]
+lemma coe_mix (x y : S) (t : unitInterval)
+    : (mix hS x y t : V) = (t : ℝ) • (x : V) + (1 - (t : ℝ)) • (y : V) :=
+  rfl
 
 /-- The weight `1/2`. -/
 noncomputable def half : unitInterval := ⟨1 / 2, by norm_num, by norm_num⟩
@@ -72,8 +74,8 @@ noncomputable def half : unitInterval := ⟨1 / 2, by norm_num, by norm_num⟩
 /-- The midpoint of a pair of points. -/
 noncomputable def mixHalf (p : S × S) : S := mix hS p.1 p.2 half
 
-lemma continuous_mixHalf [TopologicalSpace V] [IsTopologicalAddGroup V] [ContinuousSMul ℝ V] :
-    Continuous (mixHalf hS) :=
+lemma continuous_mixHalf [TopologicalSpace V] [IsTopologicalAddGroup V] [ContinuousSMul ℝ V]
+    : Continuous (mixHalf hS) :=
   continuous_induced_rng.2 <| by
     change Continuous fun p : S × S => (1 / 2 : ℝ) • (p.1 : V) + (1 - 1 / 2 : ℝ) • (p.2 : V)
     fun_prop
@@ -89,8 +91,9 @@ def IsConvexFunction (f : S → ℝ) : Prop :=
   ∀ x y t, f (mix hS x y t) ≤ (t : ℝ) * f x + (1 - (t : ℝ)) * f y
 
 /-- Continuous linear functionals are convex on `S`. -/
-lemma isConvexFunction_apply [TopologicalSpace V] (ℓ : V →L[ℝ] ℝ) :
-    IsConvexFunction hS fun y => ℓ y := fun x y t => by simp
+lemma isConvexFunction_apply [TopologicalSpace V] (ℓ : V →L[ℝ] ℝ)
+    : IsConvexFunction hS fun y => ℓ y := fun x y t => by
+  simp
 
 /-!
 
@@ -99,20 +102,21 @@ lemma isConvexFunction_apply [TopologicalSpace V] (ℓ : V →L[ℝ] ℝ) :
 -/
 
 /-- The midpoint of two distinct points is not extreme. -/
-lemma mixHalf_notMem_extremePoints {p q : S} (hpq : p ≠ q) :
-    (mixHalf hS (p, q) : V) ∉ S.extremePoints ℝ := fun h => by
-  have := (mem_extremePoints.1 h).2 p p.2 q q.2
-    ⟨1 / 2, 1 / 2, by norm_num, by norm_num, by norm_num, by simp [mixHalf]; norm_num⟩
+lemma mixHalf_notMem_extremePoints {p q : S} (hpq : p ≠ q)
+    : (mixHalf hS (p, q) : V) ∉ S.extremePoints ℝ := fun h => by
+  have :=
+    (mem_extremePoints.1 h).2 p p.2 q q.2
+      ⟨1 / 2, 1 / 2, by norm_num, by norm_num, by norm_num, by simp [mixHalf]; norm_num⟩
   exact hpq (Subtype.ext (this.1.trans this.2.symm))
 
 /-- Two points of `S` on either side of `a x₁ + b x₂` at weight distance `min a b`. -/
-lemma sub_smul_eq_of_mixHalf {x₁ x₂ : V} {a b r : ℝ} :
-    ((a + r) • x₁ + (b - r) • x₂) - ((a - r) • x₁ + (b + r) • x₂) = (2 * r) • (x₁ - x₂) := by
+lemma sub_smul_eq_of_mixHalf {x₁ x₂ : V} {a b r : ℝ}
+    : ((a + r) • x₁ + (b - r) • x₂) - ((a - r) • x₁ + (b + r) • x₂) = (2 * r) • (x₁ - x₂) := by
   module
 
 /-- A non-extreme point of `S` is the midpoint of two distinct points of `S`. -/
-lemma exists_mixHalf_eq_of_notMem_extremePoints {x : S} (hx : (x : V) ∉ S.extremePoints ℝ) :
-    ∃ p q : S, p ≠ q ∧ mixHalf hS (p, q) = x := by
+lemma exists_mixHalf_eq_of_notMem_extremePoints {x : S} (hx : (x : V) ∉ S.extremePoints ℝ)
+    : ∃ p q : S, p ≠ q ∧ mixHalf hS (p, q) = x := by
   simp only [mem_extremePoints, x.2, true_and, not_forall] at hx
   obtain ⟨x₁, h₁, x₂, h₂, ⟨a, b, ha, hb, hab, hx'⟩, hne⟩ := hx
   have h12 : x₁ ≠ x₂ := by
@@ -120,10 +124,18 @@ lemma exists_mixHalf_eq_of_notMem_extremePoints {x : S} (hx : (x : V) ∉ S.extr
     rw [← add_smul, hab, one_smul] at hx'
     exact hne ⟨hx', hx'⟩
   have hr : 0 < min a b := lt_min ha hb
-  refine ⟨⟨(a + min a b) • x₁ + (b - min a b) • x₂, hS h₁ h₂ (by positivity)
-      (sub_nonneg.2 (min_le_right a b)) (by linarith)⟩,
-    ⟨(a - min a b) • x₁ + (b + min a b) • x₂, hS h₁ h₂ (sub_nonneg.2 (min_le_left a b))
-      (by positivity) (by linarith)⟩, fun h => h12 ?_, Subtype.ext ?_⟩
+  refine ⟨
+    ⟨
+      (a + min a b) • x₁ + (b - min a b) • x₂,
+      hS h₁ h₂ (by positivity) (sub_nonneg.2 (min_le_right a b)) (by linarith)
+    ⟩,
+    ⟨
+      (a - min a b) • x₁ + (b + min a b) • x₂,
+      hS h₁ h₂ (sub_nonneg.2 (min_le_left a b)) (by positivity) (by linarith)
+    ⟩,
+    fun h => h12 ?_,
+    Subtype.ext ?_
+  ⟩
   · have := sub_smul_eq_of_mixHalf (x₁ := x₁) (x₂ := x₂) (a := a) (b := b) (r := min a b)
     have hv : (a + min a b) • x₁ + (b - min a b) • x₂ = (a - min a b) • x₁ + (b + min a b) • x₂ :=
       congrArg Subtype.val h

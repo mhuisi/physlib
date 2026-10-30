@@ -51,8 +51,10 @@ namespace QuantumMechanics
 open MeasureTheory
 open SchwartzMap
 
-/-- A hydrogen atom is characterized by the number of spatial dimensions `d`,
-  the mass `m` and the coefficient `k` for the `1/r` potential. -/
+/--
+A hydrogen atom is characterized by the number of spatial dimensions `d`,
+the mass `m` and the coefficient `k` for the `1/r` potential.
+-/
 structure HydrogenAtom (d : ℕ) extends SpaceDQuantumSystem d where
   /-- Coefficient in the Coulomb potential (positive for attractive) -/
   k : ℝ
@@ -67,28 +69,29 @@ variable {d : ℕ} (H : HydrogenAtom d)
 ## A. Basic
 -/
 
-@[simp]
-lemma potential_eq : H.potential = fun x ↦ -H.k * ‖x‖⁻¹ := H.coulomb_potential
+@[simp] lemma potential_eq : H.potential = fun x ↦ -H.k * ‖x‖⁻¹ := H.coulomb_potential
 
 @[fun_prop]
 lemma potential_AESM : AEStronglyMeasurable H.potential := by
   rw [potential_eq]
   exact AEMeasurable.aestronglyMeasurable (by fun_prop)
 
-@[fun_prop]
-lemma potential_AEM : AEMeasurable H.potential := H.potential_AESM.aemeasurable
+@[fun_prop] lemma potential_AEM : AEMeasurable H.potential := H.potential_AESM.aemeasurable
 
 /-!
 ## B. Regularization
 -/
 
-/-- The hydrogen atom Hamiltonian regularized by `ε ≠ 0` is defined to be
-  `𝐇(ε) ≔ (2m)⁻¹𝐩² - k·𝐫(ε)⁻¹`. -/
+/--
+The hydrogen atom Hamiltonian regularized by `ε ≠ 0` is defined to be
+`𝐇(ε) ≔ (2m)⁻¹𝐩² - k·𝐫(ε)⁻¹`.
+-/
 def hamiltonianRegCLM (ε : ℝˣ) : 𝓢(Space d, ℂ) →L[ℂ] 𝓢(Space d, ℂ) :=
   (2 * H.m)⁻¹ • (𝐩 ⬝ᵥ 𝐩) - H.k • 𝐫₀ ε (-1)
 
-lemma hamiltonianRegCLM_eq (ε : ℝˣ) :
-    H.hamiltonianRegCLM ε = (2 * H.m)⁻¹ • (𝐩 ⬝ᵥ 𝐩) - H.k • 𝐫₀ ε (-1) := rfl
+lemma hamiltonianRegCLM_eq (ε : ℝˣ)
+    : H.hamiltonianRegCLM ε = (2 * H.m)⁻¹ • (𝐩 ⬝ᵥ 𝐩) - H.k • 𝐫₀ ε (-1) :=
+  rfl
 
 /-!
 ## C. Domain of the Hamiltonian
@@ -96,11 +99,12 @@ lemma hamiltonianRegCLM_eq (ε : ℝˣ) :
 
 open SpaceDHilbertSpace
 
-/-- Polynomially-bounded Schwartz maps `f` with `‖x‖ ^ (-k) * ‖f x‖ ≤ Cₖ` for all `k ≤ ⌊2 - d/2⌋`
-  lie in the domain of the Hamiltonian. For `d ≥ 3` these are all Schwartz maps. -/
-lemma polyBddSchwartzSubmodule_le_hamiltonianOperator_domain :
-    PolyBddSchwartzSubmodule d ⌊1 - d / 2 - (-1 : ℝ)⌋.toNat ≤
-      H.hamiltonianOperator.domain := by
+/--
+Polynomially-bounded Schwartz maps `f` with `‖x‖ ^ (-k) * ‖f x‖ ≤ Cₖ` for all `k ≤ ⌊2 - d/2⌋`
+lie in the domain of the Hamiltonian. For `d ≥ 3` these are all Schwartz maps.
+-/
+lemma polyBddSchwartzSubmodule_le_hamiltonianOperator_domain
+    : PolyBddSchwartzSubmodule d ⌊1 - d / 2 - (-1 : ℝ)⌋.toNat ≤ H.hamiltonianOperator.domain := by
   intro ψ hψ
   refine Submodule.mem_inf.mpr ⟨?_, ?_⟩
   · rw [SpaceDQuantumSystem.kineticOperator_eq, LinearPMap.smul_domain,

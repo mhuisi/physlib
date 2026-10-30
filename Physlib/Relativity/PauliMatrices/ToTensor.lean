@@ -41,44 +41,50 @@ and properties thereof.
 -/
 
 set_option backward.isDefEq.respectTransparency false in
-/-- The equivalence between the type of indices of a [.up, .upL, .upR] tensor and
-  `(Fin 1 ⊕ Fin 3) × Fin 2 × Fin 2`. -/
-def indexEquiv : ComponentIdx (S := complexLorentzTensor) ![.up, .upL, .upR] ≃
-    (Fin 1 ⊕ Fin 3) × Fin 2 × Fin 2 where
+/--
+The equivalence between the type of indices of a [.up, .upL, .upR] tensor and
+`(Fin 1 ⊕ Fin 3) × Fin 2 × Fin 2`.
+-/
+def indexEquiv
+    : ComponentIdx (S := complexLorentzTensor) ![.up, .upL, .upR]
+      ≃ (Fin 1 ⊕ Fin 3) × Fin 2 × Fin 2 where
   toFun v := (v 0, v 1, v 2)
-  invFun v := fun | 0 => v.1 | 1 => v.2.1 | 2 => v.2.2
+  invFun v := fun
+    | 0 => v.1
+    | 1 => v.2.1
+    | 2 => v.2.2
   left_inv v := by
     funext x
     fin_cases x <;> rfl
   right_inv v := rfl
 
-instance tensorial : TensorSpecies.Tensorial complexLorentzTensor
-    ![.up, .upL, .upR] (Fin 1 ⊕ Fin 3 → Matrix (Fin 2) (Fin 2) ℂ) where
-  toTensor := LinearEquiv.symm <|
-    Equiv.toLinearEquiv
-    ((Tensor.basis (S := complexLorentzTensor) ![.up, .upL, .upR]).repr.toEquiv.trans <|
-  Finsupp.equivFunOnFinite.trans <|
-  (Equiv.piCongrLeft' _ indexEquiv).trans <|
-  (Equiv.curry _ _ _).trans <|
-  Equiv.piCongrRight fun _ => Equiv.curry _ _ _)
-    { map_add := fun x y => by
-        simp [Nat.succ_eq_add_one, Nat.reduceAdd, map_add]
-        rfl
-      map_smul := fun c x => by
-        simp [Nat.succ_eq_add_one, Nat.reduceAdd, _root_.map_smul]
-        rfl}
+instance tensorial
+    : TensorSpecies.Tensorial complexLorentzTensor (![.up, .upL, .upR])
+      (Fin 1 ⊕ Fin 3 → Matrix (Fin 2) (Fin 2) ℂ) where
+  toTensor :=
+    LinearEquiv.symm <| Equiv.toLinearEquiv
+      ((Tensor.basis (S := complexLorentzTensor) ![.up, .upL, .upR]).repr.toEquiv.trans <|
+        Finsupp.equivFunOnFinite.trans <| (Equiv.piCongrLeft' _ indexEquiv).trans <|
+          (Equiv.curry _ _ _).trans <| Equiv.piCongrRight fun _ => Equiv.curry _ _ _)
+      {
+        map_add := fun x y => by
+          simp [Nat.succ_eq_add_one, Nat.reduceAdd, map_add]
+          rfl
+        map_smul := fun c x => by
+          simp [Nat.succ_eq_add_one, Nat.reduceAdd, _root_.map_smul]
+          rfl
+      }
 
-lemma toTensor_symm_apply (p : ℂT[.up, .upL, .upR]) :
-    (toTensor (self := tensorial)).symm p =
-    ((Equiv.piCongrRight fun _ => Equiv.curry _ _ _) <|
-    (Equiv.curry _ _ _) <|
-    Equiv.piCongrLeft' _ indexEquiv <|
-    Finsupp.equivFunOnFinite <|
-    (Tensor.basis (S := complexLorentzTensor) _).repr p) := rfl
+lemma toTensor_symm_apply (p : ℂT[.up, .upL, .upR])
+    : (toTensor (self := tensorial)).symm p
+      = ((Equiv.piCongrRight fun _ => Equiv.curry _ _ _) <| (Equiv.curry _ _ _) <|
+        Equiv.piCongrLeft' _ indexEquiv <| Finsupp.equivFunOnFinite <|
+          (Tensor.basis (S := complexLorentzTensor) _).repr p) :=
+  rfl
 
-lemma toTensor_symm_basis (b : ComponentIdx (S := complexLorentzTensor) ![.up, .upL, .upR]) :
-    (toTensor (self := tensorial)).symm (Tensor.basis ![Color.up, Color.upL, Color.upR] b) =
-    fun μ α β => if indexEquiv b = (μ, α, β) then 1 else 0 := by
+lemma toTensor_symm_basis (b : ComponentIdx (S := complexLorentzTensor) ![.up, .upL, .upR])
+    : (toTensor (self := tensorial)).symm (Tensor.basis (![Color.up, Color.upL, Color.upR]) b)
+      = fun μ α β => if indexEquiv b = (μ, α, β) then 1 else 0 := by
   rw [toTensor_symm_apply]
   simp only [Nat.succ_eq_add_one, Nat.reduceAdd, Basis.repr_self, Finsupp.equivFunOnFinite_single,
     Equiv.curry_apply]
@@ -86,8 +92,8 @@ lemma toTensor_symm_basis (b : ComponentIdx (S := complexLorentzTensor) ![.up, .
   simp only [Equiv.piCongrRight_apply, Equiv.curry_apply, Pi.map_apply, Function.curry_apply,
     Equiv.piCongrLeft'_apply]
   rw [Pi.single_apply]
-  exact if_congr ⟨fun h => by rw [← h]; rfl,
-    fun h => by rw [← indexEquiv.symm_apply_apply b, h]⟩ rfl rfl
+  exact if_congr ⟨fun h => by rw [← h]; rfl, fun h => by rw [← indexEquiv.symm_apply_apply b, h]⟩
+    rfl rfl
 
 /-!
 
@@ -99,61 +105,94 @@ lemma toTensor_symm_basis (b : ComponentIdx (S := complexLorentzTensor) ![.up, .
 scoped[PauliMatrix] notation "σ^^^" => toTensor pauliMatrix
 
 set_option backward.isDefEq.respectTransparency false in
-lemma toTensor_basis_expand : σ^^^ =
-    Tensor.basis ![Color.up, Color.upL, Color.upR]
-      (fun | 0 => (Sum.inl 0 : Fin 1 ⊕ Fin 3) | 1 => (0 : Fin 2) | 2 => (0 : Fin 2))
-    + Tensor.basis ![Color.up, Color.upL, Color.upR]
-      (fun | 0 => (Sum.inl 0 : Fin 1 ⊕ Fin 3) | 1 => (1 : Fin 2) | 2 => (1 : Fin 2))
-    + Tensor.basis ![Color.up, Color.upL, Color.upR]
-      (fun | 0 => (Sum.inr 0 : Fin 1 ⊕ Fin 3) | 1 => (0 : Fin 2) | 2 => (1 : Fin 2))
-    + Tensor.basis ![Color.up, Color.upL, Color.upR]
-      (fun | 0 => (Sum.inr 0 : Fin 1 ⊕ Fin 3) | 1 => (1 : Fin 2) | 2 => (0 : Fin 2))
-    - I • Tensor.basis ![Color.up, Color.upL, Color.upR]
-      (fun | 0 => (Sum.inr 1 : Fin 1 ⊕ Fin 3) | 1 => (0 : Fin 2) | 2 => (1 : Fin 2))
-    + I • Tensor.basis ![Color.up, Color.upL, Color.upR]
-      (fun | 0 => (Sum.inr 1 : Fin 1 ⊕ Fin 3) | 1 => (1 : Fin 2) | 2 => (0 : Fin 2))
-    + Tensor.basis ![Color.up, Color.upL, Color.upR]
-      (fun | 0 => (Sum.inr 2 : Fin 1 ⊕ Fin 3) | 1 => (0 : Fin 2) | 2 => (0 : Fin 2))
-    - Tensor.basis ![Color.up, Color.upL, Color.upR]
-      (fun | 0 => (Sum.inr 2 : Fin 1 ⊕ Fin 3) | 1 => (1 : Fin 2) | 2 => (1 : Fin 2)) := by
+lemma toTensor_basis_expand
+    : σ^^^
+      = Tensor.basis (![Color.up, Color.upL, Color.upR]) (fun
+          | 0 => (Sum.inl 0 : Fin 1 ⊕ Fin 3)
+          | 1 => (0 : Fin 2)
+          | 2 => (0 : Fin 2))
+        + Tensor.basis (![Color.up, Color.upL, Color.upR]) (fun
+          | 0 => (Sum.inl 0 : Fin 1 ⊕ Fin 3)
+          | 1 => (1 : Fin 2)
+          | 2 => (1 : Fin 2))
+        + Tensor.basis (![Color.up, Color.upL, Color.upR]) (fun
+          | 0 => (Sum.inr 0 : Fin 1 ⊕ Fin 3)
+          | 1 => (0 : Fin 2)
+          | 2 => (1 : Fin 2))
+        + Tensor.basis (![Color.up, Color.upL, Color.upR]) (fun
+          | 0 => (Sum.inr 0 : Fin 1 ⊕ Fin 3)
+          | 1 => (1 : Fin 2)
+          | 2 => (0 : Fin 2))
+        - I • Tensor.basis (![Color.up, Color.upL, Color.upR]) (fun
+          | 0 => (Sum.inr 1 : Fin 1 ⊕ Fin 3)
+          | 1 => (0 : Fin 2)
+          | 2 => (1 : Fin 2))
+        + I • Tensor.basis (![Color.up, Color.upL, Color.upR]) (fun
+          | 0 => (Sum.inr 1 : Fin 1 ⊕ Fin 3)
+          | 1 => (1 : Fin 2)
+          | 2 => (0 : Fin 2))
+        + Tensor.basis (![Color.up, Color.upL, Color.upR]) (fun
+          | 0 => (Sum.inr 2 : Fin 1 ⊕ Fin 3)
+          | 1 => (0 : Fin 2)
+          | 2 => (0 : Fin 2))
+        - Tensor.basis (![Color.up, Color.upL, Color.upR]) (fun
+          | 0 => (Sum.inr 2 : Fin 1 ⊕ Fin 3)
+          | 1 => (1 : Fin 2)
+          | 2 => (1 : Fin 2)) := by
   apply toTensor (self := tensorial).symm.injective
   simp [toTensor_symm_basis, indexEquiv]
   funext μ α β
   fin_cases μ <;> fin_cases α <;> fin_cases β <;> simp [pauliMatrix]
 
 open Lorentz in
-lemma toTensor_eq_asConsTensor :
-    σ^^^ = fromConstTriple (S := complexLorentzTensor)
-      (c1 := Color.up) (c2 := Color.upL) (c3 := Color.upR) PauliMatrix.asConsTensor := by
+lemma toTensor_eq_asConsTensor
+    : σ^^^
+      = fromConstTriple (S := complexLorentzTensor) (c1 := Color.up) (c2 := Color.upL)
+        (c3 := Color.upR) PauliMatrix.asConsTensor := by
   symm
   trans fromTripleT PauliMatrix.asTensor
   · rw [fromConstTriple, congrArg fromTripleT PauliMatrix.asConsTensor_apply_one]
   rw [PauliMatrix.asTensor_expand, toTensor_basis_expand]
-  simp only [Nat.succ_eq_add_one, Nat.reduceAdd, Fin.isValue, map_sub,
-    map_add, _root_.map_smul]
+  simp only [Nat.succ_eq_add_one, Nat.reduceAdd, Fin.isValue, map_sub, map_add, _root_.map_smul]
   simp only [fromTripleT_apply_basis]
   rfl
 
 /-- Gaussian integer components of the contravariant Pauli four-vector. -/
 def pauliContrComponent (mu : Fin 1 ⊕ Fin 3) (a b : Fin 2) : GaussianInt :=
-  if mu = Sum.inl 0 ∧ a.val = b.val then ⟨1, 0⟩ else
-  if mu = Sum.inr 0 ∧ a.val ≠ b.val then ⟨1, 0⟩ else
-  if mu = Sum.inr 1 ∧ a.val = 0 ∧ b.val = 1 then ⟨0, -1⟩ else
-  if mu = Sum.inr 1 ∧ a.val = 1 ∧ b.val = 0 then ⟨0, 1⟩ else
-  if mu = Sum.inr 2 ∧ a.val = 0 ∧ b.val = 0 then ⟨1, 0⟩ else
-  if mu = Sum.inr 2 ∧ a.val = 1 ∧ b.val = 1 then ⟨-1, 0⟩ else 0
+  if mu = Sum.inl 0 ∧ a.val = b.val then
+    ⟨1, 0⟩
+  else if mu = Sum.inr 0 ∧ a.val ≠ b.val then
+    ⟨1, 0⟩
+  else if mu = Sum.inr 1 ∧ a.val = 0 ∧ b.val = 1 then
+    ⟨0, -1⟩
+  else if mu = Sum.inr 1 ∧ a.val = 1 ∧ b.val = 0 then
+    ⟨0, 1⟩
+  else if mu = Sum.inr 2 ∧ a.val = 0 ∧ b.val = 0 then
+    ⟨1, 0⟩
+  else if mu = Sum.inr 2 ∧ a.val = 1 ∧ b.val = 1 then
+    ⟨-1, 0⟩
+  else
+    0
 
 /-- Gaussian integer components of the contravariant conjugate Pauli four-vector. -/
 def pauliContrDownComponent (mu : Fin 1 ⊕ Fin 3) (a b : Fin 2) : GaussianInt :=
-  if mu = Sum.inl 0 ∧ a.val = b.val then ⟨1, 0⟩ else
-  if mu = Sum.inr 0 ∧ a.val ≠ b.val then ⟨-1, 0⟩ else
-  if mu = Sum.inr 1 ∧ a.val = 0 ∧ b.val = 1 then ⟨0, 1⟩ else
-  if mu = Sum.inr 1 ∧ a.val = 1 ∧ b.val = 0 then ⟨0, -1⟩ else
-  if mu = Sum.inr 2 ∧ a.val = 0 ∧ b.val = 0 then ⟨-1, 0⟩ else
-  if mu = Sum.inr 2 ∧ a.val = 1 ∧ b.val = 1 then ⟨1, 0⟩ else 0
+  if mu = Sum.inl 0 ∧ a.val = b.val then
+    ⟨1, 0⟩
+  else if mu = Sum.inr 0 ∧ a.val ≠ b.val then
+    ⟨-1, 0⟩
+  else if mu = Sum.inr 1 ∧ a.val = 0 ∧ b.val = 1 then
+    ⟨0, 1⟩
+  else if mu = Sum.inr 1 ∧ a.val = 1 ∧ b.val = 0 then
+    ⟨0, -1⟩
+  else if mu = Sum.inr 2 ∧ a.val = 0 ∧ b.val = 0 then
+    ⟨-1, 0⟩
+  else if mu = Sum.inr 2 ∧ a.val = 1 ∧ b.val = 1 then
+    ⟨1, 0⟩
+  else
+    0
 
-lemma toTensor_eq_ofGaussianInt : σ^^^ = ofGaussianInt (fun b =>
-    pauliContrComponent (b 0) (b 1) (b 2)) := by
+lemma toTensor_eq_ofGaussianInt
+    : σ^^^ = ofGaussianInt (fun b => pauliContrComponent (b 0) (b 1) (b 2)) := by
   apply (Tensor.basis _).repr.injective
   ext b
   rw [toTensor_basis_expand]
@@ -169,9 +208,9 @@ lemma toTensor_eq_ofGaussianInt : σ^^^ = ofGaussianInt (fun b =>
   decide +kernel
 
 /-- Gaussian integer components of `σ^^^` after dualizing its left-handed Weyl index. -/
-lemma toTensor_dualLeft_eq_ofGaussianInt :
-    {σ^^^ | μ τ(α) β}ᵀ =
-      ofGaussianInt (fun b =>
+lemma toTensor_dualLeft_eq_ofGaussianInt
+    : {σ^^^ | μ τ(α) β}ᵀ
+      = ofGaussianInt (fun b =>
         ∑ x : Fin 2, pauliContrComponent (b 0) x (b 2) *
           (if x.val = 0 ∧ Fin.val (b 1) = 1 then 1 else
             if Fin.val (b 1) = 0 ∧ x.val = 1 then -1 else 0)) := by
@@ -189,10 +228,9 @@ lemma toTensor_dualLeft_eq_ofGaussianInt :
   decide +revert +kernel
 
 /-- Gaussian integer components of `σ^^^` after dualizing both Weyl indices. -/
-lemma toTensor_dualWeyl_eq_ofGaussianInt :
-    {σ^^^ | μ τ(α) τ(β)}ᵀ =
-      ofGaussianInt (fun b =>
-        pauliContrDownComponent (b 0) (b 2) (b 1)) := by
+lemma toTensor_dualWeyl_eq_ofGaussianInt
+    : {σ^^^ | μ τ(α) τ(β)}ᵀ
+      = ofGaussianInt (fun b => pauliContrDownComponent (b 0) (b 2) (b 1)) := by
   rw [toTensor_dualLeft_eq_ofGaussianInt]
   let M : ℂT[.downR, .downR] := εR'
   conv_lhs =>
@@ -208,9 +246,8 @@ lemma toTensor_dualWeyl_eq_ofGaussianInt :
   decide +revert +kernel
 
 /-- Gaussian integer components of `σ^^^` after dualizing its Lorentz index. -/
-lemma toTensor_dualLorentz_eq_ofGaussianInt :
-    {σ^^^ | τ(μ) α β}ᵀ =
-      ofGaussianInt (fun b => pauliContrDownComponent (b 0) (b 1) (b 2)) := by
+lemma toTensor_dualLorentz_eq_ofGaussianInt
+    : {σ^^^ | τ(μ) α β}ᵀ = ofGaussianInt (fun b => pauliContrDownComponent (b 0) (b 1) (b 2)) := by
   let M : ℂT[.down, .down] := η'
   conv_lhs =>
     rw [toTensor_eq_ofGaussianInt, toDualMapAtIndex]
@@ -224,13 +261,16 @@ lemma toTensor_dualLorentz_eq_ofGaussianInt :
   funext b
   decide +revert +kernel
 
-/-- Gaussian integer components of `σ^^^` after dualizing its Lorentz and left-handed Weyl
-indices. -/
-lemma toTensor_dualLorentzLeft_eq_ofGaussianInt :
-    {σ^^^ | τ(μ) τ(α) β}ᵀ = ofGaussianInt (fun b =>
-      ∑ x : Fin 2, pauliContrDownComponent (b 0) x (b 2) *
-        (if x.val = 0 ∧ Fin.val (b 1) = 1 then 1 else
-          if Fin.val (b 1) = 0 ∧ x.val = 1 then -1 else 0)) := by
+/--
+Gaussian integer components of `σ^^^` after dualizing its Lorentz and left-handed Weyl
+indices.
+-/
+lemma toTensor_dualLorentzLeft_eq_ofGaussianInt
+    : {σ^^^ | τ(μ) τ(α) β}ᵀ
+      = ofGaussianInt (fun b =>
+        ∑ x : Fin 2, pauliContrDownComponent (b 0) x (b 2) *
+          (if x.val = 0 ∧ Fin.val (b 1) = 1 then 1 else
+            if Fin.val (b 1) = 0 ∧ x.val = 1 then -1 else 0)) := by
   rw [toTensor_dualLorentz_eq_ofGaussianInt]
   let M : ℂT[.downL, .downL] := εL'
   conv_lhs =>
@@ -246,9 +286,9 @@ lemma toTensor_dualLorentzLeft_eq_ofGaussianInt :
   decide +revert +kernel
 
 /-- Gaussian integer components of `σ^^^` after dualizing all three indices. -/
-lemma toTensor_dualAll_eq_ofGaussianInt :
-    {σ^^^ | τ(μ) τ(α) τ(β)}ᵀ =
-      ofGaussianInt (fun b => pauliContrComponent (b 0) (b 2) (b 1)) := by
+lemma toTensor_dualAll_eq_ofGaussianInt
+    : {σ^^^ | τ(μ) τ(α) τ(β)}ᵀ
+      = ofGaussianInt (fun b => pauliContrComponent (b 0) (b 2) (b 1)) := by
   rw [toTensor_dualLorentzLeft_eq_ofGaussianInt]
   let M : ℂT[.downR, .downR] := εR'
   conv_lhs =>
@@ -280,8 +320,7 @@ lemma toTensor_smul_eq_self (Λ : SL(2,ℂ)) : Λ • σ^^^ = σ^^^ := by
 -/
 
 /-- The Pauli matrices as the complex Lorentz tensor `σ_μ^α^{dot β}`. -/
-abbrev pauliCo : ℂT[.down, .upL, .upR] :=
-  permT id (IsReindexing.auto) {η' | μ ν ⊗ σ^^^ | ν α β}ᵀ
+abbrev pauliCo : ℂT[.down, .upL, .upR] := permT id (IsReindexing.auto) {η' | μ ν ⊗ σ^^^ | ν α β}ᵀ
 
 @[inherit_doc pauliCo]
 scoped[PauliMatrix] notation "σ_^^" => PauliMatrix.pauliCo
@@ -295,7 +334,7 @@ scoped[PauliMatrix] notation "σ___" => PauliMatrix.pauliCoDown
 
 /-- The Pauli matrices as the complex Lorentz tensor `σ^μ_{dot β}_α`. -/
 abbrev pauliContrDown : ℂT[.up, .downR, .downL] :=
-    permT id (IsReindexing.auto) {σ^^^ | μ α β ⊗ εR' | β β' ⊗ εL' | α α'}ᵀ
+  permT id (IsReindexing.auto) {σ^^^ | μ α β ⊗ εR' | β β' ⊗ εL' | α α'}ᵀ
 
 @[inherit_doc pauliContrDown]
 scoped[PauliMatrix] notation "σ^__" => PauliMatrix.pauliContrDown
@@ -306,8 +345,8 @@ scoped[PauliMatrix] notation "σ^__" => PauliMatrix.pauliContrDown
 -/
 open Lorentz
 
-lemma pauliCo_eq_ofGaussianInt : pauliCo = ofGaussianInt (fun b =>
-    pauliContrDownComponent (b 0) (b 1) (b 2)) := by
+lemma pauliCo_eq_ofGaussianInt
+    : pauliCo = ofGaussianInt (fun b => pauliContrDownComponent (b 0) (b 1) (b 2)) := by
   apply (Tensor.basis _).repr.injective
   ext b
   rw [pauliCo]
@@ -326,8 +365,8 @@ lemma pauliCo_eq_ofGaussianInt : pauliCo = ofGaussianInt (fun b =>
   revert b
   decide +kernel
 
-lemma pauliCoDown_eq_ofGaussianInt : pauliCoDown = ofGaussianInt (fun b =>
-    pauliContrComponent (b 0) (b 1) (b 2)) := by
+lemma pauliCoDown_eq_ofGaussianInt
+    : pauliCoDown = ofGaussianInt (fun b => pauliContrComponent (b 0) (b 1) (b 2)) := by
   apply (Tensor.basis _).repr.injective
   ext b
   rw [pauliCoDown]
@@ -358,8 +397,8 @@ lemma pauliCoDown_eq_ofGaussianInt : pauliCoDown = ofGaussianInt (fun b =>
   revert b
   decide +kernel
 
-lemma pauliContrDown_ofGaussianInt : pauliContrDown = ofGaussianInt (fun b =>
-    pauliContrDownComponent (b 0) (b 1) (b 2)) := by
+lemma pauliContrDown_ofGaussianInt
+    : pauliContrDown = ofGaussianInt (fun b => pauliContrDownComponent (b 0) (b 1) (b 2)) := by
   apply (Tensor.basis _).repr.injective
   ext b
   rw [pauliContrDown]
@@ -397,38 +436,34 @@ lemma pauliContrDown_ofGaussianInt : pauliContrDown = ofGaussianInt (fun b =>
 -/
 
 /-- Dualizing both Weyl indices of `σ^^^` gives `σ^__`. -/
-lemma toTensor_dualWeyl_eq_pauliContrDown :
-    ({σ^^^ | μ τ(α) τ(β) = σ^__ | μ β α}ᵀ : Prop) := by
+lemma toTensor_dualWeyl_eq_pauliContrDown : ({σ^^^ | μ τ(α) τ(β) = σ^__ | μ β α}ᵀ : Prop) := by
   rw [toTensor_dualWeyl_eq_ofGaussianInt]
   rw [pauliContrDown_ofGaussianInt, permT_ofGaussianInt]
   congr
 
 /-- Dualizing all three indices of `σ^^^` gives `σ___`. -/
-lemma toTensor_dualAll_eq_pauliCoDown :
-    ({σ^^^ | τ(μ) τ(α) τ(β) = σ___ | μ β α}ᵀ : Prop) := by
+lemma toTensor_dualAll_eq_pauliCoDown : ({σ^^^ | τ(μ) τ(α) τ(β) = σ___ | μ β α}ᵀ : Prop) := by
   rw [toTensor_dualAll_eq_ofGaussianInt]
   rw [pauliCoDown_eq_ofGaussianInt, permT_ofGaussianInt]
   congr
 
 /-- Lowering the Lorentz index of `σ^^^` with `τ` gives `σ_^^`. -/
-lemma pauliDual_eq_pauliCo :
-    ({σ^^^ | τ(μ) α β = σ_^^ | μ α β}ᵀ : Prop) := by
+lemma pauliDual_eq_pauliCo : ({σ^^^ | τ(μ) α β = σ_^^ | μ α β}ᵀ : Prop) := by
   rw [toTensor_dualLorentz_eq_ofGaussianInt, pauliCo_eq_ofGaussianInt, permT_ofGaussianInt]
   congr
 
 set_option backward.isDefEq.respectTransparency false in
 /-- Lowering the Lorentz index of `σ^__` with `τ` gives `σ___`. -/
-lemma pauliContrDownDual_eq_pauliCoDown :
-    ({σ^__ | τ(μ) β α = σ___ | μ β α}ᵀ : Prop) := by
-  let h : IsReindexing ![Color.down, Color.downR, Color.downL]
-      (Function.update ![Color.up, Color.downR, Color.downL] 0
-        (![Color.down, Color.down] (Fin.succAbove 0 0))) id :=
+lemma pauliContrDownDual_eq_pauliCoDown : ({σ^__ | τ(μ) β α = σ___ | μ β α}ᵀ : Prop) := by
+  let h : IsReindexing (![Color.down, Color.downR, Color.downL])
+      (Function.update (![Color.up, Color.downR, Color.downL]) 0
+        (![Color.down, Color.down] (Fin.succAbove 0 0)))
+      id :=
     IsReindexing.auto
-  have hDual :
-      (toDualMapAtIndex (S := complexLorentzTensor) 0) pauliContrDown =
-        permT (id : Fin 3 → Fin 3) h pauliCoDown := by
-    change (toDualMapAtIndex (S := complexLorentzTensor) 0) pauliContrDown =
-      permT id h pauliCoDown
+  have hDual
+      : (toDualMapAtIndex (S := complexLorentzTensor) 0) pauliContrDown
+        = permT (id : Fin 3 → Fin 3) h pauliCoDown := by
+    change (toDualMapAtIndex (S := complexLorentzTensor) 0) pauliContrDown = permT id h pauliCoDown
     conv_lhs =>
       rw [pauliContrDown_ofGaussianInt]
       rw [toDualMapAtIndex]
@@ -469,14 +504,14 @@ lemma smul_pauliCo (g : SL(2,ℂ)) : g • pauliCo = pauliCo := by
 set_option maxRecDepth 2000 in
 /-- The tensor `pauliCoDown` is invariant under the action of `SL(2,ℂ)`. -/
 lemma smul_pauliCoDown (g : SL(2,ℂ)) : g • pauliCoDown = pauliCoDown := by
-  rw [← permT_equivariant, ← contrT_equivariant, ← prodT_equivariant,
-    ← contrT_equivariant, ← prodT_equivariant]
+  rw [← permT_equivariant, ← contrT_equivariant, ← prodT_equivariant, ← contrT_equivariant,
+    ← prodT_equivariant]
   rw [smul_pauliCo, actionT_dualLeftMetric, actionT_dualRightMetric]
 
 /-- The tensor `pauliContrDown` is invariant under the action of `SL(2,ℂ)`. -/
 lemma smul_pauliContrDown (g : SL(2,ℂ)) : g • pauliContrDown = pauliContrDown := by
-  rw [← permT_equivariant, ← contrT_equivariant, ← prodT_equivariant,
-    ← contrT_equivariant, ← prodT_equivariant]
+  rw [← permT_equivariant, ← contrT_equivariant, ← prodT_equivariant, ← contrT_equivariant,
+    ← prodT_equivariant]
   rw [toTensor_smul_eq_self, actionT_dualLeftMetric, actionT_dualRightMetric]
 
 end PauliMatrix

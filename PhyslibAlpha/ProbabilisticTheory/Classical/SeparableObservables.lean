@@ -68,15 +68,17 @@ variable [TopologicalSpace.SeparableSpace E]
 
 namespace StateSpace
 
-/-- The expectation value of the `n`-th observable of a dense sequence, as a continuous linear
-functional on the weak dual. -/
+/--
+The expectation value of the `n`-th observable of a dense sequence, as a continuous linear
+functional on the weak dual.
+-/
 noncomputable def denseEval (n : ℕ) : WeakDual ℝ E →L[ℝ] ℝ :=
   WeakBilin.eval _ (TopologicalSpace.denseSeq E n)
 
 /-- The expectation values of a dense sequence of observables separate states. -/
-lemma denseEval_injective (x y : stateSpace E)
-    (h : ∀ n, denseEval n (x : WeakDual ℝ E) = denseEval n (y : WeakDual ℝ E)) :
-    x = y :=
+lemma denseEval_injective
+    (x y : stateSpace E) (h : ∀ n, denseEval n (x : WeakDual ℝ E) = denseEval n (y : WeakDual ℝ E))
+    : x = y :=
   Subtype.ext <| DFunLike.coe_injective <| (TopologicalSpace.denseRange_denseSeq E).equalizer
     (WeakDual.toStrongDual x.1).continuous (WeakDual.toStrongDual y.1).continuous (funext h)
 
@@ -90,15 +92,21 @@ end StateSpace
 
 namespace UnitalPositiveLinearMap
 
-/-- **Choquet representation of states.** Every state is the barycenter of a probability measure
-living on the pure states. -/
-lemma exists_pure_representingMeasure (ω : 𝓢[ℝ, E]) :
-    ∃ μ : ProbabilityMeasure (stateSpace E),
+/--
+**Choquet representation of states.** Every state is the barycenter of a probability measure
+living on the pure states.
+-/
+lemma exists_pure_representingMeasure (ω : 𝓢[ℝ, E])
+    : ∃ μ : ProbabilityMeasure (stateSpace E),
       barycenter μ = ω ∧ ∀ᵐ φ : stateSpace E ∂(μ : Measure _), (toState φ).IsPure := by
-  obtain ⟨μ, hrep, hext⟩ := Choquet.exists_extreme_representingMeasure convex_stateSpace denseEval
-    denseEval_injective (ofState ω)
-  exact ⟨μ, ext fun A => (hrep (WeakBilin.eval _ A)).symm,
-    hext.mono fun φ hφ => (StateSpace.isPure_iff_mem_extremePoints φ).2 hφ⟩
+  obtain ⟨μ, hrep, hext⟩ :=
+    Choquet.exists_extreme_representingMeasure convex_stateSpace denseEval denseEval_injective
+      (ofState ω)
+  exact ⟨
+    μ,
+    ext fun A => (hrep (WeakBilin.eval _ A)).symm,
+    hext.mono fun φ hφ => (StateSpace.isPure_iff_mem_extremePoints φ).2 hφ
+  ⟩
 
 end UnitalPositiveLinearMap
 
@@ -118,15 +126,14 @@ lemma measurableEmbedding_val : MeasurableEmbedding (Subtype.val : PureState E �
   MeasurableEmbedding.subtype_coe measurableSet_setOf_isPure
 
 /-- A probability measure on the state space living on the pure states, restricted to them. -/
-lemma map_comap_val_eq {μ : Measure (stateSpace E)}
-    (hμ : ∀ᵐ φ ∂μ, (toState φ).IsPure) :
-    (μ.comap (Subtype.val : PureState E → stateSpace E)).map Subtype.val = μ := by
+lemma map_comap_val_eq {μ : Measure (stateSpace E)} (hμ : ∀ᵐ φ ∂μ, (toState φ).IsPure)
+    : (μ.comap (Subtype.val : PureState E → stateSpace E)).map Subtype.val = μ := by
   rw [measurableEmbedding_val.map_comap, Subtype.range_coe_subtype]
   exact Measure.restrict_eq_self_of_ae_mem hμ
 
-lemma isProbabilityMeasure_comap_val {μ : Measure (stateSpace E)} [IsProbabilityMeasure μ]
-    (hμ : ∀ᵐ φ ∂μ, (toState φ).IsPure) :
-    IsProbabilityMeasure (μ.comap (Subtype.val : PureState E → stateSpace E)) := by
+lemma isProbabilityMeasure_comap_val
+    {μ : Measure (stateSpace E)} [IsProbabilityMeasure μ] (hμ : ∀ᵐ φ ∂μ, (toState φ).IsPure)
+    : IsProbabilityMeasure (μ.comap (Subtype.val : PureState E → stateSpace E)) := by
   have := congrArg (fun ν : Measure (stateSpace E) => ν univ) (map_comap_val_eq hμ)
   rw [Measure.map_apply measurable_subtype_coe MeasurableSet.univ, preimage_univ] at this
   exact ⟨this.trans measure_univ⟩
@@ -135,8 +142,9 @@ lemma isProbabilityMeasure_comap_val {μ : Measure (stateSpace E)} [IsProbabilit
 lemma hasPureDecomposition_of_separable (ω : 𝓢[ℝ, E]) : ω.HasPureDecomposition := by
   obtain ⟨μ, hbar, hpure⟩ := UnitalPositiveLinearMap.exists_pure_representingMeasure ω
   have hprob := isProbabilityMeasure_comap_val hpure
-  have hinner : ((μ : Measure (stateSpace E)).comap
-      (Subtype.val : PureState E → stateSpace E)).InnerRegular :=
+  have hinner
+      : ((μ : Measure (stateSpace E)).comap
+        (Subtype.val : PureState E → stateSpace E)).InnerRegular :=
     Measure.InnerRegular.comap_subtype measurableSet_setOf_isPure
   refine ⟨_, Measure.Regular.of_innerRegular, hprob, fun f => ?_⟩
   refine (measurableEmbedding_val.integral_map fun φ : stateSpace E => toState φ f).symm.trans ?_
@@ -151,10 +159,13 @@ end PureState
 
 -/
 
-/-- **Choquet–Meyer**: for separable observables, the state space is a simplex exactly when
-ensembles refine. -/
-lemma isSimplexStateSpace_iff_ensemblesRefine : IsSimplexStateSpace E ↔ EnsemblesRefine E :=
-  ⟨IsSimplexStateSpace.ensemblesRefine, fun hE ω =>
-    hE.hasUniquePureDecomposition (PureState.hasPureDecomposition_of_separable ω)⟩
+/--
+**Choquet–Meyer**: for separable observables, the state space is a simplex exactly when
+ensembles refine.
+-/
+lemma isSimplexStateSpace_iff_ensemblesRefine : IsSimplexStateSpace E ↔ EnsemblesRefine E := ⟨
+  IsSimplexStateSpace.ensemblesRefine,
+  fun hE ω => hE.hasUniquePureDecomposition (PureState.hasPureDecomposition_of_separable ω)
+⟩
 
 end ProbabilisticTheory

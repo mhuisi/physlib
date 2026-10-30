@@ -54,17 +54,12 @@ namespace Space
 instance {d} : Add (Space d) where
   add p q := ⟨fun i => p.val i + q.val i⟩
 
-@[simp]
-lemma add_val {d: ℕ} (x y : Space d) :
-    (x + y).val = x.val + y.val := rfl
+@[simp] lemma add_val {d : ℕ} (x y : Space d) : (x + y).val = x.val + y.val := rfl
 
-@[simp]
-lemma add_apply {d : ℕ} (x y : Space d) (i : Fin d) :
-    (x + y) i = x i + y i := by
-  simp
+@[simp] lemma add_apply {d : ℕ} (x y : Space d) (i : Fin d) : (x + y) i = x i + y i := by simp
 
 instance {d} : AddCommMonoid (Space d) where
-  add_assoc a b c:= by
+  add_assoc a b c := by
     apply eq_of_val
     simp only [add_val]
     ring
@@ -82,22 +77,18 @@ instance {d} : AddCommMonoid (Space d) where
     ring
   nsmul n a := ⟨fun i => n • a.val i⟩
 
-@[simp]
-lemma nsmul_val {d : ℕ} (n : ℕ) (a : Space d) :
-    (n • a).val = fun i => n • a.val i := rfl
+@[simp] lemma nsmul_val {d : ℕ} (n : ℕ) (a : Space d) : (n • a).val = fun i => n • a.val i := rfl
 
 @[simp]
-lemma nsmul_apply {d : ℕ} (n : ℕ) (a : Space d) (i : Fin d) :
-    (n • a) i = n • (a i) := by rfl
+lemma nsmul_apply {d : ℕ} (n : ℕ) (a : Space d) (i : Fin d) : (n • a) i = n • (a i) := by rfl
 
-lemma eq_vadd_zero {d} (s : Space d) :
-    ∃ v : EuclideanSpace ℝ (Fin d), s = v +ᵥ (0 : Space d) := by
+lemma eq_vadd_zero {d} (s : Space d) : ∃ v : EuclideanSpace ℝ (Fin d), s = v +ᵥ (0 : Space d) := by
   obtain ⟨v, rfl⟩ := vadd_transitive 0 s
   exact ⟨v, rfl⟩
 
 @[simp]
-lemma add_vadd_zero {d} (v1 v2 : EuclideanSpace ℝ (Fin d)) :
-    (v1 +ᵥ (0 : Space d)) + (v2 +ᵥ (0 : Space d)) = (v1 + v2) +ᵥ (0 : Space d) := by
+lemma add_vadd_zero {d} (v1 v2 : EuclideanSpace ℝ (Fin d))
+    : (v1 +ᵥ (0 : Space d)) + (v2 +ᵥ (0 : Space d)) = (v1 + v2) +ᵥ (0 : Space d) := by
   ext i
   simp
 
@@ -110,17 +101,13 @@ lemma add_vadd_zero {d} (v1 v2 : EuclideanSpace ℝ (Fin d)) :
 instance {d} : SMul ℝ (Space d) where
   smul c p := ⟨fun i => c * p.val i⟩
 
-@[simp]
-lemma smul_val {d : ℕ} (c : ℝ) (p : Space d) :
-    (c • p).val = fun i => c * p.val i := rfl
+@[simp] lemma smul_val {d : ℕ} (c : ℝ) (p : Space d) : (c • p).val = fun i => c * p.val i := rfl
+
+@[simp] lemma smul_apply {d : ℕ} (c : ℝ) (p : Space d) (i : Fin d) : (c • p) i = c * (p i) := by rfl
 
 @[simp]
-lemma smul_apply {d : ℕ} (c : ℝ) (p : Space d) (i : Fin d) :
-    (c • p) i = c * (p i) := by rfl
-
-@[simp]
-lemma smul_vadd_zero {d} (k : ℝ) (v : EuclideanSpace ℝ (Fin d)) :
-    k • (v +ᵥ (0 : Space d)) = (k • v) +ᵥ (0 : Space d) := by
+lemma smul_vadd_zero {d} (k : ℝ) (v : EuclideanSpace ℝ (Fin d))
+    : k • (v +ᵥ (0 : Space d)) = (k • v) +ᵥ (0 : Space d) := by
   ext i
   simp
 
@@ -151,41 +138,32 @@ instance {d} : Module ℝ (Space d) where
 -/
 
 noncomputable instance {d} : Norm (Space d) where
-  norm p := √ (∑ i, (p i)^2)
+  norm p := √(∑ i, (p i)^2)
 
-lemma norm_eq {d} (p : Space d) : ‖p‖ = √ (∑ i, (p i) ^ 2) := by
-  rfl
+lemma norm_eq {d} (p : Space d) : ‖p‖ = √(∑ i, (p i) ^ 2) := by rfl
 
 @[simp]
-lemma abs_eval_le_norm {d} (p : Space d) (i : Fin d) :
-    |p i| ≤ ‖p‖ := by
+lemma abs_eval_le_norm {d} (p : Space d) (i : Fin d) : |p i| ≤ ‖p‖ := by
   rw [norm_eq]
   exact Real.abs_le_sqrt
     (Finset.single_le_sum (f := fun j => (p j) ^ 2) (fun j _ => by positivity) (Finset.mem_univ i))
 
-lemma norm_sq_eq {d} (p : Space d) :
-    ‖p‖ ^ 2 = ∑ i, (p i) ^ 2 := by
+lemma norm_sq_eq {d} (p : Space d) : ‖p‖ ^ 2 = ∑ i, (p i) ^ 2 := by
   rw [norm_eq]
   exact Real.sq_sqrt (by positivity)
 
-lemma point_dim_zero_eq (p : Space 0) : p = 0 :=
-  Subsingleton.elim p 0
+lemma point_dim_zero_eq (p : Space 0) : p = 0 := Subsingleton.elim p 0
 
 @[simp]
-lemma norm_vadd_zero {d} (v : EuclideanSpace ℝ (Fin d)) :
-    ‖v +ᵥ (0 : Space d)‖ = ‖v‖ := by
+lemma norm_vadd_zero {d} (v : EuclideanSpace ℝ (Fin d)) : ‖v +ᵥ (0 : Space d)‖ = ‖v‖ := by
   simp [norm_eq, PiLp.norm_eq_of_L2]
 
 instance : Neg (Space d) where
-  neg p := ⟨fun i => - (p.val i)⟩
+  neg p := ⟨fun i => -(p.val i)⟩
 
-@[simp]
-lemma neg_val {d : ℕ} (p : Space d) :
-    (-p).val = fun i => - (p.val i) := rfl
+@[simp] lemma neg_val {d : ℕ} (p : Space d) : (-p).val = fun i => -(p.val i) := rfl
 
-@[simp]
-lemma neg_apply {d : ℕ} (p : Space d) (i : Fin d) :
-    (-p) i = - (p i) := by rfl
+@[simp] lemma neg_apply {d : ℕ} (p : Space d) (i : Fin d) : (-p) i = -(p i) := by rfl
 
 noncomputable instance {d} : AddCommGroup (Space d) where
   zsmul z p := ⟨fun i => z • p.val i⟩
@@ -194,23 +172,17 @@ noncomputable instance {d} : AddCommGroup (Space d) where
     simp
 
 @[simp]
-lemma sub_apply {d} (p q : Space d) (i : Fin d) :
-    (p - q) i = p i - q i := by
-  simp [sub_eq_add_neg]
+lemma sub_apply {d} (p q : Space d) (i : Fin d) : (p - q) i = p i - q i := by simp [sub_eq_add_neg]
+
+@[simp] lemma sub_val {d} (p q : Space d) : (p - q).val = fun i => p.val i - q.val i := by rfl
 
 @[simp]
-lemma sub_val {d} (p q : Space d) :
-    (p - q).val = fun i => p.val i - q.val i := by rfl
-
-@[simp]
-lemma vadd_zero_sub_vadd_zero {d} (v1 v2 : EuclideanSpace ℝ (Fin d)) :
-    (v1 +ᵥ (0 : Space d)) - (v2 +ᵥ (0 : Space d)) = (v1 - v2) +ᵥ (0 : Space d) := by
+lemma vadd_zero_sub_vadd_zero {d} (v1 v2 : EuclideanSpace ℝ (Fin d))
+    : (v1 +ᵥ (0 : Space d)) - (v2 +ᵥ (0 : Space d)) = (v1 - v2) +ᵥ (0 : Space d) := by
   ext i
   simp
 
-@[simp]
-lemma dist_eq_norm {d} (p q : Space d) :
-    dist p q = ‖p - q‖ := rfl
+@[simp] lemma dist_eq_norm {d} (p q : Space d) : dist p q = ‖p - q‖ := rfl
 
 noncomputable instance {d} : SeminormedAddCommGroup (Space d) where
   dist_eq x y := by
@@ -226,12 +198,11 @@ instance {d} : Inner ℝ (Space d) where
   inner p q := ∑ i, p i * q i
 
 @[simp]
-lemma inner_vadd_zero {d} (v1 v2 : EuclideanSpace ℝ (Fin d)) :
-    inner ℝ (v1 +ᵥ (0 : Space d)) (v2 +ᵥ (0 : Space d)) = Inner.inner ℝ v1 v2 := by
+lemma inner_vadd_zero {d} (v1 v2 : EuclideanSpace ℝ (Fin d))
+    : inner ℝ (v1 +ᵥ (0 : Space d)) (v2 +ᵥ (0 : Space d)) = Inner.inner ℝ v1 v2 := by
   simp [inner, vadd_apply, mul_comm]
 
-lemma inner_apply {d} (p q : Space d) :
-    inner ℝ p q = ∑ i, p i * q i := by rfl
+lemma inner_apply {d} (p q : Space d) : inner ℝ p q = ∑ i, p i * q i := by rfl
 
 instance {d} : InnerProductSpace ℝ (Space d) where
   norm_smul_le a x := by
@@ -240,8 +211,7 @@ instance {d} : InnerProductSpace ℝ (Space d) where
   norm_sq_eq_re_inner x := by
     obtain ⟨v, rfl⟩ := eq_vadd_zero x
     simp
-  conj_inner_symm x y := by
-    simp [inner_apply, mul_comm]
+  conj_inner_symm x y := by simp [inner_apply, mul_comm]
   add_left x y z := by
     obtain ⟨v1, rfl⟩ := eq_vadd_zero x
     obtain ⟨v2, rfl⟩ := eq_vadd_zero y
@@ -250,20 +220,21 @@ instance {d} : InnerProductSpace ℝ (Space d) where
   smul_left x y a := by
     obtain ⟨v1, rfl⟩ := eq_vadd_zero x
     obtain ⟨v2, rfl⟩ := eq_vadd_zero y
-    simpa only [smul_vadd_zero, inner_vadd_zero, conj_trivial]
-      using InnerProductSpace.smul_left v1 v2 a
+    simpa only [smul_vadd_zero, inner_vadd_zero, conj_trivial] using
+      InnerProductSpace.smul_left v1 v2 a
 
-/-- The normed space structure on `Space d`, registered directly. It is definitionally the
-  one underlying the inner product space structure, but registering it as its own instance is
-  needed for typeclass search to find the operator-norm structure on `Space d →L[ℝ] ℝ`
-  (for example `NormSMulClass ℝ (Space d →L[ℝ] ℝ)`), which is not found when
-  `NormedSpace ℝ (Space d)` arises only as a nested subgoal through
-  `InnerProductSpace.toNormedSpace`. -/
+/--
+The normed space structure on `Space d`, registered directly. It is definitionally the
+one underlying the inner product space structure, but registering it as its own instance is
+needed for typeclass search to find the operator-norm structure on `Space d →L[ℝ] ℝ`
+(for example `NormSMulClass ℝ (Space d →L[ℝ] ℝ)`), which is not found when
+`NormedSpace ℝ (Space d)` arises only as a nested subgoal through
+`InnerProductSpace.toNormedSpace`.
+-/
 noncomputable instance {d} : NormedSpace ℝ (Space d) := InnerProductSpace.toNormedSpace
 
-lemma norm_smul_sphere {d : ℕ} (n : ↑(Metric.sphere (0 : Space d) 1))
-    {r : ℝ} (hr : 0 ≤ r) :
-    ‖(r • (n : Space d))‖ = r := by
+lemma norm_smul_sphere {d : ℕ} (n : ↑(Metric.sphere (0 : Space d) 1)) {r : ℝ} (hr : 0 ≤ r)
+    : ‖(r • (n : Space d))‖ = r := by
   simp [norm_smul, mem_sphere_zero_iff_norm.mp n.2, abs_of_nonneg hr]
 
 /-!
@@ -289,13 +260,11 @@ instance {d : ℕ} : BorelSpace (Space d) where
 
 -/
 
-lemma inner_eq_sum {d} (p q : Space d) :
-    inner ℝ p q = ∑ i, p i * q i := by
-  simp [inner]
+lemma inner_eq_sum {d} (p q : Space d) : inner ℝ p q = ∑ i, p i * q i := by simp [inner]
 
 @[simp]
-lemma sum_apply {ι : Type} [Fintype ι] (f : ι → Space d) (i : Fin d) :
-    (∑ x, f x) i = ∑ x, f x i := by
+lemma sum_apply {ι : Type} [Fintype ι] (f : ι → Space d) (i : Fin d)
+    : (∑ x, f x) i = ∑ x, f x i := by
   let P (ι : Type) [Fintype ι] : Prop := ∀ (f : ι → Space d) (i : Fin d), (∑ x, f x) i = ∑ x, f x i
   have h1 : P ι := by
     apply Fintype.induction_empty_option
@@ -347,43 +316,38 @@ noncomputable def basis {d} : OrthonormalBasis (Fin d) ℝ (Space d) where
       rfl
     norm_map' := by
       intro x
-      simp [norm_eq, PiLp.norm_eq_of_L2]}
+      simp [norm_eq, PiLp.norm_eq_of_L2]
+  }
 
-lemma apply_eq_basis_repr_apply {d} (p : Space d) (i : Fin d) :
-    p i = basis.repr p i := by
+lemma apply_eq_basis_repr_apply {d} (p : Space d) (i : Fin d) : p i = basis.repr p i := by
   simp [basis]
 
 @[simp]
-lemma basis_repr_apply {d} (p : Space d) (i : Fin d) :
-    basis.repr p i = p i := by
+lemma basis_repr_apply {d} (p : Space d) (i : Fin d) : basis.repr p i = p i := by
   simp [apply_eq_basis_repr_apply]
 
 @[simp]
-lemma basis_repr_symm_apply {d} (v : EuclideanSpace ℝ (Fin d)) (i : Fin d) :
-    basis.repr.symm v i = v i := by rfl
+lemma basis_repr_symm_apply {d} (v : EuclideanSpace ℝ (Fin d)) (i : Fin d)
+    : basis.repr.symm v i = v i := by
+  rfl
 
-lemma basis_apply {d} (i j : Fin d) :
-    basis i j = if i = j then 1 else 0 := by
+lemma basis_apply {d} (i j : Fin d) : basis i j = if i = j then 1 else 0 := by
   simp [apply_eq_basis_repr_apply, eq_comm]
 
-@[simp]
-lemma basis_self {d} (i : Fin d) : basis i i = 1 := by
-  simp [basis_apply]
+@[simp] lemma basis_self {d} (i : Fin d) : basis i i = 1 := by simp [basis_apply]
 
 @[simp high]
-lemma inner_basis {d} (p : Space d) (i : Fin d) :
-    inner ℝ p (basis i) = p i := by
+lemma inner_basis {d} (p : Space d) (i : Fin d) : inner ℝ p (basis i) = p i := by
   simp [inner_eq_sum, basis_apply]
 
 @[simp high]
-lemma basis_inner {d} (i : Fin d) (p : Space d) :
-    inner ℝ (basis i) p = p i := by
+lemma basis_inner {d} (i : Fin d) (p : Space d) : inner ℝ (basis i) p = p i := by
   simp [inner_eq_sum, basis_apply]
 
 open InnerProductSpace
 
-lemma basis_repr_inner_eq {d} (p : Space d) (v : EuclideanSpace ℝ (Fin d)) :
-    ⟪basis.repr p, v⟫_ℝ = ⟪p, basis.repr.symm v⟫_ℝ :=
+lemma basis_repr_inner_eq {d} (p : Space d) (v : EuclideanSpace ℝ (Fin d))
+    : ⟪basis.repr p, v⟫_ℝ = ⟪p, basis.repr.symm v⟫_ℝ :=
   LinearIsometryEquiv.inner_map_eq_flip basis.repr p v
 
 instance {d : ℕ} : FiniteDimensional ℝ (Space d) :=
@@ -398,21 +362,21 @@ lemma rank_eq_dim {d : ℕ} : Module.rank ℝ (Space d) = d := by
   simp [rank_eq_card_basis (basis.toBasis)]
 
 @[simp]
-lemma fderiv_basis_repr {d} (p : Space d) :
-    fderiv ℝ basis.repr p = basis.repr.toContinuousLinearMap := by
+lemma fderiv_basis_repr {d} (p : Space d)
+    : fderiv ℝ basis.repr p = basis.repr.toContinuousLinearMap := by
   change fderiv ℝ basis.repr.toContinuousLinearMap p = _
   rw [ContinuousLinearMap.fderiv]
 
 @[simp]
-lemma fderiv_basis_repr_symm {d} (v : EuclideanSpace ℝ (Fin d)) :
-    fderiv ℝ basis.repr.symm v = basis.repr.symm.toContinuousLinearMap := by
+lemma fderiv_basis_repr_symm {d} (v : EuclideanSpace ℝ (Fin d))
+    : fderiv ℝ basis.repr.symm v = basis.repr.symm.toContinuousLinearMap := by
   change fderiv ℝ basis.repr.symm.toContinuousLinearMap v = _
   rw [ContinuousLinearMap.fderiv]
 
-lemma basis_induction_on {d} {P : Space d → Prop}
-    (hb : ∀ i, P (basis i)) (hzero : P 0)
-    (hadd : ∀ p1 p2, P p1 → P p2 → P (p1 + p2))
-    (hsmul : ∀ (c : ℝ) p, P p → P (c • p)) (p : Space d) : P p := by
+lemma basis_induction_on
+    {d} {P : Space d → Prop} (hb : ∀ i, P (basis i)) (hzero : P 0)
+    (hadd : ∀ p1 p2, P p1 → P p2 → P (p1 + p2)) (hsmul : ∀ (c : ℝ) p, P p → P (c • p)) (p : Space d)
+    : P p := by
   rw [← OrthonormalBasis.sum_repr basis p]
   exact Finset.sum_induction _ P hadd hzero fun i _ => hsmul _ _ (hb i)
 /-!
@@ -421,23 +385,20 @@ lemma basis_induction_on {d} {P : Space d → Prop}
 
 -/
 
-/-- The standard coordinate functions of Space based on `Fin d`.
+/--
+The standard coordinate functions of Space based on `Fin d`.
 
-The notation `𝔁 μ p` can be used for this. -/
-noncomputable def coord (μ : Fin d) (p : Space d) : ℝ :=
-  inner ℝ p (basis μ)
+The notation `𝔁 μ p` can be used for this.
+-/
+noncomputable def coord (μ : Fin d) (p : Space d) : ℝ := inner ℝ p (basis μ)
 
-lemma coord_apply (μ : Fin d) (p : Space d) :
-    coord μ p = p μ := by
-  simp [coord]
+lemma coord_apply (μ : Fin d) (p : Space d) : coord μ p = p μ := by simp [coord]
 
 /-- The standard coordinate functions of Space based on `Fin d`, as a continuous linear map. -/
 noncomputable def coordCLM {d} (μ : Fin d) : Space d →L[ℝ] ℝ where
   toFun := coord μ
-  map_add' := fun p q => by
-    simp [coord, basis, inner_add_left]
-  map_smul' := fun c p => by
-    simp [coord, basis, inner_smul_left]
+  map_add' := fun p q => by simp [coord, basis, inner_add_left]
+  map_smul' := fun c p => by simp [coord, basis, inner_smul_left]
   cont := by
     unfold coord
     fun_prop
@@ -445,44 +406,37 @@ noncomputable def coordCLM {d} (μ : Fin d) : Space d →L[ℝ] ℝ where
 open ContDiff
 
 @[fun_prop]
-lemma coord_contDiff {i} : ContDiff ℝ ∞ (fun x : Space d => x.coord i) :=
-  (coordCLM i).contDiff
+lemma coord_contDiff {i} : ContDiff ℝ ∞ (fun x : Space d => x.coord i) := (coordCLM i).contDiff
 
-lemma coordCLM_apply (μ : Fin d) (p : Space d) :
-    coordCLM μ p = coord μ p := by
-  rfl
+lemma coordCLM_apply (μ : Fin d) (p : Space d) : coordCLM μ p = coord μ p := by rfl
 
 @[inherit_doc coord]
 scoped notation "𝔁" => coord
 
 @[fun_prop]
-lemma eval_continuous {d} (i : Fin d) :
-    Continuous (fun p : Space d => p i) := by
+lemma eval_continuous {d} (i : Fin d) : Continuous (fun p : Space d => p i) := by
   convert (coordCLM i).continuous
   simp [coordCLM_apply, coord]
 
 @[fun_prop]
-lemma eval_differentiable {d} (i : Fin d) :
-    Differentiable ℝ (fun p : Space d => p i) := by
+lemma eval_differentiable {d} (i : Fin d) : Differentiable ℝ (fun p : Space d => p i) := by
   convert (coordCLM i).differentiable
   simp [coordCLM_apply, coord]
 
 @[fun_prop]
-lemma eval_contDiff {d n} (i : Fin d) :
-    ContDiff ℝ n (fun p : Space d => p i) := by
+lemma eval_contDiff {d n} (i : Fin d) : ContDiff ℝ n (fun p : Space d => p i) := by
   convert (coordCLM i).contDiff
   simp [coordCLM_apply, coord]
 
 @[fun_prop]
-lemma eval_hasTemperateGrowth {d} (i : Fin d) :
-    Function.HasTemperateGrowth (fun p : Space d => p i) := by
+lemma eval_hasTemperateGrowth {d} (i : Fin d)
+    : Function.HasTemperateGrowth (fun p : Space d => p i) := by
   convert (coordCLM i).hasTemperateGrowth
   simp [coordCLM_apply, coord]
 
 /-- The continuous linear equivalence between `Space d` and the corresponding `Pi` type. -/
-noncomputable def equivPi (d : ℕ) :
-    Space d ≃L[ℝ] Π (_ : Fin d), ℝ := LinearEquiv.toContinuousLinearEquiv <|
-  {
+noncomputable def equivPi (d : ℕ) : Space d ≃L[ℝ] Π (_ : Fin d), ℝ :=
+  LinearEquiv.toContinuousLinearEquiv <| {
     toFun := fun p i => p i
     map_add' p1 p2 := by funext i; simp
     map_smul' p r := by funext i; simp
@@ -496,60 +450,60 @@ noncomputable def equivPi (d : ℕ) :
 -/
 
 @[fun_prop]
-lemma mk_continuous {d : ℕ} :
-    Continuous (fun (f : Fin d → ℝ) => (⟨f⟩ : Space d)) := (equivPi d).symm.continuous
+lemma mk_continuous {d : ℕ} : Continuous (fun (f : Fin d → ℝ) => (⟨f⟩ : Space d)) :=
+  (equivPi d).symm.continuous
 
 @[fun_prop]
-lemma mk_differentiable {d : ℕ} :
-    Differentiable ℝ (fun (f : Fin d → ℝ) => (⟨f⟩ : Space d)) := (equivPi d).symm.differentiable
+lemma mk_differentiable {d : ℕ} : Differentiable ℝ (fun (f : Fin d → ℝ) => (⟨f⟩ : Space d)) :=
+  (equivPi d).symm.differentiable
 
 @[fun_prop]
-lemma mk_contDiff {d : ℕ} {n : WithTop ℕ∞}:
-    ContDiff ℝ n (fun (f : Fin d → ℝ) => (⟨f⟩ : Space d)) := (equivPi d).symm.contDiff
+lemma mk_contDiff {d : ℕ} {n : WithTop ℕ∞}
+    : ContDiff ℝ n (fun (f : Fin d → ℝ) => (⟨f⟩ : Space d)) :=
+  (equivPi d).symm.contDiff
 
 @[simp]
-lemma fderiv_mk {d : ℕ} (f : Fin d → ℝ) :
-    fderiv ℝ Space.mk f = (equivPi d).symm := by
+lemma fderiv_mk {d : ℕ} (f : Fin d → ℝ) : fderiv ℝ Space.mk f = (equivPi d).symm := by
   change fderiv ℝ (equivPi d).symm f = _
   rw [ContinuousLinearEquiv.fderiv]
 
 @[simp]
-lemma fderiv_val {d : ℕ} (p : Space d) :
-    fderiv ℝ Space.val p = (equivPi d) := by
+lemma fderiv_val {d : ℕ} (p : Space d) : fderiv ℝ Space.val p = (equivPi d) := by
   change fderiv ℝ (equivPi d) p = _
   rw [ContinuousLinearEquiv.fderiv]
 
 @[simp]
-lemma fderiv_eval_apply {d : ℕ} (p y : Space d) (i : Fin d) :
-    fderiv ℝ (fun p => p.val i) p y = y i := by
+lemma fderiv_eval_apply {d : ℕ} (p y : Space d) (i : Fin d)
+    : fderiv ℝ (fun p => p.val i) p y = y i := by
   have h : (fun p : Space d => p.val i) = ⇑(coordCLM i) :=
     funext fun q => by simp [coordCLM, coord_apply]
   rw [h, ContinuousLinearMap.fderiv]
   simp [coordCLM, coord_apply]
 
 @[fun_prop]
-lemma contDiffOn_vadd (s : Space d) :
-    ContDiffOn ℝ ω (fun (v : EuclideanSpace ℝ (Fin d)) => v +ᵥ s) Set.univ :=
+lemma contDiffOn_vadd (s : Space d)
+    : ContDiffOn ℝ ω (fun (v : EuclideanSpace ℝ (Fin d)) => v +ᵥ s) Set.univ :=
   contDiffOn_univ.mpr <| fun_comp (mk_contDiff (n := ω)) (by fun_prop)
 
 @[fun_prop]
-lemma vadd_differentiable {d} (s : Space d) :
-    Differentiable ℝ (fun (v : EuclideanSpace ℝ (Fin d)) => v +ᵥ s) :=
+lemma vadd_differentiable {d} (s : Space d)
+    : Differentiable ℝ (fun (v : EuclideanSpace ℝ (Fin d)) => v +ᵥ s) :=
   mk_differentiable.comp <| by fun_prop
 
 @[fun_prop]
-lemma contDiffOn_vsub (s1 : Space d) :
-    ContDiffOn ℝ ω (fun (s : Space d) => s -ᵥ s1) Set.univ :=
+lemma contDiffOn_vsub (s1 : Space d) : ContDiffOn ℝ ω (fun (s : Space d) => s -ᵥ s1) Set.univ :=
   contDiffOn_univ.mpr <| fun_comp (PiLp.contDiff_toLp) (by fun_prop)
 
 @[fun_prop]
-lemma vsub_differentiable {d} (s1 : Space d) :
-    Differentiable ℝ (fun (s : Space d) => s -ᵥ s1) :=
+lemma vsub_differentiable {d} (s1 : Space d) : Differentiable ℝ (fun (s : Space d) => s -ᵥ s1) :=
   (PiLp.contDiff_toLp.differentiable (NeZero.ne' 2).symm).comp (by fun_prop)
 
-lemma fderiv_space_components {M d} [NormedAddCommGroup M] [NormedSpace ℝ M]
-    (μ : Fin d) (f : M → Space d) (hf : Differentiable ℝ f) (m dm : M) :
-    fderiv ℝ f m dm μ = fderiv ℝ (fun m' => f m' μ) m dm := by
+lemma fderiv_space_components
+    {M d} [NormedAddCommGroup M] [NormedSpace ℝ M]
+    (μ : Fin d)
+    (f : M → Space d) (hf : Differentiable ℝ f)
+    (m dm : M)
+    : fderiv ℝ f m dm μ = fderiv ℝ (fun m' => f m' μ) m dm := by
   trans fderiv ℝ (Space.coordCLM μ ∘ fun m' => f m') m dm
   · rw [fderiv_comp _ (by fun_prop) (by fun_prop), ContinuousLinearMap.fderiv,
       ContinuousLinearMap.coe_comp, Function.comp_apply]
@@ -576,8 +530,7 @@ noncomputable def toDirection {d : ℕ} (x : Space d) (h : x ≠ 0) : Direction 
   norm := norm_smul_inv_norm h
 
 @[simp]
-lemma direction_unit_sq_sum {d} (s : Direction d) :
-    ∑ i : Fin d, (s.unit i) ^ 2 = 1 := by
+lemma direction_unit_sq_sum {d} (s : Direction d) : ∑ i : Fin d, (s.unit i) ^ 2 = 1 := by
   rw [← norm_sq_eq, s.norm]
   simp
 
@@ -591,8 +544,7 @@ lemma direction_unit_sq_sum {d} (s : Direction d) :
 noncomputable def oneEquiv : Space 1 ≃ₗᵢ[ℝ] ℝ where
   toFun x := x 0
   invFun x := ⟨fun _ => x⟩
-  left_inv x := by
-    ext i; fin_cases i; simp
+  left_inv x := by ext i; fin_cases i; simp
   right_inv x := by simp
   map_add' x y := by rfl
   map_smul' c x := by rfl
@@ -602,25 +554,17 @@ noncomputable def oneEquiv : Space 1 ≃ₗᵢ[ℝ] ℝ where
     simp only [Fin.isValue, Finset.univ_unique, Fin.default_eq_zero, Finset.sum_singleton]
     exact Eq.symm (Real.sqrt_sq_eq_abs (x 0))
 
-lemma oneEquiv_coe :
-    (oneEquiv : Space 1 → ℝ) = fun x => x 0 := by
-  rfl
+lemma oneEquiv_coe : (oneEquiv : Space 1 → ℝ) = fun x => x 0 := by rfl
 
-lemma oneEquiv_symm_coe :
-    (oneEquiv.symm : ℝ → Space 1) = (fun x => ⟨fun _ => x⟩) := by
-  rfl
+lemma oneEquiv_symm_coe : (oneEquiv.symm : ℝ → Space 1) = (fun x => ⟨fun _ => x⟩) := by rfl
 
-lemma oneEquiv_symm_apply (x : ℝ) (i : Fin 1) :
-    oneEquiv.symm x i = x := by
-  rfl
+lemma oneEquiv_symm_apply (x : ℝ) (i : Fin 1) : oneEquiv.symm x i = x := by rfl
 
-lemma oneEquiv_continuous :
-    Continuous (oneEquiv : Space 1 → ℝ) := by
+lemma oneEquiv_continuous : Continuous (oneEquiv : Space 1 → ℝ) := by
   simp [oneEquiv_coe]
   fun_prop
 
-lemma oneEquiv_symm_continuous :
-    Continuous (oneEquiv.symm : ℝ → Space 1) := by
+lemma oneEquiv_symm_continuous : Continuous (oneEquiv.symm : ℝ → Space 1) := by
   simp [oneEquiv_symm_coe]
   fun_prop
 
@@ -668,9 +612,11 @@ lemma oneEquiv_symm_measurePreserving : MeasurePreserving oneEquiv.symm volume v
 -/
 
 open Manifold in
-/-- A diffeomorphism between the two different manifold structures on `Space d`,
-  that equivalent to `𝓡 d` and that equivalent to `𝓘(ℝ, Space d)` -/
-noncomputable def modelDiffeo {d} : Diffeomorph (𝓡 d) 𝓘(ℝ, Space d) (Space d) (Space d) ⊤ where
+/--
+A diffeomorphism between the two different manifold structures on `Space d`,
+that equivalent to `𝓡 d` and that equivalent to `𝓘(ℝ, Space d)`
+-/
+noncomputable def modelDiffeo {d} : Diffeomorph (𝓡 d) (𝓘(ℝ, Space d)) (Space d) (Space d) ⊤ where
   toFun p := p
   invFun p := p
   left_inv _ := rfl
@@ -682,18 +628,18 @@ noncomputable def modelDiffeo {d} : Diffeomorph (𝓡 d) 𝓘(ℝ, Space d) (Spa
     apply contMDiff_iff.mpr ⟨by simpa using by fun_prop, fun x y => ?_⟩
     simpa [homEuclideanSpaceSpace, chartAt_self_eq] using by fun_prop
 
-@[simp]
-lemma modelDiffeo_apply {d : ℕ} (p : Space d) :
-    modelDiffeo p = p := rfl
+@[simp] lemma modelDiffeo_apply {d : ℕ} (p : Space d) : modelDiffeo p = p := rfl
 
 set_option backward.isDefEq.respectTransparency false in
 open Manifold in
-/-- The derivative of `modelDiffeo` provides an equivalence between
-  `Space d` and `EuclideanSpace ℝ (Fin d)`. This equivalences takes the basis
-  of `EuclideanSpace ℝ (Fin d)` to the basis of `Space d`, and vice versa. -/
-lemma basis_eq_mfderiv_modelDiffeo_single (d : ℕ) (μ : Fin d) (x : Space d) :
-    basis μ = mfderiv (𝓡 d) 𝓘(ℝ, Space d) (modelDiffeo (d := d)) x
-      (EuclideanSpace.single μ 1) := by
+/--
+The derivative of `modelDiffeo` provides an equivalence between
+`Space d` and `EuclideanSpace ℝ (Fin d)`. This equivalences takes the basis
+of `EuclideanSpace ℝ (Fin d)` to the basis of `Space d`, and vice versa.
+-/
+lemma basis_eq_mfderiv_modelDiffeo_single (d : ℕ) (μ : Fin d) (x : Space d)
+    : basis μ
+      = mfderiv (𝓡 d) (𝓘(ℝ, Space d)) (modelDiffeo (d := d)) x (EuclideanSpace.single μ 1) := by
   simp only [modelDiffeo_apply, mfderiv, writtenInExtChartAt, extChartAt,
     OpenPartialHomeomorph.extend, OpenPartialHomeomorph.refl_partialEquiv, PartialEquiv.refl_source,
     OpenPartialHomeomorph.singletonChartedSpace_chartAt_eq, modelWithCornersSelf_partialEquiv,
@@ -705,9 +651,10 @@ lemma basis_eq_mfderiv_modelDiffeo_single (d : ℕ) (μ : Fin d) (x : Space d) :
     fderivWithin_univ]
   rw [ite_eq_left (modelDiffeo.mdifferentiable (WithTop.top_ne_zero)).mdifferentiableAt]
   ext i
-  have h := fderiv_space_components i ((⇑modelDiffeo ∘ ⇑(homEuclideanSpaceSpace d)))
-    (by simpa [Function.comp_def, homEuclideanSpaceSpace] using by fun_prop)
-    (((homEuclideanSpaceSpace d).symm x)) ((EuclideanSpace.single μ 1))
+  have h :=
+    fderiv_space_components i ((⇑modelDiffeo ∘ ⇑(homEuclideanSpaceSpace d)))
+      (by simpa [Function.comp_def, homEuclideanSpaceSpace] using by fun_prop)
+      (((homEuclideanSpaceSpace d).symm x)) ((EuclideanSpace.single μ 1))
   convert! h.symm
   simp only [basis_apply, homEuclideanSpaceSpace, PiLp.continuousLinearEquiv_symm_apply,
     Homeomorph.homeomorph_mk_coe, Equiv.coe_fn_mk, Function.comp_apply, modelDiffeo_apply,
@@ -723,8 +670,7 @@ lemma basis_eq_mfderiv_modelDiffeo_single (d : ℕ) (μ : Fin d) (x : Space d) :
 
 -/
 
-lemma norm_vadd_le_add {d} (v : EuclideanSpace ℝ (Fin d)) (s : Space d) :
-    ‖v +ᵥ s‖ ≤ ‖v‖ + ‖s‖ := by
+lemma norm_vadd_le_add {d} (v : EuclideanSpace ℝ (Fin d)) (s : Space d) : ‖v +ᵥ s‖ ≤ ‖v‖ + ‖s‖ := by
   trans ‖s - (-v +ᵥ (0 : Space d))‖
   · apply le_of_eq
     congr
@@ -736,21 +682,21 @@ lemma norm_vadd_le_add {d} (v : EuclideanSpace ℝ (Fin d)) (s : Space d) :
     ring
 
 @[fun_prop]
-lemma differentiable_vadd {d} (v : EuclideanSpace ℝ (Fin d)) :
-    Differentiable ℝ (fun (s : Space d) => v +ᵥ s) :=
+lemma differentiable_vadd {d} (v : EuclideanSpace ℝ (Fin d))
+    : Differentiable ℝ (fun (s : Space d) => v +ᵥ s) :=
   mk_differentiable.comp <| by fun_prop
 
 @[simp]
-lemma fderiv_vadd {d} (v : EuclideanSpace ℝ (Fin d)) :
-    fderiv ℝ (fun s => v +ᵥ s) = fun (_ : Space d) => ContinuousLinearMap.id ℝ _ := by
+lemma fderiv_vadd {d} (v : EuclideanSpace ℝ (Fin d))
+    : fderiv ℝ (fun s => v +ᵥ s) = fun (_ : Space d) => ContinuousLinearMap.id ℝ _ := by
   ext s ds i
   rw [fderiv_space_components]
   · simp [fderiv_const_add]
   · fun_prop
 
 @[fun_prop]
-lemma vadd_hasTemperateGrowth {d} (v : EuclideanSpace ℝ (Fin d)) :
-    Function.HasTemperateGrowth (fun s : Space d => v +ᵥ s) := by
+lemma vadd_hasTemperateGrowth {d} (v : EuclideanSpace ℝ (Fin d))
+    : Function.HasTemperateGrowth (fun s : Space d => v +ᵥ s) := by
   apply Function.HasTemperateGrowth.of_fderiv (k := 1) (C := 1 + ‖v‖)
   · simp [fderiv_vadd]
   · fun_prop

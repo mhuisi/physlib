@@ -57,8 +57,10 @@ namespace CollectOfReduceBool
 
 -/
 
-/-- A structure used for collecting names of results dependent on the
-  `Lean.ofReduceBool` axiom. -/
+/--
+A structure used for collecting names of results dependent on the
+`Lean.ofReduceBool` axiom.
+-/
 structure State where
   /-- The names which have already been visited as part of the state. -/
   visited : NameSet := {}
@@ -71,8 +73,10 @@ structure State where
 
 -/
 
-/-- A monad used for collecting names of results dependent on the
-  `Lean.ofReduceBool` axiom. -/
+/--
+A monad used for collecting names of results dependent on the
+`Lean.ofReduceBool` axiom.
+-/
 abbrev M := ReaderT Environment $ StateM State
 
 /-!
@@ -81,14 +85,16 @@ abbrev M := ReaderT Environment $ StateM State
 
 -/
 
-/-- Given a `c : Name` updating the monad `M` based on which results which `c` uses
-  depend on the `Lean.ofReduceBool` axiom. -/
+/--
+Given a `c : Name` updating the monad `M` based on which results which `c` uses
+depend on the `Lean.ofReduceBool` axiom.
+-/
 partial def collect (c : Name) (parents : NameSet) : M Unit := do
-  let collectExpr (e : Expr) : M Unit := e.getUsedConstants.forM fun x =>
-    collect x (parents.insert c)
+  let collectExpr (e : Expr) : M Unit :=
+    e.getUsedConstants.forM fun x => collect x (parents.insert c)
   let s ← get
   if s.containsOfReduceBool.contains c then
-    modify fun s => { s with containsOfReduceBool := s.containsOfReduceBool.append parents}
+    modify fun s => { s with containsOfReduceBool := s.containsOfReduceBool.append parents }
   unless s.visited.contains c do
     modify fun s => { s with visited := s.visited.insert c }
     let env ← read
@@ -96,23 +102,26 @@ partial def collect (c : Name) (parents : NameSet) : M Unit := do
     -- env in case of (async) errors.
     match env.checked.get.find? c with
     | some (ConstantInfo.axiomInfo v) =>
-        if v.name == `Lean.ofReduceBool || (toString v.name).contains "native_decide" then
-            modify fun s => { s with containsOfReduceBool :=
-              s.containsOfReduceBool.append (parents.insert c)}
-        collectExpr v.type
+      if v.name == `Lean.ofReduceBool || (toString v.name).contains "native_decide" then
+        modify fun s => {
+          s with
+          containsOfReduceBool := s.containsOfReduceBool.append (parents.insert c)
+        }
+      collectExpr v.type
     | some (ConstantInfo.defnInfo v) =>
-        collectExpr v.type *> collectExpr v.value
+      collectExpr v.type *> collectExpr v.value
     | some (ConstantInfo.thmInfo v) =>
-        collectExpr v.type *> collectExpr v.value
+      collectExpr v.type *> collectExpr v.value
     | some (ConstantInfo.opaqueInfo v) =>
-        collectExpr v.type *> collectExpr v.value
-    | some (ConstantInfo.quotInfo _) => pure ()
+      collectExpr v.type *> collectExpr v.value
+    | some (ConstantInfo.quotInfo _) =>
+      pure ()
     | some (ConstantInfo.ctorInfo v) =>
-        collectExpr v.type
+      collectExpr v.type
     | some (ConstantInfo.recInfo v) =>
-        collectExpr v.type
+      collectExpr v.type
     | some (ConstantInfo.inductInfo v) =>
-        collectExpr v.type *> v.ctors.forM fun x => collect x (parents.insert c)
+      collectExpr v.type *> v.ctors.forM fun x => collect x (parents.insert c)
     | none => pure ()
 
 /-!
@@ -121,10 +130,11 @@ partial def collect (c : Name) (parents : NameSet) : M Unit := do
 
 -/
 
-/-- Given a `c : Array Name` updating the monad `M` based on which results
-  depend on the `Lean.ofReduceBool` axiom. -/
-partial def allOfReduceBool (c : Array Name) : M Unit := do
-  c.forM fun x => collect x {}
+/--
+Given a `c : Array Name` updating the monad `M` based on which results
+depend on the `Lean.ofReduceBool` axiom.
+-/
+partial def allOfReduceBool (c : Array Name) : M Unit := do c.forM fun x => collect x {}
 
 end CollectOfReduceBool
 
@@ -134,8 +144,10 @@ end CollectOfReduceBool
 
 -/
 
-/-- Given a `c : Array Name` the names of all results used to defined
-  the results in `c` with the `Lean.ofReduceBool` axiom. -/
+/--
+Given a `c : Array Name` the names of all results used to defined
+the results in `c` with the `Lean.ofReduceBool` axiom.
+-/
 def collectOfReduceBool (c : Array Name) : CoreM (Array Name) := do
   let env ← getEnv
   let (_, s) := ((CollectOfReduceBool.allOfReduceBool c).run env).run {}
@@ -148,16 +160,19 @@ def collectOfReduceBool (c : Array Name) : CoreM (Array Name) := do
 -/
 
 /-- The files of the libraries with root modules `libs`, as the imports of those roots. -/
-def libraryImports (libs : Array Name) : IO (Array Import) := libs.flatMapM fun lib => do
-  let (mod, _) ← readModuleData (← findOLean lib)
-  return mod.imports.filter (·.module != `Init)
+def libraryImports (libs : Array Name) : IO (Array Import) :=
+  libs.flatMapM fun lib => do
+    let (mod, _) ← readModuleData (← findOLean lib)
+    return mod.imports.filter (·.module != `Init)
 
 /-- The user defined constants of the libraries with root modules `libs`. -/
 def libraryUserConsts (libs : Array Name) : CoreM (Array ConstantInfo) := do
   (← libraryImports libs).flatMapM Physlib.Imports.getUserConsts
 
-/-- The user defined constants of the libraries `libs` depending on the
-  `Lean.ofReduceBool` axiom. -/
+/--
+The user defined constants of the libraries `libs` depending on the
+`Lean.ofReduceBool` axiom.
+-/
 def allWithOfReduceBool (libs : Array Name) : CoreM (Array Name) := do
   collectOfReduceBool ((← libraryUserConsts libs).map fun c => c.name)
 
@@ -179,28 +194,27 @@ unsafe def allPseudoAttributed : CoreM (Array Name) := do
 
 -/
 
-/-- Checks, over the libraries with root modules `libs`, that the results attributed `pseudo`
-  are exactly those depending on the `Lean.ofReduceBool` axiom. Returns whether the test
-  passed. -/
+/--
+Checks, over the libraries with root modules `libs`, that the results attributed `pseudo`
+are exactly those depending on the `Lean.ofReduceBool` axiom. Returns whether the test
+passed.
+-/
 unsafe def pseudoTest (libs : Array Name) : MetaM Bool := do
   let allWithPseudo ← Physlib.allWithOfReduceBool libs
   let allConst ← libraryUserConsts libs
   let allConst := allConst.map fun c => c.name
   let allWithPseudo := allWithPseudo.filter fun n => n ∈ allConst
   let pseudoAttributed := (← allPseudoAttributed).filter fun n => n ∈ allConst
-  let withPseudoAxiomNotAttributed :=
-    allWithPseudo.filter fun x => ¬ x ∈ pseudoAttributed
-  let attributedNotWithPseudoAxiom :=
-    pseudoAttributed.filter fun x => ¬ x ∈ allWithPseudo
+  let withPseudoAxiomNotAttributed := allWithPseudo.filter fun x => ¬ x ∈ pseudoAttributed
+  let attributedNotWithPseudoAxiom := pseudoAttributed.filter fun x => ¬ x ∈ allWithPseudo
   if withPseudoAxiomNotAttributed ≠ #[] ∨ attributedNotWithPseudoAxiom ≠ #[] then
-    panic! s!"
-\x1b[31mThere is an error in the pseudo test:\x1b[0m
-  The following names depend on `Lean.ofReduceBool` or `native_decide`
-  but are not attributed `pseudo`:
-  {withPseudoAxiomNotAttributed}
-  The following names are attributed `pseudo` but do not depend on `Lean.ofReduceBool`
-  or `native_decide`:
-  {attributedNotWithPseudoAxiom}"
+    panic! s!"\n\x1b[31mThere is an error in the pseudo test:\x1b[0m\
+      \n  The following names depend on `Lean.ofReduceBool` or `native_decide`\
+      \n  but are not attributed `pseudo`:\
+      \n  {withPseudoAxiomNotAttributed}\
+      \n  The following names are attributed `pseudo` but do not depend on `Lean.ofReduceBool`\
+      \n  or `native_decide`:\
+      \n  {attributedNotWithPseudoAxiom}"
     return false
   println! "\x1b[32mPseudo results are all correctly attributed: test passed.\x1b[0m"
   return true

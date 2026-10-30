@@ -145,10 +145,12 @@ section Sums
 
 variable {α : Type*} [Fintype α] (f : α → E →ₗ.[R] F)
 
-/-- A finite sum of partial linear maps.
+/--
+A finite sum of partial linear maps.
 
-  `sum f` and `∑ a, f a` are equal, but not by definition.
-  With `sum f` both `domain` and `toFun` are made explicit. -/
+`sum f` and `∑ a, f a` are equal, but not by definition.
+With `sum f` both `domain` and `toFun` are made explicit.
+-/
 def sum : E →ₗ.[R] F where
   domain := ⨅ a, (f a).domain
   toFun := ∑ a, (f a).toFun ∘ₗ inclusion (fun _ _ ↦ by simp_all only [mem_iInf])
@@ -173,8 +175,10 @@ variable {G : Type*} [AddCommGroup G] [Module R G]
 variable (g g₁ g₂ : F →ₗ.[R] G) (f f₁ f₂ : E →ₗ.[R] F)
 variable {v : F →ₗ.[R] G} {u : E →ₗ.[R] F}
 
-/-- `g ∘ᵣ f` is the composition of `g` with `f` restricted to a domain consisting of exactly those
-  `x : f.domain` for which `f x ∈ g.domain`. -/
+/--
+`g ∘ᵣ f` is the composition of `g` with `f` restricted to a domain consisting of exactly those
+`x : f.domain` for which `f x ∈ g.domain`.
+-/
 def compRestricted : E →ₗ.[R] G :=
   g.comp (f.domRestrict <| (g.domain.comap f.toFun).map f.domain.subtype) (by
     intro x
@@ -195,23 +199,25 @@ lemma compRestricted_domain : (g ∘ᵣ f).domain = (g.domain.comap f.toFun).map
   refine inf_of_le_left ?_
   intro x h
   simp only [mem_map, mem_comap, toFun_eq_coe, subtype_apply, Subtype.exists, exists_and_right,
-    exists_eq_right] at h
+      exists_eq_right]
+    at h
   exact h.choose
 
-lemma mem_compRestricted_domain_iff {x : E} :
-    x ∈ (v ∘ᵣ u).domain ↔ ∃ h : x ∈ u.domain, u ⟨x, h⟩ ∈ v.domain := by
+lemma mem_compRestricted_domain_iff {x : E}
+    : x ∈ (v ∘ᵣ u).domain ↔ ∃ h : x ∈ u.domain, u ⟨x, h⟩ ∈ v.domain := by
   simp [compRestricted_domain]
 
-lemma mem_compRestricted_domain_iff' {x : E} :
-    x ∈ (v ∘ᵣ u).domain ↔ ∃ y : u.domain, x = y ∧ ∃ y' : v.domain, u y = y' := by
+lemma mem_compRestricted_domain_iff' {x : E}
+    : x ∈ (v ∘ᵣ u).domain ↔ ∃ y : u.domain, x = y ∧ ∃ y' : v.domain, u y = y' := by
   simp [mem_compRestricted_domain_iff]
 
 lemma mem_domain_of_mem_compRestricted_domain (x : (v ∘ᵣ u).domain) : u ⟨x, x.2.2⟩ ∈ v.domain :=
   (mem_compRestricted_domain_iff.mp x.2).choose_spec
 
 @[simp]
-lemma compRestricted_apply (x : (v ∘ᵣ u).domain) :
-    (v ∘ᵣ u) x = v ⟨u ⟨x, x.2.2⟩, mem_domain_of_mem_compRestricted_domain x⟩ := rfl
+lemma compRestricted_apply (x : (v ∘ᵣ u).domain)
+    : (v ∘ᵣ u) x = v ⟨u ⟨x, x.2.2⟩, mem_domain_of_mem_compRestricted_domain x⟩ :=
+  rfl
 
 /-- The zero map is right-absorbing. -/
 @[simp]
@@ -220,17 +226,16 @@ lemma compRestricted_zero : g ∘ᵣ (0 : E →ₗ.[R] F) = 0 := by
   · simp [mem_compRestricted_domain_iff]
   · exact g.map_zero
 
-lemma compRestricted_assoc {H : Type*} [AddCommGroup H] [Module R H]
-    (f₁ : G →ₗ.[R] H) (f₂ : F →ₗ.[R] G) (f₃ : E →ₗ.[R] F) :
-    (f₁ ∘ᵣ f₂) ∘ᵣ f₃ = f₁ ∘ᵣ f₂ ∘ᵣ f₃ := by
+lemma compRestricted_assoc
+    {H : Type*} [AddCommGroup H] [Module R H] (f₁ : G →ₗ.[R] H) (f₂ : F →ₗ.[R] G) (f₃ : E →ₗ.[R] F)
+    : (f₁ ∘ᵣ f₂) ∘ᵣ f₃ = f₁ ∘ᵣ f₂ ∘ᵣ f₃ := by
   ext
   · simp only [mem_compRestricted_domain_iff]
     tauto
   · rfl
 
 /-- `compRestricted` is the same as `comp` when the range of `u` is contained in `v.domain`. -/
-lemma compRestricted_eq_comp (h : ∀ x : u.domain, u x ∈ v.domain) :
-    v ∘ᵣ u = v.comp u h := by
+lemma compRestricted_eq_comp (h : ∀ x : u.domain, u x ∈ v.domain) : v ∘ᵣ u = v.comp u h := by
   ext x
   · change _ ↔ x ∈ u.domain
     simp [mem_compRestricted_domain_iff, h]
@@ -238,12 +243,12 @@ lemma compRestricted_eq_comp (h : ∀ x : u.domain, u x ∈ v.domain) :
 
 /-- `compRestricted` is maximal amongst compositions of `v` with domain restrictions of `u`. -/
 lemma comp_le_compRestricted
-    {S : Submodule R E} (h : ∀ x : (u.domRestrict S).domain, u ⟨x, x.2.2⟩ ∈ v.domain) :
-    v.comp (u.domRestrict S) h ≤ v ∘ᵣ u :=
+    {S : Submodule R E} (h : ∀ x : (u.domRestrict S).domain, u ⟨x, x.2.2⟩ ∈ v.domain)
+    : v.comp (u.domRestrict S) h ≤ v ∘ᵣ u :=
   ⟨fun x hx ↦ mem_compRestricted_domain_iff.mpr ⟨hx.2, h ⟨x, hx⟩⟩, by aesop⟩
 
-lemma compRestricted_mono_left {g g' : F →ₗ.[R] G} (h : g ≤ g') (f : E →ₗ.[R] F) :
-    g ∘ᵣ f ≤ g' ∘ᵣ f := by
+lemma compRestricted_mono_left {g g' : F →ₗ.[R] G} (h : g ≤ g') (f : E →ₗ.[R] F)
+    : g ∘ᵣ f ≤ g' ∘ᵣ f := by
   constructor
   · intro x hx
     obtain ⟨hx', hfx⟩ := mem_compRestricted_domain_iff.mp hx
@@ -252,8 +257,8 @@ lemma compRestricted_mono_left {g g' : F →ₗ.[R] G} (h : g ≤ g') (f : E →
     exact @h.2 ⟨f ⟨x, x.2.2⟩, mem_domain_of_mem_compRestricted_domain x⟩
       ⟨f ⟨y, y.2.2⟩, mem_domain_of_mem_compRestricted_domain y⟩ (by simp [hxy])
 
-lemma compRestricted_mono_right (g : F →ₗ.[R] G) {f f' : E →ₗ.[R] F} (h : f ≤ f') :
-    g ∘ᵣ f ≤ g ∘ᵣ f' := by
+lemma compRestricted_mono_right (g : F →ₗ.[R] G) {f f' : E →ₗ.[R] F} (h : f ≤ f')
+    : g ∘ᵣ f ≤ g ∘ᵣ f' := by
   constructor
   · intro x hx
     obtain ⟨hx', hfx⟩ := mem_compRestricted_domain_iff.mp hx
@@ -261,11 +266,10 @@ lemma compRestricted_mono_right (g : F →ₗ.[R] G) {f f' : E →ₗ.[R] F} (h 
   · intro x y hxy
     simp only [compRestricted_apply, @h.2 ⟨x, x.2.2⟩ ⟨y, y.2.2⟩ hxy]
 
-@[simp]
-lemma neg_compRestricted : (-g) ∘ᵣ f = -g ∘ᵣ f := rfl
+@[simp] lemma neg_compRestricted : (-g) ∘ᵣ f = - g ∘ᵣ f := rfl
 
 @[simp]
-lemma compRestricted_neg : g ∘ᵣ (-f) = -g ∘ᵣ f := by
+lemma compRestricted_neg : g ∘ᵣ (-f) = - g ∘ᵣ f := by
   ext x hx hx'
   · simp [mem_compRestricted_domain_iff]
   · obtain ⟨h, h'⟩ := mem_compRestricted_domain_iff.mp (neg_domain (g ∘ᵣ f) ▸ hx')
@@ -295,19 +299,22 @@ lemma compRestricted_sub_ge : g ∘ᵣ f₁ - g ∘ᵣ f₂ ≤ g ∘ᵣ (f₁ -
   simp only [sub_eq_add_neg, ← compRestricted_neg]
   exact compRestricted_add_ge g f₁ (-f₂)
 
-lemma compRestricted_smul {S : Type*} [DivisionRing S]
-    [Module S E] [Module S F] [Module S G] [SMulCommClass S S F] [SMulCommClass S S G]
-    {c : S} (hc : c ≠ 0) (g : F →ₗ.[S] G) (f : E →ₗ.[S] F) :
-    g ∘ᵣ (c • f) = c • (g ∘ᵣ f) := by
+lemma compRestricted_smul
+    {S : Type*} [DivisionRing S] [Module S E] [Module S F] [Module S G] [SMulCommClass S S F]
+    [SMulCommClass S S G]
+    {c : S} (hc : c ≠ 0)
+    (g : F →ₗ.[S] G) (f : E →ₗ.[S] F)
+    : g ∘ᵣ (c • f) = c • (g ∘ᵣ f) := by
   ext x hx hx'
   · simp [mem_compRestricted_domain_iff, g.domain.smul_mem_iff hc]
   · obtain ⟨h, h'⟩ := mem_compRestricted_domain_iff.mp (smul_domain c (g ∘ᵣ f) ▸ hx')
     exact g.toFun.map_smul c ⟨f ⟨x, h⟩, h'⟩
 
 @[simp]
-lemma smul_compRestricted {M : Type*} [Monoid M] [DistribMulAction M G] [SMulCommClass R M G]
-    (c : M) (g : F →ₗ.[R] G) (f : E →ₗ.[R] F) :
-    (c • g) ∘ᵣ f = c • (g ∘ᵣ f) := by
+lemma smul_compRestricted
+    {M : Type*} [Monoid M] [DistribMulAction M G] [SMulCommClass R M G]
+    (c : M) (g : F →ₗ.[R] G) (f : E →ₗ.[R] F)
+    : (c • g) ∘ᵣ f = c • (g ∘ᵣ f) := by
   ext
   · simp [compRestricted_domain]
   · simp
@@ -340,14 +347,11 @@ instance instMonoid : Monoid (E →ₗ.[R] E) where
 
 lemma mul_def (f₁ f₂ : E →ₗ.[R] E) : f₁ * f₂ = f₁ ∘ᵣ f₂ := rfl
 
-@[simp]
-lemma one_domain : (1 : E →ₗ.[R] E).domain = ⊤ := rfl
+@[simp] lemma one_domain : (1 : E →ₗ.[R] E).domain = ⊤ := rfl
 
-@[simp]
-lemma one_toFun : (1 : E →ₗ.[R] E).toFun = topEquiv.toLinearMap := rfl
+@[simp] lemma one_toFun : (1 : E →ₗ.[R] E).toFun = topEquiv.toLinearMap := rfl
 
-@[simp]
-lemma one_coe : (1 : E →ₗ.[R] E).toFun' = ⇑topEquiv.toLinearMap := rfl
+@[simp] lemma one_coe : (1 : E →ₗ.[R] E).toFun' = ⇑topEquiv.toLinearMap := rfl
 
 end Monoid
 

@@ -51,26 +51,30 @@ variable {X} [NormedAddCommGroup X] [InnerProductSpace ℝ X] [CompleteSpace X]
 
 namespace ClassicalMechanics
 
-/-- The Euler Lagrange operator, for a trajectory `q : Time → X`,
-  and a lagrangian `Time → X → X → ℝ`, the Euler-Lagrange operator is
-    `∂L/∂q - dₜ(∂L/∂(dₜ q))`. -/
+/--
+The Euler Lagrange operator, for a trajectory `q : Time → X`,
+and a lagrangian `Time → X → X → ℝ`, the Euler-Lagrange operator is
+  `∂L/∂q - dₜ(∂L/∂(dₜ q))`.
+-/
 noncomputable def eulerLagrangeOp (L : Time → X → X → ℝ) (q : Time → X) : Time → X := fun t =>
   gradient (L t · (∂ₜ q t)) (q t) - ∂ₜ (fun t' => gradient (L t' (q t') ·) (∂ₜ q t')) t
 
-lemma eulerLagrangeOp_eq (L : Time → X → X → ℝ) (q : Time → X) :
-    eulerLagrangeOp L q = fun t => gradient (L t · (∂ₜ q t)) (q t)
-    - ∂ₜ (fun t' => gradient (L t' (q t') ·) (∂ₜ q t')) t := by rfl
+lemma eulerLagrangeOp_eq (L : Time → X → X → ℝ) (q : Time → X)
+    : eulerLagrangeOp L q
+      = fun t =>
+        gradient (L t · (∂ₜ q t)) (q t) - ∂ₜ (fun t' => gradient (L t' (q t') ·) (∂ₜ q t')) t := by
+  rfl
 
-lemma eulerLagrangeOp_zero (q : Time → X) :
-    eulerLagrangeOp (fun _ _ _ => 0) q = fun _ => 0 := by
+lemma eulerLagrangeOp_zero (q : Time → X) : eulerLagrangeOp (fun _ _ _ => 0) q = fun _ => 0 := by
   simp [eulerLagrangeOp_eq, Time.deriv_eq]
 
-/-- The variational derivative of the action `∫ t, L t (q' t) (deriv q' t)` for a Lagrangian `L`
-  is equal to the `eulerLagrangeOp`. -/
+/--
+The variational derivative of the action `∫ t, L t (q' t) (deriv q' t)` for a Lagrangian `L`
+is equal to the `eulerLagrangeOp`.
+-/
 theorem euler_lagrange_varGradient
-    (L : Time → X → X → ℝ) (q : Time → X)
-    (hq : ContDiff ℝ ∞ q) (hL : ContDiff ℝ ∞ ↿L) :
-    (δ (q':=q), ∫ t, L t (q' t) (fderiv ℝ q' t 1)) = eulerLagrangeOp L q := by
+    (L : Time → X → X → ℝ) (q : Time → X) (hq : ContDiff ℝ ∞ q) (hL : ContDiff ℝ ∞ ↿L)
+    : (δ (q':=q), ∫ t, L t (q' t) (fderiv ℝ q' t 1)) = eulerLagrangeOp L q := by
   simp only [eulerLagrangeOp_eq, Time.deriv_eq]
   apply HasVarGradientAt.varGradient
   apply HasVarGradientAt.intro _
@@ -83,7 +87,7 @@ theorem euler_lagrange_varGradient
       intro x u
       apply DifferentiableAt.hasAdjFDerivAt
       apply ContDiff.differentiable (n := ∞) (by fun_prop) (by simp)
-    · apply HasVarAdjDerivAt.prod (F:=fun φ => φ)
+    · apply HasVarAdjDerivAt.prod (F := fun φ => φ)
       · apply HasVarAdjDerivAt.id _ hq
       · apply HasVarAdjDerivAt.fderiv (hu := hq)
   case hgrad =>
@@ -92,8 +96,8 @@ theorem euler_lagrange_varGradient
     congr
     all_goals
       try funext t
-      rw [gradient_eq_adjFDeriv, adjFDeriv_uncurry] <;>
-        apply ContDiff.differentiable (n := ∞) (by fun_prop) (by simp)
+      rw [gradient_eq_adjFDeriv, adjFDeriv_uncurry]
+        <;> apply ContDiff.differentiable (n := ∞) (by fun_prop) (by simp)
 
 section Covector
 
@@ -107,22 +111,24 @@ TODO "State `canonicalMomentum` and `eulerLagrange` for curves `Time → E` with
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 
-variable (S : LagrangianSystem 𝓘(ℝ, E) ⟨E⟩) (t₀ : Time)
+variable (S : LagrangianSystem (𝓘(ℝ, E)) ⟨E⟩) (t₀ : Time)
 
 /-- The canonical momentum `∂L/∂q̇` of a curve `q`. -/
 noncomputable def canonicalMomentum (q : ℝ → E) (τ : ℝ) : E →L[ℝ] ℝ :=
   fderiv ℝ (fun v ↦ S.coord t₀ (τ, q τ, v)) (deriv q τ)
 
-/-- The Euler-Lagrange covector `∂L/∂q - dₜ(∂L/∂q̇)` of a curve `q`; the covector counterpart of
-`eulerLagrangeOp`. -/
+/--
+The Euler-Lagrange covector `∂L/∂q - dₜ(∂L/∂q̇)` of a curve `q`; the covector counterpart of
+`eulerLagrangeOp`.
+-/
 noncomputable def eulerLagrange (q : ℝ → E) (τ : ℝ) : E →L[ℝ] ℝ :=
   fderiv ℝ (fun x ↦ S.coord t₀ (τ, x, deriv q τ)) (q τ) - deriv (canonicalMomentum S t₀ q) τ
 
 variable {S t₀}
 
 /-- The Euler-Lagrange covector of a smooth curve is smooth. -/
-lemma contDiff_eulerLagrange {q : ℝ → E} (hq : ContDiff ℝ ∞ q) :
-    ContDiff ℝ ∞ (eulerLagrange S t₀ q) := by
+lemma contDiff_eulerLagrange {q : ℝ → E} (hq : ContDiff ℝ ∞ q)
+    : ContDiff ℝ ∞ (eulerLagrange S t₀ q) := by
   have hL := S.contDiff_coord t₀
   have hq' := (contDiff_infty_iff_deriv.1 hq).2
   have hP : ContDiff ℝ ∞ (canonicalMomentum S t₀ q) := by unfold canonicalMomentum; fun_prop
@@ -130,8 +136,8 @@ lemma contDiff_eulerLagrange {q : ℝ → E} (hq : ContDiff ℝ ∞ q) :
   exact ContDiff.sub (by fun_prop) (contDiff_infty_iff_deriv.1 hP).2
 
 /-- The Euler-Lagrange covector at `τ` depends only on the germ of the curve at `τ`. -/
-lemma eulerLagrange_congr {q g : ℝ → E} {τ : ℝ} (h : q =ᶠ[𝓝 τ] g) :
-    eulerLagrange S t₀ q τ = eulerLagrange S t₀ g τ := by
+lemma eulerLagrange_congr {q g : ℝ → E} {τ : ℝ} (h : q =ᶠ[𝓝 τ] g)
+    : eulerLagrange S t₀ q τ = eulerLagrange S t₀ g τ := by
   unfold eulerLagrange canonicalMomentum
   rw [h.deriv_eq, h.eq_of_nhds]
   congr 1
@@ -140,10 +146,10 @@ lemma eulerLagrange_congr {q g : ℝ → E} {τ : ℝ} (h : q =ᶠ[𝓝 τ] g) :
   rw [hσ.eq_of_nhds, hσ.deriv_eq]
 
 /-- The Euler-Lagrange covector only depends on the Lagrangian near the curve. -/
-lemma eulerLagrange_congr_lagrangian {S' : LagrangianSystem 𝓘(ℝ, E) ⟨E⟩} {q : ℝ → E} {τ : ℝ}
-    {N : Set E} (hN : IsOpen N) (hq : ∀ᶠ σ in 𝓝 τ, q σ ∈ N)
-    (h : ∀ p : ℝ × E × E, p.2.1 ∈ N → S.coord t₀ p = S'.coord t₀ p) :
-    eulerLagrange S t₀ q τ = eulerLagrange S' t₀ q τ := by
+lemma eulerLagrange_congr_lagrangian
+    {S' : LagrangianSystem (𝓘(ℝ, E)) ⟨E⟩} {q : ℝ → E} {τ : ℝ} {N : Set E} (hN : IsOpen N)
+    (hq : ∀ᶠ σ in 𝓝 τ, q σ ∈ N) (h : ∀ p : ℝ × E × E, p.2.1 ∈ N → S.coord t₀ p = S'.coord t₀ p)
+    : eulerLagrange S t₀ q τ = eulerLagrange S' t₀ q τ := by
   unfold eulerLagrange canonicalMomentum
   have h1 : (fun y ↦ S.coord t₀ (τ, y, deriv q τ)) =ᶠ[𝓝 (q τ)]
       fun y ↦ S'.coord t₀ (τ, y, deriv q τ) := by

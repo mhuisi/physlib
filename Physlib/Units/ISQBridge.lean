@@ -40,9 +40,11 @@ quantities back without *adding* them.
 
 namespace Dimension
 
-/-- The function underlying `toISQHom`: fix length, mass, time and temperature, and
-  send PhysLib's charge generator to the derived ISQ charge `I · T` (the current
-  exponent is the charge exponent, and the time exponent absorbs it). -/
+/--
+The function underlying `toISQHom`: fix length, mass, time and temperature, and
+send PhysLib's charge generator to the derived ISQ charge `I · T` (the current
+exponent is the charge exponent, and the time exponent absorbs it).
+-/
 def toISQFun (d : Dimension LTMCTDimensionBase) : Dimension ISQDimensionBase :=
   ofFunction fun
     | .length => d.exponent .length
@@ -65,9 +67,11 @@ def toISQHom : Dimension LTMCTDimensionBase →* Dimension ISQDimensionBase wher
 /-- `toISQHom` applied to a dimension is `toISQFun`. -/
 lemma toISQHom_apply (d : Dimension LTMCTDimensionBase) : toISQHom d = toISQFun d := rfl
 
-/-- The function underlying `fromISQHom`: fix length, mass and temperature, read
-  electric current as charge/time (the charge exponent is the current exponent, and the
-  time exponent subtracts it), and drop amount of substance and luminous intensity. -/
+/--
+The function underlying `fromISQHom`: fix length, mass and temperature, read
+electric current as charge/time (the charge exponent is the current exponent, and the
+time exponent subtracts it), and drop amount of substance and luminous intensity.
+-/
 def fromISQFun (d : Dimension ISQDimensionBase) : Dimension LTMCTDimensionBase :=
   ofFunction fun
     | .length => d.exponent .length
@@ -88,13 +92,15 @@ def fromISQHom : Dimension ISQDimensionBase →* Dimension LTMCTDimensionBase wh
 /-- `fromISQHom` applied to a dimension is `fromISQFun`. -/
 lemma fromISQHom_apply (d : Dimension ISQDimensionBase) : fromISQHom d = fromISQFun d := rfl
 
-/-- The projection recovers PhysLib's basis from its image under the embedding:
-  `fromISQHom ∘ toISQHom = id`. -/
-lemma fromISQHom_comp_toISQHom :
-    fromISQHom.comp toISQHom = MonoidHom.id (Dimension LTMCTDimensionBase) := by
+/--
+The projection recovers PhysLib's basis from its image under the embedding:
+`fromISQHom ∘ toISQHom = id`.
+-/
+lemma fromISQHom_comp_toISQHom
+    : fromISQHom.comp toISQHom = MonoidHom.id (Dimension LTMCTDimensionBase) := by
   refine MonoidHom.ext fun d => Dimension.ext fun b => ?_
-  cases b <;> simp only [MonoidHom.comp_apply, MonoidHom.id_apply, toISQHom_apply,
-    fromISQHom_apply, fromISQFun, toISQFun, ofFunction_exponent]
+  cases b <;> simp only [MonoidHom.comp_apply, MonoidHom.id_apply, toISQHom_apply, fromISQHom_apply,
+    fromISQFun, toISQFun, ofFunction_exponent]
   all_goals ring
 
 /-- `toISQHom` is injective: PhysLib dimensions include faithfully into ISQ. -/
@@ -108,16 +114,18 @@ lemma toISQHom_injective : Function.Injective toISQHom := by
   cases b with
   | length => simpa only [toISQFun, ofFunction_exponent] using key .length
   | time =>
-      have ht := key .time
-      have hc := key .current
-      simp only [toISQFun, ofFunction_exponent] at ht hc
-      linarith
+    have ht := key .time
+    have hc := key .current
+    simp only [toISQFun, ofFunction_exponent] at ht hc
+    linarith
   | mass => simpa only [toISQFun, ofFunction_exponent] using key .mass
   | charge => simpa only [toISQFun, ofFunction_exponent] using key .current
   | temperature => simpa only [toISQFun, ofFunction_exponent] using key .temperature
 
-/-- `fromISQHom` is surjective: every PhysLib dimension is the reduction of some ISQ
-  dimension (namely its own embedding). -/
+/--
+`fromISQHom` is surjective: every PhysLib dimension is the reduction of some ISQ
+dimension (namely its own embedding).
+-/
 lemma fromISQHom_surjective : Function.Surjective fromISQHom := fun y =>
   ⟨toISQHom y, by rw [← MonoidHom.comp_apply, fromISQHom_comp_toISQHom, MonoidHom.id_apply]⟩
 
@@ -126,21 +134,27 @@ def ltmctToISQ : Embedding LTMCTDimensionBase ISQDimensionBase where
   toHom := toISQHom
   inj := toISQHom_injective
 
-/-- The ISQ dimensions project onto PhysLib's, reading current as charge/time and
-  forgetting amount of substance and luminous intensity. -/
+/--
+The ISQ dimensions project onto PhysLib's, reading current as charge/time and
+forgetting amount of substance and luminous intensity.
+-/
 def isqToLTMCT : Projection ISQDimensionBase LTMCTDimensionBase where
   toHom := fromISQHom
   surj := fromISQHom_surjective
 
-/-- The projection is a retraction of the embedding: `isqToLTMCT ∘ ltmctToISQ = id`. So
-  PhysLib's basis embeds faithfully into ISQ and is recovered by the projection, but not
-  conversely — amount of substance and luminous intensity cannot be recovered. -/
-lemma isqToLTMCT_comp_ltmctToISQ :
-    isqToLTMCT.toHom.comp ltmctToISQ.toHom = MonoidHom.id (Dimension LTMCTDimensionBase) :=
+/--
+The projection is a retraction of the embedding: `isqToLTMCT ∘ ltmctToISQ = id`. So
+PhysLib's basis embeds faithfully into ISQ and is recovered by the projection, but not
+conversely — amount of substance and luminous intensity cannot be recovered.
+-/
+lemma isqToLTMCT_comp_ltmctToISQ
+    : isqToLTMCT.toHom.comp ltmctToISQ.toHom = MonoidHom.id (Dimension LTMCTDimensionBase) :=
   fromISQHom_comp_toISQHom
 
-/-- The embedding is physically faithful on charge: PhysLib's charge generator `C𝓭`
-  maps to the *derived* ISQ charge `I · T`. -/
+/--
+The embedding is physically faithful on charge: PhysLib's charge generator `C𝓭`
+maps to the *derived* ISQ charge `I · T`.
+-/
 lemma toISQHom_C𝓭 : toISQHom C𝓭 = ISQDimensionBase.charge := by
   ext b
   cases b <;> simp [toISQHom_apply, toISQFun, C𝓭, ISQDimensionBase.charge, single_exponent]

@@ -57,11 +57,13 @@ We define the class `Tensorial` here, and provide an API around its use.
 
 namespace TensorSpecies
 
-variable {k : Type} [CommRing k] {C : Type} {G : Type} [Group G]
-    {V : C → Type} [∀ c, AddCommGroup (V c)] [∀ c, Module k (V c)]
-    {basisIdx : C → Type} [∀ c, Fintype (basisIdx c)] [∀ c, DecidableEq (basisIdx c)]
-    {rep : (c : C) → Representation k G (V c)} {b : (c : C) → Module.Basis (basisIdx c) k (V c)}
-    {S : TensorSpecies k C G V basisIdx rep b}
+variable
+  {k : Type} [CommRing k]
+  {C : Type} {G : Type} [Group G]
+  {V : C → Type} [∀ c, AddCommGroup (V c)] [∀ c, Module k (V c)]
+  {basisIdx : C → Type} [∀ c, Fintype (basisIdx c)] [∀ c, DecidableEq (basisIdx c)]
+  {rep : (c : C) → Representation k G (V c)} {b : (c : C) → Module.Basis (basisIdx c) k (V c)}
+  {S : TensorSpecies k C G V basisIdx rep b}
 attribute [-simp] LinearEquiv.cast_apply
 
 /-!
@@ -72,18 +74,20 @@ We first define the `Tensorial` class.
 
 -/
 
-/-- The tensorial class is used to define a tensor structure on a type `M` through a
-  linear equivalence with a module `S.Tensor c` for `S` a tensor species. -/
-class Tensorial {n : outParam ℕ}
-
-    {k : outParam Type} [CommRing k] {C : outParam Type} {G : outParam Type} [Group G]
-    {V :outParam (C → Type)} [∀ c, AddCommGroup (V c)] [∀ c, Module k (V c)]
+/--
+The tensorial class is used to define a tensor structure on a type `M` through a
+linear equivalence with a module `S.Tensor c` for `S` a tensor species.
+-/
+class Tensorial
+    {n : outParam ℕ} {k : outParam Type} [CommRing k]
+    {C : outParam Type} {G : outParam Type} [Group G]
+    {V : outParam (C → Type)} [∀ c, AddCommGroup (V c)] [∀ c, Module k (V c)]
     {basisIdx : outParam (C → Type)} [∀ c, Fintype (basisIdx c)] [∀ c, DecidableEq (basisIdx c)]
     {rep : outParam ((c : C) → Representation k G (V c))}
     {b : outParam ((c : C) → Module.Basis (basisIdx c) k (V c))}
     (S : outParam (TensorSpecies k C G V basisIdx rep b))
-    (c :outParam (Fin n → C)) (M : Type)
-    [AddCommMonoid M] [Module k M] where
+    (c : outParam (Fin n → C))
+    (M : Type) [AddCommMonoid M] [Module k M] where
   /-- The equivalence between `M` and `S.Tensor c` in a tensorial instance. -/
   toTensor : M ≃ₗ[k] S.Tensor c
 
@@ -99,14 +103,14 @@ The module of tensors of a tensor species carries a canonical tensorial instance
 through the equivalence.
 
 -/
-noncomputable instance self {n : ℕ} (S : TensorSpecies k C G V basisIdx rep b) (c : Fin n → C) :
-    Tensorial S c (S.Tensor c) where
+noncomputable instance self {n : ℕ} (S : TensorSpecies k C G V basisIdx rep b) (c : Fin n → C)
+    : Tensorial S c (S.Tensor c) where
   toTensor := LinearEquiv.refl k (S.Tensor c)
 
 @[simp]
-lemma self_toTensor_apply {n : ℕ} (S : TensorSpecies k C G V basisIdx rep b)
-    (c : Fin n → C) (t : S.Tensor c) :
-    Tensorial.toTensor t = t := by
+lemma self_toTensor_apply
+    {n : ℕ} (S : TensorSpecies k C G V basisIdx rep b) (c : Fin n → C) (t : S.Tensor c)
+    : Tensorial.toTensor t = t := by
   rw [Tensorial.toTensor]
   rfl
 
@@ -147,18 +151,16 @@ noncomputable instance mulAction [Tensorial S c M] : MulAction G M where
 
 -/
 
-lemma smul_eq {g : G} {t : M} [Tensorial S c M] :
-    g • t = toTensor.symm (g • toTensor t) := by
+lemma smul_eq {g : G} {t : M} [Tensorial S c M] : g • t = toTensor.symm (g • toTensor t) := by
   rw [Tensorial.toTensor]
   rfl
 
-lemma toTensor_smul {g : G} {t : M} [Tensorial S c M] :
-    toTensor (g • t) = g • toTensor t := by
+lemma toTensor_smul {g : G} {t : M} [Tensorial S c M] : toTensor (g • t) = g • toTensor t := by
   rw [smul_eq]
   simp
 
-lemma smul_toTensor_symm {g : G} {t : Tensor S c} [self : Tensorial S c M] :
-    g • (toTensor (self := self).symm t) = toTensor.symm (g • t) := by
+lemma smul_toTensor_symm {g : G} {t : Tensor S c} [self : Tensorial S c M]
+    : g • (toTensor (self := self).symm t) = toTensor.symm (g • t) := by
   rw [smul_eq]
   simp
 
@@ -168,8 +170,8 @@ lemma smul_toTensor_symm {g : G} {t : Tensor S c} [self : Tensorial S c M] :
 
 -/
 
-noncomputable instance (priority := high) distribMulAction [Tensorial S c M] :
-    DistribMulAction G M where
+noncomputable instance (priority := high) distribMulAction [Tensorial S c M]
+    : DistribMulAction G M where
   smul_add g m m' := by
     apply toTensor.injective
     simp [toTensor_smul, map_add]
@@ -193,8 +195,7 @@ noncomputable def smulLinearMap (g : G) [Tensorial S c M] : M →ₗ[k] M where
     apply toTensor.injective
     simp [toTensor_smul]
 
-lemma smulLinearMap_apply {g : G} [Tensorial S c M] (m : M) :
-    smulLinearMap g m = g • m := rfl
+lemma smulLinearMap_apply {g : G} [Tensorial S c M] (m : M) : smulLinearMap g m = g • m := rfl
 
 /-!
 
@@ -217,8 +218,9 @@ We now prove some properties of the basis induced on a `Tensorial` instance.
 
 -/
 
-lemma basis_toTensor_apply [Tensorial S c M] (m : M) :
-    (Tensor.basis c).repr (toTensor m) = ((Tensor.basis c).map toTensor.symm).repr m := rfl
+lemma basis_toTensor_apply [Tensorial S c M] (m : M)
+    : (Tensor.basis c).repr (toTensor m) = ((Tensor.basis c).map toTensor.symm).repr m :=
+  rfl
 
 /-!
 
@@ -228,11 +230,11 @@ lemma basis_toTensor_apply [Tensorial S c M] (m : M) :
 
 open TensorProduct
 
-noncomputable instance (priority := high) prod [Tensorial S c M] {n2 : ℕ} {c2 : Fin n2 → C}
-    {M₂ : Type} [AddCommMonoid M₂] [Module k M₂] [Tensorial S c2 M₂] :
-    Tensorial S (Fin.append c c2) (M ⊗[k] M₂) where
-  toTensor := (TensorProduct.congr toTensor toTensor).trans
-    (Tensor.tensorEquivProd)
+noncomputable instance (priority := high) prod
+    [Tensorial S c M]
+    {n2 : ℕ} {c2 : Fin n2 → C} {M₂ : Type} [AddCommMonoid M₂] [Module k M₂] [Tensorial S c2 M₂]
+    : Tensorial S (Fin.append c c2) (M ⊗[k] M₂) where
+  toTensor := (TensorProduct.congr toTensor toTensor).trans (Tensor.tensorEquivProd)
 
 /-!
 
@@ -240,10 +242,12 @@ noncomputable instance (priority := high) prod [Tensorial S c M] {n2 : ℕ} {c2 
 
 -/
 
-lemma toTensor_tprod {n2 : ℕ} {c2 : Fin n2 → C} {M₂ : Type}
-    [Tensorial S c M] [AddCommMonoid M₂] [Module k M₂]
-    [Tensorial S c2 M₂] (m : M) (m2 : M₂) :
-    toTensor (m ⊗ₜ[k] m2) = Tensor.prodT (toTensor m) (toTensor m2) := rfl
+lemma toTensor_tprod
+    {n2 : ℕ} {c2 : Fin n2 → C} {M₂ : Type}
+    [Tensorial S c M] [AddCommMonoid M₂] [Module k M₂] [Tensorial S c2 M₂]
+    (m : M) (m2 : M₂)
+    : toTensor (m ⊗ₜ[k] m2) = Tensor.prodT (toTensor m) (toTensor m2) :=
+  rfl
 
 /-!
 
@@ -251,10 +255,11 @@ lemma toTensor_tprod {n2 : ℕ} {c2 : Fin n2 → C} {M₂ : Type}
 
 -/
 
-lemma smul_prod {n2 : ℕ} {c2 : Fin n2 → C} {M₂ : Type}
-    [Tensorial S c M] [AddCommMonoid M₂] [Module k M₂]
-    [Tensorial S c2 M₂] (g : G) (m : M) (m2 : M₂) :
-    g • (m ⊗ₜ[k] m2) = (g • m) ⊗ₜ[k] (g • m2) := by
+lemma smul_prod
+    {n2 : ℕ} {c2 : Fin n2 → C} {M₂ : Type}
+    [Tensorial S c M] [AddCommMonoid M₂] [Module k M₂] [Tensorial S c2 M₂]
+    (g : G) (m : M) (m2 : M₂)
+    : g • (m ⊗ₜ[k] m2) = (g • m) ⊗ₜ[k] (g • m2) := by
   apply toTensor.injective
   simp [toTensor_smul]
   rw [toTensor_tprod, toTensor_tprod]
@@ -267,18 +272,17 @@ lemma smul_prod {n2 : ℕ} {c2 : Fin n2 → C} {M₂ : Type}
 -/
 
 open Tensor in
-lemma basis_map_prod {n2 : ℕ} {c2 : Fin n2 → C} {M₂ : Type}
-    [Tensorial S c M] [AddCommMonoid M₂] [Module k M₂]
-    [Tensorial S c2 M₂] :
-    (Tensor.basis (S := S) (Fin.append c c2)).map
-      (toTensor (M := (M ⊗[k] M₂))).symm =
-    (((Tensor.basis (S := S) c).map (toTensor (M := M)).symm).tensorProduct
-    ((Tensor.basis (S := S) c2).map (toTensor (M := M₂)).symm)).reindex
-    (ComponentIdx.prod.symm) := by
+lemma basis_map_prod
+    {n2 : ℕ} {c2 : Fin n2 → C} {M₂ : Type}
+    [Tensorial S c M] [AddCommMonoid M₂] [Module k M₂] [Tensorial S c2 M₂]
+    : (Tensor.basis (S := S) (Fin.append c c2)).map (toTensor (M := (M ⊗[k] M₂))).symm
+      = (((Tensor.basis (S := S) c).map (toTensor (M := M)).symm).tensorProduct
+          ((Tensor.basis (S := S) c2).map (toTensor (M := M₂)).symm)).reindex
+        (ComponentIdx.prod.symm) := by
   rw [Tensor.basis_prod_eq]
   ext b
-  simp only [ComponentIdx.prod, Module.Basis.map_apply, Module.Basis.coe_reindex,
-    Equiv.symm_symm, Equiv.coe_fn_mk, Function.comp_apply, Module.Basis.tensorProduct_apply]
+  simp only [ComponentIdx.prod, Module.Basis.map_apply, Module.Basis.coe_reindex, Equiv.symm_symm,
+    Equiv.coe_fn_mk, Function.comp_apply, Module.Basis.tensorProduct_apply]
   apply toTensor.injective
   simp only [LinearEquiv.apply_symm_apply]
   rw [toTensor_tprod]
@@ -286,29 +290,32 @@ lemma basis_map_prod {n2 : ℕ} {c2 : Fin n2 → C} {M₂ : Type}
   rfl
 
 open Tensor in
-lemma prod_basis_of_map_reindex {n2 : ℕ} {c2 : Fin n2 → C} {M₂ : Type}
-    [Tensorial S c M] [AddCommMonoid M₂] [Module k M₂]
-    [Tensorial S c2 M₂] {ι ι2 : Type} {b : Module.Basis ι k M} {b2 : Module.Basis ι2 k M₂}
+lemma prod_basis_of_map_reindex
+    {n2 : ℕ} {c2 : Fin n2 → C} {M₂ : Type}
+    [Tensorial S c M] [AddCommMonoid M₂] [Module k M₂] [Tensorial S c2 M₂]
+    {ι ι2 : Type} {b : Module.Basis ι k M} {b2 : Module.Basis ι2 k M₂}
     {e : Tensor.ComponentIdx c ≃ ι} {e2 : Tensor.ComponentIdx c2 ≃ ι2}
     (h : b = ((Tensor.basis (S := S) c).map toTensor.symm).reindex e)
-    (h2 : b2 = ((Tensor.basis (S := S) c2).map toTensor.symm).reindex e2) :
-    b.tensorProduct b2 = ((Tensor.basis (S := S) (Fin.append c c2)).map
-    (toTensor (S := S) (M := M ⊗[k] M₂)).symm).reindex
-    (ComponentIdx.prod.trans (e.prodCongr e2)) := by
+    (h2 : b2 = ((Tensor.basis (S := S) c2).map toTensor.symm).reindex e2)
+    : b.tensorProduct b2
+      = ((Tensor.basis (S := S) (Fin.append c c2)).map
+          (toTensor (S := S) (M := M ⊗[k] M₂)).symm).reindex
+        (ComponentIdx.prod.trans (e.prodCongr e2)) := by
   ext ⟨i, j⟩
   simp_rw [Tensorial.basis_map_prod, Module.Basis.tensorProduct_apply]
   simp [h, h2]
 
 open Tensor in
-lemma prod_tensor_basis_eq_map_reindex {n2 : ℕ} {c2 : Fin n2 → C} {M₂ : Type}
-    [Tensorial S c M] [AddCommMonoid M₂] [Module k M₂]
-    [Tensorial S c2 M₂] {ι ι2 : Type} {b : Module.Basis ι k M} {b2 : Module.Basis ι2 k M₂}
+lemma prod_tensor_basis_eq_map_reindex
+    {n2 : ℕ} {c2 : Fin n2 → C} {M₂ : Type}
+    [Tensorial S c M] [AddCommMonoid M₂] [Module k M₂] [Tensorial S c2 M₂]
+    {ι ι2 : Type} {b : Module.Basis ι k M} {b2 : Module.Basis ι2 k M₂}
     {e : Tensor.ComponentIdx c ≃ ι} {e2 : Tensor.ComponentIdx c2 ≃ ι2}
     (h : b = ((Tensor.basis (S := S) c).map toTensor.symm).reindex e)
-    (h2 : b2 = ((Tensor.basis (S := S) c2).map toTensor.symm).reindex e2) :
-    Tensor.basis (S := S) (Fin.append c c2) =
-    ((b.tensorProduct b2).map (toTensor (S := S) (M := M ⊗[k] M₂))).reindex
-    (ComponentIdx.prod.trans (e.prodCongr e2)).symm := by
+    (h2 : b2 = ((Tensor.basis (S := S) c2).map toTensor.symm).reindex e2)
+    : Tensor.basis (S := S) (Fin.append c c2)
+      = ((b.tensorProduct b2).map (toTensor (S := S) (M := M ⊗[k] M₂))).reindex
+        (ComponentIdx.prod.trans (e.prodCongr e2)).symm := by
   rw [Tensor.basis_prod_eq]
   ext r
   simp
@@ -319,19 +326,23 @@ attribute [-simp] Matrix.cons_val_zero Matrix.cons_val Fin.succAbove_zero
 
 open Tensor in
 set_option backward.isDefEq.respectTransparency false in
-/-- Double basis expansion of an element of a tensor product `M ⊗[k] M₂` of two `Tensorial`
-  one-index spaces. Given bases `b`, `b2` of `M`, `M₂` coming from the single-index tensor bases,
-  every `x : M ⊗[k] M₂` is the double sum over `i, j` of the iterated evaluation coefficient
-  `toScalar (evalT 0 j (evalT 0 i (toTensor x)))` times `b i ⊗ₜ b2 j`. -/
-lemma prod_eq_sum_eval {c c2 : C} {M₂ : Type}
-    [Tensorial S ![c] M] [AddCommMonoid M₂] [Module k M₂]
-    [Tensorial S ![c2] M₂] {b : Module.Basis (basisIdx c) k M}
-    {b2 : Module.Basis (basisIdx c2) k M₂}
+/--
+Double basis expansion of an element of a tensor product `M ⊗[k] M₂` of two `Tensorial`
+one-index spaces. Given bases `b`, `b2` of `M`, `M₂` coming from the single-index tensor bases,
+every `x : M ⊗[k] M₂` is the double sum over `i, j` of the iterated evaluation coefficient
+`toScalar (evalT 0 j (evalT 0 i (toTensor x)))` times `b i ⊗ₜ b2 j`.
+-/
+lemma prod_eq_sum_eval
+    {c c2 : C} {M₂ : Type}
+    [Tensorial S (![c]) M] [AddCommMonoid M₂] [Module k M₂] [Tensorial S (![c2]) M₂]
+    {b : Module.Basis (basisIdx c) k M} {b2 : Module.Basis (basisIdx c2) k M₂}
     (h : b = ((Tensor.basis (S := S) ![c]).map toTensor.symm).reindex ComponentIdx.single)
     (h2 : b2 = ((Tensor.basis (S := S) ![c2]).map toTensor.symm).reindex ComponentIdx.single)
-    (x : M ⊗[k] M₂) : x = ∑ i : (basisIdx c), ∑ j : (basisIdx c2),
-    toScalar (evalT 0 (basisIdxCongr (by rfl) j)
-      (evalT 0 (basisIdxCongr (by rfl) i) (toTensor x))) • b i ⊗ₜ[k] b2 j := by
+    (x : M ⊗[k] M₂)
+    : x
+      = ∑ i : (basisIdx c), ∑ j : (basisIdx c2),
+        toScalar (evalT 0 (basisIdxCongr (by rfl) j)
+          (evalT 0 (basisIdxCongr (by rfl) i) (toTensor x))) • b i ⊗ₜ[k] b2 j := by
   apply toTensor.injective
   conv_lhs => rw [eq_sum_evalT_zero (toTensor x)]
   simp only [map_sum, map_smul]
@@ -356,21 +367,22 @@ lemma prod_eq_sum_eval {c c2 : C} {M₂ : Type}
 
 section Continuous
 
-variable {k : Type} [RCLike k] {C : Type} {G : Type} [Group G]
-    {V : C → Type} [∀ c, AddCommGroup (V c)] [∀ c, Module k (V c)]
-    {basisIdx : C → Type} [∀ c, Fintype (basisIdx c)] [∀ c, DecidableEq (basisIdx c)]
-    {rep : (c : C) → Representation k G (V c)} {b : (c : C) → Module.Basis (basisIdx c) k (V c)}
-    (S : TensorSpecies k C G V basisIdx rep b) {c : Fin n → C} {M : Type}
-    [AddCommGroup M] [Module k M]
-    [TopologicalSpace M]
+variable
+  {k : Type} [RCLike k]
+  {C : Type} {G : Type} [Group G]
+  {V : C → Type} [∀ c, AddCommGroup (V c)] [∀ c, Module k (V c)]
+  {basisIdx : C → Type} [∀ c, Fintype (basisIdx c)] [∀ c, DecidableEq (basisIdx c)]
+  {rep : (c : C) → Representation k G (V c)} {b : (c : C) → Module.Basis (basisIdx c) k (V c)}
+  (S : TensorSpecies k C G V basisIdx rep b)
+  {c : Fin n → C} {M : Type} [AddCommGroup M] [Module k M] [TopologicalSpace M]
 
 /-!
 
 ### E.1. Finite dimensionality
 
 -/
-instance [Tensorial S c M] : FiniteDimensional k M := LinearEquiv.finiteDimensional
-  (Tensorial.toTensor (M := M)).symm
+instance [Tensorial S c M] : FiniteDimensional k M :=
+  LinearEquiv.finiteDimensional (Tensorial.toTensor (M := M)).symm
 
 /-!
 
@@ -378,17 +390,18 @@ instance [Tensorial S c M] : FiniteDimensional k M := LinearEquiv.finiteDimensio
 
 -/
 
-/-- The map from a type carrying an Tensorial instance to tensors, as a
-  continuous linear map. -/
-def toTensorCLM [IsTopologicalAddGroup M]
-    [ContinuousSMul k M] [Tensorial S c M] [T2Space M] : M ≃L[k] (S.Tensor c) where
+/--
+The map from a type carrying an Tensorial instance to tensors, as a
+continuous linear map.
+-/
+def toTensorCLM [IsTopologicalAddGroup M] [ContinuousSMul k M] [Tensorial S c M] [T2Space M]
+    : M ≃L[k] (S.Tensor c) where
   toLinearMap := (Tensorial.toTensor (M := M))
   invFun := (Tensorial.toTensor (M := M)).symm
   left_inv x := by simp
   right_inv x := by simp
   continuous_toFun := by
-    let e : M →L[k] (S.Tensor c) := LinearMap.toContinuousLinearMap
-      (Tensorial.toTensor (M := M))
+    let e : M →L[k] (S.Tensor c) := LinearMap.toContinuousLinearMap (Tensorial.toTensor (M := M))
     change Continuous e
     exact ContinuousLinearMap.continuous e
   continuous_invFun := by apply IsModuleTopology.continuous_of_linearMap
@@ -399,15 +412,19 @@ def toTensorCLM [IsTopologicalAddGroup M]
 
 -/
 
-/-- The Lorentz action on types carrying a tensorial instance as a continuous linear
-  map. -/
-noncomputable def actionCLM (g : G) [IsTopologicalAddGroup M]
-    [ContinuousSMul k M] [Tensorial S c M] [T2Space M] : M →L[k] M :=
+/--
+The Lorentz action on types carrying a tensorial instance as a continuous linear
+map.
+-/
+noncomputable def actionCLM
+    (g : G) [IsTopologicalAddGroup M] [ContinuousSMul k M] [Tensorial S c M] [T2Space M]
+    : M →L[k] M :=
   LinearMap.toContinuousLinearMap (smulLinearMap g)
 
-lemma actionCLM_apply {g : G} [IsTopologicalAddGroup M]
-    [ContinuousSMul k M] [Tensorial S c M] [T2Space M] (m : M) :
-    actionCLM S g m = g • m := rfl
+lemma actionCLM_apply
+    {g : G} [IsTopologicalAddGroup M] [ContinuousSMul k M] [Tensorial S c M] [T2Space M] (m : M)
+    : actionCLM S g m = g • m :=
+  rfl
 
 end Continuous
 end Tensorial

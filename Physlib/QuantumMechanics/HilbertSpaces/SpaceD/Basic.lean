@@ -80,8 +80,10 @@ open scoped SchwartzMap
 ## A. SpaceDHilbertSpace
 -/
 
-/-- The L²-space of `μ`-a.e. equal equivalence classes of functions `f : Space d → ℂ`
-  for which `∫ x, ‖f x‖² ∂μ` is finite. -/
+/--
+The L²-space of `μ`-a.e. equal equivalence classes of functions `f : Space d → ℂ`
+for which `∫ x, ‖f x‖² ∂μ` is finite.
+-/
 abbrev SpaceDHilbertSpace (d : ℕ) (μ : Measure (Space d) := volume) := Lp ℂ 2 μ
 
 namespace SpaceDHilbertSpace
@@ -89,22 +91,25 @@ namespace SpaceDHilbertSpace
 variable {d : ℕ} {μ μ' : Measure (Space d)} {f g : Space d → ℂ} (ψ φ : SpaceDHilbertSpace d μ)
 
 variable {ψ φ} in
-/-- Elements of `SpaceDHilbertSpace d μ` are equivalence classes
-  of `μ`-a.e. equal functions `Space d → ℂ`. -/
+/--
+Elements of `SpaceDHilbertSpace d μ` are equivalence classes
+of `μ`-a.e. equal functions `Space d → ℂ`.
+-/
 lemma ext_iff : ψ = φ ↔ ψ =ᵐ[μ] φ := Lp.ext_iff
 
 /-!
 ### A.1. Dual space
 -/
 
-/-- The anti-linear equivalence between `SpaceDHilbertSpace d μ` and its dual.
+/--
+The anti-linear equivalence between `SpaceDHilbertSpace d μ` and its dual.
 
-  This is the map that takes a ket to its corresponding bra and _vice versa_. -/
+This is the map that takes a ket to its corresponding bra and _vice versa_.
+-/
 def toBra : SpaceDHilbertSpace d μ ≃ₛₗ[starRingEnd ℂ] StrongDual ℂ (SpaceDHilbertSpace d μ) :=
   toDual ℂ (SpaceDHilbertSpace d μ)
 
-@[simp]
-lemma toBra_apply_apply : toBra ψ φ = ⟪ψ, φ⟫_ℂ := rfl
+@[simp] lemma toBra_apply_apply : toBra ψ φ = ⟪ψ, φ⟫_ℂ := rfl
 
 @[simp]
 lemma toBra_symm_apply (f : StrongDual ℂ (SpaceDHilbertSpace d μ)) : ⟪toBra.symm f, ψ⟫_ℂ = f ψ :=
@@ -114,24 +119,27 @@ lemma toBra_symm_apply (f : StrongDual ℂ (SpaceDHilbertSpace d μ)) : ⟪toBra
 ### A.2. Membership
 -/
 
-/-- For a function `f : Space d → ℂ`, the proposition `MemHS f μ` means that the function `f`
-  can be lifted to an element of the Hilbert space. -/
+/--
+For a function `f : Space d → ℂ`, the proposition `MemHS f μ` means that the function `f`
+can be lifted to an element of the Hilbert space.
+-/
 def MemHS (f : Space d → ℂ) (μ : Measure (Space d) := volume) : Prop := MemLp f 2 μ
 
 /-- Elements of the Hilbert space satisfy the property `MemHS`. -/
 lemma memHS_coe : MemHS ψ μ := Lp.memLp ψ
 
-/-- A function `f : Space d → ℂ` satisfies `MemHS f μ` if and only if
-  it is `μ`-a.e. strongly measurable and `∫ x, ‖f x‖ ^ 2 ∂μ` is finite. -/
-lemma memHS_iff : MemHS f μ ↔ AEStronglyMeasurable f μ ∧ Integrable (fun x ↦ ‖f x‖ ^ 2) μ :=
-  ⟨fun h ↦ ⟨h.aestronglyMeasurable,
-      (memLp_two_iff_integrable_sq_norm h.aestronglyMeasurable).mp h⟩,
-    fun h ↦ (memLp_two_iff_integrable_sq_norm h.1).mpr h.2⟩
+/--
+A function `f : Space d → ℂ` satisfies `MemHS f μ` if and only if
+it is `μ`-a.e. strongly measurable and `∫ x, ‖f x‖ ^ 2 ∂μ` is finite.
+-/
+lemma memHS_iff : MemHS f μ ↔ AEStronglyMeasurable f μ ∧ Integrable (fun x ↦ ‖f x‖ ^ 2) μ := ⟨
+  fun h ↦ ⟨h.aestronglyMeasurable, (memLp_two_iff_integrable_sq_norm h.aestronglyMeasurable).mp h⟩,
+  fun h ↦ (memLp_two_iff_integrable_sq_norm h.1).mpr h.2
+⟩
 
 lemma mem_iff {f : Space d →ₘ[μ] ℂ} : f ∈ SpaceDHilbertSpace d μ ↔ MemHS f μ := Lp.mem_Lp_iff_memLp
 
-@[simp]
-lemma MemHS.zero : MemHS (0 : Space d → ℂ) μ := MemLp.zero
+@[simp] lemma MemHS.zero : MemHS (0 : Space d → ℂ) μ := MemLp.zero
 
 lemma MemHS.neg (hf : MemHS f μ) : MemHS (-f) μ := MemLp.neg hf
 
@@ -151,15 +159,17 @@ lemma MemHS.ae_eq (hfg : f =ᵐ[μ] g) (hf : MemHS f μ) : MemHS g μ := MemLp.a
 lemma memHS_congr_ae (hfg : f =ᵐ[μ] g) : MemHS f μ ↔ MemHS g μ := memLp_congr_ae hfg
 
 lemma MemHS.congr_norm
-    (hf : MemHS f μ) (hg : AEStronglyMeasurable g μ) (hfg : ∀ᵐ x ∂μ, ‖f x‖ = ‖g x‖) : MemHS g μ :=
+    (hf : MemHS f μ) (hg : AEStronglyMeasurable g μ) (hfg : ∀ᵐ x ∂μ, ‖f x‖ = ‖g x‖)
+    : MemHS g μ :=
   MemLp.congr_norm hf hg hfg
 
-lemma memHS_congr_norm (hf : AEStronglyMeasurable f μ) (hg : AEStronglyMeasurable g μ)
-    (hfg : ∀ᵐ x ∂μ, ‖f x‖ = ‖g x‖) : MemHS f μ ↔ MemHS g μ :=
+lemma memHS_congr_norm
+    (hf : AEStronglyMeasurable f μ) (hg : AEStronglyMeasurable g μ) (hfg : ∀ᵐ x ∂μ, ‖f x‖ = ‖g x‖)
+    : MemHS f μ ↔ MemHS g μ :=
   memLp_congr_norm hf hg hfg
 
-lemma MemHS.mono (hf : MemHS f μ) (hg : AEStronglyMeasurable g μ) (hfg : ∀ᵐ x ∂μ, ‖g x‖ ≤ ‖f x‖) :
-    MemHS g μ :=
+lemma MemHS.mono (hf : MemHS f μ) (hg : AEStronglyMeasurable g μ) (hfg : ∀ᵐ x ∂μ, ‖g x‖ ≤ ‖f x‖)
+    : MemHS g μ :=
   MemLp.mono hf hg hfg
 
 lemma MemHS.mono_measure (h : μ' ≤ μ) (hf : MemHS f μ) : MemHS f μ' := MemLp.mono_measure h hf
@@ -167,19 +177,21 @@ lemma MemHS.mono_measure (h : μ' ≤ μ) (hf : MemHS f μ) : MemHS f μ' := Mem
 lemma MemHS.restrict (Ω : Set (Space d)) (hf : MemHS f μ) : MemHS f (μ.restrict Ω) :=
   hf.mono_measure restrict_le_self
 
-lemma MemHS.mono_restrict {Ω Ω' : Set (Space d)} (h : Ω' ≤ Ω) (hf : MemHS f (μ.restrict Ω)) :
-    MemHS f (μ.restrict Ω') :=
+lemma MemHS.mono_restrict {Ω Ω' : Set (Space d)} (h : Ω' ≤ Ω) (hf : MemHS f (μ.restrict Ω))
+    : MemHS f (μ.restrict Ω') :=
   hf.mono_measure (μ.restrict_mono_set h)
 
-lemma MemHS.indicator {Ω : Set (Space d)} (hΩ : MeasurableSet Ω) (hf : MemHS f μ) :
-    MemHS (Ω.indicator f) μ :=
+lemma MemHS.indicator {Ω : Set (Space d)} (hΩ : MeasurableSet Ω) (hf : MemHS f μ)
+    : MemHS (Ω.indicator f) μ :=
   MemLp.indicator hΩ.nullMeasurableSet hf
 
-/-- If `f` is a member of the Hilbert space with measure restricted to `Ω` then the representative
-  `Ω.indicator f` which vanishes outside `Ω` is a member of `SpaceDHilbertSpace d μ`. -/
+/--
+If `f` is a member of the Hilbert space with measure restricted to `Ω` then the representative
+`Ω.indicator f` which vanishes outside `Ω` is a member of `SpaceDHilbertSpace d μ`.
+-/
 lemma MemHS.indicator_of_restrict
-    {Ω : Set (Space d)} (hΩ : MeasurableSet Ω) (hf : MemHS f (μ.restrict Ω)) :
-    MemHS (Ω.indicator f) μ := by
+    {Ω : Set (Space d)} (hΩ : MeasurableSet Ω) (hf : MemHS f (μ.restrict Ω))
+    : MemHS (Ω.indicator f) μ := by
   refine memHS_iff.mpr ⟨(aestronglyMeasurable_indicator_iff hΩ).mpr hf.aestronglyMeasurable, ?_⟩
   refine (IntegrableOn.integrable_indicator (memHS_iff.mp hf).2 hΩ).congr ?_
   filter_upwards with x
@@ -193,23 +205,22 @@ section
 
 variable (hf : MemHS f μ) (hg : MemHS g μ)
 
-/-- Given a function `f : Space d → ℂ` such that `MemHS f μ` is true via `hf`,
-  `mk hf` is the element of the Hilbert space defined by `f`. -/
-def mk : SpaceDHilbertSpace d μ :=
-  ⟨AEEqFun.mk f hf.aestronglyMeasurable,
-    mem_iff.mpr <| hf.ae_eq (AEEqFun.coeFn_mk f hf.aestronglyMeasurable).symm⟩
+/--
+Given a function `f : Space d → ℂ` such that `MemHS f μ` is true via `hf`,
+`mk hf` is the element of the Hilbert space defined by `f`.
+-/
+def mk : SpaceDHilbertSpace d μ := ⟨
+  AEEqFun.mk f hf.aestronglyMeasurable,
+  mem_iff.mpr <| hf.ae_eq (AEEqFun.coeFn_mk f hf.aestronglyMeasurable).symm
+⟩
 
-@[simp]
-lemma mk_neg : mk hf.neg = -mk hf := rfl
+@[simp] lemma mk_neg : mk hf.neg = - mk hf := rfl
 
-@[simp]
-lemma mk_add : mk (hf.add hg) = mk hf + mk hg := rfl
+@[simp] lemma mk_add : mk (hf.add hg) = mk hf + mk hg := rfl
 
-@[simp]
-lemma mk_sub : mk (hf.sub hg) = mk hf - mk hg := rfl
+@[simp] lemma mk_sub : mk (hf.sub hg) = mk hf - mk hg := rfl
 
-@[simp]
-lemma mk_const_smul (c : ℂ) : mk (hf.const_smul c) = c • mk hf := rfl
+@[simp] lemma mk_const_smul (c : ℂ) : mk (hf.const_smul c) = c • mk hf := rfl
 
 lemma mk_eq_iff : mk hf = mk hg ↔ f =ᵐ[μ] g := by simp [mk]
 
@@ -250,18 +261,19 @@ end
 -/
 
 /-- The tempered distribution associated to a state. -/
-abbrev toTemperedDistribution [μ.HasTemperateGrowth]
-    (ψ : SpaceDHilbertSpace d μ) : 𝓢'(Space d, ℂ) := Lp.toTemperedDistribution ψ
+abbrev toTemperedDistribution [μ.HasTemperateGrowth] (ψ : SpaceDHilbertSpace d μ)
+    : 𝓢'(Space d, ℂ) :=
+  Lp.toTemperedDistribution ψ
 
 /-- The embedding of states into tempered distributions as a continuous linear map. -/
-abbrev toTemperedDistributionCLM (d : ℕ) (μ : Measure (Space d) := volume)
-    [μ.HasTemperateGrowth] : SpaceDHilbertSpace d μ →L[ℂ] 𝓢'(Space d, ℂ) :=
+abbrev toTemperedDistributionCLM (d : ℕ) (μ : Measure (Space d) := volume) [μ.HasTemperateGrowth]
+    : SpaceDHilbertSpace d μ →L[ℂ] 𝓢'(Space d, ℂ) :=
   Lp.toTemperedDistributionCLM ℂ μ 2
 
 open Filter in
 lemma tendsto_zero_iff_tendsto_zero_lintegral_enorm_sq
-    {α : Type*} {l : Filter α} {ψ : α → SpaceDHilbertSpace d μ} :
-    Tendsto ψ l (nhds 0) ↔ Tendsto (fun a ↦ ∫⁻ x, ‖ψ a x‖ₑ ^ 2 ∂μ) l (nhds 0) := by
+    {α : Type*} {l : Filter α} {ψ : α → SpaceDHilbertSpace d μ}
+    : Tendsto ψ l (nhds 0) ↔ Tendsto (fun a ↦ ∫⁻ x, ‖ψ a x‖ₑ ^ 2 ∂μ) l (nhds 0) := by
   trans Tendsto (fun a ↦ (∫⁻ x, ‖ψ a x‖ₑ ^ 2 ∂μ) ^ (2⁻¹ : ℝ)) l (nhds 0)
   · simp [tendsto_iff_edist_tendsto_0, edist_zero_right, Lp.enorm_def, eLpNorm, eLpNorm',
       Lp.aestronglyMeasurable]
@@ -277,10 +289,12 @@ end SpaceDHilbertSpace
 ## B. SpaceDHilbertSpaceOn
 -/
 
-/-- The L²-space `SpaceDHilbertSpace d (μ.restrict Ω)`.
+/--
+The L²-space `SpaceDHilbertSpace d (μ.restrict Ω)`.
 
-  Elements are equivalence classes of functions which agree `μ`-a.e. on `Ω` and which have
-  `∫ x in Ω, ‖f x‖ ^ 2 ∂μ` finite. -/
+Elements are equivalence classes of functions which agree `μ`-a.e. on `Ω` and which have
+`∫ x in Ω, ‖f x‖ ^ 2 ∂μ` finite.
+-/
 abbrev SpaceDHilbertSpaceOn {d : ℕ} (Ω : Set (Space d)) (μ : Measure (Space d) := volume) :=
   SpaceDHilbertSpace d (μ.restrict Ω)
 
@@ -291,11 +305,13 @@ open SpaceDHilbertSpace
 variable {d : ℕ} (Ω : Set (Space d)) (hΩ : MeasurableSet Ω) (μ : Measure (Space d))
 variable (ψ : SpaceDHilbertSpace d μ) (φ : SpaceDHilbertSpaceOn Ω μ)
 
-/-- The continuous linear map projecting `SpaceDHilbertSpace d μ` onto `SpaceDHilbertSpaceOn Ω μ`.
+/--
+The continuous linear map projecting `SpaceDHilbertSpace d μ` onto `SpaceDHilbertSpaceOn Ω μ`.
 
-  As a function it agrees with `Lp.LpToLpOfMeasureLeSMul` for `c = 1` (since `μ.restrict Ω ≤ μ`),
-  the continuous `ℝ`-linear map of Mathlib from `Lp ℂ 2 μ` to `Lp ℂ 2 (μ.restrict Ω)`, from which
-  its continuity is deduced. -/
+As a function it agrees with `Lp.LpToLpOfMeasureLeSMul` for `c = 1` (since `μ.restrict Ω ≤ μ`),
+the continuous `ℝ`-linear map of Mathlib from `Lp ℂ 2 μ` to `Lp ℂ 2 (μ.restrict Ω)`, from which
+its continuity is deduced.
+-/
 def subspaceProjection : SpaceDHilbertSpace d μ →L[ℂ] SpaceDHilbertSpaceOn Ω μ where
   toFun ψ := mk ((memHS_coe ψ).restrict Ω)
   map_add' ψ φ := by
@@ -323,8 +339,10 @@ lemma subspaceProjection_norm_le : ‖subspaceProjection Ω μ ψ‖ ≤ ‖ψ�
 
 variable {Ω}
 
-/-- The linear isometry including `SpaceDHilbertSpaceOn Ω μ` as a sub-Hilbert space of
-  `SpaceDHilbertSpace d μ`, defined by mapping `ψ` to `Ω.indicator ψ`. -/
+/--
+The linear isometry including `SpaceDHilbertSpaceOn Ω μ` as a sub-Hilbert space of
+`SpaceDHilbertSpace d μ`, defined by mapping `ψ` to `Ω.indicator ψ`.
+-/
 def subspaceIncl : SpaceDHilbertSpaceOn Ω μ →ₗᵢ[ℂ] SpaceDHilbertSpace d μ where
   toFun ψ := mk ((memHS_coe ψ).indicator_of_restrict hΩ)
   map_add' ψ φ := by
@@ -343,8 +361,8 @@ variable {μ} in
 lemma subspaceIncl_apply : subspaceIncl hΩ μ φ =ᵐ[μ] Ω.indicator φ :=
   coeFn_mk ((memHS_coe φ).indicator_of_restrict hΩ)
 
-lemma leftInverse_subspaceProjection :
-    LeftInverse (subspaceProjection Ω μ) (subspaceIncl hΩ μ) := by
+lemma leftInverse_subspaceProjection
+    : LeftInverse (subspaceProjection Ω μ) (subspaceIncl hΩ μ) := by
   intro ψ
   apply ext_iff.mpr
   have h := subspaceProjection_apply Ω (subspaceIncl hΩ μ ψ)

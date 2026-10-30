@@ -51,12 +51,11 @@ namespace StandardModel
 
 open TensorProduct Matrix MatrixGroups Lorentz
 
-
 namespace CovAlgebraRealization
 
-variable {B : Type} [Ring B] [Algebra ℂ B]
-  {repGauge : Representation ℂ GaugeGroupI B}
-  {repLorentz : Representation ℂ SL(2,ℂ) B}
+variable
+  {B : Type} [Ring B] [Algebra ℂ B]
+  {repGauge : Representation ℂ GaugeGroupI B} {repLorentz : Representation ℂ (SL(2,ℂ)) B}
   {massWeightPoly : B →ₐ[ℂ] Polynomial B}
   (h : CovAlgebraRealization B repGauge repLorentz massWeightPoly)
 
@@ -66,21 +65,24 @@ variable {B : Type} [Ring B] [Algebra ℂ B]
 
 -/
 
-
-/-- The abstract index of a single covariant generator of the field algebra: one of
-  the covariant-derivative towers of the field strength, of the Higgs and its
-  conjugate, or of the three families of each fermion species and their conjugates,
-  applied to a member of the dual basis of its value space. Only basis indices are
-  stored, so for a fixed tower length the generators of a given mass weight form a
-  finite type. The evaluation in `B` is `generatorVal`. -/
+/--
+The abstract index of a single covariant generator of the field algebra: one of
+the covariant-derivative towers of the field strength, of the Higgs and its
+conjugate, or of the three families of each fermion species and their conjugates,
+applied to a member of the dual basis of its value space. Only basis indices are
+stored, so for a fixed tower length the generators of a given mass weight form a
+finite type. The evaluation in `B` is `generatorVal`.
+-/
 inductive Generators where
   /-- The Higgs tower `∇_l H` applied to a dual basis vector. -/
   | H : (n : ℕ) → (Fin n → Fin 1 ⊕ Fin 3) → Fin 2 → Generators
   /-- The conjugate-Higgs tower `∇_l H̄` applied to a dual basis vector. -/
   | barH : (n : ℕ) → (Fin n → Fin 1 ⊕ Fin 3) → Fin 2 → Generators
   /-- The field-strength tower `∇_l F_μν` applied to a dual basis vector. -/
-  | F : (n : ℕ) → (Fin n → Fin 1 ⊕ Fin 3) → (Fin 1 ⊕ Fin 3) → (Fin 1 ⊕ Fin 3) →
-      (Fin 8 ⊕ Fin 3 ⊕ Fin 1) → Generators
+  | F
+    : (n : ℕ) → (Fin n → Fin 1 ⊕ Fin 3) → (Fin 1 ⊕ Fin 3) → (Fin 1 ⊕ Fin 3)
+      → (Fin 8 ⊕ Fin 3 ⊕ Fin 1)
+      → Generators
   /-- The fermion tower `∇_l d` of the `i`-th family applied to a dual basis vector. -/
   | d : Fin 3 → (n : ℕ) → (Fin n → Fin 1 ⊕ Fin 3) → Fin 2 × Fin 3 → Generators
   /-- The fermion tower `∇_l bard` of the `i`-th family applied to a dual basis vector. -/
@@ -121,8 +123,10 @@ def IsFermionic : Generators → Prop
   | .e _ _ _ _ => True
   | .bare _ _ _ _ => True
 
-/-- The Higgs generators: the covariant towers of the Higgs field and of its
-  conjugate. -/
+/--
+The Higgs generators: the covariant towers of the Higgs field and of its
+conjugate.
+-/
 def IsHiggs : Generators → Prop
   | .H _ _ _ => True
   | .barH _ _ _ => True
@@ -166,9 +170,11 @@ inductive GeneratorClass where
   | fermion : GeneratorClass
 deriving DecidableEq
 
-/-- The three classes exhaust `GeneratorClass`. The instance is written out rather than
-  derived: the `Fintype` deriving handler builds the enumerating `Finset` with a membership
-  that resolves through `SetLike`, which is not type-correct here. -/
+/--
+The three classes exhaust `GeneratorClass`. The instance is written out rather than
+derived: the `Fintype` deriving handler builds the enumerating `Finset` with a membership
+that resolves through `SetLike`, which is not type-correct here.
+-/
 instance instFintypeGeneratorClass : Fintype GeneratorClass where
   elems := {GeneratorClass.gauge, GeneratorClass.higgs, GeneratorClass.fermion}
   complete := fun x => by cases x <;> decide
@@ -181,8 +187,7 @@ def Generators.kind : Generators → GeneratorClass
   | _ => .fermion
 
 @[simp]
-lemma Generators.isGaugeField_iff_kind (g : Generators) :
-    g.IsGaugeField ↔ g.kind = .gauge := by
+lemma Generators.isGaugeField_iff_kind (g : Generators) : g.IsGaugeField ↔ g.kind = .gauge := by
   cases g <;> simp [Generators.IsGaugeField, Generators.kind]
 
 @[simp]
@@ -190,8 +195,7 @@ lemma Generators.isHiggs_iff_kind (g : Generators) : g.IsHiggs ↔ g.kind = .hig
   cases g <;> simp [Generators.IsHiggs, Generators.kind]
 
 @[simp]
-lemma Generators.isFermionic_iff_kind (g : Generators) :
-    g.IsFermionic ↔ g.kind = .fermion := by
+lemma Generators.isFermionic_iff_kind (g : Generators) : g.IsFermionic ↔ g.kind = .fermion := by
   cases g <;> simp [Generators.IsFermionic, Generators.kind]
 
 /-- The mass weight (twice the mass dimension) of a covariant generator. -/
@@ -221,23 +225,29 @@ the ten families of fermion towers sit in between, at weight `3 + 2 * n ≥ 3`.
 
 -/
 
-/-- A gauge-class generator — a field-strength tower symbol — carries mass weight at
-  least four. -/
-lemma Generators.four_le_weight_of_gauge {g : Generators} (hg : g.kind = GeneratorClass.gauge) :
-    4 ≤ g.weight := by
+/--
+A gauge-class generator — a field-strength tower symbol — carries mass weight at
+least four.
+-/
+lemma Generators.four_le_weight_of_gauge {g : Generators} (hg : g.kind = GeneratorClass.gauge)
+    : 4 ≤ g.weight := by
   cases g <;> simp_all [Generators.weight, Generators.kind]
   omega
 
-/-- A Higgs-class generator — a Higgs or conjugate-Higgs tower symbol — carries mass
-  weight at least two. -/
-lemma Generators.two_le_weight_of_higgs {g : Generators} (hg : g.kind = GeneratorClass.higgs) :
-    2 ≤ g.weight := by
+/--
+A Higgs-class generator — a Higgs or conjugate-Higgs tower symbol — carries mass
+weight at least two.
+-/
+lemma Generators.two_le_weight_of_higgs {g : Generators} (hg : g.kind = GeneratorClass.higgs)
+    : 2 ≤ g.weight := by
   cases g <;> simp_all [Generators.weight, Generators.kind]
 
-/-- A fermion-class generator — any of the ten families of fermion tower symbols —
-  carries mass weight at least three. -/
-lemma Generators.three_le_weight_of_fermion {g : Generators}
-    (hg : g.kind = GeneratorClass.fermion) : 3 ≤ g.weight := by
+/--
+A fermion-class generator — any of the ten families of fermion tower symbols —
+carries mass weight at least three.
+-/
+lemma Generators.three_le_weight_of_fermion {g : Generators} (hg : g.kind = GeneratorClass.fermion)
+    : 3 ≤ g.weight := by
   cases g <;> simp_all [Generators.weight, Generators.kind]
 
 /-!
@@ -247,20 +257,18 @@ lemma Generators.three_le_weight_of_fermion {g : Generators}
 -/
 
 /-- The classes realised by a word in the covariant generators. -/
-def wordClasses (gl : List Generators) : Finset GeneratorClass :=
-  (gl.map Generators.kind).toFinset
+def wordClasses (gl : List Generators) : Finset GeneratorClass := (gl.map Generators.kind).toFinset
 
-@[simp]
-lemma wordClasses_nil : wordClasses [] = ∅ := by simp [wordClasses]
+@[simp] lemma wordClasses_nil : wordClasses [] = ∅ := by simp [wordClasses]
 
 /-- Concatenating words unions the classes they realise. -/
-lemma wordClasses_append (gl gl' : List Generators) :
-    wordClasses (gl ++ gl') = wordClasses gl ∪ wordClasses gl' := by
+lemma wordClasses_append (gl gl' : List Generators)
+    : wordClasses (gl ++ gl') = wordClasses gl ∪ wordClasses gl' := by
   rw [wordClasses, wordClasses, wordClasses, List.map_append, List.toFinset_append]
 
 /-- Prepending a generator inserts its class. -/
-lemma wordClasses_cons (a : Generators) (gl : List Generators) :
-    wordClasses (a :: gl) = insert a.kind (wordClasses gl) := by
+lemma wordClasses_cons (a : Generators) (gl : List Generators)
+    : wordClasses (a :: gl) = insert a.kind (wordClasses gl) := by
   rw [wordClasses, wordClasses, List.map_cons, List.toFinset_cons]
 
 /-- The total mass weight carried by the generators of a given class in a word. -/
@@ -269,13 +277,14 @@ def classWeight (c : GeneratorClass) (gl : List Generators) : ℕ :=
 
 @[simp] lemma classWeight_nil (c : GeneratorClass) : classWeight c [] = 0 := rfl
 
-lemma classWeight_cons_of_eq {c : GeneratorClass} {g : Generators} (hg : g.kind = c)
-    (t : List Generators) :
-    classWeight c (g :: t) = g.weight + classWeight c t := by
+lemma classWeight_cons_of_eq
+    {c : GeneratorClass} {g : Generators} (hg : g.kind = c) (t : List Generators)
+    : classWeight c (g :: t) = g.weight + classWeight c t := by
   simp [classWeight, hg]
 
-lemma classWeight_cons_of_ne {c : GeneratorClass} {g : Generators} (hg : g.kind ≠ c)
-    (t : List Generators) : classWeight c (g :: t) = classWeight c t := by
+lemma classWeight_cons_of_ne
+    {c : GeneratorClass} {g : Generators} (hg : g.kind ≠ c) (t : List Generators)
+    : classWeight c (g :: t) = classWeight c t := by
   simp [classWeight, hg]
 
 /-- Every generator carries a non-zero mass weight. -/
@@ -283,8 +292,8 @@ lemma Generators.weight_pos (g : Generators) : 0 < g.weight := by
   cases g <;> simp [Generators.weight]
 
 /-- A class realised by a word carries a non-zero part of its weight. -/
-lemma classWeight_ne_zero {c : GeneratorClass} {gl : List Generators}
-    (hc : c ∈ wordClasses gl) : classWeight c gl ≠ 0 := by
+lemma classWeight_ne_zero {c : GeneratorClass} {gl : List Generators} (hc : c ∈ wordClasses gl)
+    : classWeight c gl ≠ 0 := by
   induction gl with
   | nil => simp [wordClasses] at hc
   | cons g t ih =>
@@ -296,29 +305,35 @@ lemma classWeight_ne_zero {c : GeneratorClass} {gl : List Generators}
     · rw [classWeight_cons_of_ne hg]
       exact ih (hc.resolve_left fun hh => hg hh.symm)
 
-/-- Over a word realising only two classes, the two class weights add up to the total
-  weight. -/
-lemma classWeight_add {c₁ c₂ : GeneratorClass} (hne : c₁ ≠ c₂) {gl : List Generators}
-    (hgl : ∀ g ∈ gl, g.kind = c₁ ∨ g.kind = c₂) :
-    classWeight c₁ gl + classWeight c₂ gl = (gl.map Generators.weight).sum := by
+/--
+Over a word realising only two classes, the two class weights add up to the total
+weight.
+-/
+lemma classWeight_add
+    {c₁ c₂ : GeneratorClass} (hne : c₁ ≠ c₂)
+    {gl : List Generators} (hgl : ∀ g ∈ gl, g.kind = c₁ ∨ g.kind = c₂)
+    : classWeight c₁ gl + classWeight c₂ gl = (gl.map Generators.weight).sum := by
   induction gl with
   | nil => simp
   | cons g t ih =>
     have ht : ∀ g' ∈ t, g'.kind = c₁ ∨ g'.kind = c₂ := fun g' hg' => hgl g' (by simp [hg'])
     rcases hgl g (by simp) with hg | hg
-    · rw [classWeight_cons_of_eq hg, classWeight_cons_of_ne (by rw [hg]; exact hne),
-        List.map_cons, List.sum_cons, ← ih ht]
+    · rw [classWeight_cons_of_eq hg, classWeight_cons_of_ne (by rw [hg]; exact hne), List.map_cons,
+        List.sum_cons, ← ih ht]
       omega
     · rw [classWeight_cons_of_eq hg, classWeight_cons_of_ne (by rw [hg]; exact hne.symm),
         List.map_cons, List.sum_cons, ← ih ht]
       omega
 
-/-- A class realised by a word carries at least the minimum weight of that class: the
-  generator witnessing the realisation already contributes that much, and the
-  remaining generators of the class only add more. -/
-lemma le_classWeight_of_mem {c : GeneratorClass} {gl : List Generators} {m : ℕ}
-    (hc : c ∈ wordClasses gl) (hm : ∀ g : Generators, g.kind = c → m ≤ g.weight) :
-    m ≤ classWeight c gl := by
+/--
+A class realised by a word carries at least the minimum weight of that class: the
+generator witnessing the realisation already contributes that much, and the
+remaining generators of the class only add more.
+-/
+lemma le_classWeight_of_mem
+    {c : GeneratorClass} {gl : List Generators} {m : ℕ}
+    (hc : c ∈ wordClasses gl) (hm : ∀ g : Generators, g.kind = c → m ≤ g.weight)
+    : m ≤ classWeight c gl := by
   induction gl with
   | nil => simp [wordClasses] at hc
   | cons g t ih =>
@@ -330,11 +345,14 @@ lemma le_classWeight_of_mem {c : GeneratorClass} {gl : List Generators} {m : ℕ
     · rw [classWeight_cons_of_ne hg]
       exact ih (hc.resolve_left fun hh => hg hh.symm)
 
-/-- The three class weights exhaust the total weight of a word: every generator has
-  exactly one of the three kinds. -/
-lemma classWeight_add_three (gl : List Generators) :
-    classWeight GeneratorClass.gauge gl + classWeight GeneratorClass.higgs gl
-      + classWeight GeneratorClass.fermion gl = (gl.map Generators.weight).sum := by
+/--
+The three class weights exhaust the total weight of a word: every generator has
+exactly one of the three kinds.
+-/
+lemma classWeight_add_three (gl : List Generators)
+    : classWeight GeneratorClass.gauge gl + classWeight GeneratorClass.higgs gl
+        + classWeight GeneratorClass.fermion gl
+      = (gl.map Generators.weight).sum := by
   induction gl with
   | nil => simp
   | cons g t ih =>
@@ -342,27 +360,28 @@ lemma classWeight_add_three (gl : List Generators) :
     | gauge =>
       rw [classWeight_cons_of_eq hg,
         classWeight_cons_of_ne (c := GeneratorClass.higgs) (by simp [hg]),
-        classWeight_cons_of_ne (c := GeneratorClass.fermion) (by simp [hg]),
-        List.map_cons, List.sum_cons]
+        classWeight_cons_of_ne (c := GeneratorClass.fermion) (by simp [hg]), List.map_cons,
+        List.sum_cons]
       omega
     | higgs =>
       rw [classWeight_cons_of_ne (c := GeneratorClass.gauge) (by simp [hg]),
         classWeight_cons_of_eq hg,
-        classWeight_cons_of_ne (c := GeneratorClass.fermion) (by simp [hg]),
-        List.map_cons, List.sum_cons]
+        classWeight_cons_of_ne (c := GeneratorClass.fermion) (by simp [hg]), List.map_cons,
+        List.sum_cons]
       omega
     | fermion =>
       rw [classWeight_cons_of_ne (c := GeneratorClass.gauge) (by simp [hg]),
         classWeight_cons_of_ne (c := GeneratorClass.higgs) (by simp [hg]),
-        classWeight_cons_of_eq hg,
-        List.map_cons, List.sum_cons]
+        classWeight_cons_of_eq hg, List.map_cons, List.sum_cons]
       omega
 
 set_option linter.unusedVariables false in
-/-- The value in `B` of a covariant generator: the corresponding covariant tower
-  applied to the indicated dual basis vector of its value space. -/
-noncomputable def generatorVal
-    (h : CovAlgebraRealization B repGauge repLorentz massWeightPoly) : Generators → B
+/--
+The value in `B` of a covariant generator: the corresponding covariant tower
+applied to the indicated dual basis vector of its value space.
+-/
+noncomputable def generatorVal (h : CovAlgebraRealization B repGauge repLorentz massWeightPoly)
+    : Generators → B
   | .H _ l j => h.covH l (HiggsVec.orthonormBasis.toBasis.coord j)
   | .barH _ l j => h.covBarH l ((Basis.conj HiggsVec.orthonormBasis.toBasis).coord j)
   | .F _ l μ ν j => h.covF l μ ν (GaugeAlgebra.stdBasis.coord j)
@@ -378,8 +397,8 @@ noncomputable def generatorVal
   | .bare i _ l j => h.covBarE i l ((Basis.conj LeptonSinglet.basis).coord j)
 
 /-- Every covariant generator is a `massWeightPoly`-eigenvector of its weight. -/
-lemma massWeightPoly_generatorVal (g : Generators) :
-    massWeightPoly (h.generatorVal g) = Polynomial.monomial g.weight (h.generatorVal g) := by
+lemma massWeightPoly_generatorVal (g : Generators)
+    : massWeightPoly (h.generatorVal g) = Polynomial.monomial g.weight (h.generatorVal g) := by
   cases g with
   | H n l j => exact h.isHiggsSector.H_massWeight _ n l
   | barH n l j => exact h.isHiggsSector.barH_massWeight _ n l
@@ -395,76 +414,166 @@ lemma massWeightPoly_generatorVal (g : Generators) :
   | e i n l j => exact h.isFermionSector.massWeight_e i l _
   | bare i n l j => exact h.isFermionSector.massWeight_bare i l _
 
-lemma generatorVal_mem_fieldAlgebra (g : Generators) :
-    h.generatorVal g ∈ h.fieldAlgebra := by
+lemma generatorVal_mem_fieldAlgebra (g : Generators) : h.generatorVal g ∈ h.fieldAlgebra := by
   rw [fieldAlgebra]
   refine Algebra.subset_adjoin ?_
   cases g with
-    | F n l μ ν j =>
-      exact Set.mem_union_left _ (Set.mem_union_left _
-        (Set.mem_iUnion.mpr ⟨n, Set.mem_iUnion.mpr ⟨l, Set.mem_iUnion.mpr ⟨μ,
-          Set.mem_iUnion.mpr ⟨ν, ⟨_, rfl⟩⟩⟩⟩⟩))
-    | H n l j =>
-      exact Set.mem_union_left _ (Set.mem_union_right _
+  | F n l μ ν j =>
+    exact Set.mem_union_left _
+      (Set.mem_union_left _
+        (Set.mem_iUnion.mpr
+          ⟨n, Set.mem_iUnion.mpr ⟨l, Set.mem_iUnion.mpr ⟨μ, Set.mem_iUnion.mpr ⟨ν, ⟨_, rfl⟩⟩⟩⟩⟩))
+  | H n l j =>
+    exact Set.mem_union_left _
+      (Set.mem_union_right _
         (Set.mem_iUnion.mpr ⟨n, Set.mem_iUnion.mpr ⟨l, Set.mem_union_left _ ⟨_, rfl⟩⟩⟩))
-    | barH n l j =>
-      exact Set.mem_union_left _ (Set.mem_union_right _
+  | barH n l j =>
+    exact Set.mem_union_left _
+      (Set.mem_union_right _
         (Set.mem_iUnion.mpr ⟨n, Set.mem_iUnion.mpr ⟨l, Set.mem_union_right _ ⟨_, rfl⟩⟩⟩))
-    | d i n l j =>
-      exact Set.mem_union_right _
-        (Set.mem_iUnion.mpr ⟨i, Set.mem_iUnion.mpr ⟨n, Set.mem_iUnion.mpr ⟨l,
-          Set.mem_union_left _ (Set.mem_union_left _ (Set.mem_union_left _ (Set.mem_union_left _
-            (Set.mem_union_left _ (Set.mem_union_left _ (Set.mem_union_left _ (Set.mem_union_left _
-              (Set.mem_union_left _ (⟨_, rfl⟩)))))))))⟩⟩⟩)
-    | bard i n l j =>
-      exact Set.mem_union_right _
-        (Set.mem_iUnion.mpr ⟨i, Set.mem_iUnion.mpr ⟨n, Set.mem_iUnion.mpr ⟨l,
-          Set.mem_union_left _ (Set.mem_union_left _ (Set.mem_union_left _ (Set.mem_union_left _
-            (Set.mem_union_left _ (Set.mem_union_left _ (Set.mem_union_left _ (Set.mem_union_left _
-              (Set.mem_union_right _ ⟨_, rfl⟩))))))))⟩⟩⟩)
-    | u i n l j =>
-      exact Set.mem_union_right _
-        (Set.mem_iUnion.mpr ⟨i, Set.mem_iUnion.mpr ⟨n, Set.mem_iUnion.mpr ⟨l,
-          Set.mem_union_left _ (Set.mem_union_left _ (Set.mem_union_left _ (Set.mem_union_left _
-            (Set.mem_union_left _ (Set.mem_union_left _ (Set.mem_union_left _
-              (Set.mem_union_right _ ⟨_, rfl⟩)))))))⟩⟩⟩)
-    | baru i n l j =>
-      exact Set.mem_union_right _
-        (Set.mem_iUnion.mpr ⟨i, Set.mem_iUnion.mpr ⟨n, Set.mem_iUnion.mpr ⟨l,
-          Set.mem_union_left _ (Set.mem_union_left _ (Set.mem_union_left _ (Set.mem_union_left _
-            (Set.mem_union_left _ (Set.mem_union_left _ (Set.mem_union_right _ ⟨_, rfl⟩))))))⟩⟩⟩)
-    | Q i n l j =>
-      exact Set.mem_union_right _
-        (Set.mem_iUnion.mpr ⟨i, Set.mem_iUnion.mpr ⟨n, Set.mem_iUnion.mpr ⟨l,
-          Set.mem_union_left _ (Set.mem_union_left _ (Set.mem_union_left _ (Set.mem_union_left _
-            (Set.mem_union_left _ (Set.mem_union_right _ ⟨_, rfl⟩)))))⟩⟩⟩)
-    | barQ i n l j =>
-      exact Set.mem_union_right _
-        (Set.mem_iUnion.mpr ⟨i, Set.mem_iUnion.mpr ⟨n, Set.mem_iUnion.mpr ⟨l,
-          Set.mem_union_left _ (Set.mem_union_left _ (Set.mem_union_left _ (Set.mem_union_left _
-            (Set.mem_union_right _ ⟨_, rfl⟩))))⟩⟩⟩)
-    | L i n l j =>
-      exact Set.mem_union_right _
-        (Set.mem_iUnion.mpr ⟨i, Set.mem_iUnion.mpr ⟨n, Set.mem_iUnion.mpr ⟨l,
-          Set.mem_union_left _ (Set.mem_union_left _ (Set.mem_union_left _ (Set.mem_union_right _
-            ⟨_, rfl⟩)))⟩⟩⟩)
-    | barL i n l j =>
-      exact Set.mem_union_right _
-        (Set.mem_iUnion.mpr ⟨i, Set.mem_iUnion.mpr ⟨n, Set.mem_iUnion.mpr ⟨l,
-          Set.mem_union_left _ (Set.mem_union_left _ (Set.mem_union_right _ ⟨_, rfl⟩))⟩⟩⟩)
-    | e i n l j =>
-      exact Set.mem_union_right _
-        (Set.mem_iUnion.mpr ⟨i, Set.mem_iUnion.mpr ⟨n, Set.mem_iUnion.mpr ⟨l,
-          Set.mem_union_left _ (Set.mem_union_right _ ⟨_, rfl⟩)⟩⟩⟩)
-    | bare i n l j =>
-      exact Set.mem_union_right _
-        (Set.mem_iUnion.mpr ⟨i, Set.mem_iUnion.mpr ⟨n, Set.mem_iUnion.mpr ⟨l,
-          Set.mem_union_right _ ⟨_, rfl⟩⟩⟩⟩)
+  | d i n l j =>
+    exact Set.mem_union_right _
+      (Set.mem_iUnion.mpr ⟨
+        i,
+        Set.mem_iUnion.mpr ⟨
+          n,
+          Set.mem_iUnion.mpr ⟨
+            l,
+            Set.mem_union_left _
+              (Set.mem_union_left _
+                (Set.mem_union_left _
+                  (Set.mem_union_left _
+                    (Set.mem_union_left _
+                      (Set.mem_union_left _
+                        (Set.mem_union_left _
+                          (Set.mem_union_left _ (Set.mem_union_left _ (⟨_, rfl⟩)))))))))
+          ⟩
+        ⟩
+      ⟩)
+  | bard i n l j =>
+    exact Set.mem_union_right _
+      (Set.mem_iUnion.mpr ⟨
+        i,
+        Set.mem_iUnion.mpr ⟨
+          n,
+          Set.mem_iUnion.mpr ⟨
+            l,
+            Set.mem_union_left _
+              (Set.mem_union_left _
+                (Set.mem_union_left _
+                  (Set.mem_union_left _
+                    (Set.mem_union_left _
+                      (Set.mem_union_left _
+                        (Set.mem_union_left _
+                          (Set.mem_union_left _ (Set.mem_union_right _ ⟨_, rfl⟩))))))))
+          ⟩
+        ⟩
+      ⟩)
+  | u i n l j =>
+    exact Set.mem_union_right _
+      (Set.mem_iUnion.mpr ⟨
+        i,
+        Set.mem_iUnion.mpr ⟨
+          n,
+          Set.mem_iUnion.mpr ⟨
+            l,
+            Set.mem_union_left _
+              (Set.mem_union_left _
+                (Set.mem_union_left _
+                  (Set.mem_union_left _
+                    (Set.mem_union_left _
+                      (Set.mem_union_left _
+                        (Set.mem_union_left _ (Set.mem_union_right _ ⟨_, rfl⟩)))))))
+          ⟩
+        ⟩
+      ⟩)
+  | baru i n l j =>
+    exact Set.mem_union_right _
+      (Set.mem_iUnion.mpr ⟨
+        i,
+        Set.mem_iUnion.mpr ⟨
+          n,
+          Set.mem_iUnion.mpr ⟨
+            l,
+            Set.mem_union_left _
+              (Set.mem_union_left _
+                (Set.mem_union_left _
+                  (Set.mem_union_left _
+                    (Set.mem_union_left _
+                      (Set.mem_union_left _ (Set.mem_union_right _ ⟨_, rfl⟩))))))
+          ⟩
+        ⟩
+      ⟩)
+  | Q i n l j =>
+    exact Set.mem_union_right _
+      (Set.mem_iUnion.mpr ⟨
+        i,
+        Set.mem_iUnion.mpr ⟨
+          n,
+          Set.mem_iUnion.mpr ⟨
+            l,
+            Set.mem_union_left _
+              (Set.mem_union_left _
+                (Set.mem_union_left _
+                  (Set.mem_union_left _ (Set.mem_union_left _ (Set.mem_union_right _ ⟨_, rfl⟩)))))
+          ⟩
+        ⟩
+      ⟩)
+  | barQ i n l j =>
+    exact Set.mem_union_right _
+      (Set.mem_iUnion.mpr ⟨
+        i,
+        Set.mem_iUnion.mpr ⟨
+          n,
+          Set.mem_iUnion.mpr ⟨
+            l,
+            Set.mem_union_left _
+              (Set.mem_union_left _
+                (Set.mem_union_left _ (Set.mem_union_left _ (Set.mem_union_right _ ⟨_, rfl⟩))))
+          ⟩
+        ⟩
+      ⟩)
+  | L i n l j =>
+    exact Set.mem_union_right _
+      (Set.mem_iUnion.mpr ⟨
+        i,
+        Set.mem_iUnion.mpr ⟨
+          n,
+          Set.mem_iUnion.mpr ⟨
+            l,
+            Set.mem_union_left _
+              (Set.mem_union_left _ (Set.mem_union_left _ (Set.mem_union_right _ ⟨_, rfl⟩)))
+          ⟩
+        ⟩
+      ⟩)
+  | barL i n l j =>
+    exact Set.mem_union_right _
+      (Set.mem_iUnion.mpr ⟨
+        i,
+        Set.mem_iUnion.mpr ⟨
+          n,
+          Set.mem_iUnion.mpr
+            ⟨l, Set.mem_union_left _ (Set.mem_union_left _ (Set.mem_union_right _ ⟨_, rfl⟩))⟩
+        ⟩
+      ⟩)
+  | e i n l j =>
+    exact Set.mem_union_right _
+      (Set.mem_iUnion.mpr ⟨
+        i,
+        Set.mem_iUnion.mpr
+          ⟨n, Set.mem_iUnion.mpr ⟨l, Set.mem_union_left _ (Set.mem_union_right _ ⟨_, rfl⟩)⟩⟩
+      ⟩)
+  | bare i n l j =>
+    exact Set.mem_union_right _
+      (Set.mem_iUnion.mpr
+        ⟨i, Set.mem_iUnion.mpr ⟨n, Set.mem_iUnion.mpr ⟨l, Set.mem_union_right _ ⟨_, rfl⟩⟩⟩⟩)
 
-/-- Expanding every dual vector in the dual basis of its value space: the field
-  algebra is already generated by the countable family of basis generators. -/
-lemma fieldAlgebra_le_adjoin_range :
-    h.fieldAlgebra ≤ Algebra.adjoin ℂ (Set.range h.generatorVal) := by
+/--
+Expanding every dual vector in the dual basis of its value space: the field
+algebra is already generated by the countable family of basis generators.
+-/
+lemma fieldAlgebra_le_adjoin_range
+    : h.fieldAlgebra ≤ Algebra.adjoin ℂ (Set.range h.generatorVal) := by
   rw [fieldAlgebra]
   refine Algebra.adjoin_le fun x hx => ?_
   simp only [Set.mem_union, Set.mem_iUnion, Set.mem_range] at hx
@@ -473,82 +582,100 @@ lemma fieldAlgebra_le_adjoin_range :
     simp only [map_sum, map_smul]
     refine Subalgebra.sum_mem _ fun j _ => ?_
     rw [← algebraMap_smul ℂ (φ (GaugeAlgebra.stdBasis j))]
-    exact Subalgebra.smul_mem _ (Algebra.subset_adjoin
-          (Set.mem_range_self (f := h.generatorVal) (Generators.F n l μ ν j))) _
+    exact Subalgebra.smul_mem _
+      (Algebra.subset_adjoin (Set.mem_range_self (f := h.generatorVal) (Generators.F n l μ ν j))) _
   · rw [← HiggsVec.orthonormBasis.toBasis.sum_dual_apply_smul_coord φ]
     simp only [map_sum, map_smul]
-    exact Subalgebra.sum_mem _ fun j _ => Subalgebra.smul_mem _
-      (Algebra.subset_adjoin
-          (Set.mem_range_self (f := h.generatorVal) (Generators.H n l j))) _
+    exact Subalgebra.sum_mem _ fun j _ =>
+      Subalgebra.smul_mem _
+        (Algebra.subset_adjoin (Set.mem_range_self (f := h.generatorVal) (Generators.H n l j))) _
   · rw [← (Basis.conj HiggsVec.orthonormBasis.toBasis).sum_dual_apply_smul_coord φ]
     simp only [map_sum, map_smul]
-    exact Subalgebra.sum_mem _ fun j _ => Subalgebra.smul_mem _
-      (Algebra.subset_adjoin
-          (Set.mem_range_self (f := h.generatorVal) (Generators.barH n l j))) _
-  · obtain (((((((((⟨φ, rfl⟩ | ⟨φ, rfl⟩) | ⟨φ, rfl⟩) | ⟨φ, rfl⟩) | ⟨φ, rfl⟩) | ⟨φ, rfl⟩) |
-      ⟨φ, rfl⟩) | ⟨φ, rfl⟩) | ⟨φ, rfl⟩) | ⟨φ, rfl⟩) := hx
+    exact Subalgebra.sum_mem _ fun j _ =>
+      Subalgebra.smul_mem _
+        (Algebra.subset_adjoin (Set.mem_range_self (f := h.generatorVal) (Generators.barH n l j))) _
+  · obtain (((((((((⟨φ, rfl⟩ | ⟨φ, rfl⟩) | ⟨φ, rfl⟩) | ⟨φ, rfl⟩) | ⟨φ, rfl⟩) | ⟨φ, rfl⟩) | ⟨φ, rfl⟩)
+        | ⟨φ, rfl⟩)
+        | ⟨φ, rfl⟩)
+        | ⟨φ, rfl⟩) :=
+      hx
     · rw [← DownSinglet.basis.sum_dual_apply_smul_coord φ]
       simp only [map_sum, map_smul]
-      exact Subalgebra.sum_mem _ fun j _ => Subalgebra.smul_mem _
-        (Algebra.subset_adjoin
-          (Set.mem_range_self (f := h.generatorVal) (Generators.d i n l j))) _
+      exact Subalgebra.sum_mem _ fun j _ =>
+        Subalgebra.smul_mem _
+          (Algebra.subset_adjoin (Set.mem_range_self (f := h.generatorVal) (Generators.d i n l j)))
+          _
     · rw [← (Basis.conj DownSinglet.basis).sum_dual_apply_smul_coord φ]
       simp only [map_sum, map_smul]
-      exact Subalgebra.sum_mem _ fun j _ => Subalgebra.smul_mem _
-        (Algebra.subset_adjoin
-          (Set.mem_range_self (f := h.generatorVal) (Generators.bard i n l j))) _
+      exact Subalgebra.sum_mem _ fun j _ =>
+        Subalgebra.smul_mem _
+          (Algebra.subset_adjoin (Set.mem_range_self (f := h.generatorVal)
+            (Generators.bard i n l j)))
+          _
     · rw [← UpSinglet.basis.sum_dual_apply_smul_coord φ]
       simp only [map_sum, map_smul]
-      exact Subalgebra.sum_mem _ fun j _ => Subalgebra.smul_mem _
-        (Algebra.subset_adjoin
-          (Set.mem_range_self (f := h.generatorVal) (Generators.u i n l j))) _
+      exact Subalgebra.sum_mem _ fun j _ =>
+        Subalgebra.smul_mem _
+          (Algebra.subset_adjoin (Set.mem_range_self (f := h.generatorVal) (Generators.u i n l j)))
+          _
     · rw [← (Basis.conj UpSinglet.basis).sum_dual_apply_smul_coord φ]
       simp only [map_sum, map_smul]
-      exact Subalgebra.sum_mem _ fun j _ => Subalgebra.smul_mem _
-        (Algebra.subset_adjoin
-          (Set.mem_range_self (f := h.generatorVal) (Generators.baru i n l j))) _
+      exact Subalgebra.sum_mem _ fun j _ =>
+        Subalgebra.smul_mem _
+          (Algebra.subset_adjoin (Set.mem_range_self (f := h.generatorVal)
+            (Generators.baru i n l j)))
+          _
     · rw [← QuarkDoublet.basis.sum_dual_apply_smul_coord φ]
       simp only [map_sum, map_smul]
-      exact Subalgebra.sum_mem _ fun j _ => Subalgebra.smul_mem _
-        (Algebra.subset_adjoin
-          (Set.mem_range_self (f := h.generatorVal) (Generators.Q i n l j))) _
+      exact Subalgebra.sum_mem _ fun j _ =>
+        Subalgebra.smul_mem _
+          (Algebra.subset_adjoin (Set.mem_range_self (f := h.generatorVal) (Generators.Q i n l j)))
+          _
     · rw [← (Basis.conj QuarkDoublet.basis).sum_dual_apply_smul_coord φ]
       simp only [map_sum, map_smul]
-      exact Subalgebra.sum_mem _ fun j _ => Subalgebra.smul_mem _
-        (Algebra.subset_adjoin
-          (Set.mem_range_self (f := h.generatorVal) (Generators.barQ i n l j))) _
+      exact Subalgebra.sum_mem _ fun j _ =>
+        Subalgebra.smul_mem _
+          (Algebra.subset_adjoin (Set.mem_range_self (f := h.generatorVal)
+            (Generators.barQ i n l j)))
+          _
     · rw [← LeptonDoubletV.basis.sum_dual_apply_smul_coord φ]
       simp only [map_sum, map_smul]
-      exact Subalgebra.sum_mem _ fun j _ => Subalgebra.smul_mem _
-        (Algebra.subset_adjoin
-          (Set.mem_range_self (f := h.generatorVal) (Generators.L i n l j))) _
+      exact Subalgebra.sum_mem _ fun j _ =>
+        Subalgebra.smul_mem _
+          (Algebra.subset_adjoin (Set.mem_range_self (f := h.generatorVal) (Generators.L i n l j)))
+          _
     · rw [← (Basis.conj LeptonDoubletV.basis).sum_dual_apply_smul_coord φ]
       simp only [map_sum, map_smul]
-      exact Subalgebra.sum_mem _ fun j _ => Subalgebra.smul_mem _
-        (Algebra.subset_adjoin
-          (Set.mem_range_self (f := h.generatorVal) (Generators.barL i n l j))) _
+      exact Subalgebra.sum_mem _ fun j _ =>
+        Subalgebra.smul_mem _
+          (Algebra.subset_adjoin (Set.mem_range_self (f := h.generatorVal)
+            (Generators.barL i n l j)))
+          _
     · rw [← LeptonSinglet.basis.sum_dual_apply_smul_coord φ]
       simp only [map_sum, map_smul]
-      exact Subalgebra.sum_mem _ fun j _ => Subalgebra.smul_mem _
-        (Algebra.subset_adjoin
-          (Set.mem_range_self (f := h.generatorVal) (Generators.e i n l j))) _
+      exact Subalgebra.sum_mem _ fun j _ =>
+        Subalgebra.smul_mem _
+          (Algebra.subset_adjoin (Set.mem_range_self (f := h.generatorVal) (Generators.e i n l j)))
+          _
     · rw [← (Basis.conj LeptonSinglet.basis).sum_dual_apply_smul_coord φ]
       simp only [map_sum, map_smul]
-      exact Subalgebra.sum_mem _ fun j _ => Subalgebra.smul_mem _
-        (Algebra.subset_adjoin
-          (Set.mem_range_self (f := h.generatorVal) (Generators.bare i n l j))) _
+      exact Subalgebra.sum_mem _ fun j _ =>
+        Subalgebra.smul_mem _
+          (Algebra.subset_adjoin (Set.mem_range_self (f := h.generatorVal)
+            (Generators.bare i n l j)))
+          _
 
 /-- The field algebra is generated by the covariant basis generators. -/
-lemma fieldAlgebra_eq_adjoin_range :
-    h.fieldAlgebra = Algebra.adjoin ℂ (Set.range h.generatorVal) := by
+lemma fieldAlgebra_eq_adjoin_range
+    : h.fieldAlgebra = Algebra.adjoin ℂ (Set.range h.generatorVal) := by
   refine le_antisymm h.fieldAlgebra_le_adjoin_range (Algebra.adjoin_le ?_)
   rintro x ⟨g, rfl⟩
   exact h.generatorVal_mem_fieldAlgebra g
 
 /-- A list of generator values is the list of values of a list of generators. -/
-lemma exists_list_map_eq (l₀ : List B) :
-    (∀ y ∈ l₀, y ∈ Set.range h.generatorVal) →
-    ∃ gl : List Generators, gl.map h.generatorVal = l₀ := by
+lemma exists_list_map_eq (l₀ : List B)
+    : (∀ y ∈ l₀, y ∈ Set.range h.generatorVal)
+      → ∃ gl : List Generators, gl.map h.generatorVal = l₀ := by
   induction l₀ with
   | nil => exact fun _ => ⟨[], rfl⟩
   | cons a t ih =>
@@ -557,16 +684,18 @@ lemma exists_list_map_eq (l₀ : List B) :
     obtain ⟨gl, hgl⟩ := ih (fun y hy => hl₀ y (by simp [hy]))
     exact ⟨g :: gl, by rw [List.map_cons, hg, hgl]⟩
 
-/-- A word in the covariant generators is a `massWeightPoly`-eigenvector whose
-  weight is the sum of the weights of its factors. -/
-lemma massWeightPoly_generatorVal_list_prod (gl : List Generators) :
-    massWeightPoly ((gl.map h.generatorVal).prod) =
-      Polynomial.monomial ((gl.map Generators.weight).sum) ((gl.map h.generatorVal).prod) := by
+/--
+A word in the covariant generators is a `massWeightPoly`-eigenvector whose
+weight is the sum of the weights of its factors.
+-/
+lemma massWeightPoly_generatorVal_list_prod (gl : List Generators)
+    : massWeightPoly ((gl.map h.generatorVal).prod)
+      = Polynomial.monomial ((gl.map Generators.weight).sum) ((gl.map h.generatorVal).prod) := by
   induction gl with
   | nil => simp
   | cons g t ih =>
-    simp only [List.map_cons, List.prod_cons, List.sum_cons, map_mul,
-      h.massWeightPoly_generatorVal, ih, Polynomial.monomial_mul_monomial]
+    simp only [List.map_cons, List.prod_cons, List.sum_cons, map_mul, h.massWeightPoly_generatorVal,
+      ih, Polynomial.monomial_mul_monomial]
 /-!
 
 ## E. Supercommutativity of the generators
@@ -578,11 +707,14 @@ of the product of their total weights.
 
 -/
 
-/-- The field-strength symbols commute with the value of every covariant
-  generator. -/
-lemma commute_F_generatorVal {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin 3) (μ ν : Fin 1 ⊕ Fin 3)
-    (ψ : Module.Dual ℝ GaugeAlgebra) (g : Generators) :
-    Commute (h.covF l μ ν ψ) (h.generatorVal g) := by
+/--
+The field-strength symbols commute with the value of every covariant
+generator.
+-/
+lemma commute_F_generatorVal
+    {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin 3)
+    (μ ν : Fin 1 ⊕ Fin 3) (ψ : Module.Dual ℝ GaugeAlgebra) (g : Generators)
+    : Commute (h.covF l μ ν ψ) (h.generatorVal g) := by
   cases g with
   | H n' l' j => exact h.F_comm_H l μ ν ψ l' _
   | barH n' l' j => exact h.F_comm_barH l μ ν ψ l' _
@@ -599,9 +731,9 @@ lemma commute_F_generatorVal {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin 3) (μ ν : 
   | bare i n' l' j => exact h.F_comm_bare l μ ν ψ i l' _
 
 /-- The Higgs symbols commute with the value of every covariant generator. -/
-lemma commute_H_generatorVal {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin 3)
-    (φ : Module.Dual ℂ HiggsVec) (g : Generators) :
-    Commute (h.covH l φ) (h.generatorVal g) := by
+lemma commute_H_generatorVal
+    {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin 3) (φ : Module.Dual ℂ HiggsVec) (g : Generators)
+    : Commute (h.covH l φ) (h.generatorVal g) := by
   cases g with
   | H n' l' j => exact h.isHiggsSector.H_comm_H φ _ _ _ l l'
   | barH n' l' j => exact h.isHiggsSector.H_comm_barH φ _ _ _ l l'
@@ -617,11 +749,13 @@ lemma commute_H_generatorVal {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin 3)
   | e i n' l' j => exact h.H_comm_e l φ i l' _
   | bare i n' l' j => exact h.H_comm_bare l φ i l' _
 
-/-- The conjugate-Higgs symbols commute with the value of every covariant
-  generator. -/
-lemma commute_barH_generatorVal {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin 3)
-    (φ : Module.Dual ℂ (ConjModule HiggsVec)) (g : Generators) :
-    Commute (h.covBarH l φ) (h.generatorVal g) := by
+/--
+The conjugate-Higgs symbols commute with the value of every covariant
+generator.
+-/
+lemma commute_barH_generatorVal
+    {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin 3) (φ : Module.Dual ℂ (ConjModule HiggsVec)) (g : Generators)
+    : Commute (h.covBarH l φ) (h.generatorVal g) := by
   cases g with
   | H n' l' j => exact (h.isHiggsSector.H_comm_barH _ φ _ _ l' l).symm
   | barH n' l' j => exact h.isHiggsSector.barH_comm_barH φ _ _ _ l l'
@@ -637,10 +771,12 @@ lemma commute_barH_generatorVal {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin 3)
   | e i n' l' j => exact h.barH_comm_e l φ i l' _
   | bare i n' l' j => exact h.barH_comm_bare l φ i l' _
 
-/-- A covariant generator of even mass weight is bosonic: its value commutes with
-  the value of every covariant generator. -/
-lemma commute_generatorVal_of_even {g : Generators} (hg : g.weight % 2 = 0)
-    (g' : Generators) : Commute (h.generatorVal g) (h.generatorVal g') := by
+/--
+A covariant generator of even mass weight is bosonic: its value commutes with
+the value of every covariant generator.
+-/
+lemma commute_generatorVal_of_even {g : Generators} (hg : g.weight % 2 = 0) (g' : Generators)
+    : Commute (h.generatorVal g) (h.generatorVal g') := by
   cases g with
   | H n l j => exact h.commute_H_generatorVal l _ g'
   | barH n l j => exact h.commute_barH_generatorVal l _ g'
@@ -656,12 +792,13 @@ lemma commute_generatorVal_of_even {g : Generators} (hg : g.weight % 2 = 0)
   | e i n l j => exact absurd hg (by simp only [Generators.weight]; omega)
   | bare i n l j => exact absurd hg (by simp only [Generators.weight]; omega)
 
-/-- Fermionic generator values anticommute: the values of two covariant generators
-  of odd mass weight exchange with a sign. -/
-lemma generatorVal_anticomm_of_odd_of_odd {g g' : Generators}
-    (hg : g.weight % 2 = 1) (hg' : g'.weight % 2 = 1) :
-    h.generatorVal g * h.generatorVal g'
-      = -(h.generatorVal g' * h.generatorVal g) := by
+/--
+Fermionic generator values anticommute: the values of two covariant generators
+of odd mass weight exchange with a sign.
+-/
+lemma generatorVal_anticomm_of_odd_of_odd
+    {g g' : Generators} (hg : g.weight % 2 = 1) (hg' : g'.weight % 2 = 1)
+    : h.generatorVal g * h.generatorVal g' = -(h.generatorVal g' * h.generatorVal g) := by
   cases g with
   | H n l j => exact absurd hg (by simp only [Generators.weight]; omega)
   | barH n l j => exact absurd hg (by simp only [Generators.weight]; omega)
@@ -1017,12 +1154,14 @@ lemma generatorVal_anticomm_of_odd_of_odd {g g' : Generators}
       simp only [generatorVal]
       exact h.isFermionSector.bare_anticomm_bare i i' l l' _ _
 
-/-- Two covariant generators exchange up to the sign determined by their mass
-  weights: the weight is odd exactly on the fermionic generators, so the sign is
-  `-1` precisely when both generators are fermionic. -/
-lemma generatorVal_mul_generatorVal (g g' : Generators) :
-    h.generatorVal g * h.generatorVal g' =
-      ((-1 : ℂ) ^ (g.weight * g'.weight)) • (h.generatorVal g' * h.generatorVal g) := by
+/--
+Two covariant generators exchange up to the sign determined by their mass
+weights: the weight is odd exactly on the fermionic generators, so the sign is
+`-1` precisely when both generators are fermionic.
+-/
+lemma generatorVal_mul_generatorVal (g g' : Generators)
+    : h.generatorVal g * h.generatorVal g'
+      = ((-1 : ℂ) ^ (g.weight * g'.weight)) • (h.generatorVal g' * h.generatorVal g) := by
   rcases Nat.even_or_odd g.weight with hg | hg
   · rw [Even.neg_one_pow (hg.mul_right _), one_smul]
     exact h.commute_generatorVal_of_even (Nat.even_iff.mp hg) g'
@@ -1032,58 +1171,65 @@ lemma generatorVal_mul_generatorVal (g g' : Generators) :
     · rw [Odd.neg_one_pow (hg.mul hg'), neg_one_smul]
       exact h.generatorVal_anticomm_of_odd_of_odd (Nat.odd_iff.mp hg) (Nat.odd_iff.mp hg')
 
-/-- A generator value moves past a word of generators up to the sign of the
-  product of the weights. -/
-lemma generatorVal_mul_list_prod (g : Generators) (gl : List Generators) :
-    h.generatorVal g * (gl.map h.generatorVal).prod =
-      ((-1 : ℂ) ^ (g.weight * (gl.map Generators.weight).sum)) •
-        ((gl.map h.generatorVal).prod * h.generatorVal g) := by
+/--
+A generator value moves past a word of generators up to the sign of the
+product of the weights.
+-/
+lemma generatorVal_mul_list_prod (g : Generators) (gl : List Generators)
+    : h.generatorVal g * (gl.map h.generatorVal).prod
+      = ((-1 : ℂ) ^ (g.weight * (gl.map Generators.weight).sum))
+        • ((gl.map h.generatorVal).prod * h.generatorVal g) := by
   induction gl with
   | nil => simp
   | cons g' t ih =>
     simp only [List.map_cons, List.prod_cons, List.sum_cons]
-    calc h.generatorVal g * (h.generatorVal g' * (t.map h.generatorVal).prod)
-        = (h.generatorVal g * h.generatorVal g') * (t.map h.generatorVal).prod := by
-          rw [mul_assoc]
-      _ = ((-1 : ℂ) ^ (g.weight * g'.weight)) •
-            (h.generatorVal g' * (h.generatorVal g * (t.map h.generatorVal).prod)) := by
-          rw [h.generatorVal_mul_generatorVal g g', smul_mul_assoc, mul_assoc]
-      _ = ((-1 : ℂ) ^ (g.weight * g'.weight)) • (h.generatorVal g' *
-            (((-1 : ℂ) ^ (g.weight * (t.map Generators.weight).sum)) •
-              ((t.map h.generatorVal).prod * h.generatorVal g))) := by rw [ih]
-      _ = ((-1 : ℂ) ^ (g.weight * (g'.weight + (t.map Generators.weight).sum))) •
-            ((h.generatorVal g' * (t.map h.generatorVal).prod) * h.generatorVal g) := by
-          rw [mul_smul_comm, smul_smul, ← pow_add, ← mul_add, ← mul_assoc]
+    calc
+      h.generatorVal g * (h.generatorVal g' * (t.map h.generatorVal).prod)
+        = (h.generatorVal g * h.generatorVal g') * (t.map h.generatorVal).prod := by rw [mul_assoc]
+      _ = ((-1 : ℂ) ^ (g.weight * g'.weight))
+          • (h.generatorVal g' * (h.generatorVal g * (t.map h.generatorVal).prod)) := by
+        rw [h.generatorVal_mul_generatorVal g g', smul_mul_assoc, mul_assoc]
+      _ = ((-1 : ℂ) ^ (g.weight * g'.weight))
+          • (h.generatorVal g'
+            * (((-1 : ℂ) ^ (g.weight * (t.map Generators.weight).sum))
+              • ((t.map h.generatorVal).prod * h.generatorVal g))) := by
+        rw [ih]
+      _ = ((-1 : ℂ) ^ (g.weight * (g'.weight + (t.map Generators.weight).sum)))
+          • ((h.generatorVal g' * (t.map h.generatorVal).prod) * h.generatorVal g) := by
+        rw [mul_smul_comm, smul_smul, ← pow_add, ← mul_add, ← mul_assoc]
 
-/-- Two words of covariant generators exchange up to the sign of the product of
-  their total weights. -/
-lemma list_prod_mul_list_prod (gl gl' : List Generators) :
-    (gl.map h.generatorVal).prod * (gl'.map h.generatorVal).prod =
-      ((-1 : ℂ) ^ ((gl.map Generators.weight).sum * (gl'.map Generators.weight).sum)) •
-        ((gl'.map h.generatorVal).prod * (gl.map h.generatorVal).prod) := by
+/--
+Two words of covariant generators exchange up to the sign of the product of
+their total weights.
+-/
+lemma list_prod_mul_list_prod (gl gl' : List Generators)
+    : (gl.map h.generatorVal).prod * (gl'.map h.generatorVal).prod
+      = ((-1 : ℂ) ^ ((gl.map Generators.weight).sum * (gl'.map Generators.weight).sum))
+        • ((gl'.map h.generatorVal).prod * (gl.map h.generatorVal).prod) := by
   induction gl with
   | nil => simp
   | cons g t ih =>
     simp only [List.map_cons, List.prod_cons, List.sum_cons]
-    calc (h.generatorVal g * (t.map h.generatorVal).prod) * (gl'.map h.generatorVal).prod
-        = h.generatorVal g * ((t.map h.generatorVal).prod * (gl'.map h.generatorVal).prod) := by
-          rw [mul_assoc]
-      _ = ((-1 : ℂ) ^ ((t.map Generators.weight).sum * (gl'.map Generators.weight).sum)) •
-            ((h.generatorVal g * (gl'.map h.generatorVal).prod) * (t.map h.generatorVal).prod) := by
-          rw [ih, mul_smul_comm, ← mul_assoc]
-      _ = ((-1 : ℂ) ^ ((t.map Generators.weight).sum * (gl'.map Generators.weight).sum)) •
-            ((((-1 : ℂ) ^ (g.weight * (gl'.map Generators.weight).sum)) •
-              ((gl'.map h.generatorVal).prod * h.generatorVal g))
-                * (t.map h.generatorVal).prod) := by
-          rw [h.generatorVal_mul_list_prod g gl']
-      _ = ((-1 : ℂ) ^ ((g.weight + (t.map Generators.weight).sum) *
-              (gl'.map Generators.weight).sum)) •
-            ((gl'.map h.generatorVal).prod * (h.generatorVal g * (t.map h.generatorVal).prod)) := by
-          rw [smul_mul_assoc, smul_smul, ← pow_add, mul_assoc,
-            show (t.map Generators.weight).sum * (gl'.map Generators.weight).sum
+    calc
+      (h.generatorVal g * (t.map h.generatorVal).prod) * (gl'.map h.generatorVal).prod
+          = h.generatorVal g * ((t.map h.generatorVal).prod * (gl'.map h.generatorVal).prod) := by
+        rw [mul_assoc]
+      _ = ((-1 : ℂ) ^ ((t.map Generators.weight).sum * (gl'.map Generators.weight).sum))
+          • ((h.generatorVal g * (gl'.map h.generatorVal).prod) * (t.map h.generatorVal).prod) := by
+        rw [ih, mul_smul_comm, ← mul_assoc]
+      _ = ((-1 : ℂ) ^ ((t.map Generators.weight).sum * (gl'.map Generators.weight).sum))
+          • ((((-1 : ℂ) ^ (g.weight * (gl'.map Generators.weight).sum))
+              • ((gl'.map h.generatorVal).prod * h.generatorVal g))
+            * (t.map h.generatorVal).prod) := by
+        rw [h.generatorVal_mul_list_prod g gl']
+      _ = ((-1 : ℂ)
+            ^ ((g.weight + (t.map Generators.weight).sum) * (gl'.map Generators.weight).sum))
+          • ((gl'.map h.generatorVal).prod * (h.generatorVal g * (t.map h.generatorVal).prod)) := by
+        rw [smul_mul_assoc, smul_smul, ← pow_add, mul_assoc,
+          show (t.map Generators.weight).sum * (gl'.map Generators.weight).sum
                 + g.weight * (gl'.map Generators.weight).sum
-              = (g.weight + (t.map Generators.weight).sum) *
-                (gl'.map Generators.weight).sum from by ring]
+              = (g.weight + (t.map Generators.weight).sum) * (gl'.map Generators.weight).sum from by
+            ring]
 
 end CovAlgebraRealization
 

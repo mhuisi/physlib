@@ -44,19 +44,17 @@ variable {G : Type*} [Monoid G] [TopologicalSpace G]
 
 /-- Complex-valued evaluation of a Pontryagin character at a fixed monoid element is continuous. -/
 @[fun_prop]
-lemma continuous_coe_eval_const (g : G) :
-    Continuous (fun χ : _root_.PontryaginDual G => (χ g : ℂ)) :=
+lemma continuous_coe_eval_const (g : G)
+    : Continuous (fun χ : _root_.PontryaginDual G => (χ g : ℂ)) :=
   continuous_subtype_val.comp (continuous_eval_const (F := G →ₜ* Circle) g)
 
-variable [MeasurableSpace (_root_.PontryaginDual G)]
-  [OpensMeasurableSpace (_root_.PontryaginDual G)]
+variable
+  [MeasurableSpace (_root_.PontryaginDual G)] [OpensMeasurableSpace (_root_.PontryaginDual G)]
 
 /-- Complex-valued evaluation of a Pontryagin character is integrable against a finite measure. -/
-lemma integrable_coe_eval
-    {μ : Measure (_root_.PontryaginDual G)} [IsFiniteMeasure μ] (g : G) :
-    Integrable (fun χ : _root_.PontryaginDual G => (χ g : ℂ)) μ :=
-  (integrable_const (1 : ℝ)).mono'
-    (continuous_coe_eval_const g).aestronglyMeasurable
+lemma integrable_coe_eval {μ : Measure (_root_.PontryaginDual G)} [IsFiniteMeasure μ] (g : G)
+    : Integrable (fun χ : _root_.PontryaginDual G => (χ g : ℂ)) μ :=
+  (integrable_const (1 : ℝ)).mono' (continuous_coe_eval_const g).aestronglyMeasurable
     (.of_forall fun χ => by simp)
 
 end TauCeti.PontryaginDual

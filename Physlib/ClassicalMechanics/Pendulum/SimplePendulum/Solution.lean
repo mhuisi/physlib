@@ -117,11 +117,13 @@ motion.
 
 -/
 
-/-- The phase-space vector field of the simple pendulum, sending `(θ, θ̇)` to
-  `(θ̇, -ω² sin θ)`. It is the right-hand side of the first-order system on the phase space
-  equivalent to the equation of motion `θ̈ + ω² sin θ = 0`. -/
-noncomputable def phaseVectorField (p : EuclideanSpace ℝ (Fin 1) × EuclideanSpace ℝ (Fin 1)) :
-    EuclideanSpace ℝ (Fin 1) × EuclideanSpace ℝ (Fin 1) :=
+/--
+The phase-space vector field of the simple pendulum, sending `(θ, θ̇)` to
+`(θ̇, -ω² sin θ)`. It is the right-hand side of the first-order system on the phase space
+equivalent to the equation of motion `θ̈ + ω² sin θ = 0`.
+-/
+noncomputable def phaseVectorField (p : EuclideanSpace ℝ (Fin 1) × EuclideanSpace ℝ (Fin 1))
+    : EuclideanSpace ℝ (Fin 1) × EuclideanSpace ℝ (Fin 1) :=
   (p.2, -(S.ω ^ 2 * Real.sin (p.1 0)) • EuclideanSpace.single 0 1)
 
 /-!
@@ -130,11 +132,13 @@ noncomputable def phaseVectorField (p : EuclideanSpace ℝ (Fin 1) × EuclideanS
 
 -/
 
-/-- The phase-space vector field of the simple pendulum is globally Lipschitz, with constant
-  `1 + ω²`: the first component is the projection onto the angular velocity, and the second is
-  `-ω²` times `sin` of the angle, and `sin` is Lipschitz with constant one. -/
-lemma phaseVectorField_lipschitz :
-    LipschitzWith (Real.toNNReal (1 + S.ω ^ 2)) S.phaseVectorField := by
+/--
+The phase-space vector field of the simple pendulum is globally Lipschitz, with constant
+`1 + ω²`: the first component is the projection onto the angular velocity, and the second is
+`-ω²` times `sin` of the angle, and `sin` is Lipschitz with constant one.
+-/
+lemma phaseVectorField_lipschitz
+    : LipschitzWith (Real.toNNReal (1 + S.ω ^ 2)) S.phaseVectorField := by
   refine LipschitzWith.of_dist_le_mul fun p q => ?_
   rw [Real.coe_toNNReal _ (by positivity), Prod.dist_eq, add_mul, one_mul]
   apply max_le _ _
@@ -169,21 +173,25 @@ uniqueness theorem of Mathlib is stated for curves on `ℝ`.
 
 -/
 
-/-- Solving the equation of motion for the angular acceleration: along a solution the second
-  derivative of the angle is `-ω² sin θ` times the unit vector of the angular coordinate, the
-  mass having cancelled. -/
-lemma acceleration_eq_of_equationOfMotion (θ : Time → EuclideanSpace ℝ (Fin 1))
-    (h : S.EquationOfMotion θ) (t : Time) :
-    ∂ₜ (∂ₜ θ) t = -(S.ω ^ 2 * Real.sin (θ t 0)) • EuclideanSpace.single 0 1 := by
+/--
+Solving the equation of motion for the angular acceleration: along a solution the second
+derivative of the angle is `-ω² sin θ` times the unit vector of the angular coordinate, the
+mass having cancelled.
+-/
+lemma acceleration_eq_of_equationOfMotion
+    (θ : Time → EuclideanSpace ℝ (Fin 1)) (h : S.EquationOfMotion θ) (t : Time)
+    : ∂ₜ (∂ₜ θ) t = -(S.ω ^ 2 * Real.sin (θ t 0)) • EuclideanSpace.single 0 1 := by
   ext i
   fin_cases i
   simpa using eq_neg_of_add_eq_zero_left ((S.equationOfMotion_iff_scalar θ).mp h t)
 
-/-- The pointwise equation of motion in terms of the angular frequency: the moment of inertia
-  times the acceleration `-ω² sin θ` is the torque. This reads the equation of motion back off
-  the second component of the phase-space vector field. -/
-lemma inertia_smul_eq_torque (x : EuclideanSpace ℝ (Fin 1)) :
-    S.inertia • (-(S.ω ^ 2 * Real.sin (x 0)) • EuclideanSpace.single 0 1) = S.torque x := by
+/--
+The pointwise equation of motion in terms of the angular frequency: the moment of inertia
+times the acceleration `-ω² sin θ` is the torque. This reads the equation of motion back off
+the second component of the phase-space vector field.
+-/
+lemma inertia_smul_eq_torque (x : EuclideanSpace ℝ (Fin 1))
+    : S.inertia • (-(S.ω ^ 2 * Real.sin (x 0)) • EuclideanSpace.single 0 1) = S.torque x := by
   rw [torque_eq, smul_smul, ← neg_smul, ← S.ω_sq_mul_inertia]
   congr
   ring
@@ -194,11 +202,14 @@ lemma inertia_smul_eq_torque (x : EuclideanSpace ℝ (Fin 1)) :
 
 -/
 
-/-- The phase curve `τ ↦ (θ t, θ̇ t)` (with `t = toRealCLE.symm τ`) of a smooth solution `θ`
-  solves the first-order phase-space ODE with vector field `phaseVectorField`. -/
-lemma phaseCurve_hasDerivAt {θ : Time → EuclideanSpace ℝ (Fin 1)}
-    (hθ : ContDiff ℝ ∞ θ) (h : S.EquationOfMotion θ) (τ : ℝ) :
-    HasDerivAt (fun τ : ℝ => (θ (toRealCLE.symm τ), ∂ₜ θ (toRealCLE.symm τ)))
+/--
+The phase curve `τ ↦ (θ t, θ̇ t)` (with `t = toRealCLE.symm τ`) of a smooth solution `θ`
+solves the first-order phase-space ODE with vector field `phaseVectorField`.
+-/
+lemma phaseCurve_hasDerivAt
+    {θ : Time → EuclideanSpace ℝ (Fin 1)} (hθ : ContDiff ℝ ∞ θ) (h : S.EquationOfMotion θ) (τ : ℝ)
+    : HasDerivAt
+      (fun τ : ℝ => (θ (toRealCLE.symm τ), ∂ₜ θ (toRealCLE.symm τ)))
       (S.phaseVectorField (θ (toRealCLE.symm τ), ∂ₜ θ (toRealCLE.symm τ))) τ := by
   rw [phaseVectorField, ← S.acceleration_eq_of_equationOfMotion θ h (Time.toRealCLE.symm τ)]
   exact (hasDerivAt_comp_toRealCLE_symm θ τ (hθ.differentiable (by simp) _)).prodMk
@@ -217,30 +228,36 @@ first-order reduction alone.
 
 -/
 
-/-- Any two smooth solutions of the equation of motion of the simple pendulum with the same
-  initial angle and angular velocity are equal. -/
-lemma equationOfMotion_unique {x y : Time → EuclideanSpace ℝ (Fin 1)}
-    (hx : ContDiff ℝ ∞ x) (hy : ContDiff ℝ ∞ y)
-    (hEOMx : S.EquationOfMotion x) (hEOMy : S.EquationOfMotion y)
-    (h0 : x 0 = y 0) (hv0 : ∂ₜ x 0 = ∂ₜ y 0) : x = y := by
-  have hEq := ODE_solution_unique_univ (t₀ := (0 : ℝ))
-    (f := fun τ : ℝ => (x (Time.toRealCLE.symm τ), ∂ₜ x (Time.toRealCLE.symm τ)))
-    (g := fun τ : ℝ => (y (Time.toRealCLE.symm τ), ∂ₜ y (Time.toRealCLE.symm τ)))
-    (fun _ => S.phaseVectorField_lipschitz.lipschitzOnWith)
-    (fun τ => ⟨S.phaseCurve_hasDerivAt hx hEOMx τ, Set.mem_univ _⟩)
-    (fun τ => ⟨S.phaseCurve_hasDerivAt hy hEOMy τ, Set.mem_univ _⟩)
-    (by simp [h0, hv0])
+/--
+Any two smooth solutions of the equation of motion of the simple pendulum with the same
+initial angle and angular velocity are equal.
+-/
+lemma equationOfMotion_unique
+    {x y : Time → EuclideanSpace ℝ (Fin 1)}
+    (hx : ContDiff ℝ ∞ x) (hy : ContDiff ℝ ∞ y) (hEOMx : S.EquationOfMotion x)
+    (hEOMy : S.EquationOfMotion y) (h0 : x 0 = y 0) (hv0 : ∂ₜ x 0 = ∂ₜ y 0)
+    : x = y := by
+  have hEq :=
+    ODE_solution_unique_univ (t₀ := (0 : ℝ))
+      (f := fun τ : ℝ => (x (Time.toRealCLE.symm τ), ∂ₜ x (Time.toRealCLE.symm τ)))
+      (g := fun τ : ℝ => (y (Time.toRealCLE.symm τ), ∂ₜ y (Time.toRealCLE.symm τ)))
+      (fun _ => S.phaseVectorField_lipschitz.lipschitzOnWith)
+      (fun τ => ⟨S.phaseCurve_hasDerivAt hx hEOMx τ, Set.mem_univ _⟩)
+      (fun τ => ⟨S.phaseCurve_hasDerivAt hy hEOMy τ, Set.mem_univ _⟩)
+      (by simp [h0, hv0])
   funext t
   rw [funext_iff] at hEq
   exact (Prod.ext_iff.mp (hEq (toRealCLE t))).1
 
-/-- Two solutions of the simple pendulum with the same initial angle and angular velocity are
-  equal. -/
-lemma IsSolution.eq_of_initial {S : SimplePendulum} {x y : Time → EuclideanSpace ℝ (Fin 1)}
-    (hx : S.IsSolution x) (hy : S.IsSolution y) (h0 : x 0 = y 0) (hv0 : ∂ₜ x 0 = ∂ₜ y 0) :
-    x = y :=
-  S.equationOfMotion_unique hx.contDiff hy.contDiff hx.equationOfMotion hy.equationOfMotion
-    h0 hv0
+/--
+Two solutions of the simple pendulum with the same initial angle and angular velocity are
+equal.
+-/
+lemma IsSolution.eq_of_initial
+    {S : SimplePendulum} {x y : Time → EuclideanSpace ℝ (Fin 1)}
+    (hx : S.IsSolution x) (hy : S.IsSolution y) (h0 : x 0 = y 0) (hv0 : ∂ₜ x 0 = ∂ₜ y 0)
+    : x = y :=
+  S.equationOfMotion_unique hx.contDiff hy.contDiff hx.equationOfMotion hy.equationOfMotion h0 hv0
 
 /-!
 
@@ -262,11 +279,14 @@ rule `Time.deriv_comp_neg` and its second-order form `Time.deriv_deriv_comp_neg`
 
 -/
 
-/-- The time reversal `t ↦ θ (-t)` of a solution of the simple pendulum is a solution: the
-  equation of motion has no velocity term, and the angular acceleration is unchanged by the
-  reversal. -/
-lemma isSolution_comp_neg {S : SimplePendulum} {θ : Time → EuclideanSpace ℝ (Fin 1)}
-    (h : S.IsSolution θ) : S.IsSolution (fun t => θ (-t)) := by
+/--
+The time reversal `t ↦ θ (-t)` of a solution of the simple pendulum is a solution: the
+equation of motion has no velocity term, and the angular acceleration is unchanged by the
+reversal.
+-/
+lemma isSolution_comp_neg
+    {S : SimplePendulum} {θ : Time → EuclideanSpace ℝ (Fin 1)} (h : S.IsSolution θ)
+    : S.IsSolution (fun t => θ (-t)) := by
   refine ⟨h.contDiff.comp contDiff_neg, fun t => ?_⟩
   rw [Time.deriv_deriv_comp_neg θ (h.contDiff.of_le (by norm_cast)) t]
   exact h.equationOfMotion (-t)
@@ -277,12 +297,17 @@ lemma isSolution_comp_neg {S : SimplePendulum} {θ : Time → EuclideanSpace ℝ
 
 -/
 
-/-- A solution of the simple pendulum released from rest at the instant `0` is an even function
-  of time: it retraces its path, `θ (-t) = θ t`. The time reversal of the solution has the same
-  initial angle and, the initial angular velocity being zero, the same initial angular velocity,
-  so the two coincide by uniqueness. -/
-lemma releasedFromRest_even {S : SimplePendulum} {θ : Time → EuclideanSpace ℝ (Fin 1)}
-    (h : S.IsSolution θ) (hv : ∂ₜ θ 0 = 0) (t : Time) : θ (-t) = θ t := by
+/--
+A solution of the simple pendulum released from rest at the instant `0` is an even function
+of time: it retraces its path, `θ (-t) = θ t`. The time reversal of the solution has the same
+initial angle and, the initial angular velocity being zero, the same initial angular velocity,
+so the two coincide by uniqueness.
+-/
+lemma releasedFromRest_even
+    {S : SimplePendulum} {θ : Time → EuclideanSpace ℝ (Fin 1)}
+    (h : S.IsSolution θ) (hv : ∂ₜ θ 0 = 0)
+    (t : Time)
+    : θ (-t) = θ t := by
   apply congrFun (IsSolution.eq_of_initial (isSolution_comp_neg h) h _ _) t
   · rw [neg_zero]
   · rw [Time.deriv_comp_neg θ 0 (h.contDiff.differentiable (by simp) _), neg_zero, hv, neg_zero]
@@ -316,8 +341,10 @@ global Lipschitz bound of section A makes true, is not proved here.
 
 -/
 
-/-- The phase-space vector field of the simple pendulum is smooth: its components are the
-  projection onto the angular velocity and `sin` of the angle. -/
+/--
+The phase-space vector field of the simple pendulum is smooth: its components are the
+projection onto the angular velocity and `sin` of the angle.
+-/
 @[fun_prop]
 lemma phaseVectorField_contDiff (n : WithTop ℕ∞) : ContDiff ℝ n S.phaseVectorField := by
   unfold phaseVectorField
@@ -329,16 +356,21 @@ lemma phaseVectorField_contDiff (n : WithTop ℕ∞) : ContDiff ℝ n S.phaseVec
 
 -/
 
-/-- **Local existence** of solutions of the simple pendulum: for any initial angle `x₀` and
-  angular velocity `v₀` there are `ε > 0` and a curve `θ` with `θ 0 = x₀` and `∂ₜ θ 0 = v₀` which,
-  at every time within `ε` of the initial instant, is differentiable together with its velocity
-  `∂ₜ θ` and satisfies the equation of motion. This is the Picard–Lindelöf theorem applied to the
-  phase-space vector field, the first component of the integral curve through `(x₀, v₀)` being
-  the angle. -/
-lemma exists_local_solution (x₀ v₀ : EuclideanSpace ℝ (Fin 1)) :
-    ∃ ε > (0 : ℝ), ∃ θ : Time → EuclideanSpace ℝ (Fin 1), θ 0 = x₀ ∧ ∂ₜ θ 0 = v₀ ∧
-      ∀ t : Time, |t.val| ≤ ε → DifferentiableAt ℝ θ t ∧ DifferentiableAt ℝ (∂ₜ θ) t ∧
-        S.inertia • ∂ₜ (∂ₜ θ) t = S.torque (θ t) := by
+/--
+**Local existence** of solutions of the simple pendulum: for any initial angle `x₀` and
+angular velocity `v₀` there are `ε > 0` and a curve `θ` with `θ 0 = x₀` and `∂ₜ θ 0 = v₀` which,
+at every time within `ε` of the initial instant, is differentiable together with its velocity
+`∂ₜ θ` and satisfies the equation of motion. This is the Picard–Lindelöf theorem applied to the
+phase-space vector field, the first component of the integral curve through `(x₀, v₀)` being
+the angle.
+-/
+lemma exists_local_solution (x₀ v₀ : EuclideanSpace ℝ (Fin 1))
+    : ∃ ε > (0 : ℝ), ∃ θ : Time → EuclideanSpace ℝ (Fin 1),
+      θ 0 = x₀ ∧ ∂ₜ θ 0 = v₀
+        ∧ ∀ t : Time,
+          |t.val| ≤ ε
+            → DifferentiableAt ℝ θ t ∧ DifferentiableAt ℝ (∂ₜ θ) t
+              ∧ S.inertia • ∂ₜ (∂ₜ θ) t = S.torque (θ t) := by
   obtain ⟨α, hα0, ε, hε, hα⟩ :=
     ContDiffAt.exists_forall_mem_closedBall_exists_eq_forall_mem_Ioo_hasDerivAt₀
       ((S.phaseVectorField_contDiff 1).contDiffAt (x := (x₀, v₀))) 0
@@ -347,27 +379,39 @@ lemma exists_local_solution (x₀ v₀ : EuclideanSpace ℝ (Fin 1)) :
     have := abs_le.mp ht
     change t.val ∈ Set.Ioo (0 - ε) (0 + ε)
     constructor <;> linarith
-  have hd1 : ∀ t : Time, Time.toRealCLE t ∈ Set.Ioo (0 - ε) (0 + ε) →
-      ∂ₜ (fun s => (α (Time.toRealCLE s)).1) t = (α (Time.toRealCLE t)).2 := by
+  have hd1
+      : ∀ t : Time,
+        Time.toRealCLE t ∈ Set.Ioo (0 - ε) (0 + ε)
+          → ∂ₜ (fun s => (α (Time.toRealCLE s)).1) t = (α (Time.toRealCLE t)).2 := by
     intro t ht
-    have hfst := (ContinuousLinearMap.fst ℝ (EuclideanSpace ℝ (Fin 1))
-      (EuclideanSpace ℝ (Fin 1))).hasFDerivAt.comp_hasDerivAt (Time.toRealCLE t) (hα _ ht)
+    have hfst :=
+      (ContinuousLinearMap.fst ℝ (EuclideanSpace ℝ (Fin 1))
+          (EuclideanSpace ℝ (Fin 1))).hasFDerivAt.comp_hasDerivAt
+        (Time.toRealCLE t) (hα _ ht)
     apply Time.deriv_comp_toRealCLE_of_hasDerivAt (fun τ => (α τ).1) t
     simpa [Function.comp_def, phaseVectorField] using hfst
-  have hev : ∀ t : Time, Time.toRealCLE t ∈ Set.Ioo (0 - ε) (0 + ε) →
-      ∂ₜ (fun s => (α (Time.toRealCLE s)).1) =ᶠ[nhds t] fun s => (α (Time.toRealCLE s)).2 := by
+  have hev
+      : ∀ t : Time,
+        Time.toRealCLE t ∈ Set.Ioo (0 - ε) (0 + ε)
+          → ∂ₜ (fun s => (α (Time.toRealCLE s)).1) =ᶠ[nhds t] fun s => (α (Time.toRealCLE s)).2 :=
+    by
+      intro t ht
+      have hU : IsOpen {s : Time | Time.toRealCLE s ∈ Set.Ioo (0 - ε) (0 + ε)} :=
+        isOpen_Ioo.preimage Time.toRealCLE.continuous
+      exact Filter.eventuallyEq_of_mem (hU.mem_nhds ht) fun s hs => hd1 s hs
+  have hd2
+      : ∀ t : Time,
+        Time.toRealCLE t ∈ Set.Ioo (0 - ε) (0 + ε)
+          → ∂ₜ (∂ₜ (fun s => (α (Time.toRealCLE s)).1)) t
+            = (S.phaseVectorField (α (Time.toRealCLE t))).2 := by
     intro t ht
-    have hU : IsOpen {s : Time | Time.toRealCLE s ∈ Set.Ioo (0 - ε) (0 + ε)} :=
-      isOpen_Ioo.preimage Time.toRealCLE.continuous
-    exact Filter.eventuallyEq_of_mem (hU.mem_nhds ht) fun s hs => hd1 s hs
-  have hd2 : ∀ t : Time, Time.toRealCLE t ∈ Set.Ioo (0 - ε) (0 + ε) →
-      ∂ₜ (∂ₜ (fun s => (α (Time.toRealCLE s)).1)) t =
-        (S.phaseVectorField (α (Time.toRealCLE t))).2 := by
-    intro t ht
-    have hsnd := (ContinuousLinearMap.snd ℝ (EuclideanSpace ℝ (Fin 1))
-      (EuclideanSpace ℝ (Fin 1))).hasFDerivAt.comp_hasDerivAt (Time.toRealCLE t) (hα _ ht)
-    have h2 : ∂ₜ (fun s => (α (Time.toRealCLE s)).2) t =
-        (S.phaseVectorField (α (Time.toRealCLE t))).2 := by
+    have hsnd :=
+      (ContinuousLinearMap.snd ℝ (EuclideanSpace ℝ (Fin 1))
+          (EuclideanSpace ℝ (Fin 1))).hasFDerivAt.comp_hasDerivAt
+        (Time.toRealCLE t) (hα _ ht)
+    have h2
+        : ∂ₜ (fun s => (α (Time.toRealCLE s)).2) t
+          = (S.phaseVectorField (α (Time.toRealCLE t))).2 := by
       apply Time.deriv_comp_toRealCLE_of_hasDerivAt (fun τ => (α τ).2) t
       simpa [Function.comp_def] using hsnd
     rw [Time.deriv_eq, (hev t ht).fderiv_eq, ← Time.deriv_eq, h2]

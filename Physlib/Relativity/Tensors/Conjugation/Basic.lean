@@ -105,37 +105,51 @@ and for a real (δ) contraction it is `star δ = δ`.
 
 -/
 
-/-- A tensor species bundled with a conjugation. Beyond the `TensorSpecies` it `extends`, it carries
+/--
+A tensor species bundled with a conjugation. Beyond the `TensorSpecies` it `extends`, it carries
 the conjugate-colour involution `bar`, the index-set identification `barIdx_eq`, and the
 contraction-coherence `conj_contrComm`. Also carries `bar_involution` and `bar_tau` (that `bar` is
-involutive and commutes with the variance dual). -/
-structure ConjTensorSpecies (k : Type) [CommRing k] [StarRing k] (C : Type) (G : Type) [Group G]
+involutive and commutes with the variance dual).
+-/
+structure ConjTensorSpecies
+    (k : Type) [CommRing k] [StarRing k]
+    (C : Type)
+    (G : Type) [Group G]
     (V : C → Type) [∀ c, AddCommGroup (V c)] [∀ c, Module k (V c)]
     (basisIdx : C → Type) [∀ c, Fintype (basisIdx c)] [∀ c, DecidableEq (basisIdx c)]
     (rep : (c : C) → Representation k G (V c)) (b : (c : C) → Basis (basisIdx c) k (V c))
     extends TensorSpecies k C G V basisIdx rep b where
-  /-- The conjugate colour: the colour an index transforms in under complex conjugation; preserves
-  variance (commutes with `τ`). -/
+  /--
+  The conjugate colour: the colour an index transforms in under complex conjugation; preserves
+  variance (commutes with `τ`).
+  -/
   bar : C → C
   /-- `bar` is an involution. -/
   bar_involution : Function.Involutive bar
   /-- `bar` commutes with the variance dual `τ`. -/
   bar_tau : ∀ c, bar (toTensorSpecies.τ c) = toTensorSpecies.τ (bar c)
-  /-- Conjugation fixes the index set: the conjugate colour reuses the same basis labels.
+  /--
+  Conjugation fixes the index set: the conjugate colour reuses the same basis labels.
   Conjugation conjugates components in an adapted basis; it never permutes labels, so the label
-  sets of `c` and `bar c` coincide. -/
+  sets of `c` and `bar c` coincide.
+  -/
   barIdx_eq : ∀ c, basisIdx (bar c) = basisIdx c
   /-- Conjugation is equivariant: it preserves the action of the group. -/
-  conj_basis_equivariant : ∀ (c : C) (g : G) (i j : basisIdx c),
-      (b c).repr (rep c g (b c i)) j = star ((b (bar c)).repr
-      (rep (bar c) g (b (bar c) (Equiv.cast (barIdx_eq c).symm i)))
-      (Equiv.cast (barIdx_eq c).symm j))
-  /-- Conjugation is compatible with contraction at the basis level: `star` of the contraction
+  conj_basis_equivariant
+    : ∀ (c : C) (g : G) (i j : basisIdx c),
+      (b c).repr (rep c g (b c i)) j
+        = star ((b (bar c)).repr (rep (bar c) g (b (bar c) (Equiv.cast (barIdx_eq c).symm i)))
+          (Equiv.cast (barIdx_eq c).symm j))
+  /--
+  Conjugation is compatible with contraction at the basis level: `star` of the contraction
   coefficient at colour `d` equals the coefficient at the conjugate colour `bar d`, with basis
-  labels carried over by `barIdx_eq`. For a real (δ) contraction this is `star δ = δ`. -/
-  conj_contrComm : ∀ (d : C) (x₁ : basisIdx d) (x₂ : basisIdx (toTensorSpecies.τ d)),
+  labels carried over by `barIdx_eq`. For a real (δ) contraction this is `star δ = δ`.
+  -/
+  conj_contrComm
+    : ∀ (d : C) (x₁ : basisIdx d) (x₂ : basisIdx (toTensorSpecies.τ d)),
       star (toTensorSpecies.contr d (b d x₁ ⊗ₜ[k] b (toTensorSpecies.τ d) x₂))
-        = toTensorSpecies.contr (bar d) (b (bar d) ((Equiv.cast (barIdx_eq d)).symm x₁) ⊗ₜ[k]
+        = toTensorSpecies.contr (bar d)
+          (b (bar d) ((Equiv.cast (barIdx_eq d)).symm x₁) ⊗ₜ[k]
             b (toTensorSpecies.τ (bar d)) (basisIdxCongr (bar_tau d)
               ((Equiv.cast (barIdx_eq (toTensorSpecies.τ d))).symm x₂)))
 
@@ -143,11 +157,13 @@ namespace ConjTensorSpecies
 
 open Tensor
 
-variable {k : Type} [CommRing k] [StarRing k] {C : Type} {G : Type} [Group G]
-    {V : C → Type} [∀ c, AddCommGroup (V c)] [∀ c, Module k (V c)]
-    {basisIdx : C → Type} [∀ c, Fintype (basisIdx c)] [∀ c, DecidableEq (basisIdx c)]
-    {rep : (c : C) → Representation k G (V c)} {b : (c : C) → Basis (basisIdx c) k (V c)}
-    (S : ConjTensorSpecies k C G V basisIdx rep b)
+variable
+  {k : Type} [CommRing k] [StarRing k]
+  {C : Type} {G : Type} [Group G]
+  {V : C → Type} [∀ c, AddCommGroup (V c)] [∀ c, Module k (V c)]
+  {basisIdx : C → Type} [∀ c, Fintype (basisIdx c)] [∀ c, DecidableEq (basisIdx c)]
+  {rep : (c : C) → Representation k G (V c)} {b : (c : C) → Basis (basisIdx c) k (V c)}
+  (S : ConjTensorSpecies k C G V basisIdx rep b)
 
 /-- If `bar a = d`, then `bar (τ d) = τ a`. -/
 lemma bar_tau_of_bar {a d : C} (hbar : S.bar a = d) : S.bar (S.τ d) = S.τ a :=
@@ -166,28 +182,33 @@ involutivity together with `bar`'s.
 
 -/
 
-/-- The conjugate-linear slot isomorphism `V c ≃ₛₗ[starRingEnd k] V (bar c)`: conjugate the
-coordinates in the species basis and relabel to the conjugate colour via `barIdx_eq`. -/
+/--
+The conjugate-linear slot isomorphism `V c ≃ₛₗ[starRingEnd k] V (bar c)`: conjugate the
+coordinates in the species basis and relabel to the conjugate colour via `barIdx_eq`.
+-/
 def conjEquiv {c : C} : V c ≃ₛₗ[starRingEnd k] V (S.bar c) :=
   ((b c).repr.trans (ConjModule.starFinsupp (k := k))).trans
     ((Finsupp.domLCongr (Equiv.cast (S.barIdx_eq c).symm)).trans (b (S.bar c)).repr.symm)
 
-/-- `conjEquiv` on a basis vector: `b c i ↦ b (bar c) i` (relabelled through `barIdx_eq`), since the
-basis coordinates of `b c i` are the indicator at `i` and `star` fixes `0` and `1`. -/
-@[simp] lemma conjEquiv_basis {c : C} (i : basisIdx c) :
-    S.conjEquiv (b c i) = b (S.bar c) (Equiv.cast (S.barIdx_eq c).symm i) := by
+/--
+`conjEquiv` on a basis vector: `b c i ↦ b (bar c) i` (relabelled through `barIdx_eq`), since the
+basis coordinates of `b c i` are the indicator at `i` and `star` fixes `0` and `1`.
+-/
+@[simp]
+lemma conjEquiv_basis {c : C} (i : basisIdx c)
+    : S.conjEquiv (b c i) = b (S.bar c) (Equiv.cast (S.barIdx_eq c).symm i) := by
   simp [conjEquiv, ConjModule.starFinsupp, Finsupp.domLCongr_apply, Finsupp.mapRange_single]
 
-lemma conjEquiv_basis_repr {c : C} (v : V c) (φ : basisIdx (S.bar c)) :
-    (b (S.bar c)).repr (S.conjEquiv v) φ
+lemma conjEquiv_basis_repr {c : C} (v : V c) (φ : basisIdx (S.bar c))
+    : (b (S.bar c)).repr (S.conjEquiv v) φ
       = star ((b c).repr v (Equiv.cast (S.barIdx_eq c) φ)) := by
   simp only [conjEquiv, LinearEquiv.trans_apply, LinearEquiv.apply_symm_apply,
     Finsupp.domLCongr_apply, Finsupp.domCongr_apply, Finsupp.equivMapDomain_apply,
     ConjModule.starFinsupp]
   rfl
 
-lemma conjEquiv_equivariant {c : C} (g : G) (v : V c) :
-    S.conjEquiv (rep c g v) = rep (S.bar c) g (S.conjEquiv v) := by
+lemma conjEquiv_equivariant {c : C} (g : G) (v : V c)
+    : S.conjEquiv (rep c g v) = rep (S.bar c) g (S.conjEquiv v) := by
   rw [← (b c).sum_repr v]
   simp only [map_sum, map_smul, LinearEquiv.map_smulₛₗ, conjEquiv_basis, Equiv.cast_apply]
   congr
@@ -221,53 +242,62 @@ index first is the standard convention, used throughout; it is a choice, since
 -/
 
 /-- Reindex component labels of `bar ∘ c` back to `c`, slotwise via the cast `barIdx_eq`. -/
-def componentReindex {n : ℕ} (c : Fin n → C) :
-    ComponentIdx (S := S.toTensorSpecies) (fun i => S.bar (c i)) ≃
-      ComponentIdx (S := S.toTensorSpecies) c :=
+def componentReindex {n : ℕ} (c : Fin n → C)
+    : ComponentIdx (S := S.toTensorSpecies) (fun i => S.bar (c i))
+      ≃ ComponentIdx (S := S.toTensorSpecies) c :=
   Equiv.piCongrRight fun i => Equiv.cast (S.barIdx_eq (c i))
 
-/-- Conjugation of a tensor: conjugate the components and reindex the basis to the conjugate
-colours.  -/
-def conjT {n : ℕ} {c : Fin n → C} : S.Tensor c →ₛₗ[starRingEnd k]
-    S.Tensor (fun i => S.bar (c i)) where
-  toFun t := ofComponents (fun i => S.bar (c i))
-    (fun b => star (componentMap c t (S.componentReindex c b)))
+/--
+Conjugation of a tensor: conjugate the components and reindex the basis to the conjugate
+colours.
+-/
+def conjT {n : ℕ} {c : Fin n → C}
+    : S.Tensor c →ₛₗ[starRingEnd k]
+      S.Tensor (fun i => S.bar (c i)) where
+  toFun t :=
+    ofComponents (fun i => S.bar (c i)) (fun b => star (componentMap c t (S.componentReindex c b)))
   map_add' t₁ t₂ := by
     apply componentMap_ext
     intro b
-    simp  [map_add, Pi.add_apply, star_add]
+    simp [map_add, Pi.add_apply, star_add]
   map_smul' r t := by
     apply componentMap_ext
     intro b
     simp only [map_smul, Pi.smul_apply, smul_eq_mul, star_mul', componentMap_ofComponents]
     rfl
 
-lemma conjT_apply {n : ℕ} {c : Fin n → C} (t : S.Tensor c) :
-    S.conjT t = ofComponents (fun i => S.bar (c i))
-      (fun b => star (componentMap c t (S.componentReindex c b))) :=
+lemma conjT_apply {n : ℕ} {c : Fin n → C} (t : S.Tensor c)
+    : S.conjT t
+      = ofComponents
+        (fun i => S.bar (c i))
+        (fun b => star (componentMap c t (S.componentReindex c b))) :=
   rfl
 
 /-- Components of a conjugated tensor: the `star` of the original components, reindexed. -/
-@[simp] lemma componentMap_conjT {n : ℕ} {c : Fin n → C} (t : S.Tensor c)
-    (b : ComponentIdx (S := S.toTensorSpecies) (fun i => S.bar (c i))) :
-    componentMap (fun i => S.bar (c i)) (S.conjT t) b
+@[simp]
+lemma componentMap_conjT
+    {n : ℕ} {c : Fin n → C}
+    (t : S.Tensor c) (b : ComponentIdx (S := S.toTensorSpecies) (fun i => S.bar (c i)))
+    : componentMap (fun i => S.bar (c i)) (S.conjT t) b
       = star (componentMap c t (S.componentReindex c b)) := by
   simp [conjT_apply, componentMap_ofComponents]
 
-/-- Conjugating a rank-two tensor conjugates each component and bars both indices:
+/--
+Conjugating a rank-two tensor conjugates each component and bars both indices:
 `(T̄)_{ĪJ̄} = (T_{IJ})*`, where barring a barred index removes the bar. For example, `ψ_α χ_β` goes
-to `ψ̄_α̇ χ̄_β̇`, and a tensor `M_{IJ̄}` goes to `(M̄)_{ĪJ} = (M_{IJ̄})*`. -/
-lemma toMatrix_conjT {cs : Fin 2 → C} (t : S.Tensor cs) :
-    toMatrix (S.conjT t) = ((toMatrix t).map star).submatrix
-      (Equiv.cast (S.barIdx_eq (cs 0))) (Equiv.cast (S.barIdx_eq (cs 1))) := by
+to `ψ̄_α̇ χ̄_β̇`, and a tensor `M_{IJ̄}` goes to `(M̄)_{ĪJ} = (M_{IJ̄})*`.
+-/
+lemma toMatrix_conjT {cs : Fin 2 → C} (t : S.Tensor cs)
+    : toMatrix (S.conjT t)
+      = ((toMatrix t).map star).submatrix (Equiv.cast (S.barIdx_eq (cs 0)))
+        (Equiv.cast (S.barIdx_eq (cs 1))) := by
   ext x y
-  simp only [toMatrix_apply, Matrix.submatrix_apply, Matrix.map_apply,
-    ← componentMap_eq_repr, componentMap_conjT]
+  simp only [toMatrix_apply, Matrix.submatrix_apply, Matrix.map_apply, ← componentMap_eq_repr,
+    componentMap_conjT]
   exact congrArg _ (congrArg _ (funext fun i => by fin_cases i <;> rfl))
 
-
-lemma conjT_basis {n : ℕ} {c : Fin n → C} (i : ComponentIdx (S := S.toTensorSpecies) c) :
-    S.conjT (basis c i) = basis (fun i => S.bar (c i)) ((S.componentReindex c).symm i) := by
+lemma conjT_basis {n : ℕ} {c : Fin n → C} (i : ComponentIdx (S := S.toTensorSpecies) c)
+    : S.conjT (basis c i) = basis (fun i => S.bar (c i)) ((S.componentReindex c).symm i) := by
   apply componentMap_ext
   intro b
   simp [componentMap_conjT]
@@ -280,24 +310,30 @@ lemma conjT_basis {n : ℕ} {c : Fin n → C} (i : ComponentIdx (S := S.toTensor
     simp at h
   · simp
 
-/-- Conjugation of a vector, `vᴵ ↦ v̄^Ī = (vᴵ)*`, landing at the conjugate colour. For example, a
-left-handed Weyl spinor `ψ_α` goes to the right-handed `ψ̄_α̇`. -/
+/--
+Conjugation of a vector, `vᴵ ↦ v̄^Ī = (vᴵ)*`, landing at the conjugate colour. For example, a
+left-handed Weyl spinor `ψ_α` goes to the right-handed `ψ̄_α̇`.
+-/
 def conjSingleT (x : C) : S.Tensor ![x] →ₛₗ[starRingEnd k] S.Tensor ![S.bar x] :=
-  (permT (S := S.toTensorSpecies) (c := fun i => S.bar ((![x] : Fin 1 → C) i))
-    (c1 := ![S.bar x]) id (by simp [IsReindexing])).comp S.conjT
+  (permT (S := S.toTensorSpecies)
+      (c := fun i => S.bar ((![x] : Fin 1 → C) i))
+      (c1 := ![S.bar x]) id (by simp [IsReindexing])).comp
+    S.conjT
 
-/-- Conjugation sends the basis vector `e_I` to `ē_Ī`, the basis vector of the conjugate colour with
-the same label. -/
-lemma conjSingleT_basis (x : C) (z : basisIdx x) :
-    S.conjSingleT x (basis ![x] (ComponentIdx.single.symm z)) =
-      basis ![S.bar x] (ComponentIdx.single.symm (cast (S.barIdx_eq x).symm z)) := by
+/--
+Conjugation sends the basis vector `e_I` to `ē_Ī`, the basis vector of the conjugate colour with
+the same label.
+-/
+lemma conjSingleT_basis (x : C) (z : basisIdx x)
+    : S.conjSingleT x (basis (![x]) (ComponentIdx.single.symm z))
+      = basis (![S.bar x]) (ComponentIdx.single.symm (cast (S.barIdx_eq x).symm z)) := by
   rw [conjSingleT, LinearMap.comp_apply, conjT_basis, permT_basis]
   congr 1 with m
   fin_cases m
   rfl
 
-lemma conjT_pure {n : ℕ} {c : Fin n → C} (p : Tensor.Pure S.toTensorSpecies c) :
-    S.conjT p.toTensor = Pure.toTensor (fun i => S.conjEquiv (p i)) := by
+lemma conjT_pure {n : ℕ} {c : Fin n → C} (p : Tensor.Pure S.toTensorSpecies c)
+    : S.conjT p.toTensor = Pure.toTensor (fun i => S.conjEquiv (p i)) := by
   apply componentMap_ext
   intro φ
   simp only [componentMap_conjT, componentMap_pure, Pure.componentMap_apply]
@@ -307,18 +343,19 @@ lemma conjT_pure {n : ℕ} {c : Fin n → C} (p : Tensor.Pure S.toTensorSpecies 
   rw [S.conjEquiv_basis_repr]
   rfl
 
-
-/-- Componentwise criterion for `conjT t = permT σ h t'`. The conjugate of `t` equals the
+/--
+Componentwise criterion for `conjT t = permT σ h t'`. The conjugate of `t` equals the
 recolouring `permT σ h t'` exactly when, at every component, the `star`-conjugated reindexed
 component of `t` matches the corresponding component of `permT σ h t'`. This packages the
 `componentMap_conjT` expansion and the `repr`/`componentMap` bridge that the reality and Hermiticity
 proofs downstream would otherwise repeat by hand; the caller is left only with the species-specific
-permutation bookkeeping on the right-hand side. -/
-lemma conjT_eq_permT_iff {n m : ℕ} {c : Fin n → C} {c' : Fin m → C}
-    {σ : Fin n → Fin m} (h : IsReindexing c' (fun i => S.bar (c i)) σ)
-    (t : S.Tensor c) (t' : S.Tensor c') :
-    S.conjT t = permT σ h t' ↔
-      ∀ φ : ComponentIdx (S := S.toTensorSpecies) (fun i => S.bar (c i)),
+permutation bookkeeping on the right-hand side.
+-/
+lemma conjT_eq_permT_iff
+    {n m : ℕ} {c : Fin n → C} {c' : Fin m → C} {σ : Fin n → Fin m}
+    (h : IsReindexing c' (fun i => S.bar (c i)) σ) (t : S.Tensor c) (t' : S.Tensor c')
+    : S.conjT t = permT σ h t'
+      ↔ ∀ φ : ComponentIdx (S := S.toTensorSpecies) (fun i => S.bar (c i)),
         star (componentMap c t (S.componentReindex c φ))
           = (Tensor.basis (fun i => S.bar (c i))).repr (permT σ h t') φ := by
   constructor
@@ -330,8 +367,8 @@ lemma conjT_eq_permT_iff {n m : ℕ} {c : Fin n → C} {c' : Fin m → C}
     rw [componentMap_conjT]
     exact H φ
 
-lemma conjT_equivariant {n : ℕ} {c : Fin n → C} (g : G) (t : S.Tensor c) :
-    S.conjT (g • t) = g • S.conjT t := by
+lemma conjT_equivariant {n : ℕ} {c : Fin n → C} (g : G) (t : S.Tensor c)
+    : S.conjT (g • t) = g • S.conjT t := by
   induction' t using induction_on_basis with b r t ht t1 t2 ht1 ht2
   · simp [basis_apply, actionT_pure, conjT_pure, Pure.actionP_eq, conjEquiv_equivariant]
   · simp
@@ -347,25 +384,30 @@ We prove `conjT_conjT`: conjugating a tensor twice returns it, up to the identit
 
 -/
 
-/-- Undoing the two cast reindexings (at `bar c` then at `c`) on a label of the doubly-conjugated
+/--
+Undoing the two cast reindexings (at `bar c` then at `c`) on a label of the doubly-conjugated
 colour returns the `bar_involution` cast. Free from `barIdx_eq` by `cast_cast` + proof
-irrelevance, with no coherence field needed. -/
-private lemma barIdx_involutive_symm (c : C) (y : basisIdx (S.bar (S.bar c))) :
-    Equiv.cast (S.barIdx_eq c) (Equiv.cast (S.barIdx_eq (S.bar c)) y)
+irrelevance, with no coherence field needed.
+-/
+private lemma barIdx_involutive_symm (c : C) (y : basisIdx (S.bar (S.bar c)))
+    : Equiv.cast (S.barIdx_eq c) (Equiv.cast (S.barIdx_eq (S.bar c)) y)
       = basisIdxCongr (S.bar_involution c) y := by
   simp only [basisIdxCongr, Equiv.cast_apply, cast_cast]
 
-/-- The identity permutation satisfies `IsReindexing` from `c` to `bar ∘ bar ∘ c`, as `bar` is an
-involution. -/
-lemma isReindexing_bar_bar {n : ℕ} (c : Fin n → C) :
-    IsReindexing c (fun i => S.bar (S.bar (c i))) (id : Fin n → Fin n) :=
+/--
+The identity permutation satisfies `IsReindexing` from `c` to `bar ∘ bar ∘ c`, as `bar` is an
+involution.
+-/
+lemma isReindexing_bar_bar {n : ℕ} (c : Fin n → C)
+    : IsReindexing c (fun i => S.bar (S.bar (c i))) (id : Fin n → Fin n) :=
   ⟨Function.bijective_id, fun i => (S.bar_involution (c i)).symm⟩
 
-/-- Conjugation is an involution: conjugating twice returns the original tensor, up to the
-`bar_involution` recolouring (the identity permutation `permT`). -/
-lemma conjT_conjT {n : ℕ} {c : Fin n → C} (t : S.Tensor c) :
-    S.conjT (S.conjT t)
-      = permT id (S.isReindexing_bar_bar c) t := by
+/--
+Conjugation is an involution: conjugating twice returns the original tensor, up to the
+`bar_involution` recolouring (the identity permutation `permT`).
+-/
+lemma conjT_conjT {n : ℕ} {c : Fin n → C} (t : S.Tensor c)
+    : S.conjT (S.conjT t) = permT id (S.isReindexing_bar_bar c) t := by
   apply componentMap_ext
   intro φ
   rw [componentMap_conjT, componentMap_conjT, star_star]
@@ -390,36 +432,40 @@ conjugated coefficients to those on the `bar`-images.
 -/
 
 /-- Slots with dual colour in `c` have dual colour in `bar ∘ c`, as `bar` commutes with `τ`. -/
-lemma contrCond_bar {n : ℕ} {c : Fin (n + 1 + 1) → C} {i j : Fin (n + 1 + 1)}
-    (h : i ≠ j ∧ S.τ (c i) = c j) :
-    i ≠ j ∧ S.τ ((S.bar ∘ c) i) = (S.bar ∘ c) j :=
+lemma contrCond_bar
+    {n : ℕ} {c : Fin (n + 1 + 1) → C} {i j : Fin (n + 1 + 1)} (h : i ≠ j ∧ S.τ (c i) = c j)
+    : i ≠ j ∧ S.τ ((S.bar ∘ c) i) = (S.bar ∘ c) j :=
   ⟨h.1, by rw [Function.comp_apply, Function.comp_apply, ← S.bar_tau, h.2]⟩
 
-/-- Conjugation commutes with contraction: conjugating a contracted tensor equals contracting the
-conjugate on the `bar`-images of the same two slots. -/
-lemma conjT_contrT {n : ℕ} {c : Fin (n + 1 + 1) → C} (i j : Fin (n + 1 + 1))
-    (h : i ≠ j ∧ S.τ (c i) = c j) (t : S.Tensor c) :
-    S.conjT (contrT n i j h t)
-      = contrT n i j (S.contrCond_bar h) (S.conjT t) := by
+/--
+Conjugation commutes with contraction: conjugating a contracted tensor equals contracting the
+conjugate on the `bar`-images of the same two slots.
+-/
+lemma conjT_contrT
+    {n : ℕ} {c : Fin (n + 1 + 1) → C}
+    (i j : Fin (n + 1 + 1)) (h : i ≠ j ∧ S.τ (c i) = c j) (t : S.Tensor c)
+    : S.conjT (contrT n i j h t) = contrT n i j (S.contrCond_bar h) (S.conjT t) := by
   apply componentMap_ext
   intro φ
   rw [componentMap_conjT, componentMap_eq_repr, Tensor.contrT_basis_repr_apply]
-  have hrhs := Tensor.contrT_basis_repr_apply (S := S.toTensorSpecies) (c := fun i => S.bar (c i))
-    (i := i) (j := j) (S.contrCond_bar h) (S.conjT t) φ
+  have hrhs :=
+    Tensor.contrT_basis_repr_apply (S := S.toTensorSpecies)
+      (c := fun i => S.bar (c i))
+      (i := i) (j := j) (S.contrCond_bar h) (S.conjT t) φ
   rw [componentMap_eq_repr]
   refine Eq.trans ?_ hrhs.symm
   rw [star_sum]
   -- `componentReindex` carries the `bar`-side contraction section onto the `c`-side one: it
   -- commutes with `dropPair` definitionally, so the section bijection is just `subtypeEquiv`.
-  have hmem : ∀ a : ComponentIdx (S := S.toTensorSpecies) (S.bar ∘ c),
-      a ∈ ComponentIdx.DropPairSection φ ↔
-        S.componentReindex c a ∈
-          ComponentIdx.DropPairSection (S.componentReindex (c ∘ i.succSuccAbove j) φ) := by
+  have hmem
+      : ∀ a : ComponentIdx (S := S.toTensorSpecies) (S.bar ∘ c),
+        a ∈ ComponentIdx.DropPairSection φ
+          ↔ S.componentReindex c a
+            ∈ ComponentIdx.DropPairSection (S.componentReindex (c ∘ i.succSuccAbove j) φ) := by
     intro a
     simp only [ComponentIdx.DropPairSection, Finset.mem_filter, Finset.mem_univ, true_and]
     exact (Equiv.apply_eq_iff_eq (S.componentReindex (c ∘ i.succSuccAbove j))).symm
-  refine (Finset.sum_equiv (Equiv.subtypeEquiv (S.componentReindex c) hmem)
-    ?_ ?_).symm
+  refine (Finset.sum_equiv (Equiv.subtypeEquiv (S.componentReindex c) hmem) ?_ ?_).symm
   · exact fun _ => iff_of_true (Finset.mem_attach _ _) (Finset.mem_attach _ _)
   intro b'' _
   simp only [Equiv.subtypeEquiv_apply]
@@ -427,14 +473,14 @@ lemma conjT_contrT {n : ℕ} {c : Fin (n + 1 + 1) → C} (i j : Fin (n + 1 + 1))
     star_mul']
   congr 1
   rw [S.conj_contrComm (c i) ((S.componentReindex c b''.1) i)
-        (basisIdxCongr (by rw [h.2]) ((S.componentReindex c b''.1) j)),
+      (basisIdxCongr (by rw [h.2]) ((S.componentReindex c b''.1) j)),
     show (S.componentReindex c b''.1) i = Equiv.cast (S.barIdx_eq (c i)) (b''.1 i) from rfl,
     show (S.componentReindex c b''.1) j = Equiv.cast (S.barIdx_eq (c j)) (b''.1 j) from rfl,
     Equiv.symm_apply_apply]
   congr 2
-  exact congrArg (b (S.τ (S.bar (c i)))) (basisIdxCongr_heq_arg _ _
-    (HEq.symm ((cast_heq _ _).trans ((cast_heq _ _).trans (cast_heq _ _)))))
-
+  exact congrArg (b (S.τ (S.bar (c i))))
+    (basisIdxCongr_heq_arg _ _
+      (HEq.symm ((cast_heq _ _).trans ((cast_heq _ _).trans (cast_heq _ _)))))
 
 /-!
 
@@ -456,44 +502,50 @@ positive-definiteness and the inverse are defined only for square matrices. `M` 
 -/
 
 open scoped TensorProduct in
-/-- A pairing `g : V c ⊗ V (bar c) → k` is Hermitian when conjugating and swapping its two slots
-via `conjEquiv` returns its `star`: `g (x ⊗ y) = star (g (conjEquiv.symm y ⊗ conjEquiv x))`. -/
+/--
+A pairing `g : V c ⊗ V (bar c) → k` is Hermitian when conjugating and swapping its two slots
+via `conjEquiv` returns its `star`: `g (x ⊗ y) = star (g (conjEquiv.symm y ⊗ conjEquiv x))`.
+-/
 def IsHermitian {c : C} (g : V c ⊗[k] V (S.bar c) →ₗ[k] k) : Prop :=
-  ∀ (x : V c) (y : V (S.bar c)),
-    g (x ⊗ₜ[k] y) = star (g (S.conjEquiv.symm y ⊗ₜ[k] S.conjEquiv x))
+  ∀ (x : V c) (y : V (S.bar c)), g (x ⊗ₜ[k] y) = star (g (S.conjEquiv.symm y ⊗ₜ[k] S.conjEquiv x))
 
-/-- The matrix `(M_{IJ̄})`, with entries unchanged, regarded as a square matrix over the labels of
+/--
+The matrix `(M_{IJ̄})`, with entries unchanged, regarded as a square matrix over the labels of
 `I`. Lean needs this step because the labels of a colour and of its conjugate are different types,
 identified by `barIdx_eq`; only for a square matrix are Hermiticity, positive-definiteness and the
 inverse defined. Convention: the unbarred index is the row and the barred index the column, entry
 `(I, J)` being `M_{IJ̄}`, as physicists write the matrix. For a Kähler metric `g_{IJ̄}` it is the
-usual matrix `(g_{IJ̄})`. -/
-def toSquareMatrix {c : Fin 2 → C} (M : S.Tensor c) (hbar : S.bar (c 0) = c 1 := by rfl) :
-    Matrix (basisIdx (c 0)) (basisIdx (c 0)) k :=
+usual matrix `(g_{IJ̄})`.
+-/
+def toSquareMatrix {c : Fin 2 → C} (M : S.Tensor c) (hbar : S.bar (c 0) = c 1 := by rfl)
+    : Matrix (basisIdx (c 0)) (basisIdx (c 0)) k :=
   (toMatrix M).reindex (Equiv.refl _) (Equiv.cast (hbar ▸ S.barIdx_eq (c 0)))
 
-lemma toSquareMatrix_apply {c : Fin 2 → C} (hbar : S.bar (c 0) = c 1) (M : S.Tensor c)
-    (i j : basisIdx (c 0)) :
-    S.toSquareMatrix M hbar i j =
-      toMatrix M i ((Equiv.cast (hbar ▸ S.barIdx_eq (c 0))).symm j) :=
+lemma toSquareMatrix_apply
+    {c : Fin 2 → C} (hbar : S.bar (c 0) = c 1) (M : S.Tensor c) (i j : basisIdx (c 0))
+    : S.toSquareMatrix M hbar i j = toMatrix M i ((Equiv.cast (hbar ▸ S.barIdx_eq (c 0))).symm j) :=
   rfl
 
 /-- `toMatrix M` is `toSquareMatrix M` with its columns labelled by `J̄` instead of `J`. -/
-lemma toMatrix_eq_submatrix_toSquareMatrix {c : Fin 2 → C} (hbar : S.bar (c 0) = c 1)
-    (M : S.Tensor c) :
-    toMatrix M =
-      (S.toSquareMatrix M hbar).submatrix id (Equiv.cast (hbar ▸ S.barIdx_eq (c 0))) :=
+lemma toMatrix_eq_submatrix_toSquareMatrix
+    {c : Fin 2 → C} (hbar : S.bar (c 0) = c 1) (M : S.Tensor c)
+    : toMatrix M = (S.toSquareMatrix M hbar).submatrix id (Equiv.cast (hbar ▸ S.barIdx_eq (c 0))) :=
   ((Matrix.reindex (Equiv.refl _) (Equiv.cast (hbar ▸ S.barIdx_eq (c 0)))).symm_apply_apply
     (toMatrix M)).symm
 
-/-- For `M_{IJ̄}`, the conjugate `(M̄)_{ĪJ} = (M_{IJ̄})*` and the swapped tensor `M_{JĪ}` have the
+/--
+For `M_{IJ̄}`, the conjugate `(M̄)_{ĪJ} = (M_{IJ̄})*` and the swapped tensor `M_{JĪ}` have the
 same index types, a barred index then an ordinary one. They are equal, `(M_{IJ̄})* = M_{JĪ}`,
-exactly when the matrix `(M_{IJ̄})` is Hermitian. A Kähler metric satisfies this. -/
-lemma conjT_eq_permT_swap_iff_toSquareMatrix_isHermitian {c : Fin 2 → C}
-    (hbar : S.bar (c 0) = c 1) (M : S.Tensor c) :
-    S.conjT M = permT ![1, 0] (IsReindexing.swap_of_eq hbar.symm
-      ((congrArg S.bar hbar).symm.trans (S.bar_involution (c 0))).symm) M ↔
-    (S.toSquareMatrix M hbar).IsHermitian := by
+exactly when the matrix `(M_{IJ̄})` is Hermitian. A Kähler metric satisfies this.
+-/
+lemma conjT_eq_permT_swap_iff_toSquareMatrix_isHermitian
+    {c : Fin 2 → C} (hbar : S.bar (c 0) = c 1) (M : S.Tensor c)
+    : S.conjT M
+        = permT (![1, 0])
+          (IsReindexing.swap_of_eq hbar.symm
+            ((congrArg S.bar hbar).symm.trans (S.bar_involution (c 0))).symm)
+          M
+      ↔ (S.toSquareMatrix M hbar).IsHermitian := by
   obtain ⟨a, d, rfl⟩ : ∃ a d, c = ![a, d] := ⟨c 0, c 1, by funext i; fin_cases i <;> rfl⟩
   change S.bar a = d at hbar
   subst hbar
@@ -504,10 +556,10 @@ lemma conjT_eq_permT_swap_iff_toSquareMatrix_isHermitian {c : Fin 2 → C}
   rw [Matrix.IsHermitian, ← Matrix.ext_iff, ← Matrix.ext_iff]
   have hbb : basisIdx a = basisIdx (S.bar (S.bar a)) := by rw [S.bar_involution]
   change (∀ (i : basisIdx (S.bar a)) (j : basisIdx (S.bar (S.bar a))),
-      star (toMatrix M (cast (S.barIdx_eq a) i) (cast (S.barIdx_eq (S.bar a)) j)) =
-        toMatrix M (cast hbb.symm j) i) ↔
-    ∀ i j : basisIdx a, star (toMatrix M j (cast (S.barIdx_eq a).symm i)) =
-      toMatrix M i (cast (S.barIdx_eq a).symm j)
+      star (toMatrix M (cast (S.barIdx_eq a) i) (cast (S.barIdx_eq (S.bar a)) j))
+        = toMatrix M (cast hbb.symm j) i)
+    ↔ ∀ i j : basisIdx a,
+      star (toMatrix M j (cast (S.barIdx_eq a).symm i)) = toMatrix M i (cast (S.barIdx_eq a).symm j)
   constructor
   · intro H i j
     simpa [cast_cast] using H (cast (S.barIdx_eq a).symm j) (cast hbb i)
@@ -515,15 +567,18 @@ lemma conjT_eq_permT_swap_iff_toSquareMatrix_isHermitian {c : Fin 2 → C}
     simpa [cast_cast] using H (cast hbb.symm j) (cast (S.barIdx_eq a) i)
 
 open HasContrDualBases in
-/-- The matrix of `g_{IJ̄} t^{J̄K}` is the product of the square matrix `(g_{IJ̄})` and the matrix
-`(t^{J̄K})`, with the rows of `(t^{J̄K})` labelled by `J`. -/
-lemma toMatrix_contractInnerT_eq_toSquareMatrix_mul [HasContrDualBases S.toTensorSpecies]
-    {cs ds : Fin 2 → C} (hbar : S.bar (cs 0) = cs 1) (h : S.τ (cs 1) = ds 0) (M : S.Tensor cs)
-    (t : S.Tensor ds) :
-    toMatrix (contractInnerT h M t) =
-      S.toSquareMatrix M hbar * (toMatrix t).submatrix
-        (dualIdxEquiv h ∘ (Equiv.cast (hbar ▸ S.barIdx_eq (cs 0))).symm)
-        (id : basisIdx (ds 1) → _) := by
+/--
+The matrix of `g_{IJ̄} t^{J̄K}` is the product of the square matrix `(g_{IJ̄})` and the matrix
+`(t^{J̄K})`, with the rows of `(t^{J̄K})` labelled by `J`.
+-/
+lemma toMatrix_contractInnerT_eq_toSquareMatrix_mul
+    [HasContrDualBases S.toTensorSpecies]
+    {cs ds : Fin 2 → C}
+    (hbar : S.bar (cs 0) = cs 1) (h : S.τ (cs 1) = ds 0) (M : S.Tensor cs) (t : S.Tensor ds)
+    : toMatrix (contractInnerT h M t)
+      = S.toSquareMatrix M hbar
+        * (toMatrix t).submatrix (dualIdxEquiv h ∘ (Equiv.cast (hbar ▸ S.barIdx_eq (cs 0))).symm)
+          (id : basisIdx (ds 1) → _) := by
   refine (toMatrix_contractInnerT h M t).trans ?_
   rw [S.toMatrix_eq_submatrix_toSquareMatrix hbar M]
   exact Matrix.submatrix_id_mul_right _ (t.toMatrix.submatrix (dualIdxEquiv h) id) id
@@ -542,29 +597,38 @@ contraction commutes with conjugation (`conj_contrComm`).
 -/
 
 open HasContrDualBases in
-/-- The conjugate bases are dual: if `e_α` contracted with `e^β` is `δ_α^β`, then `ē_α̇` contracted
-with `ē^β̇` is `δ_α̇^β̇`. -/
-lemma isContrDualMatching_bar [HasContrDualBases S.toTensorSpecies] (d : C) :
-    IsContrDualMatching S.toTensorSpecies (S.bar d)
-      ((basisIdxCongr (S.bar_tau d)).symm.trans ((Equiv.cast (S.barIdx_eq (S.τ d))).trans
-        ((contrDualIdxEquiv S.toTensorSpecies d).trans (Equiv.cast (S.barIdx_eq d)).symm))) := by
+/--
+The conjugate bases are dual: if `e_α` contracted with `e^β` is `δ_α^β`, then `ē_α̇` contracted
+with `ē^β̇` is `δ_α̇^β̇`.
+-/
+lemma isContrDualMatching_bar [HasContrDualBases S.toTensorSpecies] (d : C)
+    : IsContrDualMatching S.toTensorSpecies (S.bar d)
+      ((basisIdxCongr (S.bar_tau d)).symm.trans
+        ((Equiv.cast (S.barIdx_eq (S.τ d))).trans
+          ((contrDualIdxEquiv S.toTensorSpecies d).trans (Equiv.cast (S.barIdx_eq d)).symm))) := by
   intro y₁ y₂
-  have key := S.conj_contrComm d (Equiv.cast (S.barIdx_eq d) y₁)
-    (Equiv.cast (S.barIdx_eq (S.τ d)) ((basisIdxCongr (S.bar_tau d)).symm y₂))
+  have key :=
+    S.conj_contrComm d (Equiv.cast (S.barIdx_eq d) y₁)
+      (Equiv.cast (S.barIdx_eq (S.τ d)) ((basisIdxCongr (S.bar_tau d)).symm y₂))
   rw [contr_basis_eq_ite] at key
   simp only [Equiv.symm_apply_apply, basisIdxCongr_symm, basisIdxCongr_apply_apply,
-    basisIdxCongr_rfl] at key
+      basisIdxCongr_rfl]
+    at key
   rw [← key]
   simp only [Equiv.trans_apply, basisIdxCongr_symm, Equiv.eq_symm_apply]
   split_ifs <;> simp
 
 open HasContrDualBases in
-/-- `dualIdxEquiv` sends a lower label `α` to the upper label `α` it contracts with to `1`.
-Conjugation commutes with this: the dotted label `α̇` pairs with the dotted upper label `α̇`. -/
-lemma dualIdxEquiv_bar [Nontrivial k] [HasContrDualBases S.toTensorSpecies] {c1 c2 c3 : C}
-    (h : S.τ c1 = c2) (h' : S.τ (S.bar c1) = c3) (hbar : S.bar c2 = c3) (x : basisIdx c1) :
-    dualIdxEquiv h' (cast (S.barIdx_eq c1).symm x) =
-      cast (hbar ▸ S.barIdx_eq c2).symm (dualIdxEquiv h x) := by
+/--
+`dualIdxEquiv` sends a lower label `α` to the upper label `α` it contracts with to `1`.
+Conjugation commutes with this: the dotted label `α̇` pairs with the dotted upper label `α̇`.
+-/
+lemma dualIdxEquiv_bar
+    [Nontrivial k] [HasContrDualBases S.toTensorSpecies]
+    {c1 c2 c3 : C}
+    (h : S.τ c1 = c2) (h' : S.τ (S.bar c1) = c3) (hbar : S.bar c2 = c3) (x : basisIdx c1)
+    : dualIdxEquiv h' (cast (S.barIdx_eq c1).symm x)
+      = cast (hbar ▸ S.barIdx_eq c2).symm (dualIdxEquiv h x) := by
   subst h hbar
   rw [dualIdxEquiv_apply, dualIdxEquiv_apply,
     contrDualIdxEquiv_eq_of_isContrDualMatching (S.isContrDualMatching_bar c1)]
@@ -572,7 +636,8 @@ lemma dualIdxEquiv_bar [Nontrivial k] [HasContrDualBases S.toTensorSpecies] {c1 
     Equiv.cast_apply, cast_cast, cast_eq, Equiv.cast_refl, Equiv.refl_apply]
 
 open HasContrDualBases in
-/-- Removing a bar and lowering an index commute on labels. From a label of the upper barred index
+/--
+Removing a bar and lowering an index commute on labels. From a label of the upper barred index
 `J̄`, removing the bar and then lowering gives the same label of the lower index `J` as lowering and
 then removing the bar.
 ```
@@ -581,21 +646,26 @@ upper J̄ (τ d)  → remove bar →  upper J (τ a)
 lower J̄ (d)    → remove bar →  lower J (a)
 ```
 The left-hand side of the statement goes across the top and down, the right-hand side down and
-across the bottom. -/
-lemma dualIdxEquiv_bar_tau [Nontrivial k] [HasContrDualBases S.toTensorSpecies] {a d : C}
-    (hbar : S.bar a = d) (j : basisIdx (S.τ d)) :
-    dualIdxEquiv (S.τ_τ_apply a)
-        ((Equiv.cast (S.bar_tau_of_bar hbar ▸ S.barIdx_eq (S.τ d))).symm j) =
-      Equiv.cast (hbar ▸ S.barIdx_eq a) ((dualIdxEquiv (rfl : S.τ d = S.τ d)).symm j) := by
+across the bottom.
+-/
+lemma dualIdxEquiv_bar_tau
+    [Nontrivial k] [HasContrDualBases S.toTensorSpecies]
+    {a d : C} (hbar : S.bar a = d) (j : basisIdx (S.τ d))
+    : dualIdxEquiv (S.τ_τ_apply a)
+        ((Equiv.cast (S.bar_tau_of_bar hbar ▸ S.barIdx_eq (S.τ d))).symm j)
+      = Equiv.cast (hbar ▸ S.barIdx_eq a) ((dualIdxEquiv (rfl : S.τ d = S.τ d)).symm j) := by
   subst hbar
-  obtain ⟨x, rfl⟩ : ∃ x, dualIdxEquiv (rfl : S.τ (S.bar a) = S.τ (S.bar a))
-      ((Equiv.cast (S.barIdx_eq a)).symm x) = j :=
-    ⟨Equiv.cast (S.barIdx_eq a) ((dualIdxEquiv rfl).symm j), by
-      rw [Equiv.symm_apply_apply, Equiv.apply_symm_apply]⟩
+  obtain ⟨x, rfl⟩
+      : ∃ x,
+        dualIdxEquiv (rfl : S.τ (S.bar a) = S.τ (S.bar a)) ((Equiv.cast (S.barIdx_eq a)).symm x)
+          = j := ⟨
+    Equiv.cast (S.barIdx_eq a) ((dualIdxEquiv rfl).symm j),
+    by rw [Equiv.symm_apply_apply, Equiv.apply_symm_apply]
+  ⟩
   rw [Equiv.symm_apply_apply, Equiv.apply_symm_apply,
     ← dualIdxEquiv_symm (rfl : S.τ a = S.τ a) (S.τ_τ_apply a), Equiv.symm_apply_eq]
-  have h' := S.dualIdxEquiv_bar (rfl : S.τ a = S.τ a) (rfl : S.τ (S.bar a) = S.τ (S.bar a))
-    (S.bar_tau a) x
+  have h' :=
+    S.dualIdxEquiv_bar (rfl : S.τ a = S.τ a) (rfl : S.τ (S.bar a) = S.τ (S.bar a)) (S.bar_tau a) x
   simp only [dualIdxEquiv_apply, basisIdxCongr, Equiv.cast_apply] at h' ⊢
   rw [Equiv.symm_apply_eq]
   simpa only [← Equiv.cast_symm, Equiv.cast_apply, cast_cast, cast_eq] using h'
@@ -633,49 +703,67 @@ squared of the kinetic term `g_{IJ̄} ∂φᴵ ∂φ̄^J̄`. It does change the 
 open HasContrDualBases
 open scoped Matrix
 
-/-- The Hermitian form `⟨s, t⟩ = M(t, s̄) = M_{IJ̄} tᴵ s̄^J̄` of a tensor `M_{IJ̄}`, on vectors
+/--
+The Hermitian form `⟨s, t⟩ = M(t, s̄) = M_{IJ̄} tᴵ s̄^J̄` of a tensor `M_{IJ̄}`, on vectors
 `s, t`. Convention: as in Mathlib it is conjugate-linear in its left argument `s`; `s̄` fills the
 second, barred slot of `M` and `t` the first, so the argument order is opposite to the slot order.
 -/
-def toSesqForm (x : C) {c : Fin 2 → C} (M : S.Tensor c) (hbar : S.bar (c 0) = c 1 := by rfl)
-    (hx : S.τ x = c 0 := by rfl) : S.Tensor ![x] →ₗ⋆[k] S.Tensor ![x] →ₗ[k] k :=
+def toSesqForm
+    (x : C)
+    {c : Fin 2 → C} (M : S.Tensor c)
+    (hbar : S.bar (c 0) = c 1 := by rfl) (hx : S.τ x = c 0 := by rfl)
+    : S.Tensor ![x] →ₗ⋆[k] S.Tensor ![x] →ₗ[k] k :=
   (toLinearMap₂ x (S.bar x) M hx (by rw [← hbar, ← hx, S.bar_tau])).flip.comp (S.conjSingleT x)
 
-/-- Since the left argument of the form fills the second slot of `M` (`toSesqForm`),
+/--
+Since the left argument of the form fills the second slot of `M` (`toSesqForm`),
 `⟨e_I, e_J⟩ = M(e_J, ē_I) = M_{JĪ}`: the matrix of the form is the transpose of `(M_{IJ̄})`. For a
-Kähler metric, `⟨∂_I, ∂_J⟩ = ∂_J ∂_Ī K = g_{JĪ}`. -/
-lemma toMatrix₂_toSesqForm [HasContrDualBases S.toTensorSpecies] {x : C} {c : Fin 2 → C}
-    (hbar : S.bar (c 0) = c 1) (hx : S.τ x = c 0) (M : S.Tensor c) :
-    LinearMap.toMatrix₂ ((basis ![x]).reindex (ComponentIdx.single.trans (dualIdxEquiv hx)))
+Kähler metric, `⟨∂_I, ∂_J⟩ = ∂_J ∂_Ī K = g_{JĪ}`.
+-/
+lemma toMatrix₂_toSesqForm
+    [HasContrDualBases S.toTensorSpecies]
+    {x : C} {c : Fin 2 → C} (hbar : S.bar (c 0) = c 1) (hx : S.τ x = c 0) (M : S.Tensor c)
+    : LinearMap.toMatrix₂ ((basis ![x]).reindex (ComponentIdx.single.trans (dualIdxEquiv hx)))
         ((basis ![x]).reindex (ComponentIdx.single.trans (dualIdxEquiv hx)))
-        (S.toSesqForm x M hbar hx) = (S.toSquareMatrix M hbar)ᵀ := by
+        (S.toSesqForm x M hbar hx)
+      = (S.toSquareMatrix M hbar)ᵀ := by
   nontriviality k
   have hy : S.τ (S.bar x) = c 1 := by rw [← hbar, ← hx, S.bar_tau]
   ext i j
-  have h := congrFun (congrFun (toMatrix₂_toLinearMap₂ hx hy M) j)
-    (dualIdxEquiv hy (cast (S.barIdx_eq x).symm ((dualIdxEquiv hx).symm i)))
+  have h :=
+    congrFun (congrFun (toMatrix₂_toLinearMap₂ hx hy M) j)
+      (dualIdxEquiv hy (cast (S.barIdx_eq x).symm ((dualIdxEquiv hx).symm i)))
   rw [LinearMap.toMatrix₂_apply, Module.Basis.reindex_apply, Module.Basis.reindex_apply,
-    Equiv.symm_trans_apply, Equiv.symm_trans_apply, Equiv.symm_apply_apply,
-    S.dualIdxEquiv_bar hx hy hbar, Equiv.apply_symm_apply] at h
+      Equiv.symm_trans_apply, Equiv.symm_trans_apply, Equiv.symm_apply_apply,
+      S.dualIdxEquiv_bar hx hy hbar, Equiv.apply_symm_apply]
+    at h
   rw [LinearMap.toMatrix₂_apply, toSesqForm, LinearMap.comp_apply, LinearMap.flip_apply,
     Module.Basis.reindex_apply, Module.Basis.reindex_apply, Equiv.symm_trans_apply,
     Equiv.symm_trans_apply, conjSingleT_basis, Matrix.transpose_apply, toSquareMatrix_apply]
   exact h
 
 /-- `⟨s, t⟩* = ⟨t, s⟩` for all `s, t` exactly when `(M_{IJ̄})* = M_{JĪ}`. -/
-lemma isSymm_toSesqForm_iff_toSquareMatrix_isHermitian [HasContrDualBases S.toTensorSpecies]
-    {x : C} {c : Fin 2 → C} (hbar : S.bar (c 0) = c 1) (hx : S.τ x = c 0) (M : S.Tensor c) :
-    (S.toSesqForm x M hbar hx).IsSymm ↔ (S.toSquareMatrix M hbar).IsHermitian := by
-  rw [LinearMap.isSymm_iff_isHermitian_toMatrix
-    ((basis ![x]).reindex (ComponentIdx.single.trans (dualIdxEquiv hx))), toMatrix₂_toSesqForm,
-    Matrix.isHermitian_transpose_iff]
+lemma isSymm_toSesqForm_iff_toSquareMatrix_isHermitian
+    [HasContrDualBases S.toTensorSpecies]
+    {x : C} {c : Fin 2 → C} (hbar : S.bar (c 0) = c 1) (hx : S.τ x = c 0) (M : S.Tensor c)
+    : (S.toSesqForm x M hbar hx).IsSymm ↔ (S.toSquareMatrix M hbar).IsHermitian := by
+  rw [LinearMap.isSymm_iff_isHermitian_toMatrix ((basis ![x]).reindex
+      (ComponentIdx.single.trans (dualIdxEquiv hx))),
+    toMatrix₂_toSesqForm, Matrix.isHermitian_transpose_iff]
 
-/-- `⟨s, t⟩* = ⟨t, s⟩` for all `s, t` exactly when the conjugate of `M` equals `M` with its two
-indices swapped, `(M_{IJ̄})* = M_{JĪ}`. -/
-lemma isSymm_toSesqForm_iff_conjT_eq_permT [HasContrDualBases S.toTensorSpecies]
-    {x : C} {c : Fin 2 → C} (hbar : S.bar (c 0) = c 1) (hx : S.τ x = c 0) (M : S.Tensor c) :
-    (S.toSesqForm x M hbar hx).IsSymm ↔ S.conjT M = permT ![1, 0] (IsReindexing.swap_of_eq hbar.symm
-      ((congrArg S.bar hbar).symm.trans (S.bar_involution (c 0))).symm) M := by
+/--
+`⟨s, t⟩* = ⟨t, s⟩` for all `s, t` exactly when the conjugate of `M` equals `M` with its two
+indices swapped, `(M_{IJ̄})* = M_{JĪ}`.
+-/
+lemma isSymm_toSesqForm_iff_conjT_eq_permT
+    [HasContrDualBases S.toTensorSpecies]
+    {x : C} {c : Fin 2 → C} (hbar : S.bar (c 0) = c 1) (hx : S.τ x = c 0) (M : S.Tensor c)
+    : (S.toSesqForm x M hbar hx).IsSymm
+      ↔ S.conjT M
+        = permT (![1, 0])
+          (IsReindexing.swap_of_eq hbar.symm
+            ((congrArg S.bar hbar).symm.trans (S.bar_involution (c 0))).symm)
+          M := by
   rw [isSymm_toSesqForm_iff_toSquareMatrix_isHermitian,
     conjT_eq_permT_swap_iff_toSquareMatrix_isHermitian]
 
@@ -689,31 +777,37 @@ section PosDef
 
 variable [PartialOrder k]
 
-/-- The form is positive-definite, Hermitian with `M_{IJ̄} tᴵ t̄^J̄ > 0` for every `t ≠ 0`, exactly
+/--
+The form is positive-definite, Hermitian with `M_{IJ̄} tᴵ t̄^J̄ > 0` for every `t ≠ 0`, exactly
 when the matrix `(M_{IJ̄})` is. A Kähler metric is positive-definite, which makes kinetic terms
-positive. -/
-lemma isPosDef_toSesqForm_iff_toSquareMatrix_posDef [HasContrDualBases S.toTensorSpecies]
-    {x : C} {c : Fin 2 → C} (hbar : S.bar (c 0) = c 1) (hx : S.τ x = c 0) (M : S.Tensor c) :
-    (S.toSesqForm x M hbar hx).IsPosDef ↔ (S.toSquareMatrix M hbar).PosDef := by
-  rw [LinearMap.isPosDef_iff_posDef_toMatrix
-    ((basis ![x]).reindex (ComponentIdx.single.trans (dualIdxEquiv hx))), toMatrix₂_toSesqForm,
-    Matrix.PosDef.transpose_iff]
+positive.
+-/
+lemma isPosDef_toSesqForm_iff_toSquareMatrix_posDef
+    [HasContrDualBases S.toTensorSpecies]
+    {x : C} {c : Fin 2 → C} (hbar : S.bar (c 0) = c 1) (hx : S.τ x = c 0) (M : S.Tensor c)
+    : (S.toSesqForm x M hbar hx).IsPosDef ↔ (S.toSquareMatrix M hbar).PosDef := by
+  rw [LinearMap.isPosDef_iff_posDef_toMatrix ((basis ![x]).reindex
+      (ComponentIdx.single.trans (dualIdxEquiv hx))),
+    toMatrix₂_toSesqForm, Matrix.PosDef.transpose_iff]
 
 end PosDef
 
 section Field
 
-variable {k : Type} [Field k] [StarRing k] [PartialOrder k] {C : Type} {G : Type} [Group G]
-    {V : C → Type} [∀ c, AddCommGroup (V c)] [∀ c, Module k (V c)]
-    {basisIdx : C → Type} [∀ c, Fintype (basisIdx c)] [∀ c, DecidableEq (basisIdx c)]
-    {rep : (c : C) → Representation k G (V c)} {b : (c : C) → Basis (basisIdx c) k (V c)}
-    (S : ConjTensorSpecies k C G V basisIdx rep b)
+variable
+  {k : Type} [Field k] [StarRing k] [PartialOrder k]
+  {C : Type} {G : Type} [Group G]
+  {V : C → Type} [∀ c, AddCommGroup (V c)] [∀ c, Module k (V c)]
+  {basisIdx : C → Type} [∀ c, Fintype (basisIdx c)] [∀ c, DecidableEq (basisIdx c)]
+  {rep : (c : C) → Representation k G (V c)} {b : (c : C) → Basis (basisIdx c) k (V c)}
+  (S : ConjTensorSpecies k C G V basisIdx rep b)
 
 /-- Over a field, the matrix `(M_{IJ̄})` of a positive-definite tensor is invertible. -/
-lemma isUnit_det_toSquareMatrix_of_isPosDef [HasContrDualBases S.toTensorSpecies] {x : C}
-    {c : Fin 2 → C} (hbar : S.bar (c 0) = c 1) (hx : S.τ x = c 0) {M : S.Tensor c}
-    (hM : (S.toSesqForm x M hbar hx).IsPosDef) :
-    IsUnit (S.toSquareMatrix M hbar).det :=
+lemma isUnit_det_toSquareMatrix_of_isPosDef
+    [HasContrDualBases S.toTensorSpecies]
+    {x : C} {c : Fin 2 → C} (hbar : S.bar (c 0) = c 1) (hx : S.τ x = c 0)
+    {M : S.Tensor c} (hM : (S.toSesqForm x M hbar hx).IsPosDef)
+    : IsUnit (S.toSquareMatrix M hbar).det :=
   (Matrix.isUnit_iff_isUnit_det _).1
     ((S.isPosDef_toSesqForm_iff_toSquareMatrix_posDef hbar hx M).1 hM).isUnit
 

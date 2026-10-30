@@ -70,55 +70,51 @@ lemma hasCompactSupport (η : AdmissibleVariation d U) : HasCompactSupport (η.t
   η.isTestFunction.supp
 
 /-- View an admissible variation as a compactly supported continuous map. -/
-noncomputable def toCompactlySupportedContinuousMap (η : AdmissibleVariation d U) :
-    CompactlySupportedContinuousMap (Space d) U :=
+noncomputable def toCompactlySupportedContinuousMap (η : AdmissibleVariation d U)
+    : CompactlySupportedContinuousMap (Space d) U :=
   η.isTestFunction.toCompactlySupportedContinuousMap
 
 noncomputable instance : Zero (AdmissibleVariation d U) where
-  zero :=
-    { toFun := fun _ => 0
-      isTestFunction := IsTestFunction.zero }
+  zero := { toFun := fun _ => 0, isTestFunction := IsTestFunction.zero }
 
-@[simp]
-lemma zero_apply (x : Space d) : (0 : AdmissibleVariation d U) x = 0 := rfl
+@[simp] lemma zero_apply (x : Space d) : (0 : AdmissibleVariation d U) x = 0 := rfl
 
 noncomputable instance : Neg (AdmissibleVariation d U) where
-  neg η :=
-    { toFun := fun x => -η x
-      isTestFunction := η.isTestFunction.neg }
+  neg η := { toFun := fun x => - η x, isTestFunction := η.isTestFunction.neg }
 
-@[simp]
-lemma neg_apply (η : AdmissibleVariation d U) (x : Space d) : (-η) x = -η x := rfl
+@[simp] lemma neg_apply (η : AdmissibleVariation d U) (x : Space d) : (-η) x = - η x := rfl
 
 noncomputable instance : Add (AdmissibleVariation d U) where
-  add η ξ :=
-    { toFun := fun x => η x + ξ x
-      isTestFunction := η.isTestFunction.add ξ.isTestFunction }
+  add η ξ := {
+    toFun := fun x => η x + ξ x
+    isTestFunction := η.isTestFunction.add ξ.isTestFunction
+  }
 
-@[simp]
-lemma add_apply (η ξ : AdmissibleVariation d U) (x : Space d) : (η + ξ) x = η x + ξ x := rfl
+@[simp] lemma add_apply (η ξ : AdmissibleVariation d U) (x : Space d) : (η + ξ) x = η x + ξ x := rfl
 
 noncomputable instance : Sub (AdmissibleVariation d U) where
-  sub η ξ :=
-    { toFun := fun x => η x - ξ x
-      isTestFunction := η.isTestFunction.sub ξ.isTestFunction }
+  sub η ξ := {
+    toFun := fun x => η x - ξ x
+    isTestFunction := η.isTestFunction.sub ξ.isTestFunction
+  }
 
-@[simp]
-lemma sub_apply (η ξ : AdmissibleVariation d U) (x : Space d) : (η - ξ) x = η x - ξ x := rfl
+@[simp] lemma sub_apply (η ξ : AdmissibleVariation d U) (x : Space d) : (η - ξ) x = η x - ξ x := rfl
 
 noncomputable instance : SMul ℝ (AdmissibleVariation d U) where
-  smul c η :=
-    { toFun := fun x => c • η x
-      isTestFunction := IsTestFunction.smul_left (f := fun _ : Space d => c) (g := η.toFun)
-        (by fun_prop) η.isTestFunction }
+  smul c η := {
+    toFun := fun x => c • η x
+    isTestFunction :=
+      IsTestFunction.smul_left
+        (f := fun _ : Space d => c)
+        (g := η.toFun) (by fun_prop) η.isTestFunction
+  }
 
 @[simp]
-lemma smul_apply (c : ℝ) (η : AdmissibleVariation d U) (x : Space d) :
-    (c • η) x = c • η x := rfl
+lemma smul_apply (c : ℝ) (η : AdmissibleVariation d U) (x : Space d) : (c • η) x = c • η x := rfl
 
 @[fun_prop]
-lemma coord {m : ℕ} (η : AdmissibleVariation d (Space m)) (a : Fin m) :
-    IsTestFunction (fun x => (η.toFun x).coord a) := by
+lemma coord {m : ℕ} (η : AdmissibleVariation d (Space m)) (a : Fin m)
+    : IsTestFunction (fun x => (η.toFun x).coord a) := by
   simpa [Space.coord] using IsTestFunction.coord η.isTestFunction a
 
 end AdmissibleVariation

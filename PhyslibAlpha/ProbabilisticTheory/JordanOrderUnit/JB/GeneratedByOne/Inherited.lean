@@ -76,14 +76,15 @@ noncomputable instance instNormedJordanAlgebra : NormedJordanAlgebra (ClosedGene
   smul_assoc r x y := by
     apply Subtype.ext
     exact NormedJordanAlgebra.smul_assoc r (x : E) (y : E)
-  jordan_identity x y := by
-    exact mul_assoc x y (x * x)
+  jordan_identity x y := by exact mul_assoc x y (x * x)
   norm_mul_le x y := by
     change ‖(x : E) * (y : E)‖ ≤ ‖(x : E)‖ * ‖(y : E)‖
     exact NormedJordanAlgebra.norm_mul_le (x : E) (y : E)
 
-/-- A nontrivial ambient algebra gives a nontrivial closed generated algebra, since it contains the
-same unit. -/
+/--
+A nontrivial ambient algebra gives a nontrivial closed generated algebra, since it contains the
+same unit.
+-/
 noncomputable instance instNontrivial [Nontrivial E] : Nontrivial (ClosedGeneratedByOne a) where
   exists_pair_ne := by
     refine ⟨(0 : ClosedGeneratedByOne a), (1 : ClosedGeneratedByOne a), ?_⟩
@@ -94,11 +95,9 @@ noncomputable instance instNontrivial [Nontrivial E] : Nontrivial (ClosedGenerat
 /-- The inherited unit has norm one, as required by the Banach-algebra spectrum estimates. -/
 noncomputable instance instNormOneClass [Nontrivial E] : NormOneClass (ClosedGeneratedByOne a) where
   norm_one := by
-    have hsq : ‖(1 : E)‖ = ‖(1 : E)‖ ^ 2 := by
-      rw [← JBAlgebra.norm_mul_self, one_mul]
+    have hsq : ‖(1 : E)‖ = ‖(1 : E)‖ ^ 2 := by rw [← JBAlgebra.norm_mul_self, one_mul]
     have hpos : 0 < ‖(1 : E)‖ := norm_pos_iff.mpr one_ne_zero
-    have hfac : ‖(1 : E)‖ * (‖(1 : E)‖ - 1) = 0 := by
-      nlinarith [hsq]
+    have hfac : ‖(1 : E)‖ * (‖(1 : E)‖ - 1) = 0 := by nlinarith [hsq]
     rcases mul_eq_zero.mp hfac with hzero | hone
     · exact False.elim (ne_of_gt hpos hzero)
     · exact sub_eq_zero.mp hone
@@ -128,10 +127,12 @@ namespace ClosedGeneratedByOne
 
 variable (a : E)
 
-/-- The closed one-generator algebra inherits the ambient Archimedean order unit: the order is
-the ambient one restricted along the inclusion, and the ambient unit already lies inside. -/
-noncomputable instance instArchimedeanOrderUnitSpace :
-    ArchimedeanOrderUnitSpace (ClosedGeneratedByOne a) where
+/--
+The closed one-generator algebra inherits the ambient Archimedean order unit: the order is
+the ambient one restricted along the inclusion, and the ambient unit already lies inside.
+-/
+noncomputable instance instArchimedeanOrderUnitSpace
+    : ArchimedeanOrderUnitSpace (ClosedGeneratedByOne a) where
   __ := (inferInstance : PartialOrder (ClosedGeneratedByOne a))
   __ := (inferInstance : Module ℝ (ClosedGeneratedByOne a))
   add_le_add_left x y h z := by
@@ -149,8 +150,10 @@ noncomputable instance instArchimedeanOrderUnitSpace :
   le_zero_of_forall_pos_smul_one_le x hx :=
     ArchimedeanOrderUnitSpace.le_zero_of_forall_pos_smul_one_le (x : E) hx
 
-/-- The closed one-generator algebra inherits square positivity and the exact JB norm, so it is
-again a JB order-unit algebra. -/
+/--
+The closed one-generator algebra inherits square positivity and the exact JB norm, so it is
+again a JB order-unit algebra.
+-/
 noncomputable instance instIsJBOrderUnit : IsJBOrderUnit (ClosedGeneratedByOne a) where
   __ := instNormedJordanAlgebra a
   __ := instJBAlgebra a

@@ -34,32 +34,39 @@ namespace ClassicalMechanics
 
 variable {X} [NormedAddCommGroup X] [InnerProductSpace ℝ X] [CompleteSpace X]
 
-/-- Given a hamiltonian `H : Time → X → X → ℝ` the operator which when
-  set to zero implies the Hamilton equations. -/
-noncomputable def hamiltonEqOp (H : Time → X → X → ℝ) (p : Time → X) (q : Time → X) :
-    Time → X × X :=
-  fun t => (∂ₜ q t + -gradient (fun x => H t x (q t)) (p t),
-    - ∂ₜ p t + -gradient (fun x => H t (p t) x) (q t))
+/--
+Given a hamiltonian `H : Time → X → X → ℝ` the operator which when
+set to zero implies the Hamilton equations.
+-/
+noncomputable def hamiltonEqOp (H : Time → X → X → ℝ) (p : Time → X) (q : Time → X)
+    : Time → X × X := fun t => (
+  ∂ₜ q t + - gradient (fun x => H t x (q t)) (p t),
+  - ∂ₜ p t + - gradient (fun x => H t (p t) x) (q t)
+)
 
-lemma hamiltonEqOp_eq (H : Time → X → X → ℝ) (p : Time → X) (q : Time → X) :
-    hamiltonEqOp H p q = fun t => (∂ₜ q t + -gradient (fun x => H t x (q t)) (p t),
-      - ∂ₜ p t + -gradient (fun x => H t (p t) x) (q t)) := by
+lemma hamiltonEqOp_eq (H : Time → X → X → ℝ) (p : Time → X) (q : Time → X)
+    : hamiltonEqOp H p q
+      = fun t => (
+        ∂ₜ q t + - gradient (fun x => H t x (q t)) (p t),
+        - ∂ₜ p t + - gradient (fun x => H t (p t) x) (q t)
+      ) := by
   rfl
 
-lemma hamiltonEqOp_eq_zero_iff_hamiltons_equations (H : Time → X → X → ℝ)
-    (p : Time → X) (q : Time → X) :
-    hamiltonEqOp H p q = 0 ↔
-    (∀ t, ∂ₜ q t = gradient (fun x => H t x (q t)) (p t)) ∧
-    (∀ t, ∂ₜ p t = -gradient (fun x => H t (p t) x) (q t)) := by
+lemma hamiltonEqOp_eq_zero_iff_hamiltons_equations
+    (H : Time → X → X → ℝ) (p : Time → X) (q : Time → X)
+    : hamiltonEqOp H p q = 0
+      ↔ (∀ t, ∂ₜ q t = gradient (fun x => H t x (q t)) (p t))
+        ∧ (∀ t, ∂ₜ p t = - gradient (fun x => H t (p t) x) (q t)) := by
   simp [hamiltonEqOp_eq, funext_iff, Prod.mk_eq_zero, forall_and, add_eq_zero_iff_neg_eq]
 
-/-- The variational derivative of `⟪(pq' t).1, ∂ₜ (Prod.snd ∘ pq') t⟫_ℝ - H t (pq' t).1 (pq' t).2`
-  for a hamiltonian `H` is equal to the Hamilton equations operator. -/
+/--
+The variational derivative of `⟪(pq' t).1, ∂ₜ (Prod.snd ∘ pq') t⟫_ℝ - H t (pq' t).1 (pq' t).2`
+for a hamiltonian `H` is equal to the Hamilton equations operator.
+-/
 theorem hamiltons_equations_varGradient
-    (H : Time → X → X → ℝ) (pq : Time → X × X) (hp : ContDiff ℝ ∞ pq)
-    (hL : ContDiff ℝ ∞ ↿H) :
-    (δ (pq':= pq), ∫ t, ⟪(pq' t).1, ∂ₜ (Prod.snd ∘ pq') t⟫_ℝ - H t (pq' t).1 (pq' t).2) =
-    fun t => hamiltonEqOp H (fun t => (pq t).1) (fun t => (pq t).2) t := by
+    (H : Time → X → X → ℝ) (pq : Time → X × X) (hp : ContDiff ℝ ∞ pq) (hL : ContDiff ℝ ∞ ↿H)
+    : (δ (pq':= pq), ∫ t, ⟪(pq' t).1, ∂ₜ (Prod.snd ∘ pq') t⟫_ℝ - H t (pq' t).1 (pq' t).2)
+      = fun t => hamiltonEqOp H (fun t => (pq t).1) (fun t => (pq t).2) t := by
   apply HasVarGradientAt.varGradient
   apply HasVarGradientAt.intro _
   · apply HasVarAdjDerivAt.add
@@ -67,17 +74,20 @@ theorem hamiltons_equations_varGradient
       apply HasVarAdjDerivAt.comp
         (F := fun (φ : Time → X × X) t => i t (φ t))
         (G := fun (φ : Time → X × X) t => ((φ t).1, fderiv ℝ (Prod.snd ∘ φ) t 1))
-      · exact HasVarAdjDerivAt.fmap _ _ (by fun_prop) (by fun_prop)
-          fun x _ => (by fun_prop : DifferentiableAt ℝ _ _).hasAdjFDerivAt
+      · exact HasVarAdjDerivAt.fmap _ _ (by fun_prop) (by fun_prop) fun x _ =>
+          (by fun_prop : DifferentiableAt ℝ _ _).hasAdjFDerivAt
       · apply HasVarAdjDerivAt.prod
         · exact HasVarAdjDerivAt.fst (HasVarAdjDerivAt.id _ (by fun_prop))
         · apply HasVarAdjDerivAt.fderiv' (F := fun (φ : Time → X × X) t => (φ t).2)
-          exact HasVarAdjDerivAt.fmap _ _ (by fun_prop) (by fun_prop)
-            fun x _ => (by fun_prop : DifferentiableAt ℝ _ _).hasAdjFDerivAt
+          exact HasVarAdjDerivAt.fmap _ _ (by fun_prop) (by fun_prop) fun x _ =>
+            (by fun_prop : DifferentiableAt ℝ _ _).hasAdjFDerivAt
     · apply HasVarAdjDerivAt.neg
-      exact HasVarAdjDerivAt.fmap (fun t => ↿(H t)) _ (by fun_prop) (by fun_prop)
-        fun x _ => (((by fun_prop : ContDiff ℝ ∞ _).differentiable
-          (by simp)).differentiableAt).hasAdjFDerivAt
+      exact HasVarAdjDerivAt.fmap
+        (fun t => ↿(H t))
+        _ (by fun_prop) (by fun_prop)
+        fun x _ =>
+          (((by fun_prop : ContDiff ℝ ∞ _).differentiable
+            (by simp)).differentiableAt).hasAdjFDerivAt
   · simp only [adjFDeriv_prod_snd, Prod.mk_add_mk, add_zero, zero_add]
     funext x
     rw [adjFDeriv_uncurry

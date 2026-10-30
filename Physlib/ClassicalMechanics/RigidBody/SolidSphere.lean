@@ -26,28 +26,34 @@ open NNReal
 
 /-- The solid sphere as a rigid body. -/
 noncomputable def solidSphere (d : ℕ) (m R : ℝ≥0) : RigidBody d where
-  ρ := ⟨⟨fun f => m / volume.real (Metric.closedBall (0 : Space d) R) *
-      ∫ x in Metric.closedBall (0 : Space d) R, f x ∂volume,
+  ρ := ⟨
+    ⟨
+      fun f =>
+        m / volume.real (Metric.closedBall (0 : Space d) R)
+          * ∫ x in Metric.closedBall (0 : Space d) R, f x ∂volume,
+      by
+        intro f g
+        simp only [ContMDiffMap.coe_add, Pi.add_apply]
+        rw [integral_add]
+        · ring
+        · exact IntegrableOn.integrable (ContinuousOn.integrableOn_compact
+            (isCompact_closedBall 0 R) (by fun_prop))
+        · exact IntegrableOn.integrable (ContinuousOn.integrableOn_compact
+            (isCompact_closedBall 0 R) (by fun_prop))
+    ⟩,
     by
-    intro f g
-    simp only [ContMDiffMap.coe_add, Pi.add_apply]
-    rw [integral_add]
-    · ring
-    · exact IntegrableOn.integrable
-        (ContinuousOn.integrableOn_compact (isCompact_closedBall 0 R) (by fun_prop))
-    · exact IntegrableOn.integrable
-        (ContinuousOn.integrableOn_compact (isCompact_closedBall 0 R) (by fun_prop))⟩, by
       intro r f
       simp only [ContMDiffMap.coe_smul, Pi.smul_apply, smul_eq_mul, RingHom.id_apply]
       rw [integral_const_mul]
-      ring⟩
+      ring
+  ⟩
 
 lemma solidSphere_mass {d : ℕ} (m R : ℝ≥0) (hr : R ≠ 0) : (solidSphere d m R).mass = m := by
   simp only [mass, solidSphere]
   simp only [LinearMap.coe_mk, AddHom.coe_mk, ContMDiffMap.coeFn_mk, integral_const,
     MeasurableSet.univ, measureReal_restrict_apply, Set.univ_inter, smul_eq_mul, mul_one]
-  have h1 : (@volume (Space d) measureSpaceOfInnerProductSpace).real
-      (Metric.closedBall 0 R) ≠ 0 := by
+  have h1
+      : (@volume (Space d) measureSpaceOfInnerProductSpace).real (Metric.closedBall 0 R) ≠ 0 := by
     refine (measureReal_ne_zero_iff ?_).mpr ?_
     · apply measure_closedBall_lt_top.ne
     · apply (Metric.measure_closedBall_pos volume _ _).ne'
@@ -65,7 +71,8 @@ lemma solidSphere_centerOfMass {d : ℕ} (m R : ℝ≥0) : (solidSphere d m R).c
   right
   right
   suffices ∫ x in Metric.closedBall (0 : Space d) R, x i ∂MeasureSpace.volume
-    = -∫ x in Metric.closedBall (0 : Space d) R, x i ∂MeasureSpace.volume by linarith
+      = - ∫ x in Metric.closedBall (0 : Space d) R, x i ∂MeasureSpace.volume by
+    linarith
   rw [← integral_neg]
   simp only [← integral_indicator measurableSet_closedBall, Set.indicator, Metric.mem_closedBall]
   rw [← integral_neg_eq_self]

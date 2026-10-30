@@ -29,8 +29,8 @@ open BigOperators
 /-- The line through $Y_3$ and $B_3$ as `LinSols`. -/
 def lineY₃B₃Charges (a b : ℚ) : MSSMACC.LinSols := a • Y₃.1.1 + b • B₃.1.1
 
-lemma lineY₃B₃Charges_val (a b : ℚ) :
-    (lineY₃B₃Charges a b).val = a • Y₃.1.1.val + b • B₃.1.1.val := rfl
+lemma lineY₃B₃Charges_val (a b : ℚ) : (lineY₃B₃Charges a b).val = a • Y₃.1.1.val + b • B₃.1.1.val :=
+  rfl
 
 set_option backward.isDefEq.respectTransparency false in
 lemma lineY₃B₃Charges_quad (a b : ℚ) : accQuad (lineY₃B₃Charges a b).val = 0 := by
@@ -58,8 +58,7 @@ lemma lineY₃B₃_val (a b : ℚ) : (lineY₃B₃ a b).val = a • Y₃.val + b
   lineY₃B₃Charges_val a b
 
 set_option backward.isDefEq.respectTransparency false in
-lemma doublePoint_Y₃_B₃ (R : MSSMACC.LinSols) :
-    cubeTriLin Y₃.val B₃.val R.val = 0 := by
+lemma doublePoint_Y₃_B₃ (R : MSSMACC.LinSols) : cubeTriLin Y₃.val B₃.val R.val = 0 := by
   simp only [cubeTriLin, TriLinearSymm.mk₃_toFun_apply_apply, cubeTriLinToFun]
   rw [sum_MSSMSpecies_numberCharges_eq_expand, B₃_val, Y₃_val, B₃AsCharge, Y₃AsCharge]
   repeat rw [toSMSpecies_toSpecies_inv]
@@ -73,13 +72,13 @@ lemma doublePoint_Y₃_B₃ (R : MSSMACC.LinSols) :
   have h3 := hLin (3 : Fin 4)
   simp only [accSU2, LinearMap.coe_mk, AddHom.coe_mk, accSU3, accYY] at h1 h2 h3
   rw [sum_MSSMSpecies_numberCharges_eq_expand] at h1 h2 h3
-  simp only [Fin.isValue, toSMSpecies_apply, Nat.reduceMul, Hd_apply, Fin.reduceFinMk,
-    Hu_apply] at h1 h2 h3
+  simp only [Fin.isValue, toSMSpecies_apply, Nat.reduceMul, Hd_apply, Fin.reduceFinMk, Hu_apply]
+    at h1 h2 h3
   linear_combination (norm := ring_nf) -(12 * h2) + 9 * h1 + 3 * h3
 
 set_option backward.isDefEq.respectTransparency false in
-lemma lineY₃B₃_doublePoint (R : MSSMACC.LinSols) (a b : ℚ) :
-    cubeTriLin (lineY₃B₃ a b).val (lineY₃B₃ a b).val R.val = 0 := by
+lemma lineY₃B₃_doublePoint (R : MSSMACC.LinSols) (a b : ℚ)
+    : cubeTriLin (lineY₃B₃ a b).val (lineY₃B₃ a b).val R.val = 0 := by
   change cubeTriLin (a • Y₃.val + b • B₃.val) (a • Y₃.val + b • B₃.val) R.val = 0
   rw [cubeTriLin.map_add₂, cubeTriLin.map_add₁, cubeTriLin.map_add₁]
   repeat rw [cubeTriLin.map_smul₂, cubeTriLin.map_smul₁]

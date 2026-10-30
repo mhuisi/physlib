@@ -70,7 +70,8 @@ noncomputable section
 
 open InnerProductSpace
 
-variable {F : Type*} [NormedAddCommGroup F] [InnerProductSpace ℝ F] [CompleteSpace F]
+variable
+  {F : Type*} [NormedAddCommGroup F] [InnerProductSpace ℝ F] [CompleteSpace F]
   {f g : F → ℝ} {f' g' : F} {x : F}
 
 /-!
@@ -84,49 +85,50 @@ the Leibniz rule.
 -/
 
 /-- The gradient of a sum is the sum of the gradients. -/
-lemma HasGradientAt.add (hf : HasGradientAt f f' x) (hg : HasGradientAt g g' x) :
-    HasGradientAt (fun y => f y + g y) (f' + g') x := by
+lemma HasGradientAt.add (hf : HasGradientAt f f' x) (hg : HasGradientAt g g' x)
+    : HasGradientAt (fun y => f y + g y) (f' + g') x := by
   rw [hasGradientAt_iff_hasFDerivAt] at *
   simp only [map_add]
   exact hf.add hg
 
 /-- The gradient of a difference is the difference of the gradients. -/
-lemma HasGradientAt.sub (hf : HasGradientAt f f' x) (hg : HasGradientAt g g' x) :
-    HasGradientAt (fun y => f y - g y) (f' - g') x := by
+lemma HasGradientAt.sub (hf : HasGradientAt f f' x) (hg : HasGradientAt g g' x)
+    : HasGradientAt (fun y => f y - g y) (f' - g') x := by
   rw [hasGradientAt_iff_hasFDerivAt] at *
   simp only [map_sub]
   exact hf.sub hg
 
 /-- The gradient of a product is given by the Leibniz rule. -/
-lemma HasGradientAt.mul (hf : HasGradientAt f f' x) (hg : HasGradientAt g g' x) :
-    HasGradientAt (fun y => f y * g y) (f x • g' + g x • f') x := by
+lemma HasGradientAt.mul (hf : HasGradientAt f f' x) (hg : HasGradientAt g g' x)
+    : HasGradientAt (fun y => f y * g y) (f x • g' + g x • f') x := by
   rw [hasGradientAt_iff_hasFDerivAt] at *
   simp only [map_add, map_smul]
   exact hf.mul hg
 
 /-- The gradient of a constant multiple is the constant multiple of the gradient. -/
-lemma HasGradientAt.const_mul (c : ℝ) (hf : HasGradientAt f f' x) :
-    HasGradientAt (fun y => c * f y) (c • f') x := by
+lemma HasGradientAt.const_mul (c : ℝ) (hf : HasGradientAt f f' x)
+    : HasGradientAt (fun y => c * f y) (c • f') x := by
   rw [hasGradientAt_iff_hasFDerivAt] at *
   simp only [map_smul]
   exact hf.const_mul c
 
 /-- Adding a constant to a function does not change its gradient. -/
-lemma gradient_add_const {f : F → ℝ} (c : ℝ) (x : F) :
-    gradient (fun y => f y + c) x = gradient f x := by
+lemma gradient_add_const {f : F → ℝ} (c : ℝ) (x : F)
+    : gradient (fun y => f y + c) x = gradient f x := by
   unfold gradient
   rw [fderiv_add_const]
 
 /-- The gradient of a sum of differentiable functions is the sum of their gradients. -/
-lemma gradient_add {f g : F → ℝ} {x : F} (hf : DifferentiableAt ℝ f x)
-    (hg : DifferentiableAt ℝ g x) :
-    gradient (fun y => f y + g y) x = gradient f x + gradient g x := by
+lemma gradient_add {f g : F → ℝ} {x : F} (hf : DifferentiableAt ℝ f x) (hg : DifferentiableAt ℝ g x)
+    : gradient (fun y => f y + g y) x = gradient f x + gradient g x := by
   exact (hf.hasGradientAt.add hg.hasGradientAt).gradient
 
-/-- The gradient of a constant multiple of a differentiable function is the constant multiple of
-the gradient. -/
-lemma gradient_const_mul {f : F → ℝ} {x : F} (c : ℝ) (hf : DifferentiableAt ℝ f x) :
-    gradient (fun y => c * f y) x = c • gradient f x := by
+/--
+The gradient of a constant multiple of a differentiable function is the constant multiple of
+the gradient.
+-/
+lemma gradient_const_mul {f : F → ℝ} {x : F} (c : ℝ) (hf : DifferentiableAt ℝ f x)
+    : gradient (fun y => c * f y) x = c • gradient f x := by
   exact (hf.hasGradientAt.const_mul c).gradient
 
 /-!
@@ -135,10 +137,13 @@ lemma gradient_const_mul {f : F → ℝ} {x : F} (c : ℝ) (hf : DifferentiableA
 
 -/
 
-/-- The gradient of `y ↦ φ (f y)` is `φ'` times the gradient of `f`, for `φ'` the derivative of
-`φ` at `f x`. -/
-lemma HasDerivAt.comp_hasGradientAt {φ : ℝ → ℝ} {φ' : ℝ} (hf : HasGradientAt f f' x)
-    (hφ : HasDerivAt φ φ' (f x)) : HasGradientAt (fun y => φ (f y)) (φ' • f') x := by
+/--
+The gradient of `y ↦ φ (f y)` is `φ'` times the gradient of `f`, for `φ'` the derivative of
+`φ` at `f x`.
+-/
+lemma HasDerivAt.comp_hasGradientAt
+    {φ : ℝ → ℝ} {φ' : ℝ} (hf : HasGradientAt f f' x) (hφ : HasDerivAt φ φ' (f x))
+    : HasGradientAt (fun y => φ (f y)) (φ' • f') x := by
   rw [hasGradientAt_iff_hasFDerivAt] at *
   simp only [map_smul]
   exact hφ.comp_hasFDerivAt x hf
@@ -176,8 +181,8 @@ lemma hasGradientAt_inner_self (x : F) : HasGradientAt (fun y : F => ⟪y, y⟫_
   exact (differentiableAt_fun_id.inner ℝ differentiableAt_fun_id).hasGradientAt
 
 /-- The gradient of `y ↦ c * ⟪y, y⟫` at `x` is `(2 * c) • x`. -/
-lemma gradient_const_mul_inner_self (c : ℝ) (x : F) :
-    gradient (fun y : F => c * ⟪y, y⟫_ℝ) x = (2 * c) • x := by
+lemma gradient_const_mul_inner_self (c : ℝ) (x : F)
+    : gradient (fun y : F => c * ⟪y, y⟫_ℝ) x = (2 * c) • x := by
   rw [gradient_const_mul c (differentiableAt_fun_id.inner ℝ differentiableAt_fun_id),
     gradient_inner_self, smul_smul, mul_comm]
 
@@ -206,29 +211,37 @@ The coordinate functional `y ↦ y i` on `EuclideanSpace ℝ ι` is the continuo
 
 -/
 
-/-- The gradient of the `i`-th coordinate functional on Euclidean space is the `i`-th basis
-vector. -/
-lemma gradient_coord {ι : Type*} [Fintype ι] [DecidableEq ι] (i : ι) (x : EuclideanSpace ℝ ι) :
-    gradient (fun y : EuclideanSpace ℝ ι => y i) x = EuclideanSpace.single i 1 := by
-  have h : HasFDerivAt (fun y : EuclideanSpace ℝ ι => y i)
+/--
+The gradient of the `i`-th coordinate functional on Euclidean space is the `i`-th basis
+vector.
+-/
+lemma gradient_coord {ι : Type*} [Fintype ι] [DecidableEq ι] (i : ι) (x : EuclideanSpace ℝ ι)
+    : gradient (fun y : EuclideanSpace ℝ ι => y i) x = EuclideanSpace.single i 1 := by
+  have h : HasFDerivAt
+      (fun y : EuclideanSpace ℝ ι => y i)
       (innerSL ℝ (EuclideanSpace.single i (1 : ℝ))) x :=
     (EuclideanSpace.proj (𝕜 := ℝ) i).hasFDerivAt.congr_fderiv
       (by ext y; simp [EuclideanSpace.inner_single_left])
   exact h.hasGradientAt.gradient.trans ((toDual ℝ _).symm_apply_apply _)
 
-/-- The gradient of the `i`-th coordinate functional on Euclidean space is the `i`-th basis
-vector. -/
-lemma hasGradientAt_coord {ι : Type*} [Fintype ι] [DecidableEq ι] (i : ι)
-    (x : EuclideanSpace ℝ ι) :
-    HasGradientAt (fun y : EuclideanSpace ℝ ι => y i) (EuclideanSpace.single i 1) x := by
+/--
+The gradient of the `i`-th coordinate functional on Euclidean space is the `i`-th basis
+vector.
+-/
+lemma hasGradientAt_coord {ι : Type*} [Fintype ι] [DecidableEq ι] (i : ι) (x : EuclideanSpace ℝ ι)
+    : HasGradientAt (fun y : EuclideanSpace ℝ ι => y i) (EuclideanSpace.single i 1) x := by
   rw [← gradient_coord i x]
   exact (EuclideanSpace.proj (𝕜 := ℝ) i).differentiableAt.hasGradientAt
 
-/-- Chain rule for a function of one coordinate: the gradient of `y ↦ f (y i)` at `x` is
-`f' • EuclideanSpace.single i 1`, where `f'` is the derivative of `f` at `x i`. -/
-lemma gradient_comp_coord {ι : Type*} [Fintype ι] [DecidableEq ι] {f : ℝ → ℝ} {f' : ℝ}
-    (i : ι) (x : EuclideanSpace ℝ ι) (hf : HasDerivAt f f' (x i)) :
-    gradient (fun y : EuclideanSpace ℝ ι => f (y i)) x = f' • EuclideanSpace.single i 1 := by
+/--
+Chain rule for a function of one coordinate: the gradient of `y ↦ f (y i)` at `x` is
+`f' • EuclideanSpace.single i 1`, where `f'` is the derivative of `f` at `x i`.
+-/
+lemma gradient_comp_coord
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {f : ℝ → ℝ} {f' : ℝ}
+    (i : ι) (x : EuclideanSpace ℝ ι) (hf : HasDerivAt f f' (x i))
+    : gradient (fun y : EuclideanSpace ℝ ι => f (y i)) x = f' • EuclideanSpace.single i 1 := by
   exact (hf.comp_hasGradientAt (hasGradientAt_coord i x)).gradient
 
 end

@@ -42,12 +42,12 @@ namespace CauchyFlow
 
 /-- A Cauchy flow is Newtonian when its stress tensor has the Newtonian constitutive form. -/
 def IsNewtonian
-    (d : ℕ) (flow : CauchyFlow d)
-    (pressure shearViscosity secondViscosity : ScalarField d) : Prop :=
+    (d : ℕ) (flow : CauchyFlow d) (pressure shearViscosity secondViscosity : ScalarField d)
+    : Prop :=
   ∀ t x,
-    flow.stress t x =
-      FluidFlow.newtonianStressTensor d flow.toFluidFlow
-        pressure shearViscosity secondViscosity t x
+    flow.stress t x
+      = FluidFlow.newtonianStressTensor d flow.toFluidFlow pressure shearViscosity secondViscosity t
+        x
 
 end CauchyFlow
 

@@ -79,10 +79,12 @@ variable {𝓩 : Type} [DecidableEq 𝓩] [AddCommGroup 𝓩]
 
 -/
 
-/-- The proposition that for multiset set of charges `charges`,
-  adding individual elements of `S5` to the `Q5` charges of elements of `charges` again
-  leads to an element in `charges` or a charge which is phenomenologically constrained,
-  or regenerates dangerous couplings with one singlet insertion. -/
+/--
+The proposition that for multiset set of charges `charges`,
+adding individual elements of `S5` to the `Q5` charges of elements of `charges` again
+leads to an element in `charges` or a charge which is phenomenologically constrained,
+or regenerates dangerous couplings with one singlet insertion.
+-/
 def IsPhenoClosedQ5 (S5 : Finset 𝓩) (charges : Multiset (ChargeSpectrum 𝓩)) : Prop :=
   ∀ q5 ∈ S5, ∀ x ∈ charges,
     let y : ChargeSpectrum 𝓩 := ⟨x.qHd, x.qHu, insert q5 x.Q5, x.Q10⟩
@@ -94,13 +96,14 @@ def IsPhenoClosedQ5 (S5 : Finset 𝓩) (charges : Multiset (ChargeSpectrum 𝓩)
 
 -/
 
-lemma isPhenClosedQ5_of_isPhenoConstrainedQ5 {S5 : Finset 𝓩} {charges : Multiset (ChargeSpectrum 𝓩)}
+lemma isPhenClosedQ5_of_isPhenoConstrainedQ5
+    {S5 : Finset 𝓩} {charges : Multiset (ChargeSpectrum 𝓩)}
     (h : ∀ q5 ∈ S5, ∀ x ∈ charges,
       let y : ChargeSpectrum 𝓩 := ⟨x.qHd, x.qHu, insert q5 x.Q5, x.Q10⟩
-      IsPhenoConstrainedQ5 x q5 ∨ y ∈ charges ∨ YukawaGeneratesDangerousAtLevel y 1) :
-    IsPhenoClosedQ5 S5 charges := by
+      IsPhenoConstrainedQ5 x q5 ∨ y ∈ charges ∨ YukawaGeneratesDangerousAtLevel y 1)
+    : IsPhenoClosedQ5 S5 charges := by
   intro q5 hq5 x hx
-  rcases h q5 hq5 x hx with h'| h' | h'
+  rcases h q5 hq5 x hx with h' | h' | h'
   · left
     rw [isPhenoConstrained_insertQ5_iff_isPhenoConstrainedQ5]
     left
@@ -114,10 +117,12 @@ lemma isPhenClosedQ5_of_isPhenoConstrainedQ5 {S5 : Finset 𝓩} {charges : Multi
 
 -/
 
-/-- The proposition that for multiset set of charges `charges`,
-  adding individual elements of `S10` to the `Q10` charges of elements of `charges` again
-  leads to an element in `charges` or a charge which is phenomenologically constrained,
-  or regenerates dangerous couplings with one singlet insertion. -/
+/--
+The proposition that for multiset set of charges `charges`,
+adding individual elements of `S10` to the `Q10` charges of elements of `charges` again
+leads to an element in `charges` or a charge which is phenomenologically constrained,
+or regenerates dangerous couplings with one singlet insertion.
+-/
 def IsPhenoClosedQ10 (S10 : Finset 𝓩) (charges : Multiset (ChargeSpectrum 𝓩)) : Prop :=
   ∀ q10 ∈ S10, ∀ x ∈ charges,
     let y : ChargeSpectrum 𝓩 := ⟨x.qHd, x.qHu, x.Q5, insert q10 x.Q10⟩
@@ -129,14 +134,14 @@ def IsPhenoClosedQ10 (S10 : Finset 𝓩) (charges : Multiset (ChargeSpectrum �
 
 -/
 
-lemma isPhenClosedQ10_of_isPhenoConstrainedQ10 {S10 : Finset 𝓩}
-    {charges : Multiset (ChargeSpectrum 𝓩)}
+lemma isPhenClosedQ10_of_isPhenoConstrainedQ10
+    {S10 : Finset 𝓩} {charges : Multiset (ChargeSpectrum 𝓩)}
     (h : ∀ q10 ∈ S10, ∀ x ∈ charges,
       let y : ChargeSpectrum 𝓩 := ⟨x.qHd, x.qHu, x.Q5, insert q10 x.Q10⟩
-      IsPhenoConstrainedQ10 x q10 ∨ y ∈ charges ∨ YukawaGeneratesDangerousAtLevel y 1) :
-    IsPhenoClosedQ10 S10 charges := by
+      IsPhenoConstrainedQ10 x q10 ∨ y ∈ charges ∨ YukawaGeneratesDangerousAtLevel y 1)
+    : IsPhenoClosedQ10 S10 charges := by
   intro q10 hq10 x hx
-  rcases h q10 hq10 x hx with h'| h' | h'
+  rcases h q10 hq10 x hx with h' | h' | h'
   · left
     rw [isPhenoConstrained_insertQ10_iff_isPhenoConstrainedQ10]
     left
@@ -151,14 +156,18 @@ lemma isPhenClosedQ10_of_isPhenoConstrainedQ10 {S10 : Finset 𝓩}
 -/
 
 open PotentialTerm
-/-- The proposition that for multiset set of charges `charges` contains all
-  viable completions of charges which allow the top Yukawa, given allowed values
-  of `5`d and `10`d charges `S5` and `S10`. -/
-def ContainsPhenoCompletionsOfMinimallyAllows (S5 S10 : Finset 𝓩)
-    (charges : Multiset (ChargeSpectrum 𝓩)) : Prop :=
+/--
+The proposition that for multiset set of charges `charges` contains all
+viable completions of charges which allow the top Yukawa, given allowed values
+of `5`d and `10`d charges `S5` and `S10`.
+-/
+def ContainsPhenoCompletionsOfMinimallyAllows
+    (S5 S10 : Finset 𝓩) (charges : Multiset (ChargeSpectrum 𝓩))
+    : Prop :=
   ∀ x ∈ (minimallyAllowsTermsOfFinset S5 S10 topYukawa),
-      ¬ x.IsPhenoConstrained → ∀ y ∈ completions S5 S10 x, ¬ y.IsPhenoConstrained
-      ∧ ¬ y.YukawaGeneratesDangerousAtLevel 1 → y ∈ charges
+    ¬x.IsPhenoConstrained
+      → ∀ y ∈ completions S5 S10 x,
+        ¬y.IsPhenoConstrained ∧ ¬ y.YukawaGeneratesDangerousAtLevel 1 → y ∈ charges
 
 /-!
 
@@ -166,15 +175,14 @@ def ContainsPhenoCompletionsOfMinimallyAllows (S5 S10 : Finset 𝓩)
 
 -/
 
-lemma containsPhenoCompletionsOfMinimallyAllows_iff_completionsTopYukawa {S5 S10 : Finset 𝓩}
-    {charges : Multiset (ChargeSpectrum 𝓩)} :
-    ContainsPhenoCompletionsOfMinimallyAllows S5 S10 charges ↔
-    ∀ x ∈ (minimallyAllowsTermsOfFinset S5 S10 topYukawa),
-    ∀ y ∈ completionsTopYukawa S5 x, ¬ y.IsPhenoConstrained
-      ∧ ¬ y.YukawaGeneratesDangerousAtLevel 1 → y ∈ charges := by
+lemma containsPhenoCompletionsOfMinimallyAllows_iff_completionsTopYukawa
+    {S5 S10 : Finset 𝓩} {charges : Multiset (ChargeSpectrum 𝓩)}
+    : ContainsPhenoCompletionsOfMinimallyAllows S5 S10 charges
+      ↔ ∀ x ∈ (minimallyAllowsTermsOfFinset S5 S10 topYukawa), ∀ y ∈ completionsTopYukawa S5 x,
+        ¬y.IsPhenoConstrained ∧ ¬ y.YukawaGeneratesDangerousAtLevel 1 → y ∈ charges := by
   rw [ContainsPhenoCompletionsOfMinimallyAllows]
-  have h1 (x : ChargeSpectrum 𝓩) (hx : x ∈ (minimallyAllowsTermsOfFinset S5 S10 topYukawa)) :
-    ¬ x.IsPhenoConstrained ↔ True := by
+  have h1 (x : ChargeSpectrum 𝓩) (hx : x ∈ (minimallyAllowsTermsOfFinset S5 S10 topYukawa))
+      : ¬x.IsPhenoConstrained ↔ True := by
     simp only [iff_true]
     exact not_isPhenoConstrained_of_minimallyAllowsTermsOfFinset_topYukawa hx
   conv_lhs =>
@@ -189,8 +197,8 @@ lemma containsPhenoCompletionsOfMinimallyAllows_iff_completionsTopYukawa {S5 S10
 
 -/
 
-instance {S5 S10 : Finset 𝓩} {charges : Multiset (ChargeSpectrum 𝓩)} :
-    Decidable (ContainsPhenoCompletionsOfMinimallyAllows S5 S10 charges) :=
+instance {S5 S10 : Finset 𝓩} {charges : Multiset (ChargeSpectrum 𝓩)}
+    : Decidable (ContainsPhenoCompletionsOfMinimallyAllows S5 S10 charges) :=
   decidable_of_iff _ (containsPhenoCompletionsOfMinimallyAllows_iff_completionsTopYukawa).symm
 
 /-!
@@ -199,25 +207,26 @@ instance {S5 S10 : Finset 𝓩} {charges : Multiset (ChargeSpectrum 𝓩)} :
 
 -/
 
-lemma containsPhenoCompletionsOfMinimallyAllows_of_subset {S5 S10 : Finset 𝓩}
-    {charges charges' : Multiset (ChargeSpectrum 𝓩)}
+lemma containsPhenoCompletionsOfMinimallyAllows_of_subset
+    {S5 S10 : Finset 𝓩} {charges charges' : Multiset (ChargeSpectrum 𝓩)}
     (h' : ContainsPhenoCompletionsOfMinimallyAllows S5 S10 charges)
-    (h : ∀ x ∈ charges, x ∈ charges') :
-    ContainsPhenoCompletionsOfMinimallyAllows S5 S10 charges' :=
-  fun x hx hnot y h3 h4 => h y <| h' x hx hnot y h3 h4
+    (h : ∀ x ∈ charges, x ∈ charges')
+    : ContainsPhenoCompletionsOfMinimallyAllows S5 S10 charges' := fun x hx hnot y h3 h4 =>
+  h y <| h' x hx hnot y h3 h4
 
 /-!
 
 ### C.4. `completeMinSubset`: Minimal multiset with viable completions of top-permitting charges
 
 -/
-/-- For a given `S5 S10 : Finset 𝓩`, the minimal multiset of charges which satisfies
-  the condition `ContainsPhenoCompletionsOfMinimallyAllows`.
-  That is to say, every multiset of charges which satisfies
-  `ContainsPhenoCompletionsOfMinimallyAllows` has `completeMinSubset` as a subset. -/
+/--
+For a given `S5 S10 : Finset 𝓩`, the minimal multiset of charges which satisfies
+the condition `ContainsPhenoCompletionsOfMinimallyAllows`.
+That is to say, every multiset of charges which satisfies
+`ContainsPhenoCompletionsOfMinimallyAllows` has `completeMinSubset` as a subset.
+-/
 def completeMinSubset (S5 S10 : Finset 𝓩) : Multiset (ChargeSpectrum 𝓩) :=
-  ((minimallyAllowsTermsOfFinset S5 S10 topYukawa).bind <|
-      completionsTopYukawa S5).dedup.filter
+  ((minimallyAllowsTermsOfFinset S5 S10 topYukawa).bind <| completionsTopYukawa S5).dedup.filter
     fun x => ¬ IsPhenoConstrained x ∧ ¬ YukawaGeneratesDangerousAtLevel x 1
 
 /-!
@@ -226,12 +235,11 @@ def completeMinSubset (S5 S10 : Finset 𝓩) : Multiset (ChargeSpectrum 𝓩) :=
 
 -/
 
-lemma completeMinSubset_nodup {S5 S10 : Finset 𝓩} :
-    (completeMinSubset S5 S10).Nodup := by
+lemma completeMinSubset_nodup {S5 S10 : Finset 𝓩} : (completeMinSubset S5 S10).Nodup := by
   simp [completeMinSubset]
   apply Multiset.Nodup.filter
-  exact Multiset.nodup_dedup
-      ((minimallyAllowsTermsOfFinset S5 S10 topYukawa).bind (completionsTopYukawa S5))
+  exact Multiset.nodup_dedup ((minimallyAllowsTermsOfFinset S5 S10 topYukawa).bind
+    (completionsTopYukawa S5))
 
 /-!
 
@@ -240,9 +248,9 @@ lemma completeMinSubset_nodup {S5 S10 : Finset 𝓩} :
 -/
 
 lemma completeMinSubset_subset_iff_containsPhenoCompletionsOfMinimallyAllows
-    (S5 S10 : Finset 𝓩) (charges : Multiset (ChargeSpectrum 𝓩)) :
-    completeMinSubset S5 S10 ⊆ charges ↔
-    ContainsPhenoCompletionsOfMinimallyAllows S5 S10 charges := by
+    (S5 S10 : Finset 𝓩) (charges : Multiset (ChargeSpectrum 𝓩))
+    : completeMinSubset S5 S10 ⊆ charges
+      ↔ ContainsPhenoCompletionsOfMinimallyAllows S5 S10 charges := by
   constructor
   · intro h
     rw [containsPhenoCompletionsOfMinimallyAllows_iff_completionsTopYukawa]
@@ -264,8 +272,8 @@ lemma completeMinSubset_subset_iff_containsPhenoCompletionsOfMinimallyAllows
 
 -/
 
-lemma completeMinSubset_containsPhenoCompletionsOfMinimallyAllows (S5 S10 : Finset 𝓩) :
-    ContainsPhenoCompletionsOfMinimallyAllows S5 S10 (completeMinSubset S5 S10) := by
+lemma completeMinSubset_containsPhenoCompletionsOfMinimallyAllows (S5 S10 : Finset 𝓩)
+    : ContainsPhenoCompletionsOfMinimallyAllows S5 S10 (completeMinSubset S5 S10) := by
   rw [← completeMinSubset_subset_iff_containsPhenoCompletionsOfMinimallyAllows]
   simp
 
@@ -302,38 +310,46 @@ not of the whole space of possible charges.
 lemma completeness_of_isPhenoClosedQ5_isPhenoClosedQ10
     {S5 S10 : Finset 𝓩} {charges : Multiset (ChargeSpectrum 𝓩)}
     (charges_topYukawa : ∀ x ∈ charges, x.AllowsTerm .topYukawa)
-    (charges_not_isPhenoConstrained : ∀ x ∈ charges, ¬ x.IsPhenoConstrained)
+    (charges_not_isPhenoConstrained : ∀ x ∈ charges, ¬x.IsPhenoConstrained)
     (charges_yukawa : ∀ x ∈ charges, ¬ x.YukawaGeneratesDangerousAtLevel 1)
     (charges_complete : ∀ x ∈ charges, x.IsComplete)
     (charges_isPhenoClosedQ5 : IsPhenoClosedQ5 S5 charges)
     (charges_isPhenoClosedQ10 : IsPhenoClosedQ10 S10 charges)
     (charges_exist : ContainsPhenoCompletionsOfMinimallyAllows S5 S10 charges)
-    {x : ChargeSpectrum 𝓩} (hsub : x ∈ ofFinset S5 S10) :
-    x ∈ charges ↔ AllowsTerm x .topYukawa ∧
-    ¬ IsPhenoConstrained x ∧ ¬ YukawaGeneratesDangerousAtLevel x 1 ∧ IsComplete x := by
+    {x : ChargeSpectrum 𝓩} (hsub : x ∈ ofFinset S5 S10)
+    : x ∈ charges
+      ↔ AllowsTerm x .topYukawa ∧ ¬ IsPhenoConstrained x ∧ ¬ YukawaGeneratesDangerousAtLevel x 1
+        ∧ IsComplete x := by
   constructor
   · /- Showing that if `x ∈ Charges` it satisfies the conditions. -/
     intro h
-    exact ⟨charges_topYukawa x h, charges_not_isPhenoConstrained x h, charges_yukawa x h,
-      charges_complete x h⟩
+    exact ⟨
+      charges_topYukawa x h,
+      charges_not_isPhenoConstrained x h,
+      charges_yukawa x h,
+      charges_complete x h
+    ⟩
   · intro ⟨hTop, hPheno, hY, hComplete⟩
-    /- Showing that if `x ∉ charges` and `AllowsTerm x .topYukawa`,
-      `¬ IsPhenoConstrained x`, ``¬ YukawaGeneratesDangerousAtLevel x 1`, `IsComplete x`,
-      then `False`. -/
+    /-
+    Showing that if `x ∉ charges` and `AllowsTerm x .topYukawa`,
+    `¬ IsPhenoConstrained x`, ``¬ YukawaGeneratesDangerousAtLevel x 1`, `IsComplete x`,
+    then `False`.
+    -/
     by_contra hn
-    suffices hnot : ¬ ((¬ IsPhenoConstrained x ∧ ¬ YukawaGeneratesDangerousAtLevel x 1) ∧
-        AllowsTerm x topYukawa) by
+    suffices hnot : ¬((¬ IsPhenoConstrained x ∧ ¬ YukawaGeneratesDangerousAtLevel x 1)
+        ∧ AllowsTerm x topYukawa) by
       simp_all
     revert hn
     rw [not_and]
     simp only [hTop, not_true_eq_false, imp_false]
     suffices hmem : ∃ y ∈ charges, y ⊆ x by
       obtain ⟨y, y_mem, hyx⟩ := hmem
-      refine subset_insert_filter_card_zero charges S5 S10 (fun x =>
-        (¬x.IsPhenoConstrained ∧ ¬x.YukawaGeneratesDangerousAtLevel 1))
+      refine subset_insert_filter_card_zero charges S5 S10
+        (fun x => (¬x.IsPhenoConstrained ∧ ¬ x.YukawaGeneratesDangerousAtLevel 1))
         ?_ ?_ y ?_ x hyx hsub ?_ ?_
-      · simpa using fun x y hxy h1 h2 => yukawaGeneratesDangerousAtLevel_of_subset hxy <| h1
-          fun hn => h2 <| isPhenoConstrained_mono hxy hn
+      · simpa using fun x y hxy h1 h2 =>
+          yukawaGeneratesDangerousAtLevel_of_subset hxy <|
+            h1 fun hn => h2 <| isPhenoConstrained_mono hxy hn
       · intro x
         exact fun a => charges_complete x a
       · exact y_mem
@@ -352,8 +368,8 @@ lemma completeness_of_isPhenoClosedQ5_isPhenoClosedQ10
         have h1 := charges_isPhenoClosedQ5 q5 q5.2 z hz
         simp_all
     /- Getting the subset of `x` which minimally allows the top Yukawa. -/
-    obtain ⟨y, hyMem, hysubsetx⟩ : ∃ y ∈ (minimallyAllowsTermsOfFinset S5 S10 topYukawa),
-        y ⊆ x := by
+    obtain ⟨y, hyMem, hysubsetx⟩
+        : ∃ y ∈ (minimallyAllowsTermsOfFinset S5 S10 topYukawa), y ⊆ x := by
       rw [allowsTerm_iff_subset_minimallyAllowsTerm] at hTop
       obtain ⟨y, hPower, hIrre⟩ := hTop
       use y
@@ -387,27 +403,33 @@ lemma completeness_of_isPhenoClosedQ5_isPhenoClosedQ10
 TODO "Make the result `viableChargesMultiset` a safe definition, that is to
   say proof that the recursion terminates."
 
-/-- All charges, for a given `S5 S10 : Finset 𝓩`,
-  which permit a top Yukawa coupling, are not phenomenologically constrained,
-  and do not regenerate dangerous couplings with one insertion of a Yukawa coupling.
+/--
+All charges, for a given `S5 S10 : Finset 𝓩`,
+which permit a top Yukawa coupling, are not phenomenologically constrained,
+and do not regenerate dangerous couplings with one insertion of a Yukawa coupling.
 
-  This is the unique multiset without duplicates which satisfies:
-  `completeness_of_isPhenoClosedQ5_isPhenoClosedQ10`.
+This is the unique multiset without duplicates which satisfies:
+`completeness_of_isPhenoClosedQ5_isPhenoClosedQ10`.
 
-  Note this is fast for evaluation, but to slow with `decide`. -/
-unsafe def viableChargesMultiset (S5 S10 : Finset 𝓩) :
-    Multiset (ChargeSpectrum 𝓩) := (aux (completeMinSubset S5 S10) (completeMinSubset S5 S10)).dedup
+Note this is fast for evaluation, but to slow with `decide`.
+-/
+unsafe def viableChargesMultiset (S5 S10 : Finset 𝓩) : Multiset (ChargeSpectrum 𝓩) :=
+  (aux (completeMinSubset S5 S10) (completeMinSubset S5 S10)).dedup
 where
   /-- Auxiliary recursive function to define `viableChargesMultiset`. -/
-  aux : Multiset (ChargeSpectrum 𝓩) → Multiset (ChargeSpectrum 𝓩) → Multiset (ChargeSpectrum 𝓩) :=
-    fun all add =>
-      /- Note that aux terminates since that every iteration the size of `all` increases,
-        unless it terminates that round, but `all` is bounded in size by the number
-        of allowed charges given `S5` and `S10`. -/
-      if add = ∅ then all else
+  aux : Multiset (ChargeSpectrum 𝓩) → Multiset (ChargeSpectrum 𝓩)
+      → Multiset (ChargeSpectrum 𝓩) := fun all add =>
+    /-
+    Note that aux terminates since that every iteration the size of `all` increases,
+    unless it terminates that round, but `all` is bounded in size by the number
+    of allowed charges given `S5` and `S10`.
+    -/
+    if add = ∅ then
+      all
+    else
       let s := add.bind fun x => (minimalSuperSet S5 S10 x).val
-      let s2 := s.filter fun y => y ∉ all ∧
-        ¬ IsPhenoConstrained y ∧ ¬ YukawaGeneratesDangerousAtLevel y 1
+      let s2 :=
+        s.filter fun y => y ∉ all ∧ ¬ IsPhenoConstrained y ∧ ¬ YukawaGeneratesDangerousAtLevel y 1
       aux (all + s2) s2
 
 end ChargeSpectrum

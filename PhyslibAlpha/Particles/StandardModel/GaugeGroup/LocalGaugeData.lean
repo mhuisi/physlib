@@ -72,24 +72,29 @@ is registered globally.
 
 -/
 
-/-- The Standard Model gauge group as local gauge data, for the jet gauge group
-  `JetGaugeGroupI` and its Lie algebra `JetGaugeAlgebra` over the global group
-  `GaugeGroupI` and gauge algebra `GaugeAlgebra`. It is the gauge data
-  `StandardModel.Model.gaugeData` that the model table assembles from the factor list
-  `[.SU 3, .SU 2, .U1]` by `LocalGaugeData.ofFactors`; the carriers of that assembly are
-  `JetGaugeGroupI` and `JetGaugeAlgebra` on the nose, and each data field is definitionally
-  the existing Standard Model construction (the rules of section B are all `rfl`). -/
-noncomputable def localGaugeData :
-    LocalGaugeData GaugeGroupI GaugeAlgebra JetGaugeGroupI JetGaugeAlgebra :=
+/--
+The Standard Model gauge group as local gauge data, for the jet gauge group
+`JetGaugeGroupI` and its Lie algebra `JetGaugeAlgebra` over the global group
+`GaugeGroupI` and gauge algebra `GaugeAlgebra`. It is the gauge data
+`StandardModel.Model.gaugeData` that the model table assembles from the factor list
+`[.SU 3, .SU 2, .U1]` by `LocalGaugeData.ofFactors`; the carriers of that assembly are
+`JetGaugeGroupI` and `JetGaugeAlgebra` on the nose, and each data field is definitionally
+the existing Standard Model construction (the rules of section B are all `rfl`).
+-/
+noncomputable def localGaugeData
+    : LocalGaugeData GaugeGroupI GaugeAlgebra JetGaugeGroupI JetGaugeAlgebra :=
   Model.gaugeData
 
-/-- The Standard Model package is free. It is the local gauge data of the factors
-  `SU(3)`, `SU(2)` and `U(1)`, each free, and freeness passes to products:
-  `LocalGaugeData.instFreeOfFactors`. The symmetrized Maurer–Cartan data are therefore free
-  coordinates on its pure jets, by `LocalGaugeData.symmetrizedMaurerCartanCoeff_bijective`. -/
+/--
+The Standard Model package is free. It is the local gauge data of the factors
+`SU(3)`, `SU(2)` and `U(1)`, each free, and freeness passes to products:
+`LocalGaugeData.instFreeOfFactors`. The symmetrized Maurer–Cartan data are therefore free
+coordinates on its pure jets, by `LocalGaugeData.symmetrizedMaurerCartanCoeff_bijective`.
+-/
 instance instFreeLocalGaugeData : localGaugeData.Free := LocalGaugeData.instFreeOfFactors _
 
-/- The hand-built package this definition replaces. Every field below is definitionally
+/-
+The hand-built package this definition replaces. Every field below is definitionally
 equal to the corresponding field of `Model.gaugeData`, which is why the rules of section B
 still hold by `rfl`; the literal is kept here for reference until the hand-built gauge
 group is retired.
@@ -131,75 +136,74 @@ the direction in which the existing Standard Model lemmas become applicable.
 
 -/
 
-@[simp]
-lemma localGaugeData_eval : localGaugeData.eval = JetGaugeGroupI.eval := rfl
+@[simp] lemma localGaugeData_eval : localGaugeData.eval = JetGaugeGroupI.eval := rfl
 
 @[simp]
 lemma localGaugeData_ofConstant : localGaugeData.ofConstant = JetGaugeGroupI.ofConstant := rfl
 
-@[simp]
-lemma localGaugeData_evalLie : localGaugeData.evalLie = JetGaugeAlgebra.eval := rfl
+@[simp] lemma localGaugeData_evalLie : localGaugeData.evalLie = JetGaugeAlgebra.eval := rfl
 
 @[simp]
-lemma localGaugeData_ofConstantLie :
-    localGaugeData.ofConstantLie = JetGaugeAlgebra.ofConstant := rfl
+lemma localGaugeData_ofConstantLie : localGaugeData.ofConstantLie = JetGaugeAlgebra.ofConstant :=
+  rfl
+
+@[simp] lemma localGaugeData_adjoint : localGaugeData.adjoint = GaugeAlgebra.adjoint := rfl
 
 @[simp]
-lemma localGaugeData_adjoint : localGaugeData.adjoint = GaugeAlgebra.adjoint := rfl
+lemma localGaugeData_deriv (μ : Fin 1 ⊕ Fin 3) : localGaugeData.deriv μ = JetGaugeAlgebra.deriv μ :=
+  rfl
+
+/--
+The generic iterated derivative is the Standard Model iterated derivative, both being
+the same fold of `JetGaugeAlgebra.deriv` over the multiset of directions.
+-/
+@[simp]
+lemma localGaugeData_iteratedDeriv (s : Multiset (Fin 1 ⊕ Fin 3))
+    : localGaugeData.iteratedDeriv s = JetGaugeAlgebra.iteratedDeriv s :=
+  rfl
 
 @[simp]
-lemma localGaugeData_deriv (μ : Fin 1 ⊕ Fin 3) :
-    localGaugeData.deriv μ = JetGaugeAlgebra.deriv μ := rfl
+lemma localGaugeData_mulCoord (μ : Fin 1 ⊕ Fin 3)
+    : localGaugeData.mulCoord μ = JetGaugeAlgebra.coord μ :=
+  rfl
 
-/-- The generic iterated derivative is the Standard Model iterated derivative, both being
-  the same fold of `JetGaugeAlgebra.deriv` over the multiset of directions. -/
-@[simp]
-lemma localGaugeData_iteratedDeriv (s : Multiset (Fin 1 ⊕ Fin 3)) :
-    localGaugeData.iteratedDeriv s = JetGaugeAlgebra.iteratedDeriv s := rfl
+@[simp] lemma localGaugeData_adjointJ : localGaugeData.adjointJ = JetGaugeAlgebra.adjoint := rfl
 
-@[simp]
-lemma localGaugeData_mulCoord (μ : Fin 1 ⊕ Fin 3) :
-    localGaugeData.mulCoord μ = JetGaugeAlgebra.coord μ := rfl
-
-@[simp]
-lemma localGaugeData_adjointJ : localGaugeData.adjointJ = JetGaugeAlgebra.adjoint := rfl
-
-@[simp]
-lemma localGaugeData_maurerCartan : localGaugeData.maurerCartan = maurerCartanForm := rfl
+@[simp] lemma localGaugeData_maurerCartan : localGaugeData.maurerCartan = maurerCartanForm := rfl
 
 /-- The adjoint Taylor coefficients of the package, written out in Standard Model terms. -/
 @[simp]
-lemma localGaugeData_adjointCoeff_apply (U : JetGaugeGroupI) (x : Multiset (Fin 1 ⊕ Fin 3))
-    (a : GaugeAlgebra) :
-    localGaugeData.adjointCoeff U x a =
-      JetGaugeAlgebra.eval (JetGaugeAlgebra.iteratedDeriv x
-        (JetGaugeAlgebra.adjointMap U (JetGaugeAlgebra.ofConstant a))) := rfl
+lemma localGaugeData_adjointCoeff_apply
+    (U : JetGaugeGroupI) (x : Multiset (Fin 1 ⊕ Fin 3)) (a : GaugeAlgebra)
+    : localGaugeData.adjointCoeff U x a
+      = JetGaugeAlgebra.eval (JetGaugeAlgebra.iteratedDeriv x
+        (JetGaugeAlgebra.adjointMap U (JetGaugeAlgebra.ofConstant a))) :=
+  rfl
 
 /-- The `su(3)` component of the adjoint Taylor coefficients. -/
-lemma localGaugeData_adjointCoeff_toSU3Matrix (U : JetGaugeGroupI)
-    (p : Multiset (Fin 1 ⊕ Fin 3)) (b : GaugeAlgebra) :
-    (localGaugeData.adjointCoeff U p b).toSU3Matrix
-      = ((U.1.1 * b.toSU3Matrix.map (MvPowerSeries.C : ℂ → SpaceTimeAlgebra) *
-          star U.1.1).map fun f =>
-          MvPowerSeries.constantCoeff (SpaceTimeAlgebra.iteratedPDeriv p f)) := by
+lemma localGaugeData_adjointCoeff_toSU3Matrix
+    (U : JetGaugeGroupI) (p : Multiset (Fin 1 ⊕ Fin 3)) (b : GaugeAlgebra)
+    : (localGaugeData.adjointCoeff U p b).toSU3Matrix
+      = ((U.1.1 * b.toSU3Matrix.map (MvPowerSeries.C : ℂ → SpaceTimeAlgebra) * star U.1.1).map
+        fun f => MvPowerSeries.constantCoeff (SpaceTimeAlgebra.iteratedPDeriv p f)) := by
   rw [localGaugeData_adjointCoeff_apply, eval_iteratedDeriv_toSU3Matrix, adjointMap_toSU3Matrix,
     ofConstant_toSU3Matrix]
 
 /-- The `su(2)` component of the adjoint Taylor coefficients. -/
-lemma localGaugeData_adjointCoeff_toSU2Matrix (U : JetGaugeGroupI)
-    (p : Multiset (Fin 1 ⊕ Fin 3)) (b : GaugeAlgebra) :
-    (localGaugeData.adjointCoeff U p b).toSU2Matrix
+lemma localGaugeData_adjointCoeff_toSU2Matrix
+    (U : JetGaugeGroupI) (p : Multiset (Fin 1 ⊕ Fin 3)) (b : GaugeAlgebra)
+    : (localGaugeData.adjointCoeff U p b).toSU2Matrix
       = ((U.2.1.1 * b.toSU2Matrix.map (MvPowerSeries.C : ℂ → SpaceTimeAlgebra) * star U.2.1.1).map
-          fun f => MvPowerSeries.constantCoeff (SpaceTimeAlgebra.iteratedPDeriv p f)) := by
+        fun f => MvPowerSeries.constantCoeff (SpaceTimeAlgebra.iteratedPDeriv p f)) := by
   rw [localGaugeData_adjointCoeff_apply, eval_iteratedDeriv_toSU2Matrix, adjointMap_toSU2Matrix,
     ofConstant_toSU2Matrix]
 
 /-- The `u(1)` component of the adjoint Taylor coefficients. -/
-lemma localGaugeData_adjointCoeff_toU1Value (U : JetGaugeGroupI)
-    (p : Multiset (Fin 1 ⊕ Fin 3)) (b : GaugeAlgebra) :
-    (localGaugeData.adjointCoeff U p b).toU1Value
-      = MvPowerSeries.constantCoeff
-          (SpaceTimeAlgebra.iteratedPDeriv p (MvPowerSeries.C b.toU1Value)) := by
+lemma localGaugeData_adjointCoeff_toU1Value
+    (U : JetGaugeGroupI) (p : Multiset (Fin 1 ⊕ Fin 3)) (b : GaugeAlgebra)
+    : (localGaugeData.adjointCoeff U p b).toU1Value
+      = MvPowerSeries.constantCoeff (SpaceTimeAlgebra.iteratedPDeriv p
+        (MvPowerSeries.C b.toU1Value)) := by
   rw [localGaugeData_adjointCoeff_apply, eval_iteratedDeriv_toU1Value, adjointMap_toU1Value,
     ofConstant_toU1Value]
 
@@ -209,17 +213,20 @@ lemma localGaugeData_adjointCoeff_toU1Value (U : JetGaugeGroupI)
 
 -/
 
-/-- The Standard Model package is faithful: an element of the jet gauge algebra is
-  determined by the base-point values of its iterated derivatives, and a jet whose
-  Maurer–Cartan form vanishes is the constant jet of its value. Both are statements about
-  power series, proved from the matrix definitions in
-  `JetGaugeAlgebra.ext_of_eval_iteratedDeriv` and `maurerCartanForm_eq_zero_iff_ofConstant`.
-  Unlike the package itself this is a property of it and not a choice, so it is an
-  instance. -/
+/--
+The Standard Model package is faithful: an element of the jet gauge algebra is
+determined by the base-point values of its iterated derivatives, and a jet whose
+Maurer–Cartan form vanishes is the constant jet of its value. Both are statements about
+power series, proved from the matrix definitions in
+`JetGaugeAlgebra.ext_of_eval_iteratedDeriv` and `maurerCartanForm_eq_zero_iff_ofConstant`.
+Unlike the package itself this is a property of it and not a choice, so it is an
+instance.
+-/
 instance instFaithfulLocalGaugeData : localGaugeData.Faithful :=
   inferInstanceAs Model.gaugeData.Faithful
 
-/- The hand-built proof this instance replaces:
+/-
+The hand-built proof this instance replaces:
 
 instance instFaithfulLocalGaugeData : localGaugeData.Faithful where
   ext_of_evalLie_iteratedDeriv h := JetGaugeAlgebra.ext_of_eval_iteratedDeriv h

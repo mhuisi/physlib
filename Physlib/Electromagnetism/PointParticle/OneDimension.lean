@@ -56,40 +56,42 @@ namespace TempDistElectromagneticPotential
 
 -/
 
-/-- The current density of a point particle stationary at the origin
-  of 1d space. -/
-noncomputable def oneDimPointParticleCurrentDensity (c : SpeedOfLight) (q : ℝ) (r₀ : Space 1) :
-    TempDistLorentzCurrentDensity 1 := (SpaceTime.distTimeSlice c).symm <|
-  constantTime ((c * q) • diracDelta' ℝ r₀ (Lorentz.Vector.basis (Sum.inl 0)))
+/--
+The current density of a point particle stationary at the origin
+of 1d space.
+-/
+noncomputable def oneDimPointParticleCurrentDensity (c : SpeedOfLight) (q : ℝ) (r₀ : Space 1)
+    : TempDistLorentzCurrentDensity 1 :=
+  (SpaceTime.distTimeSlice c).symm <|
+    constantTime ((c * q) • diracDelta' ℝ r₀ (Lorentz.Vector.basis (Sum.inl 0)))
 
-lemma oneDimPointParticleCurrentDensity_eq_distTranslate (c : SpeedOfLight) (q : ℝ) (r₀ : Space 1) :
-    oneDimPointParticleCurrentDensity c q r₀ = ((SpaceTime.distTimeSlice c).symm <|
-    constantTime <|
-    distTranslate (basis.repr r₀) <|
-    ((c * q) • diracDelta' ℝ 0 (Lorentz.Vector.basis (Sum.inl 0)))) := by
+lemma oneDimPointParticleCurrentDensity_eq_distTranslate (c : SpeedOfLight) (q : ℝ) (r₀ : Space 1)
+    : oneDimPointParticleCurrentDensity c q r₀
+      = ((SpaceTime.distTimeSlice c).symm <| constantTime <| distTranslate (basis.repr r₀) <|
+        ((c * q) • diracDelta' ℝ 0 (Lorentz.Vector.basis (Sum.inl 0)))) := by
   rw [oneDimPointParticleCurrentDensity]
   congr
   ext η
   simp [distTranslate_apply]
 
 @[simp]
-lemma oneDimPointParticleCurrentDensity_currentDensity (c : SpeedOfLight) (q : ℝ) (r₀ : Space 1) :
-    (oneDimPointParticleCurrentDensity c q r₀).currentDensity c = 0 := by
+lemma oneDimPointParticleCurrentDensity_currentDensity (c : SpeedOfLight) (q : ℝ) (r₀ : Space 1)
+    : (oneDimPointParticleCurrentDensity c q r₀).currentDensity c = 0 := by
   ext ε i
   simp [oneDimPointParticleCurrentDensity, TempDistLorentzCurrentDensity.currentDensity,
     Lorentz.Vector.spatialCLM, constantTime_apply]
 
 @[simp]
-lemma oneDimPointParticleCurrentDensity_chargeDensity (c : SpeedOfLight) (q : ℝ) (r₀ : Space 1) :
-    (oneDimPointParticleCurrentDensity c q r₀).chargeDensity c =
-    constantTime (q • diracDelta ℝ r₀) := by
+lemma oneDimPointParticleCurrentDensity_chargeDensity (c : SpeedOfLight) (q : ℝ) (r₀ : Space 1)
+    : (oneDimPointParticleCurrentDensity c q r₀).chargeDensity c
+      = constantTime (q • diracDelta ℝ r₀) := by
   ext ε
   simp only [TempDistLorentzCurrentDensity.chargeDensity, one_div, Lorentz.Vector.temporalCLM,
     Fin.isValue, oneDimPointParticleCurrentDensity, map_smul, LinearMap.coe_mk, AddHom.coe_mk,
-    ContinuousLinearEquiv.apply_symm_apply, FunLike.coe_smul,
-    ContinuousLinearMap.coe_comp, LinearMap.coe_toContinuousLinearMap', Pi.smul_apply,
-    Function.comp_apply, constantTime_apply, diracDelta'_apply, Lorentz.Vector.apply_smul,
-    Lorentz.Vector.basis_apply, ↓reduceIte, mul_one, smul_eq_mul, diracDelta_apply]
+    ContinuousLinearEquiv.apply_symm_apply, FunLike.coe_smul, ContinuousLinearMap.coe_comp,
+    LinearMap.coe_toContinuousLinearMap', Pi.smul_apply, Function.comp_apply, constantTime_apply,
+    diracDelta'_apply, Lorentz.Vector.apply_smul, Lorentz.Vector.basis_apply, ↓ reduceIte, mul_one,
+    smul_eq_mul, diracDelta_apply]
   field_simp
 
 /-!
@@ -104,37 +106,35 @@ lemma oneDimPointParticleCurrentDensity_chargeDensity (c : SpeedOfLight) (q : �
 
 -/
 
-/-- The electromagnetic potential of a point particle stationary at `r₀`
-  of 1d space. -/
-noncomputable def oneDimPointParticle (𝓕 : FreeSpace) (q : ℝ) (r₀ : Space 1) :
-    TempDistElectromagneticPotential 1 := (SpaceTime.distTimeSlice 𝓕.c).symm <| Space.constantTime
-  <| distOfFunction (fun x => ((- (q * 𝓕.μ₀ * 𝓕.c)/ 2) * ‖x - r₀‖) • Lorentz.Vector.basis
-  (Sum.inl 0))
-  (by fun_prop)
+/--
+The electromagnetic potential of a point particle stationary at `r₀`
+of 1d space.
+-/
+noncomputable def oneDimPointParticle (𝓕 : FreeSpace) (q : ℝ) (r₀ : Space 1)
+    : TempDistElectromagneticPotential 1 :=
+  (SpaceTime.distTimeSlice 𝓕.c).symm <| Space.constantTime <| distOfFunction
+    (fun x => ((-(q * 𝓕.μ₀ * 𝓕.c) / 2) * ‖x - r₀‖) • Lorentz.Vector.basis (Sum.inl 0))
+    (by fun_prop)
 
-lemma oneDimPointParticle_eq_distTranslate (𝓕 : FreeSpace) (q : ℝ) (r₀ : Space 1) :
-    oneDimPointParticle 𝓕 q r₀ = ((SpaceTime.distTimeSlice 𝓕.c).symm <|
-    constantTime <|
-    distTranslate (basis.repr r₀) <|
-    distOfFunction (fun x => ((- (q * 𝓕.μ₀ * 𝓕.c)/ 2) * ‖x‖) • Lorentz.Vector.basis (Sum.inl 0))
-      (by fun_prop)) := by
+lemma oneDimPointParticle_eq_distTranslate (𝓕 : FreeSpace) (q : ℝ) (r₀ : Space 1)
+    : oneDimPointParticle 𝓕 q r₀
+      = ((SpaceTime.distTimeSlice 𝓕.c).symm <| constantTime <| distTranslate (basis.repr r₀) <|
+        distOfFunction
+          (fun x => ((-(q * 𝓕.μ₀ * 𝓕.c) / 2) * ‖x‖) • Lorentz.Vector.basis (Sum.inl 0))
+          (by fun_prop)) := by
   rw [oneDimPointParticle]
   congr
   ext η
   simp [distTranslate_ofFunction]
 
-/-
-
-### B.2. The vector potential is zero
-
--/
+/- ### B.2. The vector potential is zero -/
 
 @[simp]
-lemma oneDimPointParticle_vectorPotential (𝓕 : FreeSpace) (q : ℝ) (r₀ : Space 1) :
-    (oneDimPointParticle 𝓕 q r₀).vectorPotential 𝓕.c = 0 := by
+lemma oneDimPointParticle_vectorPotential (𝓕 : FreeSpace) (q : ℝ) (r₀ : Space 1)
+    : (oneDimPointParticle 𝓕 q r₀).vectorPotential 𝓕.c = 0 := by
   ext ε i
-  simp [vectorPotential, Lorentz.Vector.spatialCLM,
-    oneDimPointParticle, constantTime_apply, distOfFunction_vector_eval]
+  simp [vectorPotential, Lorentz.Vector.spatialCLM, oneDimPointParticle, constantTime_apply,
+    distOfFunction_vector_eval]
 
 /-!
 
@@ -142,21 +142,20 @@ lemma oneDimPointParticle_vectorPotential (𝓕 : FreeSpace) (q : ℝ) (r₀ : S
 
 -/
 
-lemma oneDimPointParticle_scalarPotential (𝓕 : FreeSpace) (q : ℝ) (r₀ : Space 1) :
-    (oneDimPointParticle 𝓕 q r₀).scalarPotential 𝓕.c =
-    Space.constantTime (distOfFunction (fun x =>
-      - ((q * 𝓕.μ₀ * 𝓕.c ^ 2)/(2)) • ‖x-r₀‖) (by fun_prop)) := by
+lemma oneDimPointParticle_scalarPotential (𝓕 : FreeSpace) (q : ℝ) (r₀ : Space 1)
+    : (oneDimPointParticle 𝓕 q r₀).scalarPotential 𝓕.c
+      = Space.constantTime
+        (distOfFunction (fun x => -((q * 𝓕.μ₀ * 𝓕.c ^ 2) / (2)) • ‖x-r₀‖) (by fun_prop)) := by
   ext ε
   simp only [scalarPotential, Lorentz.Vector.temporalCLM, Fin.isValue, map_smul,
     ContinuousLinearMap.comp_smulₛₗ, Real.ringHom_apply, oneDimPointParticle, LinearMap.coe_mk,
     AddHom.coe_mk, ContinuousLinearEquiv.apply_symm_apply, FunLike.coe_smul,
     ContinuousLinearMap.coe_comp, LinearMap.coe_toContinuousLinearMap', Pi.smul_apply,
     Function.comp_apply, constantTime_apply, distOfFunction_vector_eval, Lorentz.Vector.apply_smul,
-    Lorentz.Vector.basis_apply, ↓reduceIte, mul_one, smul_eq_mul, neg_mul]
+    Lorentz.Vector.basis_apply, ↓ reduceIte, mul_one, smul_eq_mul, neg_mul]
   rw [distOfFunction_mul_fun _ (by fun_prop), distOfFunction_neg,
     distOfFunction_mul_fun _ (by fun_prop)]
-  simp only [FunLike.coe_smul, Pi.smul_apply, smul_eq_mul,
-    _root_.neg_apply]
+  simp only [FunLike.coe_smul, Pi.smul_apply, smul_eq_mul, _root_.neg_apply]
   ring
 
 /-!
@@ -165,11 +164,11 @@ lemma oneDimPointParticle_scalarPotential (𝓕 : FreeSpace) (q : ℝ) (r₀ : S
 
 -/
 
-lemma oneDimPointParticle_electricField (𝓕 : FreeSpace) (q : ℝ) (r₀ : Space 1) :
-    (oneDimPointParticle 𝓕 q r₀).electricField 𝓕.c =
-    ((q * 𝓕.μ₀ * 𝓕.c ^ 2) / 2) • constantTime (distOfFunction (fun x : Space 1 =>
-      ‖x - r₀‖ ^ (- 1 : ℤ) • basis.repr (x - r₀))
-      ((IsDistBounded.zpow_smul_repr_self (- 1 : ℤ) (by omega)).comp_sub_right r₀)) := by
+lemma oneDimPointParticle_electricField (𝓕 : FreeSpace) (q : ℝ) (r₀ : Space 1)
+    : (oneDimPointParticle 𝓕 q r₀).electricField 𝓕.c
+      = ((q * 𝓕.μ₀ * 𝓕.c ^ 2) / 2) • constantTime (distOfFunction
+        (fun x : Space 1 => ‖x - r₀‖ ^ (-1 : ℤ) • basis.repr (x - r₀))
+        ((IsDistBounded.zpow_smul_repr_self (-1 : ℤ) (by omega)).comp_sub_right r₀)) := by
   have h1 := Space.distGrad_distOfFunction_norm_zpow (d := 1) 1 (by grind)
   simp at h1
   simp only [electricField, LinearMap.coe_mk, AddHom.coe_mk, oneDimPointParticle_scalarPotential,
@@ -191,8 +190,8 @@ lemma oneDimPointParticle_electricField (𝓕 : FreeSpace) (q : ℝ) (r₀ : Spa
 -/
 
 @[simp]
-lemma oneDimPointParticle_electricField_timeDeriv (𝓕 : FreeSpace) (q : ℝ) (r₀ : Space 1) :
-    Space.distTimeDeriv ((oneDimPointParticle 𝓕 q r₀).electricField 𝓕.c) = 0 := by
+lemma oneDimPointParticle_electricField_timeDeriv (𝓕 : FreeSpace) (q : ℝ) (r₀ : Space 1)
+    : Space.distTimeDeriv ((oneDimPointParticle 𝓕 q r₀).electricField 𝓕.c) = 0 := by
   rw [oneDimPointParticle_electricField, map_smul, constantTime_distTimeDeriv]
   module
 
@@ -202,8 +201,8 @@ lemma oneDimPointParticle_electricField_timeDeriv (𝓕 : FreeSpace) (q : ℝ) (
 
 -/
 
-lemma oneDimPointParticle_magneticFieldMatrix (q : ℝ) (r₀ : Space 1) :
-    (oneDimPointParticle 𝓕 q r₀).magneticFieldMatrix 𝓕.c = 0 := by
+lemma oneDimPointParticle_magneticFieldMatrix (q : ℝ) (r₀ : Space 1)
+    : (oneDimPointParticle 𝓕 q r₀).magneticFieldMatrix 𝓕.c = 0 := by
   simp
 
 /-!
@@ -212,9 +211,9 @@ lemma oneDimPointParticle_magneticFieldMatrix (q : ℝ) (r₀ : Space 1) :
 
 -/
 
-lemma oneDimPointParticle_div_electricField {𝓕} (q : ℝ) (r₀ : Space 1) :
-    distSpaceDiv ((oneDimPointParticle 𝓕 q r₀).electricField 𝓕.c) =
-    (𝓕.μ₀ * 𝓕.c ^ 2) • constantTime (q • diracDelta ℝ r₀) := by
+lemma oneDimPointParticle_div_electricField {𝓕} (q : ℝ) (r₀ : Space 1)
+    : distSpaceDiv ((oneDimPointParticle 𝓕 q r₀).electricField 𝓕.c)
+      = (𝓕.μ₀ * 𝓕.c ^ 2) • constantTime (q • diracDelta ℝ r₀) := by
   rw [oneDimPointParticle_electricField]
   simp only [Int.reduceNeg, zpow_neg, zpow_one, map_smul, smul_smul]
   have h1 := Space.distDiv_inv_pow_eq_dim (d := 1)
@@ -241,8 +240,8 @@ lemma oneDimPointParticle_div_electricField {𝓕} (q : ℝ) (r₀ : Space 1) :
   · simp
   · simp
 
-lemma oneDimPointParticle_isExterma (𝓕 : FreeSpace) (q : ℝ) (r₀ : Space 1) :
-    (oneDimPointParticle 𝓕 q r₀).IsExtrema 𝓕 (oneDimPointParticleCurrentDensity 𝓕.c q r₀) := by
+lemma oneDimPointParticle_isExterma (𝓕 : FreeSpace) (q : ℝ) (r₀ : Space 1)
+    : (oneDimPointParticle 𝓕 q r₀).IsExtrema 𝓕 (oneDimPointParticleCurrentDensity 𝓕.c q r₀) := by
   rw [isExtrema_iff_components]
   apply And.intro
   · intro ε

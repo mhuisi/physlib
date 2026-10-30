@@ -15,9 +15,11 @@ public import Mathlib.Data.Fintype.Card
 
 @[expose] public section
 
-/-- The type `CreateAnnihilate` is the type containing two elements `create` and `annihilate`.
-  This type is used to specify if an operator is a creation, or annihilation, operator
-  or the sum thereof or integral thereof etc. -/
+/--
+The type `CreateAnnihilate` is the type containing two elements `create` and `annihilate`.
+This type is used to specify if an operator is a creation, or annihilation, operator
+or the sum thereof or integral thereof etc.
+-/
 inductive CreateAnnihilate where
   | create : CreateAnnihilate
   | annihilate : CreateAnnihilate
@@ -37,8 +39,10 @@ instance : Fintype CreateAnnihilate where
 lemma eq_create_or_annihilate (φ : CreateAnnihilate) : φ = create ∨ φ = annihilate := by
   cases φ <;> simp
 
-/-- The normal ordering on creation and annihilation operators.
-  Under this relation, `normalOrder a b` is false only if `a` is annihilate and `b` is create. -/
+/--
+The normal ordering on creation and annihilation operators.
+Under this relation, `normalOrder a b` is false only if `a` is annihilate and `b` is create.
+-/
 def normalOrder : CreateAnnihilate → CreateAnnihilate → Prop
   | create, _ => True
   | annihilate, annihilate => True
@@ -60,16 +64,15 @@ instance : IsTrans CreateAnnihilate normalOrder where
   trans := by decide
 
 @[simp]
-lemma not_normalOrder_annihilate_iff_false (a : CreateAnnihilate) :
-    (¬ normalOrder a annihilate) ↔ False := by
+lemma not_normalOrder_annihilate_iff_false (a : CreateAnnihilate)
+    : (¬ normalOrder a annihilate) ↔ False := by
   cases a <;> simp [normalOrder]
 
-lemma sum_eq {M : Type} [AddCommMonoid M] (f : CreateAnnihilate → M) :
-    ∑ i, f i = f create + f annihilate := by
+lemma sum_eq {M : Type} [AddCommMonoid M] (f : CreateAnnihilate → M)
+    : ∑ i, f i = f create + f annihilate := by
   change ∑ i ∈ {create, annihilate}, f i = f create + f annihilate
   simp
 
-@[simp]
-lemma CreateAnnihilate_card_eq_two : Fintype.card CreateAnnihilate = 2 := rfl
+@[simp] lemma CreateAnnihilate_card_eq_two : Fintype.card CreateAnnihilate = 2 := rfl
 
 end CreateAnnihilate

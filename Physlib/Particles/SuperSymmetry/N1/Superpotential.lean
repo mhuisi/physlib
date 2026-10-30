@@ -52,10 +52,12 @@ variable {ι : Type} [Fintype ι] [DecidableEq ι]
 
 -/
 
-/-- A superpotential on the domain `D`: a function `W` of the chiral configuration, holomorphic on
-`D`. -/
-structure Superpotential (ι : Type) [Fintype ι] [DecidableEq ι]
-    (D : Set (ChiralScalarConfiguration ι)) where
+/--
+A superpotential on the domain `D`: a function `W` of the chiral configuration, holomorphic on
+`D`.
+-/
+structure Superpotential
+    (ι : Type) [Fintype ι] [DecidableEq ι] (D : Set (ChiralScalarConfiguration ι)) where
   /-- The superpotential `W`. -/
   W : ChiralScalarConfiguration ι → ℂ
   /-- `W` is holomorphic on `D`. -/
@@ -76,14 +78,14 @@ instance : CoeFun (Superpotential ι D) (fun _ => ChiralScalarConfiguration ι �
 -/
 
 /-- The gradient `∂_I W` of the superpotential, a covector of colour `chiralDown`. -/
-def dW (W : Superpotential ι D) (u : ChiralScalarConfiguration ι) :
-    (chiralTensor (ι := ι)).Tensor ![chiralDown] :=
-  ofComponents ![chiralDown] (fun φ => dWirtingerCoord W (φ 0) u)
+def dW (W : Superpotential ι D) (u : ChiralScalarConfiguration ι)
+    : (chiralTensor (ι := ι)).Tensor ![chiralDown] :=
+  ofComponents (![chiralDown]) (fun φ => dWirtingerCoord W (φ 0) u)
 
 /-- The `I`-th component of the gradient is `∂_I W`. -/
-lemma repr_dW (W : Superpotential ι D) (u : ChiralScalarConfiguration ι) (I : ι) :
-    (basis (S := (chiralTensor (ι := ι)).toTensorSpecies) ![chiralDown]).repr (W.dW u) ![I] =
-      dWirtingerCoord W I u := by
+lemma repr_dW (W : Superpotential ι D) (u : ChiralScalarConfiguration ι) (I : ι)
+    : (basis (S := (chiralTensor (ι := ι)).toTensorSpecies) ![chiralDown]).repr (W.dW u) ![I]
+      = dWirtingerCoord W I u := by
   rw [← componentMap_eq_repr, dW, componentMap_ofComponents]
   rfl
 

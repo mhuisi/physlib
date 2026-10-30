@@ -43,22 +43,30 @@ continuous in the supremum norm.
 
 namespace MeasureTheory
 
-variable {X : Type*} [TopologicalSpace X] [CompactSpace X] [MeasurableSpace X]
-  [OpensMeasurableSpace X]
+variable
+  {X : Type*} [TopologicalSpace X] [CompactSpace X] [MeasurableSpace X] [OpensMeasurableSpace X]
 
-lemma integrable_continuousMap (μ : Measure X) [IsFiniteMeasure μ] (g : C(X, ℝ)) :
-    Integrable g μ :=
-  .of_bound g.continuous.aestronglyMeasurable ‖g‖ (.of_forall g.norm_coe_le_norm)
+lemma integrable_continuousMap (μ : Measure X) [IsFiniteMeasure μ] (g : C(X, ℝ)) : Integrable g μ :=
+  .of_bound g.continuous.aestronglyMeasurable (‖g‖) (.of_forall g.norm_coe_le_norm)
 
 /-- Integration of continuous functions against a finite measure, as a continuous functional. -/
 noncomputable def integralCLM (μ : Measure X) [IsFiniteMeasure μ] : C(X, ℝ) →L[ℝ] ℝ :=
-  LinearMap.mkContinuous ⟨⟨fun g => ∫ x, g x ∂μ, fun g h =>
-    integral_add (integrable_continuousMap μ g) (integrable_continuousMap μ h)⟩,
-    fun c _ => integral_const_mul c _⟩ (μ.real Set.univ) fun g => by
+  LinearMap.mkContinuous
+    ⟨
+      ⟨
+        fun g => ∫ x, g x ∂μ,
+        fun g h => integral_add (integrable_continuousMap μ g) (integrable_continuousMap μ h)
+      ⟩,
+      fun c _ => integral_const_mul c _
+    ⟩
+    (μ.real Set.univ)
+    fun g => by
       simpa [mul_comm] using
         norm_integral_le_of_norm_le_const (μ := μ) (.of_forall g.norm_coe_le_norm)
 
-@[simp] lemma integralCLM_apply (μ : Measure X) [IsFiniteMeasure μ] (g : C(X, ℝ)) :
-    integralCLM μ g = ∫ x, g x ∂μ := rfl
+@[simp]
+lemma integralCLM_apply (μ : Measure X) [IsFiniteMeasure μ] (g : C(X, ℝ))
+    : integralCLM μ g = ∫ x, g x ∂μ :=
+  rfl
 
 end MeasureTheory

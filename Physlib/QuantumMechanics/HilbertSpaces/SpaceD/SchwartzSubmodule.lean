@@ -54,20 +54,21 @@ namespace SpaceDHilbertSpace
 -/
 
 /-- The continuous linear map including Schwartz maps into `SpaceDHilbertSpace d μ`. -/
-def schwartzIncl {d : ℕ} (μ : Measure (Space d)) [μ.HasTemperateGrowth] :
-    𝓢(Space d, ℂ) →L[ℂ] SpaceDHilbertSpace d μ :=
+def schwartzIncl {d : ℕ} (μ : Measure (Space d)) [μ.HasTemperateGrowth]
+    : 𝓢(Space d, ℂ) →L[ℂ] SpaceDHilbertSpace d μ :=
   toLpCLM ℂ ℂ 2 μ
 
 /-- The submodule of `SpaceDHilbertSpace d` corresponding to Schwartz maps. -/
-abbrev SchwartzSubmodule (d : ℕ) (μ : Measure (Space d) := volume) [μ.HasTemperateGrowth] :
-    Submodule ℂ (SpaceDHilbertSpace d μ) :=
+abbrev SchwartzSubmodule (d : ℕ) (μ : Measure (Space d) := volume) [μ.HasTemperateGrowth]
+    : Submodule ℂ (SpaceDHilbertSpace d μ) :=
   (schwartzIncl μ).range
 
-/-- The linear equivalence between the Schwartz maps `𝓢(Space d, ℂ)` and the Schwartz submodule
-  of `SpaceDHilbertSpace d μ`. -/
-def schwartzEquiv
-    {d : ℕ} (μ : Measure (Space d)) [μ.HasTemperateGrowth] [μ.IsOpenPosMeasure] :
-    𝓢(Space d, ℂ) ≃ₗ[ℂ] SchwartzSubmodule d μ :=
+/--
+The linear equivalence between the Schwartz maps `𝓢(Space d, ℂ)` and the Schwartz submodule
+of `SpaceDHilbertSpace d μ`.
+-/
+def schwartzEquiv {d : ℕ} (μ : Measure (Space d)) [μ.HasTemperateGrowth] [μ.IsOpenPosMeasure]
+    : 𝓢(Space d, ℂ) ≃ₗ[ℂ] SchwartzSubmodule d μ :=
   LinearEquiv.ofInjective (schwartzIncl μ).toLinearMap (injective_toLp 2 μ)
 
 namespace SchwartzSubmodule
@@ -99,8 +100,8 @@ lemma schwartzEquiv_ae_eq (h : schwartzEquiv μ f =ᵐ[μ] schwartzEquiv μ g) :
 -/
 
 @[simp]
-lemma zero_eq_top (μ : Measure (Space 0)) [μ.HasTemperateGrowth] [μ.IsOpenPosMeasure] :
-    SchwartzSubmodule 0 μ = ⊤ := by
+lemma zero_eq_top (μ : Measure (Space 0)) [μ.HasTemperateGrowth] [μ.IsOpenPosMeasure]
+    : SchwartzSubmodule 0 μ = ⊤ := by
   ext ψ
   simp only [LinearMap.mem_range, ContinuousLinearMap.coe_coe, Submodule.mem_top, iff_true]
   let g : 𝓢(Space 0, ℂ) := {
@@ -122,12 +123,12 @@ lemma zero_eq_top (μ : Measure (Space 0)) [μ.HasTemperateGrowth] [μ.IsOpenPos
 
 variable (d μ) in
 omit [μ.IsOpenPosMeasure] in
-lemma dense [IsFiniteMeasureOnCompacts μ] :
-    Dense (SchwartzSubmodule d μ : Set (SpaceDHilbertSpace d μ)) :=
+lemma dense [IsFiniteMeasureOnCompacts μ]
+    : Dense (SchwartzSubmodule d μ : Set (SpaceDHilbertSpace d μ)) :=
   denseRange_toLpCLM ENNReal.top_ne_ofNat.symm
 
-lemma schwartzEquiv_inner :
-    ⟪schwartzEquiv μ f, schwartzEquiv μ g⟫_ℂ = ∫ x, starRingEnd ℂ (f x) * g x ∂μ := by
+lemma schwartzEquiv_inner
+    : ⟪schwartzEquiv μ f, schwartzEquiv μ g⟫_ℂ = ∫ x, starRingEnd ℂ (f x) * g x ∂μ := by
   apply integral_congr_ae
   filter_upwards [schwartzEquiv_coe_ae f, schwartzEquiv_coe_ae g] with _ hf hg
   simp [hf, hg, mul_comm]
@@ -137,8 +138,8 @@ lemma schwartzIncl_ker : (schwartzIncl μ).ker = (⊥ : Submodule ℂ 𝓢(Space
   ext; simp [← schwartzEquiv_apply_coe]
 
 omit [μ.IsOpenPosMeasure] in
-lemma toTemperedDistribution_schwartzIncl_eq :
-    toTemperedDistribution (schwartzIncl μ g) = g.toTemperedDistributionCLM (Space d) ℂ μ :=
+lemma toTemperedDistribution_schwartzIncl_eq
+    : toTemperedDistribution (schwartzIncl μ g) = g.toTemperedDistributionCLM (Space d) ℂ μ :=
   Lp.toTemperedDistribution_toLp_eq g
 
 end SchwartzSubmodule
@@ -154,8 +155,8 @@ open SpaceDHilbertSpace
 
 /-- The projection of `SchwartzSubmodule d μ` onto `SpaceDHilbertSpaceOn Ω μ`. -/
 abbrev SchwartzSubmoduleOn
-    {d : ℕ} (Ω : Set (Space d)) (μ : Measure (Space d) := volume) [μ.HasTemperateGrowth] :
-    Submodule ℂ (SpaceDHilbertSpaceOn Ω μ) :=
+    {d : ℕ} (Ω : Set (Space d)) (μ : Measure (Space d) := volume) [μ.HasTemperateGrowth]
+    : Submodule ℂ (SpaceDHilbertSpaceOn Ω μ) :=
   (SchwartzSubmodule d μ).map (subspaceProjection Ω μ).toLinearMap
 
 namespace SchwartzSubmoduleOn
@@ -163,8 +164,8 @@ namespace SchwartzSubmoduleOn
 variable {d : ℕ} (Ω : Set (Space d)) (μ : Measure (Space d)) [μ.HasTemperateGrowth]
 
 variable {Ω μ} in
-lemma mem_iff {ψ : SpaceDHilbertSpaceOn Ω μ} :
-    ψ ∈ SchwartzSubmoduleOn Ω μ ↔ ∃ φ : SchwartzSubmodule d μ, subspaceProjection Ω μ φ = ψ := by
+lemma mem_iff {ψ : SpaceDHilbertSpaceOn Ω μ}
+    : ψ ∈ SchwartzSubmoduleOn Ω μ ↔ ∃ φ : SchwartzSubmodule d μ, subspaceProjection Ω μ φ = ψ := by
   simp
 
 end SchwartzSubmoduleOn

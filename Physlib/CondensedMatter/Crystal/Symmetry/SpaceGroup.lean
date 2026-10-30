@@ -69,8 +69,8 @@ noncomputable def spaceGroup (g : PeriodicGraph C) : Subgroup (Symmetry C) :=
   g.graphAutomorphisms.comap (Symmetry.toPerm C)
 
 /-- A crystal symmetry belongs to the space group exactly when it preserves adjacency. -/
-lemma mem_spaceGroup_iff :
-    φ ∈ g.spaceGroup ↔ ∀ x y, g.toSimpleGraph.Adj (φ x) (φ y) ↔ g.toSimpleGraph.Adj x y := by
+lemma mem_spaceGroup_iff
+    : φ ∈ g.spaceGroup ↔ ∀ x y, g.toSimpleGraph.Adj (φ x) (φ y) ↔ g.toSimpleGraph.Adj x y := by
   rfl
 
 /-- Every lattice translation belongs to the space group. -/
@@ -89,10 +89,11 @@ lemma translations_le_spaceGroup : Symmetry.translations C ≤ g.spaceGroup := b
 noncomputable def pointGroup (g : PeriodicGraph C) : Subgroup (Symmetry C) :=
   g.spaceGroup.map (Symmetry.pointOp C)
 
-/-- A symmetry is in the point group exactly when it is a point operation of a space-group
-element. -/
-lemma mem_pointGroup_iff :
-    ψ ∈ g.pointGroup ↔ ∃ φ ∈ g.spaceGroup, Symmetry.pointOp C φ = ψ :=
+/--
+A symmetry is in the point group exactly when it is a point operation of a space-group
+element.
+-/
+lemma mem_pointGroup_iff : ψ ∈ g.pointGroup ↔ ∃ φ ∈ g.spaceGroup, Symmetry.pointOp C φ = ψ :=
   Subgroup.mem_map
 
 /-! ## C. The bond set -/
@@ -122,8 +123,7 @@ lemma mem_spaceGroup_iff_preservesBonds : φ ∈ g.spaceGroup ↔ g.PreservesBon
     · exact h.map_adj
 
 /-- The space group is the stabilizer of the set of reference-cell bonds. -/
-lemma spaceGroup_eq_stabilizer :
-    g.spaceGroup = MulAction.stabilizer (Symmetry C) g.bonds := by
+lemma spaceGroup_eq_stabilizer : g.spaceGroup = MulAction.stabilizer (Symmetry C) g.bonds := by
   ext φ
   rw [mem_spaceGroup_iff_preservesBonds, preservesBonds_iff_smul_eq, MulAction.mem_stabilizer_iff]
 

@@ -47,17 +47,19 @@ TODO "To match this with the results currently in the `QuantumInfo` part of the 
   definition of bras and kets, and the definition of mixed states. Maybe also
   parts of `./ResourceTheory/FreeState`."
 
-/-- The Hilbert space of a finite target quantum mechanical system whose target is
-  a finite type `d` with decidable equality.
+/--
+The Hilbert space of a finite target quantum mechanical system whose target is
+a finite type `d` with decidable equality.
 
-  It is defined as a structure with a single field `val`, wrapping an element of
-  `EuclideanSpace ℂ d` — the space of functions `d → ℂ` carrying the `L²` inner
-  product `⟪ψ, φ⟫ = ∑ i, conj (ψ i) * φ i`. Using a structure in preference to
-  `EuclideanSpace ℂ d` itself makes the Hilbert space of states a type of its own,
-  with its own API and the notation `𝓗[d]`.
+It is defined as a structure with a single field `val`, wrapping an element of
+`EuclideanSpace ℂ d` — the space of functions `d → ℂ` carrying the `L²` inner
+product `⟪ψ, φ⟫ = ∑ i, conj (ψ i) * φ i`. Using a structure in preference to
+`EuclideanSpace ℂ d` itself makes the Hilbert space of states a type of its own,
+with its own API and the notation `𝓗[d]`.
 
-  Being finite dimensional, it is automatically a complete inner product space,
-  that is, a genuine Hilbert space. -/
+Being finite dimensional, it is automatically a complete inner product space,
+that is, a genuine Hilbert space.
+-/
 @[ext]
 structure FiniteHilbertSpace (d : Type*) [Fintype d] [DecidableEq d] where
   /-- The underlying element of `EuclideanSpace ℂ d`. -/
@@ -70,8 +72,10 @@ namespace FiniteHilbertSpace
 
 variable {d : Type*} [Fintype d] [DecidableEq d]
 
-/-- The equivalence between `FiniteHilbertSpace d` and `EuclideanSpace ℂ d`
-  given by `val`. -/
+/--
+The equivalence between `FiniteHilbertSpace d` and `EuclideanSpace ℂ d`
+given by `val`.
+-/
 def equivEuclidean : FiniteHilbertSpace d ≃ EuclideanSpace ℂ d where
   toFun := val
   invFun := mk
@@ -92,21 +96,21 @@ noncomputable instance : AddCommGroup (FiniteHilbertSpace d) := equivEuclidean.a
 noncomputable instance : Module ℂ (FiniteHilbertSpace d) :=
   AddEquiv.module ℂ { equivEuclidean with map_add' := fun _ _ => rfl }
 
-@[simp]
-lemma val_add (ψ φ : FiniteHilbertSpace d) : (ψ + φ).val = ψ.val + φ.val := rfl
+@[simp] lemma val_add (ψ φ : FiniteHilbertSpace d) : (ψ + φ).val = ψ.val + φ.val := rfl
 
-@[simp]
-lemma val_smul (c : ℂ) (ψ : FiniteHilbertSpace d) : (c • ψ).val = c • ψ.val := rfl
+@[simp] lemma val_smul (c : ℂ) (ψ : FiniteHilbertSpace d) : (c • ψ).val = c • ψ.val := rfl
 
-@[simp]
-lemma val_zero : (0 : FiniteHilbertSpace d).val = 0 := rfl
+@[simp] lemma val_zero : (0 : FiniteHilbertSpace d).val = 0 := rfl
 
-/-- The equivalence between `FiniteHilbertSpace d` and `EuclideanSpace ℂ d`
-  as a `ℂ`-linear equivalence, upgrading `equivEuclidean`. -/
-noncomputable def linearEquivEuclidean : FiniteHilbertSpace d ≃ₗ[ℂ] EuclideanSpace ℂ d :=
-  { equivEuclidean with
-    map_add' := fun _ _ => rfl
-    map_smul' := fun _ _ => rfl }
+/--
+The equivalence between `FiniteHilbertSpace d` and `EuclideanSpace ℂ d`
+as a `ℂ`-linear equivalence, upgrading `equivEuclidean`.
+-/
+noncomputable def linearEquivEuclidean : FiniteHilbertSpace d ≃ₗ[ℂ] EuclideanSpace ℂ d := {
+  equivEuclidean with
+  map_add' := fun _ _ => rfl
+  map_smul' := fun _ _ => rfl
+}
 
 /-!
 
@@ -121,22 +125,22 @@ The norm and inner product are induced from `EuclideanSpace ℂ d` along
 noncomputable instance : NormedAddCommGroup (FiniteHilbertSpace d) :=
   NormedAddCommGroup.induced _ _ linearEquivEuclidean.toLinearMap linearEquivEuclidean.injective
 
-@[simp]
-lemma norm_eq_val (ψ : FiniteHilbertSpace d) : ‖ψ‖ = ‖ψ.val‖ := rfl
+@[simp] lemma norm_eq_val (ψ : FiniteHilbertSpace d) : ‖ψ‖ = ‖ψ.val‖ := rfl
 
 noncomputable instance : InnerProductSpace ℂ (FiniteHilbertSpace d) :=
   InnerProductSpace.induced linearEquivEuclidean.toLinearMap
 
-@[simp]
-lemma inner_eq_val (ψ φ : FiniteHilbertSpace d) : inner ℂ ψ φ = inner ℂ ψ.val φ.val := rfl
+@[simp] lemma inner_eq_val (ψ φ : FiniteHilbertSpace d) : inner ℂ ψ φ = inner ℂ ψ.val φ.val := rfl
 
 instance : FiniteDimensional ℂ (FiniteHilbertSpace d) :=
   Module.Finite.equiv linearEquivEuclidean.symm
 
 instance : CompleteSpace (FiniteHilbertSpace d) := FiniteDimensional.complete ℂ _
 
-/-- The equivalence between `FiniteHilbertSpace d` and `EuclideanSpace ℂ d`
-  as a linear isometry equivalence, upgrading `linearEquivEuclidean`. -/
+/--
+The equivalence between `FiniteHilbertSpace d` and `EuclideanSpace ℂ d`
+as a linear isometry equivalence, upgrading `linearEquivEuclidean`.
+-/
 noncomputable def isometryEquivEuclidean : FiniteHilbertSpace d ≃ₗᵢ[ℂ] EuclideanSpace ℂ d where
   toLinearEquiv := linearEquivEuclidean
   norm_map' _ := rfl
@@ -148,8 +152,8 @@ noncomputable def isometryEquivEuclidean : FiniteHilbertSpace d ≃ₗᵢ[ℂ] E
 -/
 
 /-- The standard orthonormal basis of `FiniteHilbertSpace d`, indexed by `d`. -/
-noncomputable def basisFun (d : Type*) [Fintype d] [DecidableEq d] :
-    OrthonormalBasis d ℂ (FiniteHilbertSpace d) :=
+noncomputable def basisFun (d : Type*) [Fintype d] [DecidableEq d]
+    : OrthonormalBasis d ℂ (FiniteHilbertSpace d) :=
   (EuclideanSpace.basisFun d ℂ).map isometryEquivEuclidean.symm
 
 lemma basisFun_apply (i : d) : basisFun d i = ⟨EuclideanSpace.single i 1⟩ := by

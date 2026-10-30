@@ -24,20 +24,24 @@ def SO3 : Type := {A : Matrix (Fin 3) (Fin 3) ℝ // A.det = 1 ∧ A * Aᵀ = 1}
 /-- The instance of a group on `SO3`. -/
 @[simps! mul_coe one_coe inv div]
 instance SO3Group : Group SO3 where
-  mul A B := ⟨A.1 * B.1,
-    by
-      simp only [det_mul, A.2.1, B.2.1, mul_one],
+  mul A B := ⟨
+    A.1 * B.1,
+    by simp only [det_mul, A.2.1, B.2.1, mul_one],
     by
       simp only [transpose_mul, Matrix.mul_assoc]
       trans A.1 * ((B.1 * (B.1)ᵀ) * (A.1)ᵀ)
       · noncomm_ring
-      · simp [B.2.2, A.2.2]⟩
+      · simp [B.2.2, A.2.2]
+  ⟩
   mul_assoc A B C := Subtype.ext (Matrix.mul_assoc A.1 B.1 C.1)
   one := ⟨1, det_one, by rw [transpose_one, mul_one]⟩
   one_mul A := Subtype.ext (Matrix.one_mul A.1)
   mul_one A := Subtype.ext (Matrix.mul_one A.1)
-  inv A := ⟨A.1ᵀ, by simp only [det_transpose, A.2],
-    by simp only [transpose_transpose, mul_eq_one_comm.mpr A.2.2]⟩
+  inv A := ⟨
+    A.1ᵀ,
+    by simp only [det_transpose, A.2],
+    by simp only [transpose_transpose, mul_eq_one_comm.mpr A.2.2]
+  ⟩
   inv_mul_cancel A := Subtype.ext (mul_eq_one_comm.mpr A.2.2)
 
 /-- Notation for the group `SO3`. -/
@@ -48,17 +52,16 @@ instance : TopologicalSpace SO3 := instTopologicalSpaceSubtype
 
 namespace SO3
 
-lemma coe_inv (A : SO3) : (A⁻¹).1 = A.1⁻¹:=
-  (inv_eq_left_inv (mul_eq_one_comm.mpr A.2.2)).symm
+lemma coe_inv (A : SO3) : (A⁻¹).1 = A.1⁻¹ := (inv_eq_left_inv (mul_eq_one_comm.mpr A.2.2)).symm
 
 /-- The inclusion of `SO(3)` into `GL (Fin 3) ℝ`. -/
 def toGL : SO(3) →* GL (Fin 3) ℝ where
   toFun A := ⟨A.1, (A⁻¹).1, A.2.2, mul_eq_one_comm.mpr A.2.2⟩
-  map_one' := (GeneralLinearGroup.ext_iff _ 1).mpr fun _=> congrFun rfl
+  map_one' := (GeneralLinearGroup.ext_iff _ 1).mpr fun _ => congrFun rfl
   map_mul' _ _ := (GeneralLinearGroup.ext_iff _ _).mpr fun _ => congrFun rfl
 
-lemma subtype_val_eq_toGL : (Subtype.val : SO3 → Matrix (Fin 3) (Fin 3) ℝ) =
-    Units.val ∘ toGL.toFun :=
+lemma subtype_val_eq_toGL
+    : (Subtype.val : SO3 → Matrix (Fin 3) (Fin 3) ℝ) = Units.val ∘ toGL.toFun :=
   rfl
 
 /-- The inclusion of `SO(3)` into `GL(3,ℝ)` is an injection. -/
@@ -66,8 +69,10 @@ lemma toGL_injective : Function.Injective toGL := by
   refine fun A B h ↦ Subtype.ext ?_
   rwa [@Units.ext_iff] at h
 
-/-- The inclusion of `SO(3)` into the monoid of matrices times the opposite of
-  the monoid of matrices. -/
+/--
+The inclusion of `SO(3)` into the monoid of matrices times the opposite of
+the monoid of matrices.
+-/
 @[simps!]
 def toProd : SO(3) →* (Matrix (Fin 3) (Fin 3) ℝ) × (Matrix (Fin 3) (Fin 3) ℝ)ᵐᵒᵖ :=
   MonoidHom.comp (Units.embedProduct _) toGL
@@ -80,18 +85,24 @@ lemma toProd_injective : Function.Injective toProd := by
   exact Subtype.ext (congrArg Prod.fst h)
 
 lemma toProd_continuous : Continuous toProd :=
-  continuous_prodMk.mpr ⟨continuous_iff_le_induced.mpr fun _ a ↦ a,
+  continuous_prodMk.mpr ⟨
+    continuous_iff_le_induced.mpr fun _ a ↦ a,
     Continuous.comp' (MulOpposite.continuous_op)
-      (Continuous.matrix_transpose (continuous_iff_le_induced.mpr fun _ a ↦ a))⟩
+      (Continuous.matrix_transpose (continuous_iff_le_induced.mpr fun _ a ↦ a))
+  ⟩
 
 open Topology
 
-/-- The embedding of `SO(3)` into the monoid of matrices times the opposite of
-  the monoid of matrices. -/
+/--
+The embedding of `SO(3)` into the monoid of matrices times the opposite of
+the monoid of matrices.
+-/
 lemma toProd_embedding : IsEmbedding toProd where
   injective := toProd_injective
-  eq_induced := (isInducing_iff ⇑toProd).mp (IsInducing.of_comp toProd_continuous
-    continuous_fst ((isInducing_iff (Prod.fst ∘ ⇑toProd)).mpr rfl))
+  eq_induced :=
+    (isInducing_iff ⇑toProd).mp
+      (IsInducing.of_comp toProd_continuous continuous_fst
+        ((isInducing_iff (Prod.fst ∘ ⇑toProd)).mpr rfl))
 
 set_option backward.isDefEq.respectTransparency false in
 /-- The embedding of `SO(3)` into `GL (Fin 3) ℝ`. -/
@@ -107,8 +118,10 @@ lemma toGL_embedding : IsEmbedding toGL.toFun where
       aesop
     · exact ⟨(Units.embedProduct _) ⁻¹' U, And.intro (isOpen_induced hU1) hU2⟩
 
-/-- The instance of a topological group on `SO(3)`, defined through the embedding of `SO(3)`
-  into `GL(n)`. -/
+/--
+The instance of a topological group on `SO(3)`, defined through the embedding of `SO(3)`
+into `GL(n)`.
+-/
 instance : IsTopologicalGroup SO(3) :=
   IsInducing.isTopologicalGroup toGL toGL_embedding.toIsInducing
 
@@ -116,13 +129,14 @@ instance : IsTopologicalGroup SO(3) :=
 lemma det_minus_id (A : SO(3)) : det (A.1 - 1) = 0 := by
   have h1 : det (A.1 - 1) = - det (A.1 - 1) :=
     calc
-      det (A.1 - 1) = det (A.1 - A.1 * A.1ᵀ) := by simp [A.2.2]
+      det (A.1 - 1)
+        = det (A.1 - A.1 * A.1ᵀ) := by simp [A.2.2]
       _ = det A.1 * det (1 - A.1ᵀ) := by rw [← det_mul, mul_sub, mul_one]
       _ = det (1 - A.1ᵀ) := by simp [A.2.1]
       _ = det (1 - A.1ᵀ)ᵀ := by rw [det_transpose]
       _ = det (1 - A.1) := rfl
-      _ = det (- (A.1 - 1)) := by simp
-      _ = (- 1) ^ 3 * det (A.1 - 1) := by simp only [det_neg, Fintype.card_fin]
+      _ = det (-(A.1 - 1)) := by simp
+      _ = (-1) ^ 3 * det (A.1 - 1) := by simp only [det_neg, Fintype.card_fin]
       _ = - det (A.1 - 1) := by simp [pow_three]
   exact CharZero.eq_neg_self_iff.mp h1
 
@@ -131,8 +145,9 @@ lemma det_minus_id (A : SO(3)) : det (A.1 - 1) = 0 := by
 lemma det_id_minus (A : SO(3)) : det (1 - A.1) = 0 := by
   have h1 : det (1 - A.1) = - det (A.1 - 1) := by
     calc
-      det (1 - A.1) = det (- (A.1 - 1)) := by simp
-      _ = (- 1) ^ 3 * det (A.1 - 1) := by simp only [det_neg, Fintype.card_fin]
+      det (1 - A.1)
+        = det (-(A.1 - 1)) := by simp
+      _ = (-1) ^ 3 * det (A.1 - 1) := by simp only [det_neg, Fintype.card_fin]
       _ = - det (A.1 - 1) := by simp [pow_three]
   rw [h1, det_minus_id]
   exact neg_zero
@@ -149,7 +164,7 @@ open Module
 @[simps!]
 def toEnd (A : SO(3)) : End ℝ (EuclideanSpace ℝ (Fin 3)) :=
   Matrix.toLin (EuclideanSpace.basisFun (Fin 3) ℝ).toBasis
-  (EuclideanSpace.basisFun (Fin 3) ℝ).toBasis A.1
+    (EuclideanSpace.basisFun (Fin 3) ℝ).toBasis A.1
 
 /-- Every `SO(3)` matrix has an eigenvalue equal to `1`. -/
 lemma one_is_eigenvalue (A : SO(3)) : A.toEnd.HasEigenvalue 1 := by
@@ -157,12 +172,13 @@ lemma one_is_eigenvalue (A : SO(3)) : A.toEnd.HasEigenvalue 1 := by
   erw [AlgEquiv.spectrum_eq (Matrix.toLinAlgEquiv (EuclideanSpace.basisFun (Fin 3) ℝ).toBasis) A.1]
   exact one_in_spectrum A
 
-/-- For every element of `SO(3)` there exists a vector which remains unchanged under the
-  action of that `SO(3)` element. -/
-lemma exists_stationary_vec (A : SO(3)) :
-    ∃ (v : EuclideanSpace ℝ (Fin 3)),
-    Orthonormal ℝ (({0} : Set (Fin 3)).domRestrict (fun _ => v))
-    ∧ A.toEnd v = v := by
+/--
+For every element of `SO(3)` there exists a vector which remains unchanged under the
+action of that `SO(3)` element.
+-/
+lemma exists_stationary_vec (A : SO(3))
+    : ∃ (v : EuclideanSpace ℝ (Fin 3)),
+      Orthonormal ℝ (({0} : Set (Fin 3)).domRestrict (fun _ => v)) ∧ A.toEnd v = v := by
   obtain ⟨v, hv⟩ := End.HasEigenvalue.exists_hasEigenvector $ one_is_eigenvalue A
   have hvn : ‖v‖ ≠ 0 := norm_ne_zero_iff.mpr hv.2
   use (1/‖v‖) • v
@@ -174,14 +190,16 @@ lemma exists_stationary_vec (A : SO(3)) :
     subst hveq
     show inner ℝ (‖v‖⁻¹ • v) (‖v‖⁻¹ • v) = if v1 = v1 then 1 else 0
     rw [inner_smul_right, inner_smul_left, real_inner_self_eq_norm_sq v]
-    simp only [map_inv₀, conj_trivial, Fin.isValue, ↓reduceIte]
+    simp only [map_inv₀, conj_trivial, Fin.isValue, ↓ reduceIte]
     field_simp
   · simp [End.mem_eigenspace_iff.mp hv.1]
 
-/-- For every element of `SO(3)` there exists a basis indexed by `Fin 3` under which the first
-  element remains invariant. -/
-lemma exists_basis_preserved (A : SO(3)) :
-    ∃ (b : OrthonormalBasis (Fin 3) ℝ (EuclideanSpace ℝ (Fin 3))), A.toEnd (b 0) = b 0 := by
+/--
+For every element of `SO(3)` there exists a basis indexed by `Fin 3` under which the first
+element remains invariant.
+-/
+lemma exists_basis_preserved (A : SO(3))
+    : ∃ (b : OrthonormalBasis (Fin 3) ℝ (EuclideanSpace ℝ (Fin 3))), A.toEnd (b 0) = b 0 := by
   obtain ⟨v, hv⟩ := exists_stationary_vec A
   obtain ⟨b, hb⟩ := Orthonormal.exists_orthonormalBasis_extension_of_card_eq (by aesop) hv.1
   aesop
@@ -189,13 +207,16 @@ lemma exists_basis_preserved (A : SO(3)) :
 end action
 
 /-- A rotation fixing the third axis is a rotation in the first two coordinates. -/
-lemma eq_of_apply_two (A : SO(3)) (hA : ∀ i, A.1 i 2 = if i = 2 then 1 else 0) :
-    A.1 = !![A.1 0 0, A.1 0 1, 0; -A.1 0 1, A.1 0 0, 0; 0, 0, 1] := by
+lemma eq_of_apply_two (A : SO(3)) (hA : ∀ i, A.1 i 2 = if i = 2 then 1 else 0)
+    : A.1 = !![A.1 0 0, A.1 0 1, 0; -A.1 0 1, A.1 0 0, 0; 0, 0, 1] := by
   obtain ⟨hd, h1⟩ := A.2
   have h2 : A.1ᵀ * A.1 = 1 := mul_eq_one_comm.mpr h1
   have e : ∀ i j, (A.1ᵀ * A.1) i j = if i = j then 1 else 0 := fun i j => by
     rw [h2, Matrix.one_apply]
-  have h02 := e 0 2; have h12 := e 1 2; have h00 := e 0 0; have h11 := e 1 1
+  have h02 := e 0 2
+  have h12 := e 1 2
+  have h00 := e 0 0
+  have h11 := e 1 1
   have h01 := e 0 1
   simp only [Matrix.mul_apply, transpose_apply, Fin.sum_univ_three, hA] at h02 h12 h00 h11 h01
   rw [det_fin_three] at hd
@@ -204,7 +225,7 @@ lemma eq_of_apply_two (A : SO(3)) (hA : ∀ i, A.1 i 2 = if i = 2 then 1 else 0)
   have h3 : (A.1 1 1 - A.1 0 0) ^ 2 + (A.1 1 0 + A.1 0 1) ^ 2 = 0 := by
     simp only [h02, h12] at h00 h11 h01 hd; nlinarith
   have h4 : A.1 1 1 = A.1 0 0 := by nlinarith
-  have h5 : A.1 1 0 = -A.1 0 1 := by nlinarith
+  have h5 : A.1 1 0 = - A.1 0 1 := by nlinarith
   ext i j
   fin_cases i <;> fin_cases j <;> simp [hA, h02, h12, h4, h5]
 

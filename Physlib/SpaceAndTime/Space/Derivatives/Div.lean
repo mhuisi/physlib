@@ -55,8 +55,7 @@ variable {W} [NormedAddCommGroup W] [NormedSpace ℝ W]
 -/
 
 /-- The vector calculus operator `div`. -/
-noncomputable def div {d} (f : Space d → EuclideanSpace ℝ (Fin d)) :
-    Space d → ℝ := fun x =>
+noncomputable def div {d} (f : Space d → EuclideanSpace ℝ (Fin d)) : Space d → ℝ := fun x =>
   -- get i-th component of `f`
   -- derivative of i-th component in i-th coordinate
   -- ∂fᵢ/∂xᵢ
@@ -65,9 +64,9 @@ noncomputable def div {d} (f : Space d → EuclideanSpace ℝ (Fin d)) :
 @[inherit_doc div]
 macro (name := divNotation) "∇" "⬝" f:term:100 : term => `(div $f)
 
-lemma div_eq_sum_fderiv {d} (f : Space d → EuclideanSpace ℝ (Fin d))
-    (hf : Differentiable ℝ f) (x : Space d) :
-    (∇ ⬝ f) x = ∑ i, fderiv ℝ f x (basis i) i := by
+lemma div_eq_sum_fderiv
+    {d} (f : Space d → EuclideanSpace ℝ (Fin d)) (hf : Differentiable ℝ f) (x : Space d)
+    : (∇ ⬝ f) x = ∑ i, fderiv ℝ f x (basis i) i := by
   simp [div, Space.deriv]
   congr
   funext i
@@ -108,9 +107,10 @@ lemma div_const : ∇ ⬝ (fun _ : Space d => v) = 0 := by
 
 -/
 
-lemma div_add (f1 f2 : Space d → EuclideanSpace ℝ (Fin d))
-    (hf1 : Differentiable ℝ f1) (hf2 : Differentiable ℝ f2) :
-    ∇ ⬝ (f1 + f2) = ∇ ⬝ f1 + ∇ ⬝ f2 := by
+lemma div_add
+    (f1 f2 : Space d → EuclideanSpace ℝ (Fin d))
+    (hf1 : Differentiable ℝ f1) (hf2 : Differentiable ℝ f2)
+    : ∇ ⬝ (f1 + f2) = ∇ ⬝ f1 + ∇ ⬝ f2 := by
   unfold div
   simp only [Pi.add_apply]
   funext x
@@ -130,9 +130,8 @@ lemma div_add (f1 f2 : Space d → EuclideanSpace ℝ (Fin d))
 
 -/
 
-lemma div_smul (f : Space d → EuclideanSpace ℝ (Fin d)) (k : ℝ)
-    (hf : Differentiable ℝ f) :
-    ∇ ⬝ (k • f) = k • ∇ ⬝ f := by
+lemma div_smul (f : Space d → EuclideanSpace ℝ (Fin d)) (k : ℝ) (hf : Differentiable ℝ f)
+    : ∇ ⬝ (k • f) = k • ∇ ⬝ f := by
   unfold div
   simp only [Pi.smul_apply]
   funext x
@@ -151,10 +150,10 @@ lemma div_smul (f : Space d → EuclideanSpace ℝ (Fin d)) (k : ℝ)
 
 -/
 
-lemma div_linear_map (f : W → Space 3 → EuclideanSpace ℝ (Fin 3))
-    (hf : ∀ w, Differentiable ℝ (f w))
-    (hf' : IsLinearMap ℝ f) :
-    IsLinearMap ℝ (fun w => ∇ ⬝ (f w)) := by
+lemma div_linear_map
+    (f : W → Space 3 → EuclideanSpace ℝ (Fin 3))
+    (hf : ∀ w, Differentiable ℝ (f w)) (hf' : IsLinearMap ℝ f)
+    : IsLinearMap ℝ (fun w => ∇ ⬝ (f w)) := by
   constructor
   · intro w w'
     rw [hf'.map_add]
@@ -173,10 +172,12 @@ lemma div_linear_map (f : W → Space 3 → EuclideanSpace ℝ (Fin 3))
 
 open MeasureTheory SchwartzMap InnerProductSpace Distribution
 
-/-- The divergence of a distribution `(Space d) →d[ℝ] (EuclideanSpace ℝ (Fin d))` as a distribution
-  `(Space d) →d[ℝ] ℝ`. -/
-noncomputable def distDiv {d} :
-    ((Space d) →d[ℝ] (EuclideanSpace ℝ (Fin d))) →ₗ[ℝ] (Space d) →d[ℝ] ℝ where
+/--
+The divergence of a distribution `(Space d) →d[ℝ] (EuclideanSpace ℝ (Fin d))` as a distribution
+`(Space d) →d[ℝ] ℝ`.
+-/
+noncomputable def distDiv {d}
+    : ((Space d) →d[ℝ] (EuclideanSpace ℝ (Fin d))) →ₗ[ℝ] (Space d) →d[ℝ] ℝ where
   toFun f :=
     let trace : (Space d →L[ℝ] (EuclideanSpace ℝ (Fin d))) →L[ℝ] ℝ := {
       toFun v := ∑ i, ⟪v (basis i), EuclideanSpace.single i 1⟫_ℝ
@@ -188,7 +189,8 @@ noncomputable def distDiv {d} :
         simp only [FunLike.coe_smul, Pi.smul_apply, EuclideanSpace.inner_single_right,
           PiLp.smul_apply, smul_eq_mul, conj_trivial, one_mul, RingHom.id_apply]
         rw [Finset.mul_sum]
-      cont := by fun_prop}
+      cont := by fun_prop
+    }
     trace.comp (Distribution.fderivD ℝ f)
   map_add' f1 f2 := by
     ext x
@@ -206,14 +208,14 @@ macro (name := distDivNotation) "∇ᵈ" "⬝" f:term:100 : term => `(distDiv $f
 
 -/
 
-lemma distDiv_apply_eq_sum_fderivD {d}
-    (f : (Space d) →d[ℝ] EuclideanSpace ℝ (Fin d)) (η : 𝓢(Space d, ℝ)) :
-    (∇ᵈ ⬝ f) η = ∑ i, fderivD ℝ f η (basis i) i := by
+lemma distDiv_apply_eq_sum_fderivD
+    {d} (f : (Space d) →d[ℝ] EuclideanSpace ℝ (Fin d)) (η : 𝓢(Space d, ℝ))
+    : (∇ᵈ ⬝ f) η = ∑ i, fderivD ℝ f η (basis i) i := by
   simp [distDiv, EuclideanSpace.inner_single_right]
 
-lemma distDiv_apply_eq_sum_distDeriv {d}
-    (f : (Space d) →d[ℝ] EuclideanSpace ℝ (Fin d)) (η : 𝓢(Space d, ℝ)) :
-    (∇ᵈ ⬝ f) η = ∑ i, ∂ᵈ[i] f η i := by
+lemma distDiv_apply_eq_sum_distDeriv
+    {d} (f : (Space d) →d[ℝ] EuclideanSpace ℝ (Fin d)) (η : 𝓢(Space d, ℝ))
+    : (∇ᵈ ⬝ f) η = ∑ i, ∂ᵈ[i] f η i := by
   rw [distDiv_apply_eq_sum_fderivD]
   rfl
 
@@ -224,10 +226,9 @@ lemma distDiv_apply_eq_sum_distDeriv {d}
 -/
 
 /-- The divergence of a distribution from a bounded function. -/
-lemma distDiv_ofFunction {d : ℕ} {f : Space d → EuclideanSpace ℝ (Fin d)}
-    {hf : IsDistBounded f} (η : 𝓢(Space d, ℝ)) :
-    (∇ᵈ ⬝ (distOfFunction f hf)) η =
-    - ∫ x : Space d, ⟪f x, ∇ η x⟫_ℝ := by
+lemma distDiv_ofFunction
+    {d : ℕ} {f : Space d → EuclideanSpace ℝ (Fin d)} {hf : IsDistBounded f} (η : 𝓢(Space d, ℝ))
+    : (∇ᵈ ⬝ (distOfFunction f hf)) η = - ∫ x : Space d, ⟪f x, ∇ η x⟫_ℝ := by
   rw [distDiv_apply_eq_sum_fderivD]
   conv_rhs =>
     enter [1, 2, x]
@@ -236,10 +237,10 @@ lemma distDiv_ofFunction {d : ℕ} {f : Space d → EuclideanSpace ℝ (Fin d)}
     enter [2, i]
     rw [fderivD_apply, distOfFunction_apply]
   /- The following lemma could probably be moved out of this result. -/
-  have integrable_lemma (i j : Fin d) :
-      Integrable (fun x =>
-        (((SchwartzMap.evalCLM ℝ (Space d) ℝ (basis i))
-        ((fderivCLM ℝ (Space d) ℝ) η)) x • f x) j) volume := by
+  have integrable_lemma (i j : Fin d) : Integrable
+      (fun x =>
+        (((SchwartzMap.evalCLM ℝ (Space d) ℝ (basis i)) ((fderivCLM ℝ (Space d) ℝ) η)) x • f x) j)
+      volume := by
     simp only [PiLp.smul_apply]
     exact (hf.pi_comp j).integrable_space _
   rw [MeasureTheory.integral_finsetSum]

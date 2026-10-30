@@ -20,17 +20,14 @@ variable {A B : HermitianMat d 𝕜} {x q r : ℝ}
 
 noncomputable section
 
-/--
-The Schatten p-norm of a matrix A is (Tr[(A*A)^(p/2)])^(1/p).
--/
+/-- The Schatten p-norm of a matrix A is (Tr[(A*A)^(p/2)])^(1/p). -/
 noncomputable def schattenNorm (A : Matrix d d ℂ) (p : ℝ) : ℝ :=
-  RCLike.re ((Matrix.isHermitian_mul_conjTranspose_self A.conjTranspose).cfc (· ^ (p/2))).trace ^ (1/p)
+  RCLike.re ((Matrix.isHermitian_mul_conjTranspose_self A.conjTranspose).cfc (· ^ (p / 2))).trace
+    ^ (1 / p)
 
-/-
-For a positive Hermitian matrix A, ||A||_p = (Tr(A^p))^(1/p).
--/
-lemma schattenNorm_hermitian_pow {A : HermitianMat d ℂ} (hA : 0 ≤ A) {p : ℝ} (hp : 0 < p) :
-    schattenNorm A.mat p = (A ^ p).trace ^ (1/p) := by
+/- For a positive Hermitian matrix A, ||A||_p = (Tr(A^p))^(1/p). -/
+lemma schattenNorm_hermitian_pow {A : HermitianMat d ℂ} (hA : 0 ≤ A) {p : ℝ} (hp : 0 < p)
+    : schattenNorm A.mat p = (A ^ p).trace ^ (1 / p) := by
   convert! congr_arg (· ^ (1 / p)) _ using 1
   convert! congr_arg _ (A.cfc_sq_rpow_eq_cfc_rpow hA p hp.le) using 1
   unfold HermitianMat.trace
@@ -42,34 +39,52 @@ lemma schattenNorm_hermitian_pow {A : HermitianMat d ℂ} (hA : 0 ≤ A) {p : �
   rw [sq]
   exact congrFun (congrFun (Matrix.IsHermitian.cfc_eq _ _) _) _
 
-lemma schattenNorm_nonneg (A : Matrix d d ℂ) (p : ℝ) :
-    0 ≤ schattenNorm A p := by
-  by_cases hp : p = 0 <;> simp [ *, schattenNorm ];
-  by_cases h₁ : 0 ≤ RCLike.re ( Matrix.trace ( Matrix.IsHermitian.cfc ( Matrix.isHermitian_mul_conjTranspose_self A.conjTranspose ) fun x => x ^ ( p / 2 ) ) ) <;> simp_all [ Real.rpow_nonneg ];
-  contrapose! h₁; simp_all [Matrix.trace ] ; ring_nf; norm_num [ Real.exp_nonneg, Real.log_nonneg ] ; (
-  refine' Finset.sum_nonneg fun i _ => _ ; norm_num [ Matrix.IsHermitian.cfc ] ; ring_nf ; norm_num [ Real.exp_nonneg, Real.log_nonneg ] ; (
-  simp [ Matrix.mul_apply, Matrix.diagonal ] ; ring_nf ; norm_num [ Real.exp_nonneg, Real.log_nonneg ] ; (
-  --TODO: If we import Order, the whole line is just `positivity`.
-  exact Finset.sum_nonneg fun _ _ => add_nonneg ( mul_nonneg ( sq_nonneg _ ) ( Real.rpow_nonneg (
-    (Matrix.eigenvalues_conjTranspose_mul_self_nonneg A _) ) _ ) ) ( mul_nonneg ( Real.rpow_nonneg (
-    (Matrix.eigenvalues_conjTranspose_mul_self_nonneg A _) ) _ ) ( sq_nonneg _ ) ))));
+lemma schattenNorm_nonneg (A : Matrix d d ℂ) (p : ℝ) : 0 ≤ schattenNorm A p := by
+  by_cases hp : p = 0 <;> simp [*, schattenNorm]
+  by_cases h₁
+      : 0
+        ≤ RCLike.re (Matrix.trace (Matrix.IsHermitian.cfc
+          (Matrix.isHermitian_mul_conjTranspose_self A.conjTranspose) fun x => x ^ (p / 2)))
+    <;> simp_all [Real.rpow_nonneg]
+  contrapose! h₁
+  simp_all [Matrix.trace]
+  ring_nf
+  norm_num [ Real.exp_nonneg, Real.log_nonneg ]
+  (
+    refine' Finset.sum_nonneg fun i _ => _
+    norm_num [ Matrix.IsHermitian.cfc ]
+    ring_nf
+    norm_num [ Real.exp_nonneg, Real.log_nonneg ]
+    (
+      simp [Matrix.mul_apply, Matrix.diagonal]
+      ring_nf
+      norm_num [ Real.exp_nonneg, Real.log_nonneg ]
+      (
+        -- TODO: If we import Order, the whole line is just `positivity`.
+        exact Finset.sum_nonneg fun _ _ =>
+          add_nonneg
+            (mul_nonneg (sq_nonneg _)
+              (Real.rpow_nonneg ((Matrix.eigenvalues_conjTranspose_mul_self_nonneg A _)) _))
+            (mul_nonneg
+              (Real.rpow_nonneg ((Matrix.eigenvalues_conjTranspose_mul_self_nonneg A _)) _)
+              (sq_nonneg _))
+      )
+    )
+  )
 
-lemma schattenNorm_pow_eq
-  (A : HermitianMat d ℂ) (hA : 0 ≤ A) (p k : ℝ) (hp : 0 < p) (hk : 0 < k) :
-    schattenNorm (A ^ k).mat p = (schattenNorm A.mat (k * p)) ^ k := by
-  rw [ schattenNorm_hermitian_pow, schattenNorm_hermitian_pow ] <;> try positivity;
-  · rw [ ← Real.rpow_mul ] <;> ring_nf <;> norm_num [ hp.ne', hk.ne' ];
-    · rw [ mul_comm, ← HermitianMat.rpow_mul ];
-      exact hA;
+lemma schattenNorm_pow_eq (A : HermitianMat d ℂ) (hA : 0 ≤ A) (p k : ℝ) (hp : 0 < p) (hk : 0 < k)
+    : schattenNorm (A ^ k).mat p = (schattenNorm A.mat (k * p)) ^ k := by
+  rw [schattenNorm_hermitian_pow, schattenNorm_hermitian_pow] <;> try positivity
+  · rw [← Real.rpow_mul] <;> ring_nf <;> norm_num [ hp.ne', hk.ne' ]
+    · rw [mul_comm, ← HermitianMat.rpow_mul]
+      exact hA
     · -- Since $A$ is positive, $A^{k*p}$ is also positive, and the trace of a positive matrix is non-negative.
-      have h_pos : 0 ≤ A ^ (k * p) := by
-        exact HermitianMat.rpow_nonneg hA;
-      exact HermitianMat.trace_nonneg h_pos;
+      have h_pos : 0 ≤ A ^ (k * p) := by exact HermitianMat.rpow_nonneg hA
+      exact HermitianMat.trace_nonneg h_pos
   · exact HermitianMat.rpow_nonneg hA
 
-lemma trace_eq_schattenNorm_rpow
-    (A : HermitianMat d ℂ) (hA : 0 ≤ A) (r : ℝ) (hr : 0 < r) :
-    (A ^ r).trace = (schattenNorm A.mat r) ^ r := by
+lemma trace_eq_schattenNorm_rpow (A : HermitianMat d ℂ) (hA : 0 ≤ A) (r : ℝ) (hr : 0 < r)
+    : (A ^ r).trace = (schattenNorm A.mat r) ^ r := by
   rw [schattenNorm_hermitian_pow hA hr, ← Real.rpow_mul] <;> norm_num [hr.ne']
   apply HermitianMat.trace_nonneg
   exact HermitianMat.rpow_nonneg hA
@@ -77,49 +92,63 @@ lemma trace_eq_schattenNorm_rpow
 /-! ## Relating schattenNorm to singular values -/
 
 /- The trace of cfc(A†A, t ↦ t^{p/2}) expressed as a sum of eigenvalues. -/
-lemma schattenNorm_trace_as_eigenvalue_sum (A : Matrix d d ℂ) (p : ℝ) :
-    RCLike.re ((Matrix.isHermitian_mul_conjTranspose_self A.conjTranspose).cfc (· ^ (p/2))).trace =
-    ∑ i : d, ((Matrix.isHermitian_mul_conjTranspose_self A.conjTranspose).eigenvalues i) ^ (p/2) := by
-  rw [ Matrix.IsHermitian.cfc ];
-  simp [ Matrix.trace_mul_comm, Matrix.mul_assoc ]
+lemma schattenNorm_trace_as_eigenvalue_sum (A : Matrix d d ℂ) (p : ℝ)
+    : RCLike.re ((Matrix.isHermitian_mul_conjTranspose_self A.conjTranspose).cfc
+        (· ^ (p / 2))).trace
+      = ∑ i : d, ((Matrix.isHermitian_mul_conjTranspose_self A.conjTranspose).eigenvalues i) ^ (p/2) :=
+  by
+    rw [Matrix.IsHermitian.cfc]
+    simp [Matrix.trace_mul_comm, Matrix.mul_assoc]
 
 /-
 The Schatten p-norm raised to the p-th power equals the sum of singular values
     raised to the p-th power: `‖A‖_p^p = ∑ σᵢ(A)^p`.
 -/
-lemma schattenNorm_rpow_eq_sum_singularValues (A : Matrix d d ℂ) {p : ℝ} (hp : 0 < p) :
-    schattenNorm A p ^ p = ∑ i : d, singularValues A i ^ p := by
-  unfold schattenNorm;
-  rw [ ← Real.rpow_mul ( _ ), one_div_mul_cancel hp.ne', Real.rpow_one ];
+lemma schattenNorm_rpow_eq_sum_singularValues (A : Matrix d d ℂ) {p : ℝ} (hp : 0 < p)
+    : schattenNorm A p ^ p = ∑ i : d, singularValues A i ^ p := by
+  unfold schattenNorm
+  rw [← Real.rpow_mul (_), one_div_mul_cancel hp.ne', Real.rpow_one]
   · convert schattenNorm_trace_as_eigenvalue_sum A p using 1
-    refine' Finset.sum_congr rfl fun i _ => _;
-    unfold singularValues; rw [ Real.sqrt_eq_rpow, ← Real.rpow_mul ( _ ) ]
+    refine' Finset.sum_congr rfl fun i _ => _
+    unfold singularValues
+    rw [Real.sqrt_eq_rpow, ← Real.rpow_mul (_)]
     ring_nf
-    simp +zetaDelta at *;
-    exact Matrix.eigenvalues_conjTranspose_mul_self_nonneg A i;
-  · have h_nonneg : ∀ i : d, 0 ≤ ((Matrix.isHermitian_mul_conjTranspose_self A.conjTranspose).eigenvalues i) ^ (p / 2) := by
-      exact fun i => Real.rpow_nonneg ( by have := Matrix.eigenvalues_conjTranspose_mul_self_nonneg A; aesop ) _;
-    convert! Finset.sum_nonneg fun i _ => h_nonneg i using 1;
+    simp +zetaDelta at *
+    exact Matrix.eigenvalues_conjTranspose_mul_self_nonneg A i
+  · have h_nonneg
+        : ∀ i : d,
+          0 ≤ ((Matrix.isHermitian_mul_conjTranspose_self A.conjTranspose).eigenvalues i)
+            ^ (p / 2) := by
+      exact fun i =>
+        Real.rpow_nonneg (by have := Matrix.eigenvalues_conjTranspose_mul_self_nonneg A; aesop) _
+    convert! Finset.sum_nonneg fun i _ => h_nonneg i using 1
     convert schattenNorm_trace_as_eigenvalue_sum A p using 1
 
-/- The Schatten p-norm equals the ℓ^p quasi-norm of the singular values:
-    `‖A‖_p = (∑ σᵢ(A)^p)^{1/p}`. -/
-lemma schattenNorm_eq_sum_singularValues_rpow (A : Matrix d d ℂ) {p : ℝ} (hp : 0 < p) :
-    schattenNorm A p = (∑ i : d, singularValues A i ^ p) ^ (1/p) := by
-  rw [ ←schattenNorm_rpow_eq_sum_singularValues A hp ];
-  rw [ ← Real.rpow_mul ( by exact Real.rpow_nonneg ( by
-    simp [ Matrix.trace ];
-    refine' Finset.sum_nonneg fun i _ => _;
-    rw [ Matrix.IsHermitian.cfc ];
-    simp [ Matrix.mul_apply, Matrix.diagonal ];
-    field_simp;
-    exact Finset.sum_nonneg fun _ _ => mul_nonneg ( Real.rpow_nonneg ( by
-      exact Matrix.eigenvalues_conjTranspose_mul_self_nonneg A _ ) _ ) ( add_nonneg ( sq_nonneg _ ) ( sq_nonneg _ ) ) ) _ ), mul_one_div_cancel hp.ne', Real.rpow_one ]
+/-
+The Schatten p-norm equals the ℓ^p quasi-norm of the singular values:
+ `‖A‖_p = (∑ σᵢ(A)^p)^{1/p}`.
+-/
+lemma schattenNorm_eq_sum_singularValues_rpow (A : Matrix d d ℂ) {p : ℝ} (hp : 0 < p)
+    : schattenNorm A p = (∑ i : d, singularValues A i ^ p) ^ (1 / p) := by
+  rw [← schattenNorm_rpow_eq_sum_singularValues A hp]
+  rw [← Real.rpow_mul (by
+      exact Real.rpow_nonneg
+        (by
+          simp [Matrix.trace]
+          refine' Finset.sum_nonneg fun i _ => _
+          rw [Matrix.IsHermitian.cfc]
+          simp [Matrix.mul_apply, Matrix.diagonal]
+          field_simp
+          exact Finset.sum_nonneg fun _ _ =>
+            mul_nonneg
+              (Real.rpow_nonneg (by exact Matrix.eigenvalues_conjTranspose_mul_self_nonneg A _) _)
+              (add_nonneg (sq_nonneg _) (sq_nonneg _)))
+        _),
+    mul_one_div_cancel hp.ne', Real.rpow_one]
 
 /-- `‖A‖_p^p` equals the same sum over sorted singular values. -/
-lemma schattenNorm_rpow_eq_sum_sorted (A : Matrix d d ℂ) {p : ℝ} (hp : 0 < p) :
-    schattenNorm A p ^ p =
-    ∑ i : Fin (Fintype.card d), singularValuesSorted A i ^ p := by
+lemma schattenNorm_rpow_eq_sum_sorted (A : Matrix d d ℂ) {p : ℝ} (hp : 0 < p)
+    : schattenNorm A p ^ p = ∑ i : Fin (Fintype.card d), singularValuesSorted A i ^ p := by
   rw [schattenNorm_rpow_eq_sum_singularValues A hp]
   exact sum_singularValues_rpow_eq_sum_sorted A p
 
@@ -165,48 +194,57 @@ lemma HermitianMat.trace_young
     have := Matrix.unitary_col_sum_norm_sq ( A.H.eigenvectorUnitary.val.conjTranspose * B.H.eigenvectorUnitary.val ) ?_ i <;> simp_all [ Matrix.mul_assoc, Matrix.conjTranspose_mul ];
     simp [ ← Matrix.mul_assoc, Matrix.IsHermitian.eigenvectorUnitary ]
 
-/-- For PSD `A` and Hermitian `B`, the product
-`C = A^{1/2} * B` satisfies `C^* C = (A.conj B.mat).mat = B * A * B`. -/
-lemma conjTranspose_half_mul_eq_conj
-    {A B : HermitianMat d ℂ} (hA : 0 ≤ A) :
-    ((A ^ (1/2 : ℝ)).mat * B.mat).conjTranspose * ((A ^ (1/2 : ℝ)).mat * B.mat)
-    = (A.conj B.mat).mat := by
-  have := HermitianMat.pow_half_mul hA; simp_all [ ← mul_assoc ] ;
+/--
+For PSD `A` and Hermitian `B`, the product
+`C = A^{1/2} * B` satisfies `C^* C = (A.conj B.mat).mat = B * A * B`.
+-/
+lemma conjTranspose_half_mul_eq_conj {A B : HermitianMat d ℂ} (hA : 0 ≤ A)
+    : ((A ^ (1 / 2 : ℝ)).mat * B.mat).conjTranspose * ((A ^ (1 / 2 : ℝ)).mat * B.mat)
+      = (A.conj B.mat).mat := by
+  have := HermitianMat.pow_half_mul hA
+  simp_all [← mul_assoc]
   simp only [mul_assoc, this]
 
 lemma schattenNorm_half_mul_rpow_eq_trace_conj
-    {A B : HermitianMat d ℂ} (hA : 0 ≤ A)
-    {α : ℝ} (hα : 0 < α) :
-    (schattenNorm ((A ^ (1/2 : ℝ)).mat * B.mat) (2 * α)) ^ (2 * α) =
-    ((A.conj B.mat) ^ α).trace := by
-  have h_conj : ((A ^ (1 / 2 : ℝ)).mat * B.mat).conjTranspose * ((A ^ (1 / 2 : ℝ)).mat * B.mat) = (A.conj B.mat).mat := by
-    exact conjTranspose_half_mul_eq_conj hA;
-  unfold schattenNorm;
-  rw [ ← Real.rpow_mul ] <;> norm_num [ hα.ne' ];
-  · ring_nf; norm_num [ hα.ne' ];
-    rw [ ← Matrix.IsHermitian.cfc_eq ];
-    rw [ Matrix.conjTranspose_conjTranspose ];
-    exact congrArg Complex.re (congrArg Matrix.trace (congrArg (cfc fun x => x ^ α) h_conj));
-  · have h_eigenvalues_nonneg : ∀ i, 0 ≤ (Matrix.isHermitian_mul_conjTranspose_self ((A ^ (1 / 2 : ℝ)).mat * B.mat).conjTranspose).eigenvalues i := by
+    {A B : HermitianMat d ℂ} (hA : 0 ≤ A) {α : ℝ} (hα : 0 < α)
+    : (schattenNorm ((A ^ (1 / 2 : ℝ)).mat * B.mat) (2 * α)) ^ (2 * α)
+      = ((A.conj B.mat) ^ α).trace := by
+  have h_conj
+      : ((A ^ (1 / 2 : ℝ)).mat * B.mat).conjTranspose * ((A ^ (1 / 2 : ℝ)).mat * B.mat)
+        = (A.conj B.mat).mat := by
+    exact conjTranspose_half_mul_eq_conj hA
+  unfold schattenNorm
+  rw [← Real.rpow_mul] <;> norm_num [ hα.ne' ]
+  · ring_nf
+    norm_num [ hα.ne' ]
+    rw [← Matrix.IsHermitian.cfc_eq]
+    rw [Matrix.conjTranspose_conjTranspose]
+    exact congrArg Complex.re (congrArg Matrix.trace (congrArg (cfc fun x => x ^ α) h_conj))
+  · have h_eigenvalues_nonneg
+        : ∀ i,
+          0 ≤ (Matrix.isHermitian_mul_conjTranspose_self
+              ((A ^ (1 / 2 : ℝ)).mat * B.mat).conjTranspose).eigenvalues
+            i := by
       intro i
       simpa only [one_div, HermitianMat.conjTranspose_mat, HermitianMat.conj_apply_mat,
-        Matrix.conjTranspose_mul] using
-          ((A ^ (1 / 2 : ℝ)).mat * B.mat).eigenvalues_conjTranspose_mul_self_nonneg i
+          Matrix.conjTranspose_mul]
+        using ((A ^ (1 / 2 : ℝ)).mat * B.mat).eigenvalues_conjTranspose_mul_self_nonneg i
     simp only [Matrix.trace, Matrix.IsHermitian.cfc, one_div, Matrix.conjTranspose_mul,
       HermitianMat.conjTranspose_mat, Complex.coe_algebraMap, Unitary.conjStarAlgAut_apply,
       Matrix.diag_apply, Complex.re_sum, ge_iff_le]
     simp only [one_div, Matrix.conjTranspose_mul, HermitianMat.conjTranspose_mat,
-      HermitianMat.conj_apply_mat, HermitianMat.conjTranspose_mat] at h_eigenvalues_nonneg h_conj
+        HermitianMat.conj_apply_mat, HermitianMat.conjTranspose_mat]
+      at h_eigenvalues_nonneg h_conj
     simp_all only
     simp only [Matrix.diagonal, Function.comp_apply, one_div, Matrix.conjTranspose_mul,
       HermitianMat.conjTranspose_mat, Matrix.mul_apply, Matrix.IsHermitian.eigenvectorUnitary_apply,
-      Matrix.of_apply, mul_ite, mul_zero, Finset.sum_ite_eq', Finset.mem_univ, ↓reduceIte,
+      Matrix.of_apply, mul_ite, mul_zero, Finset.sum_ite_eq', Finset.mem_univ, ↓ reduceIte,
       Matrix.star_apply, RCLike.star_def, Complex.re_sum, Complex.mul_re, Complex.ofReal_re,
       Complex.ofReal_im, sub_zero, Complex.conj_re, Complex.mul_im, zero_add, Complex.conj_im,
       mul_neg, sub_neg_eq_add, h_conj]
-    refine' Finset.sum_nonneg fun i _ => Finset.sum_nonneg fun j _ => _;
+    refine' Finset.sum_nonneg fun i _ => Finset.sum_nonneg fun j _ => _
     field_simp
-    exact mul_nonneg ( Real.rpow_nonneg ( h_eigenvalues_nonneg j ) _ ) (by positivity)
+    exact mul_nonneg (Real.rpow_nonneg (h_eigenvalues_nonneg j) _) (by positivity)
 
 /-!
 ## Schatten–Hölder inequality
@@ -231,17 +269,16 @@ The proof proceeds in three steps:
    `∑ σ↓ᵢ(A)^r · σ↓ᵢ(B)^r ≤ (∑ σᵢ(A)^p)^{r/p} · (∑ σᵢ(B)^q)^{r/q}`.
 4. Take `1/r`-th powers and combine.
 -/
-lemma schattenNorm_mul_le (A B : Matrix d d ℂ) {r p q : ℝ}
-    (hr : 0 < r) (hp : 0 < p) (hq : 0 < q) (hpqr : 1 / r = 1 / p + 1 / q) :
-    schattenNorm (A * B) r ≤ schattenNorm A p * schattenNorm B q := by
+lemma schattenNorm_mul_le
+    (A B : Matrix d d ℂ)
+    {r p q : ℝ} (hr : 0 < r) (hp : 0 < p) (hq : 0 < q) (hpqr : 1 / r = 1 / p + 1 / q)
+    : schattenNorm (A * B) r ≤ schattenNorm A p * schattenNorm B q := by
   -- It suffices to show the inequality for r-th powers, since x ↦ x^{1/r} is monotone.
   rw [schattenNorm_eq_sum_singularValues_rpow (A * B) hr,
-      schattenNorm_eq_sum_singularValues_rpow A hp,
-      schattenNorm_eq_sum_singularValues_rpow B hq]
+    schattenNorm_eq_sum_singularValues_rpow A hp, schattenNorm_eq_sum_singularValues_rpow B hq]
   -- Rewrite sums over d to sums over Fin (Fintype.card d) via sorted singular values
-  rw [sum_singularValues_rpow_eq_sum_sorted (A * B) r,
-      sum_singularValues_rpow_eq_sum_sorted A p,
-      sum_singularValues_rpow_eq_sum_sorted B q]
+  rw [sum_singularValues_rpow_eq_sum_sorted (A * B) r, sum_singularValues_rpow_eq_sum_sorted A p,
+    sum_singularValues_rpow_eq_sum_sorted B q]
   -- Now we need:
   -- (∑ σ↓ᵢ(AB)^r)^{1/r} ≤ (∑ σ↓ᵢ(A)^p)^{1/p} · (∑ σ↓ᵢ(B)^q)^{1/q}
   -- Step 1: From sum_rpow_singularValues_mul_le, we have
@@ -253,31 +290,34 @@ lemma schattenNorm_mul_le (A B : Matrix d d ℂ) {r p q : ℝ}
   -- Step 3: Combine and take 1/r-th power
   -- Need: (∑ σ↓ᵢ(AB)^r)^{1/r} ≤ ((∑ σ↓ᵢ(A)^p)^{r/p} · (∑ σ↓ᵢ(B)^q)^{r/q})^{1/r}
   --      = (∑ σ↓ᵢ(A)^p)^{1/p} · (∑ σ↓ᵢ(B)^q)^{1/q}
-  have h_combined : ∑ i, singularValuesSorted (A * B) i ^ r ≤
-      (∑ i, singularValuesSorted A i ^ p) ^ (r / p) *
-      (∑ i, singularValuesSorted B i ^ q) ^ (r / q) :=
+  have h_combined
+      : ∑ i, singularValuesSorted (A * B) i ^ r
+        ≤ (∑ i, singularValuesSorted A i ^ p) ^ (r / p)
+          * (∑ i, singularValuesSorted B i ^ q) ^ (r / q) :=
     le_trans h_sv_ineq h_holder
   -- Take 1/r-th power of both sides
-  have h_rpow : (∑ i, singularValuesSorted (A * B) i ^ r) ^ (1/r) ≤
-      ((∑ i, singularValuesSorted A i ^ p) ^ (r / p) *
-       (∑ i, singularValuesSorted B i ^ q) ^ (r / q)) ^ (1/r) := by
+  have h_rpow
+      : (∑ i, singularValuesSorted (A * B) i ^ r) ^ (1 / r)
+        ≤ ((∑ i, singularValuesSorted A i ^ p) ^ (r / p)
+            * (∑ i, singularValuesSorted B i ^ q) ^ (r / q))
+          ^ (1 / r) := by
     apply Real.rpow_le_rpow
-    · exact Finset.sum_nonneg fun i _ =>
-        Real.rpow_nonneg (singularValuesSorted_nonneg _ _) _
+    · exact Finset.sum_nonneg fun i _ => Real.rpow_nonneg (singularValuesSorted_nonneg _ _) _
     · exact h_combined
     · positivity
   -- Simplify the RHS: (X^{r/p} · Y^{r/q})^{1/r} = X^{1/p} · Y^{1/q}
-  have h_simplify :
-      ((∑ i, singularValuesSorted A i ^ p) ^ (r / p) *
-       (∑ i, singularValuesSorted B i ^ q) ^ (r / q)) ^ (1/r) =
-      (∑ i, singularValuesSorted A i ^ p) ^ (1/p) *
-      (∑ i, singularValuesSorted B i ^ q) ^ (1/q) := by
+  have h_simplify
+      : ((∑ i, singularValuesSorted A i ^ p) ^ (r / p)
+            * (∑ i, singularValuesSorted B i ^ q) ^ (r / q))
+          ^ (1 / r)
+        = (∑ i, singularValuesSorted A i ^ p) ^ (1 / p)
+          * (∑ i, singularValuesSorted B i ^ q) ^ (1 / q) := by
     have hsp : 0 ≤ (∑ i, singularValuesSorted A i ^ p) ^ (r / p) :=
-      Real.rpow_nonneg (Finset.sum_nonneg fun i _ =>
-        Real.rpow_nonneg (singularValuesSorted_nonneg _ _) _) _
+      Real.rpow_nonneg
+        (Finset.sum_nonneg fun i _ => Real.rpow_nonneg (singularValuesSorted_nonneg _ _) _) _
     have hsq : 0 ≤ (∑ i, singularValuesSorted B i ^ q) ^ (r / q) :=
-      Real.rpow_nonneg (Finset.sum_nonneg fun i _ =>
-        Real.rpow_nonneg (singularValuesSorted_nonneg _ _) _) _
+      Real.rpow_nonneg
+        (Finset.sum_nonneg fun i _ => Real.rpow_nonneg (singularValuesSorted_nonneg _ _) _) _
     rw [Real.mul_rpow hsp hsq]
     have hsp' : (0 : ℝ) ≤ ∑ i, singularValuesSorted A i ^ p :=
       Finset.sum_nonneg fun i _ => Real.rpow_nonneg (singularValuesSorted_nonneg _ _) _
@@ -288,13 +328,16 @@ lemma schattenNorm_mul_le (A B : Matrix d d ℂ) {r p q : ℝ}
 
 lemma HermitianMat.trace_rpow_conj_le
     {A B : HermitianMat d ℂ} (hA : 0 ≤ A) (hB : 0 ≤ B)
-    {α p q : ℝ} (hα : 0 < α) (hp : 0 < p) (hq : 0 < q)
-    (hpq : 1 / (2 * α) = 1 / p + 1 / q) :
-    ((A.conj B.mat) ^ α).trace ≤
-    (((A ^ (p / 2)).trace) ^ (1 / p) * ((B ^ q).trace) ^ (1 / q)) ^ (2 * α) := by
+    {α p q : ℝ} (hα : 0 < α) (hp : 0 < p) (hq : 0 < q) (hpq : 1 / (2 * α) = 1 / p + 1 / q)
+    : ((A.conj B.mat) ^ α).trace
+      ≤ (((A ^ (p / 2)).trace) ^ (1 / p) * ((B ^ q).trace) ^ (1 / q)) ^ (2 * α) := by
   -- Raise both sides of the inequality to the power of $2\alpha$.
-  have h_exp : ((A.conj B.mat) ^ α).trace ≤ (schattenNorm (A ^ (1 / 2 : ℝ)).mat p * schattenNorm B.mat q) ^ (2 * α) := by
-    have h_exp : (schattenNorm ((A ^ (1 / 2 : ℝ)).mat * B.mat) (2 * α)) ^ (2 * α) = ((A.conj B.mat) ^ α).trace := by
+  have h_exp
+      : ((A.conj B.mat) ^ α).trace
+        ≤ (schattenNorm (A ^ (1 / 2 : ℝ)).mat p * schattenNorm B.mat q) ^ (2 * α) := by
+    have h_exp
+        : (schattenNorm ((A ^ (1 / 2 : ℝ)).mat * B.mat) (2 * α)) ^ (2 * α)
+          = ((A.conj B.mat) ^ α).trace := by
       exact schattenNorm_half_mul_rpow_eq_trace_conj hA hα
     rw [← h_exp]
     -- Apply the Schatten-Hölder inequality to the matrices $A^{1/2} * B$.

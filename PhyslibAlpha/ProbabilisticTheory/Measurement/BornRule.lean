@@ -53,12 +53,14 @@ namespace EffectValuedMeasure
 
 /-! ## A. Effect-valued measures on `ℝ` are probability measures -/
 
-lemma ofReal_iUnion (ν : EffectValuedMeasure Ω ℝ) ⦃s : ℕ → Set Ω⦄ (hs : ∀ n, MeasurableSet (s n))
-    (hd : Pairwise (Disjoint on s)) :
-    ENNReal.ofReal (ν (⋃ n, s n) (.iUnion hs)) = ∑' n, ENNReal.ofReal (ν (s n) (hs n)) := by
+lemma ofReal_iUnion
+    (ν : EffectValuedMeasure Ω ℝ)
+    ⦃s : ℕ → Set Ω⦄ (hs : ∀ n, MeasurableSet (s n)) (hd : Pairwise (Disjoint on s))
+    : ENNReal.ofReal (ν (⋃ n, s n) (.iUnion hs)) = ∑' n, ENNReal.ofReal (ν (s n) (hs n)) := by
   have h0 n : 0 ≤ (ν (s n) (hs n) : ℝ) := (ν (s n) (hs n)).2.1
-  have hsum := (hasSum_iff_tendsto_nat_of_nonneg h0 _).mpr <| tendsto_atTop_isLUB
-    ((Finset.sum_mono_set_of_nonneg h0).comp Finset.range_mono) (ν.countably_additive hs hd)
+  have hsum :=
+    (hasSum_iff_tendsto_nat_of_nonneg h0 _).mpr <| tendsto_atTop_isLUB
+      ((Finset.sum_mono_set_of_nonneg h0).comp Finset.range_mono) (ν.countably_additive hs hd)
   rw [← hsum.tsum_eq, ENNReal.ofReal_tsum_of_nonneg h0 hsum.summable]
 
 /-- An effect-valued measure on `ℝ` as a measure. -/
@@ -66,12 +68,12 @@ noncomputable def toMeasure (ν : EffectValuedMeasure Ω ℝ) : Measure Ω :=
   .ofMeasurable (fun s hs => ENNReal.ofReal (ν s hs)) (by simp) ν.ofReal_iUnion
 
 @[simp]
-lemma toMeasure_apply (ν : EffectValuedMeasure Ω ℝ) (s : Set Ω) (hs : MeasurableSet s) :
-    ν.toMeasure s = ENNReal.ofReal (ν s hs) :=
+lemma toMeasure_apply (ν : EffectValuedMeasure Ω ℝ) (s : Set Ω) (hs : MeasurableSet s)
+    : ν.toMeasure s = ENNReal.ofReal (ν s hs) :=
   Measure.ofMeasurable_apply _ hs
 
-instance isProbabilityMeasure_toMeasure (ν : EffectValuedMeasure Ω ℝ) :
-    IsProbabilityMeasure ν.toMeasure :=
+instance isProbabilityMeasure_toMeasure (ν : EffectValuedMeasure Ω ℝ)
+    : IsProbabilityMeasure ν.toMeasure :=
   ⟨by simp [toMeasure_apply _ _ .univ]⟩
 
 /-- An effect-valued measure on `ℝ` as a probability measure. -/
@@ -83,23 +85,25 @@ noncomputable def toProbabilityMeasure (ν : EffectValuedMeasure Ω ℝ) : Proba
 variable [OrderUnitSpace E]
 
 /-- The effect-valued measure on `ℝ` obtained by pushing `μ` forward along the normal state `ω`. -/
-def scalarize (μ : EffectValuedMeasure Ω E) (ω : 𝓢[ℝ, E]) (hω : ω.IsNormal) :
-    EffectValuedMeasure Ω ℝ :=
+def scalarize (μ : EffectValuedMeasure Ω E) (ω : 𝓢[ℝ, E]) (hω : ω.IsNormal)
+    : EffectValuedMeasure Ω ℝ :=
   μ.map ω hω
 
 @[simp]
-lemma coe_scalarize_apply (μ : EffectValuedMeasure Ω E) (ω : 𝓢[ℝ, E]) (hω : ω.IsNormal)
-    (s : Set Ω) (hs : MeasurableSet s) : (μ.scalarize ω hω s hs : ℝ) = ω (μ s hs) := rfl
+lemma coe_scalarize_apply
+    (μ : EffectValuedMeasure Ω E) (ω : 𝓢[ℝ, E]) (hω : ω.IsNormal) (s : Set Ω) (hs : MeasurableSet s)
+    : (μ.scalarize ω hω s hs : ℝ) = ω (μ s hs) :=
+  rfl
 
 /-- The outcome distribution of the effect-valued measure `μ` in the normal state `ω`. -/
-noncomputable def probabilityLaw (μ : EffectValuedMeasure Ω E) (ω : 𝓢[ℝ, E]) (hω : ω.IsNormal) :
-    ProbabilityMeasure Ω :=
+noncomputable def probabilityLaw (μ : EffectValuedMeasure Ω E) (ω : 𝓢[ℝ, E]) (hω : ω.IsNormal)
+    : ProbabilityMeasure Ω :=
   (μ.scalarize ω hω).toProbabilityMeasure
 
 @[simp]
-lemma probabilityLaw_apply (μ : EffectValuedMeasure Ω E) (ω : 𝓢[ℝ, E]) (hω : ω.IsNormal)
-    (s : Set Ω) (hs : MeasurableSet s) :
-    (μ.probabilityLaw ω hω : Measure Ω) s = ENNReal.ofReal (ω (μ s hs)) :=
+lemma probabilityLaw_apply
+    (μ : EffectValuedMeasure Ω E) (ω : 𝓢[ℝ, E]) (hω : ω.IsNormal) (s : Set Ω) (hs : MeasurableSet s)
+    : (μ.probabilityLaw ω hω : Measure Ω) s = ENNReal.ofReal (ω (μ s hs)) :=
   toMeasure_apply _ s hs
 
 /-! ## C. Relabeling outcomes -/
@@ -109,9 +113,9 @@ section Relabel
 variable {Ω' : Type*} [MeasurableSpace Ω']
 
 /-- Relabeling outcomes pushes each Born law forward along the relabeling map. -/
-lemma probabilityLaw_mapOutcome (N : EffectValuedMeasure Ω' E) (f : Ω' → Ω)
-    (hf : Measurable f) (ω : 𝓢[ℝ, E]) (hω : ω.IsNormal) :
-    (N.mapOutcome f hf).probabilityLaw ω hω = (N.probabilityLaw ω hω).map f := by
+lemma probabilityLaw_mapOutcome
+    (N : EffectValuedMeasure Ω' E) (f : Ω' → Ω) (hf : Measurable f) (ω : 𝓢[ℝ, E]) (hω : ω.IsNormal)
+    : (N.mapOutcome f hf).probabilityLaw ω hω = (N.probabilityLaw ω hω).map f := by
   apply ProbabilityMeasure.toMeasure_injective
   rw [ProbabilityMeasure.toMeasure_map]
   apply Measure.ext

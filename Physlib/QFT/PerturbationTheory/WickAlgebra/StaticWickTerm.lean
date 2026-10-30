@@ -27,21 +27,25 @@ open WickAlgebra
 open FieldStatistic
 noncomputable section
 
-/-- For a list `φs` of `𝓕.FieldOp`, and a Wick contraction `φsΛ` of `φs`, the element
-  of `𝓕.WickAlgebra`, `φsΛ.staticWickTerm` is defined as
+/--
+For a list `φs` of `𝓕.FieldOp`, and a Wick contraction `φsΛ` of `φs`, the element
+of `𝓕.WickAlgebra`, `φsΛ.staticWickTerm` is defined as
 
-  `φsΛ.sign • φsΛ.staticContract * 𝓝([φsΛ]ᵘᶜ)`.
+`φsΛ.sign • φsΛ.staticContract * 𝓝([φsΛ]ᵘᶜ)`.
 
-  This is a term which appears in the static version Wick's theorem. -/
+This is a term which appears in the static version Wick's theorem.
+-/
 def staticWickTerm {φs : List 𝓕.FieldOp} (φsΛ : WickContraction φs.length) : 𝓕.WickAlgebra :=
   φsΛ.sign • φsΛ.staticContract * 𝓝(ofFieldOpList [φsΛ]ᵘᶜ)
 
 set_option backward.isDefEq.respectTransparency false in
-/-- For the empty list `[]` of `𝓕.FieldOp`, the `staticWickTerm` of the Wick contraction
-  corresponding to the empty set `∅` (the only Wick contraction of `[]`) is `1`. -/
+/--
+For the empty list `[]` of `𝓕.FieldOp`, the `staticWickTerm` of the Wick contraction
+corresponding to the empty set `∅` (the only Wick contraction of `[]`) is `1`.
+-/
 @[simp]
-lemma staticWickTerm_empty_nil :
-    staticWickTerm (empty (n := ([] : List 𝓕.FieldOp).length)) = 1 := by
+lemma staticWickTerm_empty_nil
+    : staticWickTerm (empty (n := ([] : List 𝓕.FieldOp).length)) = 1 := by
   rw [staticWickTerm, uncontractedListGet, nil_zero_uncontractedList]
   simp [sign, empty, staticContract]
 
@@ -55,14 +59,15 @@ The proof of this result relies on
 - `staticContract_insert_none` to rewrite the static contract.
 - `sign_insert_none_zero` to rewrite the sign.
 -/
-lemma staticWickTerm_insert_zero_none (φ : 𝓕.FieldOp) (φs : List 𝓕.FieldOp)
-    (φsΛ : WickContraction φs.length) :
-    (φsΛ ↩Λ φ 0 none).staticWickTerm =
-    φsΛ.sign • φsΛ.staticContract * 𝓝(ofFieldOpList (φ :: [φsΛ]ᵘᶜ)) := by
+lemma staticWickTerm_insert_zero_none
+    (φ : 𝓕.FieldOp) (φs : List 𝓕.FieldOp) (φsΛ : WickContraction φs.length)
+    : (φsΛ ↩Λ φ 0 none).staticWickTerm
+      = φsΛ.sign • φsΛ.staticContract * 𝓝(ofFieldOpList (φ :: [φsΛ]ᵘᶜ)) := by
   simp only [staticWickTerm, sign_insert_none_zero, staticContract_insert_none,
     insertAndContract_uncontractedList_none_zero, Algebra.smul_mul_assoc]
 
-/-- For a list `φs = φ₀…φₙ` of `𝓕.FieldOp`, a Wick contraction `φsΛ` of `φs`, an element `φ` of
+/--
+For a list `φs = φ₀…φₙ` of `𝓕.FieldOp`, a Wick contraction `φsΛ` of `φs`, an element `φ` of
   `𝓕.FieldOp`, and a `k` in `φsΛ.uncontracted`, `(φsΛ ↩Λ φ 0 (some k)).wickTerm` is equal
   to the product of
 - the sign `𝓢(φ, φ₀…φᵢ₋₁) `
@@ -77,12 +82,14 @@ The proof of this result ultimately relies on
 - `normalOrder_uncontracted_some` to rewrite normal orderings.
 - `sign_insert_some_zero` to rewrite signs.
 -/
-lemma staticWickTerm_insert_zero_some (φ : 𝓕.FieldOp) (φs : List 𝓕.FieldOp)
-    (φsΛ : WickContraction φs.length) (k : { x // x ∈ φsΛ.uncontracted }) :
-    (φsΛ ↩Λ φ 0 k).staticWickTerm =
-    sign φs φsΛ • (↑φsΛ.staticContract *
-    (contractStateAtIndex φ [φsΛ]ᵘᶜ ((uncontractedFieldOpEquiv φs φsΛ) (some k)) *
-    𝓝(ofFieldOpList (optionEraseZ [φsΛ]ᵘᶜ φ (uncontractedFieldOpEquiv φs φsΛ k))))) := by
+lemma staticWickTerm_insert_zero_some
+    (φ : 𝓕.FieldOp)
+    (φs : List 𝓕.FieldOp) (φsΛ : WickContraction φs.length) (k : {x // x ∈ φsΛ.uncontracted})
+    : (φsΛ ↩Λ φ 0 k).staticWickTerm
+      = sign φs φsΛ
+        • (↑φsΛ.staticContract
+          * (contractStateAtIndex φ ([φsΛ]ᵘᶜ) ((uncontractedFieldOpEquiv φs φsΛ) (some k))
+            * 𝓝(ofFieldOpList (optionEraseZ [φsΛ]ᵘᶜ φ (uncontractedFieldOpEquiv φs φsΛ k))))) := by
   symm
   rw [staticWickTerm, normalOrder_uncontracted_some]
   simp only [← mul_assoc]
@@ -99,10 +106,10 @@ lemma staticWickTerm_insert_zero_some (φ : 𝓕.FieldOp) (φs : List 𝓕.Field
     · rw [staticContract_of_not_gradingCompliant _ _ h0]
       simp only [ZeroMemClass.coe_zero, zero_mul, smul_zero, mul_zero]
     · simp_all only [not_not, forall_const]
-      have h1 : contractStateAtIndex φ [φsΛ]ᵘᶜ (uncontractedFieldOpEquiv φs φsΛ k) = 0 := by
+      have h1 : contractStateAtIndex φ ([φsΛ]ᵘᶜ) (uncontractedFieldOpEquiv φs φsΛ k) = 0 := by
         simp only [contractStateAtIndex, uncontractedFieldOpEquiv, Equiv.optionCongr_apply,
-          Equiv.coe_trans, Option.map_some, Function.comp_apply, finCongr_apply,
-          Fin.val_cast, Fin.getElem_fin, smul_eq_zero]
+          Equiv.coe_trans, Option.map_some, Function.comp_apply, finCongr_apply, Fin.val_cast,
+          Fin.getElem_fin, smul_eq_zero]
         right
         simp only [uncontractedListGet, List.getElem_map,
           uncontractedList_getElem_uncontractedIndexEquiv_symm, List.get_eq_getElem]
@@ -124,13 +131,14 @@ The proof proceeds as follows:
 - Then `staticWickTerm_insert_zero_none` and `staticWickTerm_insert_zero_some` are
   used to equate terms.
 -/
-lemma mul_staticWickTerm_eq_sum (φ : 𝓕.FieldOp) (φs : List 𝓕.FieldOp)
-    (φsΛ : WickContraction φs.length) :
-    ofFieldOp φ * φsΛ.staticWickTerm =
-    ∑ (k : Option φsΛ.uncontracted), (φsΛ ↩Λ φ 0 k).staticWickTerm := by
+lemma mul_staticWickTerm_eq_sum
+    (φ : 𝓕.FieldOp) (φs : List 𝓕.FieldOp) (φsΛ : WickContraction φs.length)
+    : ofFieldOp φ * φsΛ.staticWickTerm
+      = ∑ (k : Option φsΛ.uncontracted), (φsΛ ↩Λ φ 0 k).staticWickTerm := by
   trans (φsΛ.sign • φsΛ.staticContract * (ofFieldOp φ * normalOrder (ofFieldOpList [φsΛ]ᵘᶜ)))
-  · have ht := Subalgebra.mem_center_iff.mp (Subalgebra.smul_mem (Subalgebra.center ℂ _)
-      (φsΛ.staticContract).2 φsΛ.sign)
+  · have ht :=
+      Subalgebra.mem_center_iff.mp (Subalgebra.smul_mem (Subalgebra.center ℂ _)
+        (φsΛ.staticContract).2 φsΛ.sign)
     conv_rhs => rw [← mul_assoc, ← ht]
     simp [mul_assoc, staticWickTerm]
   rw [ofFieldOp_mul_normalOrder_ofFieldOpList_eq_sum, Finset.mul_sum,
@@ -145,8 +153,7 @@ lemma mul_staticWickTerm_eq_sum (φ : 𝓕.FieldOp) (φs : List 𝓕.FieldOp)
     simp only [Algebra.smul_mul_assoc]
     rfl
   | some n =>
-    simp only [Algebra.smul_mul_assoc, Nat.succ_eq_add_one, Fin.val_zero,
-      List.insertIdx_zero]
+    simp only [Algebra.smul_mul_assoc, Nat.succ_eq_add_one, Fin.val_zero, List.insertIdx_zero]
     rw [staticWickTerm_insert_zero_some]
 
 end

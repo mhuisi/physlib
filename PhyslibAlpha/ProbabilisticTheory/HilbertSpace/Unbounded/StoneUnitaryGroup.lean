@@ -57,8 +57,7 @@ variable {H : Type*} [NormedAddCommGroup H] [InnerProductSpace ℂ H] [CompleteS
 /-! ## A. The exponential multiplier -/
 
 /-- The exponential multiplier `x ↦ exp(itx)`, at real time `t`. -/
-def expFunction (t : ℝ) : ℝ → ℂ :=
-  fun x => Complex.exp ((t * x : ℝ) * Complex.I)
+def expFunction (t : ℝ) : ℝ → ℂ := fun x => Complex.exp ((t * x : ℝ) * Complex.I)
 
 lemma expFunction_measurable (t : ℝ) : Measurable (expFunction t) := by
   change Measurable (fun x : ℝ => Complex.exp ((t * x : ℝ) * Complex.I))
@@ -74,27 +73,26 @@ lemma expFunction_modulus (t : ℝ) : ∀ x, ‖expFunction t x‖ = 1 := by
 
 lemma expFunction_neg_eq_star (t : ℝ) : expFunction (-t) = star (expFunction t) := by
   funext x
-  change Complex.exp ((((-t) * x : ℝ) : ℂ) * Complex.I) =
-    starRingEnd ℂ (Complex.exp (((t * x : ℝ) : ℂ) * Complex.I))
+  change Complex.exp ((((-t) * x : ℝ) : ℂ) * Complex.I)
+    = starRingEnd ℂ (Complex.exp (((t * x : ℝ) : ℂ) * Complex.I))
   rw [← Complex.exp_conj]
   congr 1
   simp
 
-lemma expFunction_diff_bounded (t s : ℝ) :
-    ∃ C, ∀ x, ‖expFunction t x - expFunction s x‖ ≤ C := by
+lemma expFunction_diff_bounded (t s : ℝ) : ∃ C, ∀ x, ‖expFunction t x - expFunction s x‖ ≤ C := by
   refine ⟨2, fun x => ?_⟩
   calc
-    ‖expFunction t x - expFunction s x‖ ≤
-        ‖expFunction t x‖ + ‖expFunction s x‖ := norm_sub_le _ _
+    ‖expFunction t x - expFunction s x‖
+      ≤ ‖expFunction t x‖ + ‖expFunction s x‖ := norm_sub_le _ _
     _ = 2 := by rw [expFunction_modulus, expFunction_modulus]; norm_num
 
 lemma expFunction_add (t s : ℝ) : expFunction (t + s) = expFunction t * expFunction s := by
   funext x
-  change Complex.exp ((((t + s) * x : ℝ) : ℂ) * Complex.I) =
-    Complex.exp (((t * x : ℝ) : ℂ) * Complex.I) *
-      Complex.exp (((s * x : ℝ) : ℂ) * Complex.I)
-  have harg : (((t + s) * x : ℝ) : ℂ) * Complex.I =
-      ((t * x : ℝ) : ℂ) * Complex.I + ((s * x : ℝ) : ℂ) * Complex.I := by
+  change Complex.exp ((((t + s) * x : ℝ) : ℂ) * Complex.I)
+    = Complex.exp (((t * x : ℝ) : ℂ) * Complex.I) * Complex.exp (((s * x : ℝ) : ℂ) * Complex.I)
+  have harg
+      : (((t + s) * x : ℝ) : ℂ) * Complex.I
+        = ((t * x : ℝ) : ℂ) * Complex.I + ((s * x : ℝ) : ℂ) * Complex.I := by
     push_cast
     ring
   rw [harg, Complex.exp_add]
@@ -105,74 +103,71 @@ lemma expFunction_add (t s : ℝ) : expFunction (t + s) = expFunction t * expFun
 noncomputable def expIntegral (μS : WOTSpectralMeasure ℝ H) (t : ℝ) : H →WOT[ℂ] H :=
   boundedIntegral μS (expFunction t) (expFunction_measurable t) (expFunction_bounded t)
 
-lemma expIntegral_add (μS : WOTSpectralMeasure ℝ H) (t s : ℝ) :
-    expIntegral μS (t + s) = expIntegral μS t * expIntegral μS s := by
+lemma expIntegral_add (μS : WOTSpectralMeasure ℝ H) (t s : ℝ)
+    : expIntegral μS (t + s) = expIntegral μS t * expIntegral μS s := by
   change boundedIntegral μS (expFunction (t + s)) (expFunction_measurable (t + s))
-      (expFunction_bounded (t + s)) =
-    boundedIntegral μS (expFunction t) (expFunction_measurable t) (expFunction_bounded t) *
-      boundedIntegral μS (expFunction s) (expFunction_measurable s) (expFunction_bounded s)
-  have h := boundedIntegral_mul μS (expFunction_measurable t) (expFunction_measurable s)
-    (expFunction_bounded t) (expFunction_bounded s)
+      (expFunction_bounded (t + s))
+    = boundedIntegral μS (expFunction t) (expFunction_measurable t) (expFunction_bounded t)
+      * boundedIntegral μS (expFunction s) (expFunction_measurable s) (expFunction_bounded s)
+  have h :=
+    boundedIntegral_mul μS (expFunction_measurable t) (expFunction_measurable s)
+      (expFunction_bounded t) (expFunction_bounded s)
   rw [← h]
   apply boundedIntegral_congr μS (expFunction_measurable (t + s))
-    ((expFunction_measurable t).mul (expFunction_measurable s))
-    (expFunction_bounded (t + s))
+    ((expFunction_measurable t).mul (expFunction_measurable s)) (expFunction_bounded (t + s))
     (by
       rcases expFunction_bounded t with ⟨Ct, hCt⟩
       rcases expFunction_bounded s with ⟨Cs, hCs⟩
       refine ⟨Ct * Cs, fun x => ?_⟩
       simp only [Pi.mul_apply, norm_mul]
-      exact mul_le_mul (hCt x) (hCs x) (norm_nonneg _) (by
-        exact (norm_nonneg (expFunction t 0)).trans (hCt 0)))
+      exact mul_le_mul (hCt x) (hCs x) (norm_nonneg _)
+        (by exact (norm_nonneg (expFunction t 0)).trans (hCt 0)))
     (by
       intro x
       exact congrFun (expFunction_add t s) x)
 
-lemma expIntegral_zero (μS : WOTSpectralMeasure ℝ H) :
-    expIntegral μS 0 = (1 : H →WOT[ℂ] H) := by
-  change boundedIntegral μS (expFunction 0) (expFunction_measurable 0)
-      (expFunction_bounded 0) = (1 : H →WOT[ℂ] H)
+lemma expIntegral_zero (μS : WOTSpectralMeasure ℝ H) : expIntegral μS 0 = (1 : H →WOT[ℂ] H) := by
+  change boundedIntegral μS (expFunction 0) (expFunction_measurable 0) (expFunction_bounded 0)
+    = (1 : H →WOT[ℂ] H)
   calc
-    boundedIntegral μS (expFunction 0) (expFunction_measurable 0)
-        (expFunction_bounded 0) =
-        boundedIntegral μS (fun _ : ℝ => (1 : ℂ)) measurable_const
-          (⟨1, by simp⟩) := by
+    boundedIntegral μS (expFunction 0) (expFunction_measurable 0) (expFunction_bounded 0)
+        = boundedIntegral μS (fun _ : ℝ => (1 : ℂ)) measurable_const (⟨1, by simp⟩) := by
       apply boundedIntegral_congr μS (expFunction_measurable 0) measurable_const
         (expFunction_bounded 0) (⟨1, by simp⟩)
       intro x
       simp [expFunction]
     _ = 1 := by rw [boundedIntegral_const]; simp
 
-lemma expIntegral_neg_mul (μS : WOTSpectralMeasure ℝ H) (t : ℝ) :
-    expIntegral μS (-t) * expIntegral μS t = (1 : H →WOT[ℂ] H) := by
+lemma expIntegral_neg_mul (μS : WOTSpectralMeasure ℝ H) (t : ℝ)
+    : expIntegral μS (-t) * expIntegral μS t = (1 : H →WOT[ℂ] H) := by
   calc
-    expIntegral μS (-t) * expIntegral μS t = expIntegral μS (-t + t) :=
-      (expIntegral_add μS (-t) t).symm
+    expIntegral μS (-t) * expIntegral μS t
+      = expIntegral μS (-t + t) := (expIntegral_add μS (-t) t).symm
     _ = expIntegral μS 0 := by rw [neg_add_cancel]
     _ = 1 := expIntegral_zero μS
 
-lemma expIntegral_mul_neg (μS : WOTSpectralMeasure ℝ H) (t : ℝ) :
-    expIntegral μS t * expIntegral μS (-t) = (1 : H →WOT[ℂ] H) := by
+lemma expIntegral_mul_neg (μS : WOTSpectralMeasure ℝ H) (t : ℝ)
+    : expIntegral μS t * expIntegral μS (-t) = (1 : H →WOT[ℂ] H) := by
   calc
-    expIntegral μS t * expIntegral μS (-t) = expIntegral μS (t + -t) :=
-      (expIntegral_add μS t (-t)).symm
+    expIntegral μS t * expIntegral μS (-t)
+      = expIntegral μS (t + -t) := (expIntegral_add μS t (-t)).symm
     _ = expIntegral μS 0 := by rw [add_neg_cancel]
     _ = 1 := expIntegral_zero μS
 
-lemma expIntegral_star (μS : WOTSpectralMeasure ℝ H) (t : ℝ) :
-    star (expIntegral μS t) = expIntegral μS (-t) := by
+lemma expIntegral_star (μS : WOTSpectralMeasure ℝ H) (t : ℝ)
+    : star (expIntegral μS t) = expIntegral μS (-t) := by
   have h := boundedIntegral_star μS (expFunction_measurable t) (expFunction_bounded t)
   calc
-    star (expIntegral μS t) =
-        boundedIntegral μS (fun x => star (expFunction t x))
+    star (expIntegral μS t)
+        = boundedIntegral μS
+          (fun x => star (expFunction t x))
           (continuous_star.measurable.comp (expFunction_measurable t))
           (by
             rcases expFunction_bounded t with ⟨C, hC⟩
             exact ⟨C, fun x => by simpa using hC x⟩) := by
       simpa only [expIntegral] using h.symm
     _ = expIntegral μS (-t) := by
-      apply boundedIntegral_congr μS
-        (continuous_star.measurable.comp (expFunction_measurable t))
+      apply boundedIntegral_congr μS (continuous_star.measurable.comp (expFunction_measurable t))
         (expFunction_measurable (-t))
         (by
           rcases expFunction_bounded t with ⟨C, hC⟩
@@ -181,51 +176,50 @@ lemma expIntegral_star (μS : WOTSpectralMeasure ℝ H) (t : ℝ) :
       intro x
       exact congrFun (expFunction_neg_eq_star t).symm x
 
-lemma expIntegral_mem_unitary (μS : WOTSpectralMeasure ℝ H) (t : ℝ) :
-    expIntegral μS t ∈ unitary (H →WOT[ℂ] H) := by
-  let U : (H →WOT[ℂ] H)ˣ :=
-    { val := expIntegral μS t
-      inv := expIntegral μS (-t)
-      val_inv := expIntegral_mul_neg μS t
-      inv_val := expIntegral_neg_mul μS t }
+lemma expIntegral_mem_unitary (μS : WOTSpectralMeasure ℝ H) (t : ℝ)
+    : expIntegral μS t ∈ unitary (H →WOT[ℂ] H) := by
+  let U : (H →WOT[ℂ] H)ˣ := {
+    val := expIntegral μS t
+    inv := expIntegral μS (-t)
+    val_inv := expIntegral_mul_neg μS t
+    inv_val := expIntegral_neg_mul μS t
+  }
   apply IsUnit.mem_unitary_of_star_mul_self ⟨U, rfl⟩
   rw [expIntegral_star]
   exact expIntegral_neg_mul μS t
 
 @[nolint unusedArguments]
-lemma expIntegral_sub_eq_boundedIntegral_diff [Nonempty H] (μS : WOTSpectralMeasure ℝ H)
-    (t s : ℝ) (x : H) :
-    expIntegral μS t x - expIntegral μS s x =
-    boundedIntegral μS (fun z => expFunction t z - expFunction s z)
-        ((expFunction_measurable t).sub (expFunction_measurable s))
-        (expFunction_diff_bounded t s) x := by
-  have h := boundedIntegral_sub μS (expFunction_measurable t) (expFunction_measurable s)
-    (expFunction_bounded t) (expFunction_bounded s)
+lemma expIntegral_sub_eq_boundedIntegral_diff
+    [Nonempty H] (μS : WOTSpectralMeasure ℝ H) (t s : ℝ) (x : H)
+    : expIntegral μS t x - expIntegral μS s x
+      = boundedIntegral μS
+        (fun z => expFunction t z - expFunction s z)
+        ((expFunction_measurable t).sub (expFunction_measurable s)) (expFunction_diff_bounded t s)
+        x := by
+  have h :=
+    boundedIntegral_sub μS (expFunction_measurable t) (expFunction_measurable s)
+      (expFunction_bounded t) (expFunction_bounded s)
   have hx := congrArg (fun A : H →WOT[ℂ] H => A x) h
-  change (boundedIntegral μS (expFunction t) (expFunction_measurable t)
-      (expFunction_bounded t) x -
-    boundedIntegral μS (expFunction s) (expFunction_measurable s)
-      (expFunction_bounded s) x) =
-    boundedIntegral μS (fun z => expFunction t z - expFunction s z)
-      ((expFunction_measurable t).sub (expFunction_measurable s))
-      (expFunction_diff_bounded t s) x
+  change (boundedIntegral μS (expFunction t) (expFunction_measurable t) (expFunction_bounded t) x
+      - boundedIntegral μS (expFunction s) (expFunction_measurable s) (expFunction_bounded s) x)
+    = boundedIntegral μS
+      (fun z => expFunction t z - expFunction s z)
+      ((expFunction_measurable t).sub (expFunction_measurable s)) (expFunction_diff_bounded t s) x
   exact hx.symm
 
-lemma expIntegral_continuous (μS : WOTSpectralMeasure ℝ H) (x : H) :
-    Continuous (fun t => expIntegral μS t x) := by
+lemma expIntegral_continuous (μS : WOTSpectralMeasure ℝ H) (x : H)
+    : Continuous (fun t => expIntegral μS t x) := by
   rw [continuous_iff_continuousAt]
   intro t₀
   have hdiffNormSq : Filter.Tendsto
-      (fun t => ENNReal.ofReal
-        (‖expIntegral μS t x - expIntegral μS t₀ x‖ ^ 2)) (𝓝 t₀) (𝓝 0) := by
+      (fun t => ENNReal.ofReal (‖expIntegral μS t x - expIntegral μS t₀ x‖ ^ 2))
+      (𝓝 t₀) (𝓝 0) := by
     let μ : Measure ℝ := μS.diagonalMeasure x
-    let F : ℝ → ℝ → ENNReal := fun t z =>
-      ENNReal.ofReal (‖expFunction t z - expFunction t₀ z‖ ^ 2)
+    let F : ℝ → ℝ → ENNReal := fun t z => ENNReal.ofReal (‖expFunction t z - expFunction t₀ z‖ ^ 2)
     let F₀ : ℝ → ENNReal := fun _ => 0
     have hFmeas : ∀ t, Measurable (F t) := by
       intro t
-      change Measurable (fun z => ENNReal.ofReal
-        (‖expFunction t z - expFunction t₀ z‖ ^ 2))
+      change Measurable (fun z => ENNReal.ofReal (‖expFunction t z - expFunction t₀ z‖ ^ 2))
       exact ENNReal.continuous_ofReal.measurable.comp
         (((expFunction_measurable t).sub (expFunction_measurable t₀)).norm.pow_const 2)
     have hbound : ∀ᶠ t in 𝓝 t₀, ∀ᵐ z ∂μ, F t z ≤ ENNReal.ofReal 4 := by
@@ -235,8 +229,8 @@ lemma expIntegral_continuous (μS : WOTSpectralMeasure ℝ H) (x : H) :
       apply ENNReal.ofReal_le_ofReal
       have hnorm : ‖expFunction t z - expFunction t₀ z‖ ≤ 2 := by
         calc
-          ‖expFunction t z - expFunction t₀ z‖ ≤
-              ‖expFunction t z‖ + ‖expFunction t₀ z‖ := norm_sub_le _ _
+          ‖expFunction t z - expFunction t₀ z‖
+            ≤ ‖expFunction t z‖ + ‖expFunction t₀ z‖ := norm_sub_le _ _
           _ = 2 := by rw [expFunction_modulus, expFunction_modulus]; norm_num
       have hsq := (sq_le_sq₀ (norm_nonneg _) (by norm_num : (0 : ℝ) ≤ 2)).mpr hnorm
       norm_num at hsq ⊢
@@ -249,14 +243,14 @@ lemma expIntegral_continuous (μS : WOTSpectralMeasure ℝ H) (x : H) :
       have hcont : Continuous (fun t : ℝ => expFunction t z) := by
         unfold expFunction
         fun_prop
-      have hdiff : Filter.Tendsto
-          (fun t => expFunction t z - expFunction t₀ z) (𝓝 t₀) (𝓝 0) := by
+      have hdiff : Filter.Tendsto (fun t => expFunction t z - expFunction t₀ z) (𝓝 t₀) (𝓝 0) := by
         convert hcont.continuousAt.tendsto.sub
           (tendsto_const_nhds :
             Filter.Tendsto (fun _ : ℝ => expFunction t₀ z) (𝓝 t₀) (𝓝 (expFunction t₀ z))) using 1
         simp
       have hnorm : Filter.Tendsto
-          (fun t => ‖expFunction t z - expFunction t₀ z‖ ^ 2) (𝓝 t₀) (𝓝 (0 ^ 2)) := by
+          (fun t => ‖expFunction t z - expFunction t₀ z‖ ^ 2)
+          (𝓝 t₀) (𝓝 (0 ^ 2)) := by
         convert (continuous_norm.pow 2).continuousAt.tendsto.comp hdiff using 1
         · rfl
         · simp
@@ -268,20 +262,20 @@ lemma expIntegral_continuous (μS : WOTSpectralMeasure ℝ H) (x : H) :
       · funext t
         rfl
       · simp
-    have hlintegral : Filter.Tendsto
-        (fun t => ∫⁻ z, F t z ∂μ) (𝓝 t₀) (𝓝 (∫⁻ z, F₀ z ∂μ)) :=
+    have hlintegral : Filter.Tendsto (fun t => ∫⁻ z, F t z ∂μ) (𝓝 t₀) (𝓝 (∫⁻ z, F₀ z ∂μ)) :=
       MeasureTheory.tendsto_lintegral_filter_of_dominated_convergence
         (fun _ : ℝ => ENNReal.ofReal 4)
         (by filter_upwards [] with t; exact hFmeas t) hbound hfin hlim
-    have hlintegral0 : Filter.Tendsto
-        (fun t => ∫⁻ z, F t z ∂μ) (𝓝 t₀) (𝓝 0) := by
+    have hlintegral0 : Filter.Tendsto (fun t => ∫⁻ z, F t z ∂μ) (𝓝 t₀) (𝓝 0) := by
       simpa [F₀] using hlintegral
-    have hnormsq : ∀ t, ENNReal.ofReal
-        (‖expIntegral μS t x - expIntegral μS t₀ x‖ ^ 2) = ∫⁻ z, F t z ∂μ := by
+    have hnormsq
+        : ∀ t,
+          ENNReal.ofReal (‖expIntegral μS t x - expIntegral μS t₀ x‖ ^ 2) = ∫⁻ z, F t z ∂μ := by
       intro t
       rw [expIntegral_sub_eq_boundedIntegral_diff]
       simpa [F, μ] using
-        (boundedIntegral_norm_sq μS (f := fun z => expFunction t z - expFunction t₀ z)
+        (boundedIntegral_norm_sq μS
+          (f := fun z => expFunction t z - expFunction t₀ z)
           ((expFunction_measurable t).sub (expFunction_measurable t₀))
           (expFunction_diff_bounded t t₀) x)
     exact hlintegral0.congr' (Filter.Eventually.of_forall fun t => (hnormsq t).symm)
@@ -291,8 +285,7 @@ lemma expIntegral_continuous (μS : WOTSpectralMeasure ℝ H) (x : H) :
   have hevent : ∀ᶠ t in 𝓝 t₀,
       ENNReal.ofReal (‖expIntegral μS t x - expIntegral μS t₀ x‖ ^ 2) <
         ENNReal.ofReal (ε ^ 2) := by
-    exact hdiffNormSq.eventually
-      (Iio_mem_nhds (ENNReal.ofReal_pos.mpr hεsq))
+    exact hdiffNormSq.eventually (Iio_mem_nhds (ENNReal.ofReal_pos.mpr hεsq))
   filter_upwards [hevent] with t ht
   rw [dist_eq_norm]
   apply (sq_lt_sq₀ (norm_nonneg _) hε.le).mp
@@ -312,26 +305,25 @@ namespace StrongUnitaryOneParameterGroup
 
 variable {H : Type*} [NormedAddCommGroup H] [InnerProductSpace ℂ H] [CompleteSpace H]
 
-instance : CoeFun (StrongUnitaryOneParameterGroup H)
-    (fun _ => ℝ → H →WOT[ℂ] H) := ⟨StrongUnitaryOneParameterGroup.toFun⟩
+instance : CoeFun (StrongUnitaryOneParameterGroup H) (fun _ => ℝ → H →WOT[ℂ] H) :=
+  ⟨StrongUnitaryOneParameterGroup.toFun⟩
 
-@[simp]
-lemma zero (G : StrongUnitaryOneParameterGroup H) : G 0 = 1 := G.map_zero
+@[simp] lemma zero (G : StrongUnitaryOneParameterGroup H) : G 0 = 1 := G.map_zero
 
-lemma add (G : StrongUnitaryOneParameterGroup H) (t s : ℝ) : G (t + s) = G t * G s :=
-  G.map_add t s
+lemma add (G : StrongUnitaryOneParameterGroup H) (t s : ℝ) : G (t + s) = G t * G s := G.map_add t s
 
 lemma unitary (G : StrongUnitaryOneParameterGroup H) (t : ℝ) : G t ∈ unitary (H →WOT[ℂ] H) :=
   G.mem_unitary t
 
-lemma continuous_apply (G : StrongUnitaryOneParameterGroup H) (x : H) :
-    Continuous (fun t => G t x) := G.strong_continuous x
+lemma continuous_apply (G : StrongUnitaryOneParameterGroup H) (x : H)
+    : Continuous (fun t => G t x) :=
+  G.strong_continuous x
 
 end StrongUnitaryOneParameterGroup
 
 /-- The unitary group obtained by exponentiating a bounded real spectral integral. -/
-noncomputable def expUnitaryGroup (μS : WOTSpectralMeasure ℝ H) :
-    StrongUnitaryOneParameterGroup H where
+noncomputable def expUnitaryGroup (μS : WOTSpectralMeasure ℝ H)
+    : StrongUnitaryOneParameterGroup H where
   toFun := expIntegral μS
   mem_unitary := expIntegral_mem_unitary μS
   map_zero := expIntegral_zero μS

@@ -52,16 +52,19 @@ namespace Local
 -/
 
 /-- The summand `(-1)^|I| D_I (∂L/∂u^a_I)` in the local Euler-Lagrange formula. -/
-noncomputable def eulerLagrangeTerm (L : Lagrangian d m k) (I : DerivativeIndex d k) (a : Fin m)
-    (f : Space d → EuclideanSpace ℝ (Fin m)) : Space d → ℝ :=
-  fun x =>
-    (-1 : ℝ) ^ I.1.order * iteratedTotalDerivative k I.1 (L.coordDeriv I a) f x
+noncomputable def eulerLagrangeTerm
+    (L : Lagrangian d m k) (I : DerivativeIndex d k) (a : Fin m)
+    (f : Space d → EuclideanSpace ℝ (Fin m))
+    : Space d → ℝ := fun x =>
+  (-1 : ℝ) ^ I.1.order * iteratedTotalDerivative k I.1 (L.coordDeriv I a) f x
 
 @[simp]
-lemma eulerLagrangeTerm_apply (L : Lagrangian d m k) (I : DerivativeIndex d k) (a : Fin m)
-    (f : Space d → EuclideanSpace ℝ (Fin m)) (x : Space d) :
-    eulerLagrangeTerm L I a f x =
-      (-1 : ℝ) ^ I.1.order * iteratedTotalDerivative k I.1 (L.coordDeriv I a) f x := rfl
+lemma eulerLagrangeTerm_apply
+    (L : Lagrangian d m k) (I : DerivativeIndex d k) (a : Fin m)
+    (f : Space d → EuclideanSpace ℝ (Fin m)) (x : Space d)
+    : eulerLagrangeTerm L I a f x
+      = (-1 : ℝ) ^ I.1.order * iteratedTotalDerivative k I.1 (L.coordDeriv I a) f x :=
+  rfl
 
 /-!
 ## B. Components of the Euler-Lagrange operator
@@ -69,14 +72,16 @@ lemma eulerLagrangeTerm_apply (L : Lagrangian d m k) (I : DerivativeIndex d k) (
 -/
 
 /-- The `a`-th component of the local Euler-Lagrange operator. -/
-noncomputable def eulerLagrangeComponent (L : Lagrangian d m k) (a : Fin m)
-    (f : Space d → EuclideanSpace ℝ (Fin m)) : Space d → ℝ :=
-  fun x => ∑ I : DerivativeIndex d k, eulerLagrangeTerm L I a f x
+noncomputable def eulerLagrangeComponent
+    (L : Lagrangian d m k) (a : Fin m) (f : Space d → EuclideanSpace ℝ (Fin m))
+    : Space d → ℝ := fun x =>
+  ∑ I : DerivativeIndex d k, eulerLagrangeTerm L I a f x
 
 @[simp]
-lemma eulerLagrangeComponent_apply (L : Lagrangian d m k) (a : Fin m)
-    (f : Space d → EuclideanSpace ℝ (Fin m)) (x : Space d) :
-    eulerLagrangeComponent L a f x = ∑ I : DerivativeIndex d k, eulerLagrangeTerm L I a f x := rfl
+lemma eulerLagrangeComponent_apply
+    (L : Lagrangian d m k) (a : Fin m) (f : Space d → EuclideanSpace ℝ (Fin m)) (x : Space d)
+    : eulerLagrangeComponent L a f x = ∑ I : DerivativeIndex d k, eulerLagrangeTerm L I a f x :=
+  rfl
 
 /-!
 ## C. The full operator
@@ -84,18 +89,18 @@ lemma eulerLagrangeComponent_apply (L : Lagrangian d m k) (a : Fin m)
 -/
 
 /-- The local Euler-Lagrange operator attached to a local Lagrangian. -/
-noncomputable def eulerLagrangeOp (L : Lagrangian d m k) (f : Space d → EuclideanSpace ℝ (Fin m)) :
-    Space d → EuclideanSpace ℝ (Fin m) :=
-  fun x => WithLp.toLp 2 fun a => eulerLagrangeComponent L a f x
+noncomputable def eulerLagrangeOp (L : Lagrangian d m k) (f : Space d → EuclideanSpace ℝ (Fin m))
+    : Space d → EuclideanSpace ℝ (Fin m) := fun x =>
+  WithLp.toLp 2 fun a => eulerLagrangeComponent L a f x
 
-lemma eulerLagrangeOp_apply (L : Lagrangian d m k) (f : Space d → EuclideanSpace ℝ (Fin m))
-    (x : Space d) (a : Fin m) :
-    eulerLagrangeOp L f x a = eulerLagrangeComponent L a f x := by
+lemma eulerLagrangeOp_apply
+    (L : Lagrangian d m k) (f : Space d → EuclideanSpace ℝ (Fin m)) (x : Space d) (a : Fin m)
+    : eulerLagrangeOp L f x a = eulerLagrangeComponent L a f x := by
   simp [eulerLagrangeOp]
 
 @[simp]
-lemma eulerLagrangeOp_eq (L : Lagrangian d m k) (f : Space d → EuclideanSpace ℝ (Fin m)) :
-    eulerLagrangeOp L f = fun x => WithLp.toLp 2 fun a => eulerLagrangeComponent L a f x := by
+lemma eulerLagrangeOp_eq (L : Lagrangian d m k) (f : Space d → EuclideanSpace ℝ (Fin m))
+    : eulerLagrangeOp L f = fun x => WithLp.toLp 2 fun a => eulerLagrangeComponent L a f x := by
   rfl
 
 end Local

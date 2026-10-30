@@ -101,34 +101,46 @@ space; the dotted law carries the extra complex conjugation.
 
 section ChiralFamilies
 
-variable {B : Type} [Ring B] [Algebra ℂ B] {repLorentz : Representation ℂ SL(2,ℂ) B}
+variable {B : Type} [Ring B] [Algebra ℂ B] {repLorentz : Representation ℂ (SL(2,ℂ)) B}
 
-/-- A two-element family `X` of elements of `B` carries a dual undotted spinor index: it
-  transforms by the contragredient of the left-handed Weyl representation. -/
-def IsDualLeftWeyl (repLorentz : Representation ℂ SL(2,ℂ) B) (X : Fin 2 → B) : Prop :=
+/--
+A two-element family `X` of elements of `B` carries a dual undotted spinor index: it
+transforms by the contragredient of the left-handed Weyl representation.
+-/
+def IsDualLeftWeyl (repLorentz : Representation ℂ (SL(2,ℂ)) B) (X : Fin 2 → B) : Prop :=
   ∀ (Λ : SL(2,ℂ)) (a : Fin 2), repLorentz Λ (X a) = ∑ β, (Λ⁻¹).1 a β • X β
 
-/-- A two-element family `Y` of elements of `B` carries a dual dotted spinor index: it
-  transforms by the contragredient of the right-handed Weyl representation, which is the
-  conjugate of the undotted law. -/
-def IsDualRightWeyl (repLorentz : Representation ℂ SL(2,ℂ) B) (Y : Fin 2 → B) : Prop :=
+/--
+A two-element family `Y` of elements of `B` carries a dual dotted spinor index: it
+transforms by the contragredient of the right-handed Weyl representation, which is the
+conjugate of the undotted law.
+-/
+def IsDualRightWeyl (repLorentz : Representation ℂ (SL(2,ℂ)) B) (Y : Fin 2 → B) : Prop :=
   ∀ (Λ : SL(2,ℂ)) (a : Fin 2), repLorentz Λ (Y a) = ∑ β, star ((Λ⁻¹).1 a β) • Y β
 
-/-- A family `X` carrying one four-vector index and one dual undotted spinor index: the
-  once-derived form of `IsDualLeftWeyl`, the derivative slot moving by the columns of the
-  Lorentz matrix. Only the value index of a fermion symbol is dualised, so the derivative
-  slot keeps the plain Lorentz law. -/
-def IsVectorDualLeftWeyl (repLorentz : Representation ℂ SL(2,ℂ) B)
-    (X : (Fin 1 ⊕ Fin 3) → Fin 2 → B) : Prop :=
-  ∀ (Λ : SL(2,ℂ)) (μ : Fin 1 ⊕ Fin 3) (a : Fin 2), repLorentz Λ (X μ a)
-    = ∑ ν, ∑ β, ((((SL2C.toLorentzGroup Λ).1 ν μ : ℝ) : ℂ) * (Λ⁻¹).1 a β) • X ν β
+/--
+A family `X` carrying one four-vector index and one dual undotted spinor index: the
+once-derived form of `IsDualLeftWeyl`, the derivative slot moving by the columns of the
+Lorentz matrix. Only the value index of a fermion symbol is dualised, so the derivative
+slot keeps the plain Lorentz law.
+-/
+def IsVectorDualLeftWeyl
+    (repLorentz : Representation ℂ (SL(2,ℂ)) B) (X : (Fin 1 ⊕ Fin 3) → Fin 2 → B)
+    : Prop :=
+  ∀ (Λ : SL(2,ℂ)) (μ : Fin 1 ⊕ Fin 3) (a : Fin 2),
+    repLorentz Λ (X μ a)
+      = ∑ ν, ∑ β, ((((SL2C.toLorentzGroup Λ).1 ν μ : ℝ) : ℂ) * (Λ⁻¹).1 a β) • X ν β
 
-/-- A family `Y` carrying one four-vector index and one dual dotted spinor index: the
-  once-derived form of `IsDualRightWeyl`. -/
-def IsVectorDualRightWeyl (repLorentz : Representation ℂ SL(2,ℂ) B)
-    (Y : (Fin 1 ⊕ Fin 3) → Fin 2 → B) : Prop :=
-  ∀ (Λ : SL(2,ℂ)) (μ : Fin 1 ⊕ Fin 3) (a : Fin 2), repLorentz Λ (Y μ a)
-    = ∑ ν, ∑ β, ((((SL2C.toLorentzGroup Λ).1 ν μ : ℝ) : ℂ) * star ((Λ⁻¹).1 a β)) • Y ν β
+/--
+A family `Y` carrying one four-vector index and one dual dotted spinor index: the
+once-derived form of `IsDualRightWeyl`.
+-/
+def IsVectorDualRightWeyl
+    (repLorentz : Representation ℂ (SL(2,ℂ)) B) (Y : (Fin 1 ⊕ Fin 3) → Fin 2 → B)
+    : Prop :=
+  ∀ (Λ : SL(2,ℂ)) (μ : Fin 1 ⊕ Fin 3) (a : Fin 2),
+    repLorentz Λ (Y μ a)
+      = ∑ ν, ∑ β, ((((SL2C.toLorentzGroup Λ).1 ν μ : ℝ) : ℂ) * star ((Λ⁻¹).1 a β)) • Y ν β
 
 /-!
 
@@ -143,44 +155,49 @@ factors transforming independently.
 
 -/
 
-variable (hrepLorentz_mul : ∀ (Λ : SL(2,ℂ)) (b₁ b₂ : B),
-  repLorentz Λ (b₁ * b₂) = repLorentz Λ b₁ * repLorentz Λ b₂)
+variable
+  (hrepLorentz_mul
+    : ∀ (Λ : SL(2,ℂ)) (b₁ b₂ : B), repLorentz Λ (b₁ * b₂) = repLorentz Λ b₁ * repLorentz Λ b₂)
 
 include hrepLorentz_mul
 
 /-- An undotted family times a dotted one is a dual left-right Weyl family. -/
-lemma isDualLeftRightWeyl_mul {X Y : Fin 2 → B} (hX : IsDualLeftWeyl repLorentz X)
-    (hY : IsDualRightWeyl repLorentz Y) :
-    IsDualLeftRightWeyl B repLorentz
+lemma isDualLeftRightWeyl_mul
+    {X Y : Fin 2 → B} (hX : IsDualLeftWeyl repLorentz X) (hY : IsDualRightWeyl repLorentz Y)
+    : IsDualLeftRightWeyl B repLorentz
       (ofPairComponents (k := .downL) (k' := .downR) fun a b => X a * Y b) :=
   isEquivariant_ofPairComponents _ fun g a b => by
-    rw [toMatrix_rep_downL, toMatrix_rep_downR, hrepLorentz_mul, hX g a, hY g b,
-      Finset.sum_mul_sum]
+    rw [toMatrix_rep_downL, toMatrix_rep_downR, hrepLorentz_mul, hX g a, hY g b, Finset.sum_mul_sum]
     refine Finset.sum_congr rfl fun x _ => Finset.sum_congr rfl fun y _ => ?_
     rw [smul_mul_smul_comm]
     congr 1
     rw [Matrix.transpose_apply, Matrix.conjTranspose_apply, ← SL2C.inverse_coe]
 
-/-- A dotted family times an undotted one is a dual left-right Weyl family, the two
-  spinor slots exchanged. -/
-lemma isDualLeftRightWeyl_mul_swap {X Y : Fin 2 → B} (hX : IsDualRightWeyl repLorentz X)
-    (hY : IsDualLeftWeyl repLorentz Y) :
-    IsDualLeftRightWeyl B repLorentz
+/--
+A dotted family times an undotted one is a dual left-right Weyl family, the two
+spinor slots exchanged.
+-/
+lemma isDualLeftRightWeyl_mul_swap
+    {X Y : Fin 2 → B} (hX : IsDualRightWeyl repLorentz X) (hY : IsDualLeftWeyl repLorentz Y)
+    : IsDualLeftRightWeyl B repLorentz
       (ofPairComponents (k := .downL) (k' := .downR) fun a b => X b * Y a) :=
   isEquivariant_ofPairComponents _ fun g a b => by
-    rw [toMatrix_rep_downL, toMatrix_rep_downR, hrepLorentz_mul, hX g b, hY g a,
-      Finset.sum_mul_sum, Finset.sum_comm]
+    rw [toMatrix_rep_downL, toMatrix_rep_downR, hrepLorentz_mul, hX g b, hY g a, Finset.sum_mul_sum,
+      Finset.sum_comm]
     refine Finset.sum_congr rfl fun x _ => Finset.sum_congr rfl fun y _ => ?_
     rw [smul_mul_smul_comm]
     congr 1
     rw [Matrix.transpose_apply, Matrix.conjTranspose_apply, ← SL2C.inverse_coe]
     ring
 
-/-- An undotted family times a once-derived dotted one is a vector dual left-right Weyl
-  family: the derivative supplies the four-vector index. -/
-lemma isVectorDualLeftRightWeyl_mul {X : Fin 2 → B} {Y : (Fin 1 ⊕ Fin 3) → Fin 2 → B}
-    (hX : IsDualLeftWeyl repLorentz X) (hY : IsVectorDualRightWeyl repLorentz Y) :
-    IsVectorDualLeftRightWeyl B repLorentz
+/--
+An undotted family times a once-derived dotted one is a vector dual left-right Weyl
+family: the derivative supplies the four-vector index.
+-/
+lemma isVectorDualLeftRightWeyl_mul
+    {X : Fin 2 → B} {Y : (Fin 1 ⊕ Fin 3) → Fin 2 → B}
+    (hX : IsDualLeftWeyl repLorentz X) (hY : IsVectorDualRightWeyl repLorentz Y)
+    : IsVectorDualLeftRightWeyl B repLorentz
       (ofDualVectorComponents fun p => X p.2.1 * Y p.1 p.2.2) :=
   isVectorDualLeftRightWeyl_ofDualVectorComponents _ fun g μ l => by
     rw [hrepLorentz_mul, hX g l.1, hY g μ l.2, Finset.sum_mul_sum, Finset.sum_comm]
@@ -194,11 +211,14 @@ lemma isVectorDualLeftRightWeyl_mul {X : Fin 2 → B} {Y : (Fin 1 ⊕ Fin 3) →
     rw [Matrix.transpose_apply, Matrix.conjTranspose_apply, ← SL2C.inverse_coe]
     ring
 
-/-- A dotted family times a once-derived undotted one is a vector dual left-right Weyl
-  family, the two spinor slots exchanged. -/
-lemma isVectorDualLeftRightWeyl_mul_swap {X : Fin 2 → B} {Y : (Fin 1 ⊕ Fin 3) → Fin 2 → B}
-    (hX : IsDualRightWeyl repLorentz X) (hY : IsVectorDualLeftWeyl repLorentz Y) :
-    IsVectorDualLeftRightWeyl B repLorentz
+/--
+A dotted family times a once-derived undotted one is a vector dual left-right Weyl
+family, the two spinor slots exchanged.
+-/
+lemma isVectorDualLeftRightWeyl_mul_swap
+    {X : Fin 2 → B} {Y : (Fin 1 ⊕ Fin 3) → Fin 2 → B}
+    (hX : IsDualRightWeyl repLorentz X) (hY : IsVectorDualLeftWeyl repLorentz Y)
+    : IsVectorDualLeftRightWeyl B repLorentz
       (ofDualVectorComponents fun p => X p.2.2 * Y p.1 p.2.1) :=
   isVectorDualLeftRightWeyl_ofDualVectorComponents _ fun g μ l => by
     rw [hrepLorentz_mul, hX g l.2, hY g μ l.1, Finset.sum_mul_sum, Finset.sum_comm]
@@ -214,7 +234,6 @@ lemma isVectorDualLeftRightWeyl_mul_swap {X : Fin 2 → B} {Y : (Fin 1 ⊕ Fin 3
 
 end ChiralFamilies
 
-
 /-!
 
 ## C. Peeling the pair spans off a Lorentz-stable submodule
@@ -228,40 +247,55 @@ as in the gauge sector, and a whole join is discarded from a Lorentz-stable subm
 
 section Peeling
 
-variable {B : Type} [AddCommGroup B] [Module ℂ B] {repLorentz : Representation ℂ SL(2,ℂ) B}
+variable {B : Type} [AddCommGroup B] [Module ℂ B] {repLorentz : Representation ℂ (SL(2,ℂ)) B}
 
-/-- A finite join of the spans of dual left-right Weyl families carries no Lorentz
-  invariant modulo a Lorentz-stable submodule: such a family has no invariant, so each span
-  reduces to `⊥`, and `ReducesInvariantsTo.biSup` combines the reductions. A Lorentz
-  invariant of the join together with `S` lies in `S`. -/
-lemma mem_of_lorentz_invariant_biSup_dualLeftRightWeyl_span {ι : Type} [DecidableEq ι]
-    {T : ι → Fin 2 × Fin 2 → B} (hT : ∀ i, IsDualLeftRightWeyl B repLorentz
-      (ofPairComponents (k := .downL) (k' := .downR) fun a b => T i (a, b)))
-    (S : Submodule ℂ B) (hS : ∀ g : SL(2,ℂ), ∀ y ∈ S, repLorentz g y ∈ S) (s : Finset ι)
-    {x : B} (hx : x ∈ (⨆ i ∈ s, ⨆ l, ℂ ∙ T i l) ⊔ S)
-    (hinv : ∀ g : SL(2,ℂ), repLorentz g x = x) : x ∈ S := by
-  have hr : ∀ i, (⨆ l, ℂ ∙ T i l)
-      = LinearMap.range (ofPairComponents (k := .downL) (k' := .downR) fun a b => T i (a, b)) :=
-    fun i => by rw [range_ofPairComponents, Submodule.span_range_eq_iSup]
+/--
+A finite join of the spans of dual left-right Weyl families carries no Lorentz
+invariant modulo a Lorentz-stable submodule: such a family has no invariant, so each span
+reduces to `⊥`, and `ReducesInvariantsTo.biSup` combines the reductions. A Lorentz
+invariant of the join together with `S` lies in `S`.
+-/
+lemma mem_of_lorentz_invariant_biSup_dualLeftRightWeyl_span
+    {ι : Type} [DecidableEq ι]
+    {T : ι → Fin 2 × Fin 2 → B}
+    (hT : ∀ i,
+      IsDualLeftRightWeyl B repLorentz
+        (ofPairComponents (k := .downL) (k' := .downR) fun a b => T i (a, b)))
+    (S : Submodule ℂ B) (hS : ∀ g : SL(2,ℂ), ∀ y ∈ S, repLorentz g y ∈ S)
+    (s : Finset ι)
+    {x : B} (hx : x ∈ (⨆ i ∈ s, ⨆ l, ℂ ∙ T i l) ⊔ S) (hinv : ∀ g : SL(2,ℂ), repLorentz g x = x)
+    : x ∈ S := by
+  have hr
+      : ∀ i,
+        (⨆ l, ℂ ∙ T i l)
+          = LinearMap.range (ofPairComponents (k := .downL) (k' := .downR) fun a b =>
+            T i (a, b)) := fun i => by
+    rw [range_ofPairComponents, Submodule.span_range_eq_iSup]
   simp_rw [hr] at hx
-  simpa using ReducesInvariantsTo.biSup (fun i => (hT i).reducesInvariantsTo_bot)
-    (fun i => (hT i).isStableUnder_range) isStableUnder_bot s S hS x hx hinv
+  simpa using
+    ReducesInvariantsTo.biSup
+      (fun i => (hT i).reducesInvariantsTo_bot)
+      (fun i => (hT i).isStableUnder_range)
+      isStableUnder_bot s S hS x hx hinv
 
-/-- The version of `mem_of_lorentz_invariant_biSup_dualLeftRightWeyl_span` joining over a
-  whole finite index type. -/
-lemma mem_of_lorentz_invariant_iSup_dualLeftRightWeyl_span {ι : Type} [Fintype ι]
-    [DecidableEq ι] {T : ι → Fin 2 × Fin 2 → B}
-    (hT : ∀ i, IsDualLeftRightWeyl B repLorentz
-      (ofPairComponents (k := .downL) (k' := .downR) fun a b => T i (a, b))) (S : Submodule ℂ B)
-    (hS : ∀ g : SL(2,ℂ), ∀ y ∈ S, repLorentz g y ∈ S) {x : B}
-    (hx : x ∈ (⨆ i, ⨆ l, ℂ ∙ T i l) ⊔ S)
-    (hinv : ∀ g : SL(2,ℂ), repLorentz g x = x) : x ∈ S := by
+/--
+The version of `mem_of_lorentz_invariant_biSup_dualLeftRightWeyl_span` joining over a
+whole finite index type.
+-/
+lemma mem_of_lorentz_invariant_iSup_dualLeftRightWeyl_span
+    {ι : Type} [Fintype ι] [DecidableEq ι]
+    {T : ι → Fin 2 × Fin 2 → B}
+    (hT : ∀ i,
+      IsDualLeftRightWeyl B repLorentz
+        (ofPairComponents (k := .downL) (k' := .downR) fun a b => T i (a, b)))
+    (S : Submodule ℂ B) (hS : ∀ g : SL(2,ℂ), ∀ y ∈ S, repLorentz g y ∈ S)
+    {x : B} (hx : x ∈ (⨆ i, ⨆ l, ℂ ∙ T i l) ⊔ S) (hinv : ∀ g : SL(2,ℂ), repLorentz g x = x)
+    : x ∈ S := by
   refine mem_of_lorentz_invariant_biSup_dualLeftRightWeyl_span hT S hS Finset.univ ?_ hinv
   refine sup_le_sup_right (iSup_le fun i => ?_) S hx
   exact le_iSup₂_of_le i (Finset.mem_univ i) le_rfl
 
 end Peeling
-
 
 /-!
 
@@ -276,58 +310,66 @@ index, which is the shape section A asks for.
 
 -/
 
-/-- An index for the components of the five undotted fermion species: the generation
-  together with the colour and isospin the species carries. -/
+/--
+An index for the components of the five undotted fermion species: the generation
+together with the colour and isospin the species carries.
+-/
 inductive LeftIdx
   | bard (f : Fin 3) (c : Fin 3)
   | baru (f : Fin 3) (c : Fin 3)
   | Q (f : Fin 3) (c : Fin 3) (s : Fin 2)
   | L (f : Fin 3) (s : Fin 2)
   | bare (f : Fin 3)
-  deriving DecidableEq, Fintype
+deriving DecidableEq, Fintype
 
-/-- An index for the components of the five dotted fermion species: the generation
-  together with the colour and isospin the species carries. -/
+/--
+An index for the components of the five dotted fermion species: the generation
+together with the colour and isospin the species carries.
+-/
 inductive RightIdx
   | d (f : Fin 3) (c : Fin 3)
   | u (f : Fin 3) (c : Fin 3)
   | barQ (f : Fin 3) (c : Fin 3) (s : Fin 2)
   | barL (f : Fin 3) (s : Fin 2)
   | e (f : Fin 3)
-  deriving DecidableEq, Fintype
+deriving DecidableEq, Fintype
 
-variable {B : Type} [Ring B] [Algebra ℂ B]
+variable
+  {B : Type} [Ring B] [Algebra ℂ B]
   {repGauge : Representation ℂ GaugeGroupI B}
-  {hrepGauge_mul : ∀ (g : GaugeGroupI) (b₁ b₂ : B),
-    repGauge g (b₁ * b₂) = repGauge g b₁ * repGauge g b₂}
-  {repLorentz : Representation ℂ SL(2,ℂ) B}
-  {hrepLorentz_mul : ∀ (Λ : SL(2,ℂ)) (b₁ b₂ : B),
-    repLorentz Λ (b₁ * b₂) = repLorentz Λ b₁ * repLorentz Λ b₂}
+  {hrepGauge_mul
+    : ∀ (g : GaugeGroupI) (b₁ b₂ : B), repGauge g (b₁ * b₂) = repGauge g b₁ * repGauge g b₂}
+  {repLorentz : Representation ℂ (SL(2,ℂ)) B}
+  {hrepLorentz_mul
+    : ∀ (Λ : SL(2,ℂ)) (b₁ b₂ : B), repLorentz Λ (b₁ * b₂) = repLorentz Λ b₁ * repLorentz Λ b₂}
   {d : {n : ℕ} → Fin 3 → (Fin n → Fin 1 ⊕ Fin 3) → Module.Dual ℂ DownSinglet →ₗ[ℂ] B}
-  {bard : {n : ℕ} → Fin 3 → (Fin n → Fin 1 ⊕ Fin 3) →
-    Module.Dual ℂ (ConjModule DownSinglet) →ₗ[ℂ] B}
+  {bard
+    : {n : ℕ} → Fin 3 → (Fin n → Fin 1 ⊕ Fin 3) → Module.Dual ℂ (ConjModule DownSinglet) →ₗ[ℂ] B}
   {u : {n : ℕ} → Fin 3 → (Fin n → Fin 1 ⊕ Fin 3) → Module.Dual ℂ UpSinglet →ₗ[ℂ] B}
-  {baru : {n : ℕ} → Fin 3 → (Fin n → Fin 1 ⊕ Fin 3) →
-    Module.Dual ℂ (ConjModule UpSinglet) →ₗ[ℂ] B}
+  {baru : {n : ℕ} → Fin 3 → (Fin n → Fin 1 ⊕ Fin 3) → Module.Dual ℂ (ConjModule UpSinglet) →ₗ[ℂ] B}
   {Q : {n : ℕ} → Fin 3 → (Fin n → Fin 1 ⊕ Fin 3) → Module.Dual ℂ QuarkDoublet →ₗ[ℂ] B}
-  {barQ : {n : ℕ} → Fin 3 → (Fin n → Fin 1 ⊕ Fin 3) →
-    Module.Dual ℂ (ConjModule QuarkDoublet) →ₗ[ℂ] B}
+  {barQ
+    : {n : ℕ} → Fin 3 → (Fin n → Fin 1 ⊕ Fin 3) → Module.Dual ℂ (ConjModule QuarkDoublet) →ₗ[ℂ] B}
   {L : {n : ℕ} → Fin 3 → (Fin n → Fin 1 ⊕ Fin 3) → Module.Dual ℂ LeptonDoubletV →ₗ[ℂ] B}
-  {barL : {n : ℕ} → Fin 3 → (Fin n → Fin 1 ⊕ Fin 3) →
-    Module.Dual ℂ (ConjModule LeptonDoubletV) →ₗ[ℂ] B}
+  {barL
+    : {n : ℕ} → Fin 3 → (Fin n → Fin 1 ⊕ Fin 3) → Module.Dual ℂ (ConjModule LeptonDoubletV) →ₗ[ℂ] B}
   {e : {n : ℕ} → Fin 3 → (Fin n → Fin 1 ⊕ Fin 3) → Module.Dual ℂ LeptonSinglet →ₗ[ℂ] B}
-  {bare : {n : ℕ} → Fin 3 → (Fin n → Fin 1 ⊕ Fin 3) →
-    Module.Dual ℂ (ConjModule LeptonSinglet) →ₗ[ℂ] B}
+  {bare
+    : {n : ℕ} → Fin 3 → (Fin n → Fin 1 ⊕ Fin 3) → Module.Dual ℂ (ConjModule LeptonSinglet) →ₗ[ℂ] B}
   {massWeightPoly : B →ₐ[ℂ] Polynomial B}
-  (h : IsFermionSector B repGauge hrepGauge_mul repLorentz hrepLorentz_mul
-      d bard u baru Q barQ L barL e bare massWeightPoly)
+  (h : IsFermionSector B repGauge hrepGauge_mul repLorentz hrepLorentz_mul d bard u baru Q barQ L
+    barL e bare massWeightPoly)
 
 set_option linter.unusedVariables false in
-/-- The components of the five undotted species at the derivative slots `l`, presented as
-  a two-element family in the spinor index. -/
-noncomputable def leftComp (h : IsFermionSector B repGauge hrepGauge_mul repLorentz
-      hrepLorentz_mul d bard u baru Q barQ L barL e bare massWeightPoly)
-    {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin 3) : LeftIdx → Fin 2 → B
+/--
+The components of the five undotted species at the derivative slots `l`, presented as
+a two-element family in the spinor index.
+-/
+noncomputable def leftComp
+    (h : IsFermionSector B repGauge hrepGauge_mul repLorentz hrepLorentz_mul d bard u baru Q barQ L
+      barL e bare massWeightPoly)
+    {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin 3)
+    : LeftIdx → Fin 2 → B
   | .bard f c => fun a => h.bardComponent f l (a, c)
   | .baru f c => fun a => h.baruComponent f l (a, c)
   | .Q f c s => fun a => h.QComponent f l (a, c, s)
@@ -335,39 +377,45 @@ noncomputable def leftComp (h : IsFermionSector B repGauge hrepGauge_mul repLore
   | .bare f => fun a => h.bareComponent f l a
 
 set_option linter.unusedVariables false in
-/-- The components of the five dotted species at the derivative slots `l`, presented as a
-  two-element family in the spinor index. -/
-noncomputable def rightComp (h : IsFermionSector B repGauge hrepGauge_mul repLorentz
-      hrepLorentz_mul d bard u baru Q barQ L barL e bare massWeightPoly)
-    {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin 3) : RightIdx → Fin 2 → B
+/--
+The components of the five dotted species at the derivative slots `l`, presented as a
+two-element family in the spinor index.
+-/
+noncomputable def rightComp
+    (h : IsFermionSector B repGauge hrepGauge_mul repLorentz hrepLorentz_mul d bard u baru Q barQ L
+      barL e bare massWeightPoly)
+    {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin 3)
+    : RightIdx → Fin 2 → B
   | .d f c => fun a => h.dComponent f l (a, c)
   | .u f c => fun a => h.uComponent f l (a, c)
   | .barQ f c s => fun a => h.barQComponent f l (a, c, s)
   | .barL f s => fun a => h.barLComponent f l (a, s)
   | .e f => fun a => h.eComponent f l a
 
-/-- Every undotted component family carries a dual undotted spinor index, at zero
-  covariant derivatives. -/
-lemma isDualLeftWeyl_leftComp (i : LeftIdx) :
-    IsDualLeftWeyl repLorentz (h.leftComp ![] i) := by
+/--
+Every undotted component family carries a dual undotted spinor index, at zero
+covariant derivatives.
+-/
+lemma isDualLeftWeyl_leftComp (i : LeftIdx) : IsDualLeftWeyl repLorentz (h.leftComp (![]) i) := by
   cases i with
-  | bard f c => exact fun Λ a => h.repLorentz_bardComponent Λ f ![] (a, c)
-  | baru f c => exact fun Λ a => h.repLorentz_baruComponent Λ f ![] (a, c)
-  | Q f c s => exact fun Λ a => h.repLorentz_QComponent Λ f ![] (a, c, s)
-  | L f s => exact fun Λ a => h.repLorentz_LComponent Λ f ![] (a, s)
-  | bare f => exact fun Λ a => h.repLorentz_bareComponent Λ f ![] a
+  | bard f c => exact fun Λ a => h.repLorentz_bardComponent Λ f (![]) (a, c)
+  | baru f c => exact fun Λ a => h.repLorentz_baruComponent Λ f (![]) (a, c)
+  | Q f c s => exact fun Λ a => h.repLorentz_QComponent Λ f (![]) (a, c, s)
+  | L f s => exact fun Λ a => h.repLorentz_LComponent Λ f (![]) (a, s)
+  | bare f => exact fun Λ a => h.repLorentz_bareComponent Λ f (![]) a
 
-/-- Every dotted component family carries a dual dotted spinor index, at zero covariant
-  derivatives. -/
-lemma isDualRightWeyl_rightComp (i : RightIdx) :
-    IsDualRightWeyl repLorentz (h.rightComp ![] i) := by
+/--
+Every dotted component family carries a dual dotted spinor index, at zero covariant
+derivatives.
+-/
+lemma isDualRightWeyl_rightComp (i : RightIdx)
+    : IsDualRightWeyl repLorentz (h.rightComp (![]) i) := by
   cases i with
-  | d f c => exact fun Λ a => h.repLorentz_dComponent Λ f ![] (a, c)
-  | u f c => exact fun Λ a => h.repLorentz_uComponent Λ f ![] (a, c)
-  | barQ f c s => exact fun Λ a => h.repLorentz_barQComponent Λ f ![] (a, c, s)
-  | barL f s => exact fun Λ a => h.repLorentz_barLComponent Λ f ![] (a, s)
-  | e f => exact fun Λ a => h.repLorentz_eComponent Λ f ![] a
-
+  | d f c => exact fun Λ a => h.repLorentz_dComponent Λ f (![]) (a, c)
+  | u f c => exact fun Λ a => h.repLorentz_uComponent Λ f (![]) (a, c)
+  | barQ f c s => exact fun Λ a => h.repLorentz_barQComponent Λ f (![]) (a, c, s)
+  | barL f s => exact fun Λ a => h.repLorentz_barLComponent Λ f (![]) (a, s)
+  | e f => exact fun Λ a => h.repLorentz_eComponent Λ f (![]) a
 
 /-!
 
@@ -381,25 +429,31 @@ right index.
 -/
 
 /-- The join of the lines through the components of the five undotted species. -/
-noncomputable def leftSpan (h : IsFermionSector B repGauge hrepGauge_mul repLorentz
-      hrepLorentz_mul d bard u baru Q barQ L barL e bare massWeightPoly)
-    {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin 3) : Submodule ℂ B :=
+noncomputable def leftSpan
+    (h : IsFermionSector B repGauge hrepGauge_mul repLorentz hrepLorentz_mul d bard u baru Q barQ L
+      barL e bare massWeightPoly)
+    {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin 3)
+    : Submodule ℂ B :=
   ⨆ (i : LeftIdx) (a : Fin 2), ℂ ∙ h.leftComp l i a
 
 /-- The join of the lines through the components of the five dotted species. -/
-noncomputable def rightSpan (h : IsFermionSector B repGauge hrepGauge_mul repLorentz
-      hrepLorentz_mul d bard u baru Q barQ L barL e bare massWeightPoly)
-    {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin 3) : Submodule ℂ B :=
+noncomputable def rightSpan
+    (h : IsFermionSector B repGauge hrepGauge_mul repLorentz hrepLorentz_mul d bard u baru Q barQ L
+      barL e bare massWeightPoly)
+    {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin 3)
+    : Submodule ℂ B :=
   ⨆ (i : RightIdx) (a : Fin 2), ℂ ∙ h.rightComp l i a
 
 /-- A basis vector of the dual basis is the matching coordinate functional. -/
-lemma dualBasis_apply {ι M : Type} [AddCommGroup M] [Module ℂ M] [Fintype ι]
-    [DecidableEq ι] (b : Module.Basis ι ℂ M) (j : ι) : b.dualBasis j = b.coord j :=
+lemma dualBasis_apply
+    {ι M : Type} [AddCommGroup M] [Module ℂ M] [Fintype ι] [DecidableEq ι]
+    (b : Module.Basis ι ℂ M) (j : ι)
+    : b.dualBasis j = b.coord j :=
   congrFun (Module.Basis.coe_dualBasis b) j
 
 /-- The range of the `bard` symbols lies in the undotted span. -/
-lemma range_bard_le_leftSpan (f : Fin 3) {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin 3) :
-    LinearMap.range (bard f l) ≤ h.leftSpan l := by
+lemma range_bard_le_leftSpan (f : Fin 3) {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin 3)
+    : LinearMap.range (bard f l) ≤ h.leftSpan l := by
   rw [range_eq_iSup_span ((Basis.conj DownSinglet.basis)) (bard f l)]
   refine iSup_le fun j => ?_
   rw [Submodule.span_singleton_le_iff_mem, ← dualBasis_apply]
@@ -407,8 +461,8 @@ lemma range_bard_le_leftSpan (f : Fin 3) {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin 
     (Submodule.mem_iSup_of_mem j.1 (Submodule.mem_span_singleton_self _))
 
 /-- The range of the `baru` symbols lies in the undotted span. -/
-lemma range_baru_le_leftSpan (f : Fin 3) {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin 3) :
-    LinearMap.range (baru f l) ≤ h.leftSpan l := by
+lemma range_baru_le_leftSpan (f : Fin 3) {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin 3)
+    : LinearMap.range (baru f l) ≤ h.leftSpan l := by
   rw [range_eq_iSup_span ((Basis.conj UpSinglet.basis)) (baru f l)]
   refine iSup_le fun j => ?_
   rw [Submodule.span_singleton_le_iff_mem, ← dualBasis_apply]
@@ -416,8 +470,8 @@ lemma range_baru_le_leftSpan (f : Fin 3) {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin 
     (Submodule.mem_iSup_of_mem j.1 (Submodule.mem_span_singleton_self _))
 
 /-- The range of the `Q` symbols lies in the undotted span. -/
-lemma range_Q_le_leftSpan (f : Fin 3) {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin 3) :
-    LinearMap.range (Q f l) ≤ h.leftSpan l := by
+lemma range_Q_le_leftSpan (f : Fin 3) {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin 3)
+    : LinearMap.range (Q f l) ≤ h.leftSpan l := by
   rw [range_eq_iSup_span (QuarkDoublet.basis) (Q f l)]
   refine iSup_le fun j => ?_
   rw [Submodule.span_singleton_le_iff_mem, ← dualBasis_apply]
@@ -425,8 +479,8 @@ lemma range_Q_le_leftSpan (f : Fin 3) {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin 3) 
     (Submodule.mem_iSup_of_mem j.1 (Submodule.mem_span_singleton_self _))
 
 /-- The range of the `L` symbols lies in the undotted span. -/
-lemma range_L_le_leftSpan (f : Fin 3) {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin 3) :
-    LinearMap.range (L f l) ≤ h.leftSpan l := by
+lemma range_L_le_leftSpan (f : Fin 3) {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin 3)
+    : LinearMap.range (L f l) ≤ h.leftSpan l := by
   rw [range_eq_iSup_span (LeptonDoubletV.basis) (L f l)]
   refine iSup_le fun j => ?_
   rw [Submodule.span_singleton_le_iff_mem, ← dualBasis_apply]
@@ -434,8 +488,8 @@ lemma range_L_le_leftSpan (f : Fin 3) {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin 3) 
     (Submodule.mem_iSup_of_mem j.1 (Submodule.mem_span_singleton_self _))
 
 /-- The range of the `bare` symbols lies in the undotted span. -/
-lemma range_bare_le_leftSpan (f : Fin 3) {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin 3) :
-    LinearMap.range (bare f l) ≤ h.leftSpan l := by
+lemma range_bare_le_leftSpan (f : Fin 3) {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin 3)
+    : LinearMap.range (bare f l) ≤ h.leftSpan l := by
   rw [range_eq_iSup_span ((Basis.conj LeptonSinglet.basis)) (bare f l)]
   refine iSup_le fun j => ?_
   rw [Submodule.span_singleton_le_iff_mem, ← dualBasis_apply]
@@ -443,8 +497,8 @@ lemma range_bare_le_leftSpan (f : Fin 3) {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin 
     (Submodule.mem_iSup_of_mem j (Submodule.mem_span_singleton_self _))
 
 /-- The range of the `d` symbols lies in the dotted span. -/
-lemma range_d_le_rightSpan (f : Fin 3) {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin 3) :
-    LinearMap.range (d f l) ≤ h.rightSpan l := by
+lemma range_d_le_rightSpan (f : Fin 3) {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin 3)
+    : LinearMap.range (d f l) ≤ h.rightSpan l := by
   rw [range_eq_iSup_span (DownSinglet.basis) (d f l)]
   refine iSup_le fun j => ?_
   rw [Submodule.span_singleton_le_iff_mem, ← dualBasis_apply]
@@ -452,8 +506,8 @@ lemma range_d_le_rightSpan (f : Fin 3) {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin 3)
     (Submodule.mem_iSup_of_mem j.1 (Submodule.mem_span_singleton_self _))
 
 /-- The range of the `u` symbols lies in the dotted span. -/
-lemma range_u_le_rightSpan (f : Fin 3) {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin 3) :
-    LinearMap.range (u f l) ≤ h.rightSpan l := by
+lemma range_u_le_rightSpan (f : Fin 3) {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin 3)
+    : LinearMap.range (u f l) ≤ h.rightSpan l := by
   rw [range_eq_iSup_span (UpSinglet.basis) (u f l)]
   refine iSup_le fun j => ?_
   rw [Submodule.span_singleton_le_iff_mem, ← dualBasis_apply]
@@ -461,8 +515,8 @@ lemma range_u_le_rightSpan (f : Fin 3) {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin 3)
     (Submodule.mem_iSup_of_mem j.1 (Submodule.mem_span_singleton_self _))
 
 /-- The range of the `barQ` symbols lies in the dotted span. -/
-lemma range_barQ_le_rightSpan (f : Fin 3) {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin 3) :
-    LinearMap.range (barQ f l) ≤ h.rightSpan l := by
+lemma range_barQ_le_rightSpan (f : Fin 3) {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin 3)
+    : LinearMap.range (barQ f l) ≤ h.rightSpan l := by
   rw [range_eq_iSup_span ((Basis.conj QuarkDoublet.basis)) (barQ f l)]
   refine iSup_le fun j => ?_
   rw [Submodule.span_singleton_le_iff_mem, ← dualBasis_apply]
@@ -470,8 +524,8 @@ lemma range_barQ_le_rightSpan (f : Fin 3) {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin
     (Submodule.mem_iSup_of_mem j.1 (Submodule.mem_span_singleton_self _))
 
 /-- The range of the `barL` symbols lies in the dotted span. -/
-lemma range_barL_le_rightSpan (f : Fin 3) {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin 3) :
-    LinearMap.range (barL f l) ≤ h.rightSpan l := by
+lemma range_barL_le_rightSpan (f : Fin 3) {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin 3)
+    : LinearMap.range (barL f l) ≤ h.rightSpan l := by
   rw [range_eq_iSup_span ((Basis.conj LeptonDoubletV.basis)) (barL f l)]
   refine iSup_le fun j => ?_
   rw [Submodule.span_singleton_le_iff_mem, ← dualBasis_apply]
@@ -479,14 +533,13 @@ lemma range_barL_le_rightSpan (f : Fin 3) {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin
     (Submodule.mem_iSup_of_mem j.1 (Submodule.mem_span_singleton_self _))
 
 /-- The range of the `e` symbols lies in the dotted span. -/
-lemma range_e_le_rightSpan (f : Fin 3) {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin 3) :
-    LinearMap.range (e f l) ≤ h.rightSpan l := by
+lemma range_e_le_rightSpan (f : Fin 3) {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin 3)
+    : LinearMap.range (e f l) ≤ h.rightSpan l := by
   rw [range_eq_iSup_span (LeptonSinglet.basis) (e f l)]
   refine iSup_le fun j => ?_
   rw [Submodule.span_singleton_le_iff_mem, ← dualBasis_apply]
   exact Submodule.mem_iSup_of_mem (.e f)
     (Submodule.mem_iSup_of_mem j (Submodule.mem_span_singleton_self _))
-
 
 /-!
 
@@ -521,24 +574,28 @@ from the Yukawa sector, where the Higgs doublet supplies the missing index.
 
 -/
 
-/-- If `V` lies in the join of the lines through an undotted family and `W` in the join
-  for a dotted one, the product lies in the join of the spans of the pair families. -/
-lemma mul_le_iSup_span_pair {ι κ : Type} {X : ι → Fin 2 → B} {Y : κ → Fin 2 → B}
-    {V W : Submodule ℂ B} (hV : V ≤ ⨆ (i : ι) (a : Fin 2), ℂ ∙ X i a)
-    (hW : W ≤ ⨆ (j : κ) (a : Fin 2), ℂ ∙ Y j a) :
-    V * W ≤ ⨆ (p : ι × κ) (l : Fin 2 × Fin 2), ℂ ∙ (X p.1 l.1 * Y p.2 l.2) := by
+/--
+If `V` lies in the join of the lines through an undotted family and `W` in the join
+for a dotted one, the product lies in the join of the spans of the pair families.
+-/
+lemma mul_le_iSup_span_pair
+    {ι κ : Type} {X : ι → Fin 2 → B} {Y : κ → Fin 2 → B} {V W : Submodule ℂ B}
+    (hV : V ≤ ⨆ (i : ι) (a : Fin 2), ℂ ∙ X i a) (hW : W ≤ ⨆ (j : κ) (a : Fin 2), ℂ ∙ Y j a)
+    : V * W ≤ ⨆ (p : ι × κ) (l : Fin 2 × Fin 2), ℂ ∙ (X p.1 l.1 * Y p.2 l.2) := by
   refine le_trans (mul_le_mul' hV hW) ?_
   simp only [Submodule.iSup_mul, Submodule.mul_iSup]
   refine iSup_le fun j => iSup_le fun b => iSup_le fun i => iSup_le fun a => ?_
   rw [Submodule.span_mul_span, Set.singleton_mul_singleton]
   exact le_iSup₂_of_le (i, j) (a, b) le_rfl
 
-/-- The mirror of `mul_le_iSup_span_pair` with the two spinor slots exchanged, for a
-  product whose left factor is the dotted one. -/
-lemma mul_le_iSup_span_pair_swap {ι κ : Type} {X : ι → Fin 2 → B} {Y : κ → Fin 2 → B}
-    {V W : Submodule ℂ B} (hV : V ≤ ⨆ (i : ι) (a : Fin 2), ℂ ∙ X i a)
-    (hW : W ≤ ⨆ (j : κ) (a : Fin 2), ℂ ∙ Y j a) :
-    V * W ≤ ⨆ (p : ι × κ) (l : Fin 2 × Fin 2), ℂ ∙ (X p.1 l.2 * Y p.2 l.1) := by
+/--
+The mirror of `mul_le_iSup_span_pair` with the two spinor slots exchanged, for a
+product whose left factor is the dotted one.
+-/
+lemma mul_le_iSup_span_pair_swap
+    {ι κ : Type} {X : ι → Fin 2 → B} {Y : κ → Fin 2 → B} {V W : Submodule ℂ B}
+    (hV : V ≤ ⨆ (i : ι) (a : Fin 2), ℂ ∙ X i a) (hW : W ≤ ⨆ (j : κ) (a : Fin 2), ℂ ∙ Y j a)
+    : V * W ≤ ⨆ (p : ι × κ) (l : Fin 2 × Fin 2), ℂ ∙ (X p.1 l.2 * Y p.2 l.1) := by
   refine le_trans (mul_le_mul' hV hW) ?_
   simp only [Submodule.iSup_mul, Submodule.mul_iSup]
   refine iSup_le fun j => iSup_le fun b => iSup_le fun i => iSup_le fun a => ?_
@@ -546,27 +603,32 @@ lemma mul_le_iSup_span_pair_swap {ι κ : Type} {X : ι → Fin 2 → B} {Y : κ
   exact le_iSup₂_of_le (i, j) (b, a) le_rfl
 
 set_option linter.unusedVariables false in
-/-- The mass-weight six families: a product of two underived components of opposite
-  chirality, in either order. -/
-noncomputable def sixFamily (h : IsFermionSector B repGauge hrepGauge_mul repLorentz
-      hrepLorentz_mul d bard u baru Q barQ L barL e bare massWeightPoly) :
-    (LeftIdx × RightIdx) ⊕ (RightIdx × LeftIdx) → Fin 2 × Fin 2 → B
-  | .inl p => fun l => h.leftComp ![] p.1 l.1 * h.rightComp ![] p.2 l.2
-  | .inr p => fun l => h.rightComp ![] p.1 l.2 * h.leftComp ![] p.2 l.1
+/--
+The mass-weight six families: a product of two underived components of opposite
+chirality, in either order.
+-/
+noncomputable def sixFamily
+    (h : IsFermionSector B repGauge hrepGauge_mul repLorentz hrepLorentz_mul d bard u baru Q barQ L
+      barL e bare massWeightPoly)
+    : (LeftIdx × RightIdx) ⊕ (RightIdx × LeftIdx) → Fin 2 × Fin 2 → B
+  | .inl p => fun l => h.leftComp (![]) p.1 l.1 * h.rightComp (![]) p.2 l.2
+  | .inr p => fun l => h.rightComp (![]) p.1 l.2 * h.leftComp (![]) p.2 l.1
 
 /-- The join of the spans of the mass-weight six families. -/
-noncomputable def sixSpan (h : IsFermionSector B repGauge hrepGauge_mul repLorentz
-      hrepLorentz_mul d bard u baru Q barQ L barL e bare massWeightPoly) :
-    Submodule ℂ B :=
+noncomputable def sixSpan
+    (h : IsFermionSector B repGauge hrepGauge_mul repLorentz hrepLorentz_mul d bard u baru Q barQ L
+      barL e bare massWeightPoly)
+    : Submodule ℂ B :=
   ⨆ (i : (LeftIdx × RightIdx) ⊕ (RightIdx × LeftIdx)) (l : Fin 2 × Fin 2),
     ℂ ∙ h.sixFamily i l
 
 include h in
-/-- Each mass-weight six family carries one dual undotted and one dual dotted spinor
-  index. -/
-lemma isDualLeftRightWeyl_sixFamily
-    (i : (LeftIdx × RightIdx) ⊕ (RightIdx × LeftIdx)) :
-    IsDualLeftRightWeyl B repLorentz
+/--
+Each mass-weight six family carries one dual undotted and one dual dotted spinor
+index.
+-/
+lemma isDualLeftRightWeyl_sixFamily (i : (LeftIdx × RightIdx) ⊕ (RightIdx × LeftIdx))
+    : IsDualLeftRightWeyl B repLorentz
       (ofPairComponents (k := .downL) (k' := .downR) fun a b => h.sixFamily i (a, b)) := by
   cases i with
   | inl p =>
@@ -578,67 +640,77 @@ lemma isDualLeftRightWeyl_sixFamily
 
 include h in
 /-- An undotted range times a dotted one lies in the mass-weight six span. -/
-lemma mul_le_sixSpan_left {V W : Submodule ℂ B} (hV : V ≤ h.leftSpan ![])
-    (hW : W ≤ h.rightSpan ![]) : V * W ≤ h.sixSpan :=
+lemma mul_le_sixSpan_left {V W : Submodule ℂ B} (hV : V ≤ h.leftSpan ![]) (hW : W ≤ h.rightSpan ![])
+    : V * W ≤ h.sixSpan :=
   (mul_le_iSup_span_pair hV hW).trans
     (iSup_le fun p => le_iSup (fun i => ⨆ l, ℂ ∙ h.sixFamily i l) (.inl p))
 
 include h in
 /-- A dotted range times an undotted one lies in the mass-weight six span. -/
-lemma mul_le_sixSpan_right {V W : Submodule ℂ B} (hV : V ≤ h.rightSpan ![])
-    (hW : W ≤ h.leftSpan ![]) : V * W ≤ h.sixSpan :=
+lemma mul_le_sixSpan_right
+    {V W : Submodule ℂ B} (hV : V ≤ h.rightSpan ![]) (hW : W ≤ h.leftSpan ![])
+    : V * W ≤ h.sixSpan :=
   (mul_le_iSup_span_pair_swap hV hW).trans
     (iSup_le fun p => le_iSup (fun i => ⨆ l, ℂ ∙ h.sixFamily i l) (.inr p))
 
 include h in
-/-- The weight-zero piece at mass weight six lies in the span of the mass-weight six
-  families: each of the ten conjugate pairings is a product of an undotted range with a
-  dotted one, in one order or the other. -/
-lemma massWeightSubmoduleGaugeWeightSix_piece_zero_le :
-    (h.massWeightSubmoduleGaugeWeightSix).piece 0 ≤ h.sixSpan := by
+/--
+The weight-zero piece at mass weight six lies in the span of the mass-weight six
+families: each of the ten conjugate pairings is a product of an undotted range with a
+dotted one, in one order or the other.
+-/
+lemma massWeightSubmoduleGaugeWeightSix_piece_zero_le
+    : (h.massWeightSubmoduleGaugeWeightSix).piece 0 ≤ h.sixSpan := by
   rw [h.massWeightSubmoduleGaugeWeightSix_piece_zero]
-  refine iSup_le fun f => iSup_le fun f' => sup_le (sup_le (sup_le (sup_le (sup_le
-    (sup_le (sup_le (sup_le (sup_le ?_ ?_) ?_) ?_) ?_) ?_) ?_) ?_) ?_) ?_
-  · exact (GaugeWeightDecomposition.piece_le_self _ 0).trans (h.mul_le_sixSpan_right
-      (h.range_d_le_rightSpan f ![]) (h.range_bard_le_leftSpan f' ![]))
-  · exact (GaugeWeightDecomposition.piece_le_self _ 0).trans (h.mul_le_sixSpan_left
-      (h.range_bard_le_leftSpan f ![]) (h.range_d_le_rightSpan f' ![]))
-  · exact (GaugeWeightDecomposition.piece_le_self _ 0).trans (h.mul_le_sixSpan_right
-      (h.range_u_le_rightSpan f ![]) (h.range_baru_le_leftSpan f' ![]))
-  · exact (GaugeWeightDecomposition.piece_le_self _ 0).trans (h.mul_le_sixSpan_left
-      (h.range_baru_le_leftSpan f ![]) (h.range_u_le_rightSpan f' ![]))
-  · exact (GaugeWeightDecomposition.piece_le_self _ 0).trans (h.mul_le_sixSpan_left
-      (h.range_Q_le_leftSpan f ![]) (h.range_barQ_le_rightSpan f' ![]))
-  · exact (GaugeWeightDecomposition.piece_le_self _ 0).trans (h.mul_le_sixSpan_right
-      (h.range_barQ_le_rightSpan f ![]) (h.range_Q_le_leftSpan f' ![]))
-  · exact (GaugeWeightDecomposition.piece_le_self _ 0).trans (h.mul_le_sixSpan_left
-      (h.range_L_le_leftSpan f ![]) (h.range_barL_le_rightSpan f' ![]))
-  · exact (GaugeWeightDecomposition.piece_le_self _ 0).trans (h.mul_le_sixSpan_right
-      (h.range_barL_le_rightSpan f ![]) (h.range_L_le_leftSpan f' ![]))
-  · exact (GaugeWeightDecomposition.piece_le_self _ 0).trans (h.mul_le_sixSpan_right
-      (h.range_e_le_rightSpan f ![]) (h.range_bare_le_leftSpan f' ![]))
-  · exact (GaugeWeightDecomposition.piece_le_self _ 0).trans (h.mul_le_sixSpan_left
-      (h.range_bare_le_leftSpan f ![]) (h.range_e_le_rightSpan f' ![]))
+  refine iSup_le fun f =>
+    iSup_le fun f' =>
+      sup_le
+        (sup_le
+          (sup_le (sup_le (sup_le (sup_le (sup_le (sup_le (sup_le ?_ ?_) ?_) ?_) ?_) ?_) ?_) ?_) ?_)
+        ?_
+  · exact (GaugeWeightDecomposition.piece_le_self _ 0).trans
+      (h.mul_le_sixSpan_right (h.range_d_le_rightSpan f ![]) (h.range_bard_le_leftSpan f' ![]))
+  · exact (GaugeWeightDecomposition.piece_le_self _ 0).trans
+      (h.mul_le_sixSpan_left (h.range_bard_le_leftSpan f ![]) (h.range_d_le_rightSpan f' ![]))
+  · exact (GaugeWeightDecomposition.piece_le_self _ 0).trans
+      (h.mul_le_sixSpan_right (h.range_u_le_rightSpan f ![]) (h.range_baru_le_leftSpan f' ![]))
+  · exact (GaugeWeightDecomposition.piece_le_self _ 0).trans
+      (h.mul_le_sixSpan_left (h.range_baru_le_leftSpan f ![]) (h.range_u_le_rightSpan f' ![]))
+  · exact (GaugeWeightDecomposition.piece_le_self _ 0).trans
+      (h.mul_le_sixSpan_left (h.range_Q_le_leftSpan f ![]) (h.range_barQ_le_rightSpan f' ![]))
+  · exact (GaugeWeightDecomposition.piece_le_self _ 0).trans
+      (h.mul_le_sixSpan_right (h.range_barQ_le_rightSpan f ![]) (h.range_Q_le_leftSpan f' ![]))
+  · exact (GaugeWeightDecomposition.piece_le_self _ 0).trans
+      (h.mul_le_sixSpan_left (h.range_L_le_leftSpan f ![]) (h.range_barL_le_rightSpan f' ![]))
+  · exact (GaugeWeightDecomposition.piece_le_self _ 0).trans
+      (h.mul_le_sixSpan_right (h.range_barL_le_rightSpan f ![]) (h.range_L_le_leftSpan f' ![]))
+  · exact (GaugeWeightDecomposition.piece_le_self _ 0).trans
+      (h.mul_le_sixSpan_right (h.range_e_le_rightSpan f ![]) (h.range_bare_le_leftSpan f' ![]))
+  · exact (GaugeWeightDecomposition.piece_le_self _ 0).trans
+      (h.mul_le_sixSpan_left (h.range_bare_le_leftSpan f ![]) (h.range_e_le_rightSpan f' ![]))
 
 include h in
-/-- Mass weight six carries no invariant modulo a stable submodule: there is no Dirac
-  mass term. A gauge- and Lorentz-invariant element of `massWeightSubmodule 6 ⊔ S` lies
-  in `S`, gauge invariance cutting the hundred pairings of two fermion symbols down to
-  the ten conjugate ones and Lorentz invariance killing each of those, its two spinor
-  indices being of opposite chirality. -/
-lemma mem_of_invariant_of_mem_massWeightSubmoduleSix_sup {S : Submodule ℂ B}
-    (hS : ∀ (g : GaugeGroupI) (y : B), y ∈ S → repGauge g y ∈ S)
-    (hSL : ∀ g : SL(2,ℂ), ∀ y ∈ S, repLorentz g y ∈ S) {x : B}
-    (hx : x ∈ h.massWeightSubmodule 6 ⊔ S)
-    (hG : ∀ g : GaugeGroupI, repGauge g x = x)
-    (hL : ∀ g : SL(2,ℂ), repLorentz g x = x) : x ∈ S := by
+/--
+Mass weight six carries no invariant modulo a stable submodule: there is no Dirac
+mass term. A gauge- and Lorentz-invariant element of `massWeightSubmodule 6 ⊔ S` lies
+in `S`, gauge invariance cutting the hundred pairings of two fermion symbols down to
+the ten conjugate ones and Lorentz invariance killing each of those, its two spinor
+indices being of opposite chirality.
+-/
+lemma mem_of_invariant_of_mem_massWeightSubmoduleSix_sup
+    {S : Submodule ℂ B} (hS : ∀ (g : GaugeGroupI) (y : B), y ∈ S → repGauge g y ∈ S)
+    (hSL : ∀ g : SL(2,ℂ), ∀ y ∈ S, repLorentz g y ∈ S)
+    {x : B} (hx : x ∈ h.massWeightSubmodule 6 ⊔ S) (hG : ∀ g : GaugeGroupI, repGauge g x = x)
+    (hL : ∀ g : SL(2,ℂ), repLorentz g x = x)
+    : x ∈ S := by
   have hzero : x ∈ (h.massWeightSubmoduleGaugeWeightSix).piece 0 ⊔ S :=
-    GaugeWeightDecomposition.mem_piece_zero_sup_of_invariant _ (fun i y hy => hS _ y hy) hx
+    GaugeWeightDecomposition.mem_piece_zero_sup_of_invariant _
+      (fun i y hy => hS _ y hy)
+      hx
       fun _ => hG _
-  refine mem_of_lorentz_invariant_iSup_dualLeftRightWeyl_span
-    h.isDualLeftRightWeyl_sixFamily S hSL ?_ hL
+  refine mem_of_lorentz_invariant_iSup_dualLeftRightWeyl_span h.isDualLeftRightWeyl_sixFamily S hSL
+    ?_ hL
   exact sup_le_sup_right h.massWeightSubmoduleGaugeWeightSix_piece_zero_le S hzero
-
 
 /-!
 
@@ -657,17 +729,19 @@ representations being multiplicative, without lying in any given `S`.
 -/
 
 include h in
-/-- Between mass weight zero and mass weight eight the fermion sector carries no
-  invariant: an element of `massWeightSubmodule w ⊔ S` for `0 < w < 8` fixed by both
-  groups lies in `S`. Weights one, two and four are trivial, weights three, five and
-  seven carry no gauge singlet, and weight six is the missing Dirac mass term. -/
-lemma mem_of_invariant_massWeightSubmodule_lt_eight_sup (w : ℕ) (hw0 : 0 < w)
-    (hw : w < 8) (S : Submodule ℂ B)
-    (hS : ∀ g : GaugeGroupI, ∀ y ∈ S, repGauge g y ∈ S)
-    (hSL : ∀ g : SL(2,ℂ), ∀ y ∈ S, repLorentz g y ∈ S) {x : B}
-    (hx : x ∈ h.massWeightSubmodule w ⊔ S)
-    (hG : ∀ g : GaugeGroupI, repGauge g x = x)
-    (hL : ∀ g : SL(2,ℂ), repLorentz g x = x) : x ∈ S := by
+/--
+Between mass weight zero and mass weight eight the fermion sector carries no
+invariant: an element of `massWeightSubmodule w ⊔ S` for `0 < w < 8` fixed by both
+groups lies in `S`. Weights one, two and four are trivial, weights three, five and
+seven carry no gauge singlet, and weight six is the missing Dirac mass term.
+-/
+lemma mem_of_invariant_massWeightSubmodule_lt_eight_sup
+    (w : ℕ) (hw0 : 0 < w) (hw : w < 8)
+    (S : Submodule ℂ B) (hS : ∀ g : GaugeGroupI, ∀ y ∈ S, repGauge g y ∈ S)
+    (hSL : ∀ g : SL(2,ℂ), ∀ y ∈ S, repLorentz g y ∈ S)
+    {x : B} (hx : x ∈ h.massWeightSubmodule w ⊔ S) (hG : ∀ g : GaugeGroupI, repGauge g x = x)
+    (hL : ∀ g : SL(2,ℂ), repLorentz g x = x)
+    : x ∈ S := by
   interval_cases w
   · exact h.mem_of_mem_massWeightSubmoduleOne_sup hx
   · exact h.mem_of_mem_massWeightSubmoduleTwo_sup hx
@@ -678,42 +752,55 @@ lemma mem_of_invariant_massWeightSubmodule_lt_eight_sup (w : ℕ) (hw0 : 0 < w)
   · exact h.mem_of_invariant_of_mem_massWeightSubmoduleSeven_sup hS hx hG
 
 include h in
-/-- The classification below mass weight eight as an equivalence, in the shape of
-  `mem_massWeightSubmodule_eight_sup_and_gauge_lorentz_invariant_iff`: an element of
-  `massWeightSubmodule w ⊔ S` for `0 < w < 8` is fixed by both groups exactly when it is
-  itself an element of `S` fixed by both groups. The span of invariants that the weight
-  eight statement leaves over is here the trivial one, so `x - y` lies in it exactly when
-  `x = y`. -/
-lemma mem_massWeightSubmodule_lt_eight_sup_and_gauge_lorentz_invariant_iff (w : ℕ)
-    (hw0 : 0 < w) (hw : w < 8) (S : Submodule ℂ B)
-    (hS : ∀ g : GaugeGroupI, ∀ y ∈ S, repGauge g y ∈ S)
-    (hSL : ∀ g : SL(2,ℂ), ∀ y ∈ S, repLorentz g y ∈ S) (x : B) :
-    (x ∈ h.massWeightSubmodule w ⊔ S ∧ (∀ g : GaugeGroupI, repGauge g x = x)
+/--
+The classification below mass weight eight as an equivalence, in the shape of
+`mem_massWeightSubmodule_eight_sup_and_gauge_lorentz_invariant_iff`: an element of
+`massWeightSubmodule w ⊔ S` for `0 < w < 8` is fixed by both groups exactly when it is
+itself an element of `S` fixed by both groups. The span of invariants that the weight
+eight statement leaves over is here the trivial one, so `x - y` lies in it exactly when
+`x = y`.
+-/
+lemma mem_massWeightSubmodule_lt_eight_sup_and_gauge_lorentz_invariant_iff
+    (w : ℕ) (hw0 : 0 < w) (hw : w < 8)
+    (S : Submodule ℂ B) (hS : ∀ g : GaugeGroupI, ∀ y ∈ S, repGauge g y ∈ S)
+    (hSL : ∀ g : SL(2,ℂ), ∀ y ∈ S, repLorentz g y ∈ S)
+    (x : B)
+    : (x ∈ h.massWeightSubmodule w ⊔ S ∧ (∀ g : GaugeGroupI, repGauge g x = x)
         ∧ ∀ g : SL(2,ℂ), repLorentz g x = x)
-      ↔ ∃ y ∈ S, (∀ g : GaugeGroupI, repGauge g y = y)
-          ∧ (∀ g : SL(2,ℂ), repLorentz g y = y)
-          ∧ x = y := by
+      ↔ ∃ y ∈ S,
+        (∀ g : GaugeGroupI, repGauge g y = y) ∧ (∀ g : SL(2,ℂ), repLorentz g y = y) ∧ x = y := by
   constructor
   · rintro ⟨hx, hG, hL⟩
-    exact ⟨x, h.mem_of_invariant_massWeightSubmodule_lt_eight_sup w hw0 hw S hS hSL hx hG
-      hL, hG, hL, rfl⟩
+    exact ⟨
+      x,
+      h.mem_of_invariant_massWeightSubmodule_lt_eight_sup w hw0 hw S hS hSL hx hG hL,
+      hG,
+      hL,
+      rfl
+    ⟩
   · rintro ⟨y, hyS, hyG, hyL, rfl⟩
     exact ⟨Submodule.mem_sup_right hyS, hyG, hyL⟩
 
 include h in
-/-- The same classification without the existential: below mass weight eight an element
-  of `massWeightSubmodule w ⊔ S` fixed by both groups is an element of `S` fixed by both
-  groups, and conversely. -/
-lemma mem_massWeightSubmodule_lt_eight_sup_and_gauge_lorentz_invariant_iff_mem (w : ℕ)
-    (hw0 : 0 < w) (hw : w < 8) (S : Submodule ℂ B)
-    (hS : ∀ g : GaugeGroupI, ∀ y ∈ S, repGauge g y ∈ S)
-    (hSL : ∀ g : SL(2,ℂ), ∀ y ∈ S, repLorentz g y ∈ S) (x : B) :
-    (x ∈ h.massWeightSubmodule w ⊔ S ∧ (∀ g : GaugeGroupI, repGauge g x = x)
+/--
+The same classification without the existential: below mass weight eight an element
+of `massWeightSubmodule w ⊔ S` fixed by both groups is an element of `S` fixed by both
+groups, and conversely.
+-/
+lemma mem_massWeightSubmodule_lt_eight_sup_and_gauge_lorentz_invariant_iff_mem
+    (w : ℕ) (hw0 : 0 < w) (hw : w < 8)
+    (S : Submodule ℂ B) (hS : ∀ g : GaugeGroupI, ∀ y ∈ S, repGauge g y ∈ S)
+    (hSL : ∀ g : SL(2,ℂ), ∀ y ∈ S, repLorentz g y ∈ S)
+    (x : B)
+    : (x ∈ h.massWeightSubmodule w ⊔ S ∧ (∀ g : GaugeGroupI, repGauge g x = x)
         ∧ ∀ g : SL(2,ℂ), repLorentz g x = x)
-      ↔ (x ∈ S ∧ (∀ g : GaugeGroupI, repGauge g x = x)
-          ∧ ∀ g : SL(2,ℂ), repLorentz g x = x) :=
-  ⟨fun hx => ⟨h.mem_of_invariant_massWeightSubmodule_lt_eight_sup w hw0 hw S hS hSL hx.1
-    hx.2.1 hx.2.2, hx.2⟩, fun hx => ⟨Submodule.mem_sup_right hx.1, hx.2⟩⟩
+      ↔ (x ∈ S ∧ (∀ g : GaugeGroupI, repGauge g x = x) ∧ ∀ g : SL(2,ℂ), repLorentz g x = x) := ⟨
+  fun hx => ⟨
+    h.mem_of_invariant_massWeightSubmodule_lt_eight_sup w hw0 hw S hS hSL hx.1 hx.2.1 hx.2.2,
+    hx.2
+  ⟩,
+  fun hx => ⟨Submodule.mem_sup_right hx.1, hx.2⟩
+⟩
 
 end IsFermionSector
 

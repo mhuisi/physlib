@@ -127,8 +127,10 @@ We will also prove that this predicate is decidable.
 
 -/
 
-/-- The proposition which is true on those terms which are members of the
-  super potential. -/
+/--
+The proposition which is true on those terms which are members of the
+super potential.
+-/
 def InSuperPotential : PotentialTerm → Prop
   | μ => True
   | β => True
@@ -164,9 +166,9 @@ Been in the super potential implies that the term contains no conjugate fields.
 -/
 
 /-- The terms within the super-potential contain no conjugate fields. -/
-lemma no_conjugate_in_toFieldLabel_of_inSuperPotential {T : PotentialTerm}
-    (h : T.InSuperPotential) : FieldLabel.fiveMatter ∉ T.toFieldLabel ∧
-    FieldLabel.fiveHd ∉ T.toFieldLabel ∧ FieldLabel.fiveBarHu ∉ T.toFieldLabel:= by
+lemma no_conjugate_in_toFieldLabel_of_inSuperPotential {T : PotentialTerm} (h : T.InSuperPotential)
+    : FieldLabel.fiveMatter ∉ T.toFieldLabel ∧ FieldLabel.fiveHd ∉ T.toFieldLabel
+      ∧ FieldLabel.fiveBarHu ∉ T.toFieldLabel := by
   revert T
   decide
 
@@ -196,12 +198,11 @@ which are `β`, `Λ`, `W2`, `W4`, `K1`, or `K2`.
 
 -/
 /-- The R-parity of a term in the potential. -/
-def RParity (T : PotentialTerm) : Fin 2 :=
-  (T.toFieldLabel.map FieldLabel.RParity).foldl (· + ·) 0
+def RParity (T : PotentialTerm) : Fin 2 := (T.toFieldLabel.map FieldLabel.RParity).foldl (· + ·) 0
 
 /- The terms which violate R-parity are those with an odd-number of matter fields. -/
-lemma violates_RParity_iff_mem {T : PotentialTerm} :
-    T.RParity = 1 ↔ T ∈ ({β, Λ, W2, W4, K1, K2} : Finset PotentialTerm) := by
+lemma violates_RParity_iff_mem {T : PotentialTerm}
+    : T.RParity = 1 ↔ T ∈ ({β, Λ, W2, W4, K1, K2} : Finset PotentialTerm) := by
   revert T
   decide
 
@@ -214,15 +215,15 @@ We do not at this point prove this result.
 
 -/
 
-/-- The finite set of terms in the superpotential and Kahler potential which are involved in
+/--
+The finite set of terms in the superpotential and Kahler potential which are involved in
   proton decay.
 - `W¹ᵢⱼₖₗ 10ⁱ 10ʲ 10ᵏ 5̄Mˡ`
 - `𝜆ᵢⱼₖ 5̄Mⁱ 5̄Mʲ 10ᵏ`
 - `W²ᵢⱼₖ 10ⁱ 10ʲ 10ᵏ 5̄Hd`
 - `K¹ᵢⱼₖ 10ⁱ 10ʲ 5Mᵏ`
 -/
-def causeProtonDecay : Finset PotentialTerm :=
-  {W1, Λ, W2, K1}
+def causeProtonDecay : Finset PotentialTerm := {W1, Λ, W2, K1}
 
 end PotentialTerm
 

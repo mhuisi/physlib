@@ -68,19 +68,22 @@ symbols, which pairs with `f` as `∂^s` pairs with `χ f` by `pairing_constr_le
 
 /-- The action of series on derivative symbols, defined on monomials by the product rule. -/
 noncomputable def seriesAction : SpaceTimeAlgebra →+* Module.End ℂ SpaceTimeDerivAlgebraℂ where
-  toFun χ := basis.constr ℂ fun s =>
-    (s.antidiagonal.map fun t => constantCoeff (iteratedPDeriv t.1 χ) • ∂^[t.2]).sum
+  toFun χ :=
+    basis.constr ℂ fun s =>
+      (s.antidiagonal.map fun t => constantCoeff (iteratedPDeriv t.1 χ) • ∂^[t.2]).sum
   map_one' := LinearMap.ext fun p => ext_of_pairing_eq fun f => by simp [pairing_constr_leibniz]
-  map_mul' χ ψ := LinearMap.ext fun p => ext_of_pairing_eq fun f => by
-    simp only [Module.End.mul_apply, pairing_constr_leibniz, mul_comm χ ψ, mul_assoc]
+  map_mul' χ ψ :=
+    LinearMap.ext fun p =>
+      ext_of_pairing_eq fun f => by
+        simp only [Module.End.mul_apply, pairing_constr_leibniz, mul_comm χ ψ, mul_assoc]
   map_zero' := LinearMap.ext fun p => ext_of_pairing_eq fun f => by simp [pairing_constr_leibniz]
-  map_add' χ ψ := LinearMap.ext fun p => ext_of_pairing_eq fun f => by
-    simp [pairing_constr_leibniz, add_mul]
+  map_add' χ ψ :=
+    LinearMap.ext fun p => ext_of_pairing_eq fun f => by simp [pairing_constr_leibniz, add_mul]
 
 /-- The action of `χ` on a monomial `∂^s` is its Leibniz expansion. -/
-lemma seriesAction_basis (χ : SpaceTimeAlgebra) (s : Multiset (Fin 1 ⊕ Fin 3)) :
-    seriesAction χ ∂^[s] =
-      (s.antidiagonal.map fun t => constantCoeff (iteratedPDeriv t.1 χ) • ∂^[t.2]).sum :=
+lemma seriesAction_basis (χ : SpaceTimeAlgebra) (s : Multiset (Fin 1 ⊕ Fin 3))
+    : seriesAction χ ∂^[s]
+      = (s.antidiagonal.map fun t => constantCoeff (iteratedPDeriv t.1 χ) • ∂^[t.2]).sum :=
   basis.constr_basis ℂ _ s
 
 /-!
@@ -94,16 +97,15 @@ multiplying by `χ`. In particular the constant series `C c` acts as multiplicat
 -/
 
 /-- The action of `χ` multiplies by `χ` before applying the symbol. -/
-lemma pairing_seriesAction (χ : SpaceTimeAlgebra) (p : SpaceTimeDerivAlgebraℂ)
-    (f : SpaceTimeAlgebra) :
-    pairing (seriesAction χ p) f = pairing p (χ * f) :=
+lemma pairing_seriesAction
+    (χ : SpaceTimeAlgebra) (p : SpaceTimeDerivAlgebraℂ) (f : SpaceTimeAlgebra)
+    : pairing (seriesAction χ p) f = pairing p (χ * f) :=
   pairing_constr_leibniz χ p f
 
 /-- The constant series `C c` acts as scalar multiplication by `c`. -/
 @[simp]
 lemma seriesAction_C (c : ℂ) : seriesAction (C c) = c • LinearMap.id :=
-  LinearMap.ext fun p => ext_of_pairing_eq fun f => by
-    simp [pairing_seriesAction, ← smul_eq_C_mul]
+  LinearMap.ext fun p => ext_of_pairing_eq fun f => by simp [pairing_seriesAction, ← smul_eq_C_mul]
 
 /-!
 
@@ -118,14 +120,13 @@ which is the product rule at the base point.
 
 /-- A series acts on the unit symbol by its base-point value. -/
 @[simp]
-lemma seriesAction_apply_one (χ : SpaceTimeAlgebra) :
-    seriesAction χ 1 = constantCoeff χ • 1 := by
+lemma seriesAction_apply_one (χ : SpaceTimeAlgebra) : seriesAction χ 1 = constantCoeff χ • 1 := by
   rw [← basis_zero, seriesAction_basis, Multiset.antidiagonal_zero]
   simp
 
 /-- A series `χ` sends `∂_μ` to `χ(x₀) ∂_μ + (∂_μ χ)(x₀)`, the product rule. -/
-lemma seriesAction_basis_singleton (χ : SpaceTimeAlgebra) (μ : Fin 1 ⊕ Fin 3) :
-    seriesAction χ ∂[μ] = constantCoeff χ • ∂[μ] + constantCoeff (pderiv μ χ) • 1 := by
+lemma seriesAction_basis_singleton (χ : SpaceTimeAlgebra) (μ : Fin 1 ⊕ Fin 3)
+    : seriesAction χ ∂[μ] = constantCoeff χ • ∂[μ] + constantCoeff (pderiv μ χ) • 1 := by
   rw [seriesAction_basis, ← Multiset.cons_zero, Multiset.antidiagonal_cons,
     Multiset.antidiagonal_zero]
   simp
@@ -141,9 +142,9 @@ multiplication by `∂_μ`.
 -/
 
 /-- The action commutes with multiplication by `∂_μ` up to the action of `pderiv μ χ`. -/
-lemma seriesAction_mul_basis_singleton (χ : SpaceTimeAlgebra) (p : SpaceTimeDerivAlgebraℂ)
-    (μ : Fin 1 ⊕ Fin 3) :
-    seriesAction χ (p * ∂[μ]) = seriesAction χ p * ∂[μ] + seriesAction (pderiv μ χ) p :=
+lemma seriesAction_mul_basis_singleton
+    (χ : SpaceTimeAlgebra) (p : SpaceTimeDerivAlgebraℂ) (μ : Fin 1 ⊕ Fin 3)
+    : seriesAction χ (p * ∂[μ]) = seriesAction χ p * ∂[μ] + seriesAction (pderiv μ χ) p :=
   ext_of_pairing_eq fun f => by
     rw [map_add, LinearMap.add_apply, pairing_seriesAction, pairing_mul_basis_singleton,
       pairing_mul_basis_singleton, pairing_seriesAction, pairing_seriesAction, Derivation.leibniz,

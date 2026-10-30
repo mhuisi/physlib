@@ -32,8 +32,10 @@ open MatrixGroups
 open Complex
 open TensorProduct
 
-/-- A Dirac fermion, consisting of a left handed Weyl fermion and a dual
-  right handed Weyl fermion. -/
+/--
+A Dirac fermion, consisting of a left handed Weyl fermion and a dual
+right handed Weyl fermion.
+-/
 structure Dirac where
   /-- The left handed component of the Dirac fermion. -/
   left : LeftHandedWeyl
@@ -51,8 +53,10 @@ from the module structure on left handed and dual right handed Weyl fermions.
 
 -/
 
-/-- The decomposition of a Dirac fermion into its left handed and
-  dual right handed components. -/
+/--
+The decomposition of a Dirac fermion into its left handed and
+dual right handed components.
+-/
 def decomposeEquiv : Dirac ≃ LeftHandedWeyl × DualRightHandedWeyl where
   toFun d := (d.left, d.dualRight)
   invFun p := ⟨p.1, p.2⟩
@@ -63,17 +67,14 @@ instance : AddCommGroup Dirac := Equiv.addCommGroup decomposeEquiv
 
 instance : Module ℂ Dirac := AddEquiv.module ℂ { decomposeEquiv with map_add' _ _ := rfl }
 
-@[simp]
-lemma left_add (d₁ d₂ : Dirac) : (d₁ + d₂).left = d₁.left + d₂.left := rfl
+@[simp] lemma left_add (d₁ d₂ : Dirac) : (d₁ + d₂).left = d₁.left + d₂.left := rfl
 
 @[simp]
 lemma dualRight_add (d₁ d₂ : Dirac) : (d₁ + d₂).dualRight = d₁.dualRight + d₂.dualRight := rfl
 
-@[simp]
-lemma left_smul (c : ℂ) (d : Dirac) : (c • d).left = c • d.left := rfl
+@[simp] lemma left_smul (c : ℂ) (d : Dirac) : (c • d).left = c • d.left := rfl
 
-@[simp]
-lemma dualRight_smul (c : ℂ) (d : Dirac) : (c • d).dualRight = c • d.dualRight := rfl
+@[simp] lemma dualRight_smul (c : ℂ) (d : Dirac) : (c • d).dualRight = c • d.dualRight := rfl
 
 /-- The linear equivalence between `Dirac` and `LeftHandedWeyl × DualRightHandedWeyl`. -/
 def decomposeLinEquiv : Dirac ≃ₗ[ℂ] LeftHandedWeyl × DualRightHandedWeyl where
@@ -92,49 +93,54 @@ open Module
 /-- The chiral basis of the Dirac fermions. -/
 def chiralBasis : Basis (Fin 4) ℂ Dirac :=
   ((LeftHandedWeyl.basis.prod DualRightHandedWeyl.basis).reindex finSumFinEquiv).map
-  decomposeLinEquiv.symm
+    decomposeLinEquiv.symm
 
-lemma chiralBasis_cast_add (i : Fin 2) : chiralBasis (Fin.castAdd 2 i) =
-    ⟨LeftHandedWeyl.basis i, 0⟩ := by
+lemma chiralBasis_cast_add (i : Fin 2)
+    : chiralBasis (Fin.castAdd 2 i) = ⟨LeftHandedWeyl.basis i, 0⟩ := by
   fin_cases i
   all_goals
-    simp only [chiralBasis, Nat.reduceAdd, Basis.map_apply, Basis.coe_reindex,
-    Function.comp_apply, Basis.prod_apply, LinearMap.coe_inl, LinearMap.coe_inr]
+    simp only [chiralBasis, Nat.reduceAdd, Basis.map_apply, Basis.coe_reindex, Function.comp_apply,
+      Basis.prod_apply, LinearMap.coe_inl, LinearMap.coe_inr]
     rfl
 
-lemma chiralBasis_nat_add (i : Fin 2) : chiralBasis (Fin.natAdd 2 i) =
-    ⟨0, DualRightHandedWeyl.basis i⟩ := by
+lemma chiralBasis_nat_add (i : Fin 2)
+    : chiralBasis (Fin.natAdd 2 i) = ⟨0, DualRightHandedWeyl.basis i⟩ := by
   fin_cases i
   all_goals
-    simp only [chiralBasis, Nat.reduceAdd, Basis.map_apply, Basis.coe_reindex,
-    Function.comp_apply, Basis.prod_apply, LinearMap.coe_inl, LinearMap.coe_inr]
+    simp only [chiralBasis, Nat.reduceAdd, Basis.map_apply, Basis.coe_reindex, Function.comp_apply,
+      Basis.prod_apply, LinearMap.coe_inl, LinearMap.coe_inr]
     rfl
 
-/-- Dirac endomorphisms as matrices in the Dirac representation. The change of coordinates
+/--
+Dirac endomorphisms as matrices in the Dirac representation. The change of coordinates
 from the chiral representation is `S = [1, 1; -1, 1]`, with `2 × 2` blocks, so this map sends
-`f` to `S [f] S⁻¹`. The common normalization factor `1 / √2` cancels in conjugation. -/
+`f` to `S [f] S⁻¹`. The common normalization factor `1 / √2` cancels in conjugation.
+-/
 def endEquivMatrix : Module.End ℂ Dirac ≃ₐ[ℂ] Matrix (Fin 4) (Fin 4) ℂ :=
   (LinearEquiv.conjAlgEquiv ℂ
-    (Matrix.toLinOfInv chiralBasis chiralBasis
-      (M := !![1, 0, 1, 0; 0, 1, 0, 1; -1, 0, 1, 0; 0, -1, 0, 1])
-      (M' := (2 : ℂ)⁻¹ • !![1, 0, -1, 0; 0, 1, 0, -1; 1, 0, 1, 0; 0, 1, 0, 1])
-      (by ext i j; fin_cases i <;> fin_cases j <;>
-          norm_num [Matrix.cons_val_two, Matrix.cons_val_three, Matrix.one_apply])
-      (by ext i j; fin_cases i <;> fin_cases j <;>
-          norm_num [Matrix.cons_val_two, Matrix.cons_val_three, Matrix.one_apply]))).trans
+      (Matrix.toLinOfInv chiralBasis chiralBasis
+        (M := !![1, 0, 1, 0; 0, 1, 0, 1; -1, 0, 1, 0; 0, -1, 0, 1])
+        (M' := (2 : ℂ)⁻¹ • !![1, 0, -1, 0; 0, 1, 0, -1; 1, 0, 1, 0; 0, 1, 0, 1])
+        (by
+          ext i j
+          fin_cases i <;> fin_cases j
+            <;> norm_num [Matrix.cons_val_two, Matrix.cons_val_three, Matrix.one_apply])
+        (by
+          ext i j
+          fin_cases i <;> fin_cases j
+            <;> norm_num [Matrix.cons_val_two, Matrix.cons_val_three, Matrix.one_apply]))).trans
     (LinearMap.toMatrixAlgEquiv chiralBasis)
 
 /-- The change of coordinates from the chiral representation to the Dirac representation. -/
-lemma endEquivMatrix_apply (f : Module.End ℂ Dirac) :
-    endEquivMatrix f =
-      !![1, 0, 1, 0; 0, 1, 0, 1; -1, 0, 1, 0; 0, -1, 0, 1] *
-        LinearMap.toMatrix chiralBasis chiralBasis f *
-        ((2 : ℂ)⁻¹ • !![1, 0, -1, 0; 0, 1, 0, -1; 1, 0, 1, 0; 0, 1, 0, 1]) := by
+lemma endEquivMatrix_apply (f : Module.End ℂ Dirac)
+    : endEquivMatrix f
+      = !![1, 0, 1, 0; 0, 1, 0, 1; -1, 0, 1, 0; 0, -1, 0, 1]
+        * LinearMap.toMatrix chiralBasis chiralBasis f
+        * ((2 : ℂ)⁻¹ • !![1, 0, -1, 0; 0, 1, 0, -1; 1, 0, 1, 0; 0, 1, 0, 1]) := by
   simp only [endEquivMatrix, AlgEquiv.trans_apply, LinearEquiv.conjAlgEquiv_apply,
     LinearMap.toMatrixAlgEquiv, AlgEquiv.ofLinearEquiv_apply]
   simp only [Matrix.toLinOfInv, LinearEquiv.symm_mk]
-  simp only [LinearMap.toMatrix_comp chiralBasis chiralBasis chiralBasis,
-    Matrix.mul_assoc]
+  simp only [LinearMap.toMatrix_comp chiralBasis chiralBasis chiralBasis, Matrix.mul_assoc]
   apply congrArg₂ (· * ·)
   · exact LinearMap.toMatrix_toLin chiralBasis chiralBasis _
   · apply congrArg _
@@ -147,10 +153,10 @@ lemma endEquivMatrix_apply (f : Module.End ℂ Dirac) :
 -/
 
 /-- The representation of `SL(2, ℂ)` on Dirac fermions. -/
-def rep : Representation ℂ SL(2,ℂ) Dirac where
-  toFun g := decomposeLinEquiv.symm ∘ₗ
-    (((LeftHandedWeyl.rep).prod (DualRightHandedWeyl.rep)) g) ∘ₗ
-    decomposeLinEquiv
+def rep : Representation ℂ (SL(2,ℂ)) Dirac where
+  toFun g :=
+    decomposeLinEquiv.symm ∘ₗ (((LeftHandedWeyl.rep).prod (DualRightHandedWeyl.rep)) g)
+      ∘ₗ decomposeLinEquiv
   map_one' := by
     ext1 i
     simp
@@ -158,12 +164,15 @@ def rep : Representation ℂ SL(2,ℂ) Dirac where
     ext1 x
     simp
 
-lemma rep_apply_mk (g : SL(2,ℂ)) (ψ : LeftHandedWeyl) (χ : DualRightHandedWeyl) :
-    rep g ⟨ψ, χ⟩ = ⟨LeftHandedWeyl.rep g ψ, DualRightHandedWeyl.rep g χ⟩ := rfl
+lemma rep_apply_mk (g : SL(2,ℂ)) (ψ : LeftHandedWeyl) (χ : DualRightHandedWeyl)
+    : rep g ⟨ψ, χ⟩ = ⟨LeftHandedWeyl.rep g ψ, DualRightHandedWeyl.rep g χ⟩ :=
+  rfl
 
-/-- The equivalence between the representation on `Dirac` and the representation
-  on `LeftHandedWeyl × DualRightHandedWeyl`. -/
-def decomposeRepEquiv : rep.Equiv ((LeftHandedWeyl.rep).prod (DualRightHandedWeyl.rep))  where
+/--
+The equivalence between the representation on `Dirac` and the representation
+on `LeftHandedWeyl × DualRightHandedWeyl`.
+-/
+def decomposeRepEquiv : rep.Equiv ((LeftHandedWeyl.rep).prod (DualRightHandedWeyl.rep)) where
   toLinearEquiv := decomposeLinEquiv
   isIntertwining' g := by
     ext1 x

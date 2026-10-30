@@ -54,28 +54,26 @@ namespace Local
 
 -/
 
-/-- A field satisfies the local Euler-Lagrange equations for a local lagrangian when the
-Euler-Lagrange operator vanishes along that field. -/
-def SatisfiesEulerLagrange (L : Lagrangian d m k)
-    (f : Space d → EuclideanSpace ℝ (Fin m)) : Prop :=
+/--
+A field satisfies the local Euler-Lagrange equations for a local lagrangian when the
+Euler-Lagrange operator vanishes along that field.
+-/
+def SatisfiesEulerLagrange (L : Lagrangian d m k) (f : Space d → EuclideanSpace ℝ (Fin m)) : Prop :=
   eulerLagrangeOp L f = 0
 
 @[simp]
-lemma satisfiesEulerLagrange_iff (L : Lagrangian d m k)
-    (f : Space d → EuclideanSpace ℝ (Fin m)) :
-    SatisfiesEulerLagrange L f ↔ eulerLagrangeOp L f = 0 :=
+lemma satisfiesEulerLagrange_iff (L : Lagrangian d m k) (f : Space d → EuclideanSpace ℝ (Fin m))
+    : SatisfiesEulerLagrange L f ↔ eulerLagrangeOp L f = 0 :=
   Iff.rfl
 
 lemma SatisfiesEulerLagrange.eulerLagrangeOp_eq_zero
-    {L : Lagrangian d m k} {f : Space d → EuclideanSpace ℝ (Fin m)}
-    (h : SatisfiesEulerLagrange L f) :
-    eulerLagrangeOp L f = 0 :=
+    {L : Lagrangian d m k} {f : Space d → EuclideanSpace ℝ (Fin m)} (h : SatisfiesEulerLagrange L f)
+    : eulerLagrangeOp L f = 0 :=
   h
 
 lemma SatisfiesEulerLagrange.of_eulerLagrangeOp_eq_zero
-    {L : Lagrangian d m k} {f : Space d → EuclideanSpace ℝ (Fin m)}
-    (h : eulerLagrangeOp L f = 0) :
-    SatisfiesEulerLagrange L f :=
+    {L : Lagrangian d m k} {f : Space d → EuclideanSpace ℝ (Fin m)} (h : eulerLagrangeOp L f = 0)
+    : SatisfiesEulerLagrange L f :=
   h
 
 /-!
@@ -84,17 +82,17 @@ lemma SatisfiesEulerLagrange.of_eulerLagrangeOp_eq_zero
 -/
 
 lemma isCritical_iff_satisfiesEulerLagrange_of_contDiff_and_smoothInCoordinates
-    (L : Lagrangian d m k) (f : Space d → EuclideanSpace ℝ (Fin m)) (hf : ContDiff ℝ ∞ f)
-    (hL : Lagrangian.SmoothInCoordinates L)
-    (hbase : HasFiniteAction L f) :
-    IsCritical L f ↔ SatisfiesEulerLagrange L f := by
+    (L : Lagrangian d m k)
+    (f : Space d → EuclideanSpace ℝ (Fin m)) (hf : ContDiff ℝ ∞ f)
+    (hL : Lagrangian.SmoothInCoordinates L) (hbase : HasFiniteAction L f)
+    : IsCritical L f ↔ SatisfiesEulerLagrange L f := by
   exact isCritical_iff_eulerLagrange_zero_of_contDiff_and_smoothInCoordinates L f hf hL hbase
 
 lemma isCritical_iff_satisfiesEulerLagrange_of_admissibleForAction_and_smoothInCoordinates
     (L : Lagrangian d m k) (f : Space d → EuclideanSpace ℝ (Fin m))
     (hLf : IsAdmissibleForAction L f)
-    (hL : Lagrangian.SmoothInCoordinates L) :
-    IsCritical L f ↔ SatisfiesEulerLagrange L f := by
+    (hL : Lagrangian.SmoothInCoordinates L)
+    : IsCritical L f ↔ SatisfiesEulerLagrange L f := by
   exact isCritical_iff_eulerLagrange_zero_of_admissibleForAction_and_smoothInCoordinates L f hLf hL
 
 end Local

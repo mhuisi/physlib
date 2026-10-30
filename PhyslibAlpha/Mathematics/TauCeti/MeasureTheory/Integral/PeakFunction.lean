@@ -74,18 +74,23 @@ open scoped Topology
 
 namespace TauCeti
 
-variable {α 𝕜 E : Type*} [MeasurableSpace α] [RCLike 𝕜]
-  [NormedAddCommGroup E] [NormedSpace ℝ E] [NormedSpace 𝕜 E] [CompleteSpace E] {μ : Measure α}
+variable
+  {α 𝕜 E : Type*} [MeasurableSpace α] [RCLike 𝕜] [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [NormedSpace 𝕜 E] [CompleteSpace E]
+  {μ : Measure α}
 
-/-- **The approximate-identity estimate.** If an `L¹` class `f` has unit integral and vanishes
+/--
+**The approximate-identity estimate.** If an `L¹` class `f` has unit integral and vanishes
 almost everywhere outside `U`, and `φ` stays within `ε` of `y` on `U`, then the integral of `φ`
 against `f` is within `ε * ‖f‖` of `y`. The integrand `f • φ` is assumed almost everywhere
-strongly measurable. -/
-lemma norm_integral_smul_sub_le {f : α →₁[μ] 𝕜} (hf : ∫ x, f x ∂μ = 1) {U : Set α}
-    (hfU : ∀ᵐ x ∂μ, x ∉ U → f x = 0) {φ : α → E}
-    (hφ : AEStronglyMeasurable (fun x ↦ f x • φ x) μ) {y : E}
-    {ε : ℝ} (hφU : ∀ x ∈ U, ‖φ x - y‖ ≤ ε) :
-    ‖(∫ x, f x • φ x ∂μ) - y‖ ≤ ε * ‖f‖ := by
+strongly measurable.
+-/
+lemma norm_integral_smul_sub_le
+    {f : α →₁[μ] 𝕜} (hf : ∫ x, f x ∂μ = 1)
+    {U : Set α} (hfU : ∀ᵐ x ∂μ, x ∉ U → f x = 0)
+    {φ : α → E} (hφ : AEStronglyMeasurable (fun x ↦ f x • φ x) μ)
+    {y : E} {ε : ℝ} (hφU : ∀ x ∈ U, ‖φ x - y‖ ≤ ε)
+    : ‖(∫ x, f x • φ x ∂μ) - y‖ ≤ ε * ‖f‖ := by
   have hfi : Integrable (fun x ↦ f x) μ := L1.integrable_coeFn f
   -- Pointwise, `‖f x • (φ x - y)‖ ≤ ‖f x‖ * ε`, since `f x = 0` off `U`.
   have hbound : ∀ᵐ x ∂μ, ‖f x • (φ x - y)‖ ≤ ‖f x‖ * ε := by
@@ -97,7 +102,8 @@ lemma norm_integral_smul_sub_le {f : α →₁[μ] 𝕜} (hf : ∫ x, f x ∂μ 
   have hint : Integrable (fun x ↦ f x • (φ x - y)) μ :=
     (hfi.norm.mul_const ε).mono'
       ((hφ.sub (hfi.aestronglyMeasurable.smul_const y)).congr
-        (.of_forall fun x ↦ (smul_sub _ _ _).symm)) hbound
+        (.of_forall fun x ↦ (smul_sub _ _ _).symm))
+      hbound
   -- Since `∫ f = 1`, subtracting `y` is integrating `f • (φ - y)`.
   have hsplit : ∫ x, f x • φ x ∂μ = (∫ x, f x • (φ x - y) ∂μ) + ∫ x, f x • y ∂μ := by
     rw [← integral_add hint (hfi.smul_const y)]
@@ -106,17 +112,20 @@ lemma norm_integral_smul_sub_le {f : α →₁[μ] 𝕜} (hf : ∫ x, f x ∂μ 
     mul_comm, ← integral_mul_const]
   exact norm_integral_le_of_norm_le (hfi.norm.mul_const ε) hbound
 
-/-- **`L¹` peak functions integrate a function to its limit at the peak.** Let `f i` be `L¹`
+/--
+**`L¹` peak functions integrate a function to its limit at the peak.** Let `f i` be `L¹`
 classes which eventually have unit integral and `L¹` norm at most `C`, and which concentrate at
 `x₀`: for every neighbourhood `U` of `x₀`, eventually `f i` vanishes almost everywhere outside `U`.
 Then `∫ x, f i x • φ x ∂μ` tends to `a` for every `φ` tending to `a` at `x₀` whose products
-`f i • φ` are eventually almost everywhere strongly measurable. -/
-lemma tendsto_integral_smul_of_tendsto {ι : Type*} {l : Filter ι} {f : ι → α →₁[μ] 𝕜}
-    {C : ℝ} {x₀ : α} [TopologicalSpace α] (hf : ∀ᶠ i in l, ∫ x, f i x ∂μ = 1)
-    (hfC : ∀ᶠ i in l, ‖f i‖ ≤ C) (hfx₀ : ∀ U ∈ 𝓝 x₀, ∀ᶠ i in l, ∀ᵐ x ∂μ, x ∉ U → f i x = 0)
-    {φ : α → E} (hφ : ∀ᶠ i in l, AEStronglyMeasurable (fun x ↦ f i x • φ x) μ) {a : E}
-    (hφa : Tendsto φ (𝓝 x₀) (𝓝 a)) :
-    Tendsto (fun i ↦ ∫ x, f i x • φ x ∂μ) l (𝓝 a) := by
+`f i • φ` are eventually almost everywhere strongly measurable.
+-/
+lemma tendsto_integral_smul_of_tendsto
+    {ι : Type*} {l : Filter ι} {f : ι → α →₁[μ] 𝕜} {C : ℝ} {x₀ : α} [TopologicalSpace α]
+    (hf : ∀ᶠ i in l, ∫ x, f i x ∂μ = 1) (hfC : ∀ᶠ i in l, ‖f i‖ ≤ C)
+    (hfx₀ : ∀ U ∈ 𝓝 x₀, ∀ᶠ i in l, ∀ᵐ x ∂μ, x ∉ U → f i x = 0)
+    {φ : α → E} (hφ : ∀ᶠ i in l, AEStronglyMeasurable (fun x ↦ f i x • φ x) μ)
+    {a : E} (hφa : Tendsto φ (𝓝 x₀) (𝓝 a))
+    : Tendsto (fun i ↦ ∫ x, f i x • φ x ∂μ) l (𝓝 a) := by
   refine Metric.tendsto_nhds.2 fun ε hε ↦ ?_
   -- Ask `φ` to stay within `δ` of `a`, where `δ * |C| < ε`.
   set δ : ℝ := ε / (|C| + 1) with hδ
@@ -126,27 +135,30 @@ lemma tendsto_integral_smul_of_tendsto {ι : Type*} {l : Filter ι} {f : ι → 
     exact mul_lt_mul_of_pos_left (lt_add_one _) hε
   filter_upwards [hf, hfC, hfx₀ _ (hφa (closedBall_mem_nhds a hδpos)), hφ] with i hi hiC hiU hiφ
   rw [dist_eq_norm]
-  calc ‖(∫ x, f i x • φ x ∂μ) - a‖ ≤ δ * ‖f i‖ :=
-        norm_integral_smul_sub_le hi hiU hiφ fun x hx ↦ by simpa [dist_eq_norm] using hx
+  calc
+    ‖(∫ x, f i x • φ x ∂μ) - a‖ ≤ δ * ‖f i‖ :=
+      norm_integral_smul_sub_le hi hiU hiφ fun x hx ↦ by simpa [dist_eq_norm] using hx
     _ ≤ δ * |C| := mul_le_mul_of_nonneg_left (hiC.trans (le_abs_self C)) hδpos.le
     _ < ε := hδC
 
 variable (𝕜 μ) in
-/-- **`L¹` peak functions exist.** For a measure positive on nonempty open sets and finite on some
+/--
+**`L¹` peak functions exist.** For a measure positive on nonempty open sets and finite on some
 neighbourhood of each point, every neighbourhood `U` of a point carries an `L¹` class of unit
 integral and unit `L¹` norm vanishing almost everywhere outside `U`: the indicator of a
-neighbourhood of finite measure inside `U`, normalized by that measure. -/
-lemma exists_integral_eq_one_norm_eq_one [TopologicalSpace α] [OpensMeasurableSpace α]
-    [μ.IsOpenPosMeasure] [IsLocallyFiniteMeasure μ] {x₀ : α} {U : Set α} (hU : U ∈ 𝓝 x₀) :
-    ∃ f : α →₁[μ] 𝕜, ∫ x, f x ∂μ = 1 ∧ ‖f‖ = 1 ∧ ∀ᵐ x ∂μ, x ∉ U → f x = 0 := by
+neighbourhood of finite measure inside `U`, normalized by that measure.
+-/
+lemma exists_integral_eq_one_norm_eq_one
+    [TopologicalSpace α] [OpensMeasurableSpace α] [μ.IsOpenPosMeasure] [IsLocallyFiniteMeasure μ]
+    {x₀ : α} {U : Set α} (hU : U ∈ 𝓝 x₀)
+    : ∃ f : α →₁[μ] 𝕜, ∫ x, f x ∂μ = 1 ∧ ‖f‖ = 1 ∧ ∀ᵐ x ∂μ, x ∉ U → f x = 0 := by
   -- An open neighbourhood `V ⊆ U` of `x₀` of positive, finite measure.
   obtain ⟨W, hW, hWμ⟩ := μ.finiteAt_nhds x₀
   set V := interior (U ∩ W)
-  have hVμ : μ V ≠ ⊤ :=
-    ((measure_mono (interior_subset.trans inter_subset_right)).trans_lt hWμ).ne
+  have hVμ : μ V ≠ ⊤ := ((measure_mono (interior_subset.trans inter_subset_right)).trans_lt hWμ).ne
   have hVpos : 0 < μ.real V :=
-    ENNReal.toReal_pos (isOpen_interior.measure_ne_zero μ
-      ⟨x₀, mem_interior_iff_mem_nhds.2 (inter_mem hU hW)⟩) hVμ
+    ENNReal.toReal_pos
+      (isOpen_interior.measure_ne_zero μ ⟨x₀, mem_interior_iff_mem_nhds.2 (inter_mem hU hW)⟩) hVμ
   refine ⟨indicatorConstLp 1 isOpen_interior.measurableSet hVμ ((μ.real V)⁻¹ : 𝕜), ?_, ?_, ?_⟩
   · rw [integral_indicatorConstLp, RCLike.real_smul_eq_coe_mul, ← RCLike.ofReal_inv,
       ← RCLike.ofReal_mul, mul_inv_cancel₀ hVpos.ne', RCLike.ofReal_one]

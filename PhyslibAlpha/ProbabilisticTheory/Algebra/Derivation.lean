@@ -43,22 +43,22 @@ namespace ProbabilisticTheory
 
 /-! ## A. The Leibniz rule -/
 
-/-- `D` is a derivation of the multiplication on `E`: `D (a b) = D a b + a D b`. Only a
+/--
+`D` is a derivation of the multiplication on `E`: `D (a b) = D a b + a D b`. Only a
 multiplication and a real module structure are assumed, so that it applies to normed spaces with a
-separate product. -/
-def IsDerivation {E : Type*} [Mul E] [AddCommGroup E] [Module ℝ E] (D : E →ₗ[ℝ] E) :
-    Prop :=
+separate product.
+-/
+def IsDerivation {E : Type*} [Mul E] [AddCommGroup E] [Module ℝ E] (D : E →ₗ[ℝ] E) : Prop :=
   ∀ a b : E, D (a * b) = D a * b + a * D b
 
 /-! ## B. Closure properties -/
 
 variable {E : Type*} [NonUnitalNonAssocRing E] [Module ℝ E]
 
-lemma IsDerivation.zero : IsDerivation (0 : E →ₗ[ℝ] E) := by
-  intro a b; simp
+lemma IsDerivation.zero : IsDerivation (0 : E →ₗ[ℝ] E) := by intro a b; simp
 
-lemma IsDerivation.add {D₁ D₂ : E →ₗ[ℝ] E} (h₁ : IsDerivation D₁) (h₂ : IsDerivation D₂) :
-    IsDerivation (D₁ + D₂) := by
+lemma IsDerivation.add {D₁ D₂ : E →ₗ[ℝ] E} (h₁ : IsDerivation D₁) (h₂ : IsDerivation D₂)
+    : IsDerivation (D₁ + D₂) := by
   intro a b
   simp only [LinearMap.add_apply, h₁ a b, h₂ a b, add_mul, mul_add]
   abel
@@ -68,8 +68,9 @@ lemma IsDerivation.neg {D : E →ₗ[ℝ] E} (h : IsDerivation D) : IsDerivation
   simp only [LinearMap.neg_apply, h a b, neg_mul, mul_neg, neg_add_rev]
   abel
 
-lemma IsDerivation.smul [SMulCommClass ℝ E E] [IsScalarTower ℝ E E] (c : ℝ) {D : E →ₗ[ℝ] E}
-    (h : IsDerivation D) : IsDerivation (c • D) := by
+lemma IsDerivation.smul
+    [SMulCommClass ℝ E E] [IsScalarTower ℝ E E] (c : ℝ) {D : E →ₗ[ℝ] E} (h : IsDerivation D)
+    : IsDerivation (c • D) := by
   intro a b
   simp only [LinearMap.smul_apply, h a b, smul_add, smul_mul_assoc, mul_smul_comm]
 

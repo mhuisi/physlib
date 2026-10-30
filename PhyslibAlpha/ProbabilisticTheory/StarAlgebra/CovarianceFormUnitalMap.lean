@@ -73,8 +73,10 @@ namespace AlgState
 
 section Positivity
 
-variable {A : Type*} [Ring A] [Algebra ℂ A] [StarRing A] [StarModule ℂ A] [PartialOrder A]
-  [StarOrderedRing A] (ω : AlgState A)
+variable
+  {A : Type*}
+  [Ring A] [Algebra ℂ A] [StarRing A] [StarModule ℂ A] [PartialOrder A] [StarOrderedRing A]
+  (ω : AlgState A)
 
 /-- On a star-ordered ring a state is nonnegative on every nonnegative element. -/
 lemma apply_nonneg {a : A} (ha : 0 ≤ a) : 0 ≤ ω a := by
@@ -83,7 +85,8 @@ lemma apply_nonneg {a : A} (ha : 0 ≤ a) : 0 ≤ ω a := by
   | mem x hx =>
     obtain ⟨y, rfl⟩ := hx
     exact ω.nonneg y
-  | zero => exact (ω.toLinearMap.map_zero).ge
+  | zero =>
+    exact (ω.toLinearMap.map_zero).ge
   | add x y _ _ hx hy =>
     rw [ω.map_add]
     exact add_nonneg hx hy
@@ -94,15 +97,18 @@ end Positivity
 
 section Schwarz
 
-variable {A B : Type*} [Ring A] [Algebra ℂ A] [StarRing A] [StarModule ℂ A]
-  [Ring B] [Algebra ℂ B] [StarRing B] [StarModule ℂ B]
+variable
+  {A B : Type*} [Ring A] [Algebra ℂ A] [StarRing A] [StarModule ℂ A] [Ring B] [Algebra ℂ B]
+  [StarRing B] [StarModule ℂ B]
 
-/-- The quadratic form of the matrix of covariances at `c` is the covariance form of `∑ cⱼ aⱼ`
-with itself. -/
-lemma star_dotProduct_covarianceMatrixForm_mulVec {ι : Type*} [Fintype ι] (ω : AlgState A)
-    (a : ι → A) (c : ι → ℂ) :
-    star c ⬝ᵥ (ω.covarianceMatrixForm a a *ᵥ c) =
-      ω.covarianceForm (∑ j, c j • a j) (∑ j, c j • a j) := by
+/--
+The quadratic form of the matrix of covariances at `c` is the covariance form of `∑ cⱼ aⱼ`
+with itself.
+-/
+lemma star_dotProduct_covarianceMatrixForm_mulVec
+    {ι : Type*} [Fintype ι] (ω : AlgState A) (a : ι → A) (c : ι → ℂ)
+    : star c ⬝ᵥ (ω.covarianceMatrixForm a a *ᵥ c)
+      = ω.covarianceForm (∑ j, c j • a j) (∑ j, c j • a j) := by
   simp only [covarianceForm_sum_left, covarianceForm_sum_right, covarianceForm_smul_left,
     covarianceForm_smul_right, dotProduct, mulVec, covarianceMatrixForm, of_apply, Pi.star_apply,
     Finset.mul_sum]
@@ -111,11 +117,13 @@ lemma star_dotProduct_covarianceMatrixForm_mulVec {ι : Type*} [Fintype ι] (ω 
 
 variable (ω : AlgState B) (ω' : AlgState A) (Φ : A →ₗ[ℂ] B)
 
-/-- Pulling the observable through `Φ` and pushing the state differ by the value of `ω` on
-`Φ(X⋆ X) - Φ(X)⋆ Φ(X)`. -/
-lemma covarianceForm_sub_covarianceForm_map (hω' : ∀ x, ω' x = ω (Φ x)) (X : A) :
-    ω'.covarianceForm X X - ω.covarianceForm (Φ X) (Φ X) =
-      ω (Φ (star X * X) - star (Φ X) * Φ X) := by
+/--
+Pulling the observable through `Φ` and pushing the state differ by the value of `ω` on
+`Φ(X⋆ X) - Φ(X)⋆ Φ(X)`.
+-/
+lemma covarianceForm_sub_covarianceForm_map (hω' : ∀ x, ω' x = ω (Φ x)) (X : A)
+    : ω'.covarianceForm X X - ω.covarianceForm (Φ X) (Φ X)
+      = ω (Φ (star X * X) - star (Φ X) * Φ X) := by
   rw [covarianceForm_apply, covarianceForm_apply, hω', hω',
     show ω (Φ (star X * X) - star (Φ X) * Φ X) = ω (Φ (star X * X)) - ω (star (Φ X) * Φ X) from
       ω.toLinearMap.map_sub _ _]
@@ -123,20 +131,26 @@ lemma covarianceForm_sub_covarianceForm_map (hω' : ∀ x, ω' x = ω (Φ x)) (X
 
 variable [PartialOrder B] [StarOrderedRing B]
 
-/-- **A Schwarz inequality for `Φ` bounds the covariance form**: if
-`Φ(X)⋆ Φ(X) ≤ Φ(X⋆ X)`, then `C_ω(Φ X, Φ X) ≤ C_ω'(X, X)`. -/
-lemma covarianceForm_map_le (hω' : ∀ x, ω' x = ω (Φ x)) {X : A}
-    (h : star (Φ X) * Φ X ≤ Φ (star X * X)) :
-    ω.covarianceForm (Φ X) (Φ X) ≤ ω'.covarianceForm X X := by
+/--
+**A Schwarz inequality for `Φ` bounds the covariance form**: if
+`Φ(X)⋆ Φ(X) ≤ Φ(X⋆ X)`, then `C_ω(Φ X, Φ X) ≤ C_ω'(X, X)`.
+-/
+lemma covarianceForm_map_le
+    (hω' : ∀ x, ω' x = ω (Φ x)) {X : A} (h : star (Φ X) * Φ X ≤ Φ (star X * X))
+    : ω.covarianceForm (Φ X) (Φ X) ≤ ω'.covarianceForm X X := by
   rw [← sub_nonneg, covarianceForm_sub_covarianceForm_map ω ω' Φ hω']
   exact ω.apply_nonneg (sub_nonneg.mpr h)
 
-/-- **Maps satisfying the Schwarz inequality do not decrease the matrix of covariances.** The
-hypothesis holds for completely positive unital maps. -/
-lemma covarianceMatrixForm_map_le {ι : Type*} [Fintype ι] (hω' : ∀ x, ω' x = ω (Φ x))
-    (hΦ : ∀ X, star (Φ X) * Φ X ≤ Φ (star X * X)) (a : ι → A) (c : ι → ℂ) :
-    star c ⬝ᵥ (ω.covarianceMatrixForm (Φ ∘ a) (Φ ∘ a) *ᵥ c) ≤
-      star c ⬝ᵥ (ω'.covarianceMatrixForm a a *ᵥ c) := by
+/--
+**Maps satisfying the Schwarz inequality do not decrease the matrix of covariances.** The
+hypothesis holds for completely positive unital maps.
+-/
+lemma covarianceMatrixForm_map_le
+    {ι : Type*} [Fintype ι]
+    (hω' : ∀ x, ω' x = ω (Φ x)) (hΦ : ∀ X, star (Φ X) * Φ X ≤ Φ (star X * X)) (a : ι → A)
+    (c : ι → ℂ)
+    : star c ⬝ᵥ (ω.covarianceMatrixForm (Φ ∘ a) (Φ ∘ a) *ᵥ c)
+      ≤ star c ⬝ᵥ (ω'.covarianceMatrixForm a a *ᵥ c) := by
   have e : ∑ j, c j • (Φ ∘ a) j = Φ (∑ j, c j • a j) := by
     rw [map_sum]
     exact Finset.sum_congr rfl fun j _ => (_root_.map_smul Φ _ _).symm
@@ -156,14 +170,18 @@ namespace Matrix
 variable {n m : Type*} [Fintype n] [Fintype m] [DecidableEq n] [DecidableEq m]
 
 /-- With positive `Qₖ` summing to `1`, `(∑ λₖ Qₖ)² ≤ ∑ λₖ² Qₖ`. -/
-lemma sq_sum_le_sum_sq {ι : Type*} [Fintype ι] (Q : ι → Matrix m m ℂ)
-    (hQ : ∀ k, (Q k).PosSemidef) (h1 : ∑ k, Q k = 1) (c : ι → ℝ) :
-    (∑ k, (c k : ℂ) • Q k) * ∑ k, (c k : ℂ) • Q k ≤ ∑ k, ((c k : ℂ) * c k) • Q k := by
+lemma sq_sum_le_sum_sq
+    {ι : Type*} [Fintype ι]
+    (Q : ι → Matrix m m ℂ) (hQ : ∀ k, (Q k).PosSemidef) (h1 : ∑ k, Q k = 1)
+    (c : ι → ℝ)
+    : (∑ k, (c k : ℂ) • Q k) * ∑ k, (c k : ℂ) • Q k ≤ ∑ k, ((c k : ℂ) * c k) • Q k := by
   set B := ∑ k, (c k : ℂ) • Q k
-  have hB : Bᴴ = B := by
-    simp [B, conjTranspose_sum, conjTranspose_smul, (hQ _).1.eq]
-  have term : ∀ k, ((c k : ℂ) • 1 - B)ᴴ * Q k * ((c k : ℂ) • 1 - B) =
-      ((c k : ℂ) * c k) • Q k - (c k : ℂ) • (Q k * B) - (c k : ℂ) • (B * Q k) + B * Q k * B := by
+  have hB : Bᴴ = B := by simp [B, conjTranspose_sum, conjTranspose_smul, (hQ _).1.eq]
+  have term
+      : ∀ k,
+        ((c k : ℂ) • 1 - B)ᴴ * Q k * ((c k : ℂ) • 1 - B)
+          = ((c k : ℂ) * c k) • Q k - (c k : ℂ) • (Q k * B) - (c k : ℂ) • (B * Q k)
+            + B * Q k * B := by
     intro k
     simp only [conjTranspose_sub, conjTranspose_smul, conjTranspose_one, hB, Complex.star_def,
       Complex.conj_ofReal, sub_mul, mul_sub, smul_mul_assoc, one_mul, mul_smul_comm, mul_one,
@@ -174,17 +192,20 @@ lemma sq_sum_le_sum_sq {ι : Type*} [Fintype ι] (Q : ι → Matrix m m ℂ)
   have e₂ : ∑ k, (c k : ℂ) • (B * Q k) = B * B := by
     simp only [← mul_smul_comm, ← Finset.mul_sum]; rfl
   have e₃ : ∑ k, B * Q k * B = B * B := by rw [← Finset.sum_mul, ← Finset.mul_sum, h1, mul_one]
-  have h : ∑ k, ((c k : ℂ) * c k) • Q k - B * B =
-      ∑ k, ((c k : ℂ) • 1 - B)ᴴ * Q k * ((c k : ℂ) • 1 - B) := by
+  have h
+      : ∑ k, ((c k : ℂ) * c k) • Q k - B * B
+        = ∑ k, ((c k : ℂ) • 1 - B)ᴴ * Q k * ((c k : ℂ) • 1 - B) := by
     simp only [term, Finset.sum_add_distrib, Finset.sum_sub_distrib, e₁, e₂, e₃]
     abel
   rw [← sub_nonneg, h, nonneg_iff_posSemidef]
   exact posSemidef_sum _ fun k _ => (hQ k).conjTranspose_mul_mul_same _
 
-/-- **Kadison's inequality**: for a positive unital map and Hermitian `A`,
-`Φ(A)² ≤ Φ(A²)`. -/
-lemma kadison (Φ : Matrix n n ℂ →ₚ₁[ℂ] Matrix m m ℂ) {A : Matrix n n ℂ}
-    (hA : A.IsHermitian) : (Φ A)ᴴ * Φ A ≤ Φ (Aᴴ * A) := by
+/--
+**Kadison's inequality**: for a positive unital map and Hermitian `A`,
+`Φ(A)² ≤ Φ(A²)`.
+-/
+lemma kadison (Φ : Matrix n n ℂ →ₚ₁[ℂ] Matrix m m ℂ) {A : Matrix n n ℂ} (hA : A.IsHermitian)
+    : (Φ A)ᴴ * Φ A ≤ Φ (Aᴴ * A) := by
   let c := Unitary.conjStarAlgAut ℂ _ hA.eigenvectorUnitary
   let P : n → Matrix n n ℂ := fun k => c (single k k 1)
   have hdiag : ∀ f : n → ℂ, c (diagonal f) = ∑ k, f k • P k := by
@@ -194,11 +215,10 @@ lemma kadison (Φ : Matrix n n ℂ →ₚ₁[ℂ] Matrix m m ℂ) {A : Matrix n 
       by_cases h : i = j
       · simp [h, single_apply, Matrix.sum_apply]
       · simp only [diagonal_apply, h, Matrix.sum_apply, Matrix.smul_apply, single_apply]
-        exact (Finset.sum_eq_zero fun x _ => by simp [show ¬(x = i ∧ x = j) from
-          fun hx => h (hx.1 ▸ hx.2)]).symm]
+        exact (Finset.sum_eq_zero fun x _ => by
+          simp [show ¬(x = i ∧ x = j) from fun hx => h (hx.1 ▸ hx.2)]).symm]
     simp only [P, map_sum, map_smul]
-  have hA' : A = ∑ k, (hA.eigenvalues k : ℂ) • P k := by
-    rw [← hdiag]; exact hA.spectral_theorem
+  have hA' : A = ∑ k, (hA.eigenvalues k : ℂ) • P k := by rw [← hdiag]; exact hA.spectral_theorem
   have hA2 : Aᴴ * A = ∑ k, ((hA.eigenvalues k : ℂ) * hA.eigenvalues k) • P k := by
     rw [← hdiag, ← diagonal_mul_diagonal, map_mul]
     conv_lhs => rw [hA.eq, hA.spectral_theorem]
@@ -237,22 +257,28 @@ namespace ProbabilisticTheory
 
 namespace AlgState
 
-variable {n m : Type*} [Fintype n] [Fintype m] [DecidableEq n] [DecidableEq m]
+variable
+  {n m : Type*} [Fintype n] [Fintype m] [DecidableEq n] [DecidableEq m]
   (ω : AlgState (Matrix m m ℂ)) (ω' : AlgState (Matrix n n ℂ))
   (Φ : Matrix n n ℂ →ₚ₁[ℂ] Matrix m m ℂ)
 
 /-- **Positive unital maps do not decrease the covariance form of Hermitian matrices.** -/
-lemma covarianceForm_map_le_of_positive (hω' : ∀ x, ω' x = ω (Φ x)) {X : Matrix n n ℂ}
-    (hX : X.IsHermitian) : ω.covarianceForm (Φ X) (Φ X) ≤ ω'.covarianceForm X X :=
+lemma covarianceForm_map_le_of_positive
+    (hω' : ∀ x, ω' x = ω (Φ x)) {X : Matrix n n ℂ} (hX : X.IsHermitian)
+    : ω.covarianceForm (Φ X) (Φ X) ≤ ω'.covarianceForm X X :=
   covarianceForm_map_le ω ω' Φ.toLinearMap hω' (Matrix.kadison Φ hX)
 
-/-- **Positive unital maps do not decrease the matrix of covariances** of Hermitian matrices at
-real coefficients. -/
-lemma covarianceMatrixForm_map_le_of_positive {ι : Type*} [Fintype ι]
-    (hω' : ∀ x, ω' x = ω (Φ x)) {a : ι → Matrix n n ℂ} (ha : ∀ i, (a i).IsHermitian)
-    (c : ι → ℝ) :
-    star (fun i => (c i : ℂ)) ⬝ᵥ (ω.covarianceMatrixForm (Φ ∘ a) (Φ ∘ a) *ᵥ fun i => (c i : ℂ)) ≤
-      star (fun i => (c i : ℂ)) ⬝ᵥ (ω'.covarianceMatrixForm a a *ᵥ fun i => (c i : ℂ)) := by
+/--
+**Positive unital maps do not decrease the matrix of covariances** of Hermitian matrices at
+real coefficients.
+-/
+lemma covarianceMatrixForm_map_le_of_positive
+    {ι : Type*} [Fintype ι]
+    (hω' : ∀ x, ω' x = ω (Φ x))
+    {a : ι → Matrix n n ℂ} (ha : ∀ i, (a i).IsHermitian)
+    (c : ι → ℝ)
+    : star (fun i => (c i : ℂ)) ⬝ᵥ (ω.covarianceMatrixForm (Φ ∘ a) (Φ ∘ a) *ᵥ fun i => (c i : ℂ))
+      ≤ star (fun i => (c i : ℂ)) ⬝ᵥ (ω'.covarianceMatrixForm a a *ᵥ fun i => (c i : ℂ)) := by
   have e : ∑ j, (c j : ℂ) • (Φ ∘ a) j = Φ (∑ j, (c j : ℂ) • a j) := by
     rw [map_sum]
     exact Finset.sum_congr rfl fun j _ => (_root_.map_smul Φ _ _).symm
@@ -270,17 +296,14 @@ namespace Matrix
 
 /-- The state `X ↦ X₀₀` of `2 × 2` matrices, the vector state of `|0⟩`. -/
 def stateZero : ProbabilisticTheory.AlgState (Matrix (Fin 2) (Fin 2) ℂ) where
-  toLinearMap :=
-    { toFun X := X 0 0
-      map_add' _ _ := rfl
-      map_smul' _ _ := rfl }
+  toLinearMap := { toFun X := X 0 0, map_add' _ _ := rfl, map_smul' _ _ := rfl }
   map_one' := one_apply_eq 0
   map_star' _ := rfl
-  nonneg' X := show 0 ≤ ∑ k, star (X k 0) * X k 0 from
-    Finset.sum_nonneg fun k _ => star_mul_self_nonneg (X k 0)
+  nonneg' X :=
+    show 0 ≤ ∑ k, star (X k 0) * X k 0 from
+      Finset.sum_nonneg fun k _ => star_mul_self_nonneg (X k 0)
 
-@[simp]
-lemma stateZero_apply (X : Matrix (Fin 2) (Fin 2) ℂ) : stateZero X = X 0 0 := rfl
+@[simp] lemma stateZero_apply (X : Matrix (Fin 2) (Fin 2) ℂ) : stateZero X = X 0 0 := rfl
 
 /-- The transpose of `2 × 2` matrices. -/
 noncomputable def transposeMap : Matrix (Fin 2) (Fin 2) ℂ →ₚ₁[ℂ] Matrix (Fin 2) (Fin 2) ℂ :=
@@ -288,18 +311,20 @@ noncomputable def transposeMap : Matrix (Fin 2) (Fin 2) ℂ →ₚ₁[ℂ] Matri
     (fun _ hX => nonneg_iff_posSemidef.mpr (nonneg_iff_posSemidef.mp hX).transpose)
     (by simp)
 
-@[simp]
-lemma transposeMap_apply (X : Matrix (Fin 2) (Fin 2) ℂ) : transposeMap X = Xᵀ := rfl
+@[simp] lemma transposeMap_apply (X : Matrix (Fin 2) (Fin 2) ℂ) : transposeMap X = Xᵀ := rfl
 
 /-- The state `X ↦ X₀₀` is unchanged by the transpose. -/
-lemma stateZero_transposeMap (X : Matrix (Fin 2) (Fin 2) ℂ) :
-    stateZero X = stateZero (transposeMap X) := rfl
+lemma stateZero_transposeMap (X : Matrix (Fin 2) (Fin 2) ℂ)
+    : stateZero X = stateZero (transposeMap X) :=
+  rfl
 
-/-- **The transpose is positive and unital, but the bound fails for `E₀₁`**: for positive maps
-it holds only on Hermitian matrices. -/
-lemma transposeMap_gap :
-    ¬ stateZero.covarianceForm (transposeMap (single 0 1 1)) (transposeMap (single 0 1 1)) ≤
-      stateZero.covarianceForm (single 0 1 1) (single 0 1 1) := by
+/--
+**The transpose is positive and unital, but the bound fails for `E₀₁`**: for positive maps
+it holds only on Hermitian matrices.
+-/
+lemma transposeMap_gap
+    : ¬ stateZero.covarianceForm (transposeMap (single 0 1 1)) (transposeMap (single 0 1 1))
+      ≤ stateZero.covarianceForm (single 0 1 1) (single 0 1 1) := by
   simp [ProbabilisticTheory.AlgState.covarianceForm_apply, mul_apply, Fin.sum_univ_two,
     Complex.le_def]
 

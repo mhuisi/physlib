@@ -55,18 +55,19 @@ variable {d : ℕ}
 
 -/
 
-/-- Position state as a member of the strong dual of the Schwartz space.
+/--
+Position state as a member of the strong dual of the Schwartz space.
 
-  For a given `x` this corresponds to the non-normalizable wavefunction `ψ(y) = δᵈ(y - x) -/
+For a given `x` this corresponds to the non-normalizable wavefunction `ψ(y) = δᵈ(y - x)
+-/
 def positionState (x : Space d) : StrongDual ℂ 𝓢(Space d, ℂ) := TemperedDistribution.delta x
 
 /-- The defining property of position states. -/
-@[simp]
-lemma positionState_apply (x : Space d) (f : 𝓢(Space d, ℂ)) : positionState x f = f x := rfl
+@[simp] lemma positionState_apply (x : Space d) (f : 𝓢(Space d, ℂ)) : positionState x f = f x := rfl
 
 /-- Two Schwartz maps are equal if they are equal on all position states. -/
-lemma eq_of_eq_positionState {f g : 𝓢(Space d, ℂ)}
-    (h : ∀ x, positionState x f = positionState x g) : f = g := by
+lemma eq_of_eq_positionState {f g : 𝓢(Space d, ℂ)} (h : ∀ x, positionState x f = positionState x g)
+    : f = g := by
   ext x
   exact h x
 
@@ -76,11 +77,13 @@ lemma eq_of_eq_positionState {f g : 𝓢(Space d, ℂ)}
 
 -/
 
-/-- The position state `positionState x` is a generalized eigenvector of `𝐱 i` with eigenvalue
+/--
+The position state `positionState x` is a generalized eigenvector of `𝐱 i` with eigenvalue
 `xᵢ`, in the bra form `⟨x| 𝐱ᵢ = xᵢ ⟨x|` as functionals on Schwartz space. Since `𝐱 i` is
-symmetric and `xᵢ` is real, this is equivalent to the ket form `𝐱ᵢ |x⟩ = xᵢ |x⟩`. -/
-lemma positionState_comp_positionCLM (x : Space d) (i : Fin d) :
-    positionState x ∘L 𝐱 i = (x i : ℂ) • positionState x := by
+symmetric and `xᵢ` is real, this is equivalent to the ket form `𝐱ᵢ |x⟩ = xᵢ |x⟩`.
+-/
+lemma positionState_comp_positionCLM (x : Space d) (i : Fin d)
+    : positionState x ∘L 𝐱 i = (x i : ℂ) • positionState x := by
   ext ψ
   simp
 

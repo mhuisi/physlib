@@ -65,8 +65,10 @@ namespace SUSY.N1
 
 -/
 
-/-- The chiral scalar configuration: a complex value for each chiral label, the sector's only field
-data. An `abbrev`, so Mathlib's function-space lemmas apply to it directly. -/
+/--
+The chiral scalar configuration: a complex value for each chiral label, the sector's only field
+data. An `abbrev`, so Mathlib's function-space lemmas apply to it directly.
+-/
 abbrev ChiralScalarConfiguration (ChiralIndexingType : Type*) := ChiralIndexingType → ℂ
 
 variable (ι : Type) [Fintype ι] [DecidableEq ι]
@@ -76,23 +78,33 @@ variable (ι : Type) [Fintype ι] [DecidableEq ι]
 
 -/
 
-/-- The four colours of a chiral-sector index: holomorphy (`chiral` or `anti`) crossed with
-variance (`up` or `down`). -/
-inductive ChiralColor | chiralUp | chiralDown | antiUp | antiDown
+/--
+The four colours of a chiral-sector index: holomorphy (`chiral` or `anti`) crossed with
+variance (`up` or `down`).
+-/
+inductive ChiralColor
+  | chiralUp
+  | chiralDown
+  | antiUp
+  | antiDown
 deriving DecidableEq
 
 namespace ChiralColor
 
-/-- The dual colour: flips variance and keeps holomorphy. Two indices contract exactly when their
-colours are `τ`-related. -/
+/--
+The dual colour: flips variance and keeps holomorphy. Two indices contract exactly when their
+colours are `τ`-related.
+-/
 def tau : ChiralColor → ChiralColor
   | chiralUp => chiralDown
   | chiralDown => chiralUp
   | antiUp => antiDown
   | antiDown => antiUp
 
-/-- The conjugate colour: flips holomorphy and keeps variance. It commutes with `tau`
-(`bar_tau`). -/
+/--
+The conjugate colour: flips holomorphy and keeps variance. It commutes with `tau`
+(`bar_tau`).
+-/
 def bar : ChiralColor → ChiralColor
   | chiralUp => antiUp
   | antiUp => chiralUp
@@ -115,13 +127,15 @@ conjugate modules. The representation is trivial over `Unit`, and every basis is
 
 -/
 
-/-- The carrier of each colour: `ι → ℂ` and its dual on the holomorphic side, and their conjugate
-modules (`ConjModule`, where `i` acts as `−i`) on the anti-holomorphic side. -/
+/--
+The carrier of each colour: `ι → ℂ` and its dual on the holomorphic side, and their conjugate
+modules (`ConjModule`, where `i` acts as `−i`) on the anti-holomorphic side.
+-/
 abbrev chiralModule : ChiralColor → Type
-  | .chiralUp   => ι → ℂ
+  | .chiralUp => ι → ℂ
   | .chiralDown => Module.Dual ℂ (ι → ℂ)
-  | .antiUp     => ConjModule (ι → ℂ)
-  | .antiDown   => ConjModule (Module.Dual ℂ (ι → ℂ))
+  | .antiUp => ConjModule (ι → ℂ)
+  | .antiDown => ConjModule (Module.Dual ℂ (ι → ℂ))
 
 instance instAddCommGroupChiralModule : ∀ c, AddCommGroup (chiralModule (ι := ι) c)
   | .chiralUp | .chiralDown | .antiUp | .antiDown => inferInstance
@@ -130,19 +144,21 @@ noncomputable instance instModuleChiralModule : ∀ c, Module ℂ (chiralModule 
   | .chiralUp | .chiralDown | .antiUp | .antiDown => inferInstance
 
 /-- The representation of each colour: trivial, over the trivial group `Unit`. -/
-def chiralRep : (c : ChiralColor) → Representation ℂ Unit (chiralModule (ι := ι) c) :=
-  fun _ => Representation.trivial ℂ Unit _
+def chiralRep : (c : ChiralColor) → Representation ℂ Unit (chiralModule (ι := ι) c) := fun _ =>
+  Representation.trivial ℂ Unit _
 
 /-- The standard basis of `ι → ℂ`. -/
 def piBasis : Basis ι ℂ (ι → ℂ) := Pi.basisFun ℂ ι
 
-/-- The basis of each colour's carrier, indexed by `ι`: `piBasis`, its dual basis, and the
-conjugate of each. -/
+/--
+The basis of each colour's carrier, indexed by `ι`: `piBasis`, its dual basis, and the
+conjugate of each.
+-/
 noncomputable def chiralBasis : (c : ChiralColor) → Basis ι ℂ (chiralModule (ι := ι) c)
-  | .chiralUp   => piBasis
+  | .chiralUp => piBasis
   | .chiralDown => piBasis.dualBasis
-  | .antiUp     => Basis.conj piBasis
-  | .antiDown   => Basis.conj piBasis.dualBasis
+  | .antiUp => Basis.conj piBasis
+  | .antiDown => Basis.conj piBasis.dualBasis
 
 /-!
 ## D. The δ structure on based finite modules
@@ -159,14 +175,16 @@ variable {M : Type*} [AddCommGroup M] [Module ℂ M]
 
 variable {N : Type*} [AddCommGroup N] [Module ℂ N]
 
-/-- The δ pairing `(x, y) ↦ ∑_I (b x)_I (b' y)_I` of two based modules sharing the index `ι`,
-built from Mathlib's `Basis.toDual`. -/
+/--
+The δ pairing `(x, y) ↦ ∑_I (b x)_I (b' y)_I` of two based modules sharing the index `ι`,
+built from Mathlib's `Basis.toDual`.
+-/
 def deltaBil₂ (b : Basis ι ℂ M) (b' : Basis ι ℂ N) : M →ₗ[ℂ] N →ₗ[ℂ] ℂ :=
   b.toDual.compl₂ (b'.equiv b (Equiv.refl ι)).toLinearMap
 
 /-- `deltaBil₂ b b' x y = ∑_I (b x)_I (b' y)_I`. -/
-lemma deltaBil₂_apply (b : Basis ι ℂ M) (b' : Basis ι ℂ N) (x : M) (y : N) :
-    deltaBil₂ b b' x y = ∑ I, b.equivFun x I * b'.equivFun y I := by
+lemma deltaBil₂_apply (b : Basis ι ℂ M) (b' : Basis ι ℂ N) (x : M) (y : N)
+    : deltaBil₂ b b' x y = ∑ I, b.equivFun x I * b'.equivFun y I := by
   rw [deltaBil₂, LinearMap.compl₂_apply, LinearEquiv.coe_coe]
   conv_lhs => rw [← b'.sum_equivFun y]
   simp_rw [map_sum, map_smul, Basis.equiv_apply, Equiv.refl_apply, Basis.toDual_eq_equivFun,
@@ -178,23 +196,23 @@ def deltaContr₂ (b : Basis ι ℂ M) (b' : Basis ι ℂ N) : M ⊗[ℂ] N →�
   TensorProduct.lift (deltaBil₂ b b')
 
 /-- `deltaContr₂ b b' (x ⊗ₜ y) = ∑_I (b x)_I (b' y)_I`. -/
-lemma deltaContr₂_tmul (b : Basis ι ℂ M) (b' : Basis ι ℂ N) (x : M) (y : N) :
-    deltaContr₂ b b' (x ⊗ₜ[ℂ] y) = ∑ I, b.equivFun x I * b'.equivFun y I := by
+lemma deltaContr₂_tmul (b : Basis ι ℂ M) (b' : Basis ι ℂ N) (x : M) (y : N)
+    : deltaContr₂ b b' (x ⊗ₜ[ℂ] y) = ∑ I, b.equivFun x I * b'.equivFun y I := by
   rw [deltaContr₂, TensorProduct.lift.tmul, deltaBil₂_apply]
 
 /-- `deltaContr₂ b b' (x ⊗ₜ b' J) = x_J`: pairing with the second basis reads off a coordinate. -/
-lemma deltaContr₂_tmul_basis (b : Basis ι ℂ M) (b' : Basis ι ℂ N) (x : M) (J : ι) :
-    deltaContr₂ b b' (x ⊗ₜ[ℂ] b' J) = b.equivFun x J := by
+lemma deltaContr₂_tmul_basis (b : Basis ι ℂ M) (b' : Basis ι ℂ N) (x : M) (J : ι)
+    : deltaContr₂ b b' (x ⊗ₜ[ℂ] b' J) = b.equivFun x J := by
   simp [deltaContr₂_tmul, Basis.equivFun_self]
 
 /-- `deltaContr₂ b b' (b I ⊗ₜ b' J) = δ_{IJ}`: the two bases are δ-dual. -/
-lemma deltaContr₂_basis_basis (b : Basis ι ℂ M) (b' : Basis ι ℂ N) (I J : ι) :
-    deltaContr₂ b b' (b I ⊗ₜ[ℂ] b' J) = if I = J then 1 else 0 := by
+lemma deltaContr₂_basis_basis (b : Basis ι ℂ M) (b' : Basis ι ℂ N) (I J : ι)
+    : deltaContr₂ b b' (b I ⊗ₜ[ℂ] b' J) = if I = J then 1 else 0 := by
   rw [deltaContr₂_tmul_basis, Basis.equivFun_self]
 
 /-- `deltaContr₂ b b' (x ⊗ₜ y) = deltaContr₂ b' b (y ⊗ₜ x)`: swapping slots swaps the two bases. -/
-lemma deltaContr₂_comm (b : Basis ι ℂ M) (b' : Basis ι ℂ N) (x : M) (y : N) :
-    deltaContr₂ b b' (x ⊗ₜ[ℂ] y) = deltaContr₂ b' b (y ⊗ₜ[ℂ] x) := by
+lemma deltaContr₂_comm (b : Basis ι ℂ M) (b' : Basis ι ℂ N) (x : M) (y : N)
+    : deltaContr₂ b b' (x ⊗ₜ[ℂ] y) = deltaContr₂ b' b (y ⊗ₜ[ℂ] x) := by
   rw [deltaContr₂_tmul, deltaContr₂_tmul]
   exact Finset.sum_congr rfl fun I _ => mul_comm _ _
 
@@ -203,28 +221,33 @@ def deltaCap₂ (b : Basis ι ℂ M) (b' : Basis ι ℂ N) : M ⊗[ℂ] N := ∑
 
 omit [DecidableEq ι] in
 /-- `comm (deltaCap₂ b b') = deltaCap₂ b' b`: swapping the two factors swaps the two bases. -/
-lemma deltaCap₂_comm (b : Basis ι ℂ M) (b' : Basis ι ℂ N) :
-    TensorProduct.comm ℂ M N (deltaCap₂ b b') = deltaCap₂ b' b := by
+lemma deltaCap₂_comm (b : Basis ι ℂ M) (b' : Basis ι ℂ N)
+    : TensorProduct.comm ℂ M N (deltaCap₂ b b') = deltaCap₂ b' b := by
   rw [deltaCap₂, map_sum]
   exact Finset.sum_congr rfl fun I _ => by rw [TensorProduct.comm_tmul]
 
 omit [DecidableEq ι] in
-/-- The `unit_symm` law (two-module, `toSpanSingleton` form): `deltaCap₂ b' b` is the swap of
-`deltaCap₂ b b'`. -/
-lemma deltaUnit₂_symm (b : Basis ι ℂ M) (b' : Basis ι ℂ N) :
-    LinearMap.toSpanSingleton ℂ _ (deltaCap₂ b' b) 1 =
-      LinearMap.lTensor N (LinearEquiv.refl ℂ M).toLinearMap
+/--
+The `unit_symm` law (two-module, `toSpanSingleton` form): `deltaCap₂ b' b` is the swap of
+`deltaCap₂ b b'`.
+-/
+lemma deltaUnit₂_symm (b : Basis ι ℂ M) (b' : Basis ι ℂ N)
+    : LinearMap.toSpanSingleton ℂ _ (deltaCap₂ b' b) 1
+      = LinearMap.lTensor N (LinearEquiv.refl ℂ M).toLinearMap
         (TensorProduct.comm ℂ M N (LinearMap.toSpanSingleton ℂ _ (deltaCap₂ b b') 1)) := by
   simp only [LinearMap.toSpanSingleton_apply_one]
   rw [deltaCap₂_comm]
   simp only [LinearEquiv.refl_toLinearMap, LinearMap.lTensor_id, LinearMap.id_coe, id_eq]
 
-/-- The snake identity (two-module, `contr_unit` law): contracting `x ∈ M` into the `M`-leg of
-`deltaCap₂ b' b ∈ N ⊗ M` returns `x`. -/
-lemma deltaContr₂_unit (b : Basis ι ℂ M) (b' : Basis ι ℂ N) (x : M) :
-    (TensorProduct.lid ℂ M) ((deltaContr₂ b b').rTensor M
-      ((TensorProduct.assoc ℂ M N M).symm
-        (x ⊗ₜ[ℂ] LinearMap.toSpanSingleton ℂ _ (deltaCap₂ b' b) 1))) = x := by
+/--
+The snake identity (two-module, `contr_unit` law): contracting `x ∈ M` into the `M`-leg of
+`deltaCap₂ b' b ∈ N ⊗ M` returns `x`.
+-/
+lemma deltaContr₂_unit (b : Basis ι ℂ M) (b' : Basis ι ℂ N) (x : M)
+    : (TensorProduct.lid ℂ M) ((deltaContr₂ b b').rTensor M
+        ((TensorProduct.assoc ℂ M N M).symm
+          (x ⊗ₜ[ℂ] LinearMap.toSpanSingleton ℂ _ (deltaCap₂ b' b) 1)))
+      = x := by
   rw [LinearMap.toSpanSingleton_apply_one, deltaCap₂, TensorProduct.tmul_sum, map_sum, map_sum,
     map_sum]
   conv_rhs => rw [← b.sum_equivFun x]
@@ -237,20 +260,27 @@ lemma deltaContr₂_unit (b : Basis ι ℂ M) (b' : Basis ι ℂ N) (x : M) :
 
 -/
 
-/-- The chiral-index tensor species with its conjugation. Its contraction is the δ pairing of a
+/--
+The chiral-index tensor species with its conjugation. Its contraction is the δ pairing of a
 colour with its dual `τ c`, its unit the δ cap, and its conjugation flips holomorphy by
-`ChiralColor.bar`. -/
-def chiralTensor : ConjTensorSpecies ℂ ChiralColor Unit (chiralModule (ι := ι)) (fun _ => ι)
-    (chiralRep (ι := ι)) (chiralBasis (ι := ι)) where
+`ChiralColor.bar`.
+-/
+def chiralTensor
+    : ConjTensorSpecies ℂ ChiralColor Unit (chiralModule (ι := ι))
+      (fun _ => ι)
+      (chiralRep (ι := ι)) (chiralBasis (ι := ι)) where
   τ := ChiralColor.tau
   τ_involution c := by cases c <;> rfl
   -- `contr` pairs a colour with its variance dual `τ c` (distinct carriers, e.g. `ι → ℂ`
   -- against its dual); `unit` is the δ cap across those two carriers.
-  contr c := { deltaContr₂ (chiralBasis c) (chiralBasis (ChiralColor.tau c)) with
-      isIntertwining' g := by ext v; simp [Representation.tprod_apply, chiralRep] }
-  unit c := { LinearMap.toSpanSingleton ℂ _
-        (deltaCap₂ (chiralBasis (ChiralColor.tau c)) (chiralBasis c)) with
-      isIntertwining' g := by ext; simp [Representation.tprod_apply, chiralRep, deltaCap₂] }
+  contr c := {
+    deltaContr₂ (chiralBasis c) (chiralBasis (ChiralColor.tau c)) with
+    isIntertwining' g := by ext v; simp [Representation.tprod_apply, chiralRep]
+  }
+  unit c := {
+    LinearMap.toSpanSingleton ℂ _ (deltaCap₂ (chiralBasis (ChiralColor.tau c)) (chiralBasis c)) with
+    isIntertwining' g := by ext; simp [Representation.tprod_apply, chiralRep, deltaCap₂]
+  }
   -- Each coherence law reduces, by case analysis on `c`, to the matching abstract two-module
   -- δ lemma.
   contr_tmul_symm c x y := by cases c <;> exact deltaContr₂_comm _ _ _ _
@@ -268,32 +298,34 @@ def chiralTensor : ConjTensorSpecies ℂ ChiralColor Unit (chiralModule (ι := �
     -- The `key` lemma evaluates both sides by `deltaContr₂_basis_basis` (a syntactic rewrite to
     -- `if x₁ = x₂ then 1 else 0`), so the heavy `Basis.conj`/`dualBasis` carriers are never
     -- `whnf`'d.
-    have key : ∀ {M₁ M₁' M₂ M₂' : Type} [AddCommGroup M₁] [Module ℂ M₁] [AddCommGroup M₁']
-        [Module ℂ M₁'] [AddCommGroup M₂] [Module ℂ M₂] [AddCommGroup M₂'] [Module ℂ M₂']
-        (B₁ : Basis ι ℂ M₁) (B₁' : Basis ι ℂ M₁') (B₂ : Basis ι ℂ M₂) (B₂' : Basis ι ℂ M₂'),
-        star (deltaContr₂ B₁ B₁' (B₁ x₁ ⊗ₜ[ℂ] B₁' x₂))
-          = deltaContr₂ B₂ B₂' (B₂ x₁ ⊗ₜ[ℂ] B₂' x₂) := by
+    have key
+        : ∀ {M₁ M₁' M₂ M₂' : Type} [AddCommGroup M₁] [Module ℂ M₁] [AddCommGroup M₁'] [Module ℂ M₁']
+            [AddCommGroup M₂] [Module ℂ M₂] [AddCommGroup M₂'] [Module ℂ M₂'] (B₁ : Basis ι ℂ M₁)
+            (B₁' : Basis ι ℂ M₁') (B₂ : Basis ι ℂ M₂) (B₂' : Basis ι ℂ M₂'),
+          star (deltaContr₂ B₁ B₁' (B₁ x₁ ⊗ₜ[ℂ] B₁' x₂))
+            = deltaContr₂ B₂ B₂' (B₂ x₁ ⊗ₜ[ℂ] B₂' x₂) := by
       intro M₁ M₁' M₂ M₂' _ _ _ _ _ _ _ _ B₁ B₁' B₂ B₂'
-      rw [deltaContr₂_basis_basis, deltaContr₂_basis_basis]; split <;> simp
+      rw [deltaContr₂_basis_basis, deltaContr₂_basis_basis]
+      split <;> simp
     cases d <;> exact key _ _ _ _
 
 /-- The chiral contraction of two basis vectors is the Kronecker δ. -/
-lemma chiralTensor_contr_chiralBasis (d : ChiralColor) (x₁ x₂ : ι) :
-    (chiralTensor (ι := ι)).contr d
+lemma chiralTensor_contr_chiralBasis (d : ChiralColor) (x₁ x₂ : ι)
+    : (chiralTensor (ι := ι)).contr d
         (chiralBasis (ι := ι) d x₁ ⊗ₜ[ℂ] chiralBasis (ι := ι) ((chiralTensor (ι := ι)).τ d) x₂)
       = if x₁ = x₂ then 1 else 0 := by
   cases d <;> exact deltaContr₂_basis_basis _ _ x₁ x₂
 
 /-- The chiral species has dual bases at dual colours, matched by the identity on `ι`. -/
-instance chiralTensor.instHasContrDualBases :
-    TensorSpecies.HasContrDualBases (chiralTensor (ι := ι)).toTensorSpecies where
+instance chiralTensor.instHasContrDualBases
+    : TensorSpecies.HasContrDualBases (chiralTensor (ι := ι)).toTensorSpecies where
   exists_matching c := ⟨Equiv.refl ι, chiralTensor_contr_chiralBasis c⟩
 
 /-- The dual-label matching of the chiral species is the identity. -/
 @[simp]
-lemma contrDualIdxEquiv_eq_refl (c : ChiralColor) :
-    TensorSpecies.HasContrDualBases.contrDualIdxEquiv (chiralTensor (ι := ι)).toTensorSpecies c =
-      Equiv.refl ι :=
+lemma contrDualIdxEquiv_eq_refl (c : ChiralColor)
+    : TensorSpecies.HasContrDualBases.contrDualIdxEquiv (chiralTensor (ι := ι)).toTensorSpecies c
+      = Equiv.refl ι :=
   TensorSpecies.HasContrDualBases.contrDualIdxEquiv_eq_of_isContrDualMatching
     (chiralTensor_contr_chiralBasis c)
 
@@ -318,64 +350,68 @@ canonical colour lists for scalar and anti-holomorphic covector tensors respecti
 -/
 
 /-- Conjugation of a scalar tensor, normalized back to the scalar colour list `![]`. -/
-def conjScalar (t : (chiralTensor (ι := ι)).Tensor ![]) :
-    (chiralTensor (ι := ι)).Tensor ![] :=
-  permT id ⟨Function.bijective_id, fun i => by fin_cases i⟩
-    ((chiralTensor (ι := ι)).conjT t)
+def conjScalar (t : (chiralTensor (ι := ι)).Tensor ![]) : (chiralTensor (ι := ι)).Tensor ![] :=
+  permT id ⟨Function.bijective_id, fun i => by fin_cases i⟩ ((chiralTensor (ι := ι)).conjT t)
 
-/-- Conjugation of a holomorphic covector, normalized to the anti-holomorphic covector colour
-list `![antiDown]`. -/
-def conjChiralCovector
-    (t : (chiralTensor (ι := ι)).Tensor ![chiralDown]) :
-    (chiralTensor (ι := ι)).Tensor ![antiDown] :=
-  permT ![0] ⟨by decide, fun i => by fin_cases i; rfl⟩
-    ((chiralTensor (ι := ι)).conjT t)
+/--
+Conjugation of a holomorphic covector, normalized to the anti-holomorphic covector colour
+list `![antiDown]`.
+-/
+def conjChiralCovector (t : (chiralTensor (ι := ι)).Tensor ![chiralDown])
+    : (chiralTensor (ι := ι)).Tensor ![antiDown] :=
+  permT (![0]) ⟨by decide, fun i => by fin_cases i; rfl⟩ ((chiralTensor (ι := ι)).conjT t)
 
 set_option backward.isDefEq.respectTransparency false in
-/-- For scalar tensors, `toScalar` of the normalized tensor conjugate is the complex conjugate of
-`toScalar`. -/
-lemma toScalar_conjScalar (t : (chiralTensor (ι := ι)).Tensor ![]) :
-    (conjScalar t).toScalar = star t.toScalar := by
+/--
+For scalar tensors, `toScalar` of the normalized tensor conjugate is the complex conjugate of
+`toScalar`.
+-/
+lemma toScalar_conjScalar (t : (chiralTensor (ι := ι)).Tensor ![])
+    : (conjScalar t).toScalar = star t.toScalar := by
   rw [conjScalar, toScalar_permT]
   rw [toScalar_eq_repr, toScalar_eq_repr]
   change componentMap (S := (chiralTensor (ι := ι)).toTensorSpecies)
-      ((chiralTensor (ι := ι)).bar ∘ ![]) ((chiralTensor (ι := ι)).conjT t) (fun j => Fin.elim0 j) =
-    star ((basis (S := (chiralTensor (ι := ι)).toTensorSpecies) ![]).repr t (fun j => Fin.elim0 j))
+      ((chiralTensor (ι := ι)).bar ∘ ![]) ((chiralTensor (ι := ι)).conjT t) (fun j => Fin.elim0 j)
+    = star ((basis (S := (chiralTensor (ι := ι)).toTensorSpecies) ![]).repr t
+      (fun j => Fin.elim0 j))
   erw [ConjTensorSpecies.componentMap_conjT (S := chiralTensor (ι := ι))]
   rfl
 
 set_option backward.isDefEq.respectTransparency false in
-/-- Component formula for the holomorphic covector conjugate: the `![I]` basis component of
-`conjChiralCovector t` is the complex conjugate of the `![I]` component of `t`. -/
-lemma repr_conjChiralCovector
-    (t : (chiralTensor (ι := ι)).Tensor ![chiralDown]) (I : ι) :
-    (basis (S := (chiralTensor (ι := ι)).toTensorSpecies) ![antiDown]).repr
-        (conjChiralCovector t) ![I] =
-      star ((basis (S := (chiralTensor (ι := ι)).toTensorSpecies) ![chiralDown]).repr t ![I]) := by
+/--
+Component formula for the holomorphic covector conjugate: the `![I]` basis component of
+`conjChiralCovector t` is the complex conjugate of the `![I]` component of `t`.
+-/
+lemma repr_conjChiralCovector (t : (chiralTensor (ι := ι)).Tensor ![chiralDown]) (I : ι)
+    : (basis (S := (chiralTensor (ι := ι)).toTensorSpecies) ![antiDown]).repr (conjChiralCovector t)
+        ![I]
+      = star ((basis (S := (chiralTensor (ι := ι)).toTensorSpecies) ![chiralDown]).repr t
+        ![I]) := by
   rw [conjChiralCovector, permT_basis_repr_symm_apply]
   change componentMap (S := (chiralTensor (ι := ι)).toTensorSpecies)
-      ((chiralTensor (ι := ι)).bar ∘ ![chiralDown]) ((chiralTensor (ι := ι)).conjT t) _ = _
+      ((chiralTensor (ι := ι)).bar ∘ ![chiralDown]) ((chiralTensor (ι := ι)).conjT t) _
+    = _
   erw [ConjTensorSpecies.componentMap_conjT (S := chiralTensor (ι := ι))]
   apply congrArg star
-  apply congrArg (fun idx => componentMap (S := (chiralTensor (ι := ι)).toTensorSpecies)
-    ![chiralDown] t idx)
+  apply congrArg (fun idx =>
+    componentMap (S := (chiralTensor (ι := ι)).toTensorSpecies) (![chiralDown]) t idx)
   funext i
   fin_cases i
   rfl
 
 /-- Conjugation of a holomorphic covector is additive. -/
 @[simp]
-lemma conjChiralCovector_add
-    (t₁ t₂ : (chiralTensor (ι := ι)).Tensor ![chiralDown]) :
-    conjChiralCovector (t₁ + t₂) = conjChiralCovector t₁ + conjChiralCovector t₂ := by
+lemma conjChiralCovector_add (t₁ t₂ : (chiralTensor (ι := ι)).Tensor ![chiralDown])
+    : conjChiralCovector (t₁ + t₂) = conjChiralCovector t₁ + conjChiralCovector t₂ := by
   simp [conjChiralCovector, map_add]
 
-/-- Conjugation of a holomorphic covector is conjugate-linear: a scalar `r` pulls out as
-`star r`. -/
+/--
+Conjugation of a holomorphic covector is conjugate-linear: a scalar `r` pulls out as
+`star r`.
+-/
 @[simp]
-lemma conjChiralCovector_smul (r : ℂ)
-    (t : (chiralTensor (ι := ι)).Tensor ![chiralDown]) :
-    conjChiralCovector (r • t) = star r • conjChiralCovector t := by
+lemma conjChiralCovector_smul (r : ℂ) (t : (chiralTensor (ι := ι)).Tensor ![chiralDown])
+    : conjChiralCovector (r • t) = star r • conjChiralCovector t := by
   simp [conjChiralCovector]
 
 end Conjugation

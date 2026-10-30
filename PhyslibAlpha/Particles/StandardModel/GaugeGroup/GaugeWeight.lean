@@ -98,21 +98,21 @@ character equation `rep g x = c • x`.
 -/
 
 /-- The unitary scalar `exp i`, a point of the unit circle of infinite order. -/
-noncomputable def expI : unitary ℂ :=
-  ⟨Complex.exp Complex.I, by
+noncomputable def expI : unitary ℂ := ⟨
+  Complex.exp Complex.I,
+  by
     have hstar : star (Complex.exp Complex.I) = Complex.exp (-Complex.I) := by
-      rw [show star (Complex.exp Complex.I)
-          = (starRingEnd ℂ) (Complex.exp Complex.I) from rfl, ← Complex.exp_conj,
-        Complex.conj_I]
+      rw [show star (Complex.exp Complex.I) = (starRingEnd ℂ) (Complex.exp Complex.I) from rfl,
+        ← Complex.exp_conj, Complex.conj_I]
     constructor
     · rw [hstar, ← Complex.exp_add, neg_add_cancel, Complex.exp_zero]
-    · rw [hstar, ← Complex.exp_add, add_neg_cancel, Complex.exp_zero]⟩
+    · rw [hstar, ← Complex.exp_add, add_neg_cancel, Complex.exp_zero]
+⟩
 
 /-- The powers of `exp i` are pairwise distinct, by the irrationality of `π`. -/
 lemma expI_zpow_injective : Function.Injective fun n : ℤ => ((expI : ℂ) ^ n) := by
   intro a b hab
-  simp only [show ((expI : ℂ)) = Complex.exp Complex.I from rfl,
-    ← Complex.exp_int_mul] at hab
+  simp only [show ((expI : ℂ)) = Complex.exp Complex.I from rfl, ← Complex.exp_int_mul] at hab
   obtain ⟨k, hk⟩ := Complex.exp_eq_exp_iff_exists_int.mp hab
   have hℂ : ((a : ℂ)) = b + k * (2 * (Real.pi : ℂ)) := by
     refine mul_right_cancel₀ Complex.I_ne_zero ?_
@@ -125,8 +125,7 @@ lemma expI_zpow_injective : Function.Injective fun n : ℤ => ((expI : ℂ) ^ n)
   · exact_mod_cast (by simpa using hℝ : ((a : ℝ)) = b)
   · exfalso
     refine irrational_pi ⟨(a - b) / (2 * k), ?_⟩
-    have h2k : ((2 * k : ℝ)) ≠ 0 :=
-      mul_ne_zero two_ne_zero (Int.cast_ne_zero.mpr hk0)
+    have h2k : ((2 * k : ℝ)) ≠ 0 := mul_ne_zero two_ne_zero (Int.cast_ne_zero.mpr hk0)
     push_cast
     rw [div_eq_iff h2k]
     linarith [hℝ]
@@ -149,52 +148,58 @@ lemma expI_mul_conj : (expI : ℂ) * (starRingEnd ℂ) (expI : ℂ) = 1 :=
 lemma conj_mul_expI : (starRingEnd ℂ) (expI : ℂ) * (expI : ℂ) = 1 :=
   Unitary.star_mul_self_of_mem expI.2
 
-/-- A diagonal matrix whose entries are unit scalars with product one lies in the special
-  unitary group. -/
-lemma _root_.Matrix.mem_specialUnitaryGroup_diagonal {n : Type*} [Fintype n] [DecidableEq n]
-    (d : n → ℂ) (hd : ∀ i, d i * star (d i) = 1) (hdet : ∏ i, d i = 1) :
-    Matrix.diagonal d ∈ Matrix.specialUnitaryGroup n ℂ := by
+/--
+A diagonal matrix whose entries are unit scalars with product one lies in the special
+unitary group.
+-/
+lemma _root_.Matrix.mem_specialUnitaryGroup_diagonal
+    {n : Type*} [Fintype n] [DecidableEq n]
+    (d : n → ℂ) (hd : ∀ i, d i * star (d i) = 1) (hdet : ∏ i, d i = 1)
+    : Matrix.diagonal d ∈ Matrix.specialUnitaryGroup n ℂ := by
   rw [Matrix.mem_specialUnitaryGroup_iff]
   refine ⟨?_, ?_⟩
-  · rw [Matrix.mem_unitaryGroup_iff, Matrix.star_eq_conjTranspose,
-      Matrix.diagonal_conjTranspose, Matrix.diagonal_mul_diagonal]
+  · rw [Matrix.mem_unitaryGroup_iff, Matrix.star_eq_conjTranspose, Matrix.diagonal_conjTranspose,
+      Matrix.diagonal_mul_diagonal]
     simp only [Pi.star_apply]
     rw [funext hd, Matrix.diagonal_one]
   · rw [Matrix.det_diagonal, hdet]
 
 /-- The first colour torus generator, `diag (exp i, exp (-i), 1)`. -/
-noncomputable def su3ExpIOne : specialUnitaryGroup (Fin 3) ℂ :=
-  ⟨Matrix.diagonal ![(expI : ℂ), star (expI : ℂ), 1],
-    Matrix.mem_specialUnitaryGroup_diagonal _
-      (fun i => by fin_cases i <;> simp [expI_mul_conj, conj_mul_expI])
-      (by simp [Fin.prod_univ_three, expI_mul_conj])⟩
+noncomputable def su3ExpIOne : specialUnitaryGroup (Fin 3) ℂ := ⟨
+  Matrix.diagonal ![(expI : ℂ), star (expI : ℂ), 1],
+  Matrix.mem_specialUnitaryGroup_diagonal _
+    (fun i => by fin_cases i <;> simp [expI_mul_conj, conj_mul_expI])
+    (by simp [Fin.prod_univ_three, expI_mul_conj])
+⟩
 
 /-- The second colour torus generator, `diag (1, exp i, exp (-i))`. -/
-noncomputable def su3ExpITwo : specialUnitaryGroup (Fin 3) ℂ :=
-  ⟨Matrix.diagonal ![1, (expI : ℂ), star (expI : ℂ)],
-    Matrix.mem_specialUnitaryGroup_diagonal _
-      (fun i => by fin_cases i <;> simp [expI_mul_conj, conj_mul_expI])
-      (by simp [Fin.prod_univ_three, expI_mul_conj])⟩
+noncomputable def su3ExpITwo : specialUnitaryGroup (Fin 3) ℂ := ⟨
+  Matrix.diagonal ![1, (expI : ℂ), star (expI : ℂ)],
+  Matrix.mem_specialUnitaryGroup_diagonal _
+    (fun i => by fin_cases i <;> simp [expI_mul_conj, conj_mul_expI])
+    (by simp [Fin.prod_univ_three, expI_mul_conj])
+⟩
 
 /-- The `SU(2)` torus element, `diag (exp i, exp (-i))`. -/
-noncomputable def su2ExpI : specialUnitaryGroup (Fin 2) ℂ :=
-  ⟨Matrix.diagonal ![(expI : ℂ), star (expI : ℂ)],
-    Matrix.mem_specialUnitaryGroup_diagonal _
-      (fun i => by fin_cases i <;> simp [expI_mul_conj, conj_mul_expI])
-      (by simp [Fin.prod_univ_two, expI_mul_conj])⟩
+noncomputable def su2ExpI : specialUnitaryGroup (Fin 2) ℂ := ⟨
+  Matrix.diagonal ![(expI : ℂ), star (expI : ℂ)],
+  Matrix.mem_specialUnitaryGroup_diagonal _
+    (fun i => by fin_cases i <;> simp [expI_mul_conj, conj_mul_expI])
+    (by simp [Fin.prod_univ_two, expI_mul_conj])
+⟩
 
 /-- The underlying matrix of the `SU(2)` torus element. -/
-lemma su2ExpI_coe :
-    (su2ExpI : specialUnitaryGroup (Fin 2) ℂ).1
-      = !![(expI : ℂ), 0; 0, star (expI : ℂ)] := by
+lemma su2ExpI_coe
+    : (su2ExpI : specialUnitaryGroup (Fin 2) ℂ).1 = !![(expI : ℂ), 0; 0, star (expI : ℂ)] := by
   ext a b
   fin_cases a <;> fin_cases b <;> simp [su2ExpI, Matrix.diagonal]
 
-/-- The inverse torus element is `diag (exp (-i), exp i)`, so on a doublet the two components
-  are scaled by the reciprocal characters. -/
-lemma su2ExpI_inv_coe :
-    (su2ExpI⁻¹ : specialUnitaryGroup (Fin 2) ℂ).1
-      = !![star (expI : ℂ), 0; 0, (expI : ℂ)] := by
+/--
+The inverse torus element is `diag (exp (-i), exp i)`, so on a doublet the two components
+are scaled by the reciprocal characters.
+-/
+lemma su2ExpI_inv_coe
+    : (su2ExpI⁻¹ : specialUnitaryGroup (Fin 2) ℂ).1 = !![star (expI : ℂ), 0; 0, (expI : ℂ)] := by
   rw [← Matrix.star_eq_inv, Matrix.specialUnitaryGroup.coe_star, su2ExpI_coe]
   ext a b
   fin_cases a <;> fin_cases b <;> simp
@@ -220,8 +225,10 @@ characters by which the torus acts.
 noncomputable def gaugeTorusGen : Fin 4 → GaugeGroupI :=
   ![⟨su3ExpIOne, 1, 1⟩, ⟨su3ExpITwo, 1, 1⟩, ⟨1, su2ExpI, 1⟩, ⟨1, 1, expI⟩]
 
-/-- A **gauge weight**, the four exponents `(colour₁, colour₂, isospin, hypercharge)`
-  recording how a vector scales under `gaugeTorusGen`. -/
+/--
+A **gauge weight**, the four exponents `(colour₁, colour₂, isospin, hypercharge)`
+recording how a vector scales under `gaugeTorusGen`.
+-/
 abbrev GaugeWeight : Type := ℤ × ℤ × ℤ × ℤ
 
 /-- The exponent of a gauge weight against the `i`-th torus generator. -/
@@ -240,21 +247,25 @@ def GaugeWeight.coord (w : GaugeWeight) : Fin 4 → ℤ := ![w.1, w.2.1, w.2.2.1
 @[simp] lemma GaugeWeight.coord_three (w : GaugeWeight) : w.coord 3 = w.2.2.2 := rfl
 
 /-- The zero gauge weight has vanishing exponent against every torus generator. -/
-@[simp] lemma GaugeWeight.coord_neg (w : GaugeWeight) (i : Fin 4) :
-    (-w).coord i = -(w.coord i) := by
+@[simp]
+lemma GaugeWeight.coord_neg (w : GaugeWeight) (i : Fin 4) : (-w).coord i = -(w.coord i) := by
   fin_cases i <;> rfl
 
-@[simp] lemma GaugeWeight.zero_coord (i : Fin 4) : (0 : GaugeWeight).coord i = 0 := by
+@[simp]
+lemma GaugeWeight.zero_coord (i : Fin 4) : (0 : GaugeWeight).coord i = 0 := by fin_cases i <;> rfl
+
+/--
+Weights add coordinatewise. With `zero_coord` this says `coord` is additive, which is
+what makes gauge weights add under multiplication.
+-/
+lemma GaugeWeight.coord_add (w w' : GaugeWeight) (i : Fin 4)
+    : (w + w').coord i = w.coord i + w'.coord i := by
   fin_cases i <;> rfl
 
-/-- Weights add coordinatewise. With `zero_coord` this says `coord` is additive, which is
-  what makes gauge weights add under multiplication. -/
-lemma GaugeWeight.coord_add (w w' : GaugeWeight) (i : Fin 4) :
-    (w + w').coord i = w.coord i + w'.coord i := by
-  fin_cases i <;> rfl
-
-/-- A gauge weight is determined by its four exponents. This is what lets a weight be
-  recovered from the characters by which the torus acts; see `piece_eq_inf`. -/
+/--
+A gauge weight is determined by its four exponents. This is what lets a weight be
+recovered from the characters by which the torus acts; see `piece_eq_inf`.
+-/
 lemma GaugeWeight.coord_injective : Function.Injective GaugeWeight.coord := by
   rintro ⟨a, b, c, e⟩ ⟨a', b', c', e'⟩ h
   have h0 := congrFun h 0
@@ -262,7 +273,8 @@ lemma GaugeWeight.coord_injective : Function.Injective GaugeWeight.coord := by
   have h2 := congrFun h 2
   have h3 := congrFun h 3
   simp only [GaugeWeight.coord_zero, GaugeWeight.coord_one, GaugeWeight.coord_two,
-    GaugeWeight.coord_three] at h0 h1 h2 h3
+      GaugeWeight.coord_three]
+    at h0 h1 h2 h3
   subst h0
   subst h1
   subst h2
@@ -287,15 +299,20 @@ decomposition was recorded.
 
 variable {B : Type*} [Ring B] [Algebra ℂ B]
 
-/-- A representation acts by algebra maps, respecting multiplication. This is the
-  hypothesis under which charges are additive. -/
+/--
+A representation acts by algebra maps, respecting multiplication. This is the
+hypothesis under which charges are additive.
+-/
 abbrev IsMulRep (rep : Representation ℂ GaugeGroupI B) : Prop :=
   ∀ (g : GaugeGroupI) (x y : B), rep g (x * y) = rep g x * rep g y
 
-/-- A representation that respects multiplication respects the unit, since `g` is invertible
-  and so `rep g 1` is cancellable. -/
-lemma IsMulRep.map_one {rep : Representation ℂ GaugeGroupI B} (hmul : IsMulRep rep)
-    (g : GaugeGroupI) : rep g 1 = 1 := by
+/--
+A representation that respects multiplication respects the unit, since `g` is invertible
+and so `rep g 1` is cancellable.
+-/
+lemma IsMulRep.map_one
+    {rep : Representation ℂ GaugeGroupI B} (hmul : IsMulRep rep) (g : GaugeGroupI)
+    : rep g 1 = 1 := by
   have h1 := hmul g 1 (rep g⁻¹ 1)
   rw [one_mul, rep.self_inv_apply, mul_one] at h1
   exact h1.symm
@@ -306,13 +323,11 @@ lemma IsMulRep.map_one {rep : Representation ℂ GaugeGroupI B} (hmul : IsMulRep
 
 -/
 
-lemma starRingEnd_expI_pow (n : ℕ) :
-    ((starRingEnd ℂ) (expI : ℂ)) ^ n = ((expI : ℂ) ^ n)⁻¹ := by
+lemma starRingEnd_expI_pow (n : ℕ) : ((starRingEnd ℂ) (expI : ℂ)) ^ n = ((expI : ℂ) ^ n)⁻¹ := by
   rw [← inv_pow, expI_inv_eq_star]
   rfl
 
-lemma starRingEnd_expI_zpow (z : ℤ) :
-    (starRingEnd ℂ) ((expI : ℂ) ^ z) = (expI : ℂ) ^ (-z) := by
+lemma starRingEnd_expI_zpow (z : ℤ) : (starRingEnd ℂ) ((expI : ℂ) ^ z) = (expI : ℂ) ^ (-z) := by
   rw [map_zpow₀, _root_.zpow_neg, ← _root_.inv_zpow]
   congr 1
   rw [expI_inv_eq_star]
@@ -331,12 +346,16 @@ weights of the matter representations.
 
 -/
 
-/-- The colour weights of the fundamental of `SU(3)` against the two colour torus
-  generators. -/
+/--
+The colour weights of the fundamental of `SU(3)` against the two colour torus
+generators.
+-/
 def colourWeight (c : Fin 3) : ℤ × ℤ := ![(1, 0), (-1, 1), (0, -1)] c
 
-/-- The isospin weight of the fundamental of `SU(2)` against the isospin torus
-  generator. -/
+/--
+The isospin weight of the fundamental of `SU(2)` against the isospin torus
+generator.
+-/
 def isoWeight (s : Fin 2) : ℤ := ![1, -1] s
 
 /-!
@@ -354,15 +373,15 @@ section TorusBases
 variable {V : Type} [AddCommGroup V] [Module ℂ V] {ι : Type} [Fintype ι] [DecidableEq ι]
 
 omit [Fintype ι] in
-lemma dual_gaugeTorusGen_coord (ρ : Representation ℂ GaugeGroupI V)
-    (b : Module.Basis ι ℂ V) (g : GaugeGroupI) (w : ι → ℤ)
-    (hb : ∀ j, ρ g (b j) = ((expI : ℂ) ^ w j) • b j) (j : ι) :
-    ρ.dual g (b.coord j) = ((expI : ℂ) ^ (-(w j))) • b.coord j := by
+lemma dual_gaugeTorusGen_coord
+    (ρ : Representation ℂ GaugeGroupI V) (b : Module.Basis ι ℂ V) (g : GaugeGroupI) (w : ι → ℤ)
+    (hb : ∀ j, ρ g (b j) = ((expI : ℂ) ^ w j) • b j)
+    (j : ι)
+    : ρ.dual g (b.coord j) = ((expI : ℂ) ^ (-(w j))) • b.coord j := by
   have hinv : ∀ j', ρ g⁻¹ (b j') = ((expI : ℂ) ^ (-(w j'))) • b j' := by
     intro j'
     have h1 : ρ g⁻¹ (ρ g (b j')) = b j' := by
-      rw [← Module.End.mul_apply, ← map_mul, inv_mul_cancel, map_one,
-        Module.End.one_apply]
+      rw [← Module.End.mul_apply, ← map_mul, inv_mul_cancel, map_one, Module.End.one_apply]
     rw [hb j', map_smul] at h1
     rw [_root_.zpow_neg]
     exact ((inv_smul_eq_iff₀ (expI_zpow_ne_zero (w j'))).mpr h1.symm).symm
@@ -376,21 +395,22 @@ lemma dual_gaugeTorusGen_coord (ρ : Representation ℂ GaugeGroupI V)
   · simp [hne]
 
 omit [Fintype ι] [DecidableEq ι] in
-lemma conj_gaugeTorusGen_basis (ρ : Representation ℂ GaugeGroupI V)
-    (b : Module.Basis ι ℂ V) (g : GaugeGroupI) (w : ι → ℤ)
-    (hb : ∀ j, ρ g (b j) = ((expI : ℂ) ^ w j) • b j) (j : ι) :
-    ρ.conj g (Basis.conj b j)
-      = ((expI : ℂ) ^ (-(w j))) • Basis.conj b j := by
-  simp only [Basis.conj_apply, Representation.conj_apply,
-    LinearEquiv.symm_apply_apply, hb j, map_smulₛₗ, starRingEnd_expI_zpow]
+lemma conj_gaugeTorusGen_basis
+    (ρ : Representation ℂ GaugeGroupI V) (b : Module.Basis ι ℂ V) (g : GaugeGroupI) (w : ι → ℤ)
+    (hb : ∀ j, ρ g (b j) = ((expI : ℂ) ^ w j) • b j)
+    (j : ι)
+    : ρ.conj g (Basis.conj b j) = ((expI : ℂ) ^ (-(w j))) • Basis.conj b j := by
+  simp only [Basis.conj_apply, Representation.conj_apply, LinearEquiv.symm_apply_apply, hb j,
+    map_smulₛₗ, starRingEnd_expI_zpow]
 
 end TorusBases
 
-/-- A **gauge weight decomposition** of a submodule `V`, a finitely supported family of
-  subspaces of pure gauge weight whose supremum is `V`. Purity is recorded against the four
-  commuting torus generators simultaneously. -/
-class GaugeWeightDecomposition (rep : Representation ℂ GaugeGroupI B)
-    (V : Submodule ℂ B) where
+/--
+A **gauge weight decomposition** of a submodule `V`, a finitely supported family of
+subspaces of pure gauge weight whose supremum is `V`. Purity is recorded against the four
+commuting torus generators simultaneously.
+-/
+class GaugeWeightDecomposition (rep : Representation ℂ GaugeGroupI B) (V : Submodule ℂ B) where
   /-- The piece of gauge weight `w`. -/
   piece : GaugeWeight → Submodule ℂ B
   /-- The finite set of gauge weights that occur. -/
@@ -398,8 +418,7 @@ class GaugeWeightDecomposition (rep : Representation ℂ GaugeGroupI B)
   /-- Gauge transformations act by algebra maps. -/
   rep_mul : IsMulRep rep
   /-- Each piece is of pure gauge weight, as seen by all four torus generators. -/
-  piece_le : ∀ w, ∀ x, x ∈ piece w → ∀ i,
-    rep (gaugeTorusGen i) x = ((expI : ℂ) ^ w.coord i) • x
+  piece_le : ∀ w, ∀ x, x ∈ piece w → ∀ i, rep (gaugeTorusGen i) x = ((expI : ℂ) ^ w.coord i) • x
   /-- Only the gauge weights in `supp` occur. -/
   piece_eq_bot : ∀ w ∉ supp, piece w = ⊥
   /-- The pieces exhaust `V`. -/
@@ -409,26 +428,32 @@ namespace GaugeWeightDecomposition
 
 variable {rep : Representation ℂ GaugeGroupI B} {V V' : Submodule ℂ B}
 
-/-- The weight-`w` piece lies in the eigenspace of the `i`-th torus generator at the
-  eigenvalue `(exp i) ^ (w.coord i)`. This is `piece_le` phrased as an inequality of
-  submodules. -/
-lemma piece_le_eigenspace (d : GaugeWeightDecomposition rep V) (w : GaugeWeight) (i : Fin 4) :
-    d.piece w ≤ Module.End.eigenspace (rep (gaugeTorusGen i)) ((expI : ℂ) ^ w.coord i) :=
+/--
+The weight-`w` piece lies in the eigenspace of the `i`-th torus generator at the
+eigenvalue `(exp i) ^ (w.coord i)`. This is `piece_le` phrased as an inequality of
+submodules.
+-/
+lemma piece_le_eigenspace (d : GaugeWeightDecomposition rep V) (w : GaugeWeight) (i : Fin 4)
+    : d.piece w ≤ Module.End.eigenspace (rep (gaugeTorusGen i)) ((expI : ℂ) ^ w.coord i) :=
   fun _ hy => Module.End.mem_eigenspace_iff.mpr (d.piece_le w _ hy i)
 
-/-- A weight outside the support has vanishing piece. This is the `piece_eq_bot` field, in
-  the form a `simp` set can use to discard the absent weights of a computed product. -/
-lemma piece_eq_zero_of_not_mem_supp (d : GaugeWeightDecomposition rep V) (w : GaugeWeight)
-    (hw : w ∉ d.supp) : d.piece w = ⊥ := d.piece_eq_bot w hw
+/--
+A weight outside the support has vanishing piece. This is the `piece_eq_bot` field, in
+the form a `simp` set can use to discard the absent weights of a computed product.
+-/
+lemma piece_eq_zero_of_not_mem_supp
+    (d : GaugeWeightDecomposition rep V) (w : GaugeWeight) (hw : w ∉ d.supp)
+    : d.piece w = ⊥ :=
+  d.piece_eq_bot w hw
 
 /-- A weight piece lies inside the submodule it decomposes. -/
-lemma piece_le_self (d : GaugeWeightDecomposition rep V) (w : GaugeWeight) :
-    d.piece w ≤ V := le_trans (le_iSup d.piece w) (le_of_eq d.iSup_piece)
+lemma piece_le_self (d : GaugeWeightDecomposition rep V) (w : GaugeWeight) : d.piece w ≤ V :=
+  le_trans (le_iSup d.piece w) (le_of_eq d.iSup_piece)
 
 /-- Transport a decomposition along an equality of submodules. -/
 @[implicit_reducible]
-def copy (d : GaugeWeightDecomposition rep V) (W : Submodule ℂ B) (hW : W = V) :
-    GaugeWeightDecomposition rep W where
+def copy (d : GaugeWeightDecomposition rep V) (W : Submodule ℂ B) (hW : W = V)
+    : GaugeWeightDecomposition rep W where
   piece := d.piece
   supp := d.supp
   rep_mul := d.rep_mul
@@ -437,8 +462,9 @@ def copy (d : GaugeWeightDecomposition rep V) (W : Submodule ℂ B) (hW : W = V)
   iSup_piece := by rw [d.iSup_piece, hW]
 
 @[simp]
-lemma copy_piece (d : GaugeWeightDecomposition rep V) (W : Submodule ℂ B) (hW : W = V) :
-    (copy d W hW).piece = d.piece := rfl
+lemma copy_piece (d : GaugeWeightDecomposition rep V) (W : Submodule ℂ B) (hW : W = V)
+    : (copy d W hW).piece = d.piece :=
+  rfl
 
 /-!
 ## G. Joins
@@ -454,31 +480,33 @@ from a summand where there is one and supplied as an argument where there is not
 decomposes the zero submodule and the indexed forms may range over an empty family.
 -/
 
-/-- The join of two gauge weight decompositions, decomposing `V ⊔ V'`. Pieces and supports
-  combine one weight at a time. -/
+/--
+The join of two gauge weight decompositions, decomposing `V ⊔ V'`. Pieces and supports
+combine one weight at a time.
+-/
 @[implicit_reducible]
-noncomputable instance sup [d : GaugeWeightDecomposition rep V]
-    [d' : GaugeWeightDecomposition rep V'] : GaugeWeightDecomposition rep (V ⊔ V') where
+noncomputable instance sup
+    [d : GaugeWeightDecomposition rep V] [d' : GaugeWeightDecomposition rep V']
+    : GaugeWeightDecomposition rep (V ⊔ V') where
   piece w := d.piece w ⊔ d'.piece w
   supp := d.supp ∪ d'.supp
   rep_mul := d.rep_mul
   piece_le w x hx i :=
-    Module.End.mem_eigenspace_iff.mp
-      (sup_le (d.piece_le_eigenspace w i) (d'.piece_le_eigenspace w i) hx)
+    Module.End.mem_eigenspace_iff.mp (sup_le (d.piece_le_eigenspace w i)
+      (d'.piece_le_eigenspace w i) hx)
   piece_eq_bot w hw := by
     rw [Finset.mem_union, not_or] at hw
     rw [d.piece_eq_bot w hw.1, d'.piece_eq_bot w hw.2, bot_sup_eq]
-  iSup_piece := by
-    rw [iSup_sup_eq, d.iSup_piece, d'.iSup_piece]
+  iSup_piece := by rw [iSup_sup_eq, d.iSup_piece, d'.iSup_piece]
 
 @[simp]
-lemma sup_piece [GaugeWeightDecomposition rep V] [GaugeWeightDecomposition rep V']
-    (w : GaugeWeight) : piece rep (V ⊔ V') w = piece rep V w ⊔ piece rep V' w := rfl
+lemma sup_piece [GaugeWeightDecomposition rep V] [GaugeWeightDecomposition rep V'] (w : GaugeWeight)
+    : piece rep (V ⊔ V') w = piece rep V w ⊔ piece rep V' w :=
+  rfl
 
 /-- The zero submodule carries the empty decomposition. -/
 @[implicit_reducible]
-def bot (hmul : IsMulRep rep) :
-    GaugeWeightDecomposition rep (⊥ : Submodule ℂ B) where
+def bot (hmul : IsMulRep rep) : GaugeWeightDecomposition rep (⊥ : Submodule ℂ B) where
   piece _ := ⊥
   supp := ∅
   rep_mul := hmul
@@ -489,21 +517,20 @@ def bot (hmul : IsMulRep rep) :
   piece_eq_bot _ _ := rfl
   iSup_piece := by simp
 
-@[simp]
-lemma bot_piece (hmul : IsMulRep rep)
-    (w : GaugeWeight) : (bot hmul).piece w = ⊥ := rfl
+@[simp] lemma bot_piece (hmul : IsMulRep rep) (w : GaugeWeight) : (bot hmul).piece w = ⊥ := rfl
 
-@[simp]
-lemma bot_supp (hmul : IsMulRep rep) :
-    (bot hmul).supp = ∅ := rfl
+@[simp] lemma bot_supp (hmul : IsMulRep rep) : (bot hmul).supp = ∅ := rfl
 
-/-- The span of a single simultaneous eigenvector of the gauge torus, as a
-  decomposition concentrated in its one weight. This is the base case from which the
-  decompositions of spans of weight vectors are assembled by `iSup` and `sup`. -/
+/--
+The span of a single simultaneous eigenvector of the gauge torus, as a
+decomposition concentrated in its one weight. This is the base case from which the
+decompositions of spans of weight vectors are assembled by `iSup` and `sup`.
+-/
 @[implicit_reducible]
-noncomputable def spanSingleton (hmul : IsMulRep rep) (x : B) (w : GaugeWeight)
-    (hx : ∀ i, rep (gaugeTorusGen i) x = ((expI : ℂ) ^ w.coord i) • x) :
-    GaugeWeightDecomposition rep (Submodule.span ℂ {x}) where
+noncomputable def spanSingleton
+    (hmul : IsMulRep rep)
+    (x : B) (w : GaugeWeight) (hx : ∀ i, rep (gaugeTorusGen i) x = ((expI : ℂ) ^ w.coord i) • x)
+    : GaugeWeightDecomposition rep (Submodule.span ℂ {x}) where
   piece w' := if w' = w then Submodule.span ℂ {x} else ⊥
   supp := {w}
   rep_mul := hmul
@@ -526,26 +553,29 @@ noncomputable def spanSingleton (hmul : IsMulRep rep) (x : B) (w : GaugeWeight)
     · exact bot_le
 
 @[simp]
-lemma spanSingleton_piece (hmul : IsMulRep rep) (x : B) (w : GaugeWeight)
-    (hx : ∀ i, rep (gaugeTorusGen i) x = ((expI : ℂ) ^ w.coord i) • x)
-    (w' : GaugeWeight) :
-    (spanSingleton hmul x w hx).piece w'
-      = if w' = w then Submodule.span ℂ {x} else ⊥ := rfl
-
-/-- An indexed join of decompositions. A family of decompositions indexed by a finite type
-  decomposes the join, its pieces joined and its supports united one weight at a time. This is
-  the arbitrary-arity form of `sup`. -/
-@[implicit_reducible]
-noncomputable def iSup {ι : Type*} [Fintype ι] {V : ι → Submodule ℂ B}
+lemma spanSingleton_piece
     (hmul : IsMulRep rep)
-    (d : (a : ι) → GaugeWeightDecomposition rep (V a)) :
-    GaugeWeightDecomposition rep (⨆ a, V a) where
+    (x : B) (w : GaugeWeight) (hx : ∀ i, rep (gaugeTorusGen i) x = ((expI : ℂ) ^ w.coord i) • x)
+    (w' : GaugeWeight)
+    : (spanSingleton hmul x w hx).piece w' = if w' = w then Submodule.span ℂ {x} else ⊥ :=
+  rfl
+
+/--
+An indexed join of decompositions. A family of decompositions indexed by a finite type
+decomposes the join, its pieces joined and its supports united one weight at a time. This is
+the arbitrary-arity form of `sup`.
+-/
+@[implicit_reducible]
+noncomputable def iSup
+    {ι : Type*} [Fintype ι]
+    {V : ι → Submodule ℂ B}
+    (hmul : IsMulRep rep) (d : (a : ι) → GaugeWeightDecomposition rep (V a))
+    : GaugeWeightDecomposition rep (⨆ a, V a) where
   piece w := ⨆ a, (d a).piece w
   supp := Finset.univ.biUnion fun a => (d a).supp
   rep_mul := hmul
   piece_le w x hx i :=
-    Module.End.mem_eigenspace_iff.mp
-      (iSup_le (fun a => (d a).piece_le_eigenspace w i) hx)
+    Module.End.mem_eigenspace_iff.mp (iSup_le (fun a => (d a).piece_le_eigenspace w i) hx)
   piece_eq_bot w hw := by
     simp only [Finset.mem_biUnion, Finset.mem_univ, true_and, not_exists] at hw
     exact le_antisymm (iSup_le fun a => le_of_eq ((d a).piece_eq_bot w (hw a))) bot_le
@@ -554,25 +584,30 @@ noncomputable def iSup {ι : Type*} [Fintype ι] {V : ι → Submodule ℂ B}
     exact iSup_congr fun a => (d a).iSup_piece
 
 @[simp]
-lemma piece_iSup {ι : Type*} [Fintype ι] {V : ι → Submodule ℂ B}
-    (hmul : IsMulRep rep)
-    (d : (a : ι) → GaugeWeightDecomposition rep (V a)) (w : GaugeWeight) :
-    (iSup hmul d).piece w = ⨆ a, (d a).piece w := rfl
+lemma piece_iSup
+    {ι : Type*} [Fintype ι]
+    {V : ι → Submodule ℂ B}
+    (hmul : IsMulRep rep) (d : (a : ι) → GaugeWeightDecomposition rep (V a)) (w : GaugeWeight)
+    : (iSup hmul d).piece w = ⨆ a, (d a).piece w :=
+  rfl
 
 /-- The support of an indexed join is the union of the supports. -/
-lemma iSup_supp {ι : Type*} [Fintype ι] {V : ι → Submodule ℂ B}
-    (hmul : IsMulRep rep)
-    (d : (a : ι) → GaugeWeightDecomposition rep (V a)) :
-    (iSup hmul d).supp = Finset.univ.biUnion fun a => (d a).supp := rfl
+lemma iSup_supp
+    {ι : Type*} [Fintype ι]
+    {V : ι → Submodule ℂ B}
+    (hmul : IsMulRep rep) (d : (a : ι) → GaugeWeightDecomposition rep (V a))
+    : (iSup hmul d).supp = Finset.univ.biUnion fun a => (d a).supp :=
+  rfl
 
-/-- A join over a proposition. `⨆ _ : p, V` is `V` when `p` holds and `⊥` otherwise, so
-  it is decomposed by the given decomposition or by `bot`. The argument is a function of the
-  proof, so the decomposition of `V` may itself depend on `p`. -/
+/--
+A join over a proposition. `⨆ _ : p, V` is `V` when `p` holds and `⊥` otherwise, so
+it is decomposed by the given decomposition or by `bot`. The argument is a function of the
+proof, so the decomposition of `V` may itself depend on `p`.
+-/
 @[implicit_reducible]
-noncomputable def iSupProp {p : Prop} [Decidable p]
-    (hmul : IsMulRep rep)
-    (d : p → GaugeWeightDecomposition rep V) :
-    GaugeWeightDecomposition rep (⨆ _ : p, V) :=
+noncomputable def iSupProp
+    {p : Prop} [Decidable p] (hmul : IsMulRep rep) (d : p → GaugeWeightDecomposition rep V)
+    : GaugeWeightDecomposition rep (⨆ _ : p, V) :=
   if hp : p then copy (d hp) _ (iSup_pos hp) else copy (bot hmul) _ (iSup_neg hp)
 
 /-!
@@ -593,15 +628,16 @@ resulting finite joins are what make the weight pieces of a product computable.
 
 /-- The product of two gauge weight decompositions, decomposing `V * V'`. -/
 @[implicit_reducible]
-noncomputable instance mul [d : GaugeWeightDecomposition rep V]
-    [d' : GaugeWeightDecomposition rep V'] :
-    GaugeWeightDecomposition rep (V * V') where
+noncomputable instance mul
+    [d : GaugeWeightDecomposition rep V] [d' : GaugeWeightDecomposition rep V']
+    : GaugeWeightDecomposition rep (V * V') where
   piece w := ⨆ w₁, ⨆ w₂, ⨆ _ : w₁ + w₂ = w, d.piece w₁ * d'.piece w₂
   supp := d.supp + d'.supp
   rep_mul := d.rep_mul
   piece_le w x hx i := by
-    have key : (⨆ w₁, ⨆ w₂, ⨆ _ : w₁ + w₂ = w, d.piece w₁ * d'.piece w₂)
-        ≤ Module.End.eigenspace (rep (gaugeTorusGen i)) ((expI : ℂ) ^ w.coord i) := by
+    have key
+        : (⨆ w₁, ⨆ w₂, ⨆ _ : w₁ + w₂ = w, d.piece w₁ * d'.piece w₂)
+          ≤ Module.End.eigenspace (rep (gaugeTorusGen i)) ((expI : ℂ) ^ w.coord i) := by
       refine iSup_le fun w₁ => iSup_le fun w₂ => iSup_le fun hw => ?_
       refine Submodule.mul_le.mpr fun m hm n hn => ?_
       refine Module.End.mem_eigenspace_iff.mpr ?_
@@ -616,8 +652,7 @@ noncomputable instance mul [d : GaugeWeightDecomposition rep V]
       · rw [d'.piece_eq_bot w₂ h2, Submodule.mul_bot]
     · rw [d.piece_eq_bot w₁ h1, Submodule.bot_mul]
   iSup_piece := by
-    refine le_antisymm (iSup_le fun w => iSup_le fun w₁ => iSup_le fun w₂ =>
-      iSup_le fun _ => ?_) ?_
+    refine le_antisymm (iSup_le fun w => iSup_le fun w₁ => iSup_le fun w₂ => iSup_le fun _ => ?_) ?_
     · exact mul_le_mul' ((le_iSup d.piece w₁).trans d.iSup_piece.le)
         ((le_iSup d'.piece w₂).trans d'.iSup_piece.le)
     · have hV : (⨆ w₁, d.piece w₁) * (⨆ w₂, d'.piece w₂) = V * V' := by
@@ -626,25 +661,28 @@ noncomputable instance mul [d : GaugeWeightDecomposition rep V]
       refine iSup_le fun w₁ => ?_
       rw [Submodule.mul_iSup]
       refine iSup_le fun w₂ => ?_
-      exact le_iSup_of_le (w₁ + w₂)
-        (le_iSup_of_le w₁ (le_iSup_of_le w₂ (le_iSup_of_le rfl le_rfl)))
+      exact le_iSup_of_le (w₁ + w₂) (le_iSup_of_le w₁ (le_iSup_of_le w₂ (le_iSup_of_le rfl le_rfl)))
 
 /-- The support of a product is the pointwise sum of the supports. -/
-lemma mul_supp [GaugeWeightDecomposition rep V] [GaugeWeightDecomposition rep V'] :
-    supp rep (V * V') = supp rep V + supp rep V' := rfl
+lemma mul_supp [GaugeWeightDecomposition rep V] [GaugeWeightDecomposition rep V']
+    : supp rep (V * V') = supp rep V + supp rep V' :=
+  rfl
 
-/-- Weights add under multiplication. The weight-`w` piece of a product is spanned by the
-  products of pieces whose weights sum to `w`. -/
-lemma mul_piece [GaugeWeightDecomposition rep V] [GaugeWeightDecomposition rep V']
-    (w : GaugeWeight) :
-    piece rep (V * V') w
-      = ⨆ w₁, ⨆ w₂, ⨆ _ : w₁ + w₂ = w, piece rep V w₁ * piece rep V' w₂ := rfl
+/--
+Weights add under multiplication. The weight-`w` piece of a product is spanned by the
+products of pieces whose weights sum to `w`.
+-/
+lemma mul_piece [GaugeWeightDecomposition rep V] [GaugeWeightDecomposition rep V'] (w : GaugeWeight)
+    : piece rep (V * V') w = ⨆ w₁, ⨆ w₂, ⨆ _ : w₁ + w₂ = w, piece rep V w₁ * piece rep V' w₂ :=
+  rfl
 
-/-- The product formula with the second weight eliminated against the support of the left
-  factor, the right factor being read at the complement `w - w₁`. -/
-lemma mul_piece_eq_sub [d : GaugeWeightDecomposition rep V]
-    [d' : GaugeWeightDecomposition rep V'] (w : GaugeWeight) :
-    piece rep (V * V') w = ⨆ w₁ ∈ supp rep V, piece rep V w₁ * piece rep V' (w - w₁) := by
+/--
+The product formula with the second weight eliminated against the support of the left
+factor, the right factor being read at the complement `w - w₁`.
+-/
+lemma mul_piece_eq_sub
+    [d : GaugeWeightDecomposition rep V] [d' : GaugeWeightDecomposition rep V'] (w : GaugeWeight)
+    : piece rep (V * V') w = ⨆ w₁ ∈ supp rep V, piece rep V w₁ * piece rep V' (w - w₁) := by
   rw [mul_piece]
   refine le_antisymm (iSup_le fun w₁ => iSup_le fun w₂ => iSup_le fun hw => ?_) ?_
   · by_cases h1 : w₁ ∈ d.supp
@@ -656,9 +694,9 @@ lemma mul_piece_eq_sub [d : GaugeWeightDecomposition rep V]
       le_iSup_of_le w₁ (le_iSup_of_le (w - w₁) (le_iSup_of_le (add_sub_cancel w₁ w) le_rfl))
 
 /-- The mirror of `mul_piece_eq_sub`, joining over the weights of the right factor. -/
-lemma mul_piece_eq_sub' [d : GaugeWeightDecomposition rep V]
-    [d' : GaugeWeightDecomposition rep V'] (w : GaugeWeight) :
-    piece rep (V * V') w = ⨆ w₂ ∈ supp rep V', piece rep V (w - w₂) * piece rep V' w₂ := by
+lemma mul_piece_eq_sub'
+    [d : GaugeWeightDecomposition rep V] [d' : GaugeWeightDecomposition rep V'] (w : GaugeWeight)
+    : piece rep (V * V') w = ⨆ w₂ ∈ supp rep V', piece rep V (w - w₂) * piece rep V' w₂ := by
   rw [mul_piece]
   refine le_antisymm (iSup_le fun w₁ => iSup_le fun w₂ => iSup_le fun hw => ?_) ?_
   · by_cases h2 : w₂ ∈ d'.supp
@@ -691,15 +729,18 @@ group; no grading closes that gap, since a grading sees only the abelian subgrou
 the elements it uses. The `Invariants` files do that check representation by representation.
 -/
 
-/-- The one-generator refinement step. A vector in the span of a family graded along a
-  single operator, and an eigenvector of that operator at exponent `n`, lies in the span of
-  just those pieces at exponent `n`. -/
-lemma mem_iSup_of_eigenvector {ι : Type*} {T : Module.End ℂ B} {p : ι → Submodule ℂ B}
-    {f : ι → ℤ} (hp : ∀ j, p j ≤ Module.End.eigenspace T ((expI : ℂ) ^ f j))
-    {x : B} (hx : x ∈ ⨆ j, p j) {n : ℤ} (hT : T x = ((expI : ℂ) ^ n) • x) :
-    x ∈ ⨆ j, ⨆ _ : f j = n, p j := by
-  have hQle : ∀ k : ℤ, (⨆ j, ⨆ _ : f j = k, p j)
-      ≤ Module.End.eigenspace T ((expI : ℂ) ^ k) :=
+/--
+The one-generator refinement step. A vector in the span of a family graded along a
+single operator, and an eigenvector of that operator at exponent `n`, lies in the span of
+just those pieces at exponent `n`.
+-/
+lemma mem_iSup_of_eigenvector
+    {ι : Type*} {T : Module.End ℂ B} {p : ι → Submodule ℂ B} {f : ι → ℤ}
+    (hp : ∀ j, p j ≤ Module.End.eigenspace T ((expI : ℂ) ^ f j))
+    {x : B} (hx : x ∈ ⨆ j, p j)
+    {n : ℤ} (hT : T x = ((expI : ℂ) ^ n) • x)
+    : x ∈ ⨆ j, ⨆ _ : f j = n, p j := by
+  have hQle : ∀ k : ℤ, (⨆ j, ⨆ _ : f j = k, p j) ≤ Module.End.eigenspace T ((expI : ℂ) ^ k) :=
     fun k => iSup₂_le fun j hj => hj ▸ hp j
   have hQsup : (⨆ k : ℤ, ⨆ j, ⨆ _ : f j = k, p j) = ⨆ j, p j := by
     rw [iSup_comm]
@@ -709,95 +750,120 @@ lemma mem_iSup_of_eigenvector {ι : Type*} {T : Module.End ℂ B} {p : ι → Su
       (⨆ k : ℤ, ⨆ _ : k ≠ n, ⨆ j, ⨆ _ : f j = k, p j) :=
     (((Module.End.eigenspaces_iSupIndep T).comp expI_zpow_injective) n).mono_right
       (iSup₂_mono fun k _ => hQle k)
-  have key : (⨆ k : ℤ, ⨆ j, ⨆ _ : f j = k, p j)
-      ⊓ Module.End.eigenspace T ((expI : ℂ) ^ n) ≤ ⨆ j, ⨆ _ : f j = n, p j := by
-    rw [iSup_split_single (fun k : ℤ => ⨆ j, ⨆ _ : f j = k, p j) n,
-      sup_inf_assoc_of_le _ (hQle n)]
+  have key
+      : (⨆ k : ℤ, ⨆ j, ⨆ _ : f j = k, p j) ⊓ Module.End.eigenspace T ((expI : ℂ) ^ n)
+        ≤ ⨆ j, ⨆ _ : f j = n, p j := by
+    rw [iSup_split_single (fun k : ℤ => ⨆ j, ⨆ _ : f j = k, p j) n, sup_inf_assoc_of_le _ (hQle n)]
     exact sup_le le_rfl (hdisj.symm.le_bot.trans bot_le)
   exact key ⟨hQsup ▸ hx, Module.End.mem_eigenspace_iff.mpr hT⟩
 
-/-- The many-generator refinement. The same for a finite family of operators. A vector in
-  the span of the family and an eigenvector of every operator lies in the span of just those
-  pieces whose exponents match throughout. -/
-lemma mem_iSup_of_forall_eigenvector {ι κ : Type*} [Fintype κ] [DecidableEq κ]
+/--
+The many-generator refinement. The same for a finite family of operators. A vector in
+the span of the family and an eigenvector of every operator lies in the span of just those
+pieces whose exponents match throughout.
+-/
+lemma mem_iSup_of_forall_eigenvector
+    {ι κ : Type*} [Fintype κ] [DecidableEq κ]
     {T : κ → Module.End ℂ B} {p : ι → Submodule ℂ B} {f : ι → κ → ℤ}
     (hp : ∀ j k, p j ≤ Module.End.eigenspace (T k) ((expI : ℂ) ^ f j k))
-    {x : B} (hx : x ∈ ⨆ j, p j) {n : κ → ℤ}
-    (hT : ∀ k, T k x = ((expI : ℂ) ^ n k) • x) :
-    x ∈ ⨆ j, ⨆ _ : f j = n, p j := by
+    {x : B} (hx : x ∈ ⨆ j, p j)
+    {n : κ → ℤ} (hT : ∀ k, T k x = ((expI : ℂ) ^ n k) • x)
+    : x ∈ ⨆ j, ⨆ _ : f j = n, p j := by
   have key : ∀ S : Finset κ, x ∈ ⨆ j, ⨆ _ : ∀ k ∈ S, f j k = n k, p j := by
     intro S
     induction S using Finset.induction_on with
     | empty => simpa using hx
     | @insert k S hk ih =>
-      have hstep := mem_iSup_of_eigenvector (T := T k) (f := fun j => f j k)
-        (p := fun j => ⨆ _ : ∀ k' ∈ S, f j k' = n k', p j)
-        (fun j => iSup_le fun _ => hp j k) ih (hT k)
-      have hle : (⨆ j, ⨆ _ : f j k = n k, ⨆ _ : ∀ k' ∈ S, f j k' = n k', p j)
-          ≤ ⨆ j, ⨆ _ : ∀ k' ∈ insert k S, f j k' = n k', p j := by
-        refine iSup_le fun j => iSup_le fun h1 => iSup_le fun h2 =>
-          le_iSup_of_le j (le_iSup_of_le ?_ le_rfl)
+      have hstep :=
+        mem_iSup_of_eigenvector (T := T k)
+          (f := fun j => f j k)
+          (p := fun j => ⨆ _ : ∀ k' ∈ S, f j k' = n k', p j)
+          (fun j => iSup_le fun _ => hp j k)
+          ih (hT k)
+      have hle
+          : (⨆ j, ⨆ _ : f j k = n k, ⨆ _ : ∀ k' ∈ S, f j k' = n k', p j)
+            ≤ ⨆ j, ⨆ _ : ∀ k' ∈ insert k S, f j k' = n k', p j := by
+        refine iSup_le fun j =>
+          iSup_le fun h1 => iSup_le fun h2 => le_iSup_of_le j (le_iSup_of_le ?_ le_rfl)
         intro k' hk'
         rcases Finset.mem_insert.mp hk' with rfl | hk'S
         · exact h1
         · exact h2 k' hk'S
       exact hle hstep
-  have hle : (⨆ j, ⨆ _ : ∀ k ∈ (Finset.univ : Finset κ), f j k = n k, p j)
-      ≤ ⨆ j, ⨆ _ : f j = n, p j :=
-    iSup_le fun j => iSup_le fun hj =>
-      le_iSup_of_le j (le_iSup_of_le (funext fun k => hj k (Finset.mem_univ k)) le_rfl)
+  have hle
+      : (⨆ j, ⨆ _ : ∀ k ∈ (Finset.univ : Finset κ), f j k = n k, p j) ≤ ⨆ j, ⨆ _ : f j = n, p j :=
+    iSup_le fun j =>
+      iSup_le fun hj =>
+        le_iSup_of_le j (le_iSup_of_le (funext fun k => hj k (Finset.mem_univ k)) le_rfl)
   exact hle (key Finset.univ)
 
-/-- The pieces are canonical. The weight-`w` piece is exactly the part of `V` on which the
-  four torus generators act by the weight-`w` characters. See `piece_congr`. -/
-lemma piece_eq_inf (d : GaugeWeightDecomposition rep V) (w : GaugeWeight) :
-    d.piece w
+/--
+The pieces are canonical. The weight-`w` piece is exactly the part of `V` on which the
+four torus generators act by the weight-`w` characters. See `piece_congr`.
+-/
+lemma piece_eq_inf (d : GaugeWeightDecomposition rep V) (w : GaugeWeight)
+    : d.piece w
       = V ⊓ ⨅ i, Module.End.eigenspace (rep (gaugeTorusGen i)) ((expI : ℂ) ^ w.coord i) := by
-  refine le_antisymm (le_inf ((le_iSup d.piece w).trans (le_of_eq d.iSup_piece))
-    (le_iInf fun i => d.piece_le_eigenspace w i)) fun x hx => ?_
+  refine le_antisymm
+    (le_inf ((le_iSup d.piece w).trans (le_of_eq d.iSup_piece))
+      (le_iInf fun i => d.piece_le_eigenspace w i))
+    fun x hx => ?_
   obtain ⟨hxV, hxE⟩ := hx
   have hx0 : x ∈ ⨆ w' : GaugeWeight, d.piece w' := by rw [d.iSup_piece]; exact hxV
   have hspan : x ∈ ⨆ w' : GaugeWeight, ⨆ _ : w'.coord = w.coord, d.piece w' :=
-    mem_iSup_of_forall_eigenvector (T := fun i => rep (gaugeTorusGen i)) (p := d.piece)
-      (f := fun w' : GaugeWeight => w'.coord) (n := w.coord)
-      (fun w' i => d.piece_le_eigenspace w' i) hx0
+    mem_iSup_of_forall_eigenvector
+      (T := fun i => rep (gaugeTorusGen i))
+      (p := d.piece)
+      (f := fun w' : GaugeWeight => w'.coord)
+      (n := w.coord)
+      (fun w' i => d.piece_le_eigenspace w' i)
+      hx0
       (fun i => Module.End.mem_eigenspace_iff.mp (Submodule.mem_iInf _ |>.mp hxE i))
   have hle : (⨆ w' : GaugeWeight, ⨆ _ : w'.coord = w.coord, d.piece w') ≤ d.piece w :=
-    iSup_le fun w' => iSup_le fun hw' =>
-      le_of_eq (congrArg d.piece (GaugeWeight.coord_injective hw'))
+    iSup_le fun w' =>
+      iSup_le fun hw' => le_of_eq (congrArg d.piece (GaugeWeight.coord_injective hw'))
   exact hle hspan
 
-/-- The pieces depend only on the submodule. Two decompositions of equal submodules have
-  the same pieces, so a computation of `piece` may be carried along any equality of
-  submodules. -/
-lemma piece_congr {W : Submodule ℂ B} [d : GaugeWeightDecomposition rep V]
-    [d' : GaugeWeightDecomposition rep W] (hVW : V = W) (w : GaugeWeight) :
-    d.piece w = d'.piece w := by
+/--
+The pieces depend only on the submodule. Two decompositions of equal submodules have
+the same pieces, so a computation of `piece` may be carried along any equality of
+submodules.
+-/
+lemma piece_congr
+    {W : Submodule ℂ B} [d : GaugeWeightDecomposition rep V] [d' : GaugeWeightDecomposition rep W]
+    (hVW : V = W) (w : GaugeWeight)
+    : d.piece w = d'.piece w := by
   rw [d.piece_eq_inf, d'.piece_eq_inf, hVW]
 
-/-- A gauge-invariant element sits in the zero-weight piece. Only invariance under the
-  four torus generators is used. The converse is false; see the warning in section F. -/
-lemma mem_zero_of_invariant (d : GaugeWeightDecomposition rep V) {x : B} (hx : x ∈ V)
-    (hV : ∀ g : GaugeGroupI, rep g x = x) : x ∈ d.piece 0 := by
+/--
+A gauge-invariant element sits in the zero-weight piece. Only invariance under the
+four torus generators is used. The converse is false; see the warning in section F.
+-/
+lemma mem_zero_of_invariant
+    (d : GaugeWeightDecomposition rep V) {x : B} (hx : x ∈ V) (hV : ∀ g : GaugeGroupI, rep g x = x)
+    : x ∈ d.piece 0 := by
   rw [d.piece_eq_inf]
   refine ⟨hx, Submodule.mem_iInf _ |>.mpr fun i => ?_⟩
   rw [Module.End.mem_eigenspace_iff, GaugeWeight.zero_coord, zpow_zero, one_smul]
   exact hV _
 
-/-- The torus sieve as a reduction for the four torus generators: modulo a torus-stable
-  submodule, their invariants in `V` lie in the weight-zero piece. Every other weight in the
-  support is scaled by some generator by `(exp i) ^ n` with `n ≠ 0`, a scalar other than `1`,
-  so its piece reduces to `⊥` by `reducesInvariantsTo_bot_of_apply_eq_smul`; each piece is
-  carried into itself by the torus, and `ReducesInvariantsTo.iSup` joins the pieces. -/
-lemma reducesInvariantsTo_piece_zero (dV : GaugeWeightDecomposition rep V) :
-    ReducesInvariantsTo (fun i => rep (gaugeTorusGen i)) V (dV.piece 0) := by
+/--
+The torus sieve as a reduction for the four torus generators: modulo a torus-stable
+submodule, their invariants in `V` lie in the weight-zero piece. Every other weight in the
+support is scaled by some generator by `(exp i) ^ n` with `n ≠ 0`, a scalar other than `1`,
+so its piece reduces to `⊥` by `reducesInvariantsTo_bot_of_apply_eq_smul`; each piece is
+carried into itself by the torus, and `ReducesInvariantsTo.iSup` joins the pieces.
+-/
+lemma reducesInvariantsTo_piece_zero (dV : GaugeWeightDecomposition rep V)
+    : ReducesInvariantsTo (fun i => rep (gaugeTorusGen i)) V (dV.piece 0) := by
   classical
-  have hstab : ∀ w, IsStableUnder (fun i => rep (gaugeTorusGen i)) (dV.piece w) :=
-    fun w i z hz => by
-      rw [dV.piece_le w z hz i]
-      exact (dV.piece w).smul_mem _ hz
-  have hred : ∀ w : dV.supp,
-      ReducesInvariantsTo (fun i => rep (gaugeTorusGen i)) (dV.piece w) (dV.piece 0) := by
+  have hstab
+      : ∀ w, IsStableUnder (fun i => rep (gaugeTorusGen i)) (dV.piece w) := fun w i z hz => by
+    rw [dV.piece_le w z hz i]
+    exact (dV.piece w).smul_mem _ hz
+  have hred
+      : ∀ w : dV.supp,
+        ReducesInvariantsTo (fun i => rep (gaugeTorusGen i)) (dV.piece w) (dV.piece 0) := by
     rintro ⟨w, -⟩
     by_cases hw : w = 0
     · subst hw
@@ -806,8 +872,10 @@ lemma reducesInvariantsTo_piece_zero (dV : GaugeWeightDecomposition rep V) :
       by_contra hcon
       exact hw (GaugeWeight.coord_injective (funext fun i => by
         rw [not_not.mp (not_exists.mp hcon i), GaugeWeight.zero_coord]))
-    refine (reducesInvariantsTo_bot_of_apply_eq_smul i (fun h1 => hi (expI_zpow_injective ?_))
-      fun z hz => dV.piece_le w z hz i).mono_right bot_le
+    refine (reducesInvariantsTo_bot_of_apply_eq_smul i
+        (fun h1 => hi (expI_zpow_injective ?_))
+        fun z hz => dV.piece_le w z hz i).mono_right
+      bot_le
     show (expI : ℂ) ^ w.coord i = (expI : ℂ) ^ (0 : ℤ)
     rw [h1, zpow_zero]
   refine (ReducesInvariantsTo.iSup hred (fun w => hstab w) (hstab 0)).mono_left
@@ -817,16 +885,19 @@ lemma reducesInvariantsTo_piece_zero (dV : GaugeWeightDecomposition rep V) :
   · rw [dV.piece_eq_bot w hw]
     exact bot_le
 
-/-- An element of `V ⊔ S` fixed by the four torus generators, for `S` closed under them,
-  lies in the weight-zero piece joined with `S`. This is `reducesInvariantsTo_piece_zero`
-  unfolded, the form used to sieve a sector with `S` the part already understood. Only the
-  torus is used, so gauge invariance of the element and gauge stability of `S` are more than
-  is needed. -/
-lemma mem_piece_zero_sup_of_invariant {S : Submodule ℂ B}
+/--
+An element of `V ⊔ S` fixed by the four torus generators, for `S` closed under them,
+lies in the weight-zero piece joined with `S`. This is `reducesInvariantsTo_piece_zero`
+unfolded, the form used to sieve a sector with `S` the part already understood. Only the
+torus is used, so gauge invariance of the element and gauge stability of `S` are more than
+is needed.
+-/
+lemma mem_piece_zero_sup_of_invariant
+    {S : Submodule ℂ B}
     (dV : GaugeWeightDecomposition rep V)
     (hS : ∀ (i : Fin 4) (y : B), y ∈ S → rep (gaugeTorusGen i) y ∈ S)
-    {x : B} (hx : x ∈ V ⊔ S) (hinv : ∀ i : Fin 4, rep (gaugeTorusGen i) x = x) :
-    x ∈ dV.piece 0 ⊔ S :=
+    {x : B} (hx : x ∈ V ⊔ S) (hinv : ∀ i : Fin 4, rep (gaugeTorusGen i) x = x)
+    : x ∈ dV.piece 0 ⊔ S :=
   dV.reducesInvariantsTo_piece_zero S hS x hx hinv
 
 end GaugeWeightDecomposition

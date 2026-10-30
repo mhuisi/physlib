@@ -31,8 +31,8 @@ variable {R S : Type*} [Semiring R] [Semiring S] (σ : R →+* S) (M M₂ : Type
 variable [TopologicalSpace M] [AddCommMonoid M] [TopologicalSpace M₂] [AddCommMonoid M₂]
 variable [Module R M] [Module S M₂]
 
-lemma ker_mk (f : M →ₛₗ[σ] M₂) (hf : Continuous f.toFun) :
-    (ContinuousLinearMap.mk f hf).ker = LinearMap.ker f := by
+lemma ker_mk (f : M →ₛₗ[σ] M₂) (hf : Continuous f.toFun)
+    : (ContinuousLinearMap.mk f hf).ker = LinearMap.ker f := by
   rfl
 
 end ContinuousLinearMap
@@ -42,22 +42,22 @@ namespace ContinuousLinearMap
 variable {n 𝕜 : Type*} [Fintype n] [RCLike 𝕜]
 
 /-- The support of a Hermitian matrix is the sum of its nonzero eigenspaces. -/
-theorem support_eq_sup_eigenspace_nonzero (A : EuclideanSpace 𝕜 n →L[𝕜] EuclideanSpace 𝕜 n)
-    (hA : A.IsSymmetric) : A.range = ⨆ μ ≠ 0, Module.End.eigenspace A μ := by
+theorem support_eq_sup_eigenspace_nonzero
+    (A : EuclideanSpace 𝕜 n →L[𝕜] EuclideanSpace 𝕜 n) (hA : A.IsSymmetric)
+    : A.range = ⨆ μ ≠ 0, Module.End.eigenspace A μ := by
   apply le_antisymm
   · rintro x ⟨y, hy⟩
     have h_decomp : y ∈ ⨆ (μ : 𝕜), Module.End.eigenspace A.toLinearMap μ := by
       have h_orth := hA.orthogonalComplement_iSup_eigenspaces_eq_bot
       rw [Submodule.orthogonal_eq_bot_iff] at h_orth
       rw [h_orth]
-      exact Submodule.mem_top;
+      exact Submodule.mem_top
     rw [Submodule.mem_iSup_iff_exists_finsupp] at h_decomp
     rcases h_decomp with ⟨f, hf₁, hf₂⟩
     have h_apply_A : A y = ∑ i ∈ f.support, A (f i) := by
       rw [← hf₂, map_finsuppSum]
       exact rfl
-    have h_eigen (i) : A (f i) = (i : 𝕜) • f i :=
-      Module.End.mem_eigenspace_iff.mp (hf₁ i)
+    have h_eigen (i) : A (f i) = (i : 𝕜) • f i := Module.End.mem_eigenspace_iff.mp (hf₁ i)
     rw [← hy, coe_coe, h_apply_A, Finset.sum_congr rfl (fun i _ ↦ h_eigen i)]
     refine Submodule.sum_mem _ fun i _ ↦ ?_
     by_cases hi0 : i = 0

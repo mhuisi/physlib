@@ -54,36 +54,31 @@ open Matrix MatrixGroups Lorentz Lorentz.Invariants
 
 namespace IsFermionSector
 
-variable {B : Type} [Ring B] [Algebra ℂ B]
+variable
+  {B : Type} [Ring B] [Algebra ℂ B]
   {repGauge : Representation ℂ GaugeGroupI B}
-  {hrepGauge_mul : ∀ (g : GaugeGroupI) (b₁ b₂ : B),
-    repGauge g (b₁ * b₂) = repGauge g b₁ * repGauge g b₂}
-  {repLorentz : Representation ℂ SL(2,ℂ) B}
-  {hrepLorentz_mul : ∀ (Λ : SL(2,ℂ)) (b₁ b₂ : B),
-    repLorentz Λ (b₁ * b₂) = repLorentz Λ b₁ * repLorentz Λ b₂}
-  {d : {n : ℕ} → Fin 3 → (Fin n → Fin 1 ⊕ Fin 3) →
-    Module.Dual ℂ DownSinglet →ₗ[ℂ] B}
-  {bard : {n : ℕ} → Fin 3 → (Fin n → Fin 1 ⊕ Fin 3) →
-    Module.Dual ℂ (ConjModule DownSinglet) →ₗ[ℂ] B}
-  {u : {n : ℕ} → Fin 3 → (Fin n → Fin 1 ⊕ Fin 3) →
-    Module.Dual ℂ UpSinglet →ₗ[ℂ] B}
-  {baru : {n : ℕ} → Fin 3 → (Fin n → Fin 1 ⊕ Fin 3) →
-    Module.Dual ℂ (ConjModule UpSinglet) →ₗ[ℂ] B}
-  {Q : {n : ℕ} → Fin 3 → (Fin n → Fin 1 ⊕ Fin 3) →
-    Module.Dual ℂ QuarkDoublet →ₗ[ℂ] B}
-  {barQ : {n : ℕ} → Fin 3 → (Fin n → Fin 1 ⊕ Fin 3) →
-    Module.Dual ℂ (ConjModule QuarkDoublet) →ₗ[ℂ] B}
-  {L : {n : ℕ} → Fin 3 → (Fin n → Fin 1 ⊕ Fin 3) →
-    Module.Dual ℂ LeptonDoubletV →ₗ[ℂ] B}
-  {barL : {n : ℕ} → Fin 3 → (Fin n → Fin 1 ⊕ Fin 3) →
-    Module.Dual ℂ (ConjModule LeptonDoubletV) →ₗ[ℂ] B}
-  {e : {n : ℕ} → Fin 3 → (Fin n → Fin 1 ⊕ Fin 3) →
-    Module.Dual ℂ LeptonSinglet →ₗ[ℂ] B}
-  {bare : {n : ℕ} → Fin 3 → (Fin n → Fin 1 ⊕ Fin 3) →
-    Module.Dual ℂ (ConjModule LeptonSinglet) →ₗ[ℂ] B}
+  {hrepGauge_mul
+    : ∀ (g : GaugeGroupI) (b₁ b₂ : B), repGauge g (b₁ * b₂) = repGauge g b₁ * repGauge g b₂}
+  {repLorentz : Representation ℂ (SL(2,ℂ)) B}
+  {hrepLorentz_mul
+    : ∀ (Λ : SL(2,ℂ)) (b₁ b₂ : B), repLorentz Λ (b₁ * b₂) = repLorentz Λ b₁ * repLorentz Λ b₂}
+  {d : {n : ℕ} → Fin 3 → (Fin n → Fin 1 ⊕ Fin 3) → Module.Dual ℂ DownSinglet →ₗ[ℂ] B}
+  {bard
+    : {n : ℕ} → Fin 3 → (Fin n → Fin 1 ⊕ Fin 3) → Module.Dual ℂ (ConjModule DownSinglet) →ₗ[ℂ] B}
+  {u : {n : ℕ} → Fin 3 → (Fin n → Fin 1 ⊕ Fin 3) → Module.Dual ℂ UpSinglet →ₗ[ℂ] B}
+  {baru : {n : ℕ} → Fin 3 → (Fin n → Fin 1 ⊕ Fin 3) → Module.Dual ℂ (ConjModule UpSinglet) →ₗ[ℂ] B}
+  {Q : {n : ℕ} → Fin 3 → (Fin n → Fin 1 ⊕ Fin 3) → Module.Dual ℂ QuarkDoublet →ₗ[ℂ] B}
+  {barQ
+    : {n : ℕ} → Fin 3 → (Fin n → Fin 1 ⊕ Fin 3) → Module.Dual ℂ (ConjModule QuarkDoublet) →ₗ[ℂ] B}
+  {L : {n : ℕ} → Fin 3 → (Fin n → Fin 1 ⊕ Fin 3) → Module.Dual ℂ LeptonDoubletV →ₗ[ℂ] B}
+  {barL
+    : {n : ℕ} → Fin 3 → (Fin n → Fin 1 ⊕ Fin 3) → Module.Dual ℂ (ConjModule LeptonDoubletV) →ₗ[ℂ] B}
+  {e : {n : ℕ} → Fin 3 → (Fin n → Fin 1 ⊕ Fin 3) → Module.Dual ℂ LeptonSinglet →ₗ[ℂ] B}
+  {bare
+    : {n : ℕ} → Fin 3 → (Fin n → Fin 1 ⊕ Fin 3) → Module.Dual ℂ (ConjModule LeptonSinglet) →ₗ[ℂ] B}
   {massWeightPoly : B →ₐ[ℂ] Polynomial B}
-  (h : IsFermionSector B repGauge hrepGauge_mul repLorentz hrepLorentz_mul
-      d bard u baru Q barQ L barL e bare massWeightPoly)
+  (h : IsFermionSector B repGauge hrepGauge_mul repLorentz hrepLorentz_mul d bard u baru Q barQ L
+    barL e bare massWeightPoly)
 
 /-!
 
@@ -97,73 +92,66 @@ conjugate Weyl-valued; conjugation does not move a real sign, so all ten carry `
 
 include h in
 /-- The `d` symbols carry the sign `-1`. -/
-lemma range_d_le_centreEigenspace (f : Fin 3) {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin 3) :
-    LinearMap.range (d f l) ≤ centreEigenspace repLorentz (-1) :=
-  range_le_centreEigenspace_neg_one (h.repLorentz_d f)
-    DownSinglet.repLorentzGroup_neg_one l
+lemma range_d_le_centreEigenspace (f : Fin 3) {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin 3)
+    : LinearMap.range (d f l) ≤ centreEigenspace repLorentz (-1) :=
+  range_le_centreEigenspace_neg_one (h.repLorentz_d f) DownSinglet.repLorentzGroup_neg_one l
 
 include h in
 /-- The `bard` symbols carry the sign `-1`. -/
-lemma range_bard_le_centreEigenspace (f : Fin 3) {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin 3) :
-    LinearMap.range (bard f l) ≤ centreEigenspace repLorentz (-1) :=
-  range_le_centreEigenspace_neg_one (h.repLorentz_bard f)
-    DownSinglet.repLorentzGroup_conj_neg_one l
+lemma range_bard_le_centreEigenspace (f : Fin 3) {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin 3)
+    : LinearMap.range (bard f l) ≤ centreEigenspace repLorentz (-1) :=
+  range_le_centreEigenspace_neg_one (h.repLorentz_bard f) DownSinglet.repLorentzGroup_conj_neg_one l
 
 include h in
 /-- The `u` symbols carry the sign `-1`. -/
-lemma range_u_le_centreEigenspace (f : Fin 3) {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin 3) :
-    LinearMap.range (u f l) ≤ centreEigenspace repLorentz (-1) :=
-  range_le_centreEigenspace_neg_one (h.repLorentz_u f)
-    UpSinglet.repLorentzGroup_neg_one l
+lemma range_u_le_centreEigenspace (f : Fin 3) {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin 3)
+    : LinearMap.range (u f l) ≤ centreEigenspace repLorentz (-1) :=
+  range_le_centreEigenspace_neg_one (h.repLorentz_u f) UpSinglet.repLorentzGroup_neg_one l
 
 include h in
 /-- The `baru` symbols carry the sign `-1`. -/
-lemma range_baru_le_centreEigenspace (f : Fin 3) {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin 3) :
-    LinearMap.range (baru f l) ≤ centreEigenspace repLorentz (-1) :=
-  range_le_centreEigenspace_neg_one (h.repLorentz_baru f)
-    UpSinglet.repLorentzGroup_conj_neg_one l
+lemma range_baru_le_centreEigenspace (f : Fin 3) {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin 3)
+    : LinearMap.range (baru f l) ≤ centreEigenspace repLorentz (-1) :=
+  range_le_centreEigenspace_neg_one (h.repLorentz_baru f) UpSinglet.repLorentzGroup_conj_neg_one l
 
 include h in
 /-- The `Q` symbols carry the sign `-1`. -/
-lemma range_Q_le_centreEigenspace (f : Fin 3) {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin 3) :
-    LinearMap.range (Q f l) ≤ centreEigenspace repLorentz (-1) :=
-  range_le_centreEigenspace_neg_one (h.repLorentz_Q f)
-    QuarkDoublet.repLorentzGroup_neg_one l
+lemma range_Q_le_centreEigenspace (f : Fin 3) {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin 3)
+    : LinearMap.range (Q f l) ≤ centreEigenspace repLorentz (-1) :=
+  range_le_centreEigenspace_neg_one (h.repLorentz_Q f) QuarkDoublet.repLorentzGroup_neg_one l
 
 include h in
 /-- The `barQ` symbols carry the sign `-1`. -/
-lemma range_barQ_le_centreEigenspace (f : Fin 3) {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin 3) :
-    LinearMap.range (barQ f l) ≤ centreEigenspace repLorentz (-1) :=
-  range_le_centreEigenspace_neg_one (h.repLorentz_barQ f)
-    QuarkDoublet.repLorentzGroup_conj_neg_one l
+lemma range_barQ_le_centreEigenspace (f : Fin 3) {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin 3)
+    : LinearMap.range (barQ f l) ≤ centreEigenspace repLorentz (-1) :=
+  range_le_centreEigenspace_neg_one (h.repLorentz_barQ f) QuarkDoublet.repLorentzGroup_conj_neg_one
+    l
 
 include h in
 /-- The `L` symbols carry the sign `-1`. -/
-lemma range_L_le_centreEigenspace (f : Fin 3) {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin 3) :
-    LinearMap.range (L f l) ≤ centreEigenspace repLorentz (-1) :=
-  range_le_centreEigenspace_neg_one (h.repLorentz_L f)
-    LeptonDoubletV.repLorentzGroup_neg_one l
+lemma range_L_le_centreEigenspace (f : Fin 3) {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin 3)
+    : LinearMap.range (L f l) ≤ centreEigenspace repLorentz (-1) :=
+  range_le_centreEigenspace_neg_one (h.repLorentz_L f) LeptonDoubletV.repLorentzGroup_neg_one l
 
 include h in
 /-- The `barL` symbols carry the sign `-1`. -/
-lemma range_barL_le_centreEigenspace (f : Fin 3) {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin 3) :
-    LinearMap.range (barL f l) ≤ centreEigenspace repLorentz (-1) :=
+lemma range_barL_le_centreEigenspace (f : Fin 3) {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin 3)
+    : LinearMap.range (barL f l) ≤ centreEigenspace repLorentz (-1) :=
   range_le_centreEigenspace_neg_one (h.repLorentz_barL f)
     LeptonDoubletV.repLorentzGroup_conj_neg_one l
 
 include h in
 /-- The `e` symbols carry the sign `-1`. -/
-lemma range_e_le_centreEigenspace (f : Fin 3) {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin 3) :
-    LinearMap.range (e f l) ≤ centreEigenspace repLorentz (-1) :=
-  range_le_centreEigenspace_neg_one (h.repLorentz_e f)
-    LeptonSinglet.repLorentzGroup_neg_one l
+lemma range_e_le_centreEigenspace (f : Fin 3) {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin 3)
+    : LinearMap.range (e f l) ≤ centreEigenspace repLorentz (-1) :=
+  range_le_centreEigenspace_neg_one (h.repLorentz_e f) LeptonSinglet.repLorentzGroup_neg_one l
 
 include h in
 /-- The `bare` symbols carry the sign `-1`. -/
-lemma range_bare_le_centreEigenspace (f : Fin 3) {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin 3) :
-    LinearMap.range (bare f l) ≤ centreEigenspace repLorentz (-1) :=
-  range_le_centreEigenspace_neg_one (h.repLorentz_bare f)
-    LeptonSinglet.repLorentzGroup_conj_neg_one l
+lemma range_bare_le_centreEigenspace (f : Fin 3) {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin 3)
+    : LinearMap.range (bare f l) ≤ centreEigenspace repLorentz (-1) :=
+  range_le_centreEigenspace_neg_one (h.repLorentz_bare f) LeptonSinglet.repLorentzGroup_conj_neg_one
+    l
 
 /-!
 
@@ -175,19 +163,33 @@ species of the ranges of section A, and an eigenspace is closed under joins.
 -/
 
 include h in
-/-- **The centre of `SL(2,ℂ)` acts on the fermion derivative submodules by `-1`**, for any
-  number of covariant derivatives: every fermion symbol carries one Weyl-spinor value index,
-  and the derivative slots are inert at the centre. -/
-lemma derivSubmodule_le_centreEigenspace (n : ℕ) :
-    h.derivSubmodule n ≤ centreEigenspace repLorentz (-1) := by
+/--
+**The centre of `SL(2,ℂ)` acts on the fermion derivative submodules by `-1`**, for any
+number of covariant derivatives: every fermion symbol carries one Weyl-spinor value index,
+and the derivative slots are inert at the centre.
+-/
+lemma derivSubmodule_le_centreEigenspace (n : ℕ)
+    : h.derivSubmodule n ≤ centreEigenspace repLorentz (-1) := by
   rw [derivSubmodule]
   refine iSup_le fun f => iSup_le fun l => ?_
-  refine sup_le (sup_le (sup_le (sup_le (sup_le (sup_le (sup_le (sup_le (sup_le
-    (h.range_d_le_centreEigenspace f l) (h.range_bard_le_centreEigenspace f l))
-    (h.range_u_le_centreEigenspace f l)) (h.range_baru_le_centreEigenspace f l))
-    (h.range_Q_le_centreEigenspace f l)) (h.range_barQ_le_centreEigenspace f l))
-    (h.range_L_le_centreEigenspace f l)) (h.range_barL_le_centreEigenspace f l))
-    (h.range_e_le_centreEigenspace f l)) (h.range_bare_le_centreEigenspace f l)
+  refine sup_le
+    (sup_le
+      (sup_le
+        (sup_le
+          (sup_le
+            (sup_le
+              (sup_le
+                (sup_le
+                  (sup_le (h.range_d_le_centreEigenspace f l)
+                    (h.range_bard_le_centreEigenspace f l))
+                  (h.range_u_le_centreEigenspace f l))
+                (h.range_baru_le_centreEigenspace f l))
+              (h.range_Q_le_centreEigenspace f l))
+            (h.range_barQ_le_centreEigenspace f l))
+          (h.range_L_le_centreEigenspace f l))
+        (h.range_barL_le_centreEigenspace f l))
+      (h.range_e_le_centreEigenspace f l))
+    (h.range_bare_le_centreEigenspace f l)
 
 end IsFermionSector
 

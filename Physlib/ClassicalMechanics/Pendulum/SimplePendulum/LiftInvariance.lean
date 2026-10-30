@@ -90,22 +90,28 @@ of turns.
 
 -/
 
-/-- The potential energy of the simple pendulum is invariant under shifting the angle by a
-  whole number of turns. -/
-lemma potentialEnergy_add_int_mul_two_pi (x : EuclideanSpace ℝ (Fin 1)) (n : ℤ) :
-    S.potentialEnergy (x + (n * (2 * Real.pi)) • EuclideanSpace.single 0 1) =
-      S.potentialEnergy x := by
-  have h0 : (x + (n * (2 * Real.pi)) • EuclideanSpace.single 0 1 : EuclideanSpace ℝ (Fin 1)) 0 =
-      x 0 + n * (2 * Real.pi) := by
+/--
+The potential energy of the simple pendulum is invariant under shifting the angle by a
+whole number of turns.
+-/
+lemma potentialEnergy_add_int_mul_two_pi (x : EuclideanSpace ℝ (Fin 1)) (n : ℤ)
+    : S.potentialEnergy (x + (n * (2 * Real.pi)) • EuclideanSpace.single 0 1)
+      = S.potentialEnergy x := by
+  have h0
+      : (x + (n * (2 * Real.pi)) • EuclideanSpace.single 0 1 : EuclideanSpace ℝ (Fin 1)) 0
+        = x 0 + n * (2 * Real.pi) := by
     simp
   rw [potentialEnergy_eq, potentialEnergy_eq, h0, Real.cos_add_int_mul_two_pi]
 
-/-- The torque of the simple pendulum is invariant under shifting the angle by a whole number
-  of turns. -/
-lemma torque_add_int_mul_two_pi (x : EuclideanSpace ℝ (Fin 1)) (n : ℤ) :
-    S.torque (x + (n * (2 * Real.pi)) • EuclideanSpace.single 0 1) = S.torque x := by
-  have h0 : (x + (n * (2 * Real.pi)) • EuclideanSpace.single 0 1 : EuclideanSpace ℝ (Fin 1)) 0 =
-      x 0 + n * (2 * Real.pi) := by
+/--
+The torque of the simple pendulum is invariant under shifting the angle by a whole number
+of turns.
+-/
+lemma torque_add_int_mul_two_pi (x : EuclideanSpace ℝ (Fin 1)) (n : ℤ)
+    : S.torque (x + (n * (2 * Real.pi)) • EuclideanSpace.single 0 1) = S.torque x := by
+  have h0
+      : (x + (n * (2 * Real.pi)) • EuclideanSpace.single 0 1 : EuclideanSpace ℝ (Fin 1)) 0
+        = x 0 + n * (2 * Real.pi) := by
     simp
   rw [torque_eq, torque_eq, h0, Real.sin_add_int_mul_two_pi]
 
@@ -120,23 +126,25 @@ by a whole number of turns.
 
 -/
 
-/-- The kinetic energy of the simple pendulum along a lift of the angle is invariant under
-  shifting the lift by any constant: the shift drops out of the velocity. -/
-lemma kineticEnergy_add_const (θ : Time → EuclideanSpace ℝ (Fin 1))
-    (c : EuclideanSpace ℝ (Fin 1)) :
-    S.kineticEnergy (fun t => θ t + c) = S.kineticEnergy θ := by
+/--
+The kinetic energy of the simple pendulum along a lift of the angle is invariant under
+shifting the lift by any constant: the shift drops out of the velocity.
+-/
+lemma kineticEnergy_add_const (θ : Time → EuclideanSpace ℝ (Fin 1)) (c : EuclideanSpace ℝ (Fin 1))
+    : S.kineticEnergy (fun t => θ t + c) = S.kineticEnergy θ := by
   have hd : ∂ₜ (fun t => θ t + c) = ∂ₜ θ := by
     funext s
     rw [Time.deriv_eq, Time.deriv_eq, fderiv_add_const]
   funext t
   simp only [kineticEnergy_eq, hd]
 
-/-- The energy of the simple pendulum along a lift of the angle is invariant under shifting the
-  lift by a whole number of turns: A.1 supplies the invariance of the potential energy, and the
-  velocity is unchanged by a constant shift. -/
-lemma energy_add_int_mul_two_pi (θ : Time → EuclideanSpace ℝ (Fin 1)) (n : ℤ) :
-    S.energy (fun t => θ t + (n * (2 * Real.pi)) • EuclideanSpace.single 0 1) =
-      S.energy θ := by
+/--
+The energy of the simple pendulum along a lift of the angle is invariant under shifting the
+lift by a whole number of turns: A.1 supplies the invariance of the potential energy, and the
+velocity is unchanged by a constant shift.
+-/
+lemma energy_add_int_mul_two_pi (θ : Time → EuclideanSpace ℝ (Fin 1)) (n : ℤ)
+    : S.energy (fun t => θ t + (n * (2 * Real.pi)) • EuclideanSpace.single 0 1) = S.energy θ := by
   funext t
   simp only [energy_eq, S.kineticEnergy_add_const θ _, S.potentialEnergy_add_int_mul_two_pi (θ t) n]
 
@@ -150,23 +158,28 @@ likewise unaffected by adding a constant, so being a solution is invariant as we
 
 -/
 
-/-- A lift of the angle shifted by a whole number of turns satisfies the equation of motion of
-  the simple pendulum if and only if the lift itself does. -/
-lemma equationOfMotion_add_int_mul_two_pi (θ : Time → EuclideanSpace ℝ (Fin 1)) (n : ℤ) :
-    S.EquationOfMotion (fun t => θ t + (n * (2 * Real.pi)) • EuclideanSpace.single 0 1) ↔
-      S.EquationOfMotion θ := by
+/--
+A lift of the angle shifted by a whole number of turns satisfies the equation of motion of
+the simple pendulum if and only if the lift itself does.
+-/
+lemma equationOfMotion_add_int_mul_two_pi (θ : Time → EuclideanSpace ℝ (Fin 1)) (n : ℤ)
+    : S.EquationOfMotion (fun t => θ t + (n * (2 * Real.pi)) • EuclideanSpace.single 0 1)
+      ↔ S.EquationOfMotion θ := by
   have hd : ∂ₜ (fun t => θ t + (n * (2 * Real.pi)) • EuclideanSpace.single 0 1) = ∂ₜ θ := by
     funext s
     rw [Time.deriv_eq, Time.deriv_eq, fderiv_add_const]
   simp only [EquationOfMotion, hd, torque_add_int_mul_two_pi]
 
-/-- A lift of the angle shifted by a whole number of turns is a solution of the simple pendulum
-  if and only if the lift itself is. -/
-lemma isSolution_add_int_mul_two_pi (θ : Time → EuclideanSpace ℝ (Fin 1)) (n : ℤ) :
-    S.IsSolution (fun t => θ t + (n * (2 * Real.pi)) • EuclideanSpace.single 0 1) ↔
-      S.IsSolution θ := by
-  have hcd : ContDiff ℝ ∞ (fun t => θ t + (n * (2 * Real.pi)) • EuclideanSpace.single 0 1) ↔
-      ContDiff ℝ ∞ θ := by
+/--
+A lift of the angle shifted by a whole number of turns is a solution of the simple pendulum
+if and only if the lift itself is.
+-/
+lemma isSolution_add_int_mul_two_pi (θ : Time → EuclideanSpace ℝ (Fin 1)) (n : ℤ)
+    : S.IsSolution (fun t => θ t + (n * (2 * Real.pi)) • EuclideanSpace.single 0 1)
+      ↔ S.IsSolution θ := by
+  have hcd
+      : ContDiff ℝ ∞ (fun t => θ t + (n * (2 * Real.pi)) • EuclideanSpace.single 0 1)
+        ↔ ContDiff ℝ ∞ θ := by
     constructor
     · intro h
       have h2 := h.sub (contDiff_const (c := (n * (2 * Real.pi)) • EuclideanSpace.single 0 1))
@@ -184,14 +197,17 @@ periodicity of the angular lift `ConfigurationSpace.ofAngle` with period `2π`.
 
 -/
 
-/-- A lift of the angle and its shift by a whole number of turns describe the same
-  configuration of the simple pendulum. -/
-lemma ofAngle_add_int_mul_two_pi_coord (x : EuclideanSpace ℝ (Fin 1)) (n : ℤ) :
-    ConfigurationSpace.ofAngle
-        ((x + (n * (2 * Real.pi)) • EuclideanSpace.single (0 : Fin 1) (1 : ℝ)) 0) =
-      ConfigurationSpace.ofAngle (x 0) := by
-  have h0 : (x + (n * (2 * Real.pi)) • EuclideanSpace.single 0 1 : EuclideanSpace ℝ (Fin 1)) 0 =
-      x 0 + n * (2 * Real.pi) := by
+/--
+A lift of the angle and its shift by a whole number of turns describe the same
+configuration of the simple pendulum.
+-/
+lemma ofAngle_add_int_mul_two_pi_coord (x : EuclideanSpace ℝ (Fin 1)) (n : ℤ)
+    : ConfigurationSpace.ofAngle
+        ((x + (n * (2 * Real.pi)) • EuclideanSpace.single (0 : Fin 1) (1 : ℝ)) 0)
+      = ConfigurationSpace.ofAngle (x 0) := by
+  have h0
+      : (x + (n * (2 * Real.pi)) • EuclideanSpace.single 0 1 : EuclideanSpace ℝ (Fin 1)) 0
+        = x 0 + n * (2 * Real.pi) := by
     simp
   rw [h0]
   exact ConfigurationSpace.ofAngle_periodic.int_mul n (x 0)

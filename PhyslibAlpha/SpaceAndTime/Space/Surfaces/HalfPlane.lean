@@ -45,8 +45,10 @@ half-plane lies in a proper linear subspace, so it has ambient volume zero.
 open SchwartzMap NNReal
 noncomputable section
 open Physlib Distribution
-variable (𝕜 : Type) {E F F' : Type} [RCLike 𝕜] [NormedAddCommGroup E] [NormedAddCommGroup F]
-  [NormedAddCommGroup F'] [NormedSpace ℝ E] [NormedSpace ℝ F]
+variable
+  (𝕜 : Type)
+  {E F F' : Type} [RCLike 𝕜] [NormedAddCommGroup E] [NormedAddCommGroup F] [NormedAddCommGroup F']
+  [NormedSpace ℝ E] [NormedSpace ℝ F]
 
 namespace Space
 
@@ -95,12 +97,11 @@ lemma norm_halfPlane (x : Space 2) : ‖halfPlane x‖ = ‖x‖ := by
 def halfPlaneMeasure : Measure (Space 3) :=
   MeasureTheory.Measure.map halfPlane (volume.restrict halfPlaneDomain)
 
-instance halfPlaneMeasure_hasTemperateGrowth :
-    halfPlaneMeasure.HasTemperateGrowth := by
+instance halfPlaneMeasure_hasTemperateGrowth : halfPlaneMeasure.HasTemperateGrowth := by
   rw [halfPlaneMeasure]
   refine { exists_integrable := ?_ }
-  obtain ⟨n, hn⟩ := MeasureTheory.Measure.HasTemperateGrowth.exists_integrable
-    (μ := volume (α := Space 2))
+  obtain ⟨n, hn⟩ :=
+    MeasureTheory.Measure.HasTemperateGrowth.exists_integrable (μ := volume (α := Space 2))
   use n
   rw [MeasurableEmbedding.integrable_map_iff halfPlane_measurableEmbedding]
   convert! hn.restrict using 1
@@ -118,15 +119,14 @@ instance halfPlaneMeasure_sFinite : SFinite halfPlaneMeasure := by
 -/
 
 /-- The distribution on `Space 3` corresponding to integration over a half-plane. -/
-def halfPlaneDist : (Space 3) →d[ℝ] ℝ :=
-  SchwartzMap.integralCLM ℝ halfPlaneMeasure
+def halfPlaneDist : (Space 3) →d[ℝ] ℝ := SchwartzMap.integralCLM ℝ halfPlaneMeasure
 
-lemma halfPlaneDist_apply_eq_integral_halfPlaneMeasure (f : 𝓢(Space 3, ℝ)) :
-    halfPlaneDist f = ∫ x, f x ∂halfPlaneMeasure := by
+lemma halfPlaneDist_apply_eq_integral_halfPlaneMeasure (f : 𝓢(Space 3, ℝ))
+    : halfPlaneDist f = ∫ x, f x ∂halfPlaneMeasure := by
   rw [halfPlaneDist, SchwartzMap.integralCLM_apply]
 
-lemma halfPlaneDist_apply_eq_integral_volume (f : 𝓢(Space 3, ℝ)) :
-    halfPlaneDist f = ∫ x, f (halfPlane x) ∂(volume.restrict halfPlaneDomain) := by
+lemma halfPlaneDist_apply_eq_integral_volume (f : 𝓢(Space 3, ℝ))
+    : halfPlaneDist f = ∫ x, f (halfPlane x) ∂(volume.restrict halfPlaneDomain) := by
   rw [halfPlaneDist_apply_eq_integral_halfPlaneMeasure, halfPlaneMeasure,
     MeasurableEmbedding.integral_map halfPlane_measurableEmbedding]
 
@@ -150,8 +150,8 @@ def halfPlaneSubmodule : Submodule ℝ (Space 3) where
 lemma halfPlane_mem_halfPlaneSubmodule (x : Space 2) : halfPlane x ∈ halfPlaneSubmodule := by
   simp [halfPlaneSubmodule, halfPlane]
 
-lemma halfPlane_image_domain_subset_halfPlaneSubmodule :
-    halfPlane '' halfPlaneDomain ⊆ (halfPlaneSubmodule : Set (Space 3)) := by
+lemma halfPlane_image_domain_subset_halfPlaneSubmodule
+    : halfPlane '' halfPlaneDomain ⊆ (halfPlaneSubmodule : Set (Space 3)) := by
   rintro x ⟨y, _, rfl⟩
   exact halfPlane_mem_halfPlaneSubmodule y
 
@@ -162,12 +162,11 @@ lemma halfPlaneSubmodule_ne_top : halfPlaneSubmodule ≠ ⊤ := by
     exact Submodule.mem_top
   simp [halfPlaneSubmodule] at hbasis
 
-lemma volume_halfPlane_image_domain :
-    volume (halfPlane '' halfPlaneDomain : Set (Space 3)) = 0 := by
+lemma volume_halfPlane_image_domain
+    : volume (halfPlane '' halfPlaneDomain : Set (Space 3)) = 0 := by
   refine measure_mono_null halfPlane_image_domain_subset_halfPlaneSubmodule ?_
   rw [volume_eq_addHaar]
-  exact MeasureTheory.Measure.addHaar_submodule
-    (Space.basis.toBasis.addHaar : Measure (Space 3))
+  exact MeasureTheory.Measure.addHaar_submodule (Space.basis.toBasis.addHaar : Measure (Space 3))
     halfPlaneSubmodule halfPlaneSubmodule_ne_top
 
 end Space

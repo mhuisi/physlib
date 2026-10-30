@@ -75,18 +75,17 @@ noncomputable def stateEquiv : 𝓢[ℝ, GBit] ≃ {a : Fin 3 → ℝ // ∑ i, 
 noncomputable abbrev dualEquiv : ((Fin 3 → ℝ) →L[ℝ] ℝ) ≃ₗ[ℝ] (Fin 3 → ℝ) :=
   coeffEquiv (Pi.basisFun ℝ (Fin 3))
 
-lemma dualEquiv_symm_image_ball :
-    dualEquiv.symm '' {a : Fin 3 → ℝ | ∑ i, |a i| ≤ 1} = {f | ‖f‖ ≤ 1} := by
+lemma dualEquiv_symm_image_ball
+    : dualEquiv.symm '' {a : Fin 3 → ℝ | ∑ i, |a i| ≤ 1} = {f | ‖f‖ ≤ 1} := by
   rw [← image_coeffEquiv_ball _ norm_eq_sum_abs_basisFun, Set.image_image]
   simp
 
 /-- The pure state whose functional is `±1` times a coordinate. -/
 noncomputable def purePoint (j : Fin 3 × Bool) : 𝓢[ℝ, GBit] :=
-  stateOfDual (dualEquiv.symm (signedVertex j))
-    (by
-      rw [norm_eq_sum_abs_basisFun]
-      simp only [coeffEquiv_symm_apply_basis]
-      exact signedVertex_mem_l1Ball j)
+  stateOfDual (dualEquiv.symm (signedVertex j)) (by
+    rw [norm_eq_sum_abs_basisFun]
+    simp only [coeffEquiv_symm_apply_basis]
+    exact signedVertex_mem_l1Ball j)
 
 lemma isPure_purePoint (j : Fin 3 × Bool) : (purePoint j).IsPure := by
   rw [purePoint, isPure_stateOfDual_iff, ← dualEquiv_symm_image_ball, ← image_extremePoints]
@@ -99,15 +98,18 @@ lemma finrank_eq_four : Module.finrank ℝ GBit = 4 := by
   change Module.finrank ℝ (ℝ × (Fin 3 → ℝ)) = 4
   simp [Module.finrank_prod]
 
-/-- **The gbit is not classical**: it has `6` pure states in a `4`-dimensional space, too many
-for a simplex. -/
-lemma not_isSimplex_stateSpace :
-    ¬ IsSimplex (UnitalPositiveLinearMap.algebraicStateSpace (E := GBit)) :=
-  fun h => by
-    have := h.card_le_finrank_add_one_of_mapsTo (p := fun j => (purePoint j).toLinearMap)
+/--
+**The gbit is not classical**: it has `6` pure states in a `4`-dimensional space, too many
+for a simplex.
+-/
+lemma not_isSimplex_stateSpace
+    : ¬ IsSimplex (UnitalPositiveLinearMap.algebraicStateSpace (E := GBit)) := fun h => by
+  have :=
+    h.card_le_finrank_add_one_of_mapsTo
+      (p := fun j => (purePoint j).toLinearMap)
       (fun _ _ hp => purePoint_injective (UnitalPositiveLinearMap.toLinearMap_injective hp))
       isPure_purePoint
-    simp [finrank_eq_four] at this
+  simp [finrank_eq_four] at this
 
 end GBit
 

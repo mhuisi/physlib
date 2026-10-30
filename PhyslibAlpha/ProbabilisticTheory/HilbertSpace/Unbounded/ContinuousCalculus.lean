@@ -50,15 +50,15 @@ namespace QuantumMechanics
 
 namespace WOTSpectralMeasure
 
-variable {X : Type*} [TopologicalSpace X] [MeasurableSpace X] [BorelSpace X] [CompactSpace X]
-  [Nonempty X]
+variable
+  {X : Type*} [TopologicalSpace X] [MeasurableSpace X] [BorelSpace X] [CompactSpace X] [Nonempty X]
 variable {H : Type*} [NormedAddCommGroup H] [InnerProductSpace ℂ H] [CompleteSpace H]
 variable (P : WOTSpectralMeasure X H)
 
 /-- The bounded integral of a continuous function, as a bounded operator. -/
 def integralCLM (f : C(X, ℂ)) : H →L[ℂ] H :=
-  ContinuousLinearMapWOT.toCLM
-    (P.boundedIntegral f f.continuous.measurable ⟨‖f‖, fun z => f.norm_coe_le_norm z⟩)
+  ContinuousLinearMapWOT.toCLM (P.boundedIntegral f f.continuous.measurable
+    ⟨‖f‖, fun z => f.norm_coe_le_norm z⟩)
 
 /-! ## A. The ⋆-homomorphism -/
 
@@ -67,53 +67,68 @@ lemma bound_of_continuous (f : C(X, ℂ)) : ∃ C, ∀ z, ‖f z‖ ≤ C :=
   ⟨‖f‖, fun z => f.norm_coe_le_norm z⟩
 
 /-- The integral of a measurable bounded function that agrees with a continuous function. -/
-lemma integralCLM_eq_of_forall_eq (f : C(X, ℂ)) {F : X → ℂ} (hF : Measurable F)
-    (hbF : ∃ C, ∀ z, ‖F z‖ ≤ C) (h : ∀ z, f z = F z) :
-    P.integralCLM f = ContinuousLinearMapWOT.toCLM (P.boundedIntegral F hF hbF) :=
+lemma integralCLM_eq_of_forall_eq
+    (f : C(X, ℂ)) {F : X → ℂ} (hF : Measurable F) (hbF : ∃ C, ∀ z, ‖F z‖ ≤ C) (h : ∀ z, f z = F z)
+    : P.integralCLM f = ContinuousLinearMapWOT.toCLM (P.boundedIntegral F hF hbF) :=
   congrArg ContinuousLinearMapWOT.toCLM
     (P.boundedIntegral_congr f.continuous.measurable hF (bound_of_continuous f) hbF h)
 
-lemma integralCLM_add (f g : C(X, ℂ)) :
-    P.integralCLM (f + g) = P.integralCLM f + P.integralCLM g := by
-  have hsum := P.boundedIntegral_add f.continuous.measurable g.continuous.measurable
-    (bound_of_continuous f) (bound_of_continuous g)
+lemma integralCLM_add (f g : C(X, ℂ))
+    : P.integralCLM (f + g) = P.integralCLM f + P.integralCLM g := by
+  have hsum :=
+    P.boundedIntegral_add f.continuous.measurable g.continuous.measurable (bound_of_continuous f)
+      (bound_of_continuous g)
   rw [integralCLM_eq_of_forall_eq P (f + g) (f.continuous.measurable.add g.continuous.measurable)
-    (by obtain ⟨C₁, h₁⟩ := bound_of_continuous f; obtain ⟨C₂, h₂⟩ := bound_of_continuous g
+      (by
+        obtain ⟨C₁, h₁⟩ := bound_of_continuous f
+        obtain ⟨C₂, h₂⟩ := bound_of_continuous g
         exact ⟨C₁ + C₂, fun z => (norm_add_le _ _).trans (add_le_add (h₁ z) (h₂ z))⟩)
-    (fun z => rfl), hsum]
+      (fun z => rfl),
+    hsum]
   rfl
 
-lemma integralCLM_mul (f g : C(X, ℂ)) :
-    P.integralCLM (f * g) = P.integralCLM f * P.integralCLM g := by
-  have hmul := P.boundedIntegral_mul f.continuous.measurable g.continuous.measurable
-    (bound_of_continuous f) (bound_of_continuous g)
+lemma integralCLM_mul (f g : C(X, ℂ))
+    : P.integralCLM (f * g) = P.integralCLM f * P.integralCLM g := by
+  have hmul :=
+    P.boundedIntegral_mul f.continuous.measurable g.continuous.measurable (bound_of_continuous f)
+      (bound_of_continuous g)
   rw [integralCLM_eq_of_forall_eq P (f * g) (f.continuous.measurable.mul g.continuous.measurable)
-    (by obtain ⟨C₁, h₁⟩ := bound_of_continuous f; obtain ⟨C₂, h₂⟩ := bound_of_continuous g
+      (by
+        obtain ⟨C₁, h₁⟩ := bound_of_continuous f
+        obtain ⟨C₂, h₂⟩ := bound_of_continuous g
         obtain ⟨z₀⟩ := (inferInstance : Nonempty X)
         have hC₁ : 0 ≤ C₁ := (norm_nonneg _).trans (h₁ z₀)
-        exact ⟨C₁ * C₂, fun z => by
-          rw [Pi.mul_apply, norm_mul]
-          exact mul_le_mul (h₁ z) (h₂ z) (norm_nonneg _) hC₁⟩)
-    (fun z => rfl), hmul]
+        exact ⟨
+          C₁ * C₂,
+          fun z => by
+            rw [Pi.mul_apply, norm_mul]
+            exact mul_le_mul (h₁ z) (h₂ z) (norm_nonneg _) hC₁
+        ⟩)
+      (fun z => rfl),
+    hmul]
   exact ContinuousLinearMapWOT.toCLM_mul _ _
 
 lemma integralCLM_const (c : ℂ) : P.integralCLM (ContinuousMap.const X c) = c • 1 := by
   have h := P.boundedIntegral_const c
-  rw [integralCLM_eq_of_forall_eq P (ContinuousMap.const X c) measurable_const ⟨‖c‖,
-    fun _ => le_rfl⟩
-    (fun z => rfl), h]
+  rw [integralCLM_eq_of_forall_eq P (ContinuousMap.const X c) measurable_const
+      ⟨‖c‖, fun _ => le_rfl⟩ (fun z => rfl),
+    h]
   rfl
 
 lemma integralCLM_star (f : C(X, ℂ)) : P.integralCLM (star f) = star (P.integralCLM f) := by
   have h := P.boundedIntegral_star f.continuous.measurable (bound_of_continuous f)
-  rw [integralCLM_eq_of_forall_eq P (star f) (F := fun z => star (f z))
-    (continuous_star.measurable.comp f.continuous.measurable)
-    (by obtain ⟨C, hC⟩ := bound_of_continuous f; exact ⟨C, fun z => by simpa using hC z⟩)
-    (fun z => rfl), h]
+  rw [integralCLM_eq_of_forall_eq P (star f)
+      (F := fun z => star (f z))
+      (continuous_star.measurable.comp f.continuous.measurable)
+      (by obtain ⟨C, hC⟩ := bound_of_continuous f; exact ⟨C, fun z => by simpa using hC z⟩)
+      (fun z => rfl),
+    h]
   rfl
 
-/-- **The continuous functional calculus of a spectral measure**: `f ↦ ∫ f dP` is a unital
-⋆-homomorphism from the continuous functions to the bounded operators. -/
+/--
+**The continuous functional calculus of a spectral measure**: `f ↦ ∫ f dP` is a unital
+⋆-homomorphism from the continuous functions to the bounded operators.
+-/
 def continuousCalculus : C(X, ℂ) →⋆ₐ[ℂ] (H →L[ℂ] H) where
   toFun := P.integralCLM
   map_one' := by

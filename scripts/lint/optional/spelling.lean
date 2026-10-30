@@ -30,21 +30,23 @@ open Lean
 def moduleDocs : MetaM (Array String) := do
   let env ← getEnv
   let allModules ← allPhyslibModules
-  let modDocs := allModules.filterMap fun c =>
-    Lean.getModuleDoc? env c
+  let modDocs := allModules.filterMap fun c => Lean.getModuleDoc? env c
   let modDocs := modDocs.flatten
   let modDocs := modDocs.map fun d => d.doc
   return modDocs
 
-/-- All the words in either module doc-strings or doc-strings of definitions, theorems
-  and lemmas. -/
+/--
+All the words in either module doc-strings or doc-strings of definitions, theorems
+and lemmas.
+-/
 def allWords : MetaM (Array String) := do
   let allConstants ← Physlib.allUserConsts
   let allModuleDocs ← moduleDocs
   let allDocStrings ← allConstants.mapM fun c => Lean.Name.getDocString c.name
   let allDocStrings := allDocStrings ++ allModuleDocs
   let allDocStrings := allDocStrings.filter (fun x => x ≠ "")
-  let allList := allDocStrings.flatMap (fun s =>
+  let allList :=
+    allDocStrings.flatMap (fun s =>
       (s.split (fun c => c.isWhitespace || ".,?!:;()[]{}<>\"'".contains c)).toArray)
   let allList := (allList.filter (fun w => w ≠ "" ∧ w ≠ " ")).toList.dedup.toArray
 
@@ -66,11 +68,11 @@ unsafe def main (_ : List String) : IO Unit := do
   let env ← importModules (loadExts := true) #[`Physlib] {} 0
   let fileName := ""
   let options : Options := {}
-  let ctx : Core.Context := {fileName, options, fileMap := default }
-  let state := {env}
+  let ctx : Core.Context := { fileName, options, fileMap := default }
+  let state := { env }
   let (array, _) ← (Lean.Core.CoreM.toIO · ctx state) do (allWords).run'
   let (dict, _) ← (Lean.Core.CoreM.toIO · ctx state) do (dictionary).run'
   let misspelled := array.filter fun w => ¬ (w.toLower) ∈ dict
-  println! "The following words are not in the dictionary, please correct or add them to
-    the spellingWords.txt file:"
+  println! "The following words are not in the dictionary, please correct or add them to\
+    \n    the spellingWords.txt file:"
   println! "{misspelled}"

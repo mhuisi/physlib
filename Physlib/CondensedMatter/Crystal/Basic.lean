@@ -63,8 +63,10 @@ namespace Physlib.CondensedMatter
 
 /-! ## A. The unit cell -/
 
-/-- A crystal with finitely generated abelian translation group `G` and a finite, nonempty unit
-cell. The sites are one copy of each unit-cell label in every translated cell. -/
+/--
+A crystal with finitely generated abelian translation group `G` and a finite, nonempty unit
+cell. The sites are one copy of each unit-cell label in every translated cell.
+-/
 structure Crystal (G : Type*) [AddCommGroup G] [AddGroup.FG G] where
   /-- The labels of the things in one unit cell, such as atoms, spins or orbitals. -/
   UnitCell : Type*
@@ -79,10 +81,12 @@ namespace Crystal
 
 /-! ## B. Constructing a crystal from a unit cell -/
 
-/-- Construct a crystal by repeating a unit cell with labels `F`.
-The group `G` indexes translated cells; `⟨n, i⟩` is the site with label `i` in cell `n`. -/
-abbrev ofUnitCell (G : Type*) (F : Type*) [AddCommGroup G] [AddGroup.FG G]
-    [Finite F] [Nonempty F] : Crystal G where
+/--
+Construct a crystal by repeating a unit cell with labels `F`.
+The group `G` indexes translated cells; `⟨n, i⟩` is the site with label `i` in cell `n`.
+-/
+abbrev ofUnitCell (G : Type*) (F : Type*) [AddCommGroup G] [AddGroup.FG G] [Finite F] [Nonempty F]
+    : Crystal G where
   UnitCell := F
 
 variable {G : Type*} [AddCommGroup G] [AddGroup.FG G]
@@ -90,7 +94,8 @@ variable {G : Type*} [AddCommGroup G] [AddGroup.FG G]
 /-! ## C. Sites and their finiteness -/
 
 /-- A site of `C`, with label `i` in cell `n`. -/
-@[ext] structure Site (C : Crystal G) where
+@[ext]
+structure Site (C : Crystal G) where
   /-- The cell containing this site. -/
   cell : G
   /-- The label of this site within its cell. -/
@@ -112,8 +117,7 @@ instance (C : Crystal G) [Fintype G] [Fintype C.UnitCell] : Fintype C.Site :=
   Fintype.ofEquiv _ (siteEquiv C).symm
 
 /-- A finite translation group, as for periodic boundary conditions, gives a finite crystal. -/
-instance (C : Crystal G) [Finite G] : Finite C.Site :=
-  Finite.of_equiv _ (siteEquiv C).symm
+instance (C : Crystal G) [Finite G] : Finite C.Site := Finite.of_equiv _ (siteEquiv C).symm
 
 /-- Every crystal has a site in its reference cell. -/
 instance (C : Crystal G) : Nonempty C.Site :=
@@ -129,26 +133,26 @@ instance (C : Crystal G) : AddAction G C.Site where
   add_vadd _ _ _ := Site.ext (add_assoc _ _ _) rfl
 
 /-- Translation changes a site's cell and preserves its label. -/
-lemma Site.vadd_def {C : Crystal G} (a : G) (x : C.Site) :
-    a +ᵥ x = ⟨a + x.cell, x.label⟩ := rfl
+lemma Site.vadd_def {C : Crystal G} (a : G) (x : C.Site) : a +ᵥ x = ⟨a + x.cell, x.label⟩ := rfl
 
 /-- The cell of a translated site is the translated cell. -/
-@[simp] lemma Site.cell_vadd {C : Crystal G} (a : G) (x : C.Site) :
-    (a +ᵥ x).cell = a + x.cell := rfl
+@[simp]
+lemma Site.cell_vadd {C : Crystal G} (a : G) (x : C.Site) : (a +ᵥ x).cell = a + x.cell := rfl
 
 /-- Translation preserves the label of a site. -/
-@[simp] lemma Site.label_vadd {C : Crystal G} (a : G) (x : C.Site) :
-    (a +ᵥ x).label = x.label := rfl
+@[simp] lemma Site.label_vadd {C : Crystal G} (a : G) (x : C.Site) : (a +ᵥ x).label = x.label := rfl
 
-/-- Translation acts freely: translations are injective on sites, and different translations move
-a site to different sites. -/
+/--
+Translation acts freely: translations are injective on sites, and different translations move
+a site to different sites.
+-/
 instance (C : Crystal G) : IsCancelVAdd G C.Site where
   toIsLeftCancelVAdd := inferInstance
   right_cancel' _ _ _ h := add_right_cancel (congrArg Site.cell h)
 
 /-- The translates of a site are exactly the sites with the same label. -/
-lemma Site.mem_orbit_iff_label_eq {C : Crystal G} (x y : C.Site) :
-    y ∈ AddAction.orbit G x ↔ x.label = y.label := by
+lemma Site.mem_orbit_iff_label_eq {C : Crystal G} (x y : C.Site)
+    : y ∈ AddAction.orbit G x ↔ x.label = y.label := by
   rw [AddAction.mem_orbit_iff]
   constructor
   · rintro ⟨a, rfl⟩
@@ -158,8 +162,10 @@ lemma Site.mem_orbit_iff_label_eq {C : Crystal G} (x y : C.Site) :
 
 /-! ## E. Species -/
 
-/-- A species assignment gives each label of the unit cell a species in `Q`, for example a chemical
-element. The same assignment holds in every cell. -/
+/--
+A species assignment gives each label of the unit cell a species in `Q`, for example a chemical
+element. The same assignment holds in every cell.
+-/
 abbrev Species (C : Crystal G) (Q : Type*) := C.UnitCell → Q
 
 end Crystal

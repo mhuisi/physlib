@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Jinzheng Li, Nathaneal Sajan, Joseph Tooby-Smith
 -/
 module
+
 public import PhyslibAlpha.Particles.StandardModel.Realization.Basic
 /-!
 # The jet algebra of the Standard Model is a Standard Model
@@ -53,15 +54,17 @@ open TensorProduct Matrix MatrixGroups Lorentz
 
 -/
 
-/-- The jet algebra of the Standard Model is a Standard Model: it is one along the identity
-  algebra map. -/
-noncomputable def id : AlgebraRealization JetAlgebra JetAlgebra.repJetGaugeGroupI
-    JetAlgebra.repLorentzGroup JetAlgebra.massWeightPoly where
+/--
+The jet algebra of the Standard Model is a Standard Model: it is one along the identity
+algebra map.
+-/
+noncomputable def id
+    : AlgebraRealization JetAlgebra JetAlgebra.repJetGaugeGroupI JetAlgebra.repLorentzGroup
+      JetAlgebra.massWeightPoly where
   toAlgHom := AlgHom.id ℂ JetAlgebra
   map_repJet _ _ := rfl
   map_repLorentz _ _ := rfl
-  map_massWeight x := by
-    simp [Polynomial.mapAlgHom]
+  map_massWeight x := by simp [Polynomial.mapAlgHom]
   repJet_mul := JetAlgebra.repJetGaugeGroupI_apply_mul
   repLorentz_mul := JetAlgebra.repLorentzGroup_apply_mul
 

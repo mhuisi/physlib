@@ -21,11 +21,16 @@ does not change its speed.
 
 namespace Matrix
 
-/-- An orthogonal matrix preserves the dot product: if `Aᵀ A = 1` then `(A v) ⬝ᵥ (A w) = v ⬝ᵥ w`.
-Taking `w = v` shows orthogonal matrices preserve squared lengths, `(A v) ⬝ᵥ (A v) = v ⬝ᵥ v`. -/
-lemma dotProduct_mulVec_orthogonal {R : Type*} [CommRing R] {n : Type*} [Fintype n]
-    [DecidableEq n] {A : Matrix n n R} (hA : Aᵀ * A = 1) (v w : n → R) :
-    (A *ᵥ v) ⬝ᵥ (A *ᵥ w) = v ⬝ᵥ w := by
+/--
+An orthogonal matrix preserves the dot product: if `Aᵀ A = 1` then `(A v) ⬝ᵥ (A w) = v ⬝ᵥ w`.
+Taking `w = v` shows orthogonal matrices preserve squared lengths, `(A v) ⬝ᵥ (A v) = v ⬝ᵥ v`.
+-/
+lemma dotProduct_mulVec_orthogonal
+    {R : Type*} [CommRing R]
+    {n : Type*} [Fintype n] [DecidableEq n]
+    {A : Matrix n n R} (hA : Aᵀ * A = 1)
+    (v w : n → R)
+    : (A *ᵥ v) ⬝ᵥ (A *ᵥ w) = v ⬝ᵥ w := by
   rw [dotProduct_mulVec, ← mulVec_transpose, mulVec_mulVec, hA, one_mulVec]
 
 end Matrix

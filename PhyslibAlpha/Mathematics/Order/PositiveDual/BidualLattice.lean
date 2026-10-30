@@ -44,8 +44,9 @@ open scoped NNReal
 
 namespace Bidual
 
-variable {E : Type*} [AddCommGroup E] [PartialOrder E] [IsOrderedAddMonoid E] [Module ℝ E]
-  [IsDirectedOrder E]
+variable
+  {E : Type*}
+  [AddCommGroup E] [PartialOrder E] [IsOrderedAddMonoid E] [Module ℝ E] [IsDirectedOrder E]
 
 /-! ## A. Best splits of a positive functional -/
 
@@ -59,8 +60,10 @@ lemma splitValues_nonempty (x y : Bidual E) (φ : E →ₚ[ℝ] ℝ) : (splitVal
 
 omit [IsDirectedOrder E] in
 /-- A split of `φ` evaluates to at most `φ (f + g)` when `f` dominates `x` and `g` dominates `y`. -/
-lemma add_le_of_bound {x y : Bidual E} {f g : E} (hf : ∀ φ, |x φ| ≤ φ f) (hg : ∀ φ, |y φ| ≤ φ g)
-    {φ φ₁ φ₂ : E →ₚ[ℝ] ℝ} (h : φ₁ + φ₂ = φ) : x φ₁ + y φ₂ ≤ φ (f + g) := by
+lemma add_le_of_bound
+    {x y : Bidual E} {f g : E} (hf : ∀ φ, |x φ| ≤ φ f) (hg : ∀ φ, |y φ| ≤ φ g)
+    {φ φ₁ φ₂ : E →ₚ[ℝ] ℝ} (h : φ₁ + φ₂ = φ)
+    : x φ₁ + y φ₂ ≤ φ (f + g) := by
   have h₁ := (abs_le.1 (hf φ₁)).2
   have h₂ := (abs_le.1 (hg φ₂)).2
   have e₁ := apply_nonneg_of_bound hg φ₁
@@ -78,24 +81,27 @@ lemma bddAbove_splitValues (x y : Bidual E) (φ : E →ₚ[ℝ] ℝ) : BddAbove 
 noncomputable def dsupFun (x y : Bidual E) (φ : E →ₚ[ℝ] ℝ) : ℝ := sSup (splitValues x y φ)
 
 omit [IsDirectedOrder E] in
-lemma le_dsupFun {x y : Bidual E} {φ φ₁ φ₂ : E →ₚ[ℝ] ℝ} (h : φ₁ + φ₂ = φ) :
-    x φ₁ + y φ₂ ≤ dsupFun x y φ :=
+lemma le_dsupFun {x y : Bidual E} {φ φ₁ φ₂ : E →ₚ[ℝ] ℝ} (h : φ₁ + φ₂ = φ)
+    : x φ₁ + y φ₂ ≤ dsupFun x y φ :=
   le_csSup (bddAbove_splitValues x y φ) ⟨φ₁, φ₂, h, rfl⟩
 
 omit [IsDirectedOrder E] in
-lemma dsupFun_le {x y : Bidual E} {φ : E →ₚ[ℝ] ℝ} {r : ℝ}
-    (h : ∀ φ₁ φ₂ : E →ₚ[ℝ] ℝ, φ₁ + φ₂ = φ → x φ₁ + y φ₂ ≤ r) : dsupFun x y φ ≤ r :=
+lemma dsupFun_le
+    {x y : Bidual E} {φ : E →ₚ[ℝ] ℝ} {r : ℝ}
+    (h : ∀ φ₁ φ₂ : E →ₚ[ℝ] ℝ, φ₁ + φ₂ = φ → x φ₁ + y φ₂ ≤ r)
+    : dsupFun x y φ ≤ r :=
   csSup_le (splitValues_nonempty x y φ) fun _ ⟨φ₁, φ₂, hφ, hr⟩ => hr ▸ h φ₁ φ₂ hφ
 
 omit [IsDirectedOrder E] in
-lemma dsupFun_add_le (x y : Bidual E) (φ ψ : E →ₚ[ℝ] ℝ) :
-    dsupFun x y φ + dsupFun x y ψ ≤ dsupFun x y (φ + ψ) := by
+lemma dsupFun_add_le (x y : Bidual E) (φ ψ : E →ₚ[ℝ] ℝ)
+    : dsupFun x y φ + dsupFun x y ψ ≤ dsupFun x y (φ + ψ) := by
   have h₁ : ∀ r ∈ splitValues x y ψ, dsupFun x y (φ + ψ) - r ≥ dsupFun x y φ := by
     rintro _ ⟨ψ₁, ψ₂, hψ, rfl⟩
     show dsupFun x y φ ≤ _
     refine dsupFun_le fun φ₁ φ₂ hφ => ?_
-    have := le_dsupFun (x := x) (y := y) (φ := φ + ψ) (φ₁ := φ₁ + ψ₁) (φ₂ := φ₂ + ψ₂)
-      (by rw [← hφ, ← hψ]; abel)
+    have :=
+      le_dsupFun (x := x) (y := y) (φ := φ + ψ) (φ₁ := φ₁ + ψ₁) (φ₂ := φ₂ + ψ₂)
+        (by rw [← hφ, ← hψ]; abel)
     rw [x.map_add, y.map_add] at this
     linarith
   have h₂ : dsupFun x y (φ + ψ) - dsupFun x y φ ≥ dsupFun x y ψ :=
@@ -105,11 +111,14 @@ lemma dsupFun_add_le (x y : Bidual E) (φ ψ : E →ₚ[ℝ] ℝ) :
 variable (hE : HasLatticeDualCone E)
 include hE
 
-lemma dsupFun_add (x y : Bidual E) (φ ψ : E →ₚ[ℝ] ℝ) :
-    dsupFun x y (φ + ψ) = dsupFun x y φ + dsupFun x y ψ := by
+lemma dsupFun_add (x y : Bidual E) (φ ψ : E →ₚ[ℝ] ℝ)
+    : dsupFun x y (φ + ψ) = dsupFun x y φ + dsupFun x y ψ := by
   refine le_antisymm (dsupFun_le fun χ₁ χ₂ hχ => ?_) (dsupFun_add_le x y φ ψ)
-  obtain ⟨τ, hτ₁, hτ₂⟩ := hE.exists_table ![χ₁, χ₂] ![φ, ψ] (by simpa using hχ)
-  have r₀ := hτ₁ 0; have r₁ := hτ₁ 1; have c₀ := hτ₂ 0; have c₁ := hτ₂ 1
+  obtain ⟨τ, hτ₁, hτ₂⟩ := hE.exists_table (![χ₁, χ₂]) (![φ, ψ]) (by simpa using hχ)
+  have r₀ := hτ₁ 0
+  have r₁ := hτ₁ 1
+  have c₀ := hτ₂ 0
+  have c₁ := hτ₂ 1
   simp only [Fin.sum_univ_two, Matrix.cons_val_zero, Matrix.cons_val_one] at r₀ r₁ c₀ c₁
   have := add_le_add (le_dsupFun (x := x) (y := y) c₀) (le_dsupFun (x := x) (y := y) c₁)
   rw [← r₀, ← r₁, x.map_add, y.map_add]
@@ -124,14 +133,15 @@ lemma dsupFun_zero (x y : Bidual E) : dsupFun x y 0 = 0 := by
   · simpa [x.map_zero, y.map_zero] using le_dsupFun (x := x) (y := y) (add_zero (0 : E →ₚ[ℝ] ℝ))
 
 omit hE in
-lemma dsupFun_nnsmul (x y : Bidual E) (c : ℝ≥0) (φ : E →ₚ[ℝ] ℝ) :
-    dsupFun x y (c • φ) = c * dsupFun x y φ := by
+lemma dsupFun_nnsmul (x y : Bidual E) (c : ℝ≥0) (φ : E →ₚ[ℝ] ℝ)
+    : dsupFun x y (c • φ) = c * dsupFun x y φ := by
   rcases eq_or_ne c 0 with rfl | hc
   · have : (0 : ℝ≥0) • φ = 0 := PositiveLinearMap.ext fun _ => by simp
-    rw [this, dsupFun_zero]; simp
+    rw [this, dsupFun_zero]
+    simp
   have hc' : (0 : ℝ) < c := by positivity
-  have hinv (ψ : E →ₚ[ℝ] ℝ) : c⁻¹ • c • ψ = ψ := PositiveLinearMap.ext fun _ => by
-    simp [← mul_assoc, inv_mul_cancel₀ hc'.ne']
+  have hinv (ψ : E →ₚ[ℝ] ℝ) : c⁻¹ • c • ψ = ψ :=
+    PositiveLinearMap.ext fun _ => by simp [← mul_assoc, inv_mul_cancel₀ hc'.ne']
   have hsplit {φ₁ φ₂ ψ : E →ₚ[ℝ] ℝ} (h : φ₁ + φ₂ = ψ) (d : ℝ≥0) : d • φ₁ + d • φ₂ = d • ψ :=
     PositiveLinearMap.ext fun a => by simp [← h, mul_add]
   refine le_antisymm (dsupFun_le fun φ₁ φ₂ h => ?_) ?_
@@ -139,7 +149,8 @@ lemma dsupFun_nnsmul (x y : Bidual E) (c : ℝ≥0) (φ : E →ₚ[ℝ] ℝ) :
     rw [hinv, x.map_nnsmul, y.map_nnsmul] at this
     have h2 := mul_le_mul_of_nonneg_left this hc'.le
     rw [mul_add, ← mul_assoc, ← mul_assoc, NNReal.coe_inv, mul_inv_cancel₀ hc'.ne', one_mul,
-      one_mul] at h2
+        one_mul]
+      at h2
     exact h2
   · rw [← le_div_iff₀' hc']
     refine dsupFun_le fun φ₁ φ₂ h => ?_
@@ -149,8 +160,10 @@ lemma dsupFun_nnsmul (x y : Bidual E) (c : ℝ≥0) (φ : E →ₚ[ℝ] ℝ) :
 
 /-! ## B. The least upper bound -/
 
-/-- The least upper bound of two elements of the bidual: the best split of each positive
-functional. -/
+/--
+The least upper bound of two elements of the bidual: the best split of each positive
+functional.
+-/
 noncomputable def dsup (x y : Bidual E) : Bidual E :=
   mk (dsupFun x y) (dsupFun_add hE x y) (dsupFun_nnsmul x y) (by
     obtain ⟨f, hf⟩ := x.exists_bound
@@ -186,7 +199,8 @@ end Bidual
 
 namespace Bidual
 
-variable {E : Type*} [AddCommGroup E] [PartialOrder E] [IsOrderedAddMonoid E] [Module ℝ E]
+variable
+  {E : Type*} [AddCommGroup E] [PartialOrder E] [IsOrderedAddMonoid E] [Module ℝ E]
   [IsDirectedOrder E] [hE : Fact (HasLatticeDualCone E)]
 
 /-- When the positive functionals form a lattice, the bidual is a lattice. -/
@@ -195,10 +209,10 @@ noncomputable instance instLattice : Lattice (Bidual E) where
   le_sup_left x y := (isLUB_dsup hE.out x y).1 (Set.mem_insert _ _)
   le_sup_right x y := (isLUB_dsup hE.out x y).1 (Set.mem_insert_of_mem _ rfl)
   sup_le x y _ hx hy := (isLUB_dsup hE.out x y).2 fun _ h => h.elim (· ▸ hx) (· ▸ hy)
-  inf x y := -dsup hE.out (-x) (-y)
+  inf x y := - dsup hE.out (-x) (-y)
   inf_le_left _ _ := neg_le.1 ((isLUB_dsup hE.out _ _).1 (Set.mem_insert _ _))
   inf_le_right _ _ := neg_le.1 ((isLUB_dsup hE.out _ _).1 (Set.mem_insert_of_mem _ rfl))
-  le_inf _ _ _ hx hy := le_neg.1 ((isLUB_dsup hE.out _ _).2 fun _ h =>
-    h.elim (· ▸ neg_le_neg hx) (· ▸ neg_le_neg hy))
+  le_inf _ _ _ hx hy :=
+    le_neg.1 ((isLUB_dsup hE.out _ _).2 fun _ h => h.elim (· ▸ neg_le_neg hx) (· ▸ neg_le_neg hy))
 
 end Bidual

@@ -19,11 +19,12 @@ namespace MicroHamiltonian
 
 variable {D : Type} (H : MicroHamiltonian D) (d : D)
 
-/-- The partition function corresponding to a given MicroHamiltonian. This is a function taking a
-  thermodynamic β, not a temperature. It also depends on the data D defining the system extrinsincs.
+/--
+The partition function corresponding to a given MicroHamiltonian. This is a function taking a
+thermodynamic β, not a temperature. It also depends on the data D defining the system extrinsincs.
 
-  * Ideally this would be an NNReal, but ∫ (NNReal) doesn't work right now, so it would just be a
-    separate proof anyway
+* Ideally this would be an NNReal, but ∫ (NNReal) doesn't work right now, so it would just be a
+  separate proof anyway
 -/
 def partitionZ (β : ℝ) : ℝ :=
   ∫ (config : H.dim d → ℝ),
@@ -38,76 +39,77 @@ def PartitionZComplex (z : ℂ) : ℂ :=
 def ZComplexConvergenceDomain : Set ℂ :=
   ComplexLaplaceConvergenceDomain (fun config : H.dim d → ℝ => H.H config)
 
-private lemma partitionZ_eq_re_partitionZComplex {β : ℝ}
-    (hβ : (β : ℂ) ∈ H.ZComplexConvergenceDomain d) :
-    H.partitionZ d β = (H.PartitionZComplex d β).re := by
+private lemma partitionZ_eq_re_partitionZComplex
+    {β : ℝ} (hβ : (β : ℂ) ∈ H.ZComplexConvergenceDomain d)
+    : H.partitionZ d β = (H.PartitionZComplex d β).re := by
   have hInt : MeasureTheory.Integrable (μ := MeasureTheory.volume)
-      (ComplexLaplaceIntegrand (fun config : H.dim d → ℝ => H.H config) (β : ℂ)) := hβ
+      (ComplexLaplaceIntegrand (fun config : H.dim d → ℝ => H.H config) (β : ℂ)) :=
+    hβ
   rw [partitionZ, PartitionZComplex, ComplexLaplaceTransform]
   calc
     (∫ (config : H.dim d → ℝ),
         have E := H.H config
-        if h : E = ⊤ then 0 else Real.exp (-β * E.untop h)) =
-        ∫ x, RCLike.re (ComplexLaplaceIntegrand
-          (fun config : H.dim d → ℝ => H.H config) (β : ℂ) x) := by
+        if h : E = ⊤ then 0 else Real.exp (-β * E.untop h))
+        = ∫ x, RCLike.re (ComplexLaplaceIntegrand
+            (fun config : H.dim d → ℝ => H.H config) (β : ℂ) x) := by
       apply MeasureTheory.integral_congr_ae
       filter_upwards with config
       unfold ComplexLaplaceIntegrand
       by_cases h : H.H config = ⊤
       · simp [h]
       · simp only [h, dite_false]
-        simpa [Complex.ofReal_mul] using
-          (Complex.exp_ofReal_re (-(β * (H.H config).untop h))).symm
+        simpa [Complex.ofReal_mul] using (Complex.exp_ofReal_re (-(β * (H.H config).untop h))).symm
     _ = RCLike.re (∫ x, ComplexLaplaceIntegrand
-        (fun config : H.dim d → ℝ => H.H config) (β : ℂ) x) := integral_re hInt
+        (fun config : H.dim d → ℝ => H.H config) (β : ℂ) x) :=
+      integral_re hInt
 
 open scoped ContDiff Topology in
-lemma contDiffAt_partitionZ_of_mem_interior_convergenceDomain {β : ℝ}
-    (hβ : (β : ℂ) ∈ interior (H.ZComplexConvergenceDomain d)) :
-    ContDiffAt ℝ ⊤ (H.partitionZ d) β := by
+lemma contDiffAt_partitionZ_of_mem_interior_convergenceDomain
+    {β : ℝ} (hβ : (β : ℂ) ∈ interior (H.ZComplexConvergenceDomain d))
+    : ContDiffAt ℝ ⊤ (H.partitionZ d) β := by
   refine (analyticAt_complexLaplaceTransform_of_mem_interior_convergenceDomain
-    (E := fun config : H.dim d → ℝ => H.H config) (H.measurable_H d) hβ).contDiffAt
-    |>.real_of_complex |>.congr_of_eventuallyEq ?_
+      (E := fun config : H.dim d → ℝ => H.H config)
+      (H.measurable_H d) hβ).contDiffAt
+    |>.real_of_complex
+    |>.congr_of_eventuallyEq ?_
   filter_upwards [(Complex.continuous_ofReal.tendsto β).eventually
     (IsOpen.mem_nhds isOpen_interior hβ)] with x hx using
     H.partitionZ_eq_re_partitionZComplex d (_root_.interior_subset hx)
 
 /-- The partition function as a function of temperature T instead of β. -/
-def partitionZT (T : ℝ) : ℝ :=
-  partitionZ H d (1/T)
+def partitionZT (T : ℝ) : ℝ := partitionZ H d (1 / T)
 
 /-- The Internal Energy, U or E, defined as -∂(ln Z)/∂β. Parameterized here with β. -/
-def internalU (β : ℝ) : ℝ :=
-  -deriv (fun β' ↦ (partitionZ H d β').log) β
+def internalU (β : ℝ) : ℝ := - deriv (fun β' ↦ (partitionZ H d β').log) β
 
-/-- The Helmholtz Free Energy, -T * ln Z. Also denoted F. Parameterized here with temperature T, not
-  β. -/
-def helmholtzA (T : ℝ) : ℝ :=
-  -T * (partitionZT H d T).log
+/--
+The Helmholtz Free Energy, -T * ln Z. Also denoted F. Parameterized here with temperature T, not
+β.
+-/
+def helmholtzA (T : ℝ) : ℝ := -T * (partitionZT H d T).log
 
 /-- The entropy, defined as the -∂A/∂T. Function of T. -/
-def entropyS (T : ℝ) : ℝ :=
-  -deriv (helmholtzA H d) T
+def entropyS (T : ℝ) : ℝ := - deriv (helmholtzA H d) T
 
 /-- The entropy, defined as ln Z + β*U. Function of β. -/
-def entropySβ (β : ℝ) : ℝ :=
-  (partitionZ H d β).log + β * internalU H d β
+def entropySβ (β : ℝ) : ℝ := (partitionZ H d β).log + β * internalU H d β
 
-/-- To be able to compute or define anything from a Hamiltonian, we need its partition function to
-  be a computable integral. A Hamiltonian is ZIntegrable at β if PartitionZ is Lesbegue integrable
-  and nonzero.
+/--
+To be able to compute or define anything from a Hamiltonian, we need its partition function to
+be a computable integral. A Hamiltonian is ZIntegrable at β if PartitionZ is Lesbegue integrable
+and nonzero.
 -/
 def ZIntegrable (β : ℝ) : Prop :=
   MeasureTheory.Integrable (fun (config : H.dim d → ℝ) ↦
-    let E := H.H config;
-    if h : E = ⊤ then 0 else Real.exp (-β * (E.untop h))) ∧ (H.partitionZ d β ≠ 0)
+      let E := H.H config
+      if h : E = ⊤ then 0 else Real.exp (-β * (E.untop h)))
+    ∧ (H.partitionZ d β ≠ 0)
 
 /--
 This Prop defines the most common case of ZIntegrable, that it is integrable at all finite
 temperatures (aka all positive β).
 -/
-def PositiveβIntegrable : Prop :=
-  ∀ β > 0, H.ZIntegrable d β
+def PositiveβIntegrable : Prop := ∀ β > 0, H.ZIntegrable d β
 
 variable {H d}
 
@@ -130,13 +132,12 @@ absolutely convergent, which follows from the local domination estimate above,
 Fubini's theorem, and Morera's theorem.
 -/
 /-- The two definitions of entropy, in terms of `T` or `β = 1 / T`, are equivalent. -/
-theorem entropy_A_eq_entropy_Z (T : ℝ) (hT : T ≠ 0)
-    (hZne : H.partitionZ d (1 / T) ≠ 0)
-    (hZint : ((1 / T : ℝ) : ℂ) ∈ interior (H.ZComplexConvergenceDomain d)) :
-    entropyS H d T = entropySβ H d (1 / T) := by
+theorem entropy_A_eq_entropy_Z
+    (T : ℝ) (hT : T ≠ 0) (hZne : H.partitionZ d (1 / T) ≠ 0)
+    (hZint : ((1 / T : ℝ) : ℂ) ∈ interior (H.ZComplexConvergenceDomain d))
+    : entropyS H d T = entropySβ H d (1 / T) := by
   have hZdiff : DifferentiableAt ℝ (H.partitionZ d) (1 / T) :=
-    (H.contDiffAt_partitionZ_of_mem_interior_convergenceDomain d hZint).differentiableAt
-      (by simp)
+    (H.contDiffAt_partitionZ_of_mem_interior_convergenceDomain d hZint).differentiableAt (by simp)
   dsimp [entropyS, entropySβ, internalU, partitionZT]
   unfold helmholtzA
   rw [deriv_fun_mul]
@@ -148,7 +149,7 @@ theorem entropy_A_eq_entropy_Z (T : ℝ) (hT : T ≠ 0)
   simp only [hdc, one_div, deriv_inv', mul_neg, neg_inj]
   field_simp
   ring_nf
-  --Show the differentiability side-goals
+  -- Show the differentiability side-goals
   · rw [← one_div]
     fun_prop (disch := assumption)
   · fun_prop (disch := assumption)
@@ -165,16 +166,15 @@ as all our things are ultimately parameterized by β.
 
 This identity requires the denominator `∂U/∂β` to be nonzero.
 -/
-theorem β_eq_deriv_S_U {β : ℝ}
-    (hZne : H.partitionZ d β ≠ 0)
-    (hZint : (β : ℂ) ∈ interior (H.ZComplexConvergenceDomain d))
-    (hU' : deriv (H.internalU d) β ≠ 0) :
-    β = (deriv (H.entropySβ d) β) / deriv (H.internalU d) β := by
+theorem β_eq_deriv_S_U
+    {β : ℝ} (hZne : H.partitionZ d β ≠ 0)
+    (hZint : (β : ℂ) ∈ interior (H.ZComplexConvergenceDomain d)) (hU' : deriv (H.internalU d) β ≠ 0)
+    : β = (deriv (H.entropySβ d) β) / deriv (H.internalU d) β := by
   have hZ : ContDiffAt ℝ ⊤ (H.partitionZ d) β :=
     H.contDiffAt_partitionZ_of_mem_interior_convergenceDomain d hZint
   unfold entropySβ internalU
 
-  --Show the differentiability side-goals
+  -- Show the differentiability side-goals
   have hlogDiff : DifferentiableAt ℝ (fun β => Real.log (H.partitionZ d β)) β :=
     (hZ.differentiableAt (by simp)).log hZne
   have hlogDerivDiff : DifferentiableAt ℝ (deriv fun β => Real.log (H.partitionZ d β)) β := by
@@ -184,17 +184,17 @@ theorem β_eq_deriv_S_U {β : ℝ}
   have hderiv : deriv (deriv fun β => Real.log (H.partitionZ d β)) β ≠ 0 := by
     intro hzero
     apply hU'
-    change deriv (-fun β => deriv (fun β' => Real.log (H.partitionZ d β')) β) β = 0
+    change deriv (- fun β => deriv (fun β' => Real.log (H.partitionZ d β')) β) β = 0
     simp [deriv.neg, hzero]
 
-  --Main goal
+  -- Main goal
   simp only [mul_neg]
   rw [deriv.fun_neg', deriv_fun_add, deriv.fun_neg']
   dsimp
   rw [deriv_fun_mul]
   simp only [deriv_id'', one_mul, neg_add_rev, add_neg_cancel_comm_assoc, neg_div_neg_eq]
   exact (mul_div_cancel_right₀ β hderiv).symm
-  --Discharge those side-goals
+  -- Discharge those side-goals
   · exact differentiableAt_id
   · exact hlogDerivDiff
   · fun_prop (disch := assumption)
@@ -208,7 +208,7 @@ example (x : ℝ) (f : ℝ → ℝ) (hf : ContDiffAt ℝ ⊤ f x) : Differentiab
 
 end MicroHamiltonian
 
---! Specializing to a system of particles in space
+-- ! Specializing to a system of particles in space
 
 namespace NVEHamiltonian
 open MicroHamiltonian

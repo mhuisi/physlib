@@ -18,8 +18,10 @@ open Lean
 
 namespace Informal
 
-/-- Is true if and only if a `ConstantInfo` corresponds to an `InformalLemma` or a
-  `InformalDefinition`. -/
+/--
+Is true if and only if a `ConstantInfo` corresponds to an `InformalLemma` or a
+`InformalDefinition`.
+-/
 def isInformal : ConstantInfo → Bool
   | .defnInfo c => c.type.isConstOf ``InformalDefinition ∨ c.type.isConstOf ``InformalLemma
   | _ => false
@@ -34,20 +36,25 @@ def isInformalDef : ConstantInfo → Bool
   | .defnInfo c => c.type.isConstOf ``InformalDefinition
   | _ => false
 
-/-- Takes a `ConstantInfo` corresponding to a `InformalLemma` and returns
-  the corresponding `InformalLemma`. -/
+/--
+Takes a `ConstantInfo` corresponding to a `InformalLemma` and returns
+the corresponding `InformalLemma`.
+-/
 unsafe def constantInfoToInformalLemma (c : ConstantInfo) : CoreM InformalLemma := do
   match c with
   | .defnInfo c => evalConstCheck InformalLemma ``InformalLemma c.name
   | _ => panic! "Passed constantInfoToInformalLemma a `ConstantInfo` that is not a `InformalLemma`"
 
-/-- Takes a `ConstantInfo` corresponding to a `InformalDefinition` and returns
-  the corresponding `InformalDefinition`. -/
+/--
+Takes a `ConstantInfo` corresponding to a `InformalDefinition` and returns
+the corresponding `InformalDefinition`.
+-/
 unsafe def constantInfoToInformalDefinition (c : ConstantInfo) : CoreM InformalDefinition := do
   match c with
   | .defnInfo c => evalConstCheck InformalDefinition ``InformalDefinition c.name
-  | _ => panic!
-    "Passed constantInfoToInformalDefinition a `ConstantInfo` that is not a `InformalDefinition`"
+  | _ =>
+    panic!
+      "Passed constantInfoToInformalDefinition a `ConstantInfo` that is not a `InformalDefinition`"
 
 /-- Gets the tag associated with an informal definition or lemma. -/
 unsafe def getTag (c : ConstantInfo) : CoreM String := do

@@ -28,11 +28,13 @@ namespace Lorentz
 
 variable {d : ℕ}
 
-/-- The bi-linear map corresponding to contraction of a contravariant Lorentz vector with a
-  covariant Lorentz vector. -/
+/--
+The bi-linear map corresponding to contraction of a contravariant Lorentz vector with a
+covariant Lorentz vector.
+-/
 def contrModCoModBi (d : ℕ) : ContrMod d →ₗ[ℝ] CoMod d →ₗ[ℝ] ℝ where
   toFun ψ := {
-    toFun := fun φ => ψ.toFin1dℝ ⬝ᵥ φ.toFin1dℝ,
+    toFun := fun φ => ψ.toFin1dℝ ⬝ᵥ φ.toFin1dℝ
     map_add' := by
       intro φ φ'
       simp only [map_add]
@@ -41,8 +43,9 @@ def contrModCoModBi (d : ℕ) : ContrMod d →ₗ[ℝ] CoMod d →ₗ[ℝ] ℝ w
       intro r φ
       simp only [LinearEquiv.map_smul]
       rw [dotProduct_smul]
-      rfl}
-  map_add' ψ ψ':= by
+      rfl
+  }
+  map_add' ψ ψ' := by
     refine LinearMap.ext (fun φ => ?_)
     simp only [map_add, LinearMap.coe_mk, AddHom.coe_mk, LinearMap.add_apply]
     rw [add_dotProduct]
@@ -52,11 +55,13 @@ def contrModCoModBi (d : ℕ) : ContrMod d →ₗ[ℝ] CoMod d →ₗ[ℝ] ℝ w
     rw [smul_dotProduct]
     rfl
 
-/-- The bi-linear map corresponding to contraction of a covariant Lorentz vector with a
-  contravariant Lorentz vector. -/
+/--
+The bi-linear map corresponding to contraction of a covariant Lorentz vector with a
+contravariant Lorentz vector.
+-/
 def coModContrModBi (d : ℕ) : CoMod d →ₗ[ℝ] ContrMod d →ₗ[ℝ] ℝ where
   toFun φ := {
-    toFun := fun ψ => φ.toFin1dℝ ⬝ᵥ ψ.toFin1dℝ,
+    toFun := fun ψ => φ.toFin1dℝ ⬝ᵥ ψ.toFin1dℝ
     map_add' := by
       intro ψ ψ'
       simp only [map_add]
@@ -65,7 +70,8 @@ def coModContrModBi (d : ℕ) : CoMod d →ₗ[ℝ] ContrMod d →ₗ[ℝ] ℝ w
       intro r ψ
       simp only [LinearEquiv.map_smul]
       rw [dotProduct_smul]
-      rfl}
+      rfl
+  }
   map_add' φ φ' := by
     refine LinearMap.ext (fun ψ => ?_)
     simp only [map_add, LinearMap.coe_mk, AddHom.coe_mk, LinearMap.add_apply]
@@ -76,13 +82,16 @@ def coModContrModBi (d : ℕ) : CoMod d →ₗ[ℝ] ContrMod d →ₗ[ℝ] ℝ w
     rw [smul_dotProduct]
     rfl
 
-/-- The linear map from ContrMod d ⊗ CoMod d to ℝ given by
-    summing over components of contravariant Lorentz vector and
-    covariant Lorentz vector in the
-    standard basis (i.e. the dot product).
-    In terms of index notation this is the contraction is ψⁱ φᵢ. -/
-def ContrMod.contr : ((ContrMod.rep).tprod (CoMod.rep)).IntertwiningMap
-    (Representation.trivial ℝ (LorentzGroup d) ℝ) where
+/--
+The linear map from ContrMod d ⊗ CoMod d to ℝ given by
+summing over components of contravariant Lorentz vector and
+covariant Lorentz vector in the
+standard basis (i.e. the dot product).
+In terms of index notation this is the contraction is ψⁱ φᵢ.
+-/
+def ContrMod.contr
+    : ((ContrMod.rep).tprod (CoMod.rep)).IntertwiningMap
+      (Representation.trivial ℝ (LorentzGroup d) ℝ) where
   toLinearMap := TensorProduct.lift (contrModCoModBi d)
   isIntertwining' Λ := by
     ext ψ φ
@@ -90,25 +99,27 @@ def ContrMod.contr : ((ContrMod.rep).tprod (CoMod.rep)).IntertwiningMap
       LinearMap.restrictScalars_self, curry_apply, LinearMap.coe_comp, Function.comp_apply,
       map_tmul, lift.tmul, Representation.isTrivial_def, LinearMap.id_comp]
     change (Λ.1 *ᵥ ψ.toFin1dℝ) ⬝ᵥ ((LorentzGroup.transpose Λ⁻¹).1 *ᵥ φ.toFin1dℝ) = _
-    rw [dotProduct_mulVec, LorentzGroup.transpose_val,
-      vecMul_transpose, Matrix.mulVec_mulVec, LorentzGroup.coe_inv, inv_mul_of_invertible Λ.1]
+    rw [dotProduct_mulVec, LorentzGroup.transpose_val, vecMul_transpose, Matrix.mulVec_mulVec,
+      LorentzGroup.coe_inv, inv_mul_of_invertible Λ.1]
     simp only [Matrix.one_mulVec]
     rfl
 
 /-- Notation for `ContrMod.contr` acting on a tmul. -/
 local notation "⟪" ψ "," φ "⟫ₘ" => ContrMod.contr (ψ ⊗ₜ φ)
 
-lemma ContrMod.contr_tmul (ψ : ContrMod d) (φ : CoMod d) :
-    ⟪ψ, φ⟫ₘ = ψ.toFin1dℝ ⬝ᵥ φ.toFin1dℝ := by
+lemma ContrMod.contr_tmul (ψ : ContrMod d) (φ : CoMod d) : ⟪ψ, φ⟫ₘ = ψ.toFin1dℝ ⬝ᵥ φ.toFin1dℝ := by
   rfl
 
-/-- The linear map from CoMod d ⊗ ContrMod d to ℝ given by
-    summing over components of contravariant Lorentz vector and
-    covariant Lorentz vector in the
-    standard basis (i.e. the dot product).
-    In terms of index notation this is the contraction is ψⁱ φᵢ. -/
-def CoMod.contr : ((CoMod.rep (d := d)).tprod (ContrMod.rep (d := d))).IntertwiningMap
-    (Representation.trivial ℝ (LorentzGroup d) ℝ) where
+/--
+The linear map from CoMod d ⊗ ContrMod d to ℝ given by
+summing over components of contravariant Lorentz vector and
+covariant Lorentz vector in the
+standard basis (i.e. the dot product).
+In terms of index notation this is the contraction is ψⁱ φᵢ.
+-/
+def CoMod.contr
+    : ((CoMod.rep (d := d)).tprod (ContrMod.rep (d := d))).IntertwiningMap
+      (Representation.trivial ℝ (LorentzGroup d) ℝ) where
   toLinearMap := TensorProduct.lift (coModContrModBi d)
   isIntertwining' Λ := by
     ext ψ φ
@@ -121,9 +132,7 @@ def CoMod.contr : ((CoMod.rep (d := d)).tprod (ContrMod.rep (d := d))).Intertwin
 /-- Notation for `CoMod.contr` acting on a tmul. -/
 local notation "⟪" φ "," ψ "⟫ₘ" => CoMod.contr (φ ⊗ₜ ψ)
 
-lemma CoMod.contr_tmul (φ : CoMod d) (ψ : ContrMod d) :
-    ⟪φ, ψ⟫ₘ = φ.toFin1dℝ ⬝ᵥ ψ.toFin1dℝ := by
-  rfl
+lemma CoMod.contr_tmul (φ : CoMod d) (ψ : ContrMod d) : ⟪φ, ψ⟫ₘ = φ.toFin1dℝ ⬝ᵥ ψ.toFin1dℝ := by rfl
 
 /-!
 
@@ -145,35 +154,43 @@ lemma CoMod.contr_tmul_symm (φ : CoMod d) (ψ : ContrMod d) : ⟪φ, ψ⟫ₘ =
 open CategoryTheory.MonoidalCategory
 open CategoryTheory
 
-/-- The linear map from ContrMod d ⊗ ContrMod d to ℝ induced by the homomorphism
-  `Contr.toCo` and the contraction `ContrMod.contr`. -/
-def contrContrContract : ((ContrMod.rep (d := d)).tprod (ContrMod.rep (d := d))).IntertwiningMap
-    (Representation.trivial ℝ (LorentzGroup d) ℝ) := ContrMod.contr.comp
-  ((Contr.toCo d).lTensor (ContrMod.rep (d := d)))
+/--
+The linear map from ContrMod d ⊗ ContrMod d to ℝ induced by the homomorphism
+`Contr.toCo` and the contraction `ContrMod.contr`.
+-/
+def contrContrContract
+    : ((ContrMod.rep (d := d)).tprod (ContrMod.rep (d := d))).IntertwiningMap
+      (Representation.trivial ℝ (LorentzGroup d) ℝ) :=
+  ContrMod.contr.comp ((Contr.toCo d).lTensor (ContrMod.rep (d := d)))
 
-/-- The linear map from ContrMod d ⊗ ContrMod d to ℝ induced by the homomorphism
-  `Contr.toCo` and the contraction `ContrMod.contr`. -/
-def contrContrContractField : ContrMod d ⊗[ℝ] ContrMod d →ₗ[ℝ] ℝ :=
-  contrContrContract.toLinearMap
+/--
+The linear map from ContrMod d ⊗ ContrMod d to ℝ induced by the homomorphism
+`Contr.toCo` and the contraction `ContrMod.contr`.
+-/
+def contrContrContractField : ContrMod d ⊗[ℝ] ContrMod d →ₗ[ℝ] ℝ := contrContrContract.toLinearMap
 
 /-- Notation for `contrContrContractField` acting on a tmul. -/
 local notation "⟪" ψ "," φ "⟫ₘ" => contrContrContractField (ψ ⊗ₜ φ)
 
-lemma contrContrContract_hom_tmul (φ : ContrMod d) (ψ : ContrMod d) :
-    ⟪φ, ψ⟫ₘ = φ.toFin1dℝ ⬝ᵥ η *ᵥ ψ.toFin1dℝ:= by
+lemma contrContrContract_hom_tmul (φ : ContrMod d) (ψ : ContrMod d)
+    : ⟪φ, ψ⟫ₘ = φ.toFin1dℝ ⬝ᵥ η *ᵥ ψ.toFin1dℝ := by
   rfl
 
-/-- The linear map from CoMod d ⊗ CoMod d to ℝ induced by the homomorphism
-  `Co.toContr` and the contraction `CoMod.contr`. -/
-def coCoContract : ((CoMod.rep (d := d)).tprod (CoMod.rep (d := d))).IntertwiningMap
-    (Representation.trivial ℝ (LorentzGroup d) ℝ) := CoMod.contr.comp
-    ((Co.toContr d).lTensor (CoMod.rep (d := d)))
+/--
+The linear map from CoMod d ⊗ CoMod d to ℝ induced by the homomorphism
+`Co.toContr` and the contraction `CoMod.contr`.
+-/
+def coCoContract
+    : ((CoMod.rep (d := d)).tprod (CoMod.rep (d := d))).IntertwiningMap
+      (Representation.trivial ℝ (LorentzGroup d) ℝ) :=
+  CoMod.contr.comp ((Co.toContr d).lTensor (CoMod.rep (d := d)))
 
 /-- Notation for `coCoContract` acting on a tmul. -/
 local notation "⟪" ψ "," φ "⟫ₘ" => coCoContract (ψ ⊗ₜ φ)
 
-lemma coCoContract_hom_tmul (φ : CoMod d) (ψ : CoMod d) :
-    ⟪φ, ψ⟫ₘ = φ.toFin1dℝ ⬝ᵥ η *ᵥ ψ.toFin1dℝ := by rfl
+lemma coCoContract_hom_tmul (φ : CoMod d) (ψ : CoMod d)
+    : ⟪φ, ψ⟫ₘ = φ.toFin1dℝ ⬝ᵥ η *ᵥ ψ.toFin1dℝ := by
+  rfl
 
 /-!
 
@@ -190,8 +207,9 @@ variable (x y : ContrMod d)
 lemma action_tmul (g : LorentzGroup d) : ⟪ContrMod.rep g x, ContrMod.rep g y⟫ₘ = ⟪x, y⟫ₘ :=
   LinearMap.congr_fun (contrContrContract.isIntertwining' g) (x ⊗ₜ[ℝ] y)
 
-lemma as_sum : ⟪x, y⟫ₘ = x.val (Sum.inl 0) * y.val (Sum.inl 0) -
-    ∑ i, x.val (Sum.inr i) * y.val (Sum.inr i) := by
+lemma as_sum
+    : ⟪x, y⟫ₘ
+      = x.val (Sum.inl 0) * y.val (Sum.inl 0) - ∑ i, x.val (Sum.inr i) * y.val (Sum.inr i) := by
   rw [contrContrContract_hom_tmul]
   simp only [dotProduct, minkowskiMatrix, LieAlgebra.Orthogonal.indefiniteDiagonal, mulVec_diagonal,
     Fintype.sum_sum_type, Finset.univ_unique, Fin.default_eq_zero, Fin.isValue, Sum.elim_inl,
@@ -200,16 +218,16 @@ lemma as_sum : ⟪x, y⟫ₘ = x.val (Sum.inl 0) * y.val (Sum.inl 0) -
 
 open InnerProductSpace
 
-lemma as_sum_toSpace : ⟪x, y⟫ₘ = x.val (Sum.inl 0) * y.val (Sum.inl 0) -
-    ⟪x.toSpace, y.toSpace⟫_ℝ := by
+lemma as_sum_toSpace
+    : ⟪x, y⟫ₘ = x.val (Sum.inl 0) * y.val (Sum.inl 0) - ⟪x.toSpace, y.toSpace⟫_ℝ := by
   rw [as_sum]
   congr
   funext i
   rw [mul_comm]
   rfl
 
-lemma stdBasis_inl {d : ℕ} :
-    ⟪@ContrMod.stdBasis d (Sum.inl 0), ContrMod.stdBasis (Sum.inl 0)⟫ₘ = (1 : ℝ) := by
+lemma stdBasis_inl {d : ℕ}
+    : ⟪@ContrMod.stdBasis d (Sum.inl 0), ContrMod.stdBasis (Sum.inl 0)⟫ₘ = (1 : ℝ) := by
   rw [as_sum]
   trans (1 : ℝ) - (0 : ℝ)
   congr
@@ -234,8 +252,7 @@ lemma dual_mulVec_right : ⟪x, dual Λ *ᵥ y⟫ₘ = ⟪Λ *ᵥ x, y⟫ₘ := 
   simp only [dual, ← mul_assoc, minkowskiMatrix.sq, one_mul]
   rw [← mulVec_mulVec, dotProduct_mulVec, vecMul_transpose]
 
-lemma dual_mulVec_left : ⟪dual Λ *ᵥ x, y⟫ₘ = ⟪x, Λ *ᵥ y⟫ₘ := by
-  rw [symm, dual_mulVec_right, symm]
+lemma dual_mulVec_left : ⟪dual Λ *ᵥ x, y⟫ₘ = ⟪x, Λ *ᵥ y⟫ₘ := by rw [symm, dual_mulVec_right, symm]
 
 lemma right_parity : ⟪x, ContrMod.rep LorentzGroup.parity y⟫ₘ = ∑ i, x.val i * y.val i := by
   rw [as_sum]
@@ -251,15 +268,17 @@ lemma right_parity : ⟪x, ContrMod.rep LorentzGroup.parity y⟫ₘ = ∑ i, x.v
     exact mul_eq_mul_left_iff.mp rfl
   · congr
     funext i
-    change - (x.val (Sum.inr i) * ((η *ᵥ y.toFin1dℝ) (Sum.inr i))) = _
+    change -(x.val (Sum.inr i) * ((η *ᵥ y.toFin1dℝ) (Sum.inr i))) = _
     simp only [mulVec_inr_i, mul_neg, neg_neg, mul_eq_mul_left_iff]
     exact mul_eq_mul_left_iff.mp rfl
 
 lemma self_parity_eq_zero_iff : ⟪y, ContrMod.rep LorentzGroup.parity y⟫ₘ = 0 ↔ y = 0 := by
   refine Iff.intro (fun h => ?_) (fun h => ?_)
   · rw [right_parity] at h
-    have hn := Fintype.sum_eq_zero_iff_of_nonneg (f := fun i => y.val i * y.val i) (fun i => by
-      simpa using mul_self_nonneg (y.val i))
+    have hn :=
+      Fintype.sum_eq_zero_iff_of_nonneg
+        (f := fun i => y.val i * y.val i)
+        (fun i => by simpa using mul_self_nonneg (y.val i))
     rw [h] at hn
     simp only [true_iff] at hn
     apply ContrMod.ext
@@ -280,8 +299,9 @@ lemma nondegenerate : (∀ (x : ContrMod d), ⟪x, y⟫ₘ = 0) ↔ y = 0 := by
 lemma matrix_apply_eq_iff_sub : ⟪x, Λ *ᵥ y⟫ₘ = ⟪x, Λ' *ᵥ y⟫ₘ ↔ ⟪x, (Λ - Λ') *ᵥ y⟫ₘ = 0 := by
   rw [← sub_eq_zero, ← LinearMap.map_sub, ← tmul_sub, ← ContrMod.sub_mulVec Λ Λ' y]
 
-lemma matrix_eq_iff_eq_forall' : (∀ (v : ContrMod d), (Λ *ᵥ v) = Λ' *ᵥ v) ↔
-    ∀ (w v : ContrMod d), ⟪v, Λ *ᵥ w⟫ₘ = ⟪v, Λ' *ᵥ w⟫ₘ := by
+lemma matrix_eq_iff_eq_forall'
+    : (∀ (v : ContrMod d), (Λ *ᵥ v) = Λ' *ᵥ v)
+      ↔ ∀ (w v : ContrMod d), ⟪v, Λ *ᵥ w⟫ₘ = ⟪v, Λ' *ᵥ w⟫ₘ := by
   refine Iff.intro (fun h ↦ fun w v ↦ ?_) (fun h ↦ fun v ↦ ?_)
   · rw [h w]
   · simp only [matrix_apply_eq_iff_sub] at h
@@ -304,8 +324,8 @@ lemma matrix_eq_id_iff : Λ = 1 ↔ ∀ (w v : ContrMod d), ⟪v, Λ *ᵥ w⟫�
   rw [matrix_eq_iff_eq_forall]
   simp only [ContrMod.one_mulVec]
 
-lemma _root_.LorentzGroup.mem_iff_invariant : Λ ∈ LorentzGroup d ↔
-    ∀ (w v : ContrMod d), ⟪Λ *ᵥ v, Λ *ᵥ w⟫ₘ = ⟪v, w⟫ₘ := by
+lemma _root_.LorentzGroup.mem_iff_invariant
+    : Λ ∈ LorentzGroup d ↔ ∀ (w v : ContrMod d), ⟪Λ *ᵥ v, Λ *ᵥ w⟫ₘ = ⟪v, w⟫ₘ := by
   refine Iff.intro (fun h => ?_) (fun h => ?_)
   · intro x y
     rw [← dual_mulVec_right, ContrMod.mulVec_mulVec]
@@ -318,8 +338,8 @@ lemma _root_.LorentzGroup.mem_iff_invariant : Λ ∈ LorentzGroup d ↔
     rw [← matrix_eq_id_iff] at h
     exact LorentzGroup.mem_iff_dual_mul_self.mpr h
 
-lemma _root_.LorentzGroup.mem_iff_norm : Λ ∈ LorentzGroup d ↔
-    ∀ (w : ContrMod d), ⟪Λ *ᵥ w, Λ *ᵥ w⟫ₘ = ⟪w, w⟫ₘ := by
+lemma _root_.LorentzGroup.mem_iff_norm
+    : Λ ∈ LorentzGroup d ↔ ∀ (w : ContrMod d), ⟪Λ *ᵥ w, Λ *ᵥ w⟫ₘ = ⟪w, w⟫ₘ := by
   rw [LorentzGroup.mem_iff_invariant]
   refine Iff.intro (fun h x => h x x) (fun h x y => ?_)
   have hp := h (x + y)
@@ -344,8 +364,8 @@ lemma _root_.LorentzGroup.mem_iff_norm : Λ ∈ LorentzGroup d ↔
 
 -/
 
-lemma inl_sq_eq (v : ContrMod d) : v.val (Sum.inl 0) ^ 2 =
-    (⟪v, v⟫ₘ) + ∑ i, v.val (Sum.inr i) ^ 2:= by
+lemma inl_sq_eq (v : ContrMod d)
+    : v.val (Sum.inl 0) ^ 2 = (⟪v, v⟫ₘ) + ∑ i, v.val (Sum.inr i) ^ 2 := by
   rw [as_sum]
   apply sub_eq_iff_eq_add.mp
   congr
@@ -359,13 +379,13 @@ lemma le_inl_sq (v : ContrMod d) : ⟪v, v⟫ₘ ≤ v.val (Sum.inl 0) ^ 2 := by
   refine Fintype.sum_nonneg ?hf
   exact fun i => pow_two_nonneg (v.val (Sum.inr i))
 
-lemma ge_abs_inner_product (v w : ContrMod d) : v.val (Sum.inl 0) * w.val (Sum.inl 0) -
-    ‖⟪v.toSpace, w.toSpace⟫_ℝ‖ ≤ ⟪v, w⟫ₘ := by
+lemma ge_abs_inner_product (v w : ContrMod d)
+    : v.val (Sum.inl 0) * w.val (Sum.inl 0) - ‖⟪v.toSpace, w.toSpace⟫_ℝ‖ ≤ ⟪v, w⟫ₘ := by
   rw [as_sum_toSpace, sub_le_sub_iff_left]
   exact Real.le_norm_self ⟪v.toSpace, w.toSpace⟫_ℝ
 
-lemma ge_sub_norm (v w : ContrMod d) : v.val (Sum.inl 0) * w.val (Sum.inl 0) -
-    ‖v.toSpace‖ * ‖w.toSpace‖ ≤ ⟪v, w⟫ₘ := by
+lemma ge_sub_norm (v w : ContrMod d)
+    : v.val (Sum.inl 0) * w.val (Sum.inl 0) - ‖v.toSpace‖ * ‖w.toSpace‖ ≤ ⟪v, w⟫ₘ := by
   apply le_trans _ (ge_abs_inner_product v w)
   rw [sub_le_sub_iff_left]
   exact norm_inner_le_norm v.toSpace w.toSpace
@@ -377,8 +397,8 @@ lemma ge_sub_norm (v w : ContrMod d) : v.val (Sum.inl 0) * w.val (Sum.inl 0) -
 -/
 
 @[simp]
-lemma basis_left {v : ContrMod d} (μ : Fin 1 ⊕ Fin d) :
-    ⟪ ContrMod.stdBasis μ, v⟫ₘ = η μ μ * v.toFin1dℝ μ := by
+lemma basis_left {v : ContrMod d} (μ : Fin 1 ⊕ Fin d)
+    : ⟪ ContrMod.stdBasis μ, v⟫ₘ = η μ μ * v.toFin1dℝ μ := by
   rw [as_sum]
   rcases μ with μ | μ
   · fin_cases μ
@@ -386,13 +406,14 @@ lemma basis_left {v : ContrMod d} (μ : Fin 1 ⊕ Fin d) :
       ContrMod.stdBasis_inl_apply_inr, zero_mul, Finset.sum_const_zero, sub_zero, minkowskiMatrix,
       LieAlgebra.Orthogonal.indefiniteDiagonal, diagonal_apply_eq, Sum.elim_inl]
     rfl
-  · simp only [Fin.isValue, ContrMod.stdBasis_apply, reduceCtorEq, ↓reduceIte, zero_mul,
-    Sum.inr.injEq, ite_mul, one_mul, Finset.sum_ite_eq, Finset.mem_univ, zero_sub, minkowskiMatrix,
-    LieAlgebra.Orthogonal.indefiniteDiagonal, diagonal_apply_eq, Sum.elim_inr, neg_mul, neg_inj]
+  · simp only [Fin.isValue, ContrMod.stdBasis_apply, reduceCtorEq, ↓ reduceIte, zero_mul,
+      Sum.inr.injEq, ite_mul, one_mul, Finset.sum_ite_eq, Finset.mem_univ, zero_sub,
+      minkowskiMatrix, LieAlgebra.Orthogonal.indefiniteDiagonal, diagonal_apply_eq, Sum.elim_inr,
+      neg_mul, neg_inj]
     rfl
 
-lemma on_basis_mulVec (μ ν : Fin 1 ⊕ Fin d) :
-    ⟪ContrMod.stdBasis μ, Λ *ᵥ ContrMod.stdBasis ν⟫ₘ = η μ μ * Λ μ ν := by
+lemma on_basis_mulVec (μ ν : Fin 1 ⊕ Fin d)
+    : ⟪ContrMod.stdBasis μ, Λ *ᵥ ContrMod.stdBasis ν⟫ₘ = η μ μ * Λ μ ν := by
   rw [basis_left, ContrMod.mulVec_toFin1dℝ]
   simp [mulVec, dotProduct, ContrMod.stdBasis_apply, ContrMod.toFin1dℝ_eq_val]
 
@@ -405,8 +426,8 @@ lemma on_basis (μ ν : Fin 1 ⊕ Fin d) : ⟪ContrMod.stdBasis μ, ContrMod.std
     simp
   · simp only [ne_eq, h, not_false_eq_true, one_apply_ne, mul_zero, off_diag_zero]
 
-lemma matrix_apply_stdBasis (ν μ : Fin 1 ⊕ Fin d) :
-    Λ ν μ = η ν ν * ⟪ContrMod.stdBasis ν, Λ *ᵥ ContrMod.stdBasis μ⟫ₘ := by
+lemma matrix_apply_stdBasis (ν μ : Fin 1 ⊕ Fin d)
+    : Λ ν μ = η ν ν * ⟪ContrMod.stdBasis ν, Λ *ᵥ ContrMod.stdBasis μ⟫ₘ := by
   rw [on_basis_mulVec, ← mul_assoc]
   simp [η_apply_mul_η_apply_diag ν]
 
@@ -416,11 +437,9 @@ lemma matrix_apply_stdBasis (ν μ : Fin 1 ⊕ Fin d) :
 
 -/
 
-lemma same_eq_det_toSelfAdjoint (x : ContrMod 3) :
-    ⟪x, x⟫ₘ = det (ContrMod.toSelfAdjoint x).1 := by
-  rw [ContrMod.toSelfAdjoint_apply_coe, as_sum_toSpace, det_fin_two,
-    PauliMatrix.pauliMatrix, PauliMatrix.pauliMatrix, PauliMatrix.pauliMatrix,
-    PauliMatrix.pauliMatrix, ContrMod.toSpace,
+lemma same_eq_det_toSelfAdjoint (x : ContrMod 3) : ⟪x, x⟫ₘ = det (ContrMod.toSelfAdjoint x).1 := by
+  rw [ContrMod.toSelfAdjoint_apply_coe, as_sum_toSpace, det_fin_two, PauliMatrix.pauliMatrix,
+    PauliMatrix.pauliMatrix, PauliMatrix.pauliMatrix, PauliMatrix.pauliMatrix, ContrMod.toSpace,
     ContrMod.toFin1dℝ_eq_val]
   simp only [Fin.isValue, PiLp.inner_apply, Fin.sum_univ_three, ofReal_sub, ofReal_mul, smul_of,
     smul_cons, smul_zero, real_smul, mul_one, smul_empty, smul_neg, Matrix.sub_apply,
@@ -440,16 +459,16 @@ end contrContrContractField
 
 -/
 
-lemma ContrMod.contr_basis {d : ℕ} (i j : Fin 1 ⊕ Fin d) :
-    ContrMod.contr (contrBasis d i ⊗ₜ coBasis d j) = if i = j then (1 : ℝ) else 0 := by
+lemma ContrMod.contr_basis {d : ℕ} (i j : Fin 1 ⊕ Fin d)
+    : ContrMod.contr (contrBasis d i ⊗ₜ coBasis d j) = if i = j then (1 : ℝ) else 0 := by
   rw [ContrMod.contr_tmul]
   simp only [contrBasis_toFin1dℝ, coBasis_toFin1dℝ, dotProduct_single, mul_one]
   rw [Pi.single_apply]
   congr 1
   simp [eq_comm]
 
-lemma CoMod.contr_basis {d : ℕ} (i j : Fin 1 ⊕ Fin d) :
-    CoMod.contr (coBasis d i ⊗ₜ[ℝ] contrBasis d j) = if i = j then (1 : ℝ) else 0 := by
+lemma CoMod.contr_basis {d : ℕ} (i j : Fin 1 ⊕ Fin d)
+    : CoMod.contr (coBasis d i ⊗ₜ[ℝ] contrBasis d j) = if i = j then (1 : ℝ) else 0 := by
   rw [CoMod.contr_tmul]
   simp only [coBasis_toFin1dℝ, contrBasis_toFin1dℝ, dotProduct_single, mul_one]
   rw [Pi.single_apply]

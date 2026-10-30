@@ -82,12 +82,13 @@ def firstDerivativeIndex (d : ℕ) (i : Fin d) : DerivativeIndex d 1 :=
   ⟨Physlib.MultiIndex.increment 0 i, by simp⟩
 
 @[simp]
-lemma firstDerivativeIndex_coe (d : ℕ) (i : Fin d) :
-    ((firstDerivativeIndex d i : DerivativeIndex d 1) : MultiIndex d) =
-      Physlib.MultiIndex.increment 0 i := rfl
+lemma firstDerivativeIndex_coe (d : ℕ) (i : Fin d)
+    : ((firstDerivativeIndex d i : DerivativeIndex d 1) : MultiIndex d)
+      = Physlib.MultiIndex.increment 0 i :=
+  rfl
 
-lemma firstDerivativeIndex_order (d : ℕ) (i : Fin d) :
-    ((firstDerivativeIndex d i : DerivativeIndex d 1) : MultiIndex d).order = 1 := by
+lemma firstDerivativeIndex_order (d : ℕ) (i : Fin d)
+    : ((firstDerivativeIndex d i : DerivativeIndex d 1) : MultiIndex d).order = 1 := by
   simp [firstDerivativeIndex]
 
 /-!
@@ -108,14 +109,15 @@ def firstDerivVector (J : FirstOrderJetPoint d m) (i : Fin d) : EuclideanSpace �
   WithLp.toLp 2 fun a => J.firstDerivCoord i a
 
 @[simp]
-lemma firstDerivVector_apply (J : FirstOrderJetPoint d m) (i : Fin d) (a : Fin m) :
-    J.firstDerivVector i a = J.firstDerivCoord i a := by
+lemma firstDerivVector_apply (J : FirstOrderJetPoint d m) (i : Fin d) (a : Fin m)
+    : J.firstDerivVector i a = J.firstDerivCoord i a := by
   simp [firstDerivVector]
 
 @[simp]
-lemma firstDerivCoord_ofBaseCoordinates (x : Space d) (u : FirstOrderJetCoordinates d m)
-    (i : Fin d) (a : Fin m) :
-    (JetPoint.ofBaseCoordinates x u).firstDerivCoord i a = u (firstDerivativeIndex d i) a := rfl
+lemma firstDerivCoord_ofBaseCoordinates
+    (x : Space d) (u : FirstOrderJetCoordinates d m) (i : Fin d) (a : Fin m)
+    : (JetPoint.ofBaseCoordinates x u).firstDerivCoord i a = u (firstDerivativeIndex d i) a :=
+  rfl
 
 end JetPoint
 
@@ -125,44 +127,49 @@ end JetPoint
 -/
 
 /-- The first-order coordinate-level jet point of a field at a point. -/
-noncomputable abbrev firstOrderJetAt (f : Space d → EuclideanSpace ℝ (Fin m)) (x : Space d) :
-    FirstOrderJetPoint d m :=
+noncomputable abbrev firstOrderJetAt (f : Space d → EuclideanSpace ℝ (Fin m)) (x : Space d)
+    : FirstOrderJetPoint d m :=
   jetAt 1 f x
 
 @[simp]
-lemma firstOrderJetAt_base (f : Space d → EuclideanSpace ℝ (Fin m)) (x : Space d) :
-    (firstOrderJetAt f x).base = x := rfl
+lemma firstOrderJetAt_base (f : Space d → EuclideanSpace ℝ (Fin m)) (x : Space d)
+    : (firstOrderJetAt f x).base = x :=
+  rfl
 
-lemma firstOrderJetAt_value (f : Space d → EuclideanSpace ℝ (Fin m)) (x : Space d) :
-    (firstOrderJetAt f x).value = f x := by
+lemma firstOrderJetAt_value (f : Space d → EuclideanSpace ℝ (Fin m)) (x : Space d)
+    : (firstOrderJetAt f x).value = f x := by
   simp [firstOrderJetAt]
 
 @[simp]
-lemma firstOrderJetAt_firstDerivCoord (f : Space d → EuclideanSpace ℝ (Fin m))
-    (x : Space d) (i : Fin d) (a : Fin m) :
-    (firstOrderJetAt f x).firstDerivCoord i a =
-      ∂^[Physlib.MultiIndex.increment 0 i] (fun y => (f y) a) x := rfl
+lemma firstOrderJetAt_firstDerivCoord
+    (f : Space d → EuclideanSpace ℝ (Fin m)) (x : Space d) (i : Fin d) (a : Fin m)
+    : (firstOrderJetAt f x).firstDerivCoord i a
+      = ∂^[Physlib.MultiIndex.increment 0 i] (fun y => (f y) a) x :=
+  rfl
 
 /-- Evaluate a first-order local lagrangian along the first jets of a field. -/
-noncomputable abbrev firstOrderActionDensity (L : FirstOrderLagrangian d m)
-    (f : Space d → EuclideanSpace ℝ (Fin m)) : Space d → ℝ :=
+noncomputable abbrev firstOrderActionDensity
+    (L : FirstOrderLagrangian d m) (f : Space d → EuclideanSpace ℝ (Fin m))
+    : Space d → ℝ :=
   actionDensity L f
 
 /-- The action of a first-order local lagrangian. -/
-noncomputable abbrev firstOrderAction (L : FirstOrderLagrangian d m)
-    (f : Space d → EuclideanSpace ℝ (Fin m)) : ℝ :=
+noncomputable abbrev firstOrderAction
+    (L : FirstOrderLagrangian d m) (f : Space d → EuclideanSpace ℝ (Fin m))
+    : ℝ :=
   action L f
 
 /-- The Euler-Lagrange operator of a first-order local lagrangian. -/
-noncomputable abbrev firstOrderEulerLagrangeOp (L : FirstOrderLagrangian d m)
-    (f : Space d → EuclideanSpace ℝ (Fin m)) : Space d → EuclideanSpace ℝ (Fin m) :=
+noncomputable abbrev firstOrderEulerLagrangeOp
+    (L : FirstOrderLagrangian d m) (f : Space d → EuclideanSpace ℝ (Fin m))
+    : Space d → EuclideanSpace ℝ (Fin m) :=
   eulerLagrangeOp L f
 
 lemma firstOrder_isCritical_iff_eulerLagrange_zero
     (L : FirstOrderLagrangian d m) (f : Space d → EuclideanSpace ℝ (Fin m))
     (hLf : IsAdmissibleForAction L f)
-    (hL : Lagrangian.SmoothInCoordinates L) :
-    IsCritical L f ↔ firstOrderEulerLagrangeOp L f = 0 := by
+    (hL : Lagrangian.SmoothInCoordinates L)
+    : IsCritical L f ↔ firstOrderEulerLagrangeOp L f = 0 := by
   exact isCritical_iff_eulerLagrange_zero_of_admissibleForAction_and_smoothInCoordinates L f hLf hL
 
 end Local

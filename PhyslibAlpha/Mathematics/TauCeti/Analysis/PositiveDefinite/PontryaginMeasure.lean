@@ -44,25 +44,28 @@ namespace TauCeti
 
 variable {G : Type*} [AddCommGroup G] [TopologicalSpace G]
 
-variable [MeasurableSpace (PontryaginDual (Multiplicative G))]
+variable
+  [MeasurableSpace (PontryaginDual (Multiplicative G))]
   [OpensMeasurableSpace (PontryaginDual (Multiplicative G))]
 
 /-- The transform of a finite positive measure on the dual is positive definite. -/
 lemma _root_.MeasureTheory.FiniteMeasure.isPositiveDefiniteSub_pontryaginMeasureTransform
-    (μ : FiniteMeasure (PontryaginDual (Multiplicative G))) :
-    IsPositiveDefiniteSub μ.pontryaginMeasureTransform := by
+    (μ : FiniteMeasure (PontryaginDual (Multiplicative G)))
+    : IsPositiveDefiniteSub μ.pontryaginMeasureTransform := by
   refine isPositiveDefiniteSub_iff_forall_sum_nonneg.mpr ?_
   intro n c v
-  have hint (i j : Fin n) :
-      Integrable (fun χ : PontryaginDual (Multiplicative G) =>
-        (c i * conj (c j)) * (χ (Multiplicative.ofAdd (v i - v j)) : ℂ)) μ.toMeasure :=
+  have hint (i j : Fin n) : Integrable
+      (fun χ : PontryaginDual (Multiplicative G) =>
+        (c i * conj (c j)) * (χ (Multiplicative.ofAdd (v i - v j)) : ℂ))
+      μ.toMeasure :=
     (PontryaginDual.integrable_coe_eval (μ := μ.toMeasure)
-      (Multiplicative.ofAdd (v i - v j))).const_mul _
-  have hsum :
-      (∫ χ, ∑ i : Fin n, ∑ j : Fin n,
-        (c i * conj (c j)) * (χ (Multiplicative.ofAdd (v i - v j)) : ℂ) ∂μ.toMeasure) =
-      ∑ i : Fin n, ∑ j : Fin n,
-        (c i * conj (c j)) * μ.pontryaginMeasureTransform (v i - v j) := by
+        (Multiplicative.ofAdd (v i - v j))).const_mul
+      _
+  have hsum
+      : (∫ χ, ∑ i : Fin n, ∑ j : Fin n,
+          (c i * conj (c j)) * (χ (Multiplicative.ofAdd (v i - v j)) : ℂ) ∂μ.toMeasure)
+        = ∑ i : Fin n, ∑ j : Fin n,
+            (c i * conj (c j)) * μ.pontryaginMeasureTransform (v i - v j) := by
     rw [integral_finsetSum]
     · congr 1
       ext i
@@ -73,14 +76,14 @@ lemma _root_.MeasureTheory.FiniteMeasure.isPositiveDefiniteSub_pontryaginMeasure
     · intro i _
       exact integrable_finsetSum _ (fun j _ => hint i j)
   rw [← hsum]
-  exact integral_nonneg fun χ => (isPositiveDefiniteSub_iff_forall_sum_nonneg.mp
-    (PontryaginDual.isPositiveDefiniteSub χ).2) n c v
+  exact integral_nonneg fun χ =>
+    (isPositiveDefiniteSub_iff_forall_sum_nonneg.mp (PontryaginDual.isPositiveDefiniteSub χ).2) n c
+      v
 
 /-- The absolute value of a measure transform is bounded by the measure's total mass. -/
 lemma _root_.MeasureTheory.FiniteMeasure.norm_pontryaginMeasureTransform_le
-    (μ : FiniteMeasure (PontryaginDual (Multiplicative G))) (g : G) :
-    ‖μ.pontryaginMeasureTransform g‖ ≤ μ.toMeasure.real Set.univ := by
-  simpa using
-    μ.isPositiveDefiniteSub_pontryaginMeasureTransform.norm_apply_le_map_zero_re g
+    (μ : FiniteMeasure (PontryaginDual (Multiplicative G))) (g : G)
+    : ‖μ.pontryaginMeasureTransform g‖ ≤ μ.toMeasure.real Set.univ := by
+  simpa using μ.isPositiveDefiniteSub_pontryaginMeasureTransform.norm_apply_le_map_zero_re g
 
 end TauCeti

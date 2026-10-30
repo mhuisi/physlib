@@ -33,8 +33,10 @@ existence of the mass unit of kilograms, and construct all other mass units from
 
 open NNReal
 
-/-- The choices of translationally-invariant metrics on the mass-manifold.
-  Such a choice corresponds to a choice of units for mass. -/
+/--
+The choices of translationally-invariant metrics on the mass-manifold.
+Such a choice corresponds to a choice of units for mass.
+-/
 structure MassUnit where
   /-- The underlying scale of the unit. -/
   val : ℝ
@@ -68,13 +70,13 @@ From this choice of kilograms, we can define other length units by scaling kilog
 def kilograms : MassUnit := ⟨1, by norm_num⟩
 
 /-- The mass unit of a microgram (10^(-9) of a kilogram). -/
-noncomputable def micrograms : MassUnit := scale ((1/10) ^ 9) kilograms
+noncomputable def micrograms : MassUnit := scale ((1 / 10) ^ 9) kilograms
 
 /-- The mass unit of milligram (10^(-6) of a kilogram). -/
-noncomputable def milligrams : MassUnit := scale ((1/10) ^ 6) kilograms
+noncomputable def milligrams : MassUnit := scale ((1 / 10) ^ 6) kilograms
 
 /-- The mass unit of grams (10^(-3) of a kilogram). -/
-noncomputable def grams : MassUnit := scale ((1/10) ^ 3) kilograms
+noncomputable def grams : MassUnit := scale ((1 / 10) ^ 3) kilograms
 
 /-- The mass unit of (avoirdupois) ounces (0.028 349 523 125 of a kilogram). -/
 noncomputable def ounces : MassUnit := scale (0.028349523125) kilograms
@@ -100,8 +102,10 @@ noncomputable def metricTons : MassUnit := scale (1000) kilograms
 /-- The mass unit of long tons (2240 pounds). Also called shortweight tons. -/
 noncomputable def longTons : MassUnit := scale (2240) pounds
 
-/-- The mass unit of nominal solar masses (1.988416 × 10 ^ 30 kilograms).
-  See: https://iopscience.iop.org/article/10.3847/0004-6256/152/2/41 [ref: nominal_solar_mass_article] -/
+/--
+The mass unit of nominal solar masses (1.988416 × 10 ^ 30 kilograms).
+See: https://iopscience.iop.org/article/10.3847/0004-6256/152/2/41 [ref: nominal_solar_mass_article]
+-/
 noncomputable def nominalSolarMasses : MassUnit := scale (1.988416e30) kilograms
 
 /-!
@@ -110,16 +114,17 @@ noncomputable def nominalSolarMasses : MassUnit := scale (1.988416e30) kilograms
 
 -/
 
-lemma pounds_div_ounces : pounds / ounces = (16 : ℝ≥0) := NNReal.eq <| by
-  simp [pounds, ounces]
-  show (0.45359237 : ℝ) / 0.028349523125 = ((16 : ℝ≥0) : ℝ)
-  push_cast
-  norm_num
+lemma pounds_div_ounces : pounds / ounces = (16 : ℝ≥0) :=
+  NNReal.eq <| by
+    simp [pounds, ounces]
+    show (0.45359237 : ℝ) / 0.028349523125 = ((16 : ℝ≥0) : ℝ)
+    push_cast
+    norm_num
 
-lemma shortTons_div_kilograms : shortTons / kilograms = (907.18474 : ℝ≥0) := NNReal.eq <| by
-  simp [shortTons, pounds]; rw [toReal]; norm_num
+lemma shortTons_div_kilograms : shortTons / kilograms = (907.18474 : ℝ≥0) :=
+  NNReal.eq <| by simp [shortTons, pounds]; rw [toReal]; norm_num
 
-lemma longTons_div_kilograms : longTons / kilograms = (1016.0469088 : ℝ≥0) := NNReal.eq <| by
-  simp [longTons, pounds]; rw [toReal]; norm_num
+lemma longTons_div_kilograms : longTons / kilograms = (1016.0469088 : ℝ≥0) :=
+  NNReal.eq <| by simp [longTons, pounds]; rw [toReal]; norm_num
 
 end MassUnit

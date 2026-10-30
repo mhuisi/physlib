@@ -57,14 +57,19 @@ variable {α : Type*} [MeasurableSpace α] [TopologicalSpace α] {μ ν : Measur
 -/
 
 /-- A measure below a finite inner regular measure is inner regular. -/
-lemma InnerRegular.of_le [OpensMeasurableSpace α] [T2Space α] [IsFiniteMeasure μ]
-    [InnerRegular μ] (h : ν ≤ μ) : InnerRegular ν where
+lemma InnerRegular.of_le
+    [OpensMeasurableSpace α] [T2Space α] [IsFiniteMeasure μ] [InnerRegular μ] (h : ν ≤ μ)
+    : InnerRegular ν where
   innerRegular A hA r hr := by
     obtain ⟨K, hKA, hK, hAK⟩ :=
       hA.exists_isCompact_sdiff_lt (μ := μ) (measure_ne_top μ A) (tsub_pos_of_lt hr).ne'
-    refine ⟨K, hKA, hK, lt_of_add_lt_add_right
-      ((lt_tsub_iff_left.1 ((Measure.le_iff'.1 h _).trans_lt hAK)).trans_le
-      ((measure_mono (union_sdiff_cancel hKA).ge).trans (measure_union_le _ _)))⟩
+    refine ⟨
+      K,
+      hKA,
+      hK,
+      lt_of_add_lt_add_right ((lt_tsub_iff_left.1 ((Measure.le_iff'.1 h _).trans_lt hAK)).trans_le
+        ((measure_mono (union_sdiff_cancel hKA).ge).trans (measure_union_le _ _)))
+    ⟩
 
 /-!
 
@@ -73,30 +78,35 @@ lemma InnerRegular.of_le [OpensMeasurableSpace α] [T2Space α] [IsFiniteMeasure
 -/
 
 /-- A finite inner regular measure on a Hausdorff space is regular. -/
-lemma Regular.of_innerRegular [T2Space α] [BorelSpace α] [IsFiniteMeasure μ] [InnerRegular μ] :
-    Regular μ :=
-  { toOuterRegular := inferInstance
-    lt_top_of_isCompact := fun _ _ => measure_lt_top _ _
-    innerRegular := fun _ hU r hr => InnerRegular.innerRegular hU.measurableSet r hr }
+lemma Regular.of_innerRegular [T2Space α] [BorelSpace α] [IsFiniteMeasure μ] [InnerRegular μ]
+    : Regular μ := {
+  toOuterRegular := inferInstance
+  lt_top_of_isCompact := fun _ _ => measure_lt_top _ _
+  innerRegular := fun _ hU r hr => InnerRegular.innerRegular hU.measurableSet r hr
+}
 
 /-- A measure below a finite inner regular measure on a Hausdorff space is regular. -/
-lemma Regular.of_le [T2Space α] [BorelSpace α] [IsFiniteMeasure μ] [InnerRegular μ] (h : ν ≤ μ) :
-    Regular ν :=
+lemma Regular.of_le [T2Space α] [BorelSpace α] [IsFiniteMeasure μ] [InnerRegular μ] (h : ν ≤ μ)
+    : Regular ν :=
   have := InnerRegular.of_le h
   have := isFiniteMeasure_of_le μ h
   Regular.of_innerRegular
 
-/-- A finite regular measure pushes forward to a regular measure along a continuous map into a
-Hausdorff space. -/
-lemma Regular.map_of_continuous {β : Type*} [TopologicalSpace β] [MeasurableSpace β]
-    [BorelSpace β] [T2Space β] [BorelSpace α] [IsFiniteMeasure μ] [Regular μ] {f : α → β}
-    (hf : Continuous f) : Regular (μ.map f) :=
+/--
+A finite regular measure pushes forward to a regular measure along a continuous map into a
+Hausdorff space.
+-/
+lemma Regular.map_of_continuous
+    {β : Type*} [TopologicalSpace β] [MeasurableSpace β] [BorelSpace β] [T2Space β] [BorelSpace α]
+    [IsFiniteMeasure μ] [Regular μ]
+    {f : α → β} (hf : Continuous f)
+    : Regular (μ.map f) :=
   have : InnerRegular (μ.map f) := InnerRegular.map_of_continuous hf
   Regular.of_innerRegular
 
 /-- An inner regular measure stays inner regular on a measurable subset. -/
-lemma InnerRegular.comap_subtype [InnerRegular μ] {s : Set α} (hs : MeasurableSet s) :
-    InnerRegular (μ.comap ((↑) : s → α)) :=
+lemma InnerRegular.comap_subtype [InnerRegular μ] {s : Set α} (hs : MeasurableSet s)
+    : InnerRegular (μ.comap ((↑) : s → α)) :=
   ⟨InnerRegular.innerRegular.comap (MeasurableEmbedding.subtype_coe hs)
     (fun _ hU => (MeasurableEmbedding.subtype_coe hs).measurableSet_image' hU)
     (fun _ hK hKc => Topology.IsInducing.subtypeVal.isCompact_preimage' hKc hK)⟩

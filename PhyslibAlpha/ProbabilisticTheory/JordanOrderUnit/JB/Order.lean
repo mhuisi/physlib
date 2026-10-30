@@ -43,8 +43,7 @@ variable {E : Type*} [IsJBOrderUnit E] [Nontrivial E]
 /-! ## A. Nonnegative observables are squares -/
 
 /-- **The nonnegative observables of an ordered JB-algebra are the squares.** -/
-lemma nonneg_iff_exists_mul_self (a : E) :
-    0 ≤ a ↔ ∃ b : E, b * b = a := by
+lemma nonneg_iff_exists_mul_self (a : E) : 0 ≤ a ↔ ∃ b : E, b * b = a := by
   constructor
   · intro ha
     let x : NormedJordanAlgebra.ClosedGeneratedByOne a :=

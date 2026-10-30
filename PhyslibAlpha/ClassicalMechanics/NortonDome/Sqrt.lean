@@ -50,10 +50,11 @@ the difference quotient of `√t ^ 3 = t √t` is `√t`, which tends to zero.
 
 -/
 
-/-- The cube of the real square root, `√y ^ 3`, has derivative `(3/2) √x` at every real `x`. It
-  is differentiable at `0`, with derivative `0`, even though `√` is not. -/
-lemma hasDerivAt_sqrt_pow_three (x : ℝ) :
-    HasDerivAt (fun y : ℝ => √y ^ 3) (3 / 2 * √x) x := by
+/--
+The cube of the real square root, `√y ^ 3`, has derivative `(3/2) √x` at every real `x`. It
+is differentiable at `0`, with derivative `0`, even though `√` is not.
+-/
+lemma hasDerivAt_sqrt_pow_three (x : ℝ) : HasDerivAt (fun y : ℝ => √y ^ 3) (3 / 2 * √x) x := by
   rcases lt_trichotomy x 0 with hx | rfl | hx
   · have hev : (fun y : ℝ => √y ^ 3) =ᶠ[𝓝 x] fun _ => 0 := by
       filter_upwards [Iio_mem_nhds hx] with y hy
@@ -84,10 +85,12 @@ A bound `√y ≤ K y` on `[0, ε]` gives `1 ≤ K √y` for every positive `y �
 
 -/
 
-/-- The real square root is not Lipschitz on any interval `[0, ε]` with `ε > 0`, for any
-  Lipschitz constant. -/
-lemma not_lipschitzOnWith_sqrt (K : NNReal) {ε : ℝ} (hε : 0 < ε) :
-    ¬ LipschitzOnWith K (fun y : ℝ => √y) (Set.Icc 0 ε) := by
+/--
+The real square root is not Lipschitz on any interval `[0, ε]` with `ε > 0`, for any
+Lipschitz constant.
+-/
+lemma not_lipschitzOnWith_sqrt (K : NNReal) {ε : ℝ} (hε : 0 < ε)
+    : ¬ LipschitzOnWith K (fun y : ℝ => √y) (Set.Icc 0 ε) := by
   intro h
   have hK : (0 : ℝ) ≤ K := K.2
   obtain ⟨y, hy0, hyε, hy⟩ : ∃ y : ℝ, 0 < y ∧ y ≤ ε ∧ (K : ℝ) * √y < 1 := by
@@ -96,13 +99,16 @@ lemma not_lipschitzOnWith_sqrt (K : NNReal) {ε : ℝ} (hε : 0 < ε) :
     have h1 : √(min ε ((1 / (2 * (K : ℝ) + 1)) ^ 2)) ≤ 1 / (2 * K + 1) := by
       rw [Real.sqrt_le_left (by positivity)]
       exact min_le_right _ _
-    calc (K : ℝ) * √(min ε ((1 / (2 * (K : ℝ) + 1)) ^ 2)) ≤ K * (1 / (2 * K + 1)) := by gcongr
+    calc
+      (K : ℝ) * √(min ε ((1 / (2 * (K : ℝ) + 1)) ^ 2))
+        ≤ K * (1 / (2 * K + 1)) := by gcongr
       _ < 1 := by
         rw [mul_one_div, div_lt_one (by positivity)]
         linarith
   have := h.dist_le_mul y ⟨hy0.le, hyε⟩ 0 ⟨le_rfl, hε.le⟩
-  simp only [Real.sqrt_zero, dist_zero_right, Real.norm_eq_abs,
-    abs_of_nonneg (Real.sqrt_nonneg _), abs_of_pos hy0] at this
+  simp only [Real.sqrt_zero, dist_zero_right, Real.norm_eq_abs, abs_of_nonneg (Real.sqrt_nonneg _),
+      abs_of_pos hy0]
+    at this
   have hsq : √y * √y = y := Real.mul_self_sqrt hy0.le
   have hs : 0 < √y := Real.sqrt_pos.mpr hy0
   nlinarith

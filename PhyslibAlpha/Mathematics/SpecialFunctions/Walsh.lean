@@ -63,19 +63,13 @@ noncomputable section
 def walshSign (j k : Fin 2) : ℂ := if j = 1 ∧ k = 1 then -1 else 1
 
 /-- The sign `walshSign 0 k` is `1`. -/
-@[simp]
-lemma walshSign_zero_left (k : Fin 2) : walshSign 0 k = 1 := by
-  simp [walshSign]
+@[simp] lemma walshSign_zero_left (k : Fin 2) : walshSign 0 k = 1 := by simp [walshSign]
 
 /-- The sign `walshSign j 0` is `1`. -/
-@[simp]
-lemma walshSign_zero_right (j : Fin 2) : walshSign j 0 = 1 := by
-  simp [walshSign]
+@[simp] lemma walshSign_zero_right (j : Fin 2) : walshSign j 0 = 1 := by simp [walshSign]
 
 /-- The sign `walshSign 1 1` is `-1`. -/
-@[simp]
-lemma walshSign_one_one : walshSign 1 1 = -1 := by
-  simp [walshSign]
+@[simp] lemma walshSign_one_one : walshSign 1 1 = -1 := by simp [walshSign]
 
 /-- The sign `(-1) ^ (j * k)` is symmetric in `j` and `k`. -/
 lemma walshSign_comm (j k : Fin 2) : walshSign j k = walshSign k j := by
@@ -90,12 +84,11 @@ lemma conj_walshSign (j k : Fin 2) : starRingEnd ℂ (walshSign j k) = walshSign
   fin_cases j <;> fin_cases k <;> simp
 
 /-- A sign has unit norm. -/
-lemma norm_walshSign (j k : Fin 2) : ‖walshSign j k‖ = 1 := by
-  fin_cases j <;> fin_cases k <;> simp
+lemma norm_walshSign (j k : Fin 2) : ‖walshSign j k‖ = 1 := by fin_cases j <;> fin_cases k <;> simp
 
 /-- Orthogonality of the signs on `Fin 2`. -/
-lemma sum_walshSign_mul_walshSign (a b : Fin 2) :
-    ∑ k, walshSign a k * walshSign b k = if a = b then 2 else 0 := by
+lemma sum_walshSign_mul_walshSign (a b : Fin 2)
+    : ∑ k, walshSign a k * walshSign b k = if a = b then 2 else 0 := by
   fin_cases a <;> fin_cases b <;> norm_num [Fin.sum_univ_two]
 
 /-!
@@ -124,12 +117,11 @@ lemma conj_walsh (x z : Fin n → Fin 2) : starRingEnd ℂ (walsh x z) = walsh x
   simp only [walsh_eq, map_prod, conj_walshSign]
 
 /-- A Walsh character has unit norm. -/
-lemma norm_walsh (x z : Fin n → Fin 2) : ‖walsh x z‖ = 1 := by
-  simp [walsh_eq, norm_walshSign]
+lemma norm_walsh (x z : Fin n → Fin 2) : ‖walsh x z‖ = 1 := by simp [walsh_eq, norm_walshSign]
 
 /-- Orthogonality of the Walsh characters. -/
-lemma sum_walsh_mul_walsh (x y : Fin n → Fin 2) :
-    ∑ z, walsh x z * walsh y z = if x = y then 2 ^ n else 0 := by
+lemma sum_walsh_mul_walsh (x y : Fin n → Fin 2)
+    : ∑ z, walsh x z * walsh y z = if x = y then 2 ^ n else 0 := by
   simp only [walsh_eq, ← Finset.prod_mul_distrib]
   rw [← Fintype.prod_sum fun i k => walshSign (x i) k * walshSign (y i) k]
   simp only [sum_walshSign_mul_walshSign]
@@ -146,15 +138,16 @@ lemma sum_walsh_mul_walsh (x y : Fin n → Fin 2) :
 
 -/
 
-/-- The rescaled Walsh vector `z ↦ (√(2 ^ n))⁻¹ * walsh x z` in
-`EuclideanSpace ℂ (Fin n → Fin 2)`. -/
+/--
+The rescaled Walsh vector `z ↦ (√(2 ^ n))⁻¹ * walsh x z` in
+`EuclideanSpace ℂ (Fin n → Fin 2)`.
+-/
 def walshVec (x : Fin n → Fin 2) : EuclideanSpace ℂ (Fin n → Fin 2) :=
   WithLp.toLp 2 fun z => (Real.sqrt (2 ^ n))⁻¹ * walsh x z
 
 /-- The component `z` of `walshVec x` is `(√(2 ^ n))⁻¹ * walsh x z`. -/
 @[simp]
-lemma walshVec_apply (x z : Fin n → Fin 2) :
-    walshVec x z = (Real.sqrt (2 ^ n))⁻¹ * walsh x z := rfl
+lemma walshVec_apply (x z : Fin n → Fin 2) : walshVec x z = (Real.sqrt (2 ^ n))⁻¹ * walsh x z := rfl
 
 /-- The rescaled Walsh vectors are orthonormal. -/
 lemma orthonormal_walshVec : Orthonormal ℂ (walshVec (n := n)) := by
@@ -166,45 +159,48 @@ lemma orthonormal_walshVec : Orthonormal ℂ (walshVec (n := n)) := by
     rfl
   simp only [PiLp.inner_apply, walshVec_apply, RCLike.inner_apply, map_mul, Complex.conj_ofReal,
     conj_walsh]
-  calc _ = (((Real.sqrt (2 ^ n))⁻¹ : ℝ) : ℂ) ^ 2 * ∑ z, walsh x z * walsh y z := by
-        rw [Finset.mul_sum]
-        exact Finset.sum_congr rfl fun z _ => by ring
+  calc
+    _ = (((Real.sqrt (2 ^ n))⁻¹ : ℝ) : ℂ) ^ 2 * ∑ z, walsh x z * walsh y z := by
+      rw [Finset.mul_sum]
+      exact Finset.sum_congr rfl fun z _ => by ring
     _ = _ := by
-        rw [sum_walsh_mul_walsh, hc]
-        split_ifs
-        · exact inv_mul_cancel₀ (pow_ne_zero _ two_ne_zero)
-        · exact mul_zero _
+      rw [sum_walsh_mul_walsh, hc]
+      split_ifs
+      · exact inv_mul_cancel₀ (pow_ne_zero _ two_ne_zero)
+      · exact mul_zero _
 
 /-!
 ### C.2. The orthonormal basis
 
 -/
 
-/-- The orthonormal basis of `EuclideanSpace ℂ (Fin n → Fin 2)` formed by the rescaled Walsh
-vectors `walshVec x`. -/
-def walshBasis (n : ℕ) :
-    OrthonormalBasis (Fin n → Fin 2) ℂ (EuclideanSpace ℂ (Fin n → Fin 2)) :=
+/--
+The orthonormal basis of `EuclideanSpace ℂ (Fin n → Fin 2)` formed by the rescaled Walsh
+vectors `walshVec x`.
+-/
+def walshBasis (n : ℕ) : OrthonormalBasis (Fin n → Fin 2) ℂ (EuclideanSpace ℂ (Fin n → Fin 2)) :=
   OrthonormalBasis.mk orthonormal_walshVec
     (orthonormal_walshVec.linearIndependent.span_eq_top_of_card_eq_finrank'
       finrank_euclideanSpace.symm).ge
 
 /-- The vectors of `walshBasis n` are the rescaled Walsh vectors. -/
-@[simp]
-lemma coe_walshBasis (n : ℕ) : ⇑(walshBasis n) = walshVec :=
-  OrthonormalBasis.coe_mk _ _
+@[simp] lemma coe_walshBasis (n : ℕ) : ⇑(walshBasis n) = walshVec := OrthonormalBasis.coe_mk _ _
 
 /-!
 ### C.3. Parseval's identity
 
 -/
 
-/-- Parseval's identity for the rescaled Walsh vectors. The vector
-`x ↦ ∑ z, β z * (√(2 ^ n))⁻¹ * walsh x z` has the same squared norm as `β`. -/
-lemma sum_norm_sq_sum_mul_inv_sqrt_mul_walsh (n : ℕ) (β : (Fin n → Fin 2) → ℂ) :
-    ∑ x : Fin n → Fin 2, ‖∑ z, β z * ((Real.sqrt (2 ^ n))⁻¹ * walsh x z)‖ ^ 2 =
-      ∑ z, ‖β z‖ ^ 2 := by
+/--
+Parseval's identity for the rescaled Walsh vectors. The vector
+`x ↦ ∑ z, β z * (√(2 ^ n))⁻¹ * walsh x z` has the same squared norm as `β`.
+-/
+lemma sum_norm_sq_sum_mul_inv_sqrt_mul_walsh (n : ℕ) (β : (Fin n → Fin 2) → ℂ)
+    : ∑ x : Fin n → Fin 2, ‖∑ z, β z * ((Real.sqrt (2 ^ n))⁻¹ * walsh x z)‖ ^ 2
+      = ∑ z, ‖β z‖ ^ 2 := by
   have h := (walshBasis n).sum_sq_norm_inner_right (WithLp.toLp 2 β)
   rw [EuclideanSpace.norm_sq_eq] at h
   simp only [coe_walshBasis, PiLp.inner_apply, walshVec_apply, RCLike.inner_apply, map_mul,
-    Complex.conj_ofReal, conj_walsh] at h
+      Complex.conj_ofReal, conj_walsh]
+    at h
   simpa only [mul_comm (β _)] using h

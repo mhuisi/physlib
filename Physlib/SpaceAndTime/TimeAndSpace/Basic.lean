@@ -87,23 +87,17 @@ noncomputable def time {d : ℕ} : TimeAndSpace d →L[ℝ] Time :=
 noncomputable def space {d : ℕ} : TimeAndSpace d →L[ℝ] Space d :=
   ContinuousLinearMap.snd ℝ Time (Space d)
 
-@[simp]
-lemma time_apply (tx : TimeAndSpace d) :
-    time tx = tx.1 := rfl
+@[simp] lemma time_apply (tx : TimeAndSpace d) : time tx = tx.1 := rfl
 
-@[simp]
-lemma space_apply (tx : TimeAndSpace d) :
-    space tx = tx.2 := rfl
+@[simp] lemma space_apply (tx : TimeAndSpace d) : space tx = tx.2 := rfl
 
 /-- The time projection is nonexpanding for the product metric. -/
-lemma dist_time_le (tx ty : TimeAndSpace d) :
-    dist (time tx) (time ty) ≤ dist tx ty := by
+lemma dist_time_le (tx ty : TimeAndSpace d) : dist (time tx) (time ty) ≤ dist tx ty := by
   rw [Prod.dist_eq]
   exact le_max_left _ _
 
 /-- The spatial projection is nonexpanding for the product metric. -/
-lemma dist_space_le (tx ty : TimeAndSpace d) :
-    dist (space tx) (space ty) ≤ dist tx ty := by
+lemma dist_space_le (tx ty : TimeAndSpace d) : dist (space tx) (space ty) ≤ dist tx ty := by
   rw [Prod.dist_eq]
   exact le_max_right _ _
 
@@ -117,21 +111,23 @@ namespace Space
 
 -/
 
-lemma fderiv_space_eq_fderiv_curry {M} [NormedAddCommGroup M] [NormedSpace ℝ M]
-    (f : Time → Space d → M) (t : Time) (x dx : Space d)
-    (hf : Differentiable ℝ ↿f) :
-    fderiv ℝ (fun x' => f t x') x dx = fderiv ℝ ↿f (t, x) (0, dx) := by
+lemma fderiv_space_eq_fderiv_curry
+    {M} [NormedAddCommGroup M] [NormedSpace ℝ M]
+    (f : Time → Space d → M)
+    (t : Time) (x dx : Space d) (hf : Differentiable ℝ ↿f)
+    : fderiv ℝ (fun x' => f t x') x dx = fderiv ℝ ↿f (t, x) (0, dx) := by
   change fderiv ℝ (↿f ∘ fun x' => (t, x')) x dx = _
   rw [fderiv_comp, DifferentiableAt.fderiv_prodMk]
   simp only [ContinuousLinearMap.coe_comp, Function.comp_apply, fderiv_fun_const, Pi.zero_apply,
-    fderiv_fun_id, ContinuousLinearMap.prod_apply, _root_.zero_apply,
-    ContinuousLinearMap.coe_id', id_eq]
+    fderiv_fun_id, ContinuousLinearMap.prod_apply, _root_.zero_apply, ContinuousLinearMap.coe_id',
+    id_eq]
   repeat' fun_prop
 
-lemma fderiv_time_eq_fderiv_curry {M} [NormedAddCommGroup M] [NormedSpace ℝ M]
-    (f : Time → Space d → M) (t dt : Time) (x : Space d)
-    (hf : Differentiable ℝ ↿f) :
-    fderiv ℝ (fun t' => f t' x) t dt = fderiv ℝ ↿f (t, x) (dt, 0) := by
+lemma fderiv_time_eq_fderiv_curry
+    {M} [NormedAddCommGroup M] [NormedSpace ℝ M]
+    (f : Time → Space d → M)
+    (t dt : Time) (x : Space d) (hf : Differentiable ℝ ↿f)
+    : fderiv ℝ (fun t' => f t' x) t dt = fderiv ℝ ↿f (t, x) (dt, 0) := by
   change fderiv ℝ (↿f ∘ fun t' => (t', x)) t dt = _
   rw [fderiv_comp, DifferentiableAt.fderiv_prodMk]
   simp only [ContinuousLinearMap.coe_comp, Function.comp_apply, fderiv_fun_id, fderiv_fun_const,
@@ -146,11 +142,12 @@ lemma fderiv_time_eq_fderiv_curry {M} [NormedAddCommGroup M] [NormedSpace ℝ M]
 -/
 
 /-- Derivatives along space coordinates and time commute. -/
-lemma fderiv_time_commute_fderiv_space {M} [NormedAddCommGroup M] [NormedSpace ℝ M]
-    (f : Time → Space d → M) (t dt : Time) (x dx : Space d)
-    (hf : ContDiff ℝ 2 ↿f) :
-    fderiv ℝ (fun t' => fderiv ℝ (fun x' => f t' x') x dx) t dt
-    = fderiv ℝ (fun x' => fderiv ℝ (fun t' => f t' x') t dt) x dx := by
+lemma fderiv_time_commute_fderiv_space
+    {M} [NormedAddCommGroup M] [NormedSpace ℝ M]
+    (f : Time → Space d → M)
+    (t dt : Time) (x dx : Space d) (hf : ContDiff ℝ 2 ↿f)
+    : fderiv ℝ (fun t' => fderiv ℝ (fun x' => f t' x') x dx) t dt
+      = fderiv ℝ (fun x' => fderiv ℝ (fun t' => f t' x') t dt) x dx := by
   trans fderiv ℝ (fun t' => (fderiv ℝ (↿f) (t', x) (0, dx))) t dt
   · congr
     funext t'
@@ -170,10 +167,12 @@ lemma fderiv_time_commute_fderiv_space {M} [NormedAddCommGroup M] [NormedSpace �
     exact (hf.contDiffAt.isSymmSndFDerivAt (by simp)).eq (0, dx) (dt, 0)
   all_goals fun_prop
 
-lemma time_deriv_comm_space_deriv {d i} {M} [NormedAddCommGroup M] [NormedSpace ℝ M]
-    {f : Time → Space d → M} (hf : ContDiff ℝ 2 ↿f) (t : Time) (x : Space d) :
-    Time.deriv (fun t' => Space.deriv i (f t') x) t
-    = Space.deriv i (fun x' => Time.deriv (fun t' => f t' x') t) x := by
+lemma time_deriv_comm_space_deriv
+    {d i} {M} [NormedAddCommGroup M] [NormedSpace ℝ M]
+    {f : Time → Space d → M} (hf : ContDiff ℝ 2 ↿f)
+    (t : Time) (x : Space d)
+    : Time.deriv (fun t' => Space.deriv i (f t') x) t
+      = Space.deriv i (fun x' => Time.deriv (fun t' => f t' x') t) x := by
   simp only [Time.deriv_eq, Space.deriv_eq_fderiv_basis]
   exact fderiv_time_commute_fderiv_space f t 1 x (Space.basis i) hf
 
@@ -184,16 +183,19 @@ lemma time_deriv_comm_space_deriv {d i} {M} [NormedAddCommGroup M] [NormedSpace 
 -/
 
 @[fun_prop]
-lemma space_deriv_differentiable_time {d i} {M} [NormedAddCommGroup M] [NormedSpace ℝ M]
-    {f : Time → Space d → M} (hf : ContDiff ℝ 2 ↿f) (x : Space d) :
-    Differentiable ℝ (fun t => Space.deriv i (f t) x) := by
+lemma space_deriv_differentiable_time
+    {d i} {M} [NormedAddCommGroup M] [NormedSpace ℝ M]
+    {f : Time → Space d → M} (hf : ContDiff ℝ 2 ↿f)
+    (x : Space d)
+    : Differentiable ℝ (fun t => Space.deriv i (f t) x) := by
   conv =>
-    enter [2, t];
+    enter [2, t]
     rw [Space.deriv_eq_fderiv_basis]
   apply Differentiable.clm_apply
   · have hdd : Differentiable ℝ ↿f := hf.differentiable (by simp)
-    have h1 (t : Time) : fderiv ℝ (fun x => f t x) x
-      = fderiv ℝ (↿f) (t, x) ∘L (ContinuousLinearMap.inr ℝ Time (Space d)) := by
+    have h1 (t : Time)
+        : fderiv ℝ (fun x => f t x) x
+          = fderiv ℝ (↿f) (t, x) ∘L (ContinuousLinearMap.inr ℝ Time (Space d)) := by
       ext w
       simp only [ContinuousLinearMap.coe_comp, Function.comp_apply, ContinuousLinearMap.inr_apply]
       rw [← fderiv_space_eq_fderiv_curry f t x w hdd]
@@ -205,16 +207,19 @@ lemma space_deriv_differentiable_time {d i} {M} [NormedAddCommGroup M] [NormedSp
   · fun_prop
 
 @[fun_prop]
-lemma time_deriv_differentiable_space {d } {M} [NormedAddCommGroup M] [NormedSpace ℝ M]
-    {f : Time → Space d → M} (hf : ContDiff ℝ 2 ↿f) (t : Time) :
-    Differentiable ℝ (fun x => Time.deriv (f · x) t) := by
+lemma time_deriv_differentiable_space
+    {d} {M} [NormedAddCommGroup M] [NormedSpace ℝ M]
+    {f : Time → Space d → M} (hf : ContDiff ℝ 2 ↿f)
+    (t : Time)
+    : Differentiable ℝ (fun x => Time.deriv (f · x) t) := by
   conv =>
-    enter [2, x];
+    enter [2, x]
     rw [Time.deriv_eq]
   apply Differentiable.clm_apply
   · have hdd : Differentiable ℝ ↿f := hf.differentiable (by simp)
-    have h1 (x : Space d) : fderiv ℝ (fun t => f t x) t
-      = fderiv ℝ (↿f) (t, x) ∘L (ContinuousLinearMap.inl ℝ Time (Space d)) := by
+    have h1 (x : Space d)
+        : fderiv ℝ (fun t => f t x) t
+          = fderiv ℝ (↿f) (t, x) ∘L (ContinuousLinearMap.inl ℝ Time (Space d)) := by
       ext w
       simp only [ContinuousLinearMap.coe_comp, Function.comp_apply, ContinuousLinearMap.inl_apply]
       rw [← fderiv_time_eq_fderiv_curry f t w x hdd]
@@ -227,9 +232,8 @@ lemma time_deriv_differentiable_space {d } {M} [NormedAddCommGroup M] [NormedSpa
 
 @[fun_prop]
 lemma curl_differentiable_time
-    (fₜ : Time → Space → EuclideanSpace ℝ (Fin 3))
-    (hf : ContDiff ℝ 2 ↿fₜ) (x : Space) :
-    Differentiable ℝ (fun t => (∇ ⨯ fₜ t) x) := by
+    (fₜ : Time → Space → EuclideanSpace ℝ (Fin 3)) (hf : ContDiff ℝ 2 ↿fₜ) (x : Space)
+    : Differentiable ℝ (fun t => (∇ ⨯ fₜ t) x) := by
   rw [differentiable_euclidean]
   intro i
   fin_cases i <;> simp only [Fin.zero_eta, Fin.isValue, curl] <;> fun_prop
@@ -242,26 +246,27 @@ lemma curl_differentiable_time
 open Time
 
 /-- Curl and time derivative commute. -/
-lemma time_deriv_curl_commute (fₜ : Time → Space → EuclideanSpace ℝ (Fin 3))
-    (t : Time) (x : Space) (hf : ContDiff ℝ 2 ↿fₜ) :
-    ∂ₜ (fun t => (∇ ⨯ fₜ t) x) t = (∇ ⨯ fun x => (∂ₜ (fun t => fₜ t x) t)) x:= by
+lemma time_deriv_curl_commute
+    (fₜ : Time → Space → EuclideanSpace ℝ (Fin 3)) (t : Time) (x : Space) (hf : ContDiff ℝ 2 ↿fₜ)
+    : ∂ₜ (fun t => (∇ ⨯ fₜ t) x) t = (∇ ⨯ fun x => (∂ₜ (fun t => fₜ t x) t)) x := by
   ext i
   rw [← Time.deriv_euclid]
   · fin_cases i
     all_goals
-    simp [curl]
-    rw [Time.deriv_eq, fderiv_fun_sub]
-    simp [← Time.deriv_eq]
-    rw [time_deriv_comm_space_deriv, time_deriv_comm_space_deriv]
-    congr <;>
-      (funext x'
-       rw [Time.deriv_euclid]
-       have h1 := hf.differentiable (by simp)
-       fun_prop)
-    repeat' fun_prop
-    all_goals
-      apply Differentiable.differentiableAt
-      fun_prop
+      simp [curl]
+      rw [Time.deriv_eq, fderiv_fun_sub]
+      simp [← Time.deriv_eq]
+      rw [time_deriv_comm_space_deriv, time_deriv_comm_space_deriv]
+      congr <;> (
+        funext x'
+        rw [Time.deriv_euclid]
+        have h1 := hf.differentiable (by simp)
+        fun_prop
+      )
+      repeat' fun_prop
+      all_goals
+        apply Differentiable.differentiableAt
+        fun_prop
   · fun_prop
 
 /-!
@@ -270,10 +275,10 @@ lemma time_deriv_curl_commute (fₜ : Time → Space → EuclideanSpace ℝ (Fin
 
 -/
 
-lemma space_fun_of_time_deriv_eq_zero {d} {M} [NormedAddCommGroup M] [NormedSpace ℝ M]
-    {f : Time → Space d → M} (hf : Differentiable ℝ ↿f)
-    (h : ∀ t x, ∂ₜ (f · x) t = 0) :
-    ∃ (g : Space d → M), ∀ t x, f t x = g x := by
+lemma space_fun_of_time_deriv_eq_zero
+    {d} {M} [NormedAddCommGroup M] [NormedSpace ℝ M]
+    {f : Time → Space d → M} (hf : Differentiable ℝ ↿f) (h : ∀ t x, ∂ₜ (f · x) t = 0)
+    : ∃ (g : Space d → M), ∀ t x, f t x = g x := by
   use fun x => f 0 x
   intro t x
   apply is_const_of_fderiv_eq_zero (f := fun t' => f t' x) (𝕜 := ℝ)
@@ -288,10 +293,10 @@ lemma space_fun_of_time_deriv_eq_zero {d} {M} [NormedAddCommGroup M] [NormedSpac
     simp
   rw [← Time.deriv_eq, h t x, smul_zero]
 
-lemma time_fun_of_space_deriv_eq_zero {d} {M} [NormedAddCommGroup M] [NormedSpace ℝ M]
-    {f : Time → Space d → M} (hf : Differentiable ℝ ↿f)
-    (h : ∀ t x i, Space.deriv i (f t) x = 0) :
-    ∃ (g : Time → M), ∀ t x, f t x = g t := by
+lemma time_fun_of_space_deriv_eq_zero
+    {d} {M} [NormedAddCommGroup M] [NormedSpace ℝ M]
+    {f : Time → Space d → M} (hf : Differentiable ℝ ↿f) (h : ∀ t x i, Space.deriv i (f t) x = 0)
+    : ∃ (g : Time → M), ∀ t x, f t x = g t := by
   use fun t => f t 0
   intro t x
   apply is_const_of_fderiv_eq_zero (f := fun x' => f t x') (𝕜 := ℝ)
@@ -304,11 +309,11 @@ lemma time_fun_of_space_deriv_eq_zero {d} {M} [NormedAddCommGroup M] [NormedSpac
     ContinuousLinearMap.coe_coe, LinearMap.zero_apply]
   rw [← h t x i, Space.deriv_eq_fderiv_basis]
 
-lemma const_of_time_deriv_space_deriv_eq_zero {d} {M} [NormedAddCommGroup M] [NormedSpace ℝ M]
-    {f : Time → Space d → M} (hf : Differentiable ℝ ↿f)
-    (h₁ : ∀ t x, ∂ₜ (f · x) t = 0)
-    (h₂ : ∀ t x i, Space.deriv i (f t) x = 0) :
-    ∃ (c : M), ∀ t x, f t x = c := by
+lemma const_of_time_deriv_space_deriv_eq_zero
+    {d} {M} [NormedAddCommGroup M] [NormedSpace ℝ M]
+    {f : Time → Space d → M} (hf : Differentiable ℝ ↿f) (h₁ : ∀ t x, ∂ₜ (f · x) t = 0)
+    (h₂ : ∀ t x i, Space.deriv i (f t) x = 0)
+    : ∃ (c : M), ∀ t x, f t x = c := by
   obtain ⟨g, hg⟩ := space_fun_of_time_deriv_eq_zero hf h₁
   obtain ⟨k, hk⟩ := time_fun_of_space_deriv_eq_zero hf h₂
   use g 0
@@ -321,11 +326,12 @@ lemma const_of_time_deriv_space_deriv_eq_zero {d} {M} [NormedAddCommGroup M] [No
 
 -/
 
-lemma equal_up_to_const_of_deriv_eq {d} {M} [NormedAddCommGroup M] [NormedSpace ℝ M]
-    {f g : Time → Space d → M} (hf : Differentiable ℝ ↿f) (hg : Differentiable ℝ ↿g)
-    (h₁ : ∀ t x, ∂ₜ (f · x) t = ∂ₜ (g · x) t)
-    (h₂ : ∀ t x i, Space.deriv i (f t) x = Space.deriv i (g t) x) :
-    ∃ (c : M), ∀ t x, f t x = g t x + c := by
+lemma equal_up_to_const_of_deriv_eq
+    {d} {M} [NormedAddCommGroup M] [NormedSpace ℝ M]
+    {f g : Time → Space d → M}
+    (hf : Differentiable ℝ ↿f) (hg : Differentiable ℝ ↿g) (h₁ : ∀ t x, ∂ₜ (f · x) t = ∂ₜ (g · x) t)
+    (h₂ : ∀ t x i, Space.deriv i (f t) x = Space.deriv i (g t) x)
+    : ∃ (c : M), ∀ t x, f t x = g t x + c := by
   suffices h : ∃ c', ∀ t x, f t x - g t x = c' by
     obtain ⟨c', hc'⟩ := h
     use c'
@@ -357,37 +363,37 @@ open Distribution SchwartzMap
 -/
 
 /-- The time derivative of a distribution dependent on time and space. -/
-noncomputable def distTimeDeriv {M d} [NormedAddCommGroup M] [NormedSpace ℝ M] :
-    ((Time × Space d) →d[ℝ] M) →ₗ[ℝ] (Time × Space d) →d[ℝ] M where
+noncomputable def distTimeDeriv {M d} [NormedAddCommGroup M] [NormedSpace ℝ M]
+    : ((Time × Space d) →d[ℝ] M) →ₗ[ℝ] (Time × Space d) →d[ℝ] M where
   toFun f :=
     let ev : ((Time × Space d) →L[ℝ] M) →L[ℝ] M := {
       toFun v := v (1, 0)
-      map_add' v1 v2 := by
-        simp only [_root_.add_apply]
-      map_smul' a v := by
-        simp
+      map_add' v1 v2 := by simp only [_root_.add_apply]
+      map_smul' a v := by simp
     }
     ev.comp (Distribution.fderivD ℝ f)
-  map_add' f1 f2 := by
-    simp
+  map_add' f1 f2 := by simp
   map_smul' a f := by simp
 
-lemma distTimeDeriv_apply {M d} [NormedAddCommGroup M] [NormedSpace ℝ M]
-    (f : (Time × Space d) →d[ℝ] M) (ε : 𝓢(Time × Space d, ℝ)) :
-    (distTimeDeriv f) ε = fderivD ℝ f ε (1, 0) := by
+lemma distTimeDeriv_apply
+    {M d} [NormedAddCommGroup M] [NormedSpace ℝ M]
+    (f : (Time × Space d) →d[ℝ] M) (ε : 𝓢(Time × Space d, ℝ))
+    : (distTimeDeriv f) ε = fderivD ℝ f ε (1, 0) := by
   simp [distTimeDeriv]
 
-lemma distTimeDeriv_apply' {M d} [NormedAddCommGroup M] [NormedSpace ℝ M]
-    (f : (Time × Space d) →d[ℝ] M) (ε : 𝓢(Time × Space d, ℝ)) :
-    (distTimeDeriv f) ε =
-    -f (SchwartzMap.evalCLM ℝ (Time × Space d) ℝ (1, 0)
-    ((fderivCLM ℝ (Time × Space d) ℝ) ε)) := by
+lemma distTimeDeriv_apply'
+    {M d} [NormedAddCommGroup M] [NormedSpace ℝ M]
+    (f : (Time × Space d) →d[ℝ] M) (ε : 𝓢(Time × Space d, ℝ))
+    : (distTimeDeriv f) ε
+      = - f (SchwartzMap.evalCLM ℝ (Time × Space d) ℝ (1, 0)
+        ((fderivCLM ℝ (Time × Space d) ℝ) ε)) := by
   rw [distTimeDeriv_apply, fderivD_apply]
 
-lemma apply_fderiv_eq_distTimeDeriv {M d} [NormedAddCommGroup M] [NormedSpace ℝ M]
-    (f : (Time × Space d) →d[ℝ] M) (ε : 𝓢(Time × Space d, ℝ)) :
-    f (SchwartzMap.evalCLM ℝ (Time × Space d) ℝ (1, 0) ((fderivCLM ℝ (Time × Space d) ℝ) ε)) =
-    - (distTimeDeriv f) ε := by
+lemma apply_fderiv_eq_distTimeDeriv
+    {M d} [NormedAddCommGroup M] [NormedSpace ℝ M]
+    (f : (Time × Space d) →d[ℝ] M) (ε : 𝓢(Time × Space d, ℝ))
+    : f (SchwartzMap.evalCLM ℝ (Time × Space d) ℝ (1, 0) ((fderivCLM ℝ (Time × Space d) ℝ) ε))
+      = - (distTimeDeriv f) ε := by
   simp [distTimeDeriv_apply']
 
 /-!
@@ -396,9 +402,10 @@ lemma apply_fderiv_eq_distTimeDeriv {M d} [NormedAddCommGroup M] [NormedSpace �
 
 -/
 
-lemma distTimeDeriv_apply_CLM {M M2 d} [NormedAddCommGroup M] [NormedSpace ℝ M]
-    [NormedAddCommGroup M2] [NormedSpace ℝ M2] (f : (Time × Space d) →d[ℝ] M)
-    (c : M →L[ℝ] M2) : distTimeDeriv (c ∘L f) = c ∘L (distTimeDeriv f) := by
+lemma distTimeDeriv_apply_CLM
+    {M M2 d} [NormedAddCommGroup M] [NormedSpace ℝ M] [NormedAddCommGroup M2] [NormedSpace ℝ M2]
+    (f : (Time × Space d) →d[ℝ] M) (c : M →L[ℝ] M2)
+    : distTimeDeriv (c ∘L f) = c ∘L (distTimeDeriv f) := by
   ext ε
   simp [distTimeDeriv_apply, fderivD_apply]
 
@@ -409,38 +416,38 @@ lemma distTimeDeriv_apply_CLM {M M2 d} [NormedAddCommGroup M] [NormedSpace ℝ M
 -/
 
 /-- The space derivative of a distribution dependent on time and space. -/
-noncomputable def distSpaceDeriv {M d} [NormedAddCommGroup M] [NormedSpace ℝ M]
-    (i : Fin d) : ((Time × Space d) →d[ℝ] M) →ₗ[ℝ] (Time × Space d) →d[ℝ] M where
+noncomputable def distSpaceDeriv {M d} [NormedAddCommGroup M] [NormedSpace ℝ M] (i : Fin d)
+    : ((Time × Space d) →d[ℝ] M) →ₗ[ℝ] (Time × Space d) →d[ℝ] M where
   toFun f :=
     let ev : (Time × Space d →L[ℝ] M) →L[ℝ] M := {
       toFun v := v (0, basis i)
-      map_add' v1 v2 := by
-        simp only [_root_.add_apply]
-      map_smul' a v := by
-        simp
+      map_add' v1 v2 := by simp only [_root_.add_apply]
+      map_smul' a v := by simp
     }
     ev.comp (Distribution.fderivD ℝ f)
-  map_add' f1 f2 := by
-    simp
+  map_add' f1 f2 := by simp
   map_smul' a f := by simp
 
-lemma distSpaceDeriv_apply {M d} [NormedAddCommGroup M] [NormedSpace ℝ M]
-    (i : Fin d) (f : (Time × Space d) →d[ℝ] M) (ε : 𝓢(Time × Space d, ℝ)) :
-    (distSpaceDeriv i f) ε = fderivD ℝ f ε (0, basis i) := by
+lemma distSpaceDeriv_apply
+    {M d} [NormedAddCommGroup M] [NormedSpace ℝ M]
+    (i : Fin d) (f : (Time × Space d) →d[ℝ] M) (ε : 𝓢(Time × Space d, ℝ))
+    : (distSpaceDeriv i f) ε = fderivD ℝ f ε (0, basis i) := by
   simp [distSpaceDeriv]
 
-lemma distSpaceDeriv_apply' {M d} [NormedAddCommGroup M] [NormedSpace ℝ M]
-    (i : Fin d) (f : (Time × Space d) →d[ℝ] M) (ε : 𝓢(Time × Space d, ℝ)) :
-    (distSpaceDeriv i f) ε =
-    - f ((SchwartzMap.evalCLM ℝ (Time × Space d) ℝ (0, basis i))
-    ((fderivCLM ℝ (Time × Space d) ℝ) ε)) := by
+lemma distSpaceDeriv_apply'
+    {M d} [NormedAddCommGroup M] [NormedSpace ℝ M]
+    (i : Fin d) (f : (Time × Space d) →d[ℝ] M) (ε : 𝓢(Time × Space d, ℝ))
+    : (distSpaceDeriv i f) ε
+      = - f ((SchwartzMap.evalCLM ℝ (Time × Space d) ℝ (0, basis i))
+        ((fderivCLM ℝ (Time × Space d) ℝ) ε)) := by
   rw [distSpaceDeriv_apply, fderivD_apply]
 
-lemma apply_fderiv_eq_distSpaceDeriv {M d} [NormedAddCommGroup M] [NormedSpace ℝ M]
-    (i : Fin d) (f : (Time × Space d) →d[ℝ] M) (ε : 𝓢(Time × Space d, ℝ)) :
-    f ((SchwartzMap.evalCLM ℝ (Time × Space d) ℝ (0, basis i))
-    ((fderivCLM ℝ (Time × Space d) ℝ) ε)) =
-    - (distSpaceDeriv i f) ε := by
+lemma apply_fderiv_eq_distSpaceDeriv
+    {M d} [NormedAddCommGroup M] [NormedSpace ℝ M]
+    (i : Fin d) (f : (Time × Space d) →d[ℝ] M) (ε : 𝓢(Time × Space d, ℝ))
+    : f ((SchwartzMap.evalCLM ℝ (Time × Space d) ℝ (0, basis i)) ((fderivCLM ℝ (Time × Space d) ℝ)
+        ε))
+      = - (distSpaceDeriv i f) ε := by
   simp [distSpaceDeriv_apply']
 
 /-!
@@ -449,15 +456,15 @@ lemma apply_fderiv_eq_distSpaceDeriv {M d} [NormedAddCommGroup M] [NormedSpace �
 
 -/
 
-lemma distSpaceDeriv_commute {M d} [NormedAddCommGroup M] [NormedSpace ℝ M]
-    (i j : Fin d) (f : (Time × Space d) →d[ℝ] M) :
-    distSpaceDeriv i (distSpaceDeriv j f) = distSpaceDeriv j (distSpaceDeriv i f) := by
+lemma distSpaceDeriv_commute
+    {M d} [NormedAddCommGroup M] [NormedSpace ℝ M] (i j : Fin d) (f : (Time × Space d) →d[ℝ] M)
+    : distSpaceDeriv i (distSpaceDeriv j f) = distSpaceDeriv j (distSpaceDeriv i f) := by
   ext κ
   simp only [distSpaceDeriv_apply, fderivD_apply, neg_neg]
   congr 1
   ext x
-  change fderiv ℝ (fun x => fderiv ℝ κ x (0, basis i)) x (0, basis j) =
-    fderiv ℝ (fun x => fderiv ℝ κ x (0, basis j)) x (0, basis i)
+  change fderiv ℝ (fun x => fderiv ℝ κ x (0, basis i)) x (0, basis j)
+    = fderiv ℝ (fun x => fderiv ℝ κ x (0, basis j)) x (0, basis i)
   have h1 := smooth κ 2
   rw [fderiv_clm_apply, fderiv_clm_apply]
   · simp only [fderiv_fun_const, Pi.zero_apply, ContinuousLinearMap.comp_zero, zero_add,
@@ -471,10 +478,10 @@ lemma distSpaceDeriv_commute {M d} [NormedAddCommGroup M] [NormedSpace ℝ M]
 
 -/
 
-lemma distSpaceDeriv_apply_CLM {M M2 d} [NormedAddCommGroup M] [NormedSpace ℝ M]
-    [NormedAddCommGroup M2] [NormedSpace ℝ M2]
-    (i : Fin d) (f : (Time × Space d) →d[ℝ] M)
-    (c : M →L[ℝ] M2) : distSpaceDeriv i (c ∘L f) = c ∘L (distSpaceDeriv i f) := by
+lemma distSpaceDeriv_apply_CLM
+    {M M2 d} [NormedAddCommGroup M] [NormedSpace ℝ M] [NormedAddCommGroup M2] [NormedSpace ℝ M2]
+    (i : Fin d) (f : (Time × Space d) →d[ℝ] M) (c : M →L[ℝ] M2)
+    : distSpaceDeriv i (c ∘L f) = c ∘L (distSpaceDeriv i f) := by
   ext ε
   simp [distSpaceDeriv_apply, fderivD_apply]
 
@@ -484,15 +491,15 @@ lemma distSpaceDeriv_apply_CLM {M M2 d} [NormedAddCommGroup M] [NormedSpace ℝ 
 
 -/
 
-lemma distTimeDeriv_commute_distSpaceDeriv {M d} [NormedAddCommGroup M] [NormedSpace ℝ M]
-    (i : Fin d) (f : (Time × Space d) →d[ℝ] M) :
-    distTimeDeriv (distSpaceDeriv i f) = distSpaceDeriv i (distTimeDeriv f) := by
+lemma distTimeDeriv_commute_distSpaceDeriv
+    {M d} [NormedAddCommGroup M] [NormedSpace ℝ M] (i : Fin d) (f : (Time × Space d) →d[ℝ] M)
+    : distTimeDeriv (distSpaceDeriv i f) = distSpaceDeriv i (distTimeDeriv f) := by
   ext κ
   simp only [distTimeDeriv_apply, distSpaceDeriv_apply, fderivD_apply, neg_neg]
   congr 1
   ext x
-  change fderiv ℝ (fun x => fderiv ℝ κ x (1, 0)) x (0, basis i) =
-    fderiv ℝ (fun x => fderiv ℝ κ x (0, basis i)) x (1, 0)
+  change fderiv ℝ (fun x => fderiv ℝ κ x (1, 0)) x (0, basis i)
+    = fderiv ℝ (fun x => fderiv ℝ κ x (0, basis i)) x (1, 0)
   have h1 := smooth κ 2
   rw [fderiv_clm_apply, fderiv_clm_apply]
   · simp only [fderiv_fun_const, Pi.zero_apply, ContinuousLinearMap.comp_zero, zero_add,
@@ -507,13 +514,14 @@ lemma distTimeDeriv_commute_distSpaceDeriv {M d} [NormedAddCommGroup M] [NormedS
 -/
 
 /-- The spatial gradient of a distribution dependent on time and space. -/
-noncomputable def distSpaceGrad {d} :
-    ((Time × Space d) →d[ℝ] ℝ) →ₗ[ℝ] (Time × Space d) →d[ℝ] (EuclideanSpace ℝ (Fin d)) where
+noncomputable def distSpaceGrad {d}
+    : ((Time × Space d) →d[ℝ] ℝ) →ₗ[ℝ] (Time × Space d) →d[ℝ] (EuclideanSpace ℝ (Fin d)) where
   toFun f := {
-      toFun := fun ε => WithLp.toLp 2 fun i => distSpaceDeriv i f ε
-      map_add' ε1 ε2 := by ext i; simp
-      map_smul' a ε := by ext i; simp
-      cont := by fun_prop}
+    toFun := fun ε => WithLp.toLp 2 fun i => distSpaceDeriv i f ε
+    map_add' ε1 ε2 := by ext i; simp
+    map_smul' a ε := by ext i; simp
+    cont := by fun_prop
+  }
   map_add' f1 f2 := by
     ext x
     simp
@@ -521,8 +529,8 @@ noncomputable def distSpaceGrad {d} :
     ext x
     simp
 
-lemma distSpaceGrad_apply {d} (f : (Time × Space d) →d[ℝ] ℝ) (ε : 𝓢(Time × Space d, ℝ)) :
-    distSpaceGrad f ε = fun i => distSpaceDeriv i f ε := by
+lemma distSpaceGrad_apply {d} (f : (Time × Space d) →d[ℝ] ℝ) (ε : 𝓢(Time × Space d, ℝ))
+    : distSpaceGrad f ε = fun i => distSpaceDeriv i f ε := by
   rfl
 
 /-!
@@ -532,13 +540,14 @@ lemma distSpaceGrad_apply {d} (f : (Time × Space d) →d[ℝ] ℝ) (ε : 𝓢(T
 -/
 
 /-- The spatial divergence of a distribution dependent on time and space. -/
-noncomputable def distSpaceDiv {d} :
-    ((Time × Space d) →d[ℝ] (EuclideanSpace ℝ (Fin d))) →ₗ[ℝ] (Time × Space d) →d[ℝ] ℝ where
+noncomputable def distSpaceDiv {d}
+    : ((Time × Space d) →d[ℝ] (EuclideanSpace ℝ (Fin d))) →ₗ[ℝ] (Time × Space d) →d[ℝ] ℝ where
   toFun f := {
     toFun ε := ∑ i, distSpaceDeriv i f ε i
     map_add' ε1 ε2 := by simp [Finset.sum_add_distrib]
     map_smul' a ε := by simp [Finset.mul_sum]
-    cont := by fun_prop}
+    cont := by fun_prop
+  }
   map_add' f1 f2 := by
     ext x
     simp [Finset.sum_add_distrib]
@@ -546,9 +555,10 @@ noncomputable def distSpaceDiv {d} :
     ext x
     simp [Finset.mul_sum]
 
-lemma distSpaceDiv_apply_eq_sum_distSpaceDeriv {d}
-    (f : (Time × Space d) →d[ℝ] EuclideanSpace ℝ (Fin d)) (η : 𝓢(Time ×Space d, ℝ)) :
-    distSpaceDiv f η = ∑ i, distSpaceDeriv i f η i := by rfl
+lemma distSpaceDiv_apply_eq_sum_distSpaceDeriv
+    {d} (f : (Time × Space d) →d[ℝ] EuclideanSpace ℝ (Fin d)) (η : 𝓢(Time ×Space d, ℝ))
+    : distSpaceDiv f η = ∑ i, distSpaceDeriv i f η i := by
+  rfl
 
 /-!
 
@@ -557,14 +567,16 @@ lemma distSpaceDiv_apply_eq_sum_distSpaceDeriv {d}
 -/
 
 /-- The curl of a distribution dependent on time and space. -/
-noncomputable def distSpaceCurl : ((Time × Space 3) →d[ℝ] (EuclideanSpace ℝ (Fin 3))) →ₗ[ℝ]
-    (Time × Space 3) →d[ℝ] (EuclideanSpace ℝ (Fin 3)) where
-  toFun f :={
-    toFun ε := WithLp.toLp 2 fun i =>
-      match i with
-      | 0 => distSpaceDeriv 2 f ε 1 - distSpaceDeriv 1 f ε 2
-      | 1 => distSpaceDeriv 0 f ε 2 - distSpaceDeriv 2 f ε 0
-      | 2 => distSpaceDeriv 1 f ε 0 - distSpaceDeriv 0 f ε 1
+noncomputable def distSpaceCurl
+    : ((Time × Space 3) →d[ℝ] (EuclideanSpace ℝ (Fin 3))) →ₗ[ℝ]
+      (Time × Space 3) →d[ℝ] (EuclideanSpace ℝ (Fin 3)) where
+  toFun f := {
+    toFun ε :=
+      WithLp.toLp 2 fun i =>
+        match i with
+        | 0 => distSpaceDeriv 2 f ε 1 - distSpaceDeriv 1 f ε 2
+        | 1 => distSpaceDeriv 0 f ε 2 - distSpaceDeriv 2 f ε 0
+        | 2 => distSpaceDeriv 1 f ε 0 - distSpaceDeriv 0 f ε 1
     map_add' ε1 ε2 := by
       ext i
       fin_cases i
@@ -584,7 +596,7 @@ noncomputable def distSpaceCurl : ((Time × Space 3) →d[ℝ] (EuclideanSpace �
       rw [continuous_pi_iff]
       intro i
       fin_cases i <;> fun_prop
-      }
+  }
   map_add' f1 f2 := by
     ext x i
     fin_cases i
@@ -596,9 +608,9 @@ noncomputable def distSpaceCurl : ((Time × Space 3) →d[ℝ] (EuclideanSpace �
     ext x i
     fin_cases i
     all_goals
-      simp only [Fin.isValue, map_smul, FunLike.coe_smul, Pi.smul_apply,
-        PiLp.smul_apply, smul_eq_mul, Fin.reduceFinMk, ContinuousLinearMap.coe_mk',
-        LinearMap.coe_mk, AddHom.coe_mk, RingHom.id_apply]
+      simp only [Fin.isValue, map_smul, FunLike.coe_smul, Pi.smul_apply, PiLp.smul_apply,
+        smul_eq_mul, Fin.reduceFinMk, ContinuousLinearMap.coe_mk', LinearMap.coe_mk, AddHom.coe_mk,
+        RingHom.id_apply]
       ring
 
 end Space

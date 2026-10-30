@@ -87,39 +87,46 @@ positive, so the integrand is continuous and interval integrable.
 
 -/
 
-/-- The complete elliptic integral of the first kind in the parameter convention,
+/--
+The complete elliptic integral of the first kind in the parameter convention,
 `K(m) = ∫ φ in 0..π/2, (1 - m sin² φ) ^ (-1/2)`. The physics literature often writes `K(k)`
 with `m = k²`. The integrand is written as a real power rather than `1 / √(…)` so that
 continuity, positivity and monotonicity in `m` come from the `rpow` API (`Continuous.rpow_const`,
 `Real.rpow_pos_of_pos`, `Real.rpow_le_rpow_of_nonpos`); the two forms agree by
-`Real.sqrt_eq_rpow` and `Real.rpow_neg`. For `m ≥ 1` see the module docstring. -/
+`Real.sqrt_eq_rpow` and `Real.rpow_neg`. For `m ≥ 1` see the module docstring.
+-/
 @[pp_nodot]
 noncomputable def completeEllipticK (m : ℝ) : ℝ :=
   ∫ φ in (0 : ℝ)..π / 2, (1 - m * sin φ ^ 2) ^ (-(1 / 2 : ℝ))
 
-/-- Unfolding lemma: `completeEllipticK m` is the interval integral of its integrand over
-`[0, π/2]`. -/
-lemma completeEllipticK_def (m : ℝ) :
-    completeEllipticK m = ∫ φ in (0 : ℝ)..π / 2, (1 - m * sin φ ^ 2) ^ (-(1 / 2 : ℝ)) :=
+/--
+Unfolding lemma: `completeEllipticK m` is the interval integral of its integrand over
+`[0, π/2]`.
+-/
+lemma completeEllipticK_def (m : ℝ)
+    : completeEllipticK m = ∫ φ in (0 : ℝ)..π / 2, (1 - m * sin φ ^ 2) ^ (-(1 / 2 : ℝ)) :=
   rfl
 
-/-- For `m < 1` the radicand `1 - m sin² φ` of the integrand of `completeEllipticK m` is
-positive at every angle `φ`. -/
-lemma completeEllipticK_radicand_pos {m : ℝ} (hm : m < 1) (φ : ℝ) :
-    0 < 1 - m * sin φ ^ 2 := by
+/--
+For `m < 1` the radicand `1 - m sin² φ` of the integrand of `completeEllipticK m` is
+positive at every angle `φ`.
+-/
+lemma completeEllipticK_radicand_pos {m : ℝ} (hm : m < 1) (φ : ℝ) : 0 < 1 - m * sin φ ^ 2 := by
   nlinarith [sq_nonneg (sin φ), sin_sq_le_one φ,
     mul_nonneg (sub_nonneg.2 hm.le) (sq_nonneg (sin φ))]
 
-/-- For `m < 1` the integrand of `completeEllipticK m` is continuous, the real power being
-taken at a positive base. -/
-lemma continuous_completeEllipticK_integrand {m : ℝ} (hm : m < 1) :
-    Continuous fun φ : ℝ => (1 - m * sin φ ^ 2) ^ (-(1 / 2 : ℝ)) := by
+/--
+For `m < 1` the integrand of `completeEllipticK m` is continuous, the real power being
+taken at a positive base.
+-/
+lemma continuous_completeEllipticK_integrand {m : ℝ} (hm : m < 1)
+    : Continuous fun φ : ℝ => (1 - m * sin φ ^ 2) ^ (-(1 / 2 : ℝ)) := by
   refine Continuous.rpow_const ?_ fun φ => Or.inl (completeEllipticK_radicand_pos hm φ).ne'
   fun_prop
 
 /-- For `m < 1` the integrand of `completeEllipticK m` is interval integrable on `[0, π/2]`. -/
-lemma intervalIntegrable_completeEllipticK_integrand {m : ℝ} (hm : m < 1) :
-    IntervalIntegrable (fun φ : ℝ => (1 - m * sin φ ^ 2) ^ (-(1 / 2 : ℝ))) volume 0 (π / 2) :=
+lemma intervalIntegrable_completeEllipticK_integrand {m : ℝ} (hm : m < 1)
+    : IntervalIntegrable (fun φ : ℝ => (1 - m * sin φ ^ 2) ^ (-(1 / 2 : ℝ))) volume 0 (π / 2) :=
   (continuous_completeEllipticK_integrand hm).intervalIntegrable 0 (π / 2)
 
 /-!
@@ -132,14 +139,14 @@ integral is positive, being the integral of a positive continuous function.
 -/
 
 /-- `K 0 = π / 2`: at parameter zero the integrand of `completeEllipticK` is the constant `1`. -/
-@[simp]
-lemma completeEllipticK_zero : completeEllipticK 0 = π / 2 := by
-  simp [completeEllipticK]
+@[simp] lemma completeEllipticK_zero : completeEllipticK 0 = π / 2 := by simp [completeEllipticK]
 
 /-- For `m < 1` the complete elliptic integral `completeEllipticK m` is positive. -/
 lemma completeEllipticK_pos {m : ℝ} (hm : m < 1) : 0 < completeEllipticK m := by
   refine intervalIntegral.intervalIntegral_pos_of_pos_on
-    (intervalIntegrable_completeEllipticK_integrand hm) (fun φ _ => ?_) pi_div_two_pos
+    (intervalIntegrable_completeEllipticK_integrand hm)
+    (fun φ _ => ?_)
+    pi_div_two_pos
   exact rpow_pos_of_pos (completeEllipticK_radicand_pos hm φ) _
 
 /-!
@@ -154,34 +161,38 @@ the radicand below by `1 - m` bounds `K` above by `π / 2 * (1 - m) ^ (-1/2)` th
 
 -/
 
-/-- `completeEllipticK` is monotone on its domain: for `m₁ ≤ m₂ < 1`, `K m₁ ≤ K m₂`. The
+/--
+`completeEllipticK` is monotone on its domain: for `m₁ ≤ m₂ < 1`, `K m₁ ≤ K m₂`. The
 integrand is pointwise monotone in the parameter, the radicand being positive for both
-parameters. -/
+parameters.
+-/
 @[gcongr]
-lemma completeEllipticK_mono {m₁ m₂ : ℝ} (h12 : m₁ ≤ m₂) (h2 : m₂ < 1) :
-    completeEllipticK m₁ ≤ completeEllipticK m₂ := by
+lemma completeEllipticK_mono {m₁ m₂ : ℝ} (h12 : m₁ ≤ m₂) (h2 : m₂ < 1)
+    : completeEllipticK m₁ ≤ completeEllipticK m₂ := by
   have h1 : m₁ < 1 := h12.trans_lt h2
   refine intervalIntegral.integral_mono_on pi_div_two_pos.le
     (intervalIntegrable_completeEllipticK_integrand h1)
-    (intervalIntegrable_completeEllipticK_integrand h2)
-    fun φ _ => ?_
+    (intervalIntegrable_completeEllipticK_integrand h2) fun φ _ => ?_
   exact rpow_le_rpow_of_nonpos (completeEllipticK_radicand_pos h2 φ)
     (sub_le_sub_left (mul_le_mul_of_nonneg_right h12 (sq_nonneg _)) 1) (by norm_num)
 
 /-- `completeEllipticK` is monotone on its domain `(-∞, 1)`, as a `MonotoneOn` statement. -/
-lemma monotoneOn_completeEllipticK : MonotoneOn completeEllipticK (Set.Iio 1) :=
-  fun _ _ _ hm₂ h => completeEllipticK_mono h hm₂
+lemma monotoneOn_completeEllipticK : MonotoneOn completeEllipticK (Set.Iio 1) := fun _ _ _ hm₂ h =>
+  completeEllipticK_mono h hm₂
 
-/-- `completeEllipticK` is strictly monotone on its domain: for `m₁ < m₂ < 1`, `K m₁ < K m₂`.
-The pointwise inequality between the integrands is strict at `φ = π / 2`, where `sin² φ = 1`. -/
+/--
+`completeEllipticK` is strictly monotone on its domain: for `m₁ < m₂ < 1`, `K m₁ < K m₂`.
+The pointwise inequality between the integrands is strict at `φ = π / 2`, where `sin² φ = 1`.
+-/
 @[gcongr]
-lemma completeEllipticK_strictMono {m₁ m₂ : ℝ} (h12 : m₁ < m₂) (h2 : m₂ < 1) :
-    completeEllipticK m₁ < completeEllipticK m₂ := by
+lemma completeEllipticK_strictMono {m₁ m₂ : ℝ} (h12 : m₁ < m₂) (h2 : m₂ < 1)
+    : completeEllipticK m₁ < completeEllipticK m₂ := by
   have h1 : m₁ < 1 := h12.trans h2
   refine intervalIntegral.integral_lt_integral_of_continuousOn_of_le_of_exists_lt pi_div_two_pos
     (continuous_completeEllipticK_integrand h1).continuousOn
     (continuous_completeEllipticK_integrand h2).continuousOn
-    (fun φ _ => ?_) ⟨π / 2, Set.right_mem_Icc.2 pi_div_two_pos.le, ?_⟩
+    (fun φ _ => ?_)
+    ⟨π / 2, Set.right_mem_Icc.2 pi_div_two_pos.le, ?_⟩
   · exact rpow_le_rpow_of_nonpos (completeEllipticK_radicand_pos h2 φ)
       (sub_le_sub_left (mul_le_mul_of_nonneg_right h12.le (sq_nonneg _)) 1) (by norm_num)
   · simp only [sin_pi_div_two, one_pow, mul_one]
@@ -191,24 +202,27 @@ lemma completeEllipticK_strictMono {m₁ m₂ : ℝ} (h12 : m₁ < m₂) (h2 : m
 lemma strictMonoOn_completeEllipticK : StrictMonoOn completeEllipticK (Set.Iio 1) :=
   fun _ _ _ hm₂ h => completeEllipticK_strictMono h hm₂
 
-/-- For `0 ≤ m < 1` the complete elliptic integral `completeEllipticK m` is at least its value
-`π / 2` at `m = 0`. -/
-lemma pi_div_two_le_completeEllipticK {m : ℝ} (hm0 : 0 ≤ m) (hm1 : m < 1) :
-    π / 2 ≤ completeEllipticK m := by
+/--
+For `0 ≤ m < 1` the complete elliptic integral `completeEllipticK m` is at least its value
+`π / 2` at `m = 0`.
+-/
+lemma pi_div_two_le_completeEllipticK {m : ℝ} (hm0 : 0 ≤ m) (hm1 : m < 1)
+    : π / 2 ≤ completeEllipticK m := by
   rw [← completeEllipticK_zero]
   exact completeEllipticK_mono hm0 hm1
 
-/-- For `0 ≤ m < 1` the complete elliptic integral `completeEllipticK m` is at most
+/--
+For `0 ≤ m < 1` the complete elliptic integral `completeEllipticK m` is at most
 `π / 2 * (1 - m) ^ (-1/2)`: the radicand is at least `1 - m`, `sin² φ` being at most `1`, so the
 integrand is at most the constant `(1 - m) ^ (-1/2)`. With `pi_div_two_le_completeEllipticK` this
 sandwiches `K` on `[0, 1)`; for the pendulum, where `m = sin² (θ₀ / 2)`, it bounds the period by
-`T ≤ 2π √(ℓ / g) / cos (θ₀ / 2)`. -/
-lemma completeEllipticK_le {m : ℝ} (hm0 : 0 ≤ m) (hm1 : m < 1) :
-    completeEllipticK m ≤ π / 2 * (1 - m) ^ (-(1 / 2 : ℝ)) := by
+`T ≤ 2π √(ℓ / g) / cos (θ₀ / 2)`.
+-/
+lemma completeEllipticK_le {m : ℝ} (hm0 : 0 ≤ m) (hm1 : m < 1)
+    : completeEllipticK m ≤ π / 2 * (1 - m) ^ (-(1 / 2 : ℝ)) := by
   have h : completeEllipticK m ≤ ∫ _ in (0 : ℝ)..π / 2, (1 - m) ^ (-(1 / 2 : ℝ)) := by
     refine intervalIntegral.integral_mono_on pi_div_two_pos.le
-      (intervalIntegrable_completeEllipticK_integrand hm1) intervalIntegrable_const
-      fun φ _ => ?_
+      (intervalIntegrable_completeEllipticK_integrand hm1) intervalIntegrable_const fun φ _ => ?_
     exact rpow_le_rpow_of_nonpos (by linarith)
       (sub_le_sub_left (mul_le_of_le_one_right hm0 (sin_sq_le_one φ)) 1) (by norm_num)
   rwa [intervalIntegral.integral_const, sub_zero, smul_eq_mul] at h
@@ -229,8 +243,8 @@ applies and gives continuity of `K` on the domain. Continuity at each point `m <
 /-- `completeEllipticK` is continuous on its domain `(-∞, 1)`. -/
 lemma continuousOn_completeEllipticK : ContinuousOn completeEllipticK (Set.Iio 1) := by
   rw [continuousOn_iff_continuous_domRestrict]
-  have hf : Continuous fun p : Set.Iio (1 : ℝ) × ℝ =>
-      (1 - p.1.1 * sin p.2 ^ 2) ^ (-(1 / 2 : ℝ)) := by
+  have hf
+      : Continuous fun p : Set.Iio (1 : ℝ) × ℝ => (1 - p.1.1 * sin p.2 ^ 2) ^ (-(1 / 2 : ℝ)) := by
     refine Continuous.rpow_const ?_ fun p => Or.inl (completeEllipticK_radicand_pos p.1.2 p.2).ne'
     fun_prop
   exact intervalIntegral.continuous_parametric_intervalIntegral_of_continuous'
@@ -238,8 +252,10 @@ lemma continuousOn_completeEllipticK : ContinuousOn completeEllipticK (Set.Iio 1
     (f := fun (m : Set.Iio (1 : ℝ)) (φ : ℝ) => (1 - m.1 * sin φ ^ 2) ^ (-(1 / 2 : ℝ)))
     hf 0 (π / 2)
 
-/-- `completeEllipticK` is continuous at every point `m < 1` of its domain, `(-∞, 1)` being a
-neighbourhood of `m`. -/
+/--
+`completeEllipticK` is continuous at every point `m < 1` of its domain, `(-∞, 1)` being a
+neighbourhood of `m`.
+-/
 lemma continuousAt_completeEllipticK {m : ℝ} (hm : m < 1) : ContinuousAt completeEllipticK m :=
   continuousOn_completeEllipticK.continuousAt (Iio_mem_nhds hm)
 

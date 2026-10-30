@@ -56,23 +56,20 @@ lemma norm_mul_self (x : ClosedGeneratedByOne a) : ‖x * x‖ = ‖x‖ ^ 2 := 
   exact JBAlgebra.norm_mul_self x
 
 /-- The spectral radius is at most the norm. -/
-lemma spectralRadius_le_norm (x : ClosedGeneratedByOne a) :
-    spectralRadius ℝ x ≤ (‖x‖₊ : ℝ≥0∞) := by
+lemma spectralRadius_le_norm (x : ClosedGeneratedByOne a) : spectralRadius ℝ x ≤ (‖x‖₊ : ℝ≥0∞) := by
   exact spectralRadius_le_nnnorm x
 
 /-- Along powers of two, the closed one-generator algebra has a uniform norm. -/
-lemma norm_pow_two_pow (x : ClosedGeneratedByOne a) (n : ℕ) :
-    ‖x ^ (2 ^ n)‖ = ‖x‖ ^ (2 ^ n) := by
+lemma norm_pow_two_pow (x : ClosedGeneratedByOne a) (n : ℕ) : ‖x ^ (2 ^ n)‖ = ‖x‖ ^ (2 ^ n) := by
   induction n with
   | zero => simp
   | succ n ih =>
-      calc
-        ‖x ^ (2 ^ (n + 1))‖ = ‖(x ^ (2 ^ n)) * (x ^ (2 ^ n))‖ := by
-          rw [pow_succ, pow_mul, pow_two]
-        _ = ‖x ^ (2 ^ n)‖ ^ 2 := norm_mul_self a _
-        _ = (‖x‖ ^ (2 ^ n)) ^ 2 := by rw [ih]
-        _ = ‖x‖ ^ (2 ^ (n + 1)) := by
-          rw [← pow_mul, pow_succ]
+    calc
+      ‖x ^ (2 ^ (n + 1))‖
+        = ‖(x ^ (2 ^ n)) * (x ^ (2 ^ n))‖ := by rw [pow_succ, pow_mul, pow_two]
+      _ = ‖x ^ (2 ^ n)‖ ^ 2 := norm_mul_self a _
+      _ = (‖x‖ ^ (2 ^ n)) ^ 2 := by rw [ih]
+      _ = ‖x‖ ^ (2 ^ (n + 1)) := by rw [← pow_mul, pow_succ]
 
 end ClosedGeneratedByOne
 

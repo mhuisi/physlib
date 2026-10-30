@@ -68,8 +68,10 @@ namespace SL2C
 
 -/
 
-/-- Entrywise complex conjugation as a monoid endomorphism of `SL(2,ℂ)`: Mathlib's
-  `SpecialLinearGroup.map` along `starRingEnd ℂ`. -/
+/--
+Entrywise complex conjugation as a monoid endomorphism of `SL(2,ℂ)`: Mathlib's
+`SpecialLinearGroup.map` along `starRingEnd ℂ`.
+-/
 abbrev conjHom : SL(2,ℂ) →* SL(2,ℂ) := SpecialLinearGroup.map (starRingEnd ℂ)
 
 lemma conjHom_coe (g : SL(2,ℂ)) : (conjHom g).1 = g.1.map star := rfl
@@ -81,8 +83,10 @@ lemma conjHom_involutive : Function.Involutive conjHom := by
   ext i j
   simp
 
-/-- Conjugating the group argument undoes the conjugation of the entries: the inverse
-  conjugate transpose at `conjHom g` is the inverse transpose at `g`. -/
+/--
+Conjugating the group argument undoes the conjugation of the entries: the inverse
+conjugate transpose at `conjHom g` is the inverse transpose at `g`.
+-/
 lemma conjHom_inv_conjTranspose (g : SL(2,ℂ)) : (((conjHom g).1)⁻¹)ᴴ = (g.1⁻¹)ᵀ := by
   have h1 : ((conjHom g).1)⁻¹ = (g.1⁻¹).map star := by
     rw [inverse_coe, ← map_inv, inverse_coe]
@@ -97,9 +101,11 @@ lemma conjHom_inv_conjTranspose (g : SL(2,ℂ)) : (((conjHom g).1)⁻¹)ᴴ = (g
 
 -/
 
-/-- **The centre of `SL(2, ℂ)` covers the identity Lorentz transformation.** The covering
-  map sandwiches, `A ↦ M A Mᴴ`, so the two signs of `-1` cancel. Together with
-  `_root_.map_one` this says that the covering map is two-to-one. -/
+/--
+**The centre of `SL(2, ℂ)` covers the identity Lorentz transformation.** The covering
+map sandwiches, `A ↦ M A Mᴴ`, so the two signs of `-1` cancel. Together with
+`_root_.map_one` this says that the covering map is two-to-one.
+-/
 lemma toLorentzGroup_neg_one : toLorentzGroup (-1) = 1 := by
   ext1
   have h : toSelfAdjointMap (-1) = LinearMap.id := by
@@ -115,18 +121,22 @@ lemma toLorentzGroup_neg_one : toLorentzGroup (-1) = 1 := by
 
 -/
 
-/-- The intertwining identity `toSelfAdjointMap_basis` read entrywise: sandwiching the
-  covariant Pauli matrix `σ_μ` between `g` and `gᴴ` mixes the covariant Pauli matrices by the
-  column `μ` of the Lorentz matrix of `g`, the summed Lorentz index first. -/
-lemma sum_pauliLower_mul_sl2c (g : SL(2,ℂ)) (μ : Fin 1 ⊕ Fin 3) (β β' : Fin 2) :
-    ∑ p : Fin 2 × Fin 2, PauliMatrix.pauliLower μ p.1 p.2 * (g.1 β p.1 * star (g.1 β' p.2))
+/--
+The intertwining identity `toSelfAdjointMap_basis` read entrywise: sandwiching the
+covariant Pauli matrix `σ_μ` between `g` and `gᴴ` mixes the covariant Pauli matrices by the
+column `μ` of the Lorentz matrix of `g`, the summed Lorentz index first.
+-/
+lemma sum_pauliLower_mul_sl2c (g : SL(2,ℂ)) (μ : Fin 1 ⊕ Fin 3) (β β' : Fin 2)
+    : ∑ p : Fin 2 × Fin 2, PauliMatrix.pauliLower μ p.1 p.2 * (g.1 β p.1 * star (g.1 β' p.2))
       = ∑ ν : Fin 1 ⊕ Fin 3, (((toLorentzGroup g).1 ν μ : ℝ) : ℂ)
         * PauliMatrix.pauliLower ν β β' := by
-  have h := congrArg (fun A : selfAdjoint (Matrix (Fin 2) (Fin 2) ℂ) => A.1 β β')
-    (toSelfAdjointMap_basis (M := g) μ)
-  simp only [toSelfAdjointMap_apply_coe, AddSubmonoidClass.coe_finsetSum,
-    Matrix.sum_apply, selfAdjoint.val_smul, Matrix.smul_apply, Complex.real_smul,
-    PauliMatrix.pauliBasis'_coe] at h
+  have h :=
+    congrArg
+      (fun A : selfAdjoint (Matrix (Fin 2) (Fin 2) ℂ) => A.1 β β')
+      (toSelfAdjointMap_basis (M := g) μ)
+  simp only [toSelfAdjointMap_apply_coe, AddSubmonoidClass.coe_finsetSum, Matrix.sum_apply,
+      selfAdjoint.val_smul, Matrix.smul_apply, Complex.real_smul, PauliMatrix.pauliBasis'_coe]
+    at h
   rw [← h, Matrix.mul_apply, Fintype.sum_prod_type_right]
   refine Finset.sum_congr rfl fun p₂ _ => ?_
   rw [Matrix.mul_apply, Finset.sum_mul]
@@ -140,10 +150,12 @@ lemma sum_pauliLower_mul_sl2c (g : SL(2,ℂ)) (μ : Fin 1 ⊕ Fin 3) (β β' : F
 
 -/
 
-/-- The covering map intertwines conjugate transposition with matrix
-  transposition: `L(M†) = L(M)ᵀ`. -/
-lemma toLorentzGroup_conjTranspose {M N : SL(2,ℂ)} (hN : N.1 = M.1ᴴ) :
-    (toLorentzGroup N).1 = (toLorentzGroup M).1ᵀ := by
+/--
+The covering map intertwines conjugate transposition with matrix
+transposition: `L(M†) = L(M)ᵀ`.
+-/
+lemma toLorentzGroup_conjTranspose {M N : SL(2,ℂ)} (hN : N.1 = M.1ᴴ)
+    : (toLorentzGroup N).1 = (toLorentzGroup M).1ᵀ := by
   ext l i
   refine Complex.ofReal_injective ?_
   have h1 := toLorentzGroup_eq_trace N l i
@@ -152,8 +164,7 @@ lemma toLorentzGroup_conjTranspose {M N : SL(2,ℂ)} (hN : N.1 = M.1ᴴ) :
   rw [Matrix.transpose_apply, h1, h2]
   congr 1
   rw [Matrix.conjTranspose_conjTranspose, ← Matrix.mul_assoc, ← Matrix.mul_assoc,
-    Matrix.trace_mul_cycle, ← Matrix.mul_assoc, Matrix.trace_mul_comm,
-    ← Matrix.mul_assoc]
+    Matrix.trace_mul_cycle, ← Matrix.mul_assoc, Matrix.trace_mul_comm, ← Matrix.mul_assoc]
 
 end SL2C
 

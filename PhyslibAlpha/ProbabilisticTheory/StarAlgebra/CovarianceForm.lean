@@ -78,13 +78,15 @@ def fluctuationMap : A →ₗ[ℂ] A where
 
 lemma fluctuationMap_apply (a : A) : ω.fluctuationMap a = a - ω a • 1 := rfl
 
-/-- The covariance form `C(a, b) = ω(a⋆ b) - conj (ω a) ω(b)`, the inner product of the
-fluctuations in the pre-Hilbert space of the state. -/
+/--
+The covariance form `C(a, b) = ω(a⋆ b) - conj (ω a) ω(b)`, the inner product of the
+fluctuations in the pre-Hilbert space of the state.
+-/
 noncomputable def covarianceForm (a b : A) : ℂ :=
   ⟪ω.toPre (ω.fluctuationMap a), ω.toPre (ω.fluctuationMap b)⟫_ℂ
 
-lemma covarianceForm_apply (a b : A) :
-    ω.covarianceForm a b = ω (star a * b) - star (ω a) * ω b := by
+lemma covarianceForm_apply (a b : A)
+    : ω.covarianceForm a b = ω (star a * b) - star (ω a) * ω b := by
   rw [covarianceForm, inner_pre]
   change ω (star (a - ω a • 1) * (b - ω b • 1)) = _
   rw [star_sub, star_smul, star_one, sub_mul, mul_sub, mul_sub, smul_mul_assoc, one_mul,
@@ -95,26 +97,26 @@ lemma covarianceForm_apply (a b : A) :
   simp only [e, ω.map_one, ω.map_star]
   ring
 
-lemma covarianceForm_smul_left (c : ℂ) (a b : A) :
-    ω.covarianceForm (c • a) b = star c * ω.covarianceForm a b := by
+lemma covarianceForm_smul_left (c : ℂ) (a b : A)
+    : ω.covarianceForm (c • a) b = star c * ω.covarianceForm a b := by
   rw [covarianceForm, covarianceForm, _root_.map_smul, _root_.map_smul, inner_smul_left]
   rfl
 
-lemma covarianceForm_smul_right (c : ℂ) (a b : A) :
-    ω.covarianceForm a (c • b) = c * ω.covarianceForm a b := by
+lemma covarianceForm_smul_right (c : ℂ) (a b : A)
+    : ω.covarianceForm a (c • b) = c * ω.covarianceForm a b := by
   rw [covarianceForm, covarianceForm, _root_.map_smul, _root_.map_smul, inner_smul_right]
 
-lemma covarianceForm_sum_left {ι : Type*} (s : Finset ι) (a : ι → A) (b : A) :
-    ω.covarianceForm (∑ i ∈ s, a i) b = ∑ i ∈ s, ω.covarianceForm (a i) b := by
+lemma covarianceForm_sum_left {ι : Type*} (s : Finset ι) (a : ι → A) (b : A)
+    : ω.covarianceForm (∑ i ∈ s, a i) b = ∑ i ∈ s, ω.covarianceForm (a i) b := by
   simp only [covarianceForm, map_sum, sum_inner]
 
-lemma covarianceForm_sum_right {ι : Type*} (s : Finset ι) (a : A) (b : ι → A) :
-    ω.covarianceForm a (∑ i ∈ s, b i) = ∑ i ∈ s, ω.covarianceForm a (b i) := by
+lemma covarianceForm_sum_right {ι : Type*} (s : Finset ι) (a : A) (b : ι → A)
+    : ω.covarianceForm a (∑ i ∈ s, b i) = ∑ i ∈ s, ω.covarianceForm a (b i) := by
   simp only [covarianceForm, map_sum, inner_sum]
 
 /-- For observables, `C(a, b) = Cov(a, b) + i ω⟨⁅a, b⁆⟩`. -/
-lemma covarianceForm_selfAdjoint (a b : selfAdjoint A) :
-    ω.covarianceForm a b = ω.covariance a b + Complex.I * ω.bracket a b := by
+lemma covarianceForm_selfAdjoint (a b : selfAdjoint A)
+    : ω.covarianceForm a b = ω.covariance a b + Complex.I * ω.bracket a b := by
   have h : ω.covarianceForm a b = ω (ω.fluctuation a * ω.fluctuation b) := by
     rw [covarianceForm_apply, apply_fluctuation_mul, ω.apply_selfAdjoint a]
     simp
@@ -130,21 +132,24 @@ include hω
 
 /-- **A symmetry of the state preserves the covariance form**: `C(σ a, σ b) = C(a, b)`. -/
 lemma covarianceForm_map (a b : A) : ω.covarianceForm (σ a) (σ b) = ω.covarianceForm a b := by
-  rw [covarianceForm_apply, covarianceForm_apply, ← StarHomClass.map_star, ← _root_.map_mul, hω,
-    hω, hω]
+  rw [covarianceForm_apply, covarianceForm_apply, ← StarHomClass.map_star, ← _root_.map_mul, hω, hω,
+    hω]
 
-/-- Elements multiplied by `χ` and `χ'` under a symmetry, with `conj χ · χ' ≠ 1`, have
-covariance zero. -/
-lemma covarianceForm_eq_zero_of_smul {a b : A} {χ χ' : ℂ} (ha : σ a = χ • a) (hb : σ b = χ' • b)
-    (h : star χ * χ' ≠ 1) : ω.covarianceForm a b = 0 := by
+/--
+Elements multiplied by `χ` and `χ'` under a symmetry, with `conj χ · χ' ≠ 1`, have
+covariance zero.
+-/
+lemma covarianceForm_eq_zero_of_smul
+    {a b : A} {χ χ' : ℂ} (ha : σ a = χ • a) (hb : σ b = χ' • b) (h : star χ * χ' ≠ 1)
+    : ω.covarianceForm a b = 0 := by
   have e := ω.covarianceForm_map σ hω a b
   rw [ha, hb, covarianceForm_smul_left, covarianceForm_smul_right, ← mul_assoc] at e
   have e' : (star χ * χ' - 1) * ω.covarianceForm a b = 0 := by linear_combination e
   exact (mul_eq_zero.mp e').resolve_left (sub_ne_zero.mpr h)
 
 /-- **An even and an odd element have covariance zero.** -/
-lemma covarianceForm_eq_zero_of_neg {a b : A} (ha : σ a = a) (hb : σ b = -b) :
-    ω.covarianceForm a b = 0 :=
+lemma covarianceForm_eq_zero_of_neg {a b : A} (ha : σ a = a) (hb : σ b = -b)
+    : ω.covarianceForm a b = 0 :=
   ω.covarianceForm_eq_zero_of_smul σ hω (χ := 1) (χ' := -1) (by rw [one_smul, ha])
     (by rw [neg_one_smul, hb]) (by norm_num)
 
@@ -155,11 +160,14 @@ section Character
 variable {Γ : Type*} [Group Γ] (α : Γ →* (A ≃⋆ₐ[ℂ] A)) (hα : ∀ g x, ω (α g x) = ω x)
 include hα
 
-/-- **Elements transforming with different unitary characters have covariance zero.** If
-`α g a = χ g • a` and `α g b = χ' g • b` with `|χ g| = 1` and `χ ≠ χ'`, then `C(a, b) = 0`. -/
-lemma covarianceForm_eq_zero_of_character {a b : A} {χ χ' : Γ → ℂ} (hχ : ∀ g, ‖χ g‖ = 1)
-    (ha : ∀ g, α g a = χ g • a) (hb : ∀ g, α g b = χ' g • b) (hne : χ ≠ χ') :
-    ω.covarianceForm a b = 0 := by
+/--
+**Elements transforming with different unitary characters have covariance zero.** If
+`α g a = χ g • a` and `α g b = χ' g • b` with `|χ g| = 1` and `χ ≠ χ'`, then `C(a, b) = 0`.
+-/
+lemma covarianceForm_eq_zero_of_character
+    {a b : A} {χ χ' : Γ → ℂ}
+    (hχ : ∀ g, ‖χ g‖ = 1) (ha : ∀ g, α g a = χ g • a) (hb : ∀ g, α g b = χ' g • b) (hne : χ ≠ χ')
+    : ω.covarianceForm a b = 0 := by
   obtain ⟨g, hg⟩ := Function.ne_iff.mp hne
   refine ω.covarianceForm_eq_zero_of_smul (α g) (hα g) (ha g) (hb g) fun h => hg ?_
   have hn : star (χ g) * χ g = 1 := by
@@ -183,19 +191,21 @@ variable [Fintype ι] [Fintype κ]
 
 /-- **The matrix of covariances of a family is positive semidefinite**, being a Gram matrix. -/
 lemma posSemidef_covarianceMatrixForm (a : ι → A) : (ω.covarianceMatrixForm a a).PosSemidef := by
-  have h : ω.covarianceMatrixForm a a =
-      gram ℂ fun i => ω.toPre (ω.fluctuationMap (a i)) := by
+  have h : ω.covarianceMatrixForm a a = gram ℂ fun i => ω.toPre (ω.fluctuationMap (a i)) := by
     ext i k
     rfl
   rw [h]
   exact posSemidef_gram ℂ _
 
-/-- **A symmetry of the state preserves the matrix of covariances**: if `σ` acts on the two
-families by the matrices `R` and `S`, then `Rᴴ M S = M`. -/
-lemma conjTranspose_mul_covarianceMatrixForm_mul (σ : A ≃⋆ₐ[ℂ] A) (hω : ∀ x, ω (σ x) = ω x)
+/--
+**A symmetry of the state preserves the matrix of covariances**: if `σ` acts on the two
+families by the matrices `R` and `S`, then `Rᴴ M S = M`.
+-/
+lemma conjTranspose_mul_covarianceMatrixForm_mul
+    (σ : A ≃⋆ₐ[ℂ] A) (hω : ∀ x, ω (σ x) = ω x)
     {a : ι → A} {b : κ → A} {R : Matrix ι ι ℂ} {S : Matrix κ κ ℂ}
-    (ha : ∀ i, σ (a i) = ∑ j, R j i • a j) (hb : ∀ k, σ (b k) = ∑ l, S l k • b l) :
-    Rᴴ * ω.covarianceMatrixForm a b * S = ω.covarianceMatrixForm a b := by
+    (ha : ∀ i, σ (a i) = ∑ j, R j i • a j) (hb : ∀ k, σ (b k) = ∑ l, S l k • b l)
+    : Rᴴ * ω.covarianceMatrixForm a b * S = ω.covarianceMatrixForm a b := by
   ext i k
   have e := ω.covarianceForm_map σ hω (a i) (b k)
   rw [ha, hb, covarianceForm_sum_left] at e
@@ -211,44 +221,54 @@ end Matrix
 
 section Schur
 
-variable {Γ : Type*} [Group Γ] (α : Γ →* (A ≃⋆ₐ[ℂ] A)) (hα : ∀ g x, ω (α g x) = ω x)
+variable
+  {Γ : Type*} [Group Γ]
+  (α : Γ →* (A ≃⋆ₐ[ℂ] A)) (hα : ∀ g x, ω (α g x) = ω x)
   {ι κ : Type*} [Fintype ι] [Fintype κ] [DecidableEq ι] [DecidableEq κ]
   (ρ : Representation ℂ Γ (ι → ℂ)) (π : Representation ℂ Γ (κ → ℂ))
 include hα
 
-/-- If `α` acts on the families `a` and `b` by `ρ` and `π`, with `ρ` unitary, then the matrix of
-covariances intertwines `π` with `ρ`. -/
-lemma covarianceMatrixForm_isIntertwining {a : ι → A} {b : κ → A}
+/--
+If `α` acts on the families `a` and `b` by `ρ` and `π`, with `ρ` unitary, then the matrix of
+covariances intertwines `π` with `ρ`.
+-/
+lemma covarianceMatrixForm_isIntertwining
+    {a : ι → A} {b : κ → A}
     (hρ : ∀ g, LinearMap.toMatrix' (ρ g) ∈ unitaryGroup ι ℂ)
     (ha : ∀ g i, α g (a i) = ∑ j, LinearMap.toMatrix' (ρ g) j i • a j)
-    (hb : ∀ g k, α g (b k) = ∑ l, LinearMap.toMatrix' (π g) l k • b l) (g : Γ) :
-    toLin' (ω.covarianceMatrixForm a b) ∘ₗ π g =
-      ρ g ∘ₗ toLin' (ω.covarianceMatrixForm a b) := by
+    (hb : ∀ g k, α g (b k) = ∑ l, LinearMap.toMatrix' (π g) l k • b l) (g : Γ)
+    : toLin' (ω.covarianceMatrixForm a b) ∘ₗ π g = ρ g ∘ₗ toLin' (ω.covarianceMatrixForm a b) := by
   have e := ω.conjTranspose_mul_covarianceMatrixForm_mul (α g) (hα g) (ha g) (hb g)
   have hR : LinearMap.toMatrix' (ρ g) * (LinearMap.toMatrix' (ρ g))ᴴ = 1 :=
     mem_unitaryGroup_iff.mp (hρ g)
-  have h : ω.covarianceMatrixForm a b * LinearMap.toMatrix' (π g) =
-      LinearMap.toMatrix' (ρ g) * ω.covarianceMatrixForm a b := by
-    calc ω.covarianceMatrixForm a b * LinearMap.toMatrix' (π g)
-        = LinearMap.toMatrix' (ρ g) * (LinearMap.toMatrix' (ρ g))ᴴ *
-            ω.covarianceMatrixForm a b * LinearMap.toMatrix' (π g) := by
-          rw [hR, Matrix.one_mul]
-      _ = LinearMap.toMatrix' (ρ g) * ((LinearMap.toMatrix' (ρ g))ᴴ *
-            ω.covarianceMatrixForm a b * LinearMap.toMatrix' (π g)) := by
-          simp only [Matrix.mul_assoc]
+  have h
+      : ω.covarianceMatrixForm a b * LinearMap.toMatrix' (π g)
+        = LinearMap.toMatrix' (ρ g) * ω.covarianceMatrixForm a b := by
+    calc
+      ω.covarianceMatrixForm a b * LinearMap.toMatrix' (π g)
+          = LinearMap.toMatrix' (ρ g) * (LinearMap.toMatrix' (ρ g))ᴴ * ω.covarianceMatrixForm a b
+            * LinearMap.toMatrix' (π g) := by
+        rw [hR, Matrix.one_mul]
+      _ = LinearMap.toMatrix' (ρ g)
+          * ((LinearMap.toMatrix' (ρ g))ᴴ * ω.covarianceMatrixForm a b
+            * LinearMap.toMatrix' (π g)) := by
+        simp only [Matrix.mul_assoc]
       _ = LinearMap.toMatrix' (ρ g) * ω.covarianceMatrixForm a b := by rw [e]
   have h' := congrArg toLin' h
   rwa [toLin'_mul, toLin'_mul, toLin'_toMatrix', toLin'_toMatrix'] at h'
 
-/-- **Schur's lemma for covariances.** If a group of symmetries of the state acts on the family
+/--
+**Schur's lemma for covariances.** If a group of symmetries of the state acts on the family
 `a` by the irreducible unitary representation `ρ` and on the family `b` by the irreducible
-representation `π`, and `π` and `ρ` are not equivalent, then `C(a_i, b_k) = 0` for all `i, k`. -/
-lemma covarianceMatrixForm_eq_zero_of_irreducible [ρ.IsIrreducible] [π.IsIrreducible]
-    [IsEmpty (π.Equiv ρ)] {a : ι → A} {b : κ → A}
+representation `π`, and `π` and `ρ` are not equivalent, then `C(a_i, b_k) = 0` for all `i, k`.
+-/
+lemma covarianceMatrixForm_eq_zero_of_irreducible
+    [ρ.IsIrreducible] [π.IsIrreducible] [IsEmpty (π.Equiv ρ)]
+    {a : ι → A} {b : κ → A}
     (hρ : ∀ g, LinearMap.toMatrix' (ρ g) ∈ unitaryGroup ι ℂ)
     (ha : ∀ g i, α g (a i) = ∑ j, LinearMap.toMatrix' (ρ g) j i • a j)
-    (hb : ∀ g k, α g (b k) = ∑ l, LinearMap.toMatrix' (π g) l k • b l) :
-    ω.covarianceMatrixForm a b = 0 := by
+    (hb : ∀ g k, α g (b k) = ∑ l, LinearMap.toMatrix' (π g) l k • b l)
+    : ω.covarianceMatrixForm a b = 0 := by
   let f : Representation.IntertwiningMap π ρ :=
     (toLin' (ω.covarianceMatrixForm a b)).intertwiningMap_of_isIntertwiningMap π ρ fun g v =>
       LinearMap.congr_fun (ω.covarianceMatrixForm_isIntertwining α hα ρ π hρ ha hb g) v

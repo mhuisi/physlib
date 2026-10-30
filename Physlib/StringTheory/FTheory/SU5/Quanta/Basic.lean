@@ -63,16 +63,20 @@ variable {I : CodimensionOneConfig}
 
 -/
 
-/-- The quanta associated with the representations in a `SU(5) x U(1)` F-theory.
-  This contains the value of the charges and the flux integers `(M, N)` for the
-  5-bar matter content and the 10d matter content, and the charges of the `Hd` and
-  `Hu` particles (there values of `(M,N)` are not included as they are
-  forced to be `(0, 1)` and `(0, -1)` respectively. -/
+/--
+The quanta associated with the representations in a `SU(5) x U(1)` F-theory.
+This contains the value of the charges and the flux integers `(M, N)` for the
+5-bar matter content and the 10d matter content, and the charges of the `Hd` and
+`Hu` particles (there values of `(M,N)` are not included as they are
+forced to be `(0, 1)` and `(0, -1)` respectively.
+-/
 structure Quanta (𝓩 : Type := ℤ) where
   /-- The charge of the Hd matter field. -/
   qHd : Option 𝓩
-  /-- The negative charge of the Hu matter field.
-    In other words the charge of the Hu considered as a 5-bar field. -/
+  /--
+  The negative charge of the Hu matter field.
+  In other words the charge of the Hu considered as a 5-bar field.
+  -/
   qHu : Option 𝓩
   /-- The quanta carried by the 5-bar matter fields. -/
   F : FiveQuanta 𝓩
@@ -92,12 +96,8 @@ variable {𝓩 : Type}
 -/
 
 unsafe instance [Repr 𝓩] : Repr (Quanta 𝓩) where
-  reprPrec x _ := "⟨" ++
-    repr x.qHd ++ ", " ++
-    repr x.qHu ++ ", " ++
-    repr x.F ++ ", " ++
-    repr x.T ++
-    "⟩"
+  reprPrec x _ :=
+    "⟨" ++ repr x.qHd ++ ", " ++ repr x.qHu ++ ", " ++ repr x.F ++ ", " ++ repr x.T ++ "⟩"
 
 /-!
 
@@ -106,9 +106,12 @@ unsafe instance [Repr 𝓩] : Repr (Quanta 𝓩) where
 -/
 
 @[ext]
-lemma ext {𝓩 : Type} {x y : Quanta 𝓩} (h1 : x.qHd = y.qHd) (h2 : x.qHu = y.qHu)
-    (h3 : x.F = y.F) (h4 : x.T = y.T) : x = y := by
-  cases x; cases y;
+lemma ext
+    {𝓩 : Type} {x y : Quanta 𝓩}
+    (h1 : x.qHd = y.qHd) (h2 : x.qHu = y.qHu) (h3 : x.F = y.F) (h4 : x.T = y.T)
+    : x = y := by
+  cases x
+  cases y
   simp_all
 
 /-!
@@ -142,8 +145,10 @@ lemma toCharges_qHu [DecidableEq 𝓩] (x : Quanta 𝓩) : (toCharges x).qHu = x
 
 -/
 
-/-- The reduce of `Quanta` is a new `Quanta` with all the fluxes corresponding to the same
-  charge (i.e. representation) added together. -/
+/--
+The reduce of `Quanta` is a new `Quanta` with all the fluxes corresponding to the same
+charge (i.e. representation) added together.
+-/
 def reduce [DecidableEq 𝓩] (x : Quanta 𝓩) : Quanta 𝓩 where
   qHd := x.qHd
   qHu := x.qHu
@@ -156,24 +161,24 @@ def reduce [DecidableEq 𝓩] (x : Quanta 𝓩) : Quanta 𝓩 where
 
 -/
 
-/-- Lifting a charge spectrum to quanta which do not have exotics and
-  which have no zero flux. -/
+/--
+Lifting a charge spectrum to quanta which do not have exotics and
+which have no zero flux.
+-/
 def liftCharge [DecidableEq 𝓩] (c : ChargeSpectrum 𝓩) : Multiset (Quanta 𝓩) :=
   let Q5s := FiveQuanta.liftCharge c.Q5
   let Q10s := TenQuanta.liftCharge c.Q10
-  Q5s.bind <| fun Q5 =>
-  Q10s.map <| fun Q10 =>
-    ⟨c.qHd, c.qHu, Q5, Q10⟩
+  Q5s.bind <| fun Q5 => Q10s.map <| fun Q10 => ⟨c.qHd, c.qHu, Q5, Q10⟩
 
 /-!
 
 ### C.1. Simplification of membership in the liftCharge multiset
 
 -/
-lemma mem_liftCharge_iff [DecidableEq 𝓩] {c : ChargeSpectrum 𝓩}
-    {x : Quanta 𝓩} :
-    x ∈ liftCharge c ↔ x.qHd = c.qHd ∧ x.qHu = c.qHu ∧
-    x.F ∈ FiveQuanta.liftCharge c.Q5 ∧ x.T ∈ TenQuanta.liftCharge c.Q10:= by
+lemma mem_liftCharge_iff [DecidableEq 𝓩] {c : ChargeSpectrum 𝓩} {x : Quanta 𝓩}
+    : x ∈ liftCharge c
+      ↔ x.qHd = c.qHd ∧ x.qHu = c.qHu ∧ x.F ∈ FiveQuanta.liftCharge c.Q5
+        ∧ x.T ∈ TenQuanta.liftCharge c.Q10 := by
   simp only [liftCharge, Multiset.mem_bind, Multiset.mem_map]
   constructor
   · rintro ⟨Q5, h1, Q10, h2, rfl⟩
@@ -187,9 +192,9 @@ lemma mem_liftCharge_iff [DecidableEq 𝓩] {c : ChargeSpectrum 𝓩}
 
 -/
 
-lemma toCharges_of_mem_liftCharge [DecidableEq 𝓩] {c : ChargeSpectrum 𝓩}
-    {x : Quanta 𝓩} (h : x ∈ liftCharge c) :
-    x.toCharges = c := by
+lemma toCharges_of_mem_liftCharge
+    [DecidableEq 𝓩] {c : ChargeSpectrum 𝓩} {x : Quanta 𝓩} (h : x ∈ liftCharge c)
+    : x.toCharges = c := by
   rw [mem_liftCharge_iff] at h
   obtain ⟨h1, h2, h3, h4⟩ := h
   rw [FiveQuanta.mem_liftCharge_iff] at h3
@@ -226,9 +231,9 @@ def HdAnomalyCoefficient [CommRing 𝓩] (qHd : Option 𝓩) : 𝓩 × 𝓩 :=
   | some qHd => (qHd, qHd ^ 2)
 
 @[simp]
-lemma HdAnomalyCoefficient_map {𝓩 𝓩1 : Type} [CommRing 𝓩] [CommRing 𝓩1]
-    (f : 𝓩 →+* 𝓩1) (qHd : Option 𝓩) :
-    HdAnomalyCoefficient (qHd.map f) = (f.prodMap f) (HdAnomalyCoefficient qHd) := by
+lemma HdAnomalyCoefficient_map
+    {𝓩 𝓩1 : Type} [CommRing 𝓩] [CommRing 𝓩1] (f : 𝓩 →+* 𝓩1) (qHd : Option 𝓩)
+    : HdAnomalyCoefficient (qHd.map f) = (f.prodMap f) (HdAnomalyCoefficient qHd) := by
   cases qHd <;> simp [HdAnomalyCoefficient]
 
 /-!
@@ -241,12 +246,12 @@ lemma HdAnomalyCoefficient_map {𝓩 𝓩1 : Type} [CommRing 𝓩] [CommRing �
 def HuAnomalyCoefficient [CommRing 𝓩] (qHu : Option 𝓩) : 𝓩 × 𝓩 :=
   match qHu with
   | none => (0, 0)
-  | some qHu => (-qHu, -qHu ^ 2)
+  | some qHu => (-qHu, - qHu ^ 2)
 
 @[simp]
-lemma HuAnomalyCoefficient_map {𝓩 𝓩1 : Type} [CommRing 𝓩] [CommRing 𝓩1]
-    (f : 𝓩 →+* 𝓩1) (qHu : Option 𝓩) :
-    HuAnomalyCoefficient (qHu.map f) = (f.prodMap f) (HuAnomalyCoefficient qHu) := by
+lemma HuAnomalyCoefficient_map
+    {𝓩 𝓩1 : Type} [CommRing 𝓩] [CommRing 𝓩1] (f : 𝓩 →+* 𝓩1) (qHu : Option 𝓩)
+    : HuAnomalyCoefficient (qHu.map f) = (f.prodMap f) (HuAnomalyCoefficient qHu) := by
   cases qHu <;> simp [HuAnomalyCoefficient]
 
 /-!
@@ -255,21 +260,25 @@ lemma HuAnomalyCoefficient_map {𝓩 𝓩1 : Type} [CommRing 𝓩] [CommRing �
 
 -/
 
-/-- The linear anomaly cancellation condition, corresponding to
+/--
+The linear anomaly cancellation condition, corresponding to
 `∑ᵢ qᵢ Nᵢ + ∑ₐ qₐ Nₐ = 0` where the first sum is over all 5-bar representations and the second
-  is over all 10d representations. -/
+  is over all 10d representations.
+-/
 def LinearAnomalyCancellation [CommRing 𝓩] (Q : Quanta 𝓩) : Prop :=
-  (HdAnomalyCoefficient Q.qHd).1 + (HuAnomalyCoefficient Q.qHu).1 + Q.F.anomalyCoefficient.1 +
-  Q.T.anomalyCoefficient.1 = 0
+  (HdAnomalyCoefficient Q.qHd).1 + (HuAnomalyCoefficient Q.qHu).1 + Q.F.anomalyCoefficient.1
+      + Q.T.anomalyCoefficient.1
+    = 0
 
-/-- The quartic anomaly cancellation condition, corresponding to
+/--
+The quartic anomaly cancellation condition, corresponding to
 `∑ᵢ qᵢ² Nᵢ + 3 * ∑ₐ qₐ² Nₐ = 0` where the first sum is over all 5-bar representations and the
   second is over all 10d representations.
 -/
-def QuarticAnomalyCancellation [CommRing 𝓩] (Q : Quanta 𝓩) :
-    Prop :=
-  (HdAnomalyCoefficient Q.qHd).2 + (HuAnomalyCoefficient Q.qHu).2 + Q.F.anomalyCoefficient.2 +
-    Q.T.anomalyCoefficient.2 = 0
+def QuarticAnomalyCancellation [CommRing 𝓩] (Q : Quanta 𝓩) : Prop :=
+  (HdAnomalyCoefficient Q.qHd).2 + (HuAnomalyCoefficient Q.qHu).2 + Q.F.anomalyCoefficient.2
+      + Q.T.anomalyCoefficient.2
+    = 0
 
 /-!
 
@@ -278,12 +287,16 @@ def QuarticAnomalyCancellation [CommRing 𝓩] (Q : Quanta 𝓩) :
 -/
 
 instance [CommRing 𝓩] [DecidableEq 𝓩] (Q : Quanta 𝓩) : Decidable Q.LinearAnomalyCancellation :=
-    inferInstanceAs (Decidable ((HdAnomalyCoefficient Q.qHd).1 +
-    (HuAnomalyCoefficient Q.qHu).1 + Q.F.anomalyCoefficient.1 + Q.T.anomalyCoefficient.1 = 0))
+  inferInstanceAs (Decidable
+    ((HdAnomalyCoefficient Q.qHd).1 + (HuAnomalyCoefficient Q.qHu).1 + Q.F.anomalyCoefficient.1
+        + Q.T.anomalyCoefficient.1
+      = 0))
 
 instance [CommRing 𝓩] [DecidableEq 𝓩] (Q : Quanta 𝓩) : Decidable Q.QuarticAnomalyCancellation :=
-    inferInstanceAs (Decidable ((HdAnomalyCoefficient Q.qHd).2 +
-    (HuAnomalyCoefficient Q.qHu).2 + Q.F.anomalyCoefficient.2 + Q.T.anomalyCoefficient.2 = 0))
+  inferInstanceAs (Decidable
+    ((HdAnomalyCoefficient Q.qHd).2 + (HuAnomalyCoefficient Q.qHu).2 + Q.F.anomalyCoefficient.2
+        + Q.T.anomalyCoefficient.2
+      = 0))
 
 end Quanta
 

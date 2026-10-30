@@ -66,7 +66,7 @@ local notation "Θᵣₑ" => realNumericalRange
 lemma realNumericalRange_eq (T : H →ₗ.[ℂ] H) : Θᵣₑ T = re '' Θ T := rfl
 
 @[simp]
-lemma realNumericalRange_neg (T : H →ₗ.[ℂ] H) : Θᵣₑ (-T) = -Θᵣₑ T := by
+lemma realNumericalRange_neg (T : H →ₗ.[ℂ] H) : Θᵣₑ (-T) = - Θᵣₑ T := by
   ext
   simp [realNumericalRange_eq, neg_eq_iff_eq_neg]
 
@@ -80,8 +80,8 @@ lemma im_eq_zero_of_mem_numericalRange {z : ℂ} (hz : z ∈ Θ T) : z.im = 0 :=
   exact conj_eq_iff_im.mp (hxz ▸ isSymmetric_iff_inner_map_self_real.mp hT x)
 
 /-- The numerical range of a symmetric operator is contained in the real axis. -/
-lemma numericalRange_subset : Θ T ⊆ range ofReal :=
-  fun z hz ↦ ⟨z.re, Complex.ext rfl (hT.im_eq_zero_of_mem_numericalRange hz).symm⟩
+lemma numericalRange_subset : Θ T ⊆ range ofReal := fun z hz ↦
+  ⟨z.re, Complex.ext rfl (hT.im_eq_zero_of_mem_numericalRange hz).symm⟩
 
 /-- The numerical range of a symmetric operator is equal to its projection onto the real axis. -/
 lemma numericalRange_eq : Θ T = ofReal '' Θᵣₑ T := by
@@ -97,22 +97,26 @@ lemma closure_numericalRange_subset : _root_.closure (Θ T) ⊆ range ofReal :=
 ## B. Regularity domain
 -/
 
-/-- The regularity domain of a symmetric operator contains all complex numbers with non-zero
-  imaginary part. -/
+/--
+The regularity domain of a symmetric operator contains all complex numbers with non-zero
+imaginary part.
+-/
 lemma mem_regularityDomain_of_im_ne_zero {z : ℂ} (hz : z.im ≠ 0) : z ∈ T.regularityDomain := by
   apply T.compl_closure_numericalRange_subset_regularityDomain
   refine (mem_compl_iff _ _).mpr fun h ↦ hz ?_
   obtain ⟨r, _, rfl⟩ := hT.closure_numericalRange_subset h
   exact ofReal_im r
 
-/-- The regularity domain of a symmetric operator contains all complex numbers with non-zero
-  imaginary part. -/
-lemma compl_ofReal_subset_regularityDomain : (range ofReal)ᶜ ⊆ T.regularityDomain :=
-  fun z hz ↦ hT.mem_regularityDomain_of_im_ne_zero fun h ↦ hz ⟨z.re, Eq.symm (Complex.ext rfl h)⟩
+/--
+The regularity domain of a symmetric operator contains all complex numbers with non-zero
+imaginary part.
+-/
+lemma compl_ofReal_subset_regularityDomain : (range ofReal)ᶜ ⊆ T.regularityDomain := fun z hz ↦
+  hT.mem_regularityDomain_of_im_ne_zero fun h ↦ hz ⟨z.re, Eq.symm (Complex.ext rfl h)⟩
 
 /-- If `m` is a lower bound on the numerical range then the regularity domain contains `(-∞,m)`. -/
-lemma Iio_subset_regularityDomain {m : ℝ} (h : m ∈ lowerBounds (Θᵣₑ T)) :
-    ofReal '' Iio m ⊆ T.regularityDomain := by
+lemma Iio_subset_regularityDomain {m : ℝ} (h : m ∈ lowerBounds (Θᵣₑ T))
+    : ofReal '' Iio m ⊆ T.regularityDomain := by
   intro z ⟨r, hr, hrz⟩
   refine ⟨m - r, sub_pos.mpr hr, fun x ↦ ?_⟩
   rcases eq_zero_or_neZero x with rfl | hx
@@ -131,8 +135,8 @@ lemma Iio_subset_regularityDomain {m : ℝ} (h : m ∈ lowerBounds (Θᵣₑ T))
       _ ≤ ‖T x - z • x‖ * ‖x‖ := mul_comm _ ‖x‖ ▸ norm_inner_le_norm _ _
 
 /-- If `m` is an upper bound on the numerical range then the regularity domain contains `(m,∞)`. -/
-lemma Ioi_subset_regularityDomain {m : ℝ} (h : m ∈ upperBounds (Θᵣₑ T)) :
-    ofReal '' Ioi m ⊆ T.regularityDomain := by
+lemma Ioi_subset_regularityDomain {m : ℝ} (h : m ∈ upperBounds (Θᵣₑ T))
+    : ofReal '' Ioi m ⊆ T.regularityDomain := by
   intro z ⟨r, hr, hrz⟩
   rw [← neg_mem_neg, ← regularityDomain_neg]
   refine hT.neg.Iio_subset_regularityDomain (m := -m) ?_ ?_
@@ -140,8 +144,8 @@ lemma Ioi_subset_regularityDomain {m : ℝ} (h : m ∈ upperBounds (Θᵣₑ T))
   · exact ⟨-r, by simp [mem_Ioi.mp hr], by simp [hrz]⟩
 
 /-- The regularity domain of a symmetric operator is connected iff it contains a real number. -/
-lemma regularityDomain_isConnected_iff :
-    IsConnected T.regularityDomain ↔ (ofReal ⁻¹' T.regularityDomain).Nonempty := by
+lemma regularityDomain_isConnected_iff
+    : IsConnected T.regularityDomain ↔ (ofReal ⁻¹' T.regularityDomain).Nonempty := by
   rw [T.regularityDomain_isOpen.isConnected_iff_isPathConnected]
   constructor
   · intro h
@@ -177,8 +181,8 @@ lemma regularityDomain_isConnected_iff :
               rcases Int.even_or_odd n with he | ho
               · simp [path, hexp, he.neg_one_zpow, hz]
               · simp [path, hexp, ho.neg_one_zpow, add_comm z r, hr]
-            · have hzr' : z.re - r ≠ 0 :=
-                  fun h ↦ hzr <| Complex.ext (sub_eq_zero.mp h) (by simp [hz_im])
+            · have hzr' : z.re - r ≠ 0 := fun h ↦
+                hzr <| Complex.ext (sub_eq_zero.mp h) (by simp [hz_im])
               refine hT.mem_regularityDomain_of_im_ne_zero ?_
               simp [path, hz_im, exp_im, Real.sin_eq_zero_iff, mul_comm, hzr', ht]
         · refine JoinedIn.of_segment_subset fun w ⟨a, b, _, _, _, hw⟩ ↦ ?_
@@ -188,15 +192,15 @@ lemma regularityDomain_isConnected_iff :
       exact (h z₁ hz₁).trans (h z₂ hz₂).symm
 
 /-- The regularity domain of a lower semibounded symmetric operator is connected. -/
-lemma regularityDomain_isConnected_of_bddBelow (h : BddBelow (Θᵣₑ T)) :
-    IsConnected T.regularityDomain := by
+lemma regularityDomain_isConnected_of_bddBelow (h : BddBelow (Θᵣₑ T))
+    : IsConnected T.regularityDomain := by
   obtain ⟨m, hm⟩ := h
   apply hT.regularityDomain_isConnected_iff.mpr
   exact ⟨m - 1, hT.Iio_subset_regularityDomain hm ⟨m - 1, by simp⟩⟩
 
 /-- The regularity domain of an upper semibounded symmetric operator is connected. -/
-lemma regularityDomain_isConnected_of_bddAbove (h : BddAbove (Θᵣₑ T)) :
-    IsConnected T.regularityDomain := by
+lemma regularityDomain_isConnected_of_bddAbove (h : BddAbove (Θᵣₑ T))
+    : IsConnected T.regularityDomain := by
   obtain ⟨m, hm⟩ := h
   apply hT.regularityDomain_isConnected_iff.mpr
   exact ⟨m + 1, hT.Ioi_subset_regularityDomain hm ⟨m + 1, by simp⟩⟩
@@ -225,17 +229,18 @@ lemma pointSpectrum_real : σᵖ T ⊆ range ofReal := by
 
 variable [CompleteSpace H]
 
-/-- The basic criterion for essential self-adjointness: a symmetric, densely-defined operator
-whose defect numbers at `I` and `-I` both vanish is essentially self-adjoint. -/
+/--
+The basic criterion for essential self-adjointness: a symmetric, densely-defined operator
+whose defect numbers at `I` and `-I` both vanish is essentially self-adjoint.
+-/
 lemma isEssentiallySelfAdjoint_of_defectNumber_eq_zero
-    (hdense : T.HasDenseDomain) (hpos : T.defectNumber I = 0) (hneg : T.defectNumber (-I) = 0) :
-    T.IsEssentiallySelfAdjoint := by
-  have hrange {z : ℂ} (hz : z.im ≠ 0) (hd : T.defectNumber z = 0) :
-      (T.closure - z • 1).toFun.range = ⊤ := by
+    (hdense : T.HasDenseDomain) (hpos : T.defectNumber I = 0) (hneg : T.defectNumber (-I) = 0)
+    : T.IsEssentiallySelfAdjoint := by
+  have hrange {z : ℂ} (hz : z.im ≠ 0) (hd : T.defectNumber z = 0)
+      : (T.closure - z • 1).toFun.range = ⊤ := by
     have hz' : z ∈ T.regularityDomain := hT.mem_regularityDomain_of_im_ne_zero hz
     have hcl : T.closure.IsClosed := (hT.isClosable hdense).closure_isClosed
-    rw [← hcl.defectNumber_eq_zero_iff (T.regularityDomain_closure ▸ hz'),
-      defectNumber_closure hz']
+    rw [← hcl.defectNumber_eq_zero_iff (T.regularityDomain_closure ▸ hz'), defectNumber_closure hz']
     exact hd
   rw [isEssentiallySelfAdjoint_def]
   apply (hT.closure hdense).isSelfAdjoint_of_range_eq_top hdense.closure

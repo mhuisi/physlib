@@ -48,23 +48,25 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [Mul E]
 
 /-! ## A. The generator is a derivation -/
 
-/-- **The generator of a family of automorphisms is a derivation.** If `α 0 = id` and every `α t`
-preserves a bounded bilinear multiplication, the generator of `α` is a derivation of it. -/
+/--
+**The generator of a family of automorphisms is a derivation.** If `α 0 = id` and every `α t`
+preserves a bounded bilinear multiplication, the generator of `α` is a derivation of it.
+-/
 lemma IsGenerator.isDerivation_of_isAutomorphismFamily
     (bilin : IsBoundedBilinearMap ℝ (fun p : E × E => p.1 * p.2))
     {α : ℝ → E → E} (hα0 : ∀ a, α 0 a = a) (hmul : ∀ t a b, α t (a * b) = α t a * α t b)
-    {D : E →ₗ[ℝ] E} (hD : IsGenerator α D) : IsDerivation D := by
+    {D : E →ₗ[ℝ] E} (hD : IsGenerator α D)
+    : IsDerivation D := by
   intro a b
   have hpair : HasDerivAt (fun t => (α t a, α t b)) (D a, D b) 0 := (hD a).prodMk (hD b)
   have hcomp0 := (bilin.hasFDerivAt (α 0 a, α 0 b)).comp_hasDerivAt 0 hpair
-  have hcomp : HasDerivAt (fun t => α t a * α t b)
-      (bilin.deriv (α 0 a, α 0 b) (D a, D b)) 0 := hcomp0
+  have hcomp : HasDerivAt (fun t => α t a * α t b) (bilin.deriv (α 0 a, α 0 b) (D a, D b)) 0 :=
+    hcomp0
   have hval : bilin.deriv (α 0 a, α 0 b) (D a, D b) = D a * b + a * D b := by
     rw [IsBoundedBilinearMap.deriv_apply, hα0, hα0]
     abel
   rw [hval] at hcomp
-  have heq : (fun t => α t a * α t b) = fun t => α t (a * b) := by
-    funext t; rw [hmul]
+  have heq : (fun t => α t a * α t b) = fun t => α t (a * b) := by funext t; rw [hmul]
   rw [heq] at hcomp
   exact hcomp.unique (hD (a * b)) |>.symm
 

@@ -49,8 +49,11 @@ namespace BosonicAlgebra
 
 open Matrix MatrixGroups TensorProduct
 
-variable {G₀ : Type} [Group G₀] {𝔤 : Type} [LieRing 𝔤] [LieAlgebra ℝ 𝔤]
-  {GJ : Type} [Group GJ] {𝔤J : Type} [LieRing 𝔤J] [LieAlgebra ℝ 𝔤J]
+variable
+  {G₀ : Type} [Group G₀]
+  {𝔤 : Type} [LieRing 𝔤] [LieAlgebra ℝ 𝔤]
+  {GJ : Type} [Group GJ]
+  {𝔤J : Type} [LieRing 𝔤J] [LieAlgebra ℝ 𝔤J]
   {jets : LocalGaugeData G₀ 𝔤 GJ 𝔤J} (M : MatterField jets)
 
 /-!
@@ -59,11 +62,12 @@ variable {G₀ : Type} [Group G₀] {𝔤 : Type} [LieRing 𝔤] [LieAlgebra ℝ
 
 -/
 
-/-- **The Lorentz action on the bosonic algebra** of the matter field `M`, induced
-  from a representation `M.repLorentz` of `SL(2,ℂ)` on `V`: the symmetric-algebra functor applied
-  to the Lorentz action on the jet component space. -/
-noncomputable def repLorentzGroup :
-    Representation ℂ SL(2,ℂ) (BosonicAlgebra M) where
+/--
+**The Lorentz action on the bosonic algebra** of the matter field `M`, induced
+from a representation `M.repLorentz` of `SL(2,ℂ)` on `V`: the symmetric-algebra functor applied
+to the Lorentz action on the jet component space.
+-/
+noncomputable def repLorentzGroup : Representation ℂ (SL(2,ℂ)) (BosonicAlgebra M) where
   toFun Λ := (SymmetricAlgebra.map (JetComponentSpace.repLorentzGroup M Λ)).toLinearMap
   map_one' := by
     simp only [map_one, Module.End.one_eq_id, SymmetricAlgebra.map_id, AlgHom.toLinearMap_id]
@@ -71,34 +75,31 @@ noncomputable def repLorentzGroup :
     simp only [map_mul, Module.End.mul_eq_comp, ← SymmetricAlgebra.map_comp_map,
       AlgHom.comp_toLinearMap]
 
-lemma repLorentzGroup_apply (Λ : SL(2,ℂ))
-    (x : BosonicAlgebra M) :
-    repLorentzGroup M Λ x =
-      SymmetricAlgebra.map (JetComponentSpace.repLorentzGroup M Λ) x := rfl
+lemma repLorentzGroup_apply (Λ : SL(2,ℂ)) (x : BosonicAlgebra M)
+    : repLorentzGroup M Λ x = SymmetricAlgebra.map (JetComponentSpace.repLorentzGroup M Λ) x :=
+  rfl
 
 @[simp]
-lemma repLorentzGroup_apply_one (Λ : SL(2,ℂ)) :
-    repLorentzGroup M Λ (1 : BosonicAlgebra M) = 1 := by
+lemma repLorentzGroup_apply_one (Λ : SL(2,ℂ)) : repLorentzGroup M Λ (1 : BosonicAlgebra M) = 1 := by
   simp [repLorentzGroup_apply]
 
-lemma repLorentzGroup_apply_mul (Λ : SL(2,ℂ))
-    (x y : BosonicAlgebra M) :
-    repLorentzGroup M Λ (x * y)
-      = repLorentzGroup M Λ x * repLorentzGroup M Λ y := by
+lemma repLorentzGroup_apply_mul (Λ : SL(2,ℂ)) (x y : BosonicAlgebra M)
+    : repLorentzGroup M Λ (x * y) = repLorentzGroup M Λ x * repLorentzGroup M Λ y := by
   simp [repLorentzGroup_apply]
 
 /-- On a component function the Lorentz action is the action on the component space. -/
 @[simp]
-lemma repLorentzGroup_ι (Λ : SL(2,ℂ))
-    (v : JetComponentSpace M) :
-    repLorentzGroup M Λ (SymmetricAlgebra.ι ℂ _ v) =
-      SymmetricAlgebra.ι ℂ _ (JetComponentSpace.repLorentzGroup M Λ v) := by
+lemma repLorentzGroup_ι (Λ : SL(2,ℂ)) (v : JetComponentSpace M)
+    : repLorentzGroup M Λ (SymmetricAlgebra.ι ℂ _ v)
+      = SymmetricAlgebra.ι ℂ _ (JetComponentSpace.repLorentzGroup M Λ v) := by
   rw [repLorentzGroup_apply, SymmetricAlgebra.map_apply_ι]
 
-/-- The Lorentz action as an algebra homomorphism: it preserves the symmetric product, so a
-  Lorentz transformation acts on a Lagrangian term factor by factor. -/
-noncomputable def repLorentzGroupAlgHom (Λ : SL(2,ℂ)) :
-    BosonicAlgebra M →ₐ[ℂ] BosonicAlgebra M where
+/--
+The Lorentz action as an algebra homomorphism: it preserves the symmetric product, so a
+Lorentz transformation acts on a Lagrangian term factor by factor.
+-/
+noncomputable def repLorentzGroupAlgHom (Λ : SL(2,ℂ))
+    : BosonicAlgebra M →ₐ[ℂ] BosonicAlgebra M where
   toFun := repLorentzGroup M Λ
   map_add' := LinearMap.map_add _
   map_zero' := LinearMap.map_zero _
@@ -112,14 +113,15 @@ noncomputable def repLorentzGroupAlgHom (Λ : SL(2,ℂ)) :
 
 -/
 
-/-- **`ofField` is `SL(2,ℂ)`-equivariant.** The undifferentiated component functions carry
-  the contragredient of the representation on the target space, and no derivative labels
-  are generated: `ofField` intertwines `M.repLorentz.dual` with the action on the bosonic
-  algebra. -/
+/--
+**`ofField` is `SL(2,ℂ)`-equivariant.** The undifferentiated component functions carry
+the contragredient of the representation on the target space, and no derivative labels
+are generated: `ofField` intertwines `M.repLorentz.dual` with the action on the bosonic
+algebra.
+-/
 @[simp]
-lemma repLorentzGroup_ofField (Λ : SL(2,ℂ))
-    (φ : Module.Dual ℂ M.V) :
-    repLorentzGroup M Λ (ofField φ) = ofField (M.repLorentz.dual Λ φ) := by
+lemma repLorentzGroup_ofField (Λ : SL(2,ℂ)) (φ : Module.Dual ℂ M.V)
+    : repLorentzGroup M Λ (ofField φ) = ofField (M.repLorentz.dual Λ φ) := by
   rw [ofField_apply, repLorentzGroup_ι, ofField_apply]
   congr 1
   refine Prod.ext ?_ ?_
@@ -129,13 +131,14 @@ lemma repLorentzGroup_ofField (Λ : SL(2,ℂ))
   · rw [JetComponentSpace.repLorentzGroup_snd]
     exact map_zero _
 
-/-- **`ofConjField` is `SL(2,ℂ)`-equivariant**, for the conjugate of the representation on
-  the target space: the conjugate component functions transform by `star` of the spinor
-  matrix. -/
+/--
+**`ofConjField` is `SL(2,ℂ)`-equivariant**, for the conjugate of the representation on
+the target space: the conjugate component functions transform by `star` of the spinor
+matrix.
+-/
 @[simp]
-lemma repLorentzGroup_ofConjField (Λ : SL(2,ℂ))
-    (φ : Module.Dual ℂ (ConjModule M.V)) :
-    repLorentzGroup M Λ (ofConjField φ) = ofConjField (M.repLorentz.conj.dual Λ φ) := by
+lemma repLorentzGroup_ofConjField (Λ : SL(2,ℂ)) (φ : Module.Dual ℂ (ConjModule M.V))
+    : repLorentzGroup M Λ (ofConjField φ) = ofConjField (M.repLorentz.conj.dual Λ φ) := by
   rw [ofConjField_apply, repLorentzGroup_ι, ofConjField_apply]
   congr 1
   refine Prod.ext ?_ ?_
@@ -152,20 +155,21 @@ lemma repLorentzGroup_ofConjField (Λ : SL(2,ℂ))
 -/
 
 set_option maxHeartbeats 4000000 in
-/-- **The total derivative on the bosonic algebra is a Lorentz vector.** The four
-  derivations `∂_μ` transform into each other by the columns of the Lorentz matrix of `Λ`,
-  exactly as the covector index `μ` should. -/
-lemma repLorentzGroup_jetDeriv (Λ : SL(2,ℂ))
-    (μ : Fin 1 ⊕ Fin 3) (x : BosonicAlgebra M) :
-    repLorentzGroup M Λ (jetDeriv μ x) =
-      ∑ a, (((Lorentz.SL2C.toLorentzGroup Λ).1 a μ : ℝ) : ℂ) •
-        jetDeriv a (repLorentzGroup M Λ x) := by
+/--
+**The total derivative on the bosonic algebra is a Lorentz vector.** The four
+derivations `∂_μ` transform into each other by the columns of the Lorentz matrix of `Λ`,
+exactly as the covector index `μ` should.
+-/
+lemma repLorentzGroup_jetDeriv (Λ : SL(2,ℂ)) (μ : Fin 1 ⊕ Fin 3) (x : BosonicAlgebra M)
+    : repLorentzGroup M Λ (jetDeriv μ x)
+      = ∑ a, (((Lorentz.SL2C.toLorentzGroup Λ).1 a μ : ℝ) : ℂ) •
+          jetDeriv a (repLorentzGroup M Λ x) := by
   induction x using SymmetricAlgebra.induction with
   | algebraMap r =>
     rw [jetDeriv_algebraMap, map_zero]
     refine (Finset.sum_eq_zero fun a _ => ?_).symm
-    rw [Algebra.algebraMap_eq_smul_one, map_smul, repLorentzGroup_apply_one, map_smul,
-      jetDeriv_one, smul_zero, smul_zero]
+    rw [Algebra.algebraMap_eq_smul_one, map_smul, repLorentzGroup_apply_one, map_smul, jetDeriv_one,
+      smul_zero, smul_zero]
   | ι v =>
     rw [jetDeriv_ι, repLorentzGroup_ι, repLorentzGroup_ι,
       JetComponentSpace.repLorentzGroup_jetDeriv, map_sum]
@@ -179,10 +183,11 @@ lemma repLorentzGroup_jetDeriv (Λ : SL(2,ℂ))
     rw [map_add, map_add, map_add, ha, hb, ← Finset.sum_add_distrib]
     exact Finset.sum_congr rfl fun a _ => by rw [map_add, smul_add]
 
-/-- The total derivatives on the bosonic algebra form a Lorentz derivative, giving access
-  to the boost-weight machinery of `PhyslibAlpha.Relativity.IsLorentzDeriv`. -/
-instance instIsLorentzDeriv :
-    Lorentz.IsLorentzDeriv (repLorentzGroup M) (jetDeriv (M := M)) where
+/--
+The total derivatives on the bosonic algebra form a Lorentz derivative, giving access
+to the boost-weight machinery of `PhyslibAlpha.Relativity.IsLorentzDeriv`.
+-/
+instance instIsLorentzDeriv : Lorentz.IsLorentzDeriv (repLorentzGroup M) (jetDeriv (M := M)) where
   rep_deriv := repLorentzGroup_jetDeriv M _ _ _
 
 end BosonicAlgebra

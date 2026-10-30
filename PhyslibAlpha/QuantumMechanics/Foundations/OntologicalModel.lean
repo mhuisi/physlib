@@ -86,7 +86,8 @@ open scoped ENNReal
 
 -/
 
-/-- An ontological model (Harrigan–Spekkens) of the quantum system `𝓗[d]`, with ontic state
+/--
+An ontological model (Harrigan–Spekkens) of the quantum system `𝓗[d]`, with ontic state
 space `Λ`.
 
 Preparations are indexed by unit vectors rather than by states. This is more general: a model
@@ -95,31 +96,46 @@ unit vectors differing by a global phase, which have the same vector state and h
 measurement statistics, may be prepared with different measures. Only pure-state preparations
 are modelled, as only these are needed for the PBR theorem. Measurements have finitely many
 outcomes, and response functions take values in `ℝ≥0∞` so that they can be integrated with the
-Lebesgue integral `∫⁻`. -/
-structure OntologicalModel (d : Type*) [Fintype d] [DecidableEq d] (Λ : Type*)
-    [MeasurableSpace Λ] where
-  /-- The preparation measure: preparing the unit vector `ψ` puts the system in an ontic state
-  distributed according to `prep ψ hψ`. -/
+Lebesgue integral `∫⁻`.
+-/
+structure OntologicalModel
+    (d : Type*) [Fintype d] [DecidableEq d] (Λ : Type*) [MeasurableSpace Λ] where
+  /--
+  The preparation measure: preparing the unit vector `ψ` puts the system in an ontic state
+  distributed according to `prep ψ hψ`.
+  -/
   prep (ψ : 𝓗[d]) (hψ : ‖ψ‖ = 1) : Measure Λ
   /-- Each preparation measure is a probability measure on the ontic states. -/
   isProbabilityMeasure_prep (ψ : 𝓗[d]) (hψ : ‖ψ‖ = 1) : IsProbabilityMeasure (prep ψ hψ)
-  /-- The response function: `resp M x l` is the probability of obtaining the outcome `x` when
-  performing the measurement `M` on a system in the ontic state `l`. -/
-  resp {X : Type} [Fintype X] [MeasurableSpace X] [MeasurableSingletonClass X] :
-    Measurement X (Observable (𝓗[d] →L[ℂ] 𝓗[d])) → X → Λ → ℝ≥0∞
+  /--
+  The response function: `resp M x l` is the probability of obtaining the outcome `x` when
+  performing the measurement `M` on a system in the ontic state `l`.
+  -/
+  resp {X : Type} [Fintype X] [MeasurableSpace X] [MeasurableSingletonClass X]
+    : Measurement X (Observable (𝓗[d] →L[ℂ] 𝓗[d])) → X → Λ → ℝ≥0∞
   /-- The response functions are measurable, so they can be averaged over a preparation. -/
-  measurable_resp {X : Type} [Fintype X] [MeasurableSpace X] [MeasurableSingletonClass X]
-    (M : Measurement X (Observable (𝓗[d] →L[ℂ] 𝓗[d]))) (x : X) : Measurable (resp M x)
-  /-- In every ontic state, the measurement `M` gives some outcome: the response probabilities
-  sum to one. -/
-  sum_resp {X : Type} [Fintype X] [MeasurableSpace X] [MeasurableSingletonClass X]
-    (M : Measurement X (Observable (𝓗[d] →L[ℂ] 𝓗[d]))) (l : Λ) : ∑ x, resp M x l = 1
-  /-- The model reproduces the Born rule: averaging the response function over the preparation
-  measure of `ψ` gives the probability of the outcome `x` in the vector state of `ψ`. -/
-  lintegral_resp {X : Type} [Fintype X] [MeasurableSpace X] [MeasurableSingletonClass X]
-    (M : Measurement X (Observable (𝓗[d] →L[ℂ] 𝓗[d]))) (ψ : 𝓗[d]) (hψ : ‖ψ‖ = 1) (x : X) :
-    ∫⁻ l, resp M x l ∂prep ψ hψ =
-      ENNReal.ofReal ((ofVec hψ)⟨M {x} (measurableSet_singleton x)⟩)
+  measurable_resp
+    {X : Type} [Fintype X] [MeasurableSpace X] [MeasurableSingletonClass X]
+    (M : Measurement X (Observable (𝓗[d] →L[ℂ] 𝓗[d]))) (x : X)
+    : Measurable (resp M x)
+  /--
+  In every ontic state, the measurement `M` gives some outcome: the response probabilities
+  sum to one.
+  -/
+  sum_resp
+    {X : Type} [Fintype X] [MeasurableSpace X] [MeasurableSingletonClass X]
+    (M : Measurement X (Observable (𝓗[d] →L[ℂ] 𝓗[d]))) (l : Λ)
+    : ∑ x, resp M x l = 1
+  /--
+  The model reproduces the Born rule: averaging the response function over the preparation
+  measure of `ψ` gives the probability of the outcome `x` in the vector state of `ψ`.
+  -/
+  lintegral_resp
+    {X : Type} [Fintype X] [MeasurableSpace X] [MeasurableSingletonClass X]
+    (M : Measurement X (Observable (𝓗[d] →L[ℂ] 𝓗[d])))
+    (ψ : 𝓗[d]) (hψ : ‖ψ‖ = 1)
+    (x : X)
+    : ∫⁻ l, resp M x l ∂prep ψ hψ = ENNReal.ofReal ((ofVec hψ)⟨M {x} (measurableSet_singleton x)⟩)
 
 attribute [instance] OntologicalModel.isProbabilityMeasure_prep
 
@@ -133,10 +149,12 @@ variable {d : Type*} [Fintype d] [DecidableEq d] {Λ : Type*} [MeasurableSpace �
 
 -/
 
-/-- An ontological model is ψ-ontic if the preparation measures of any two unit vectors with
+/--
+An ontological model is ψ-ontic if the preparation measures of any two unit vectors with
 different vector states are mutually singular, so that the ontic state determines the quantum
 state. Unit vectors differing only by a global phase have the same vector state, and may share
-ontic states. -/
+ontic states.
+-/
 def IsPsiOntic (M : OntologicalModel d Λ) : Prop :=
   ∀ (ψ φ : 𝓗[d]) (hψ : ‖ψ‖ = 1) (hφ : ‖φ‖ = 1),
     ofVec (𝕜 := ℂ) hψ ≠ ofVec (𝕜 := ℂ) hφ → M.prep ψ hψ ⟂ₘ M.prep φ hφ
@@ -147,7 +165,8 @@ def IsPsiOntic (M : OntologicalModel d Λ) : Prop :=
 
 -/
 
-/-- The preparation-independence assumption of Pusey, Barrett and Rudolph for the model `M`,
+/--
+The preparation-independence assumption of Pusey, Barrett and Rudolph for the model `M`,
 relative to a family of models `Mn n` of `n` copies of the system (on `𝓗[Fin n → d]`, with ontic
 states `Λn n`). It asks that `n` independently prepared systems have independent ontic states
 which jointly determine the ontic state of the `n` copies: there are measurable maps
@@ -163,23 +182,30 @@ Since preparations are indexed by vectors, two families `ψ`, `ψ'` with the sam
 measure, and at `n = 0` the preparation `(Mn 0).prep` of the trivial product vector must be a
 Dirac measure. The first condition is automatic when `M.prep` depends only on the ray of the
 vector, and the second only concerns the trivial system `n = 0`, which the PBR theorem does not
-use; so the standard PBR setting is covered by choosing one representative vector per ray. -/
-def PreparationIndependent (M : OntologicalModel d Λ) {Λn : ℕ → Type*}
-    [∀ n, MeasurableSpace (Λn n)] (Mn : (n : ℕ) → OntologicalModel (Fin n → d) (Λn n)) : Prop :=
-  ∃ ι : (n : ℕ) → (Fin n → Λ) → Λn n, (∀ n, Measurable (ι n)) ∧
-    ∀ (n : ℕ) (ψ : Fin n → 𝓗[d]) (hψ : ∀ i, ‖ψ i‖ = 1),
-      (Mn n).prep (piProdVec ψ) (norm_piProdVec_eq_one hψ) =
-        (Measure.pi fun i => M.prep (ψ i) (hψ i)).map (ι n)
+use; so the standard PBR setting is covered by choosing one representative vector per ray.
+-/
+def PreparationIndependent
+    (M : OntologicalModel d Λ)
+    {Λn : ℕ → Type*} [∀ n, MeasurableSpace (Λn n)]
+    (Mn : (n : ℕ) → OntologicalModel (Fin n → d) (Λn n))
+    : Prop :=
+  ∃ ι : (n : ℕ) → (Fin n → Λ) → Λn n,
+    (∀ n, Measurable (ι n))
+      ∧ ∀ (n : ℕ) (ψ : Fin n → 𝓗[d]) (hψ : ∀ i, ‖ψ i‖ = 1),
+        (Mn n).prep (piProdVec ψ) (norm_piProdVec_eq_one hψ)
+          = (Measure.pi fun i => M.prep (ψ i) (hψ i)).map (ι n)
 
-/-- The Cartesian-product form of preparation independence: if the `n`-copy models have ontic
+/--
+The Cartesian-product form of preparation independence: if the `n`-copy models have ontic
 space `Fin n → Λ` and prepare the product vector `piProdVec ψ` with the product of the
-measures `M.prep (ψ i)`, then `M` is preparation independent (with `ι n = id`). -/
-lemma PreparationIndependent.of_prep_piProdVec {M : OntologicalModel d Λ}
-    {Mn : (n : ℕ) → OntologicalModel (Fin n → d) (Fin n → Λ)}
+measures `M.prep (ψ i)`, then `M` is preparation independent (with `ι n = id`).
+-/
+lemma PreparationIndependent.of_prep_piProdVec
+    {M : OntologicalModel d Λ} {Mn : (n : ℕ) → OntologicalModel (Fin n → d) (Fin n → Λ)}
     (h : ∀ n (ψ : Fin n → 𝓗[d]) (hψ : ∀ i, ‖ψ i‖ = 1),
-      (Mn n).prep (piProdVec ψ) (norm_piProdVec_eq_one hψ) =
-        Measure.pi fun i => M.prep (ψ i) (hψ i)) :
-    M.PreparationIndependent Mn :=
+      (Mn n).prep (piProdVec ψ) (norm_piProdVec_eq_one hψ)
+        = Measure.pi fun i => M.prep (ψ i) (hψ i))
+    : M.PreparationIndependent Mn :=
   ⟨fun _ => id, fun _ => measurable_id, fun n ψ hψ => by rw [h, Measure.map_id]⟩
 
 end OntologicalModel

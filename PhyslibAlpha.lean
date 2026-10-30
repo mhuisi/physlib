@@ -273,7 +273,8 @@ public import PhyslibAlpha.Mathematics.TauCeti.Analysis.PositiveDefinite.Normali
 public import PhyslibAlpha.Mathematics.TauCeti.Analysis.PositiveDefinite.PontryaginMeasure
 public import PhyslibAlpha.Mathematics.TauCeti.LinearAlgebra.Dimension.Submodule
 public import PhyslibAlpha.Mathematics.TauCeti.LinearAlgebra.Matrix.PosSemidef
-public import PhyslibAlpha.Mathematics.TauCeti.MeasureTheory.Function.StronglyMeasurable.InnerRegular
+public import
+  PhyslibAlpha.Mathematics.TauCeti.MeasureTheory.Function.StronglyMeasurable.InnerRegular
 public import PhyslibAlpha.Mathematics.TauCeti.MeasureTheory.Integral.PeakFunction
 public import PhyslibAlpha.Mathematics.TauCeti.MeasureTheory.Measure.FiniteMeasureExt
 public import PhyslibAlpha.Mathematics.TauCeti.MeasureTheory.Measure.Regular

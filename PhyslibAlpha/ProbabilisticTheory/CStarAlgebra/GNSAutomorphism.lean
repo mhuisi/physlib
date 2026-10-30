@@ -62,53 +62,55 @@ variable (ω : 𝓢[ℂ, A]) (σ : A ≃⋆ₐ[ℂ] A)
 
 /-- The map `[a] ↦ [σ a]` on the pre-Hilbert space of a state. -/
 def preGNSAut : ω.toPositiveLinearMap.PreGNS →ₗ[ℂ] ω.toPositiveLinearMap.PreGNS :=
-  ω.toPositiveLinearMap.toPreGNS.toLinearMap ∘ₗ σ.toAlgEquiv.toLinearMap ∘ₗ
-    ω.toPositiveLinearMap.ofPreGNS.toLinearMap
+  ω.toPositiveLinearMap.toPreGNS.toLinearMap ∘ₗ σ.toAlgEquiv.toLinearMap
+    ∘ₗ ω.toPositiveLinearMap.ofPreGNS.toLinearMap
 
 variable {ω σ}
 
 omit [StarOrderedRing A] in
-lemma ofPreGNS_preGNSAut (x : ω.toPositiveLinearMap.PreGNS) :
-    ω.toPositiveLinearMap.ofPreGNS (preGNSAut ω σ x) = σ (ω.toPositiveLinearMap.ofPreGNS x) := rfl
+lemma ofPreGNS_preGNSAut (x : ω.toPositiveLinearMap.PreGNS)
+    : ω.toPositiveLinearMap.ofPreGNS (preGNSAut ω σ x) = σ (ω.toPositiveLinearMap.ofPreGNS x) :=
+  rfl
 
 /-- A symmetry preserving the state preserves the GNS inner product. -/
-lemma inner_preGNSAut (hσ : ∀ a, ω (σ a) = ω a) (x y : ω.toPositiveLinearMap.PreGNS) :
-    ⟪preGNSAut ω σ x, preGNSAut ω σ y⟫_ℂ = ⟪x, y⟫_ℂ := by
-  rw [PositiveLinearMap.preGNS_inner_def, PositiveLinearMap.preGNS_inner_def,
-    ofPreGNS_preGNSAut, ofPreGNS_preGNSAut, ← map_star, ← map_mul]
+lemma inner_preGNSAut (hσ : ∀ a, ω (σ a) = ω a) (x y : ω.toPositiveLinearMap.PreGNS)
+    : ⟪preGNSAut ω σ x, preGNSAut ω σ y⟫_ℂ = ⟪x, y⟫_ℂ := by
+  rw [PositiveLinearMap.preGNS_inner_def, PositiveLinearMap.preGNS_inner_def, ofPreGNS_preGNSAut,
+    ofPreGNS_preGNSAut, ← map_star, ← map_mul]
   exact hσ _
 
-lemma norm_preGNSAut (hσ : ∀ a, ω (σ a) = ω a) (x : ω.toPositiveLinearMap.PreGNS) :
-    ‖preGNSAut ω σ x‖ = ‖x‖ := by
+lemma norm_preGNSAut (hσ : ∀ a, ω (σ a) = ω a) (x : ω.toPositiveLinearMap.PreGNS)
+    : ‖preGNSAut ω σ x‖ = ‖x‖ := by
   have h := inner_preGNSAut hσ x x
   rw [inner_self_eq_norm_sq_to_K, inner_self_eq_norm_sq_to_K] at h
   have h' : ‖preGNSAut ω σ x‖ ^ 2 = ‖x‖ ^ 2 := by exact_mod_cast h
   nlinarith [norm_nonneg (preGNSAut ω σ x), norm_nonneg x]
 
 /-- The symmetry as a bounded operator on the pre-Hilbert space. -/
-def preGNSAutCLM (hσ : ∀ a, ω (σ a) = ω a) :
-    ω.toPositiveLinearMap.PreGNS →L[ℂ] ω.toPositiveLinearMap.PreGNS :=
+def preGNSAutCLM (hσ : ∀ a, ω (σ a) = ω a)
+    : ω.toPositiveLinearMap.PreGNS →L[ℂ] ω.toPositiveLinearMap.PreGNS :=
   (preGNSAut ω σ).mkContinuous 1 fun x => by rw [one_mul, norm_preGNSAut hσ]
 
 /-! ## B. The unitary operator -/
 
 /-- The unitary operator on the GNS space implementing a symmetry that preserves the state. -/
-def gnsAut (hσ : ∀ a, ω (σ a) = ω a) : ω.GNS →L[ℂ] ω.GNS :=
-  (preGNSAutCLM hσ).completion
+def gnsAut (hσ : ∀ a, ω (σ a) = ω a) : ω.GNS →L[ℂ] ω.GNS := (preGNSAutCLM hσ).completion
 
-lemma gnsAut_coe (hσ : ∀ a, ω (σ a) = ω a) (x : ω.toPositiveLinearMap.PreGNS) :
-    gnsAut hσ (x : ω.GNS) = ((preGNSAut ω σ x : ω.toPositiveLinearMap.PreGNS) : ω.GNS) := by
+lemma gnsAut_coe (hσ : ∀ a, ω (σ a) = ω a) (x : ω.toPositiveLinearMap.PreGNS)
+    : gnsAut hσ (x : ω.GNS) = ((preGNSAut ω σ x : ω.toPositiveLinearMap.PreGNS) : ω.GNS) := by
   simp [gnsAut, preGNSAutCLM]
 
 /-- The implementing operator preserves the inner product of the GNS space. -/
-lemma inner_gnsAut (hσ : ∀ a, ω (σ a) = ω a) (x y : ω.GNS) :
-    ⟪gnsAut hσ x, gnsAut hσ y⟫_ℂ = ⟪x, y⟫_ℂ := by
+lemma inner_gnsAut (hσ : ∀ a, ω (σ a) = ω a) (x y : ω.GNS)
+    : ⟪gnsAut hσ x, gnsAut hσ y⟫_ℂ = ⟪x, y⟫_ℂ := by
   induction x, y using UniformSpace.Completion.induction_on₂ with
   | hp =>
-    exact isClosed_eq ((continuous_inner.comp ((gnsAut hσ).continuous.prodMap
-      (gnsAut hσ).continuous)).comp continuous_id) continuous_inner
-  | ih x y => rw [gnsAut_coe, gnsAut_coe, Completion.inner_coe, Completion.inner_coe,
-      inner_preGNSAut hσ]
+    exact isClosed_eq
+      ((continuous_inner.comp ((gnsAut hσ).continuous.prodMap (gnsAut hσ).continuous)).comp
+        continuous_id)
+      continuous_inner
+  | ih x y =>
+    rw [gnsAut_coe, gnsAut_coe, Completion.inner_coe, Completion.inner_coe, inner_preGNSAut hσ]
 
 /-! ## C. Representations of groups of symmetries -/
 
@@ -119,8 +121,8 @@ variable {α : Multiplicative G →* (A ≃⋆ₐ[ℂ] A)} (hα : ∀ g a, ω (�
 
 include hα
 
-lemma gnsAut_mul (g h : Multiplicative G) :
-    gnsAut (hα (g * h)) = gnsAut (hα g) * gnsAut (hα h) := by
+lemma gnsAut_mul (g h : Multiplicative G)
+    : gnsAut (hα (g * h)) = gnsAut (hα g) * gnsAut (hα h) := by
   ext x
   induction x using UniformSpace.Completion.induction_on with
   | hp =>
@@ -145,8 +147,7 @@ lemma gnsAut_one : gnsAut (hα 1) = 1 := by
     rw [map_one]
     rfl
 
-lemma star_gnsAut_mul_gnsAut (g : Multiplicative G) :
-    star (gnsAut (hα g)) * gnsAut (hα g) = 1 := by
+lemma star_gnsAut_mul_gnsAut (g : Multiplicative G) : star (gnsAut (hα g)) * gnsAut (hα g) = 1 := by
   rw [ContinuousLinearMap.star_eq_adjoint, ContinuousLinearMap.mul_def]
   exact (ContinuousLinearMap.inner_map_map_iff_adjoint_comp_self _).mp
     (fun x y => inner_gnsAut (hα g) x y)
@@ -154,17 +155,22 @@ lemma star_gnsAut_mul_gnsAut (g : Multiplicative G) :
 lemma star_gnsAut (g : Multiplicative G) : star (gnsAut (hα g)) = gnsAut (hα g⁻¹) := by
   have h1 : gnsAut (hα g) * gnsAut (hα g⁻¹) = 1 := by
     rw [← gnsAut_mul hα _ _, mul_inv_cancel, gnsAut_one hα]
-  calc star (gnsAut (hα g)) = star (gnsAut (hα g)) * (gnsAut (hα g) * gnsAut (hα g⁻¹)) := by
-        rw [h1, mul_one]
+  calc
+    star (gnsAut (hα g))
+      = star (gnsAut (hα g)) * (gnsAut (hα g) * gnsAut (hα g⁻¹)) := by rw [h1, mul_one]
     _ = gnsAut (hα g⁻¹) := by rw [← mul_assoc, star_gnsAut_mul_gnsAut hα, one_mul]
 
-/-- **Translations of an invariant state are unitarily implemented**: the unitary operator on the
-GNS space implementing the symmetry `α g`. -/
-def gnsUnitary (g : Multiplicative G) : unitary (ω.GNS →L[ℂ] ω.GNS) :=
-  ⟨gnsAut (hα g), by
+/--
+**Translations of an invariant state are unitarily implemented**: the unitary operator on the
+GNS space implementing the symmetry `α g`.
+-/
+def gnsUnitary (g : Multiplicative G) : unitary (ω.GNS →L[ℂ] ω.GNS) := ⟨
+  gnsAut (hα g),
+  by
     rw [Unitary.mem_iff]
     refine ⟨star_gnsAut_mul_gnsAut hα g, ?_⟩
-    rw [star_gnsAut hα g, ← gnsAut_mul hα _ _, mul_inv_cancel, gnsAut_one hα]⟩
+    rw [star_gnsAut hα g, ← gnsAut_mul hα _ _, mul_inv_cancel, gnsAut_one hα]
+⟩
 
 /-- **The unitary representation of a symmetry group on the GNS space of an invariant state.** -/
 def gnsUnitaryRep : Multiplicative G →* unitary (ω.GNS →L[ℂ] ω.GNS) where
@@ -173,9 +179,9 @@ def gnsUnitaryRep : Multiplicative G →* unitary (ω.GNS →L[ℂ] ω.GNS) wher
   map_mul' g h := Subtype.ext (gnsAut_mul hα g h)
 
 /-- The implementing unitary fixes the cyclic vector. -/
-lemma gnsUnitary_cyclicVector (g : Multiplicative G) :
-    ((gnsUnitary hα g : unitary (ω.GNS →L[ℂ] ω.GNS)) : ω.GNS →L[ℂ] ω.GNS) ω.gnsCyclicVector =
-      ω.gnsCyclicVector := by
+lemma gnsUnitary_cyclicVector (g : Multiplicative G)
+    : ((gnsUnitary hα g : unitary (ω.GNS →L[ℂ] ω.GNS)) : ω.GNS →L[ℂ] ω.GNS) ω.gnsCyclicVector
+      = ω.gnsCyclicVector := by
   show gnsAut (hα g) ω.gnsCyclicVector = ω.gnsCyclicVector
   rw [gnsCyclicVector, gnsAut_coe]
   congr 1
@@ -183,26 +189,31 @@ lemma gnsUnitary_cyclicVector (g : Multiplicative G) :
   rw [map_one]
 
 /-- The implementing unitary carries `π(a) Ω` to `π(α_g a) Ω`. -/
-lemma gnsUnitary_gnsRep_cyclicVector (g : Multiplicative G) (a : A) :
-    ((gnsUnitary hα g : unitary (ω.GNS →L[ℂ] ω.GNS)) : ω.GNS →L[ℂ] ω.GNS)
-        (ω.gnsRep a ω.gnsCyclicVector) = ω.gnsRep (α g a) ω.gnsCyclicVector := by
+lemma gnsUnitary_gnsRep_cyclicVector (g : Multiplicative G) (a : A)
+    : ((gnsUnitary hα g : unitary (ω.GNS →L[ℂ] ω.GNS)) : ω.GNS →L[ℂ] ω.GNS) (ω.gnsRep a
+        ω.gnsCyclicVector)
+      = ω.gnsRep (α g a) ω.gnsCyclicVector := by
   rw [gnsRep_gnsCyclicVector, gnsRep_gnsCyclicVector]
   show gnsAut (hα g) _ = _
   rw [gnsAut_coe]
   rfl
 
-/-- The implementing unitaries intertwine the GNS representation with the symmetry:
-`U_g π(a) = π(α_g a) U_g`. -/
-lemma gnsUnitary_comp_gnsRep (g : Multiplicative G) (a : A) :
-    ((gnsUnitary hα g : unitary (ω.GNS →L[ℂ] ω.GNS)) : ω.GNS →L[ℂ] ω.GNS) * ω.gnsRep a =
-      ω.gnsRep (α g a) * ((gnsUnitary hα g : unitary (ω.GNS →L[ℂ] ω.GNS)) : ω.GNS →L[ℂ] ω.GNS) := by
+/--
+The implementing unitaries intertwine the GNS representation with the symmetry:
+`U_g π(a) = π(α_g a) U_g`.
+-/
+lemma gnsUnitary_comp_gnsRep (g : Multiplicative G) (a : A)
+    : ((gnsUnitary hα g : unitary (ω.GNS →L[ℂ] ω.GNS)) : ω.GNS →L[ℂ] ω.GNS) * ω.gnsRep a
+      = ω.gnsRep (α g a)
+        * ((gnsUnitary hα g : unitary (ω.GNS →L[ℂ] ω.GNS)) : ω.GNS →L[ℂ] ω.GNS) := by
   ext x
   induction x using UniformSpace.Completion.induction_on with
   | hp =>
-    exact isClosed_eq (((gnsUnitary hα g : unitary (ω.GNS →L[ℂ] ω.GNS)) :
-        ω.GNS →L[ℂ] ω.GNS) * ω.gnsRep a).continuous
-      (ω.gnsRep (α g a) * ((gnsUnitary hα g : unitary (ω.GNS →L[ℂ] ω.GNS)) :
-        ω.GNS →L[ℂ] ω.GNS)).continuous
+    exact isClosed_eq
+      (((gnsUnitary hα g : unitary (ω.GNS →L[ℂ] ω.GNS)) : ω.GNS →L[ℂ] ω.GNS)
+        * ω.gnsRep a).continuous
+      (ω.gnsRep (α g a)
+        * ((gnsUnitary hα g : unitary (ω.GNS →L[ℂ] ω.GNS)) : ω.GNS →L[ℂ] ω.GNS)).continuous
   | ih x =>
     show gnsAut (hα g) (ω.toPositiveLinearMap.gnsStarAlgHom a (x : ω.GNS)) =
       ω.toPositiveLinearMap.gnsStarAlgHom (α g a) (gnsAut (hα g) (x : ω.GNS))
@@ -216,15 +227,19 @@ lemma gnsUnitary_comp_gnsRep (g : Multiplicative G) (a : A) :
       ω.toPositiveLinearMap.toPreGNS ((α g a) * (α g) (ω.toPositiveLinearMap.ofPreGNS x))
     rw [map_mul]
 
-/-- The matrix coefficients of the GNS vectors `π(a) Ω` are the correlation functions of the
-state: `⟪π(a) Ω, U_g π(a) Ω⟫ = ω(a⋆ α_g(a))`. -/
-lemma inner_gnsRep_cyclicVector_gnsUnitary (g : Multiplicative G) (a : A) :
-    ⟪ω.gnsRep a ω.gnsCyclicVector,
-      ((gnsUnitary hα g : unitary (ω.GNS →L[ℂ] ω.GNS)) : ω.GNS →L[ℂ] ω.GNS)
-        (ω.gnsRep a ω.gnsCyclicVector)⟫_ℂ = ω (star a * α g a) := by
+/--
+The matrix coefficients of the GNS vectors `π(a) Ω` are the correlation functions of the
+state: `⟪π(a) Ω, U_g π(a) Ω⟫ = ω(a⋆ α_g(a))`.
+-/
+lemma inner_gnsRep_cyclicVector_gnsUnitary (g : Multiplicative G) (a : A)
+    : ⟪ω.gnsRep a ω.gnsCyclicVector,
+        ((gnsUnitary hα g : unitary (ω.GNS →L[ℂ] ω.GNS)) : ω.GNS →L[ℂ] ω.GNS)
+          (ω.gnsRep a ω.gnsCyclicVector)⟫_ℂ
+      = ω (star a * α g a) := by
   rw [gnsUnitary_gnsRep_cyclicVector hα g a]
-  have h : ⟪ω.gnsRep a ω.gnsCyclicVector, ω.gnsRep (α g a) ω.gnsCyclicVector⟫_ℂ =
-      ⟪ω.gnsCyclicVector, ω.gnsRep (star a) (ω.gnsRep (α g a) ω.gnsCyclicVector)⟫_ℂ := by
+  have h
+      : ⟪ω.gnsRep a ω.gnsCyclicVector, ω.gnsRep (α g a) ω.gnsCyclicVector⟫_ℂ
+        = ⟪ω.gnsCyclicVector, ω.gnsRep (star a) (ω.gnsRep (α g a) ω.gnsCyclicVector)⟫_ℂ := by
     rw [← ContinuousLinearMap.adjoint_inner_left (ω.gnsRep (star a)),
       ← ContinuousLinearMap.star_eq_adjoint, ← map_star]
     simp

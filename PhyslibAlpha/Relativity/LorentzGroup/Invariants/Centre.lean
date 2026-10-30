@@ -76,20 +76,25 @@ a Weyl index carries `-1`, and nothing else is needed of the pattern.
 
 -/
 
-/-- The subspace on which the centre of `SL(2,ℂ)` acts by the scalar `ε`: an integer spin
-  sits at `ε = 1` and a half-integer spin at `ε = -1`. -/
-def centreEigenspace (repLorentz : Representation ℂ SL(2,ℂ) V) (ε : ℂ) : Submodule ℂ V :=
+/--
+The subspace on which the centre of `SL(2,ℂ)` acts by the scalar `ε`: an integer spin
+sits at `ε = 1` and a half-integer spin at `ε = -1`.
+-/
+def centreEigenspace (repLorentz : Representation ℂ (SL(2,ℂ)) V) (ε : ℂ) : Submodule ℂ V :=
   Module.End.eigenspace (repLorentz (-1)) ε
 
 /-- Membership of `centreEigenspace` unfolded: the centre scales the vector by `ε`. -/
-lemma mem_centreEigenspace {repLorentz : Representation ℂ SL(2,ℂ) V} {ε : ℂ} {x : V} :
-    x ∈ centreEigenspace repLorentz ε ↔ repLorentz (-1) x = ε • x := by
+lemma mem_centreEigenspace {repLorentz : Representation ℂ (SL(2,ℂ)) V} {ε : ℂ} {x : V}
+    : x ∈ centreEigenspace repLorentz ε ↔ repLorentz (-1) x = ε • x := by
   simp [centreEigenspace]
 
-/-- Dualising a representation preserves the sign at the centre: `-1` is its own inverse, so
-  the contragredient action of the centre is the transpose of a scalar. -/
-lemma dual_neg_one_eq_smul_id {rep : Representation ℂ SL(2,ℂ) V} {ε : ℂ}
-    (hrep : rep (-1) = ε • LinearMap.id) : rep.dual (-1) = ε • LinearMap.id := by
+/--
+Dualising a representation preserves the sign at the centre: `-1` is its own inverse, so
+the contragredient action of the centre is the transpose of a scalar.
+-/
+lemma dual_neg_one_eq_smul_id
+    {rep : Representation ℂ (SL(2,ℂ)) V} {ε : ℂ} (hrep : rep (-1) = ε • LinearMap.id)
+    : rep.dual (-1) = ε • LinearMap.id := by
   ext φ x
   have hinv : (-1 : SL(2,ℂ))⁻¹ = -1 := by simp
   simp [Representation.dual_apply, Module.Dual.transpose_apply, hinv, hrep]
@@ -109,24 +114,27 @@ the Lorentz-scalar value spaces and `ε = -1` for the Weyl ones.
 variable {A : Type} [Ring A] [Algebra ℂ A]
 
 /-- **The span of one symbol family carries the sign of its value space.** -/
-lemma range_le_centreEigenspace {repLorentz : Representation ℂ SL(2,ℂ) A}
-    {rep : Representation ℂ SL(2,ℂ) V}
+lemma range_le_centreEigenspace
+    {repLorentz : Representation ℂ (SL(2,ℂ)) A} {rep : Representation ℂ (SL(2,ℂ)) V}
     {F : {n : ℕ} → (Fin n → Fin 1 ⊕ Fin 3) → Module.Dual ℂ V →ₗ[ℂ] A}
-    (hF : IsLorentzCovDerivTransforms repLorentz rep F) {ε : ℂ}
-    (hrep : rep (-1) = ε • LinearMap.id) {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin 3) :
-    LinearMap.range (F l) ≤ centreEigenspace repLorentz ε := by
+    (hF : IsLorentzCovDerivTransforms repLorentz rep F)
+    {ε : ℂ} (hrep : rep (-1) = ε • LinearMap.id)
+    {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin 3)
+    : LinearMap.range (F l) ≤ centreEigenspace repLorentz ε := by
   rintro _ ⟨φ, rfl⟩
   rw [mem_centreEigenspace, hF.neg_one_apply l φ, dual_neg_one_eq_smul_id hrep]
   simp
 
-/-- The half-integer case of `range_le_centreEigenspace`, in the form the Weyl value spaces
-  state their sign. -/
-lemma range_le_centreEigenspace_neg_one {repLorentz : Representation ℂ SL(2,ℂ) A}
-    {rep : Representation ℂ SL(2,ℂ) V}
+/--
+The half-integer case of `range_le_centreEigenspace`, in the form the Weyl value spaces
+state their sign.
+-/
+lemma range_le_centreEigenspace_neg_one
+    {repLorentz : Representation ℂ (SL(2,ℂ)) A} {rep : Representation ℂ (SL(2,ℂ)) V}
     {F : {n : ℕ} → (Fin n → Fin 1 ⊕ Fin 3) → Module.Dual ℂ V →ₗ[ℂ] A}
-    (hF : IsLorentzCovDerivTransforms repLorentz rep F)
-    (hrep : rep (-1) = -LinearMap.id) {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin 3) :
-    LinearMap.range (F l) ≤ centreEigenspace repLorentz (-1) :=
+    (hF : IsLorentzCovDerivTransforms repLorentz rep F) (hrep : rep (-1) = -LinearMap.id)
+    {n : ℕ} (l : Fin n → Fin 1 ⊕ Fin 3)
+    : LinearMap.range (F l) ≤ centreEigenspace repLorentz (-1) :=
   range_le_centreEigenspace hF (by rw [hrep]; module) l
 
 /-!
@@ -140,14 +148,15 @@ indices cancel and an odd number does not.
 -/
 
 /-- The sign of a product is the product of the signs. -/
-lemma mul_le_centreEigenspace {repLorentz : Representation ℂ SL(2,ℂ) A}
+lemma mul_le_centreEigenspace
+    {repLorentz : Representation ℂ (SL(2,ℂ)) A}
     (hmul : ∀ (Λ : SL(2,ℂ)) (x y : A), repLorentz Λ (x * y) = repLorentz Λ x * repLorentz Λ y)
-    {W₁ W₂ : Submodule ℂ A} {ε₁ ε₂ : ℂ} (h₁ : W₁ ≤ centreEigenspace repLorentz ε₁)
-    (h₂ : W₂ ≤ centreEigenspace repLorentz ε₂) :
-    W₁ * W₂ ≤ centreEigenspace repLorentz (ε₁ * ε₂) := by
+    {W₁ W₂ : Submodule ℂ A} {ε₁ ε₂ : ℂ}
+    (h₁ : W₁ ≤ centreEigenspace repLorentz ε₁) (h₂ : W₂ ≤ centreEigenspace repLorentz ε₂)
+    : W₁ * W₂ ≤ centreEigenspace repLorentz (ε₁ * ε₂) := by
   refine Submodule.mul_le.2 fun a ha b hb => ?_
-  rw [mem_centreEigenspace, hmul, mem_centreEigenspace.1 (h₁ ha),
-    mem_centreEigenspace.1 (h₂ hb), Algebra.smul_mul_assoc, Algebra.mul_smul_comm, smul_smul]
+  rw [mem_centreEigenspace, hmul, mem_centreEigenspace.1 (h₁ ha), mem_centreEigenspace.1 (h₂ hb),
+    Algebra.smul_mul_assoc, Algebra.mul_smul_comm, smul_smul]
 
 /-!
 
@@ -160,16 +169,23 @@ once, so it is zero. Modulo a stable subspace `S` this is the case `μ = -1` of
 
 -/
 
-/-- A subspace of half-integer spin carries no Lorentz invariant beyond a Lorentz-stable
-  submodule `S`: an invariant of the join with `S` already lies in `S`. The centre acts on the
-  subspace by `-1 ≠ 1`, so it reduces to `⊥`. -/
+/--
+A subspace of half-integer spin carries no Lorentz invariant beyond a Lorentz-stable
+submodule `S`: an invariant of the join with `S` already lies in `S`. The centre acts on the
+subspace by `-1 ≠ 1`, so it reduces to `⊥`.
+-/
 lemma mem_of_invariant_of_mem_sup_centreEigenspace_neg_one
-    {repLorentz : Representation ℂ SL(2,ℂ) A} {W : Submodule ℂ A}
-    (hW : W ≤ centreEigenspace repLorentz (-1)) (S : Submodule ℂ A)
-    (hS : ∀ g : SL(2,ℂ), ∀ y ∈ S, repLorentz g y ∈ S) {x : A} (hx : x ∈ W ⊔ S)
-    (hinv : ∀ g : SL(2,ℂ), repLorentz g x = x) : x ∈ S := by
-  simpa using reducesInvariantsTo_bot_of_apply_eq_smul (σ := fun g => repLorentz g) (-1)
-    (by norm_num) (fun v hv => mem_centreEigenspace.1 (hW hv)) S hS x hx hinv
+    {repLorentz : Representation ℂ (SL(2,ℂ)) A} {W : Submodule ℂ A}
+    (hW : W ≤ centreEigenspace repLorentz (-1))
+    (S : Submodule ℂ A) (hS : ∀ g : SL(2,ℂ), ∀ y ∈ S, repLorentz g y ∈ S)
+    {x : A} (hx : x ∈ W ⊔ S) (hinv : ∀ g : SL(2,ℂ), repLorentz g x = x)
+    : x ∈ S := by
+  simpa using
+    reducesInvariantsTo_bot_of_apply_eq_smul
+      (σ := fun g => repLorentz g)
+      (-1) (by norm_num)
+      (fun v hv => mem_centreEigenspace.1 (hW hv))
+      S hS x hx hinv
 
 end Invariants
 

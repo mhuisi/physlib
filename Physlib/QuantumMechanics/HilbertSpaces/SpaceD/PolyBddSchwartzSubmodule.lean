@@ -69,8 +69,9 @@ open SchwartzSubmodule
 
 /-- A function is a bounded Schwartz map if it is both Schwartz and bounded by powers of `‖x‖`. -/
 def PolyBddSchwartzMap (d : ℕ) (a : ℕ∞) : Submodule ℂ 𝓢(Space d, ℂ) where
-  carrier := {f : 𝓢(Space d, ℂ) |
-    ∀ k : ℕ, k ≤ a → ∃ C : ℝ, 0 < C ∧ ∀ x : Space d, ‖x‖ ^ (-k : ℤ) * ‖f x‖ ≤ C}
+  carrier :=
+    {f : 𝓢(Space d, ℂ) |
+      ∀ k : ℕ, k ≤ a → ∃ C : ℝ, 0 < C ∧ ∀ x : Space d, ‖x‖ ^ (-k : ℤ) * ‖f x‖ ≤ C}
   add_mem' := by
     intro f g hf hg k hk
     obtain ⟨C₁, hC₁_pos, hC₁⟩ := hf k hk
@@ -88,27 +89,30 @@ def PolyBddSchwartzMap (d : ℕ) (a : ℕ∞) : Submodule ℂ 𝓢(Space d, ℂ)
     exact le_trans (mul_le_mul_of_nonneg_left (hC x) (norm_nonneg c)) (by linarith)
 
 /-- The continuous linear map `schwartzIncl` with domain restricted to `PolyBddSchwartzMap d a`. -/
-def polyBddSchwartzIncl {d : ℕ} {a : ℕ∞} (μ : Measure (Space d)) [μ.HasTemperateGrowth] :
-    PolyBddSchwartzMap d a →L[ℂ] SpaceDHilbertSpace d μ :=
-  ⟨(schwartzIncl μ).domRestrict (PolyBddSchwartzMap d a),
-    (schwartzIncl μ).continuous_domRestrict (schwartzIncl μ).continuous _⟩
+def polyBddSchwartzIncl {d : ℕ} {a : ℕ∞} (μ : Measure (Space d)) [μ.HasTemperateGrowth]
+    : PolyBddSchwartzMap d a →L[ℂ] SpaceDHilbertSpace d μ := ⟨
+  (schwartzIncl μ).domRestrict (PolyBddSchwartzMap d a),
+  (schwartzIncl μ).continuous_domRestrict (schwartzIncl μ).continuous _
+⟩
 
 /-- The submodule of `SpaceDHilbertSpace d` corresponding to bounded Schwartz maps. -/
 abbrev PolyBddSchwartzSubmodule
-    (d : ℕ) (a : ℕ∞) (μ : Measure (Space d) := volume) [μ.HasTemperateGrowth] :
-    Submodule ℂ (SpaceDHilbertSpace d μ) :=
+    (d : ℕ) (a : ℕ∞) (μ : Measure (Space d) := volume) [μ.HasTemperateGrowth]
+    : Submodule ℂ (SpaceDHilbertSpace d μ) :=
   (polyBddSchwartzIncl (a := a) μ).range
 
 lemma polyBddSchwartzIncl_injective
-    {d : ℕ} (a : ℕ∞) (μ : Measure (Space d)) [μ.HasTemperateGrowth] [μ.IsOpenPosMeasure] :
-    Function.Injective (polyBddSchwartzIncl (a := a) μ) :=
+    {d : ℕ} (a : ℕ∞) (μ : Measure (Space d)) [μ.HasTemperateGrowth] [μ.IsOpenPosMeasure]
+    : Function.Injective (polyBddSchwartzIncl (a := a) μ) :=
   LinearMap.injective_domRestrict_iff.mpr <| (schwartzIncl_ker μ).symm ▸ disjoint_bot_right
 
-/-- The linear equivalence between polynomially-bounded Schwartz maps and the corresponding
-  submodule of the Hilbert space. -/
+/--
+The linear equivalence between polynomially-bounded Schwartz maps and the corresponding
+submodule of the Hilbert space.
+-/
 def polyBddSchwartzEquiv
-    {d : ℕ} {a : ℕ∞} (μ : Measure (Space d)) [μ.HasTemperateGrowth] [μ.IsOpenPosMeasure] :
-    PolyBddSchwartzMap d a ≃ₗ[ℂ] PolyBddSchwartzSubmodule d a μ :=
+    {d : ℕ} {a : ℕ∞} (μ : Measure (Space d)) [μ.HasTemperateGrowth] [μ.IsOpenPosMeasure]
+    : PolyBddSchwartzMap d a ≃ₗ[ℂ] PolyBddSchwartzSubmodule d a μ :=
   LinearEquiv.ofInjective (polyBddSchwartzIncl μ).toLinearMap (polyBddSchwartzIncl_injective a μ)
 
 namespace PolyBddSchwartzSubmodule
@@ -127,9 +131,9 @@ instance : CoeFun (PolyBddSchwartzMap d a) (fun _ ↦ Space d → ℂ) := ⟨fun
 @[simp]
 lemma toFun_eq_coe (f : PolyBddSchwartzMap d a) (x : Space d) : f.val.toFun x = f.val x := rfl
 
-lemma polyBddSchwartzEquiv_symm_apply_coe [μ.IsOpenPosMeasure]
-    {ψ : SchwartzSubmodule d μ} (hψ : ↑ψ ∈ PolyBddSchwartzSubmodule d a μ) :
-    ((polyBddSchwartzEquiv μ).symm ⟨ψ, hψ⟩).val = (schwartzEquiv μ).symm ψ := by
+lemma polyBddSchwartzEquiv_symm_apply_coe
+    [μ.IsOpenPosMeasure] {ψ : SchwartzSubmodule d μ} (hψ : ↑ψ ∈ PolyBddSchwartzSubmodule d a μ)
+    : ((polyBddSchwartzEquiv μ).symm ⟨ψ, hψ⟩).val = (schwartzEquiv μ).symm ψ := by
   apply (schwartzEquiv μ).injective
   apply SetLike.coe_eq_coe.mp
   obtain ⟨g, hg⟩ := (polyBddSchwartzEquiv μ).surjective ⟨ψ.val, hψ⟩
@@ -138,8 +142,8 @@ lemma polyBddSchwartzEquiv_symm_apply_coe [μ.IsOpenPosMeasure]
   rfl
 
 variable {μ} in
-lemma polyBddSchwartzEquiv_coe_ae [μ.IsOpenPosMeasure] (f : PolyBddSchwartzMap d a) :
-    polyBddSchwartzEquiv μ f =ᵐ[μ] f.val :=
+lemma polyBddSchwartzEquiv_coe_ae [μ.IsOpenPosMeasure] (f : PolyBddSchwartzMap d a)
+    : polyBddSchwartzEquiv μ f =ᵐ[μ] f.val :=
   schwartzEquiv_coe_ae f.val
 
 /-!
@@ -151,8 +155,9 @@ lemma PolyBddSchwartzMap_zero_eq_top (d : ℕ) : PolyBddSchwartzMap d 0 = ⊤ :=
   have := f.decay 0 0
   simp_all [PolyBddSchwartzMap]
 
-lemma PolyBddSchwartzMap_antitone (d : ℕ) {a b : ℕ∞} (h : a ≤ b) :
-    PolyBddSchwartzMap d b ≤ PolyBddSchwartzMap d a := fun _ hx k hk ↦ hx k (hk.trans h)
+lemma PolyBddSchwartzMap_antitone (d : ℕ) {a b : ℕ∞} (h : a ≤ b)
+    : PolyBddSchwartzMap d b ≤ PolyBddSchwartzMap d a := fun _ hx k hk ↦
+  hx k (hk.trans h)
 
 lemma of_zero_eq : PolyBddSchwartzSubmodule d 0 μ = SchwartzSubmodule d μ := by
   simp [PolyBddSchwartzSubmodule, polyBddSchwartzIncl, PolyBddSchwartzMap_zero_eq_top]
@@ -160,8 +165,8 @@ lemma of_zero_eq : PolyBddSchwartzSubmodule d 0 μ = SchwartzSubmodule d μ := b
 lemma le_SchwartzSubmodule (d : ℕ) (a : ℕ∞) : PolyBddSchwartzSubmodule d a ≤ SchwartzSubmodule d :=
   LinearMap.range_domRestrict_le_range _ _
 
-lemma antitone {a b : ℕ∞} (h : a ≤ b) :
-    PolyBddSchwartzSubmodule d b μ ≤ PolyBddSchwartzSubmodule d a μ := by
+lemma antitone {a b : ℕ∞} (h : a ≤ b)
+    : PolyBddSchwartzSubmodule d b μ ≤ PolyBddSchwartzSubmodule d a μ := by
   simp only [PolyBddSchwartzSubmodule, polyBddSchwartzIncl,
     ContinuousLinearMap.toLinearMap_domRestrict, LinearMap.range_domRestrict]
   exact Submodule.map_mono (PolyBddSchwartzMap_antitone d h)
@@ -172,9 +177,11 @@ lemma antitone {a b : ℕ∞} (h : a ≤ b) :
 
 open Filter Complex
 
-private lemma enorm_bump_mul_le_enorm {𝕜 E : Type*} [RCLike 𝕜] [NormedAddCommGroup E]
-    [NormedSpace ℝ E] [HasContDiffBump E] {c : E} (f : ContDiffBump c) (g : E → 𝕜) (x : E) :
-    ‖f x * g x‖ₑ ≤ ‖g x‖ₑ := by
+private lemma enorm_bump_mul_le_enorm
+    {𝕜 E : Type*} [RCLike 𝕜] [NormedAddCommGroup E] [NormedSpace ℝ E] [HasContDiffBump E]
+    {c : E} (f : ContDiffBump c)
+    (g : E → 𝕜) (x : E)
+    : ‖f x * g x‖ₑ ≤ ‖g x‖ₑ := by
   nth_rw 2 [← one_mul (g x)]
   simp_rw [enorm_mul]
   refine mul_le_mul_left ?_ ‖g x‖ₑ
@@ -182,10 +189,9 @@ private lemma enorm_bump_mul_le_enorm {𝕜 E : Type*} [RCLike 𝕜] [NormedAddC
   rw [norm_algebraMap', Real.norm_eq_abs, norm_one, ← abs_one]
   exact abs_le_abs_of_nonneg f.nonneg f.le_one
 
-private lemma dense_zero_top (μ : Measure (Space 0)) [μ.HasTemperateGrowth] [μ.IsOpenPosMeasure] :
-    Dense (PolyBddSchwartzSubmodule 0 ⊤ μ : Set (SpaceDHilbertSpace 0 μ)) := by
-  suffices PolyBddSchwartzMap 0 ⊤ = ⊤ by
-    simp [PolyBddSchwartzSubmodule, polyBddSchwartzIncl, this]
+private lemma dense_zero_top (μ : Measure (Space 0)) [μ.HasTemperateGrowth] [μ.IsOpenPosMeasure]
+    : Dense (PolyBddSchwartzSubmodule 0 ⊤ μ : Set (SpaceDHilbertSpace 0 μ)) := by
+  suffices PolyBddSchwartzMap 0 ⊤ = ⊤ by simp [PolyBddSchwartzSubmodule, polyBddSchwartzIncl, this]
   refine Submodule.eq_top_iff'.mpr (fun f k hk ↦ ?_)
   refine ⟨1 + ‖f 0‖, by positivity, fun x ↦ ?_⟩
   simp only [Space.point_dim_zero_eq, norm_zero, zpow_neg, zpow_natCast]
@@ -193,8 +199,8 @@ private lemma dense_zero_top (μ : Measure (Space 0)) [μ.HasTemperateGrowth] [�
 
 TODO "Generalize density of PolyBddSchwartzSubmodule to more general measures than just μ ≤ volume."
 
-lemma dense_top (hμ : μ ≤ volume) [μ.IsOpenPosMeasure] [IsFiniteMeasureOnCompacts μ] :
-    Dense (PolyBddSchwartzSubmodule d ⊤ μ : Set (SpaceDHilbertSpace d μ)) := by
+lemma dense_top (hμ : μ ≤ volume) [μ.IsOpenPosMeasure] [IsFiniteMeasureOnCompacts μ]
+    : Dense (PolyBddSchwartzSubmodule d ⊤ μ : Set (SpaceDHilbertSpace d μ)) := by
   rcases eq_zero_or_pos d with (rfl | hd)
   · -- `d = 0`: Every function `Space 0 ≅ {0} → ℂ` is in `PolyBddSchwartzSubmodule 0 ⊤ μ`.
     exact dense_zero_top _
@@ -223,7 +229,7 @@ lemma dense_top (hμ : μ ≤ volume) [μ.IsOpenPosMeasure] [IsFiniteMeasureOnCo
       simp only [pow_zero, norm_iteratedFDeriv_zero, one_mul] at hC
       use (n + 1) ^ k * C
       refine ⟨by positivity, fun x ↦ ?_⟩
-      rcases le_or_gt ‖x‖ (b n).rIn with (hx | hx)
+      rcases le_or_gt (‖x‖) (b n).rIn with (hx | hx)
       · have h_one : b n x = 1 := (b n).one_of_mem_closedBall (mem_closedBall_zero_iff.mpr hx)
         exact le_of_eq_of_le (b := 0) (by simp [hg, h_one]) (by positivity)
       · refine mul_le_mul_of_nonneg ?_ ?_ (by positivity) hC_pos.le
@@ -300,8 +306,8 @@ lemma dense_top (hμ : μ ≤ volume) [μ.IsOpenPosMeasure] [IsFiniteMeasureOnCo
         simp_rw [h, h', Pi.sub_apply, hg, s, ← mul_sub]
         exact ENNReal.pow_le_pow_left <| enorm_bump_mul_le_enorm (b n) (fun x ↦ f n x - ξ x) x
 
-lemma dense (hμ : μ ≤ volume) [μ.IsOpenPosMeasure] [IsFiniteMeasureOnCompacts μ] :
-    Dense (PolyBddSchwartzSubmodule d a μ : Set (SpaceDHilbertSpace d μ)) :=
+lemma dense (hμ : μ ≤ volume) [μ.IsOpenPosMeasure] [IsFiniteMeasureOnCompacts μ]
+    : Dense (PolyBddSchwartzSubmodule d a μ : Set (SpaceDHilbertSpace d μ)) :=
   (dense_top μ hμ).mono (antitone μ le_top)
 
 end PolyBddSchwartzSubmodule

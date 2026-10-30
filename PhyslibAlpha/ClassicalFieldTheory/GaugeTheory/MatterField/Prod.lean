@@ -51,8 +51,11 @@ open Matrix MatrixGroups TensorProduct
 
 namespace MatterField
 
-variable {G₀ : Type} [Group G₀] {𝔤 : Type} [LieRing 𝔤] [LieAlgebra ℝ 𝔤]
-  {GJ : Type} [Group GJ] {𝔤J : Type} [LieRing 𝔤J] [LieAlgebra ℝ 𝔤J]
+variable
+  {G₀ : Type} [Group G₀]
+  {𝔤 : Type} [LieRing 𝔤] [LieAlgebra ℝ 𝔤]
+  {GJ : Type} [Group GJ]
+  {𝔤J : Type} [LieRing 𝔤J] [LieAlgebra ℝ 𝔤J]
   {jets : LocalGaugeData G₀ 𝔤 GJ 𝔤J}
 
 /-!
@@ -72,32 +75,35 @@ section Prod
 
 variable (M N : MatterField jets)
 
-private lemma prodMap_add_prodMap {V₁ V₂ : Type} [AddCommGroup V₁] [Module ℂ V₁]
-    [AddCommGroup V₂] [Module ℂ V₂] (f₁ f₂ : V₁ →ₗ[ℂ] V₁) (g₁ g₂ : V₂ →ₗ[ℂ] V₂) :
-    (f₁ + f₂).prodMap (g₁ + g₂) = f₁.prodMap g₁ + f₂.prodMap g₂ :=
+private lemma prodMap_add_prodMap
+    {V₁ V₂ : Type} [AddCommGroup V₁] [Module ℂ V₁] [AddCommGroup V₂] [Module ℂ V₂]
+    (f₁ f₂ : V₁ →ₗ[ℂ] V₁) (g₁ g₂ : V₂ →ₗ[ℂ] V₂)
+    : (f₁ + f₂).prodMap (g₁ + g₂) = f₁.prodMap g₁ + f₂.prodMap g₂ :=
   LinearMap.ext fun _ => rfl
 
-private lemma prodMap_multiset_sum {ι V₁ V₂ : Type} [AddCommGroup V₁] [Module ℂ V₁]
-    [AddCommGroup V₂] [Module ℂ V₂] (S : Multiset ι) (f : ι → V₁ →ₗ[ℂ] V₁)
-    (g : ι → V₂ →ₗ[ℂ] V₂) :
-    ((S.map f).sum).prodMap ((S.map g).sum) = (S.map fun i => (f i).prodMap (g i)).sum := by
+private lemma prodMap_multiset_sum
+    {ι V₁ V₂ : Type} [AddCommGroup V₁] [Module ℂ V₁] [AddCommGroup V₂] [Module ℂ V₂]
+    (S : Multiset ι) (f : ι → V₁ →ₗ[ℂ] V₁) (g : ι → V₂ →ₗ[ℂ] V₂)
+    : ((S.map f).sum).prodMap ((S.map g).sum) = (S.map fun i => (f i).prodMap (g i)).sum := by
   induction S using Multiset.induction_on with
   | empty => exact LinearMap.ext fun _ => rfl
   | cons i S ih =>
-      rw [Multiset.map_cons, Multiset.map_cons, Multiset.map_cons, Multiset.sum_cons,
-        Multiset.sum_cons, Multiset.sum_cons, prodMap_add_prodMap, ih]
+    rw [Multiset.map_cons, Multiset.map_cons, Multiset.map_cons, Multiset.sum_cons,
+      Multiset.sum_cons, Multiset.sum_cons, prodMap_add_prodMap, ih]
 
-/-- **The jet gauge action of a direct sum**: the two actions, read through the
-  identification of the jets of `M.V × N.V` with the pair of jets. -/
-noncomputable def repJetProd :
-    Representation ℂ GJ (SpaceTimeAlgebra ⊗[ℂ] (M.V × N.V)) where
+/--
+**The jet gauge action of a direct sum**: the two actions, read through the
+identification of the jets of `M.V × N.V` with the pair of jets.
+-/
+noncomputable def repJetProd : Representation ℂ GJ (SpaceTimeAlgebra ⊗[ℂ] (M.V × N.V)) where
   toFun U := LinearEquiv.conjRingEquiv jetProdEquiv.symm ((M.repJet.prod N.repJet) U)
   map_one' := by rw [map_one, map_one]
   map_mul' U W := by rw [map_mul, map_mul]
 
-lemma repJetProd_apply (U : GJ) (z : SpaceTimeAlgebra ⊗[ℂ] (M.V × N.V)) :
-    repJetProd M N U z =
-      jetProdEquiv.symm (M.repJet U (jetProdEquiv z).1, N.repJet U (jetProdEquiv z).2) := rfl
+lemma repJetProd_apply (U : GJ) (z : SpaceTimeAlgebra ⊗[ℂ] (M.V × N.V))
+    : repJetProd M N U z
+      = jetProdEquiv.symm (M.repJet U (jetProdEquiv z).1, N.repJet U (jetProdEquiv z).2) :=
+  rfl
 
 /-- **The infinitesimal action of a direct sum**: the two actions on the two summands. -/
 noncomputable def repAlgebraProd : 𝔤 →ₗ[ℝ] (M.V × N.V) →ₗ[ℂ] (M.V × N.V) where
@@ -108,15 +114,18 @@ noncomputable def repAlgebraProd : 𝔤 →ₗ[ℝ] (M.V × N.V) →ₗ[ℂ] (M.
     exact LinearMap.ext fun _ => rfl
 
 @[simp]
-lemma repAlgebraProd_apply (c : 𝔤) :
-    repAlgebraProd M N c = (M.repAlgebra c).prodMap (N.repAlgebra c) := rfl
+lemma repAlgebraProd_apply (c : 𝔤)
+    : repAlgebraProd M N c = (M.repAlgebra c).prodMap (N.repAlgebra c) :=
+  rfl
 
-/-- The base-point Taylor coefficients of the summed jet action are the pair of the
-  coefficients of the summands: `jetOfConstant`, `jetIteratedDeriv` and `jetEval` all act
-  componentwise through `jetProdEquiv`. -/
-lemma repCoeff_repJetProd (U : GJ) (x : Multiset (Fin 1 ⊕ Fin 3)) :
-    GaugeAlgebraRealization.repCoeff (repJetProd M N) U x =
-      (GaugeAlgebraRealization.repCoeff M.repJet U x).prodMap
+/--
+The base-point Taylor coefficients of the summed jet action are the pair of the
+coefficients of the summands: `jetOfConstant`, `jetIteratedDeriv` and `jetEval` all act
+componentwise through `jetProdEquiv`.
+-/
+lemma repCoeff_repJetProd (U : GJ) (x : Multiset (Fin 1 ⊕ Fin 3))
+    : GaugeAlgebraRealization.repCoeff (repJetProd M N) U x
+      = (GaugeAlgebraRealization.repCoeff M.repJet U x).prodMap
         (GaugeAlgebraRealization.repCoeff N.repJet U x) := by
   refine LinearMap.ext fun p => ?_
   show jetEval (jetIteratedDeriv x (repJetProd M N U (jetOfConstant p))) = _
@@ -127,17 +136,19 @@ lemma repCoeff_repJetProd (U : GJ) (x : Multiset (Fin 1 ⊕ Fin 3)) :
       rfl]
   rfl
 
-/-- **The componentwise algebra action generates the componentwise jet action**: both laws
-  of `IsInfinitesimalActionOf` are the corresponding laws of the summands, read through
-  `repCoeff_repJetProd`, since `prodMap` is additive in both slots at once and composes
-  componentwise. -/
-lemma isInfinitesimalActionOf_repAlgebraProd :
-    jets.IsInfinitesimalActionOf (repAlgebraProd M N) (repJetProd M N) where
+/--
+**The componentwise algebra action generates the componentwise jet action**: both laws
+of `IsInfinitesimalActionOf` are the corresponding laws of the summands, read through
+`repCoeff_repJetProd`, since `prodMap` is additive in both slots at once and composes
+componentwise.
+-/
+lemma isInfinitesimalActionOf_repAlgebraProd
+    : jets.IsInfinitesimalActionOf (repAlgebraProd M N) (repJetProd M N) where
   repCoeff_cons U μ x := by
     rw [repCoeff_repJetProd, M.repAlgebra_isInfinitesimalAction.repCoeff_cons U μ x,
       N.repAlgebra_isInfinitesimalAction.repCoeff_cons U μ x,
-      show ∀ (f : M.V →ₗ[ℂ] M.V) (g : N.V →ₗ[ℂ] N.V),
-          (-f).prodMap (-g) = -(f.prodMap g) from fun _ _ => LinearMap.ext fun _ => rfl,
+      show ∀ (f : M.V →ₗ[ℂ] M.V) (g : N.V →ₗ[ℂ] N.V), (-f).prodMap (-g) = -(f.prodMap g) from
+        fun _ _ => LinearMap.ext fun _ => rfl,
       prodMap_multiset_sum]
     refine congrArg Neg.neg (congrArg Multiset.sum (Multiset.map_congr rfl fun p _ => ?_))
     rw [repCoeff_repJetProd, repAlgebraProd_apply, LinearMap.prodMap_comp]
@@ -148,10 +159,12 @@ lemma isInfinitesimalActionOf_repAlgebraProd :
     refine congrArg Multiset.sum (Multiset.map_congr rfl fun p _ => ?_)
     rw [repCoeff_repJetProd, repAlgebraProd_apply, LinearMap.prodMap_comp]
 
-/-- **The direct sum of two matter fields** of the same mass weight: one field valued in
-  `M.V × N.V`, with every action acting componentwise. Fields of different mass weight do
-  not sum — a `MatterField` carries one weight, which is what makes the mass-weight
-  grading of its field algebra well defined. -/
+/--
+**The direct sum of two matter fields** of the same mass weight: one field valued in
+`M.V × N.V`, with every action acting componentwise. Fields of different mass weight do
+not sum — a `MatterField` carries one weight, which is what makes the mass-weight
+grading of its field algebra well defined.
+-/
 noncomputable def prod (_h : M.massWeight = N.massWeight) : MatterField jets where
   V := M.V × N.V
   repLorentz := M.repLorentz.prod N.repLorentz
@@ -163,29 +176,32 @@ noncomputable def prod (_h : M.massWeight = N.massWeight) : MatterField jets whe
   repAlgebra_isInfinitesimalAction := isInfinitesimalActionOf_repAlgebraProd M N
   massWeight := M.massWeight
 
-@[simp]
-lemma prod_V (h : M.massWeight = N.massWeight) : (prod M N h).V = (M.V × N.V) := rfl
+@[simp] lemma prod_V (h : M.massWeight = N.massWeight) : (prod M N h).V = (M.V × N.V) := rfl
 
 @[simp]
-lemma prod_repJet (h : M.massWeight = N.massWeight) :
-    (prod M N h).repJet = repJetProd M N := rfl
+lemma prod_repJet (h : M.massWeight = N.massWeight) : (prod M N h).repJet = repJetProd M N := rfl
 
 @[simp]
-lemma prod_repAlgebra (h : M.massWeight = N.massWeight) :
-    (prod M N h).repAlgebra = repAlgebraProd M N := rfl
+lemma prod_repAlgebra (h : M.massWeight = N.massWeight)
+    : (prod M N h).repAlgebra = repAlgebraProd M N :=
+  rfl
 
 @[simp]
-lemma prod_repLorentz (h : M.massWeight = N.massWeight) :
-    (prod M N h).repLorentz = M.repLorentz.prod N.repLorentz := rfl
+lemma prod_repLorentz (h : M.massWeight = N.massWeight)
+    : (prod M N h).repLorentz = M.repLorentz.prod N.repLorentz :=
+  rfl
 
 @[simp]
-lemma prod_massWeight (h : M.massWeight = N.massWeight) :
-    (prod M N h).massWeight = M.massWeight := rfl
+lemma prod_massWeight (h : M.massWeight = N.massWeight) : (prod M N h).massWeight = M.massWeight :=
+  rfl
 
-/-- The shared weight, read off the second summand: this is what the hypothesis of `prod`
-  buys — the direct sum has one weight, and it is the weight of either summand. -/
-lemma prod_massWeight_right (h : M.massWeight = N.massWeight) :
-    (prod M N h).massWeight = N.massWeight := h
+/--
+The shared weight, read off the second summand: this is what the hypothesis of `prod`
+buys — the direct sum has one weight, and it is the weight of either summand.
+-/
+lemma prod_massWeight_right (h : M.massWeight = N.massWeight)
+    : (prod M N h).massWeight = N.massWeight :=
+  h
 
 end Prod
 
@@ -195,13 +211,15 @@ end Prod
 
 -/
 
-/-- **The component space of a direct sum splits.** The component functions of the direct
-  sum `M.prod N h` are those of `M` together with those of `N`: the dual and the conjugate
-  both distribute over the finite product, and the derivative label is untouched. Only the
-  value spaces enter, so the shared mass weight `h` is carried along and not used. -/
-noncomputable def _root_.JetComponentSpace.prodEquiv (M N : MatterField jets)
-    (h : M.massWeight = N.massWeight) :
-    JetComponentSpace (M.prod N h) ≃ₗ[ℂ] JetComponentSpace M × JetComponentSpace N :=
+/--
+**The component space of a direct sum splits.** The component functions of the direct
+sum `M.prod N h` are those of `M` together with those of `N`: the dual and the conjugate
+both distribute over the finite product, and the derivative label is untouched. Only the
+value spaces enter, so the shared mass weight `h` is carried along and not used.
+-/
+noncomputable def _root_.JetComponentSpace.prodEquiv
+    (M N : MatterField jets) (h : M.massWeight = N.massWeight)
+    : JetComponentSpace (M.prod N h) ≃ₗ[ℂ] JetComponentSpace M × JetComponentSpace N :=
   (LinearEquiv.prodCongr
       (TensorProduct.congr (LinearEquiv.refl ℂ SpaceTimeDerivAlgebraℂ)
         (Module.dualProdDualEquivDual ℂ M.V N.V).symm)

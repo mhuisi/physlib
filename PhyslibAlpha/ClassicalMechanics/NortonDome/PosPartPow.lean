@@ -53,10 +53,13 @@ which tends to zero.
 
 -/
 
-/-- The power `max (y - c) 0 ^ (n + 2)` of the positive part of `y - c` has derivative
-  `(n + 2) max (x - c) 0 ^ (n + 1)` at every `x`, including the junction `x = c`. -/
-lemma hasDerivAt_max_sub_pow (c : ℝ) (n : ℕ) (x : ℝ) :
-    HasDerivAt (fun y : ℝ => max (y - c) 0 ^ (n + 2))
+/--
+The power `max (y - c) 0 ^ (n + 2)` of the positive part of `y - c` has derivative
+`(n + 2) max (x - c) 0 ^ (n + 1)` at every `x`, including the junction `x = c`.
+-/
+lemma hasDerivAt_max_sub_pow (c : ℝ) (n : ℕ) (x : ℝ)
+    : HasDerivAt
+      (fun y : ℝ => max (y - c) 0 ^ (n + 2))
       (((n : ℝ) + 2) * max (x - c) 0 ^ (n + 1)) x := by
   rcases lt_trichotomy x c with hx | rfl | hx
   · have hev : (fun y : ℝ => max (y - c) 0 ^ (n + 2)) =ᶠ[𝓝 x] fun _ => 0 := by
@@ -66,8 +69,11 @@ lemma hasDerivAt_max_sub_pow (c : ℝ) (n : ℕ) (x : ℝ) :
     exact (hasDerivAt_const x (0 : ℝ)).congr_of_eventuallyEq hev
   · rw [sub_self, max_self, zero_pow (Nat.succ_ne_zero _), mul_zero,
       hasDerivAt_iff_tendsto_slope_zero]
-    have h : ∀ t : ℝ, t ≠ 0 →
-        max t 0 ^ (n + 1) = t⁻¹ • (max (x + t - x) 0 ^ (n + 2) - max (x - x) 0 ^ (n + 2)) := by
+    have h
+        : ∀ t : ℝ,
+          t ≠ 0
+            → max t 0 ^ (n + 1)
+              = t⁻¹ • (max (x + t - x) 0 ^ (n + 2) - max (x - x) 0 ^ (n + 2)) := by
       intro t ht
       rw [add_sub_cancel_left, sub_self, max_self, zero_pow (Nat.succ_ne_zero _), sub_zero,
         smul_eq_mul]
@@ -100,23 +106,25 @@ By induction on `n`: the derivative of the `(n + 3)`-rd power is a constant mult
 -/
 
 /-- The power `max (y - c) 0 ^ (n + 2)` of the positive part of `y - c` is `C^(n+1)`. -/
-lemma contDiff_max_sub_pow (c : ℝ) (n : ℕ) :
-    ContDiff ℝ (n + 1) (fun y : ℝ => max (y - c) 0 ^ (n + 2)) := by
+lemma contDiff_max_sub_pow (c : ℝ) (n : ℕ)
+    : ContDiff ℝ (n + 1) (fun y : ℝ => max (y - c) 0 ^ (n + 2)) := by
   induction n with
   | zero =>
     have h : ((0 : ℕ) : WithTop ℕ∞) + 1 = 1 := by simp
     rw [h, contDiff_one_iff_deriv]
     refine ⟨fun y => (hasDerivAt_max_sub_pow c 0 y).differentiableAt, ?_⟩
-    have hd : deriv (fun y : ℝ => max (y - c) 0 ^ (0 + 2)) =
-        fun y => (((0 : ℕ) : ℝ) + 2) * max (y - c) 0 ^ (0 + 1) :=
+    have hd
+        : deriv (fun y : ℝ => max (y - c) 0 ^ (0 + 2))
+          = fun y => (((0 : ℕ) : ℝ) + 2) * max (y - c) 0 ^ (0 + 1) :=
       funext fun y => (hasDerivAt_max_sub_pow c 0 y).deriv
     rw [hd]
     fun_prop
   | succ n ih =>
     rw [Nat.cast_succ, contDiff_succ_iff_deriv]
     refine ⟨fun y => (hasDerivAt_max_sub_pow c (n + 1) y).differentiableAt, by simp, ?_⟩
-    have hd : deriv (fun y : ℝ => max (y - c) 0 ^ (n + 1 + 2)) =
-        fun y => (((n + 1 : ℕ) : ℝ) + 2) * max (y - c) 0 ^ (n + 2) :=
+    have hd
+        : deriv (fun y : ℝ => max (y - c) 0 ^ (n + 1 + 2))
+          = fun y => (((n + 1 : ℕ) : ℝ) + 2) * max (y - c) 0 ^ (n + 2) :=
       funext fun y => (hasDerivAt_max_sub_pow c (n + 1) y).deriv
     rw [hd]
     exact ContDiff.mul contDiff_const ih

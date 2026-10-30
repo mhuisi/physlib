@@ -56,8 +56,8 @@ def IsStrongUnit : Prop := ∀ x : G, ∃ n : ℕ, x ≤ n • u
 namespace IsStrongUnit
 
 /-- Every element lies between two opposite multiples of a nonnegative strong unit. -/
-lemma exists_two_sided (hunit : IsStrongUnit u) (hu : 0 ≤ u) (x : G) :
-    ∃ n : ℕ, -(n • u) ≤ x ∧ x ≤ n • u := by
+lemma exists_two_sided (hunit : IsStrongUnit u) (hu : 0 ≤ u) (x : G)
+    : ∃ n : ℕ, -(n • u) ≤ x ∧ x ≤ n • u := by
   obtain ⟨n₁, h₁⟩ := hunit x
   obtain ⟨n₂, h₂⟩ := hunit (-x)
   refine ⟨max n₁ n₂, ?_, h₁.trans (nsmul_le_nsmul_left hu (le_max_left _ _))⟩
@@ -65,12 +65,14 @@ lemma exists_two_sided (hunit : IsStrongUnit u) (hu : 0 ≤ u) (x : G) :
   exact h₂.trans (nsmul_le_nsmul_left hu (le_max_right _ _))
 
 /-- A nonnegative strong unit makes the order directed. -/
-lemma isDirectedOrder (hunit : IsStrongUnit u) (hu : 0 ≤ u) : IsDirectedOrder G :=
-  ⟨fun x y => by
-    obtain ⟨m, hm⟩ := hunit x
-    obtain ⟨n, hn⟩ := hunit y
-    exact ⟨(m + n) • u, hm.trans (nsmul_le_nsmul_left hu (Nat.le_add_right m n)),
-      hn.trans (nsmul_le_nsmul_left hu (Nat.le_add_left n m))⟩⟩
+lemma isDirectedOrder (hunit : IsStrongUnit u) (hu : 0 ≤ u) : IsDirectedOrder G := ⟨fun x y => by
+  obtain ⟨m, hm⟩ := hunit x
+  obtain ⟨n, hn⟩ := hunit y
+  exact ⟨
+    (m + n) • u,
+    hm.trans (nsmul_le_nsmul_left hu (Nat.le_add_right m n)),
+    hn.trans (nsmul_le_nsmul_left hu (Nat.le_add_left n m))
+  ⟩⟩
 
 /-- A strong unit of a nontrivial group is nonzero. -/
 lemma ne_zero [Nontrivial G] (hunit : IsStrongUnit u) : u ≠ 0 := by
@@ -108,17 +110,18 @@ section Module
 variable [Module ℝ G] [PosSMulMono ℝ G]
 
 /-- Finitely many elements lie below a common nonnegative multiple of an order unit. -/
-lemma exists_forall_le_smul {ι : Type*} [Fintype ι] (x : ι → G) :
-    ∃ μ : ℝ, 0 ≤ μ ∧ ∀ i, x i ≤ μ • u := by
+lemma exists_forall_le_smul {ι : Type*} [Fintype ι] (x : ι → G)
+    : ∃ μ : ℝ, 0 ≤ μ ∧ ∀ i, x i ≤ μ • u := by
   choose n hn using fun i => hu.isStrongUnit (x i)
-  refine ⟨∑ i, (n i : ℝ), Finset.sum_nonneg fun i _ => (n i).cast_nonneg,
-    fun i => (hn i).trans ?_⟩
+  refine ⟨∑ i, (n i : ℝ), Finset.sum_nonneg fun i _ => (n i).cast_nonneg, fun i => (hn i).trans ?_⟩
   rw [← Nat.cast_smul_eq_nsmul ℝ]
   exact smul_le_smul_of_nonneg_right
     (Finset.single_le_sum (fun j _ => (n j).cast_nonneg) (Finset.mem_univ i)) hu.nonneg
 
-/-- A multiple of an order unit of a nontrivial space is nonnegative only for a nonnegative
-factor. -/
+/--
+A multiple of an order unit of a nontrivial space is nonnegative only for a nonnegative
+factor.
+-/
 lemma nonneg_of_smul_nonneg [Nontrivial G] {c : ℝ} (h : 0 ≤ c • u) : 0 ≤ c := by
   by_contra hc
   push Not at hc

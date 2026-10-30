@@ -68,10 +68,12 @@ example (c : GaugeAlgebra) : leptonDoublet.rep.act c = LeptonDoubletV.actionMatr
 /-- The target space of the species is the target space of the datum. -/
 example : LeptonDoubletV = leptonDoublet.V := rfl
 
-/-- **The matter field of the datum is the matter field of the species**: the table's
-  description and the species' description of the lepton doublet are one definition. -/
-lemma leptonDoublet_toMatterField_eq :
-    leptonDoublet.toMatterField = LeptonDoubletV.matterField := rfl
+/--
+**The matter field of the datum is the matter field of the species**: the table's
+description and the species' description of the lepton doublet are one definition.
+-/
+lemma leptonDoublet_toMatterField_eq : leptonDoublet.toMatterField = LeptonDoubletV.matterField :=
+  rfl
 
 end Model
 

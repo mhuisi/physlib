@@ -25,7 +25,6 @@ It collects the following TODO items:
 
 open Lean System Meta Physlib
 
-
 /-!
 
 ## Physlib categories.
@@ -53,7 +52,7 @@ inductive PhyslibCategory
   | Other
 deriving BEq, DecidableEq
 
-def PhyslibCategory.string :  PhyslibCategory → String
+def PhyslibCategory.string : PhyslibCategory → String
   | ClassicalMechanics => "Classical Mechanics"
   | CondensedMatter => "Condensed Matter"
   | Cosmology => "Cosmology"
@@ -91,31 +90,32 @@ def PhyslibCategory.emoji : PhyslibCategory → String
   | PhyslibAlpha => "🧪"
   | Other => "❓"
 
-def PhyslibCategory.List :  List PhyslibCategory :=
-  [ PhyslibCategory.ClassicalMechanics,
-    PhyslibCategory.CondensedMatter,
-    PhyslibCategory.Cosmology,
-    PhyslibCategory.Elctromagnetism,
-    PhyslibCategory.Mathematics,
-    PhyslibCategory.Meta,
-    PhyslibCategory.Optics,
-    PhyslibCategory.Particles,
-    PhyslibCategory.QFT,
-    PhyslibCategory.QuantumMechanics,
-    PhyslibCategory.Relativity,
-    PhyslibCategory.StringTheory,
-    PhyslibCategory.StatisticalMechanics,
-    PhyslibCategory.Thermodynamics,
-    PhyslibCategory.QuantumInfo,
-    PhyslibCategory.PhyslibAlpha,
-    PhyslibCategory.Other]
+def PhyslibCategory.List : List PhyslibCategory := [
+  PhyslibCategory.ClassicalMechanics,
+  PhyslibCategory.CondensedMatter,
+  PhyslibCategory.Cosmology,
+  PhyslibCategory.Elctromagnetism,
+  PhyslibCategory.Mathematics,
+  PhyslibCategory.Meta,
+  PhyslibCategory.Optics,
+  PhyslibCategory.Particles,
+  PhyslibCategory.QFT,
+  PhyslibCategory.QuantumMechanics,
+  PhyslibCategory.Relativity,
+  PhyslibCategory.StringTheory,
+  PhyslibCategory.StatisticalMechanics,
+  PhyslibCategory.Thermodynamics,
+  PhyslibCategory.QuantumInfo,
+  PhyslibCategory.PhyslibAlpha,
+  PhyslibCategory.Other
+]
 
 instance : ToString PhyslibCategory where
   toString := PhyslibCategory.string
 
 def PhyslibCategory.ofFileName (n : Name) : PhyslibCategory :=
   let s : String := n.toString
-  if s.startsWith "Physlib.ClassicalMechanics"  then
+  if s.startsWith "Physlib.ClassicalMechanics" then
     PhyslibCategory.ClassicalMechanics
   else if s.startsWith "Physlib.CondensedMatter" then
     PhyslibCategory.CondensedMatter
@@ -148,7 +148,7 @@ def PhyslibCategory.ofFileName (n : Name) : PhyslibCategory :=
   else
     PhyslibCategory.Other
 
-/-########################-/
+/- ######################## -/
 
 /-!
 
@@ -171,18 +171,17 @@ structure FullTODOInfo where
 def FullTODOInfo.toYAML (todo : FullTODOInfo) : MetaM String := do
   let content := todo.content
   let contentIndent := content.replace "\n" "\n      "
-  return s!"
-  - file: {todo.fileName}
-    githubLink: {Name.toGitHubLink todo.fileName todo.line}
-    line: {todo.line}
-    isInformalDef: {todo.isInformalDef}
-    isInformalLemma: {todo.isInformalLemma}
-    isSemiFormalResult: {todo.isSemiFormalResult}
-    category: {todo.category}
-    name: {todo.name}
-    tag: {todo.tag}
-    content: |
-      {contentIndent}"
+  return s!"\n  - file: {todo.fileName}\
+    \n    githubLink: {Name.toGitHubLink todo.fileName todo.line}\
+    \n    line: {todo.line}\
+    \n    isInformalDef: {todo.isInformalDef}\
+    \n    isInformalLemma: {todo.isInformalLemma}\
+    \n    isSemiFormalResult: {todo.isSemiFormalResult}\
+    \n    category: {todo.category}\
+    \n    name: {todo.name}\
+    \n    tag: {todo.tag}\
+    \n    content: |\
+    \n      {contentIndent}"
 
 /-!
 
@@ -190,11 +189,17 @@ def FullTODOInfo.toYAML (todo : FullTODOInfo) : MetaM String := do
 
 -/
 
-def FullTODOInfo.ofTODO (t : todoInfo) : FullTODOInfo :=
-  {content := t.content, fileName := t.fileName, line := t.line, name := t.fileName,
-   isInformalDef := false, isInformalLemma := false,
-   isSemiFormalResult := false, category := PhyslibCategory.ofFileName t.fileName,
-   tag := t.tag}
+def FullTODOInfo.ofTODO (t : todoInfo) : FullTODOInfo := {
+  content := t.content
+  fileName := t.fileName
+  line := t.line
+  name := t.fileName
+  isInformalDef := false
+  isInformalLemma := false
+  isSemiFormalResult := false
+  category := PhyslibCategory.ofFileName t.fileName
+  tag := t.tag
+}
 
 unsafe def getTodoInfo : MetaM (Array FullTODOInfo) := do
   let env ← getEnv
@@ -217,10 +222,17 @@ unsafe def informalTODO (x : ConstantInfo) : CoreM FullTODOInfo := do
   let isInformalDef := Informal.isInformalDef x
   let isInformalLemma := Informal.isInformalLemma x
   let category := PhyslibCategory.ofFileName file
-  return {content := docString, fileName := file, line := lineNo, name := name,
-          isInformalDef := isInformalDef, isInformalLemma := isInformalLemma,
-          isSemiFormalResult := false, category := category,
-          tag := tag}
+  return {
+    content := docString
+    fileName := file
+    line := lineNo
+    name := name
+    isInformalDef := isInformalDef
+    isInformalLemma := isInformalLemma
+    isSemiFormalResult := false
+    category := category
+    tag := tag
+  }
 
 unsafe def allInformalTODO : CoreM (Array FullTODOInfo) := do
   let x ← AllInformal
@@ -232,13 +244,19 @@ unsafe def allInformalTODO : CoreM (Array FullTODOInfo) := do
 
 -/
 
-def FullTODOInfo.ofSemiFormal (t : WantedInfo) : FullTODOInfo :=
-  {content := t.content, fileName := t.fileName, line := t.line, name := t.name,
-   isInformalDef := false, isInformalLemma := false,
-   isSemiFormalResult := true, category := PhyslibCategory.ofFileName t.fileName,
-   tag := t.tag}
+def FullTODOInfo.ofSemiFormal (t : WantedInfo) : FullTODOInfo := {
+  content := t.content
+  fileName := t.fileName
+  line := t.line
+  name := t.name
+  isInformalDef := false
+  isInformalLemma := false
+  isSemiFormalResult := true
+  category := PhyslibCategory.ofFileName t.fileName
+  tag := t.tag
+}
 
-unsafe def allSemiInformal  : CoreM (Array FullTODOInfo) := do
+unsafe def allSemiInformal : CoreM (Array FullTODOInfo) := do
   let env ← getEnv
   let semiInformalInfos := (wantedExtension.getState env)
   pure (semiInformalInfos.map FullTODOInfo.ofSemiFormal)
@@ -256,9 +274,9 @@ unsafe def allTODOs : MetaM (List FullTODOInfo) := do
   let informalTODOs ← allInformalTODO
   let semiInformal ← allSemiInformal
   let all := todos ++ informalTODOs ++ semiInformal
-  return  (all.qsort (fun x y => x.fileName.toString < y.fileName.toString
-    ∨ (x.fileName.toString = y.fileName.toString ∧ x.line < y.line))).toList
-
+  return (all.qsort (fun x y =>
+    x.fileName.toString < y.fileName.toString
+      ∨ (x.fileName.toString = y.fileName.toString ∧ x.line < y.line))).toList
 
 /-!
 
@@ -270,16 +288,15 @@ unsafe def categoriesToYML : MetaM String := do
   let mut cat := "Category:\n"
   for c in PhyslibCategory.List do
     let num := (todos.filter (fun x => x.category == c)).length
-    cat := cat ++
-    s!"
-  - name: \"{c}\"
-    num: {num}
-    emoji: \"{c.emoji}\""
+    cat :=
+      cat ++ s!"\n  - name: \"{c}\"\
+        \n    num: {num}\
+        \n    emoji: \"{c.emoji}\""
   return cat ++ "\n"
 
 unsafe def todosToYAML : MetaM String := do
   let todos ← allTODOs
-  /- Check no duplicate tags-/
+  /- Check no duplicate tags -/
   let tags := todos.map (fun x => x.tag)
   if !tags.Nodup then
     let duplicates := tags.filter (fun tag => tags.count tag > 1) |>.eraseDups
@@ -307,16 +324,16 @@ unsafe def main (args : List String) : IO UInt32 := do
   let env ← importModules (loadExts := true) #[`Physlib, `QuantumInfo, `PhyslibAlpha] {} 0
   let fileName := ""
   let options : Options := {}
-  let ctx : Core.Context := {fileName, options, fileMap := default }
-  let state := {env}
+  let ctx : Core.Context := { fileName, options, fileMap := default }
+  let state := { env }
   let ymlString' ← (Lean.Core.CoreM.toIO · ctx state) do (fullTODOYML).run'
   let ymlString := ymlString'.1
   println! ymlString
-  let fileOut : System.FilePath := {toString := "./docs/_data/TODO.yml"}
+  let fileOut : System.FilePath := { toString := "./docs/_data/TODO.yml" }
   if "mkFile" ∈ args then
     IO.println (s!"TODOList file made.")
     -- Create directory if it doesn't exist
-    let dir : System.FilePath := {toString := "./docs/_data"}
+    let dir : System.FilePath := { toString := "./docs/_data" }
     if !(← System.FilePath.pathExists dir) then
       IO.FS.createDirAll dir
     IO.FS.writeFile fileOut ymlString

@@ -55,9 +55,8 @@ variable {H : Type*} [NormedAddCommGroup H] [InnerProductSpace ℂ H] [CompleteS
 
 -/
 
-lemma sqrt_abs_diagonal_eq_norm_sq {T : H →L[ℂ] H} {w : Set H} (b : HilbertBasis w ℂ H)
-    (i : w) :
-    (⟪b i, CFC.abs T (b i)⟫_ℂ).re = ‖(CFC.sqrt (CFC.abs T)) (b i)‖ ^ 2 := by
+lemma sqrt_abs_diagonal_eq_norm_sq {T : H →L[ℂ] H} {w : Set H} (b : HilbertBasis w ℂ H) (i : w)
+    : (⟪b i, CFC.abs T (b i)⟫_ℂ).re = ‖(CFC.sqrt (CFC.abs T)) (b i)‖ ^ 2 := by
   let A : H →L[ℂ] H := CFC.abs T
   let S : H →L[ℂ] H := CFC.sqrt A
   have hAnonneg : 0 ≤ A := CFC.abs_nonneg T
@@ -73,8 +72,8 @@ lemma sqrt_abs_diagonal_eq_norm_sq {T : H →L[ℂ] H} {w : Set H} (b : HilbertB
   rw [show CFC.abs T = A from rfl, hinner, inner_self_eq_norm_sq_to_K]
   norm_cast
 
-lemma isHilbertSchmidt_sqrt_abs_of_isTraceClass {T : H →L[ℂ] H} (hT : IsTraceClass T) :
-    IsHilbertSchmidt (CFC.sqrt (CFC.abs T)) := by
+lemma isHilbertSchmidt_sqrt_abs_of_isTraceClass {T : H →L[ℂ] H} (hT : IsTraceClass T)
+    : IsHilbertSchmidt (CFC.sqrt (CFC.abs T)) := by
   obtain ⟨w, b, _⟩ := exists_hilbertBasis ℂ H
   refine ⟨w, b, ?_⟩
   have hdiag : Summable (fun i : w => (⟪b i, CFC.abs T (b i)⟫_ℂ).re) := isTraceClass_iff.mp hT w b
@@ -86,9 +85,9 @@ lemma isHilbertSchmidt_sqrt_abs_of_isTraceClass {T : H →L[ℂ] H} (hT : IsTrac
 
 -/
 
-lemma summable_trace_diagonal_of_isTraceClass {T : H →L[ℂ] H} (hT : IsTraceClass T)
-    {w : Set H} (b : HilbertBasis w ℂ H) :
-    Summable (fun i : w => ⟪b i, T (b i)⟫_ℂ) := by
+lemma summable_trace_diagonal_of_isTraceClass
+    {T : H →L[ℂ] H} (hT : IsTraceClass T) {w : Set H} (b : HilbertBasis w ℂ H)
+    : Summable (fun i : w => ⟪b i, T (b i)⟫_ℂ) := by
   let S : H →L[ℂ] H := CFC.sqrt (CFC.abs T)
   let U : H →L[ℂ] H := Polar.polarFactor T
   have hS : IsHilbertSchmidt S := isHilbertSchmidt_sqrt_abs_of_isTraceClass hT
@@ -100,9 +99,10 @@ lemma summable_trace_diagonal_of_isTraceClass {T : H →L[ℂ] H} (hT : IsTraceC
     rw [mul_assoc, hSS]; exact Polar.polarFactor_mul_absOperator T
   simpa only [hfactor] using hdiag
 
-lemma tsum_diagonal_eq_of_isTraceClass {T : H →L[ℂ] H} (hT : IsTraceClass T)
-    {w w' : Set H} (b : HilbertBasis w ℂ H) (c : HilbertBasis w' ℂ H) :
-    (∑' i : w, ⟪b i, T (b i)⟫_ℂ) = ∑' j : w', ⟪c j, T (c j)⟫_ℂ := by
+lemma tsum_diagonal_eq_of_isTraceClass
+    {T : H →L[ℂ] H} (hT : IsTraceClass T)
+    {w w' : Set H} (b : HilbertBasis w ℂ H) (c : HilbertBasis w' ℂ H)
+    : (∑' i : w, ⟪b i, T (b i)⟫_ℂ) = ∑' j : w', ⟪c j, T (c j)⟫_ℂ := by
   let S : H →L[ℂ] H := CFC.sqrt (CFC.abs T)
   let U : H →L[ℂ] H := Polar.polarFactor T
   have hS : IsHilbertSchmidt S := isHilbertSchmidt_sqrt_abs_of_isTraceClass hT
@@ -115,22 +115,25 @@ lemma tsum_diagonal_eq_of_isTraceClass {T : H →L[ℂ] H} (hT : IsTraceClass T)
   have h₂ := HilbertSchmidt.tsum_diagonal_mul_eq_tsum_diagonal_swap (R := S) (S := U * S) c c hS hUS
   rw [hfactor] at h₁ h₂
   calc
-    (∑' i : w, ⟪b i, T (b i)⟫_ℂ) = ∑' j : w', ⟪c j, (S * (U * S)) (c j)⟫_ℂ := h₁
+    (∑' i : w, ⟪b i, T (b i)⟫_ℂ)
+      = ∑' j : w', ⟪c j, (S * (U * S)) (c j)⟫_ℂ := h₁
     _ = ∑' j : w', ⟪c j, T (c j)⟫_ℂ := h₂
 
-lemma trace_eq_of_hilbertBasis_unconditional {T : H →L[ℂ] H} (hT : IsTraceClass T) {w : Set H}
-    (b : HilbertBasis w ℂ H) :
-    trace T hT = ∑' i : w, ⟪b i, T (b i)⟫_ℂ := by
+lemma trace_eq_of_hilbertBasis_unconditional
+    {T : H →L[ℂ] H} (hT : IsTraceClass T) {w : Set H} (b : HilbertBasis w ℂ H)
+    : trace T hT = ∑' i : w, ⟪b i, T (b i)⟫_ℂ := by
   let w₀ : Set H := hT.choose
   let b₀ : HilbertBasis w₀ ℂ H := hT.choose_spec.choose
   change (∑' i : w₀, ⟪b₀ i, T (b₀ i)⟫_ℂ) = ∑' i : w, ⟪b i, T (b i)⟫_ℂ
   exact tsum_diagonal_eq_of_isTraceClass hT b₀ b
 
-/-- **Basis-independent trace evaluation for an arbitrary trace-class operator.** Unlike the
-witness-basis definition, this requires no self-adjointness/positivity hypothesis. -/
-lemma trace_eq_of_hilbertBasis {T : H →L[ℂ] H} (hT : IsTraceClass T) {w : Set H}
-    (b : HilbertBasis w ℂ H) :
-    trace T hT = ∑' i : w, ⟪b i, T (b i)⟫_ℂ :=
+/--
+**Basis-independent trace evaluation for an arbitrary trace-class operator.** Unlike the
+witness-basis definition, this requires no self-adjointness/positivity hypothesis.
+-/
+lemma trace_eq_of_hilbertBasis
+    {T : H →L[ℂ] H} (hT : IsTraceClass T) {w : Set H} (b : HilbertBasis w ℂ H)
+    : trace T hT = ∑' i : w, ⟪b i, T (b i)⟫_ℂ :=
   trace_eq_of_hilbertBasis_unconditional hT b
 
 end ProbabilisticTheory

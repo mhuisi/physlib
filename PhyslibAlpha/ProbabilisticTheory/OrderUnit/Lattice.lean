@@ -59,8 +59,8 @@ namespace OrderUnitLattice
 variable {E : Type*} [OrderUnitLattice E]
 
 /-- A positive functional preserves suprema whenever it preserves infima. -/
-lemma map_sup_of_map_inf {ω : E →ₚ[ℝ] ℝ} (h : ∀ f g, ω (f ⊓ g) = min (ω f) (ω g)) (f g : E) :
-    ω (f ⊔ g) = max (ω f) (ω g) := by
+lemma map_sup_of_map_inf {ω : E →ₚ[ℝ] ℝ} (h : ∀ f g, ω (f ⊓ g) = min (ω f) (ω g)) (f g : E)
+    : ω (f ⊔ g) = max (ω f) (ω g) := by
   have := congrArg ω (inf_add_sup f g)
   rw [map_add, map_add, h] at this
   linarith [min_add_max (ω f) (ω g)]

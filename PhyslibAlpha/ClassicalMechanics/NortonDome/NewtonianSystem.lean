@@ -136,10 +136,12 @@ which is all the dome needs; the two live in different namespaces and no file op
 
 -/
 
-/-- A conservative Newtonian system on the configuration space `X`: a point mass `m` in a
-  differentiable potential `V`. Its equation of motion is Newton's second law `m r̈ = -∇V(r)`. -/
-structure NewtonianSystem (X : Type) [NormedAddCommGroup X] [InnerProductSpace ℝ X]
-    [CompleteSpace X] where
+/--
+A conservative Newtonian system on the configuration space `X`: a point mass `m` in a
+differentiable potential `V`. Its equation of motion is Newton's second law `m r̈ = -∇V(r)`.
+-/
+structure NewtonianSystem
+    (X : Type) [NormedAddCommGroup X] [InnerProductSpace ℝ X] [CompleteSpace X] where
   /-- The mass. -/
   m : ℝ
   /-- The potential. -/
@@ -152,8 +154,7 @@ namespace NewtonianSystem
 variable (S : NewtonianSystem X)
 
 /-- The mass of a Newtonian system is not equal to zero. -/
-@[simp]
-lemma m_ne_zero : S.m ≠ 0 := S.m_pos.ne'
+@[simp] lemma m_ne_zero : S.m ≠ 0 := S.m_pos.ne'
 
 /-!
 
@@ -162,12 +163,13 @@ lemma m_ne_zero : S.m ≠ 0 := S.m_pos.ne'
 -/
 
 /-- The force of a Newtonian system, minus the gradient of the potential. -/
-noncomputable def force (x : X) : X := -gradient S.potential x
+noncomputable def force (x : X) : X := - gradient S.potential x
 
-/-- Newton's second law for a Newtonian system: at every instant `m r̈` equals the force at
-  the position. -/
-def EquationOfMotion (r : Time → X) : Prop :=
-  ∀ t, S.m • ∂ₜ (∂ₜ r) t = S.force (r t)
+/--
+Newton's second law for a Newtonian system: at every instant `m r̈` equals the force at
+the position.
+-/
+def EquationOfMotion (r : Time → X) : Prop := ∀ t, S.m • ∂ₜ (∂ₜ r) t = S.force (r t)
 
 /-!
 
@@ -181,22 +183,27 @@ the acceleration is not demanded; for a continuous force it is automatic.
 
 -/
 
-/-- A solution of a Newtonian system is a twice differentiable curve, its position and velocity
-  both differentiable, satisfying the equation of motion. -/
+/--
+A solution of a Newtonian system is a twice differentiable curve, its position and velocity
+both differentiable, satisfying the equation of motion.
+-/
 def IsSolution (r : Time → X) : Prop :=
   Differentiable ℝ r ∧ Differentiable ℝ (∂ₜ r) ∧ S.EquationOfMotion r
 
 /-- The position along a solution is differentiable. -/
-lemma IsSolution.differentiable {S : NewtonianSystem X} {r : Time → X} (h : S.IsSolution r) :
-    Differentiable ℝ r := h.1
+lemma IsSolution.differentiable {S : NewtonianSystem X} {r : Time → X} (h : S.IsSolution r)
+    : Differentiable ℝ r :=
+  h.1
 
 /-- The velocity along a solution is differentiable. -/
-lemma IsSolution.deriv_differentiable {S : NewtonianSystem X} {r : Time → X}
-    (h : S.IsSolution r) : Differentiable ℝ (∂ₜ r) := h.2.1
+lemma IsSolution.deriv_differentiable {S : NewtonianSystem X} {r : Time → X} (h : S.IsSolution r)
+    : Differentiable ℝ (∂ₜ r) :=
+  h.2.1
 
 /-- A solution satisfies the equation of motion. -/
-lemma IsSolution.equationOfMotion {S : NewtonianSystem X} {r : Time → X}
-    (h : S.IsSolution r) : S.EquationOfMotion r := h.2.2
+lemma IsSolution.equationOfMotion {S : NewtonianSystem X} {r : Time → X} (h : S.IsSolution r)
+    : S.EquationOfMotion r :=
+  h.2.2
 
 /-- The curve at rest at a point where the force vanishes is a solution. -/
 lemma isSolution_const {x : X} (hx : S.force x = 0) : S.IsSolution (fun _ => x) := by
@@ -240,15 +247,18 @@ and the state taken to be position and velocity. Four things follow.
 
 -/
 
-/-- A Newtonian system is deterministic if any two solutions with the same position and
-  velocity at some instant coincide. This is uniqueness of twice differentiable solutions
-  defined for all time, in both directions of time and without existence; see section B.1. -/
+/--
+A Newtonian system is deterministic if any two solutions with the same position and
+velocity at some instant coincide. This is uniqueness of twice differentiable solutions
+defined for all time, in both directions of time and without existence; see section B.1.
+-/
 def IsDeterministic : Prop :=
-  ∀ x y : Time → X, S.IsSolution x → S.IsSolution y →
-    ∀ t₀, x t₀ = y t₀ → ∂ₜ x t₀ = ∂ₜ y t₀ → x = y
+  ∀ x y : Time → X, S.IsSolution x → S.IsSolution y → ∀ t₀, x t₀ = y t₀ → ∂ₜ x t₀ = ∂ₜ y t₀ → x = y
 
-/-- A Newtonian system satisfies the first law if a solution at rest, at some instant, at a
-  point where the force vanishes stays at that point at all instants. -/
+/--
+A Newtonian system satisfies the first law if a solution at rest, at some instant, at a
+point where the force vanishes stays at that point at all instants.
+-/
 def SatisfiesFirstLaw : Prop :=
   ∀ r : Time → X, S.IsSolution r → ∀ t₀, S.force (r t₀) = 0 → ∂ₜ r t₀ = 0 → ∀ t, r t = r t₀
 
@@ -262,8 +272,8 @@ given one at the given instant, so by determinism it is the given one.
 -/
 
 /-- A deterministic Newtonian system satisfies the first law. -/
-lemma IsDeterministic.satisfiesFirstLaw {S : NewtonianSystem X} (h : S.IsDeterministic) :
-    S.SatisfiesFirstLaw := by
+lemma IsDeterministic.satisfiesFirstLaw {S : NewtonianSystem X} (h : S.IsDeterministic)
+    : S.SatisfiesFirstLaw := by
   intro r hr t₀ hF hv t
   have hc := S.isSolution_const hF
   have heq := h r (fun _ => r t₀) hr hc t₀ rfl (by rw [hv, Time.deriv_const])
@@ -282,27 +292,32 @@ what the dome violates and what Norton's argument is about, so it is the reading
 
 -/
 
-/-- The first law read on an interval: if the force vanishes along a solution throughout the
-  interval `[a, b]`, the velocity is constant on it. This is a consequence of the second law
-  alone, and holds for every system. -/
-lemma IsSolution.deriv_eq_of_force_eq_zero_on {S : NewtonianSystem X} {r : Time → X}
-    (hr : S.IsSolution r) {a b : Time} (hF : ∀ t ∈ Set.Icc a b, S.force (r t) = 0) :
-    ∀ t ∈ Set.Icc a b, ∂ₜ r t = ∂ₜ r a := by
-  have hv : ∀ τ : ℝ, HasDerivAt (fun τ : ℝ => ∂ₜ r (toRealCLE.symm τ))
-      (∂ₜ (∂ₜ r) (toRealCLE.symm τ)) τ := fun τ =>
-    hasDerivAt_comp_toRealCLE_symm (∂ₜ r) τ (hr.deriv_differentiable _)
-  have hconst := constant_of_has_deriv_right_zero (a := toRealCLE a) (b := toRealCLE b)
-    (f := fun τ : ℝ => ∂ₜ r (toRealCLE.symm τ))
-    (continuous_iff_continuousAt.mpr fun τ => (hv τ).continuousAt).continuousOn
-    (fun τ hτ => by
-      have hmem : toRealCLE.symm τ ∈ Set.Icc a b := ⟨hτ.1, hτ.2.le⟩
-      have hacc : ∂ₜ (∂ₜ r) (toRealCLE.symm τ) = 0 := by
-        have h := hr.equationOfMotion (toRealCLE.symm τ)
-        rw [hF _ hmem] at h
-        exact (smul_eq_zero.mp h).resolve_left S.m_ne_zero
-      have h' := hv τ
-      rw [hacc] at h'
-      exact h'.hasDerivWithinAt)
+/--
+The first law read on an interval: if the force vanishes along a solution throughout the
+interval `[a, b]`, the velocity is constant on it. This is a consequence of the second law
+alone, and holds for every system.
+-/
+lemma IsSolution.deriv_eq_of_force_eq_zero_on
+    {S : NewtonianSystem X} {r : Time → X} (hr : S.IsSolution r)
+    {a b : Time} (hF : ∀ t ∈ Set.Icc a b, S.force (r t) = 0)
+    : ∀ t ∈ Set.Icc a b, ∂ₜ r t = ∂ₜ r a := by
+  have hv
+      : ∀ τ : ℝ,
+        HasDerivAt (fun τ : ℝ => ∂ₜ r (toRealCLE.symm τ)) (∂ₜ (∂ₜ r) (toRealCLE.symm τ)) τ :=
+    fun τ => hasDerivAt_comp_toRealCLE_symm (∂ₜ r) τ (hr.deriv_differentiable _)
+  have hconst :=
+    constant_of_has_deriv_right_zero (a := toRealCLE a) (b := toRealCLE b)
+      (f := fun τ : ℝ => ∂ₜ r (toRealCLE.symm τ))
+      (continuous_iff_continuousAt.mpr fun τ => (hv τ).continuousAt).continuousOn
+      (fun τ hτ => by
+        have hmem : toRealCLE.symm τ ∈ Set.Icc a b := ⟨hτ.1, hτ.2.le⟩
+        have hacc : ∂ₜ (∂ₜ r) (toRealCLE.symm τ) = 0 := by
+          have h := hr.equationOfMotion (toRealCLE.symm τ)
+          rw [hF _ hmem] at h
+          exact (smul_eq_zero.mp h).resolve_left S.m_ne_zero
+        have h' := hv τ
+        rw [hacc] at h'
+        exact h'.hasDerivWithinAt)
   intro t ht
   simpa using hconst (toRealCLE t) ⟨ht.1, ht.2⟩
 
@@ -319,34 +334,37 @@ of section A assumes none of these conditions; they are separate predicates on i
 
 -/
 
-/-- A Newtonian system has a locally Lipschitz force if its force is Lipschitz on a
-  neighbourhood of every point. This is the hypothesis of the uniqueness theorem for ordinary
-  differential equations. -/
+/--
+A Newtonian system has a locally Lipschitz force if its force is Lipschitz on a
+neighbourhood of every point. This is the hypothesis of the uniqueness theorem for ordinary
+differential equations.
+-/
 def HasLocallyLipschitzForce : Prop := LocallyLipschitz S.force
 
 /-- A Newtonian system has a Lipschitz force if its force is globally Lipschitz. -/
 def HasLipschitzForce : Prop := ∃ K : NNReal, LipschitzWith K S.force
 
-/-- A Newtonian system has a `C²` potential if its potential is twice continuously
-  differentiable; two derivatives are what the uniqueness theory of ordinary differential
-  equations uses. -/
+/--
+A Newtonian system has a `C²` potential if its potential is twice continuously
+differentiable; two derivatives are what the uniqueness theory of ordinary differential
+equations uses.
+-/
 def HasC2Potential : Prop := ContDiff ℝ 2 S.potential
 
 /-- A Lipschitz force is locally Lipschitz. -/
-lemma HasLipschitzForce.hasLocallyLipschitzForce (h : S.HasLipschitzForce) :
-    S.HasLocallyLipschitzForce := by
+lemma HasLipschitzForce.hasLocallyLipschitzForce (h : S.HasLipschitzForce)
+    : S.HasLocallyLipschitzForce := by
   obtain ⟨K, hK⟩ := h
   exact hK.locallyLipschitz
 
 /-- The gradient of a `C²` potential is `C¹`. -/
-lemma HasC2Potential.contDiff_gradient (h : S.HasC2Potential) :
-    ContDiff ℝ 1 (gradient S.potential) :=
+lemma HasC2Potential.contDiff_gradient (h : S.HasC2Potential)
+    : ContDiff ℝ 1 (gradient S.potential) :=
   (InnerProductSpace.toDual ℝ X).symm.contDiff.comp
     ((contDiff_succ_iff_fderiv (n := 1)).mp (by rw [one_add_one_eq_two]; exact h)).2.2
 
 /-- The force of a system with a `C²` potential is locally Lipschitz. -/
-lemma HasC2Potential.hasLocallyLipschitzForce (h : S.HasC2Potential) :
-    S.HasLocallyLipschitzForce :=
+lemma HasC2Potential.hasLocallyLipschitzForce (h : S.HasC2Potential) : S.HasLocallyLipschitzForce :=
   h.contDiff_gradient.locallyLipschitz.neg
 
 /-!
@@ -367,17 +385,18 @@ determinism, as in `SimplePendulum.equationOfMotion_unique`.
 -/
 
 /-- The phase-space vector field of a Newtonian system, sending `(r, v)` to `(v, F(r)/m)`. -/
-noncomputable def phaseVectorField (p : X × X) : X × X :=
-  (p.2, S.m⁻¹ • S.force p.1)
+noncomputable def phaseVectorField (p : X × X) : X × X := (p.2, S.m⁻¹ • S.force p.1)
 
-/-- If the force of a Newtonian system is locally Lipschitz, so is its phase-space vector
-  field. -/
-lemma phaseVectorField_locallyLipschitz (h : LocallyLipschitz S.force) :
-    LocallyLipschitz S.phaseVectorField := by
+/--
+If the force of a Newtonian system is locally Lipschitz, so is its phase-space vector
+field.
+-/
+lemma phaseVectorField_locallyLipschitz (h : LocallyLipschitz S.force)
+    : LocallyLipschitz S.phaseVectorField := by
   unfold phaseVectorField
-  exact LipschitzWith.prod_snd.locallyLipschitz.prodMk
-    ((lipschitzWith_smul S.m⁻¹).locallyLipschitz.comp
-      (h.comp LipschitzWith.prod_fst.locallyLipschitz))
+  exact LipschitzWith.prod_snd.locallyLipschitz.prodMk ((lipschitzWith_smul
+      S.m⁻¹).locallyLipschitz.comp
+    (h.comp LipschitzWith.prod_fst.locallyLipschitz))
 
 /-!
 
@@ -385,11 +404,16 @@ lemma phaseVectorField_locallyLipschitz (h : LocallyLipschitz S.force) :
 
 -/
 
-/-- The phase curve `τ ↦ (r t, ṙ t)` (with `t = toRealCLE.symm τ`) of a solution is an
-  integral curve of the phase-space vector field. -/
-lemma phaseCurve_hasDerivAt {r : Time → X} (hr : Differentiable ℝ r)
-    (hr' : Differentiable ℝ (∂ₜ r)) (h : S.EquationOfMotion r) (τ : ℝ) :
-    HasDerivAt (fun τ : ℝ => (r (toRealCLE.symm τ), ∂ₜ r (toRealCLE.symm τ)))
+/--
+The phase curve `τ ↦ (r t, ṙ t)` (with `t = toRealCLE.symm τ`) of a solution is an
+integral curve of the phase-space vector field.
+-/
+lemma phaseCurve_hasDerivAt
+    {r : Time → X}
+    (hr : Differentiable ℝ r) (hr' : Differentiable ℝ (∂ₜ r)) (h : S.EquationOfMotion r)
+    (τ : ℝ)
+    : HasDerivAt
+      (fun τ : ℝ => (r (toRealCLE.symm τ), ∂ₜ r (toRealCLE.symm τ)))
       (S.phaseVectorField (r (toRealCLE.symm τ), ∂ₜ r (toRealCLE.symm τ))) τ := by
   have hacc : ∂ₜ (∂ₜ r) (toRealCLE.symm τ) = S.m⁻¹ • S.force (r (toRealCLE.symm τ)) := by
     rw [← h, smul_smul, inv_mul_cancel₀ S.m_ne_zero, one_smul]
@@ -417,12 +441,16 @@ Naming follows Mathlib: `isDeterministic_of_hasC2Potential` is the arrow from
 
 -/
 
-/-- Integral curves of a locally Lipschitz vector field, defined at all times, which pass
-  through the same point at the same instant coincide. -/
-lemma ODE_solution_unique_of_locallyLipschitz {E : Type} [NormedAddCommGroup E]
-    [NormedSpace ℝ E] {v : E → E} (hv : LocallyLipschitz v) {f g : ℝ → E}
-    (hf : ∀ τ, HasDerivAt f (v (f τ)) τ) (hg : ∀ τ, HasDerivAt g (v (g τ)) τ)
-    {τ₀ : ℝ} (h0 : f τ₀ = g τ₀) : f = g := by
+/--
+Integral curves of a locally Lipschitz vector field, defined at all times, which pass
+through the same point at the same instant coincide.
+-/
+lemma ODE_solution_unique_of_locallyLipschitz
+    {E : Type} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    {v : E → E} (hv : LocallyLipschitz v)
+    {f g : ℝ → E} (hf : ∀ τ, HasDerivAt f (v (f τ)) τ) (hg : ∀ τ, HasDerivAt g (v (g τ)) τ)
+    {τ₀ : ℝ} (h0 : f τ₀ = g τ₀)
+    : f = g := by
   have hclosed : IsClosed {τ | f τ = g τ} :=
     isClosed_eq (continuous_iff_continuousAt.mpr fun τ => (hf τ).continuousAt)
       (continuous_iff_continuousAt.mpr fun τ => (hg τ).continuousAt)
@@ -433,7 +461,9 @@ lemma ODE_solution_unique_of_locallyLipschitz {E : Type} [NormedAddCommGroup E]
     have hs' : s ∈ nhds (g τ₁) := by
       rw [← show f τ₁ = g τ₁ from hτ₁]
       exact hs
-    refine ODE_solution_unique_of_eventually (v := fun _ => v) (s := fun _ => s)
+    refine ODE_solution_unique_of_eventually
+      (v := fun _ => v)
+      (s := fun _ => s)
       (Filter.Eventually.of_forall fun _ => hKs) ?_ ?_ hτ₁
     · filter_upwards [(hf τ₁).continuousAt.preimage_mem_nhds hs] with τ hτ
       exact ⟨hf τ, hτ⟩
@@ -444,23 +474,27 @@ lemma ODE_solution_unique_of_locallyLipschitz {E : Type} [NormedAddCommGroup E]
   funext τ
   exact Set.eq_univ_iff_forall.mp huniv τ
 
-/-- The uniqueness theorem for Newtonian systems: a Newtonian system with a locally Lipschitz
-  force is deterministic. -/
-lemma isDeterministic_of_hasLocallyLipschitzForce (h : S.HasLocallyLipschitzForce) :
-    S.IsDeterministic := by
+/--
+The uniqueness theorem for Newtonian systems: a Newtonian system with a locally Lipschitz
+force is deterministic.
+-/
+lemma isDeterministic_of_hasLocallyLipschitzForce (h : S.HasLocallyLipschitzForce)
+    : S.IsDeterministic := by
   intro x y hx hy t₀ h0 hv0
-  have hEq := ODE_solution_unique_of_locallyLipschitz (S.phaseVectorField_locallyLipschitz h)
-    (f := fun τ : ℝ => (x (toRealCLE.symm τ), ∂ₜ x (toRealCLE.symm τ)))
-    (g := fun τ : ℝ => (y (toRealCLE.symm τ), ∂ₜ y (toRealCLE.symm τ)))
-    (S.phaseCurve_hasDerivAt hx.differentiable hx.deriv_differentiable hx.equationOfMotion)
-    (S.phaseCurve_hasDerivAt hy.differentiable hy.deriv_differentiable hy.equationOfMotion)
-    (τ₀ := toRealCLE t₀)
-    (by simp [h0, hv0])
+  have hEq :=
+    ODE_solution_unique_of_locallyLipschitz (S.phaseVectorField_locallyLipschitz h)
+      (f := fun τ : ℝ => (x (toRealCLE.symm τ), ∂ₜ x (toRealCLE.symm τ)))
+      (g := fun τ : ℝ => (y (toRealCLE.symm τ), ∂ₜ y (toRealCLE.symm τ)))
+      (S.phaseCurve_hasDerivAt hx.differentiable hx.deriv_differentiable hx.equationOfMotion)
+      (S.phaseCurve_hasDerivAt hy.differentiable hy.deriv_differentiable hy.equationOfMotion)
+      (τ₀ := toRealCLE t₀) (by simp [h0, hv0])
   funext t
   exact (Prod.ext_iff.mp (congrFun hEq (toRealCLE t))).1
 
-/-- Picard–Lindelöf for Newtonian systems: a Newtonian system with a Lipschitz force is
-  deterministic. -/
+/--
+Picard–Lindelöf for Newtonian systems: a Newtonian system with a Lipschitz force is
+deterministic.
+-/
 lemma isDeterministic_of_hasLipschitzForce (h : S.HasLipschitzForce) : S.IsDeterministic :=
   S.isDeterministic_of_hasLocallyLipschitzForce h.hasLocallyLipschitzForce
 
@@ -469,8 +503,8 @@ lemma isDeterministic_of_hasC2Potential (h : S.HasC2Potential) : S.IsDeterminist
   S.isDeterministic_of_hasLocallyLipschitzForce h.hasLocallyLipschitzForce
 
 /-- A Newtonian system with a locally Lipschitz force satisfies the first law. -/
-lemma satisfiesFirstLaw_of_hasLocallyLipschitzForce (h : S.HasLocallyLipschitzForce) :
-    S.SatisfiesFirstLaw :=
+lemma satisfiesFirstLaw_of_hasLocallyLipschitzForce (h : S.HasLocallyLipschitzForce)
+    : S.SatisfiesFirstLaw :=
   (S.isDeterministic_of_hasLocallyLipschitzForce h).satisfiesFirstLaw
 
 /-!
@@ -492,14 +526,18 @@ vector field, as Picard–Lindelöf gives it for the pendulum in
 
 -/
 
-/-- A Newtonian system has local solutions if for every initial position `x₀` and velocity
-  `v₀` there are `ε > 0` and a curve `r` with `r 0 = x₀` and `ṙ 0 = v₀` which, at every time
-  within `ε` of the initial instant, is differentiable together with its velocity and satisfies
-  the equation of motion. -/
+/--
+A Newtonian system has local solutions if for every initial position `x₀` and velocity
+`v₀` there are `ε > 0` and a curve `r` with `r 0 = x₀` and `ṙ 0 = v₀` which, at every time
+within `ε` of the initial instant, is differentiable together with its velocity and satisfies
+the equation of motion.
+-/
 def HasLocalSolutions : Prop :=
-  ∀ x₀ v₀ : X, ∃ ε > (0 : ℝ), ∃ r : Time → X, r 0 = x₀ ∧ ∂ₜ r 0 = v₀ ∧
-    ∀ t : Time, |t.val| ≤ ε → DifferentiableAt ℝ r t ∧ DifferentiableAt ℝ (∂ₜ r) t ∧
-      S.m • ∂ₜ (∂ₜ r) t = S.force (r t)
+  ∀ x₀ v₀ : X, ∃ ε > (0 : ℝ), ∃ r : Time → X,
+    r 0 = x₀ ∧ ∂ₜ r 0 = v₀
+      ∧ ∀ t : Time,
+        |t.val| ≤ ε
+          → DifferentiableAt ℝ r t ∧ DifferentiableAt ℝ (∂ₜ r) t ∧ S.m • ∂ₜ (∂ₜ r) t = S.force (r t)
 
 /-!
 
@@ -513,20 +551,21 @@ hypotheses of Peano's theorem.
 
 /-- If the force of a Newtonian system is continuous, so is its phase-space vector field. -/
 @[fun_prop]
-lemma phaseVectorField_continuous (hF : Continuous S.force) :
-    Continuous S.phaseVectorField := by
+lemma phaseVectorField_continuous (hF : Continuous S.force) : Continuous S.phaseVectorField := by
   unfold phaseVectorField
   fun_prop
 
-/-- For a continuous force on a finite-dimensional configuration space, the time-independent
-  phase-space vector field satisfies the hypotheses of Peano's theorem about any initial datum,
-  on a short enough symmetric time interval and the closed unit ball. -/
-lemma exists_isPeano_phaseVectorField [FiniteDimensional ℝ X] (hF : Continuous S.force)
-    (p₀ : X × X) :
-    ∃ δ > (0 : ℝ), ∃ L : NNReal,
+/--
+For a continuous force on a finite-dimensional configuration space, the time-independent
+phase-space vector field satisfies the hypotheses of Peano's theorem about any initial datum,
+on a short enough symmetric time interval and the closed unit ball.
+-/
+lemma exists_isPeano_phaseVectorField [FiniteDimensional ℝ X] (hF : Continuous S.force) (p₀ : X × X)
+    : ∃ δ > (0 : ℝ), ∃ L : NNReal,
       IsPeano (fun q : ℝ × (X × X) => S.phaseVectorField q.2) (-δ) δ 0 p₀ 1 L := by
-  obtain ⟨C, hC⟩ := (ProperSpace.isCompact_closedBall p₀ 1).exists_bound_of_continuousOn
-    (S.phaseVectorField_continuous hF).continuousOn
+  obtain ⟨C, hC⟩ :=
+    (ProperSpace.isCompact_closedBall p₀ 1).exists_bound_of_continuousOn
+      (S.phaseVectorField_continuous hF).continuousOn
   have hL : (0 : ℝ) ≤ Real.toNNReal C := NNReal.coe_nonneg _
   have hδ : (0 : ℝ) < 1 / (Real.toNNReal C + 1) := by positivity
   refine ⟨1 / (Real.toNNReal C + 1), hδ, Real.toNNReal C, ⟨⟨by linarith, hδ.le⟩, ?_, ?_, ?_⟩⟩

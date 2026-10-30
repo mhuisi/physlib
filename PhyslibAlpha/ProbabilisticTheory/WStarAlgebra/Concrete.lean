@@ -49,16 +49,14 @@ namespace TraceClass
 variable {H : Type*} [NormedAddCommGroup H] [InnerProductSpace ℂ H] [CompleteSpace H]
 
 /-- The concrete trace pairing is surjective onto the strong dual of the trace class. -/
-lemma tracePairing_surjective :
-    Function.Surjective (⇑(tracePairingLinearIsometry (H := H))) :=
+lemma tracePairing_surjective : Function.Surjective (⇑(tracePairingLinearIsometry (H := H))) :=
   tracePairing_surjective_concrete
 
 /-- The isometric identification of `H →L[ℂ] H` with the strong dual of its trace class. -/
 def tracePairingEquiv : (H →L[ℂ] H) ≃ₗᵢ[ℂ] StrongDual ℂ (TraceClass H) :=
   LinearIsometryEquiv.ofSurjective tracePairingLinearIsometry tracePairing_surjective
 
-@[simp] lemma tracePairingEquiv_apply (A : H →L[ℂ] H) :
-    tracePairingEquiv A = tracePairing A := rfl
+@[simp] lemma tracePairingEquiv_apply (A : H →L[ℂ] H) : tracePairingEquiv A = tracePairing A := rfl
 
 end TraceClass
 
@@ -66,10 +64,12 @@ end TraceClass
 
 variable {H : Type*} [NormedAddCommGroup H] [InnerProductSpace ℂ H] [CompleteSpace H]
 
-/-- **The bounded operators form a W⋆-algebra**, with predual the trace-class operators and the
-trace pairing `a ↦ (ρ ↦ Tr (a ρ))`. -/
-noncomputable instance instWStarAlgebraStructureContinuousLinearMap :
-    WStarAlgebraStructure (H →L[ℂ] H) where
+/--
+**The bounded operators form a W⋆-algebra**, with predual the trace-class operators and the
+trace pairing `a ↦ (ρ ↦ Tr (a ρ))`.
+-/
+noncomputable instance instWStarAlgebraStructureContinuousLinearMap
+    : WStarAlgebraStructure (H →L[ℂ] H) where
   Predual := TraceClass H
   predualNormedAddCommGroup := TraceClass.instNormedAddCommGroup
   predualNormedSpace := TraceClass.instNormedSpace

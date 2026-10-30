@@ -56,8 +56,10 @@ The Weyl spinor carries the right-handed Lorentz index, and it is the whole of t
 a charged-lepton singlet has no colour index and no weak-isospin index.
 -/
 
-/-- The target vector space of one Standard Model charged-lepton singlet.
-  It carries the `(1, 1)_{-6}` representation of the gauge group. -/
+/--
+The target vector space of one Standard Model charged-lepton singlet.
+It carries the `(1, 1)_{-6}` representation of the gauge group.
+-/
 @[ext]
 structure LeptonSinglet where
   /-- The right-handed Weyl spinor. -/
@@ -90,17 +92,13 @@ def valLinEquiv : LeptonSinglet ≃ₗ[ℂ] Fermion.RightHandedWeyl where
   map_add' := by intros; rfl
   map_smul' := by intros; rfl
 
-@[simp]
-lemma valLinEquiv_apply (l : LeptonSinglet) : valLinEquiv l = l.val := rfl
+@[simp] lemma valLinEquiv_apply (l : LeptonSinglet) : valLinEquiv l = l.val := rfl
 
-lemma valLinEquiv_symm_apply (m : Fermion.RightHandedWeyl) :
-    valLinEquiv.symm m = ⟨m⟩ := rfl
+lemma valLinEquiv_symm_apply (m : Fermion.RightHandedWeyl) : valLinEquiv.symm m = ⟨m⟩ := rfl
 
-@[simp]
-lemma val_add (l₁ l₂ : LeptonSinglet) : (l₁ + l₂).val = l₁.val + l₂.val := rfl
+@[simp] lemma val_add (l₁ l₂ : LeptonSinglet) : (l₁ + l₂).val = l₁.val + l₂.val := rfl
 
-@[simp]
-lemma val_smul (r : ℂ) (l : LeptonSinglet) : (r • l).val = r • l.val := rfl
+@[simp] lemma val_smul (r : ℂ) (l : LeptonSinglet) : (r • l).val = r • l.val := rfl
 
 /-!
 
@@ -135,8 +133,8 @@ The formulas below expose the scalar used to compare actions and compute the ker
 
 /-- The `(1, 1)_{-6}` action of the unquotiented Standard Model gauge group. -/
 noncomputable def repGaugeGroupI : Representation ℂ GaugeGroupI LeptonSinglet where
-  toFun g := valLinEquiv.symm ∘ₗ
-      LinearMap.lsmul ℂ Fermion.RightHandedWeyl (star g.toU1.1 ^ 6 : ℂ)
+  toFun g :=
+    valLinEquiv.symm ∘ₗ LinearMap.lsmul ℂ Fermion.RightHandedWeyl (star g.toU1.1 ^ 6 : ℂ)
       ∘ₗ valLinEquiv
   map_one' := by
     ext l
@@ -147,24 +145,24 @@ noncomputable def repGaugeGroupI : Representation ℂ GaugeGroupI LeptonSinglet 
     ring_nf
 
 /-- The gauge group acts on a charged-lepton singlet by the hypercharge scalar alone. -/
-lemma repGaugeGroupI_apply (g : GaugeGroupI) (ψ : Fermion.RightHandedWeyl) :
-    repGaugeGroupI g ⟨ψ⟩ = ⟨(star g.toU1.1 ^ 6) • ψ⟩ := rfl
+lemma repGaugeGroupI_apply (g : GaugeGroupI) (ψ : Fermion.RightHandedWeyl)
+    : repGaugeGroupI g ⟨ψ⟩ = ⟨(star g.toU1.1 ^ 6) • ψ⟩ :=
+  rfl
 
 open Fermion in
 /-- The gauge action is diagonal in the standard Weyl basis. -/
-lemma repGaugeGroupI_basis (g : GaugeGroupI) (k : Fin 2) :
-    repGaugeGroupI g ⟨RightHandedWeyl.basis k⟩ =
-      (star g.toU1.1 ^ 6) • (⟨RightHandedWeyl.basis k⟩ : LeptonSinglet) := rfl
+lemma repGaugeGroupI_basis (g : GaugeGroupI) (k : Fin 2)
+    : repGaugeGroupI g ⟨RightHandedWeyl.basis k⟩
+      = (star g.toU1.1 ^ 6) • (⟨RightHandedWeyl.basis k⟩ : LeptonSinglet) :=
+  rfl
 
 open Fermion in
 /-- Two gauge elements induce the same action exactly when their hypercharge scalars agree. -/
-lemma repGaugeGroupI_eq_iff {g₁ g₂ : GaugeGroupI} :
-    repGaugeGroupI g₁ = repGaugeGroupI g₂ ↔
-      star g₁.toU1.1 ^ 6 = star g₂.toU1.1 ^ 6 := by
+lemma repGaugeGroupI_eq_iff {g₁ g₂ : GaugeGroupI}
+    : repGaugeGroupI g₁ = repGaugeGroupI g₂ ↔ star g₁.toU1.1 ^ 6 = star g₂.toU1.1 ^ 6 := by
   constructor
   · intro h
-    have h' := congrFun (congrArg (fun f => f.1) h)
-      (⟨RightHandedWeyl.basis 0⟩ : LeptonSinglet)
+    have h' := congrFun (congrArg (fun f => f.1) h) (⟨RightHandedWeyl.basis 0⟩ : LeptonSinglet)
     simp only [LinearMap.coe_toAddHom, repGaugeGroupI_apply] at h'
     have h'' := congrArg (fun v => RightHandedWeyl.basis.repr (LeptonSinglet.val v) 0) h'
     simpa using h''
@@ -182,8 +180,8 @@ components are unrestricted, since neither appears in the action.
 -/
 
 /-- Characterizes the full-group elements acting trivially on the charged-lepton singlet. -/
-lemma mem_repGaugeGroupI_ker_iff_eq {g : GaugeGroupI} :
-    g ∈ repGaugeGroupI.ker ↔ star g.toU1.1 ^ 6 = 1 := by
+lemma mem_repGaugeGroupI_ker_iff_eq {g : GaugeGroupI}
+    : g ∈ repGaugeGroupI.ker ↔ star g.toU1.1 ^ 6 = 1 := by
   rw [MonoidHom.mem_ker, ← MonoidHom.map_one repGaugeGroupI, repGaugeGroupI_eq_iff]
   simp
 
@@ -197,25 +195,27 @@ to the sixth power gives one, and charge `-6` therefore acts trivially.
 -/
 
 /-- The central `ℤ₆` subgroup acts trivially on `(1, 1)_{-6}`. -/
-lemma gaugeGroup_subgroup_ℤ₆_le_ker_repGaugeGroupI :
-    GaugeGroupQuot.subgroup .ℤ₆ ≤ repGaugeGroupI.ker := by
+lemma gaugeGroup_subgroup_ℤ₆_le_ker_repGaugeGroupI
+    : GaugeGroupQuot.subgroup .ℤ₆ ≤ repGaugeGroupI.ker := by
   simp only [GaugeGroupQuot.subgroup, gaugeGroupℤ₆SubGroup, IsConcreteLE.le_iff,
-    MonoidHom.mem_range, gaugeGroupℤ₆Hom_apply, Subtype.exists,
-    mem_repGaugeGroupI_ker_iff_eq, forall_exists_index]
+    MonoidHom.mem_range, gaugeGroupℤ₆Hom_apply, Subtype.exists, mem_repGaugeGroupI_ker_iff_eq,
+    forall_exists_index]
   rintro g x hx ⟨rfl⟩
   simp only [gaugeGroupℤ₆OfRoot_toU1, gaugeGroupℤ₆UnitaryOfRoot_coe]
   have hx6 : (((x : ℂˣ) : ℂ)) ^ 6 = 1 := (mem_rootsOfUnity' 6 x).mp hx
   simpa [map_pow] using congrArg (starRingEnd ℂ) hx6
 
 /-- Every supported quotient subgroup acts trivially on the charged-lepton singlet. -/
-lemma gaugeGroup_subgroup_le_ker_repGaugeGroupI (Q : GaugeGroupQuot) :
-    Q.subgroup ≤ repGaugeGroupI.ker := Q.subgroup_le_subgroup_ℤ₆.trans
-  gaugeGroup_subgroup_ℤ₆_le_ker_repGaugeGroupI
+lemma gaugeGroup_subgroup_le_ker_repGaugeGroupI (Q : GaugeGroupQuot)
+    : Q.subgroup ≤ repGaugeGroupI.ker :=
+  Q.subgroup_le_subgroup_ℤ₆.trans gaugeGroup_subgroup_ℤ₆_le_ker_repGaugeGroupI
 
-/-- The `(1, 1)_{-6}` representation for every supported global form of the
-  Standard Model gauge group. -/
-noncomputable def repGaugeGroup : (Q : GaugeGroupQuot) →
-    Representation ℂ (GaugeGroup Q) LeptonSinglet
+/--
+The `(1, 1)_{-6}` representation for every supported global form of the
+Standard Model gauge group.
+-/
+noncomputable def repGaugeGroup
+    : (Q : GaugeGroupQuot) → Representation ℂ (GaugeGroup Q) LeptonSinglet
   | .I => repGaugeGroupI
   | .ℤ₆ => QuotientGroup.lift _ repGaugeGroupI (gaugeGroup_subgroup_le_ker_repGaugeGroupI .ℤ₆)
   | .ℤ₂ => QuotientGroup.lift _ repGaugeGroupI (gaugeGroup_subgroup_le_ker_repGaugeGroupI .ℤ₂)

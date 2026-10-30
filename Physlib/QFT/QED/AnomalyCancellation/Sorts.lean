@@ -24,9 +24,7 @@ namespace PureU1
 variable {n : ℕ}
 
 /-- A charge is sorted if for all `i ≤ j`, then `S i ≤ S j`. -/
-@[simp]
-def Sorted {n : ℕ} (S : (PureU1 n).Charges) : Prop :=
-  ∀ i j (_ : i ≤ j), S i ≤ S j
+@[simp] def Sorted {n : ℕ} (S : (PureU1 n).Charges) : Prop := ∀ i j (_ : i ≤ j), S i ≤ S j
 
 /-- Given a charge assignment `S`, the corresponding sorted charge assignment. -/
 @[simp]
@@ -38,12 +36,12 @@ lemma sort_sorted {n : ℕ} (S : (PureU1 n).Charges) : Sorted (sort S) := by
   intro i j hij
   exact Tuple.monotone_sort S hij
 
-lemma sort_perm {n : ℕ} (S : (PureU1 n).Charges) (M :(FamilyPermutations n).group) :
-    sort ((FamilyPermutations n).rep M S) = sort S :=
+lemma sort_perm {n : ℕ} (S : (PureU1 n).Charges) (M : (FamilyPermutations n).group)
+    : sort ((FamilyPermutations n).rep M S) = sort S :=
   @Tuple.comp_perm_comp_sort_eq_comp_sort n ℚ _ S M⁻¹
 
-lemma sort_apply {n : ℕ} (S : (PureU1 n).Charges) (j : Fin n) :
-    sort S j = S ((Tuple.sort S) j) := by
+lemma sort_apply {n : ℕ} (S : (PureU1 n).Charges) (j : Fin n)
+    : sort S j = S ((Tuple.sort S) j) := by
   rfl
 
 set_option backward.isDefEq.respectTransparency false in
@@ -66,8 +64,7 @@ lemma sort_projection {n : ℕ} (S : (PureU1 n).Charges) : sort (sort S) = sort 
 def sortAFL {n : ℕ} (S : (PureU1 n).LinSols) : (PureU1 n).LinSols :=
   ((FamilyPermutations n).linSolRep (Tuple.sort S.val).symm S)
 
-lemma sortAFL_val {n : ℕ} (S : (PureU1 n).LinSols) : (sortAFL S).val = sort S.val := by
-  rfl
+lemma sortAFL_val {n : ℕ} (S : (PureU1 n).LinSols) : (sortAFL S).val = sort S.val := by rfl
 
 lemma sortAFL_zero {n : ℕ} (S : (PureU1 n).LinSols) (hS : sortAFL S = 0) : S = 0 := by
   apply ACCSystemLinear.LinSols.ext

@@ -58,8 +58,9 @@ end OrderUnitSpace
 /-! ## B. Positive functionals -/
 
 /-- A positive functional with total weight zero vanishes. -/
-lemma _root_.PositiveLinearMap.eq_zero_of_map_one_eq_zero {E : Type*} [OrderUnitSpace E]
-    {ψ : E →ₚ[ℝ] ℝ} (h : ψ 1 = 0) : ψ = 0 :=
+lemma _root_.PositiveLinearMap.eq_zero_of_map_one_eq_zero
+    {E : Type*} [OrderUnitSpace E] {ψ : E →ₚ[ℝ] ℝ} (h : ψ 1 = 0)
+    : ψ = 0 :=
   PositiveLinearMap.eq_zero_of_map_eq_zero OrderUnitSpace.isOrderUnit_one h
 
 end ProbabilisticTheory

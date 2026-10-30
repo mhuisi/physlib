@@ -44,10 +44,13 @@ open Distribution
 
 -/
 
-/-- The constant distribution from `Space d` to a module `M` associated with
-  `m : M`. -/
-noncomputable def distConst {M } [NormedAddCommGroup M] [NormedSpace ℝ M] (d : ℕ) (m : M) :
-    (Space d) →d[ℝ] M := const ℝ (Space d) m
+/--
+The constant distribution from `Space d` to a module `M` associated with
+`m : M`.
+-/
+noncomputable def distConst {M} [NormedAddCommGroup M] [NormedSpace ℝ M] (d : ℕ) (m : M)
+    : (Space d) →d[ℝ] M :=
+  const ℝ (Space d) m
 
 /-!
 
@@ -56,24 +59,18 @@ noncomputable def distConst {M } [NormedAddCommGroup M] [NormedSpace ℝ M] (d :
 -/
 
 @[simp]
-lemma distDeriv_distConst {M d} [NormedAddCommGroup M] [NormedSpace ℝ M]
-    (μ : Fin d) (m : M) :
-    distDeriv μ (distConst d m) = 0 := by
+lemma distDeriv_distConst {M d} [NormedAddCommGroup M] [NormedSpace ℝ M] (μ : Fin d) (m : M)
+    : distDeriv μ (distConst d m) = 0 := by
   simp [distDeriv, distConst]
 
-@[simp]
-lemma distGrad_distConst {d} (m : ℝ) :
-    distGrad (distConst d m) = 0 := by
-  simp [distConst]
+@[simp] lemma distGrad_distConst {d} (m : ℝ) : distGrad (distConst d m) = 0 := by simp [distConst]
 
 @[simp]
-lemma distDiv_distConst {d} (m : EuclideanSpace ℝ (Fin d)) :
-    distDiv (distConst d m) = 0 := by
+lemma distDiv_distConst {d} (m : EuclideanSpace ℝ (Fin d)) : distDiv (distConst d m) = 0 := by
   simp [distDiv, distConst]
 
 @[simp]
-lemma distCurl_distConst (m : EuclideanSpace ℝ (Fin 3)) :
-    distCurl (distConst 3 m) = 0 := by
+lemma distCurl_distConst (m : EuclideanSpace ℝ (Fin 3)) : distCurl (distConst 3 m) = 0 := by
   simp [distCurl, distConst]
 
 end Space

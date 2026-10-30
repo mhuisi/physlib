@@ -29,85 +29,91 @@ open BigOperators
 variable {n : ℕ}
 open VectorLikeEvenPlane
 
-/-- Given coefficients `g` of a point in the unshifted plane and `f` of a point in the
+/--
+Given coefficients `g` of a point in the unshifted plane and `f` of a point in the
 shifted plane, and a rational, we get a
 rational `a ∈ ℚ`, we get a
 point in `(PureU1 (2 * n.succ)).AnomalyFreeLinear`, which we will later show extends to an anomaly
-free point. -/
-def parameterizationAsLinear (g : Fin n.succ → ℚ) (f : Fin n → ℚ) (a : ℚ) :
-    (PureU1 (2 * n.succ)).LinSols :=
-  a •
-    ((accCubeTriLinSymm (Shifted.planeCharges f) (Shifted.planeCharges f)
-        (Unshifted.planeCharges g)) • Unshifted.planeLinSols g +
-      (- accCubeTriLinSymm (Unshifted.planeCharges g) (Unshifted.planeCharges g)
-        (Shifted.planeCharges f)) • Shifted.planeLinSols f)
+free point.
+-/
+def parameterizationAsLinear (g : Fin n.succ → ℚ) (f : Fin n → ℚ) (a : ℚ)
+    : (PureU1 (2 * n.succ)).LinSols :=
+  a • ((accCubeTriLinSymm (Shifted.planeCharges f) (Shifted.planeCharges f)
+        (Unshifted.planeCharges g))
+      • Unshifted.planeLinSols g
+    + (- accCubeTriLinSymm (Unshifted.planeCharges g) (Unshifted.planeCharges g)
+        (Shifted.planeCharges f))
+      • Shifted.planeLinSols f)
 
-lemma parameterizationAsLinear_val (g : Fin n.succ → ℚ) (f : Fin n → ℚ) (a : ℚ) :
-    (parameterizationAsLinear g f a).val =
-    a •
-      ((accCubeTriLinSymm (Shifted.planeCharges f) (Shifted.planeCharges f)
-          (Unshifted.planeCharges g)) • Unshifted.planeCharges g +
-        (- accCubeTriLinSymm (Unshifted.planeCharges g) (Unshifted.planeCharges g)
-          (Shifted.planeCharges f)) • Shifted.planeCharges f) := by
+lemma parameterizationAsLinear_val (g : Fin n.succ → ℚ) (f : Fin n → ℚ) (a : ℚ)
+    : (parameterizationAsLinear g f a).val
+      = a
+        • ((accCubeTriLinSymm (Shifted.planeCharges f) (Shifted.planeCharges f)
+              (Unshifted.planeCharges g))
+            • Unshifted.planeCharges g
+          + (- accCubeTriLinSymm (Unshifted.planeCharges g) (Unshifted.planeCharges g)
+              (Shifted.planeCharges f))
+            • Shifted.planeCharges f) := by
   rw [parameterizationAsLinear]
   change a • (_ • (Unshifted.planeLinSols g).val + _ • (Shifted.planeLinSols f).val) = _
   rw [Unshifted.planeLinSols_val, Shifted.planeLinSols_val]
 
 set_option backward.isDefEq.respectTransparency false in
-lemma parameterizationCharge_cube (g : Fin n.succ → ℚ) (f : Fin n → ℚ) (a : ℚ) :
-    accCube (2* n.succ) (parameterizationAsLinear g f a).val = 0 := by
-  rw [parameterizationAsLinear_val, HomogeneousCubic.map_smul,
-    accCube, TriLinearSymm.toCubic_add, ← accCube,
-    HomogeneousCubic.map_smul, HomogeneousCubic.map_smul,
+lemma parameterizationCharge_cube (g : Fin n.succ → ℚ) (f : Fin n → ℚ) (a : ℚ)
+    : accCube (2 * n.succ) (parameterizationAsLinear g f a).val = 0 := by
+  rw [parameterizationAsLinear_val, HomogeneousCubic.map_smul, accCube, TriLinearSymm.toCubic_add,
+    ← accCube, HomogeneousCubic.map_smul, HomogeneousCubic.map_smul,
     Unshifted.planeCharges_accCube g, Shifted.planeCharges_accCube f]
-  rw [accCubeTriLinSymm.map_smul₁, accCubeTriLinSymm.map_smul₂,
-    accCubeTriLinSymm.map_smul₃, accCubeTriLinSymm.map_smul₁, accCubeTriLinSymm.map_smul₂,
-    accCubeTriLinSymm.map_smul₃]
+  rw [accCubeTriLinSymm.map_smul₁, accCubeTriLinSymm.map_smul₂, accCubeTriLinSymm.map_smul₃,
+    accCubeTriLinSymm.map_smul₁, accCubeTriLinSymm.map_smul₂, accCubeTriLinSymm.map_smul₃]
   ring
 
 /-- The construction of a `Sol` from a `Fin n.succ → ℚ`, a `Fin n → ℚ` and a `ℚ`. -/
-def parameterization (g : Fin n.succ → ℚ) (f : Fin n → ℚ) (a : ℚ) :
-    (PureU1 (2 * n.succ)).Sols :=
-  ⟨⟨parameterizationAsLinear g f a, fun i => Fin.elim0 i⟩,
-  parameterizationCharge_cube g f a⟩
+def parameterization (g : Fin n.succ → ℚ) (f : Fin n → ℚ) (a : ℚ) : (PureU1 (2 * n.succ)).Sols :=
+  ⟨⟨parameterizationAsLinear g f a, fun i => Fin.elim0 i⟩, parameterizationCharge_cube g f a⟩
 
-lemma anomalyFree_param {S : (PureU1 (2 * n.succ)).Sols}
-    (g : Fin n.succ → ℚ) (f : Fin n → ℚ)
-    (hS : S.val = Unshifted.planeCharges g + Shifted.planeCharges f) :
-    accCubeTriLinSymm (Unshifted.planeCharges g) (Unshifted.planeCharges g)
-      (Shifted.planeCharges f) =
-      - accCubeTriLinSymm (Shifted.planeCharges f) (Shifted.planeCharges f)
+lemma anomalyFree_param
+    {S : (PureU1 (2 * n.succ)).Sols} (g : Fin n.succ → ℚ) (f : Fin n → ℚ)
+    (hS : S.val = Unshifted.planeCharges g + Shifted.planeCharges f)
+    : accCubeTriLinSymm (Unshifted.planeCharges g) (Unshifted.planeCharges g)
+        (Shifted.planeCharges f)
+      = - accCubeTriLinSymm (Shifted.planeCharges f) (Shifted.planeCharges f)
         (Unshifted.planeCharges g) := by
-  have hC : accCube (2 * n.succ)
-      (Unshifted.planeCharges g + Shifted.planeCharges f) = 0 := by
+  have hC : accCube (2 * n.succ) (Unshifted.planeCharges g + Shifted.planeCharges f) = 0 := by
     rw [← hS]
     exact S.cubicSol
-  have h3 : accCube (2 * n.succ) (Unshifted.planeCharges g + Shifted.planeCharges f) =
-      accCube (2 * n.succ) (Unshifted.planeCharges g) +
-      accCube (2 * n.succ) (Shifted.planeCharges f) +
-      3 * accCubeTriLinSymm (Unshifted.planeCharges g) (Unshifted.planeCharges g)
-        (Shifted.planeCharges f) +
-      3 * accCubeTriLinSymm (Shifted.planeCharges f) (Shifted.planeCharges f)
-        (Unshifted.planeCharges g) :=
+  have h3
+      : accCube (2 * n.succ) (Unshifted.planeCharges g + Shifted.planeCharges f)
+        = accCube (2 * n.succ) (Unshifted.planeCharges g)
+          + accCube (2 * n.succ) (Shifted.planeCharges f)
+          + 3 * accCubeTriLinSymm (Unshifted.planeCharges g) (Unshifted.planeCharges g)
+            (Shifted.planeCharges f)
+          + 3 * accCubeTriLinSymm (Shifted.planeCharges f) (Shifted.planeCharges f)
+            (Unshifted.planeCharges g) :=
     TriLinearSymm.toCubic_add _ _ _
   rw [Unshifted.planeCharges_accCube, Shifted.planeCharges_accCube, hC] at h3
   linear_combination -h3 / 3
 
-/-- A proposition on a solution which is true if
+/--
+A proposition on a solution which is true if
 `accCubeTriLinSymm (Unshifted.planeCharges g, Unshifted.planeCharges g,
   Shifted.planeCharges f) ≠ 0`.
-In this case our parameterization above will be able to recover this point. -/
+In this case our parameterization above will be able to recover this point.
+-/
 def GenericCase (S : (PureU1 (2 * n.succ)).Sols) : Prop :=
   ∀ (g : Fin n.succ → ℚ) (f : Fin n → ℚ)
-    (_ : S.val = Unshifted.planeCharges g + Shifted.planeCharges f),
-  accCubeTriLinSymm (Unshifted.planeCharges g) (Unshifted.planeCharges g)
-    (Shifted.planeCharges f) ≠ 0
+      (_ : S.val = Unshifted.planeCharges g + Shifted.planeCharges f),
+    accCubeTriLinSymm (Unshifted.planeCharges g) (Unshifted.planeCharges g) (Shifted.planeCharges f)
+      ≠ 0
 
-lemma genericCase_exists (S : (PureU1 (2 * n.succ)).Sols)
+lemma genericCase_exists
+    (S : (PureU1 (2 * n.succ)).Sols)
     (hs : ∃ (g : Fin n.succ → ℚ) (f : Fin n → ℚ),
-      S.val = Unshifted.planeCharges g + Shifted.planeCharges f ∧
-      accCubeTriLinSymm (Unshifted.planeCharges g) (Unshifted.planeCharges g)
-        (Shifted.planeCharges f) ≠ 0) : GenericCase S := by
+      S.val = Unshifted.planeCharges g + Shifted.planeCharges f
+        ∧ accCubeTriLinSymm (Unshifted.planeCharges g) (Unshifted.planeCharges g)
+            (Shifted.planeCharges f)
+          ≠ 0)
+    : GenericCase S := by
   intro g f hS hC
   obtain ⟨g', f', hS', hC'⟩ := hs
   rw [hS] at hS'
@@ -115,20 +121,25 @@ lemma genericCase_exists (S : (PureU1 (2 * n.succ)).Sols)
   rw [hS'.1, hS'.2] at hC
   exact hC' hC
 
-/-- A proposition on a solution which is true if
+/--
+A proposition on a solution which is true if
 `accCubeTriLinSymm (Unshifted.planeCharges g, Unshifted.planeCharges g,
-  Shifted.planeCharges f) = 0`. -/
+  Shifted.planeCharges f) = 0`.
+-/
 def SpecialCase (S : (PureU1 (2 * n.succ)).Sols) : Prop :=
   ∀ (g : Fin n.succ → ℚ) (f : Fin n → ℚ)
-    (_ : S.val = Unshifted.planeCharges g + Shifted.planeCharges f),
-  accCubeTriLinSymm (Unshifted.planeCharges g) (Unshifted.planeCharges g)
-    (Shifted.planeCharges f) = 0
+      (_ : S.val = Unshifted.planeCharges g + Shifted.planeCharges f),
+    accCubeTriLinSymm (Unshifted.planeCharges g) (Unshifted.planeCharges g) (Shifted.planeCharges f)
+      = 0
 
-lemma specialCase_exists (S : (PureU1 (2 * n.succ)).Sols)
+lemma specialCase_exists
+    (S : (PureU1 (2 * n.succ)).Sols)
     (hs : ∃ (g : Fin n.succ → ℚ) (f : Fin n → ℚ),
-      S.val = Unshifted.planeCharges g + Shifted.planeCharges f ∧
-      accCubeTriLinSymm (Unshifted.planeCharges g) (Unshifted.planeCharges g)
-        (Shifted.planeCharges f) = 0) : SpecialCase S := by
+      S.val = Unshifted.planeCharges g + Shifted.planeCharges f
+        ∧ accCubeTriLinSymm (Unshifted.planeCharges g) (Unshifted.planeCharges g)
+            (Shifted.planeCharges f)
+          = 0)
+    : SpecialCase S := by
   intro g f hS
   obtain ⟨g', f', hS', hC'⟩ := hs
   rw [hS] at hS'
@@ -136,20 +147,22 @@ lemma specialCase_exists (S : (PureU1 (2 * n.succ)).Sols)
   rw [hS'.1, hS'.2]
   exact hC'
 
-lemma generic_or_special (S : (PureU1 (2 * n.succ)).Sols) :
-    GenericCase S ∨ SpecialCase S := by
+lemma generic_or_special (S : (PureU1 (2 * n.succ)).Sols) : GenericCase S ∨ SpecialCase S := by
   obtain ⟨g, f, h⟩ := span_basis S.1.1
-  have h1 : accCubeTriLinSymm (Unshifted.planeCharges g) (Unshifted.planeCharges g)
-      (Shifted.planeCharges f) ≠ 0 ∨
-    accCubeTriLinSymm (Unshifted.planeCharges g) (Unshifted.planeCharges g)
-      (Shifted.planeCharges f) = 0 := by
+  have h1
+      : accCubeTriLinSymm (Unshifted.planeCharges g) (Unshifted.planeCharges g)
+            (Shifted.planeCharges f)
+          ≠ 0
+        ∨ accCubeTriLinSymm (Unshifted.planeCharges g) (Unshifted.planeCharges g)
+            (Shifted.planeCharges f)
+          = 0 := by
     exact ne_or_eq _ _
   rcases h1 with h1 | h1
   · exact Or.inl (genericCase_exists S ⟨g, f, h, h1⟩)
   · exact Or.inr (specialCase_exists S ⟨g, f, h, h1⟩)
 
-lemma generic_case {S : (PureU1 (2 * n.succ)).Sols} (h : GenericCase S) :
-    ∃ g f a, S = parameterization g f a := by
+lemma generic_case {S : (PureU1 (2 * n.succ)).Sols} (h : GenericCase S)
+    : ∃ g f a, S = parameterization g f a := by
   obtain ⟨g, f, hS⟩ := span_basis S.1.1
   use g, f,
     (accCubeTriLinSymm (Shifted.planeCharges f) (Shifted.planeCharges f)
@@ -166,35 +179,38 @@ lemma generic_case {S : (PureU1 (2 * n.succ)).Sols} (h : GenericCase S) :
     exact h
 
 set_option backward.isDefEq.respectTransparency false in
-lemma special_case_lineInCubic {S : (PureU1 (2 * n.succ)).Sols}
-    (h : SpecialCase S) : LineInCubic S.1.1 := by
+lemma special_case_lineInCubic {S : (PureU1 (2 * n.succ)).Sols} (h : SpecialCase S)
+    : LineInCubic S.1.1 := by
   intro g f hS a b
   rw [accCube, TriLinearSymm.toCubic_add, ← accCube]
   rw [HomogeneousCubic.map_smul, HomogeneousCubic.map_smul]
   rw [Unshifted.planeCharges_accCube, Shifted.planeCharges_accCube]
   have h := h g f hS
-  rw [accCubeTriLinSymm.map_smul₁, accCubeTriLinSymm.map_smul₂,
-    accCubeTriLinSymm.map_smul₃, accCubeTriLinSymm.map_smul₁, accCubeTriLinSymm.map_smul₂,
-    accCubeTriLinSymm.map_smul₃, h]
+  rw [accCubeTriLinSymm.map_smul₁, accCubeTriLinSymm.map_smul₂, accCubeTriLinSymm.map_smul₃,
+    accCubeTriLinSymm.map_smul₁, accCubeTriLinSymm.map_smul₂, accCubeTriLinSymm.map_smul₃, h]
   rw [anomalyFree_param _ _ hS] at h
   simp only [Nat.succ_eq_add_one, accCubeTriLinSymm_toFun_apply_apply, neg_eq_zero] at h
   change accCubeTriLinSymm (Shifted.planeCharges f) (Shifted.planeCharges f)
-    (Unshifted.planeCharges g) = 0 at h
+        (Unshifted.planeCharges g)
+      = 0
+    at h
   rw [h]
   simp
 
-lemma special_case_lineInCubic_perm {S : (PureU1 (2 * n.succ)).Sols}
+lemma special_case_lineInCubic_perm
+    {S : (PureU1 (2 * n.succ)).Sols}
     (h : ∀ (M : (FamilyPermutations (2 * n.succ)).group),
-    SpecialCase ((FamilyPermutations (2 * n.succ)).solAction.toFun _ _ S M)) :
-    LineInCubicPerm S.1.1 :=
-  fun M => special_case_lineInCubic (h M)
+      SpecialCase ((FamilyPermutations (2 * n.succ)).solAction.toFun _ _ S M))
+    : LineInCubicPerm S.1.1 := fun M =>
+  special_case_lineInCubic (h M)
 
-lemma special_case {S : (PureU1 (2 * n.succ.succ)).Sols}
+lemma special_case
+    {S : (PureU1 (2 * n.succ.succ)).Sols}
     (h : ∀ (M : (FamilyPermutations (2 * n.succ.succ)).group),
-    SpecialCase ((FamilyPermutations (2 * n.succ.succ)).solAction.toFun _ _ S M)) :
-    ∃ (M : (FamilyPermutations (2 * n.succ.succ)).group),
-    ((FamilyPermutations (2 * n.succ.succ)).solAction.toFun _ _ S M).1.1
-    ∈ Submodule.span ℚ (Set.range Unshifted.basis) :=
+      SpecialCase ((FamilyPermutations (2 * n.succ.succ)).solAction.toFun _ _ S M))
+    : ∃ (M : (FamilyPermutations (2 * n.succ.succ)).group),
+      ((FamilyPermutations (2 * n.succ.succ)).solAction.toFun _ _ S M).1.1
+        ∈ Submodule.span ℚ (Set.range Unshifted.basis) :=
   lineInCubicPerm_in_plane S (special_case_lineInCubic_perm h)
 
 end Even

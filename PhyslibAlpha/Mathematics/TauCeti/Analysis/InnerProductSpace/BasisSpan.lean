@@ -51,37 +51,42 @@ namespace OrthonormalBasis
 open Module (finrank)
 open scoped InnerProductSpace
 
-variable {𝕜 E ι : Type*} [RCLike 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
-  [Fintype ι]
+variable {𝕜 E ι : Type*} [RCLike 𝕜] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E] [Fintype ι]
 
-/-- The subspace spanned by the orthonormal basis vectors `b i` for indices
-`i ∈ s`. -/
-noncomputable def spanIndices (b : OrthonormalBasis ι 𝕜 E) (s : Set ι) :
-    Submodule 𝕜 E :=
+/--
+The subspace spanned by the orthonormal basis vectors `b i` for indices
+`i ∈ s`.
+-/
+noncomputable def spanIndices (b : OrthonormalBasis ι 𝕜 E) (s : Set ι) : Submodule 𝕜 E :=
   Submodule.span 𝕜 (b '' s)
 
-/-- The selected subspace is the span of its basis vectors.
-Use this identity to apply `Submodule.span`'s induction or universal property. -/
-lemma spanIndices_eq_span (b : OrthonormalBasis ι 𝕜 E) (s : Set ι) :
-    b.spanIndices s = Submodule.span 𝕜 (b '' s) := (rfl)
+/--
+The selected subspace is the span of its basis vectors.
+Use this identity to apply `Submodule.span`'s induction or universal property.
+-/
+lemma spanIndices_eq_span (b : OrthonormalBasis ι 𝕜 E) (s : Set ι)
+    : b.spanIndices s = Submodule.span 𝕜 (b '' s) :=
+  (rfl)
 
 /-- Selecting more indices spans more. -/
-lemma spanIndices_mono (b : OrthonormalBasis ι 𝕜 E) {s t : Set ι} (h : s ⊆ t) :
-    b.spanIndices s ≤ b.spanIndices t := by
+lemma spanIndices_mono (b : OrthonormalBasis ι 𝕜 E) {s t : Set ι} (h : s ⊆ t)
+    : b.spanIndices s ≤ b.spanIndices t := by
   rw [b.spanIndices_eq_span s, b.spanIndices_eq_span t]
   exact Submodule.span_mono (Set.image_mono h)
 
 /-- A selected basis vector lies in the span of its index set. -/
-lemma mem_spanIndices_of_mem (b : OrthonormalBasis ι 𝕜 E) {s : Set ι} {i : ι}
-    (hi : i ∈ s) : b i ∈ b.spanIndices s := by
+lemma mem_spanIndices_of_mem (b : OrthonormalBasis ι 𝕜 E) {s : Set ι} {i : ι} (hi : i ∈ s)
+    : b i ∈ b.spanIndices s := by
   rw [b.spanIndices_eq_span]
   exact Submodule.subset_span ⟨i, hi, rfl⟩
 
-/-- A vector in the span of a selected subfamily has zero coordinate at any
-index outside the selection. -/
-lemma repr_eq_zero_of_mem_spanIndices (b : OrthonormalBasis ι 𝕜 E)
-    {s : Set ι} {x : E} (hx : x ∈ b.spanIndices s) {i : ι} (hi : i ∉ s) :
-    b.repr x i = 0 := by
+/--
+A vector in the span of a selected subfamily has zero coordinate at any
+index outside the selection.
+-/
+lemma repr_eq_zero_of_mem_spanIndices
+    (b : OrthonormalBasis ι 𝕜 E) {s : Set ι} {x : E} (hx : x ∈ b.spanIndices s) {i : ι} (hi : i ∉ s)
+    : b.repr x i = 0 := by
   rw [b.spanIndices_eq_span] at hx
   rw [b.repr_apply_apply]
   -- `⟪b i, ·⟫` vanishes on the spanning set, hence on the whole span.
@@ -96,12 +101,13 @@ lemma repr_eq_zero_of_mem_spanIndices (b : OrthonormalBasis ι 𝕜 E)
   · intro a y _ hy
     rw [inner_smul_right, hy, mul_zero]
 
-/-- Membership in the span of a selected subfamily is exactly the vanishing of
-the coordinates outside the selection. -/
+/--
+Membership in the span of a selected subfamily is exactly the vanishing of
+the coordinates outside the selection.
+-/
 @[simp]
-lemma mem_spanIndices_iff (b : OrthonormalBasis ι 𝕜 E)
-    {s : Set ι} {x : E} :
-    x ∈ b.spanIndices s ↔ ∀ i ∉ s, b.repr x i = 0 := by
+lemma mem_spanIndices_iff (b : OrthonormalBasis ι 𝕜 E) {s : Set ι} {x : E}
+    : x ∈ b.spanIndices s ↔ ∀ i ∉ s, b.repr x i = 0 := by
   classical
   refine ⟨fun hx i hi => b.repr_eq_zero_of_mem_spanIndices hx hi, fun h => ?_⟩
   rw [← b.sum_repr x]
@@ -111,33 +117,38 @@ lemma mem_spanIndices_iff (b : OrthonormalBasis ι 𝕜 E)
   · rw [h i hi, zero_smul]
     exact Submodule.zero_mem _
 
-/-- The span of a selected subfamily has dimension the number of selected
-indices. -/
-lemma finrank_spanIndices (b : OrthonormalBasis ι 𝕜 E) (s : Finset ι) :
-    finrank 𝕜 (b.spanIndices ↑s) = s.card := by
-  have h : finrank 𝕜 (Submodule.span 𝕜
-      (Set.range fun i : ↥(↑s : Set ι) => b ↑i)) = Fintype.card ↥(↑s : Set ι) :=
-    finrank_span_eq_card
-      (b.orthonormal.linearIndependent.comp _ Subtype.val_injective)
+/--
+The span of a selected subfamily has dimension the number of selected
+indices.
+-/
+lemma finrank_spanIndices (b : OrthonormalBasis ι 𝕜 E) (s : Finset ι)
+    : finrank 𝕜 (b.spanIndices ↑s) = s.card := by
+  have h
+      : finrank 𝕜 (Submodule.span 𝕜 (Set.range fun i : ↥(↑s : Set ι) => b ↑i))
+        = Fintype.card ↥(↑s : Set ι) :=
+    finrank_span_eq_card (b.orthonormal.linearIndependent.comp _ Subtype.val_injective)
   rw [b.spanIndices_eq_span, Set.image_eq_range, h]
   simp
 
-/-- The span of a selected set of basis vectors has dimension equal to the
-number of selected indices. -/
-lemma finrank_spanIndices_set (b : OrthonormalBasis ι 𝕜 E) (s : Set ι) :
-    finrank 𝕜 (b.spanIndices s) = s.ncard := by
+/--
+The span of a selected set of basis vectors has dimension equal to the
+number of selected indices.
+-/
+lemma finrank_spanIndices_set (b : OrthonormalBasis ι 𝕜 E) (s : Set ι)
+    : finrank 𝕜 (b.spanIndices s) = s.ncard := by
   classical
   rw [Set.ncard_eq_toFinset_card']
   rw [← b.finrank_spanIndices s.toFinset, Set.coe_toFinset]
 
-/-- The orthogonal complement of the span of a selected subfamily is the span
-of the complementary subfamily. -/
-lemma orthogonal_spanIndices (b : OrthonormalBasis ι 𝕜 E) (s : Set ι) :
-    (b.spanIndices s)ᗮ = b.spanIndices sᶜ := by
+/--
+The orthogonal complement of the span of a selected subfamily is the span
+of the complementary subfamily.
+-/
+lemma orthogonal_spanIndices (b : OrthonormalBasis ι 𝕜 E) (s : Set ι)
+    : (b.spanIndices s)ᗮ = b.spanIndices sᶜ := by
   classical
   have : FiniteDimensional 𝕜 E := Module.Finite.of_basis b.toBasis
-  have hEcard : finrank 𝕜 E = Fintype.card ι := by
-    rw [Module.finrank_eq_card_basis b.toBasis]
+  have hEcard : finrank 𝕜 E = Fintype.card ι := by rw [Module.finrank_eq_card_basis b.toBasis]
   refine (Submodule.eq_of_le_of_finrank_le ?_ ?_).symm
   · -- the complementary span is orthogonal to the selected span.
     rw [b.spanIndices_eq_span (sᶜ)]
@@ -145,11 +156,11 @@ lemma orthogonal_spanIndices (b : OrthonormalBasis ι 𝕜 E) (s : Set ι) :
     rintro y ⟨j, hj, rfl⟩
     rw [SetLike.mem_coe, Submodule.mem_orthogonal]
     intro u hu
-    rw [← inner_conj_symm, ← b.repr_apply_apply,
-      b.repr_eq_zero_of_mem_spanIndices hu hj, map_zero]
+    rw [← inner_conj_symm, ← b.repr_apply_apply, b.repr_eq_zero_of_mem_spanIndices hu hj, map_zero]
   · -- dimensions match: `card ι − #s` on both sides.
-    have h1 : finrank 𝕜 (b.spanIndices s)
-        + finrank 𝕜 ((b.spanIndices s)ᗮ : Submodule 𝕜 E) = Fintype.card ι := by
+    have h1
+        : finrank 𝕜 (b.spanIndices s) + finrank 𝕜 ((b.spanIndices s)ᗮ : Submodule 𝕜 E)
+          = Fintype.card ι := by
       rw [Submodule.finrank_add_finrank_orthogonal, hEcard]
     have h2 := b.finrank_spanIndices_set s
     have h3 := b.finrank_spanIndices_set sᶜ

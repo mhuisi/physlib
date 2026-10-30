@@ -30,8 +30,10 @@ existence of the temperature unit of kelvin, and construct all other temperature
 
 open NNReal
 
-/-- The choices of translationally-invariant metrics on the temperature-manifold.
-  Such a choice corresponds to a choice of units for temperature. -/
+/--
+The choices of translationally-invariant metrics on the temperature-manifold.
+Such a choice corresponds to a choice of units for temperature.
+-/
 structure TemperatureUnit where
   /-- The underlying scale of the unit. -/
   val : ℝ
@@ -74,8 +76,10 @@ noncomputable def microkelvin : TemperatureUnit := scale (1e-6) kelvin
 /-- The temperature unit of degrees millikelvin (10^(-3) kelvin). -/
 noncomputable def millikelvin : TemperatureUnit := scale (1e-3) kelvin
 
-/-- The temperature unit of degrees fahrenheit ((5/9) of a kelvin).
-  Note, this is fahrenheit starting at `0` absolute temperature. -/
+/--
+The temperature unit of degrees fahrenheit ((5/9) of a kelvin).
+Note, this is fahrenheit starting at `0` absolute temperature.
+-/
 noncomputable def absoluteFahrenheit : TemperatureUnit := scale (5 / 9) kelvin
 
 end TemperatureUnit

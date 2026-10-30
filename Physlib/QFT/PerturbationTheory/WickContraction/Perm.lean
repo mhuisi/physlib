@@ -38,8 +38,10 @@ open WickAlgebra
 open FieldStatistic
 noncomputable section
 
-/-- For a list `φs` of `𝓕.FieldOp`, and two Wick contractions `φsΛ₁` and `φsΛ₂` of `φs`,
-  we say that `φsΛ₁` and `φsΛ₂` are permutations of each other if they have the same Wick term. -/
+/--
+For a list `φs` of `𝓕.FieldOp`, and two Wick contractions `φsΛ₁` and `φsΛ₂` of `φs`,
+we say that `φsΛ₁` and `φsΛ₂` are permutations of each other if they have the same Wick term.
+-/
 def Perm {φs : List 𝓕.FieldOp} (φsΛ₁ φsΛ₂ : WickContraction φs.length) : Prop :=
   φsΛ₁.wickTerm = φsΛ₂.wickTerm
 
@@ -48,9 +50,7 @@ namespace Perm
 variable {φs : List 𝓕.FieldOp} {φsΛ φsΛ₁ φsΛ₂ φsΛ₃ : WickContraction φs.length}
 
 /-- The reflexivity of the `Perm` relation. -/
-@[refl]
-lemma refl : Perm φsΛ φsΛ := by
-  rw [Perm]
+@[refl] lemma refl : Perm φsΛ φsΛ := by rw [Perm]
 
 /-- The symmetry of the `Perm` relation. -/
 @[symm]
@@ -60,8 +60,7 @@ lemma symm (h : Perm φsΛ₁ φsΛ₂) : Perm φsΛ₂ φsΛ₁ := by
 
 /-- The transitivity of the `Perm` relation. -/
 @[trans]
-lemma trans (h12 : Perm φsΛ₁ φsΛ₂) (h23 : Perm φsΛ₂ φsΛ₃) :
-    Perm φsΛ₁ φsΛ₃ := by
+lemma trans (h12 : Perm φsΛ₁ φsΛ₂) (h23 : Perm φsΛ₂ φsΛ₃) : Perm φsΛ₁ φsΛ₃ := by
   rw [Perm] at h12 h23 ⊢
   exact h12.trans h23
 

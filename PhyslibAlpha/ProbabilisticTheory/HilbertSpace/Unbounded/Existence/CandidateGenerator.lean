@@ -56,7 +56,8 @@ open scoped InnerProductSpace
 universe u
 
 variable {H : Type u} [NormedAddCommGroup H] [InnerProductSpace ℂ H] [CompleteSpace H]
-variable {U : ℝ → H →L[ℂ] H} (hU0 : U 0 = 1) (hUmul : ∀ s t, U (s + t) = U s * U t)
+variable
+  {U : ℝ → H →L[ℂ] H} (hU0 : U 0 = 1) (hUmul : ∀ s t, U (s + t) = U s * U t)
   (hUunit : ∀ t, U t ∈ unitary (H →L[ℂ] H)) (hUcont : ∀ ξ : H, Continuous (fun t : ℝ => U t ξ))
 
 /-!
@@ -69,11 +70,15 @@ variable {U : ℝ → H →L[ℂ] H} (hU0 : U 0 = 1) (hUmul : ∀ s t, U (s + t)
 def stoneCandidateDomainPred (ψ : H) : Prop := ∃ φ : H, HasDerivAt (fun t : ℝ => U t ψ) φ 0
 
 omit [CompleteSpace H] in
-/-- The candidate domain is closed under addition. The group law is an argument so that the
-domain is attached to a unitary group. -/
-lemma stoneCandidateDomainPred_add (_hUmul : ∀ s t, U (s + t) = U s * U t) {ψ₁ ψ₂ : H}
-    (h₁ : stoneCandidateDomainPred (U := U) ψ₁) (h₂ : stoneCandidateDomainPred (U := U) ψ₂) :
-    stoneCandidateDomainPred (U := U) (ψ₁ + ψ₂) := by
+/--
+The candidate domain is closed under addition. The group law is an argument so that the
+domain is attached to a unitary group.
+-/
+lemma stoneCandidateDomainPred_add
+    (_hUmul : ∀ s t, U (s + t) = U s * U t)
+    {ψ₁ ψ₂ : H}
+    (h₁ : stoneCandidateDomainPred (U := U) ψ₁) (h₂ : stoneCandidateDomainPred (U := U) ψ₂)
+    : stoneCandidateDomainPred (U := U) (ψ₁ + ψ₂) := by
   obtain ⟨φ₁, hφ₁⟩ := h₁
   obtain ⟨φ₂, hφ₂⟩ := h₂
   refine ⟨φ₁ + φ₂, ?_⟩
@@ -82,9 +87,8 @@ lemma stoneCandidateDomainPred_add (_hUmul : ∀ s t, U (s + t) = U s * U t) {ψ
 
 omit [CompleteSpace H] in
 /-- The candidate domain is closed under scalar multiplication, by the same linearity argument. -/
-lemma stoneCandidateDomainPred_smul {ψ : H} (c : ℂ)
-    (h : stoneCandidateDomainPred (U := U) ψ) :
-    stoneCandidateDomainPred (U := U) (c • ψ) := by
+lemma stoneCandidateDomainPred_smul {ψ : H} (c : ℂ) (h : stoneCandidateDomainPred (U := U) ψ)
+    : stoneCandidateDomainPred (U := U) (c • ψ) := by
   obtain ⟨φ, hφ⟩ := h
   refine ⟨c • φ, ?_⟩
   have hsmul : HasDerivAt (fun t : ℝ => c • U t ψ) (c • φ) 0 := hφ.const_smul c
@@ -108,30 +112,32 @@ def stoneCandidateDomain : Submodule ℂ H where
 
 -/
 
-/-- The derivative witness for a vector in the candidate domain, chosen once and for all via
-choice; `-Complex.I` times this is the candidate generator's action. -/
-def stoneCandidateDeriv (ψ : stoneCandidateDomain (U := U) hUmul) : H :=
-  ψ.property.choose
+/--
+The derivative witness for a vector in the candidate domain, chosen once and for all via
+choice; `-Complex.I` times this is the candidate generator's action.
+-/
+def stoneCandidateDeriv (ψ : stoneCandidateDomain (U := U) hUmul) : H := ψ.property.choose
 
 omit [CompleteSpace H] in
-lemma stoneCandidateDeriv_spec (ψ : stoneCandidateDomain (U := U) hUmul) :
-    HasDerivAt (fun t : ℝ => U t (ψ : H)) (stoneCandidateDeriv hUmul ψ) 0 :=
+lemma stoneCandidateDeriv_spec (ψ : stoneCandidateDomain (U := U) hUmul)
+    : HasDerivAt (fun t : ℝ => U t (ψ : H)) (stoneCandidateDeriv hUmul ψ) 0 :=
   ψ.property.choose_spec
 
 omit [CompleteSpace H] in
-lemma stoneCandidateDeriv_add (ψ₁ ψ₂ : stoneCandidateDomain (U := U) hUmul) :
-    stoneCandidateDeriv hUmul (ψ₁ + ψ₂) =
-      stoneCandidateDeriv hUmul ψ₁ + stoneCandidateDeriv hUmul ψ₂ := by
+lemma stoneCandidateDeriv_add (ψ₁ ψ₂ : stoneCandidateDomain (U := U) hUmul)
+    : stoneCandidateDeriv hUmul (ψ₁ + ψ₂)
+      = stoneCandidateDeriv hUmul ψ₁ + stoneCandidateDeriv hUmul ψ₂ := by
   apply HasDerivAt.unique (stoneCandidateDeriv_spec hUmul (ψ₁ + ψ₂))
-  have hsum : HasDerivAt (fun t : ℝ => U t (ψ₁ : H) + U t (ψ₂ : H))
+  have hsum : HasDerivAt
+      (fun t : ℝ => U t (ψ₁ : H) + U t (ψ₂ : H))
       (stoneCandidateDeriv hUmul ψ₁ + stoneCandidateDeriv hUmul ψ₂) 0 :=
     (stoneCandidateDeriv_spec hUmul ψ₁).add (stoneCandidateDeriv_spec hUmul ψ₂)
   have hco : ((ψ₁ + ψ₂ : stoneCandidateDomain (U := U) hUmul) : H) = (ψ₁ : H) + (ψ₂ : H) := rfl
   simpa [hco, map_add] using hsum
 
 omit [CompleteSpace H] in
-lemma stoneCandidateDeriv_smul (c : ℂ) (ψ : stoneCandidateDomain (U := U) hUmul) :
-    stoneCandidateDeriv hUmul (c • ψ) = c • stoneCandidateDeriv hUmul ψ := by
+lemma stoneCandidateDeriv_smul (c : ℂ) (ψ : stoneCandidateDomain (U := U) hUmul)
+    : stoneCandidateDeriv hUmul (c • ψ) = c • stoneCandidateDeriv hUmul ψ := by
   apply HasDerivAt.unique (stoneCandidateDeriv_spec hUmul (c • ψ))
   have hsmul : HasDerivAt (fun t : ℝ => c • U t (ψ : H)) (c • stoneCandidateDeriv hUmul ψ) 0 :=
     (stoneCandidateDeriv_spec hUmul ψ).const_smul c
@@ -139,22 +145,24 @@ lemma stoneCandidateDeriv_smul (c : ℂ) (ψ : stoneCandidateDomain (U := U) hUm
   simpa [hco, map_smul] using hsmul
 
 /-- The candidate generator as a linear map on its domain. -/
-def stoneCandidateLinearMap :
-    stoneCandidateDomain (U := U) hUmul →ₗ[ℂ] H where
+def stoneCandidateLinearMap : stoneCandidateDomain (U := U) hUmul →ₗ[ℂ] H where
   toFun ψ := (-Complex.I) • stoneCandidateDeriv hUmul ψ
   map_add' ψ₁ ψ₂ := by rw [stoneCandidateDeriv_add, smul_add]
   map_smul' c ψ := by
     simp only [RingHom.id_apply, stoneCandidateDeriv_smul, smul_comm (-Complex.I) c]
 
-/-- The candidate Stone generator: a `LinearPMap` whose domain is exactly the vectors along which
-`U`'s orbit is differentiable at `0`, sending such a vector to `-i` times that derivative. -/
+/--
+The candidate Stone generator: a `LinearPMap` whose domain is exactly the vectors along which
+`U`'s orbit is differentiable at `0`, sending such a vector to `-i` times that derivative.
+-/
 def stoneCandidateGenerator : H →ₗ.[ℂ] H where
   domain := stoneCandidateDomain (U := U) hUmul
   toFun := stoneCandidateLinearMap hUmul
 
 omit [CompleteSpace H] in
-lemma stoneCandidateGenerator_apply (ψ : (stoneCandidateGenerator (U := U) hUmul).domain) :
-    stoneCandidateGenerator (U := U) hUmul ψ = (-Complex.I) • stoneCandidateDeriv hUmul ψ := rfl
+lemma stoneCandidateGenerator_apply (ψ : (stoneCandidateGenerator (U := U) hUmul).domain)
+    : stoneCandidateGenerator (U := U) hUmul ψ = (-Complex.I) • stoneCandidateDeriv hUmul ψ :=
+  rfl
 
 /-!
 
@@ -163,25 +171,29 @@ lemma stoneCandidateGenerator_apply (ψ : (stoneCandidateGenerator (U := U) hUmu
 -/
 
 include hU0 hUunit in
-/-- **The candidate generator is symmetric.** The inner product `⟪U t ψ₁, U t ψ₂⟫` is constant in
-`t`; differentiating at `0` gives the symmetry. -/
-lemma stoneCandidateGenerator_isSymmetric :
-    (stoneCandidateGenerator (U := U) hUmul).IsSymmetric := by
+/--
+**The candidate generator is symmetric.** The inner product `⟪U t ψ₁, U t ψ₂⟫` is constant in
+`t`; differentiating at `0` gives the symmetry.
+-/
+lemma stoneCandidateGenerator_isSymmetric
+    : (stoneCandidateGenerator (U := U) hUmul).IsSymmetric := by
   intro ψ₁ ψ₂
   set φ₁ := stoneCandidateDeriv hUmul ψ₁
   set φ₂ := stoneCandidateDeriv hUmul ψ₂
   have hconst : ∀ t : ℝ, ⟪U t (ψ₁ : H), U t (ψ₂ : H)⟫_ℂ = ⟪(ψ₁ : H), (ψ₂ : H)⟫_ℂ := by
     intro t
     exact ContinuousLinearMap.inner_map_map_of_mem_unitary (hUunit t) (ψ₁ : H) (ψ₂ : H)
-  have hderiv0 : HasDerivAt (fun t : ℝ => ⟪U t (ψ₁ : H), U t (ψ₂ : H)⟫_ℂ)
+  have hderiv0 : HasDerivAt
+      (fun t : ℝ => ⟪U t (ψ₁ : H), U t (ψ₂ : H)⟫_ℂ)
       (⟪φ₁, (ψ₂ : H)⟫_ℂ + ⟪(ψ₁ : H), φ₂⟫_ℂ) 0 := by
     have hraw := (stoneCandidateDeriv_spec hUmul ψ₁).inner ℂ (stoneCandidateDeriv_spec hUmul ψ₂)
     simp only [hU0, one_apply_eq_self] at hraw
     rw [add_comm] at hraw
     exact hraw
   have hconstfun : HasDerivAt (fun t : ℝ => ⟪U t (ψ₁ : H), U t (ψ₂ : H)⟫_ℂ) 0 0 := by
-    have hfun : (fun t : ℝ => ⟪U t (ψ₁ : H), U t (ψ₂ : H)⟫_ℂ) =
-        fun _ : ℝ => ⟪(ψ₁ : H), (ψ₂ : H)⟫_ℂ := funext hconst
+    have hfun
+        : (fun t : ℝ => ⟪U t (ψ₁ : H), U t (ψ₂ : H)⟫_ℂ) = fun _ : ℝ => ⟪(ψ₁ : H), (ψ₂ : H)⟫_ℂ :=
+      funext hconst
     rw [hfun]
     exact hasDerivAt_const 0 _
   have hzero : ⟪φ₁, (ψ₂ : H)⟫_ℂ + ⟪(ψ₁ : H), φ₂⟫_ℂ = 0 := hderiv0.unique hconstfun

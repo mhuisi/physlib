@@ -60,9 +60,7 @@ section OrderedVectorSpace
 
 variable {E : Type*} [OrderedVectorSpace E]
 
-@[ext]
-lemma ext {w₁ w₂ : Weight E} (h : ∀ A, w₁ A = w₂ A) : w₁ = w₂ :=
-  LinearMap.ext h
+@[ext] lemma ext {w₁ w₂ : Weight E} (h : ∀ A, w₁ A = w₂ A) : w₁ = w₂ := LinearMap.ext h
 
 /-- Only the zero positive element has weight zero. -/
 def IsFaithful (w : Weight E) : Prop := ∀ A : PosCone E, w A = 0 → A = 0
@@ -71,8 +69,8 @@ def IsFaithful (w : Weight E) : Prop := ∀ A : PosCone E, w A = 0 → A = 0
 def IsFinite (w : Weight E) : Prop := ∀ A : PosCone E, w A ≠ ⊤
 
 /-- A weight is the supremum of its finite values below each positive element. -/
-def IsSemifinite (w : Weight E) : Prop := ∀ A : PosCone E,
-  w A = ⨆ B : {B : PosCone E // B ≤ A ∧ w B ≠ ⊤}, w B
+def IsSemifinite (w : Weight E) : Prop :=
+  ∀ A : PosCone E, w A = ⨆ B : {B : PosCone E // B ≤ A ∧ w B ≠ ⊤}, w B
 
 /-- Weights are monotone on the positive cone. -/
 lemma mono (w : Weight E) : Monotone (w : PosCone E → ℝ≥0∞) := by
@@ -88,19 +86,22 @@ lemma IsFinite.isSemifinite {w : Weight E} (hw : w.IsFinite) : w.IsSemifinite :=
   le_antisymm (le_iSup_of_le ⟨A, le_rfl, hw A⟩ le_rfl) (iSup_le fun B => w.mono B.2.1)
 
 /-- A finite weight's real value is additive. -/
-lemma IsFinite.toReal_map_add {w : Weight E} (hw : w.IsFinite) (A B : PosCone E) :
-    (w (A + B)).toReal = (w A).toReal + (w B).toReal := by
+lemma IsFinite.toReal_map_add {w : Weight E} (hw : w.IsFinite) (A B : PosCone E)
+    : (w (A + B)).toReal = (w A).toReal + (w B).toReal := by
   rw [w.map_add, ENNReal.toReal_add (hw A) (hw B)]
 
 /-- A weight's real value scales linearly under nonnegative real scaling. -/
-lemma toReal_map_nnreal_smul (w : Weight E) (k : ℝ≥0) (A : PosCone E) :
-    (w (k • A)).toReal = k * (w A).toReal := by
+lemma toReal_map_nnreal_smul (w : Weight E) (k : ℝ≥0) (A : PosCone E)
+    : (w (k • A)).toReal = k * (w A).toReal := by
   rw [w.map_smul, ENNReal.smul_def, smul_eq_mul, ENNReal.toReal_mul, ENNReal.coe_toReal]
 
-/-- A weight is normal when it preserves least upper bounds of increasing sequences in the
-positive cone. -/
-def IsNormal (w : Weight E) : Prop := ∀ (f : ℕ → PosCone E) (A : PosCone E),
-  Monotone f → IsLUB (Set.range f) A → IsLUB (Set.range (w ∘ f)) (w A)
+/--
+A weight is normal when it preserves least upper bounds of increasing sequences in the
+positive cone.
+-/
+def IsNormal (w : Weight E) : Prop :=
+  ∀ (f : ℕ → PosCone E) (A : PosCone E),
+    Monotone f → IsLUB (Set.range f) A → IsLUB (Set.range (w ∘ f)) (w A)
 
 end OrderedVectorSpace
 
@@ -129,18 +130,19 @@ noncomputable def normalize (w : Weight E) : Weight E where
     simp only [map_smul, ENNReal.smul_def, smul_eq_mul, RingHom.id_apply]
     ring
 
-@[simp] lemma normalize_apply (w : Weight E) (A : PosCone E) :
-    normalize w A = (w 1)⁻¹ * w A := rfl
+@[simp] lemma normalize_apply (w : Weight E) (A : PosCone E) : normalize w A = (w 1)⁻¹ * w A := rfl
 
 /-- Normalizing a finite weight that's nonzero at the order unit keeps it finite. -/
-lemma IsFinite.normalize_isFinite {w : Weight E} (hw : w.IsFinite) (h : w 1 ≠ 0) :
-    (normalize w).IsFinite := fun A =>
+lemma IsFinite.normalize_isFinite {w : Weight E} (hw : w.IsFinite) (h : w 1 ≠ 0)
+    : (normalize w).IsFinite := fun A =>
   ENNReal.mul_ne_top (ENNReal.inv_ne_top.mpr h) (hw A)
 
-/-- Normalizing a finite weight that's nonzero at the order unit makes it a state: the order unit
-is scaled to weight exactly `1`. -/
-lemma IsFinite.normalize_isState {w : Weight E} (hw : w.IsFinite) (h : w 1 ≠ 0) :
-    (normalize w).IsState where
+/--
+Normalizing a finite weight that's nonzero at the order unit makes it a state: the order unit
+is scaled to weight exactly `1`.
+-/
+lemma IsFinite.normalize_isState {w : Weight E} (hw : w.IsFinite) (h : w 1 ≠ 0)
+    : (normalize w).IsState where
   finite := hw.normalize_isFinite h
   normalized := ENNReal.inv_mul_cancel h (hw 1)
 

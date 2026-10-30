@@ -75,13 +75,15 @@ namespace StandardModel
 
 namespace LeptonDoubletV
 
-/-- The lepton doublet as a matter field of `StandardModel.localGaugeData`, in the `(1, 2)_{-3}`
-  representation with its left-handed Lorentz action: the matter field the general theory
-  derives from the table's datum `StandardModel.Model.leptonDoublet`. -/
-noncomputable def matterField : MatterField localGaugeData :=
-  Model.leptonDoublet.toMatterField
+/--
+The lepton doublet as a matter field of `StandardModel.localGaugeData`, in the `(1, 2)_{-3}`
+representation with its left-handed Lorentz action: the matter field the general theory
+derives from the table's datum `StandardModel.Model.leptonDoublet`.
+-/
+noncomputable def matterField : MatterField localGaugeData := Model.leptonDoublet.toMatterField
 
-/- The hand-built definition, now derived from the datum:
+/-
+The hand-built definition, now derived from the datum:
 /-- The lepton doublet as a matter field of `StandardModel.localGaugeData`, in the `(1, 2)_{-3}`
   representation with its left-handed Lorentz action. -/
 noncomputable def matterField : MatterField localGaugeData where
@@ -94,24 +96,19 @@ noncomputable def matterField : MatterField localGaugeData where
   massWeight := 3
 -/
 
-@[simp]
-lemma matterField_V : matterField.V = LeptonDoubletV := rfl
+@[simp] lemma matterField_V : matterField.V = LeptonDoubletV := rfl
 
-@[simp]
-lemma matterField_repLorentz : matterField.repLorentz = repLorentzGroup := rfl
+@[simp] lemma matterField_repLorentz : matterField.repLorentz = repLorentzGroup := rfl
 
-@[simp]
-lemma matterField_repJet : matterField.repJet = repJetGaugeGroupI := rfl
+@[simp] lemma matterField_repJet : matterField.repJet = repJetGaugeGroupI := rfl
 
-@[simp]
-lemma matterField_repAlgebra : matterField.repAlgebra = gaugeAlgebraAction := rfl
+@[simp] lemma matterField_repAlgebra : matterField.repAlgebra = gaugeAlgebraAction := rfl
 
-@[simp]
-lemma matterField_massWeight : matterField.massWeight = 3 := rfl
+@[simp] lemma matterField_massWeight : matterField.massWeight = 3 := rfl
 
 /-- Pure gauge jets act trivially on the lepton doublet at the base point. -/
-lemma matterField_pureJetsActTrivially : matterField.PureJetsActTrivially :=
-  fun hW => repCoeff_zero_of_eval_eq_one hW
+lemma matterField_pureJetsActTrivially : matterField.PureJetsActTrivially := fun hW =>
+  repCoeff_zero_of_eval_eq_one hW
 
 /-- The gauge and Lorentz actions on the lepton doublet commute. -/
 lemma matterField_gaugeLorentzCompatible : matterField.GaugeLorentzCompatible :=
@@ -127,8 +124,10 @@ end LeptonDoubletV
 
 namespace LeptonSinglet
 
-/-- The charged-lepton singlet as a matter field of `StandardModel.localGaugeData`, in the
-  `(1, 1)_{-6}` representation with its right-handed Lorentz action. -/
+/--
+The charged-lepton singlet as a matter field of `StandardModel.localGaugeData`, in the
+`(1, 1)_{-6}` representation with its right-handed Lorentz action.
+-/
 noncomputable def matterField : MatterField localGaugeData where
   V := LeptonSinglet
   repLorentz := repLorentzGroup
@@ -138,24 +137,19 @@ noncomputable def matterField : MatterField localGaugeData where
   repJet_smul := repJetGaugeGroupI_smul
   massWeight := 3
 
-@[simp]
-lemma matterField_V : matterField.V = LeptonSinglet := rfl
+@[simp] lemma matterField_V : matterField.V = LeptonSinglet := rfl
 
-@[simp]
-lemma matterField_repLorentz : matterField.repLorentz = repLorentzGroup := rfl
+@[simp] lemma matterField_repLorentz : matterField.repLorentz = repLorentzGroup := rfl
 
-@[simp]
-lemma matterField_repJet : matterField.repJet = repJetGaugeGroupI := rfl
+@[simp] lemma matterField_repJet : matterField.repJet = repJetGaugeGroupI := rfl
 
-@[simp]
-lemma matterField_repAlgebra : matterField.repAlgebra = gaugeAlgebraAction := rfl
+@[simp] lemma matterField_repAlgebra : matterField.repAlgebra = gaugeAlgebraAction := rfl
 
-@[simp]
-lemma matterField_massWeight : matterField.massWeight = 3 := rfl
+@[simp] lemma matterField_massWeight : matterField.massWeight = 3 := rfl
 
 /-- Pure gauge jets act trivially on the charged-lepton singlet at the base point. -/
-lemma matterField_pureJetsActTrivially : matterField.PureJetsActTrivially :=
-  fun hW => repCoeff_zero_of_eval_eq_one hW
+lemma matterField_pureJetsActTrivially : matterField.PureJetsActTrivially := fun hW =>
+  repCoeff_zero_of_eval_eq_one hW
 
 /-- The gauge and Lorentz actions on the charged-lepton singlet commute. -/
 lemma matterField_gaugeLorentzCompatible : matterField.GaugeLorentzCompatible :=
@@ -173,8 +167,10 @@ end LeptonSinglet
 
 namespace QuarkDoublet
 
-/-- The quark doublet as a matter field of `StandardModel.localGaugeData`, in the `(3, 2)_{1}`
-  representation with its left-handed Lorentz action. -/
+/--
+The quark doublet as a matter field of `StandardModel.localGaugeData`, in the `(3, 2)_{1}`
+representation with its left-handed Lorentz action.
+-/
 noncomputable def matterField : MatterField localGaugeData where
   V := QuarkDoublet
   repLorentz := repLorentzGroup
@@ -184,24 +180,19 @@ noncomputable def matterField : MatterField localGaugeData where
   repJet_smul := repJetGaugeGroupI_smul
   massWeight := 3
 
-@[simp]
-lemma matterField_V : matterField.V = QuarkDoublet := rfl
+@[simp] lemma matterField_V : matterField.V = QuarkDoublet := rfl
 
-@[simp]
-lemma matterField_repLorentz : matterField.repLorentz = repLorentzGroup := rfl
+@[simp] lemma matterField_repLorentz : matterField.repLorentz = repLorentzGroup := rfl
 
-@[simp]
-lemma matterField_repJet : matterField.repJet = repJetGaugeGroupI := rfl
+@[simp] lemma matterField_repJet : matterField.repJet = repJetGaugeGroupI := rfl
 
-@[simp]
-lemma matterField_repAlgebra : matterField.repAlgebra = gaugeAlgebraAction := rfl
+@[simp] lemma matterField_repAlgebra : matterField.repAlgebra = gaugeAlgebraAction := rfl
 
-@[simp]
-lemma matterField_massWeight : matterField.massWeight = 3 := rfl
+@[simp] lemma matterField_massWeight : matterField.massWeight = 3 := rfl
 
 /-- Pure gauge jets act trivially on the quark doublet at the base point. -/
-lemma matterField_pureJetsActTrivially : matterField.PureJetsActTrivially :=
-  fun hW => repCoeff_zero_of_eval_eq_one hW
+lemma matterField_pureJetsActTrivially : matterField.PureJetsActTrivially := fun hW =>
+  repCoeff_zero_of_eval_eq_one hW
 
 /-- The gauge and Lorentz actions on the quark doublet commute. -/
 lemma matterField_gaugeLorentzCompatible : matterField.GaugeLorentzCompatible :=
@@ -217,8 +208,10 @@ end QuarkDoublet
 
 namespace UpSinglet
 
-/-- The up-type quark singlet as a matter field of `StandardModel.localGaugeData`, in the
-  `(3, 1)_{4}` representation with its right-handed Lorentz action. -/
+/--
+The up-type quark singlet as a matter field of `StandardModel.localGaugeData`, in the
+`(3, 1)_{4}` representation with its right-handed Lorentz action.
+-/
 noncomputable def matterField : MatterField localGaugeData where
   V := UpSinglet
   repLorentz := repLorentzGroup
@@ -228,24 +221,19 @@ noncomputable def matterField : MatterField localGaugeData where
   repJet_smul := repJetGaugeGroupI_smul
   massWeight := 3
 
-@[simp]
-lemma matterField_V : matterField.V = UpSinglet := rfl
+@[simp] lemma matterField_V : matterField.V = UpSinglet := rfl
 
-@[simp]
-lemma matterField_repLorentz : matterField.repLorentz = repLorentzGroup := rfl
+@[simp] lemma matterField_repLorentz : matterField.repLorentz = repLorentzGroup := rfl
 
-@[simp]
-lemma matterField_repJet : matterField.repJet = repJetGaugeGroupI := rfl
+@[simp] lemma matterField_repJet : matterField.repJet = repJetGaugeGroupI := rfl
 
-@[simp]
-lemma matterField_repAlgebra : matterField.repAlgebra = gaugeAlgebraAction := rfl
+@[simp] lemma matterField_repAlgebra : matterField.repAlgebra = gaugeAlgebraAction := rfl
 
-@[simp]
-lemma matterField_massWeight : matterField.massWeight = 3 := rfl
+@[simp] lemma matterField_massWeight : matterField.massWeight = 3 := rfl
 
 /-- Pure gauge jets act trivially on the up-type singlet at the base point. -/
-lemma matterField_pureJetsActTrivially : matterField.PureJetsActTrivially :=
-  fun hW => repCoeff_zero_of_eval_eq_one hW
+lemma matterField_pureJetsActTrivially : matterField.PureJetsActTrivially := fun hW =>
+  repCoeff_zero_of_eval_eq_one hW
 
 /-- The gauge and Lorentz actions on the up-type singlet commute. -/
 lemma matterField_gaugeLorentzCompatible : matterField.GaugeLorentzCompatible :=
@@ -261,8 +249,10 @@ end UpSinglet
 
 namespace DownSinglet
 
-/-- The down-type quark singlet as a matter field of `StandardModel.localGaugeData`, in the
-  `(3, 1)_{-2}` representation with its right-handed Lorentz action. -/
+/--
+The down-type quark singlet as a matter field of `StandardModel.localGaugeData`, in the
+`(3, 1)_{-2}` representation with its right-handed Lorentz action.
+-/
 noncomputable def matterField : MatterField localGaugeData where
   V := DownSinglet
   repLorentz := repLorentzGroup
@@ -272,24 +262,19 @@ noncomputable def matterField : MatterField localGaugeData where
   repJet_smul := repJetGaugeGroupI_smul
   massWeight := 3
 
-@[simp]
-lemma matterField_V : matterField.V = DownSinglet := rfl
+@[simp] lemma matterField_V : matterField.V = DownSinglet := rfl
 
-@[simp]
-lemma matterField_repLorentz : matterField.repLorentz = repLorentzGroup := rfl
+@[simp] lemma matterField_repLorentz : matterField.repLorentz = repLorentzGroup := rfl
 
-@[simp]
-lemma matterField_repJet : matterField.repJet = repJetGaugeGroupI := rfl
+@[simp] lemma matterField_repJet : matterField.repJet = repJetGaugeGroupI := rfl
 
-@[simp]
-lemma matterField_repAlgebra : matterField.repAlgebra = gaugeAlgebraAction := rfl
+@[simp] lemma matterField_repAlgebra : matterField.repAlgebra = gaugeAlgebraAction := rfl
 
-@[simp]
-lemma matterField_massWeight : matterField.massWeight = 3 := rfl
+@[simp] lemma matterField_massWeight : matterField.massWeight = 3 := rfl
 
 /-- Pure gauge jets act trivially on the down-type singlet at the base point. -/
-lemma matterField_pureJetsActTrivially : matterField.PureJetsActTrivially :=
-  fun hW => repCoeff_zero_of_eval_eq_one hW
+lemma matterField_pureJetsActTrivially : matterField.PureJetsActTrivially := fun hW =>
+  repCoeff_zero_of_eval_eq_one hW
 
 /-- The gauge and Lorentz actions on the down-type singlet commute. -/
 lemma matterField_gaugeLorentzCompatible : matterField.GaugeLorentzCompatible :=

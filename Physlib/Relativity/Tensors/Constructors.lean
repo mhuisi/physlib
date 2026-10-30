@@ -20,11 +20,13 @@ open Module
 
 namespace TensorSpecies
 
-variable {k : Type} [CommRing k] {C : Type} {G : Type} [Group G]
-    {V : C → Type} [∀ c, AddCommGroup (V c)] [∀ c, Module k (V c)]
-    {basisIdx : C → Type} [∀ c, Fintype (basisIdx c)] [∀ c, DecidableEq (basisIdx c)]
-    {rep : (c : C) → Representation k G (V c)} {b : (c : C) → Basis (basisIdx c) k (V c)}
-    {S : TensorSpecies k C G V basisIdx rep b}
+variable
+  {k : Type} [CommRing k]
+  {C : Type} {G : Type} [Group G]
+  {V : C → Type} [∀ c, AddCommGroup (V c)] [∀ c, Module k (V c)]
+  {basisIdx : C → Type} [∀ c, Fintype (basisIdx c)] [∀ c, DecidableEq (basisIdx c)]
+  {rep : (c : C) → Representation k G (V c)} {b : (c : C) → Basis (basisIdx c) k (V c)}
+  {S : TensorSpecies k C G V basisIdx rep b}
 attribute [-simp] LinearEquiv.cast_apply
 
 namespace Tensor
@@ -57,39 +59,37 @@ noncomputable def Pure.fromSingleP {c : C} : V c ≃ₗ[k] Pure S ![c] where
 noncomputable def fromSingleT {c : C} : V c ≃ₗ[k] S.Tensor ![c] :=
   (PiTensorProduct.subsingletonEquiv (s := fun i => V (![c] i)) 0).symm
 
-lemma fromSingleT_symm_pure {c : C} (p : Pure S ![c]) :
-    fromSingleT.symm p.toTensor = Pure.fromSingleP.symm p :=
+lemma fromSingleT_symm_pure {c : C} (p : Pure S ![c])
+    : fromSingleT.symm p.toTensor = Pure.fromSingleP.symm p :=
   PiTensorProduct.subsingletonEquiv_apply_tprod 0 p
 
-lemma fromSingleT_eq_pureT {c : C} (x : V c) :
-    fromSingleT (S := S) x = Pure.toTensor (fun 0 => x : Pure S ![c]) := by
+lemma fromSingleT_eq_pureT {c : C} (x : V c)
+    : fromSingleT (S := S) x = Pure.toTensor (fun 0 => x : Pure S ![c]) := by
   change _ = Pure.toTensor (Pure.fromSingleP x)
   apply fromSingleT.symm.injective
   rw [fromSingleT_symm_pure]
   simp
 
-lemma actionT_fromSingleT {c : C} (x : V c) (g : G) :
-    g • fromSingleT (S := S) x = fromSingleT (rep c g x) := by
+lemma actionT_fromSingleT {c : C} (x : V c) (g : G)
+    : g • fromSingleT (S := S) x = fromSingleT (rep c g x) := by
   rw [fromSingleT_eq_pureT, actionT_pure, fromSingleT_eq_pureT]
   congr
   funext x
   fin_cases x
   rfl
 
-lemma fromSingleT_map {c c1 : C}
-    (h : c = c1) (x : V c) :
-    fromSingleT (LinearEquiv.cast (R := k) h x) =
-    permT id (by simp [h]) (fromSingleT (S := S) x) := by
+lemma fromSingleT_map {c c1 : C} (h : c = c1) (x : V c)
+    : fromSingleT (LinearEquiv.cast (R := k) h x)
+      = permT id (by simp [h]) (fromSingleT (S := S) x) := by
   rw [fromSingleT_eq_pureT, fromSingleT_eq_pureT, permT_pure]
   congr
   funext i
   fin_cases i
   rfl
 
-lemma contrT_fromSingleT_fromSingleT {c : C} (x : V c)
-    (y : V (S.τ c)) :
-    contrT (S := S) 0 0 1 (by simp; rfl) (prodT (fromSingleT x) (fromSingleT y)) =
-    (S.contr c) (x ⊗ₜ[k] y) • (Pure.toTensor default) := by
+lemma contrT_fromSingleT_fromSingleT {c : C} (x : V c) (y : V (S.τ c))
+    : contrT (S := S) 0 0 1 (by simp; rfl) (prodT (fromSingleT x) (fromSingleT y))
+      = (S.contr c) (x ⊗ₜ[k] y) • (Pure.toTensor default) := by
   rw [fromSingleT_eq_pureT, fromSingleT_eq_pureT, prodT_pure, contrT_pure, Pure.contrP,
     Pure.contrPCoeff]
   congr 1
@@ -111,55 +111,57 @@ open TensorProduct
 
 -/
 
-/-- The construction of a tensor with two indices from the tensor product
-  `V c1 ⊗[k] V c2 ` defined
-  categorically. -/
-noncomputable def fromPairT {c1 c2 : C} :
-    V c1 ⊗[k] V c2 →ₗ[k] S.Tensor ![c1, c2] where
+/--
+The construction of a tensor with two indices from the tensor product
+`V c1 ⊗[k] V c2 ` defined
+categorically.
+-/
+noncomputable def fromPairT {c1 c2 : C} : V c1 ⊗[k] V c2 →ₗ[k] S.Tensor ![c1, c2] where
   toFun x :=
     permT id (And.intro Function.bijective_id (fun i => by fin_cases i <;> rfl))
-    (TensorProduct.lift prodT (TensorProduct.map (fromSingleT (S := S) (c := c1))
-      (fromSingleT (S := S) (c := c2)).toLinearMap (x) : S.Tensor ![c1] ⊗[k] S.Tensor ![c2]))
+      (TensorProduct.lift prodT
+        (TensorProduct.map (fromSingleT (S := S) (c := c1))
+            (fromSingleT (S := S) (c := c2)).toLinearMap (x)
+          : S.Tensor ![c1] ⊗[k] S.Tensor ![c2]))
   map_add' x y := by simp
   map_smul' r x := by simp
 
-lemma fromPairT_tmul {c1 c2 : C} (x : V c1)
-    (y : V c2) : fromPairT (x ⊗ₜ[k] y) =
-    permT id (And.intro Function.bijective_id (fun i => by fin_cases i <;> rfl))
-    (prodT (fromSingleT (S := S) x) (fromSingleT y)) := by
+lemma fromPairT_tmul {c1 c2 : C} (x : V c1) (y : V c2)
+    : fromPairT (x ⊗ₜ[k] y)
+      = permT id (And.intro Function.bijective_id (fun i => by fin_cases i <;> rfl))
+        (prodT (fromSingleT (S := S) x) (fromSingleT y)) := by
   rfl
 
 set_option backward.isDefEq.respectTransparency false in
-lemma fromPairT_eq_pure {c1 c2 : C} (x : V c1) (y : V c2) :
-    fromPairT (S := S) (x ⊗ₜ[k] y) = Pure.toTensor (fun | 0 => x | 1 => y) := by
+lemma fromPairT_eq_pure {c1 c2 : C} (x : V c1) (y : V c2)
+    : fromPairT (S := S) (x ⊗ₜ[k] y)
+      = Pure.toTensor (fun
+        | 0 => x
+        | 1 => y) := by
   rw [fromPairT_tmul, fromSingleT_eq_pureT, fromSingleT_eq_pureT, prodT_pure, permT_pure]
   congr
   funext i
   fin_cases i <;> rfl
 
 set_option backward.isDefEq.respectTransparency false in
-lemma actionT_fromPairT {c1 c2 : C}
-    (x : V c1 ⊗[k]V c2)
-    (g : G) :
-    g • fromPairT (S := S) x = fromPairT (TensorProduct.map (rep c1 g)
-      (rep c2 g) x) := by
+lemma actionT_fromPairT {c1 c2 : C} (x : V c1 ⊗[k]V c2) (g : G)
+    : g • fromPairT (S := S) x = fromPairT (TensorProduct.map (rep c1 g) (rep c2 g) x) := by
   induction x using TensorProduct.inductionOn with
   | tmul x y =>
     simp only [Nat.succ_eq_add_one, Nat.reduceAdd, map_tmul]
-    rw [fromPairT_tmul, ← permT_equivariant, ← prodT_equivariant,
-      actionT_fromSingleT, actionT_fromSingleT]
+    rw [fromPairT_tmul, ← permT_equivariant, ← prodT_equivariant, actionT_fromSingleT,
+      actionT_fromSingleT]
     rfl
   | add x y hx hy => simp [hx, hy]
 
 set_option backward.isDefEq.respectTransparency false in
-lemma fromPairT_map_right {c1 c2 c2' : C} (h :c2 = c2')
-    (x : V c1 ⊗[k] V c2) :
-    fromPairT (TensorProduct.map LinearMap.id
-      (LinearEquiv.cast (R := k) (M := V) h) x : _ ⊗[k] V c2') =
-    permT id (by simp [h]) (fromPairT (S := S) x) := by
+lemma fromPairT_map_right {c1 c2 c2' : C} (h : c2 = c2') (x : V c1 ⊗[k] V c2)
+    : fromPairT
+        (TensorProduct.map LinearMap.id (LinearEquiv.cast (R := k) (M := V) h) x : _ ⊗[k] V c2')
+      = permT id (by simp [h]) (fromPairT (S := S) x) := by
   induction' x using TensorProduct.inductionOn with x y x1 x2 h1 h2
   · simp only [Nat.succ_eq_add_one, Nat.reduceAdd, map_tmul, LinearMap.id_coe, id_eq,
-    LinearEquiv.coe_coe]
+      LinearEquiv.coe_coe]
     rw [fromPairT_tmul, fromPairT_tmul]
     simp only [Nat.succ_eq_add_one, Nat.reduceAdd, permT_permT, CompTriple.comp_eq]
     rw [fromSingleT_map, prodT_permT_right, permT_permT]
@@ -169,11 +171,10 @@ lemma fromPairT_map_right {c1 c2 c2' : C} (h :c2 = c2')
   · simp [h1, h2]
 
 set_option backward.isDefEq.respectTransparency false in
-lemma fromPairT_comm {c1 c2 : C}
-    (x : V c1 ⊗[k] V c2) :
-    fromPairT (TensorProduct.comm k _ _ x) =
-    permT ![1, 0] (And.intro (by decide) (fun i => by fin_cases i <;> simp))
-    (fromPairT (S := S) x) := by
+lemma fromPairT_comm {c1 c2 : C} (x : V c1 ⊗[k] V c2)
+    : fromPairT (TensorProduct.comm k _ _ x)
+      = permT (![1, 0]) (And.intro (by decide) (fun i => by fin_cases i <;> simp))
+        (fromPairT (S := S) x) := by
   induction x using TensorProduct.inductionOn with
   | tmul x y =>
     simp only [Nat.succ_eq_add_one, Nat.reduceAdd, comm_tmul, Fin.isValue]
@@ -191,26 +192,22 @@ lemma fromPairT_comm {c1 c2 : C}
 -/
 
 /-- The contraction of tensors with one index with one with two indices defined categorically. -/
-noncomputable def fromSingleTContrFromPairT {c c2 : C}
-    (x : V c) (y : V (S.τ c) ⊗[k] V c2) : S.Tensor ![c2] :=
+noncomputable def fromSingleTContrFromPairT {c c2 : C} (x : V c) (y : V (S.τ c) ⊗[k] V c2)
+    : S.Tensor ![c2] :=
   let T1 : V c ⊗[k] (V (S.τ c) ⊗[k] (V c2)) := x ⊗ₜ[k] y
   let T3 : (V c ⊗[k] V (S.τ c)) ⊗[k] V c2 := (TensorProduct.assoc _ _ _ _).symm T1
   let T4 : k ⊗[k] V c2 := (S.contr c).toLinearMap.rTensor (V c2) T3
   let T5 : V c2 := TensorProduct.lid _ _ T4
   fromSingleT T5
 
-lemma fromSingleTContrFromPairT_tmul {c c2 : C}
-    (x : V c) (y1 : V (S.τ c)) (y2 : V c2) :
-    fromSingleTContrFromPairT x (y1 ⊗ₜ[k] y2) =
-    S.contr c (x ⊗ₜ[k] y1) • fromSingleT y2 := by
+lemma fromSingleTContrFromPairT_tmul {c c2 : C} (x : V c) (y1 : V (S.τ c)) (y2 : V c2)
+    : fromSingleTContrFromPairT x (y1 ⊗ₜ[k] y2) = S.contr c (x ⊗ₜ[k] y1) • fromSingleT y2 := by
   simp [fromSingleTContrFromPairT]
 
 set_option backward.isDefEq.respectTransparency false in
-lemma fromSingleT_contr_fromPairT_tmul {c c2 : C}
-    (x : V c) (y1 : V (S.τ c)) (y2 : V c2) :
-    contrT 1 0 1 (by simp; rfl)
-      (prodT (fromSingleT x) (fromPairT (y1 ⊗ₜ[k] y2))) =
-    permT id (by simp; rfl) (fromSingleTContrFromPairT x (y1 ⊗ₜ[k] y2)) := by
+lemma fromSingleT_contr_fromPairT_tmul {c c2 : C} (x : V c) (y1 : V (S.τ c)) (y2 : V c2)
+    : contrT 1 0 1 (by simp; rfl) (prodT (fromSingleT x) (fromPairT (y1 ⊗ₜ[k] y2)))
+      = permT id (by simp; rfl) (fromSingleTContrFromPairT x (y1 ⊗ₜ[k] y2)) := by
   trans permT id (by simp; rfl)
     (prodT (contrT 0 0 1 (by simp; rfl) (prodT (fromSingleT x) (fromSingleT y1))) (fromSingleT y2))
   · conv_rhs =>
@@ -255,12 +252,9 @@ lemma fromSingleT_contr_fromPairT_tmul {c c2 : C}
     ext i
     simp
 
-lemma contrT_fromSingleT_fromPairT {c c2 : C}
-    (x : V c)
-    (y : V (S.τ c) ⊗[k] V c2) :
-    contrT 1 0 1 (by simp; rfl)
-      (prodT (fromSingleT x) (fromPairT y)) =
-    permT id (by simp; rfl) (fromSingleTContrFromPairT x y) := by
+lemma contrT_fromSingleT_fromPairT {c c2 : C} (x : V c) (y : V (S.τ c) ⊗[k] V c2)
+    : contrT 1 0 1 (by simp; rfl) (prodT (fromSingleT x) (fromPairT y))
+      = permT id (by simp; rfl) (fromSingleTContrFromPairT x y) := by
   induction y using TensorProduct.inductionOn with
   | tmul y1 y2 => exact fromSingleT_contr_fromPairT_tmul x y1 y2
   | add a b ha hb =>
@@ -275,8 +269,8 @@ lemma contrT_fromSingleT_fromPairT {c c2 : C}
 -/
 
 /-- The contraction of tensors with two indices defined categorically. -/
-noncomputable def fromPairTContr {c c1 c2 : C}(x : V c1 ⊗[k] V c) (y : V (S.τ c) ⊗[k] V c2) :
-    S.Tensor ![c1, c2] :=
+noncomputable def fromPairTContr {c c1 c2 : C} (x : V c1 ⊗[k] V c) (y : V (S.τ c) ⊗[k] V c2)
+    : S.Tensor ![c1, c2] :=
   let V1 := (V c1)
   let V2 := (V c)
   let V2' := (V (S.τ c))
@@ -288,29 +282,25 @@ noncomputable def fromPairTContr {c c1 c2 : C}(x : V c1 ⊗[k] V c) (y : V (S.τ
   let T5 : V1 ⊗[k] V3 := (TensorProduct.lid _ _).lTensor _ T4
   fromPairT T5
 
-lemma fromPairTContr_tmul_tmul {c c1 c2 : C} (x1 : V c1) (x2 : V c) (y1 : V (S.τ c))
-    (y2 : V c2) : fromPairTContr (x1 ⊗ₜ[k] x2) (y1 ⊗ₜ[k] y2) =
-    (S.contr c) (x2 ⊗ₜ[k] y1) • fromPairT (x1 ⊗ₜ[k] y2) := by
+lemma fromPairTContr_tmul_tmul {c c1 c2 : C} (x1 : V c1) (x2 : V c) (y1 : V (S.τ c)) (y2 : V c2)
+    : fromPairTContr (x1 ⊗ₜ[k] x2) (y1 ⊗ₜ[k] y2)
+      = (S.contr c) (x2 ⊗ₜ[k] y1) • fromPairT (x1 ⊗ₜ[k] y2) := by
   simp [fromPairTContr, tmul_smul]
 
-lemma fromPairT_contr_fromPairT_eq_fromPairTContr_tmul (c c1 c2 : C)
-    (x1 : V c1) (x2 : V c) (y1 : V (S.τ c))
-    (y2 : V c2) :
-    contrT 2 1 2 (by simp; rfl) (prodT (fromPairT (x1 ⊗ₜ[k] x2)) (fromPairT (y1 ⊗ₜ[k] y2))) =
-    permT id (by simp; exact ⟨rfl, rfl⟩)
-    (fromPairTContr (x1 ⊗ₜ[k] x2) (y1 ⊗ₜ[k] y2)) := by
-  simp only [map_smul, fromPairTContr_tmul_tmul, fromPairT_eq_pure, permT_pure,
-    Pure.contrP, contrT_pure, prodT_pure]
+lemma fromPairT_contr_fromPairT_eq_fromPairTContr_tmul
+    (c c1 c2 : C) (x1 : V c1) (x2 : V c) (y1 : V (S.τ c)) (y2 : V c2)
+    : contrT 2 1 2 (by simp; rfl) (prodT (fromPairT (x1 ⊗ₜ[k] x2)) (fromPairT (y1 ⊗ₜ[k] y2)))
+      = permT id (by simp; exact ⟨rfl, rfl⟩) (fromPairTContr (x1 ⊗ₜ[k] x2) (y1 ⊗ₜ[k] y2)) := by
+  simp only [map_smul, fromPairTContr_tmul_tmul, fromPairT_eq_pure, permT_pure, Pure.contrP,
+    contrT_pure, prodT_pure]
   congr
   funext i
   fin_cases i <;> rfl
 
-lemma fromPairT_contr_fromPairT_eq_fromPairTContr (c c1 c2 : C)
-    (x : V c1 ⊗[k] V c)
-    (y : V (S.τ c) ⊗[k] V c2) :
-    contrT 2 1 2 (by simp; rfl)
-      (prodT (fromPairT x) (fromPairT y)) =
-    permT id (by simp; exact ⟨rfl, rfl⟩) (fromPairTContr x y) := by
+lemma fromPairT_contr_fromPairT_eq_fromPairTContr
+    (c c1 c2 : C) (x : V c1 ⊗[k] V c) (y : V (S.τ c) ⊗[k] V c2)
+    : contrT 2 1 2 (by simp; rfl) (prodT (fromPairT x) (fromPairT y))
+      = permT id (by simp; exact ⟨rfl, rfl⟩) (fromPairTContr x y) := by
   induction x using TensorProduct.inductionOn with
   | tmul x1 x2 =>
     induction y using TensorProduct.inductionOn with
@@ -328,11 +318,9 @@ lemma fromPairT_contr_fromPairT_eq_fromPairTContr (c c1 c2 : C)
     simp
 
 set_option backward.isDefEq.respectTransparency false in
-lemma fromPairT_basis_repr {c c1 : C}
-    (x : V c ⊗[k] V c1)
-    (φ : ComponentIdx ![c, c1]) :
-    (basis ![c, c1]).repr (fromPairT (S := S) x) φ =
-    (Basis.tensorProduct (b c) (b c1)).repr x (φ 0, φ 1) := by
+lemma fromPairT_basis_repr {c c1 : C} (x : V c ⊗[k] V c1) (φ : ComponentIdx ![c, c1])
+    : (basis ![c, c1]).repr (fromPairT (S := S) x) φ
+      = (Basis.tensorProduct (b c) (b c1)).repr x (φ 0, φ 1) := by
   induction x using TensorProduct.inductionOn with
   | tmul x y =>
     simp only [Nat.succ_eq_add_one, Nat.reduceAdd, Fin.isValue, Basis.tensorProduct_repr_tmul_apply,
@@ -350,10 +338,11 @@ lemma fromPairT_basis_repr {c c1 : C}
   | add x y hx hy => simp_all
 
 set_option backward.isDefEq.respectTransparency false in
-lemma fromPairT_apply_basis_repr {c c1 : C}
-    (b0 : basisIdx c) (b1 : basisIdx c1) :
-    fromPairT (S := S) (b c b0 ⊗ₜ[k] b c1 b1) =
-    Tensor.basis ![c, c1] (fun | 0 => b0 | 1 => b1) := by
+lemma fromPairT_apply_basis_repr {c c1 : C} (b0 : basisIdx c) (b1 : basisIdx c1)
+    : fromPairT (S := S) (b c b0 ⊗ₜ[k] b c1 b1)
+      = Tensor.basis (![c, c1]) (fun
+        | 0 => b0
+        | 1 => b1) := by
   apply (Tensor.basis _).repr.injective
   simp only [Nat.succ_eq_add_one, Nat.reduceAdd, Basis.repr_self]
   ext b
@@ -368,7 +357,7 @@ lemma fromPairT_apply_basis_repr {c c1 : C}
   next h =>
     subst h
     simp_all only [Fin.isValue, true_and]
-  next h => simp_all only [Fin.isValue, false_and, ↓reduceIte]
+  next h => simp_all only [Fin.isValue, false_and, ↓ reduceIte]
 
 /-!
 
@@ -377,15 +366,17 @@ lemma fromPairT_apply_basis_repr {c c1 : C}
 -/
 
 /-- A constant two tensor (e.g. metric and unit). -/
-noncomputable def fromConstPair {c1 c2 : C}
-      (v : (Representation.trivial k G k).IntertwiningMap ((rep c1).tprod (rep c2))) :
-    S.Tensor ![c1, c2] := fromPairT (v (1 : k))
+noncomputable def fromConstPair
+    {c1 c2 : C} (v : (Representation.trivial k G k).IntertwiningMap ((rep c1).tprod (rep c2)))
+    : S.Tensor ![c1, c2] :=
+  fromPairT (v (1 : k))
 
 /-- Tensors formed by `fromConstPair` are invariant under the group action. -/
 @[simp]
-lemma actionT_fromConstPair {c1 c2 : C}
-    (v : (Representation.trivial k G k).IntertwiningMap ((rep c1).tprod (rep c2)))
-    (g : G) : g • fromConstPair (S := S) v = fromConstPair v := by
+lemma actionT_fromConstPair
+    {c1 c2 : C} (v : (Representation.trivial k G k).IntertwiningMap ((rep c1).tprod (rep c2)))
+    (g : G)
+    : g • fromConstPair (S := S) v = fromConstPair v := by
   rw [fromConstPair, actionT_fromPairT]
   exact congrArg _ (LinearMap.congr_fun (v.isIntertwining' g) 1).symm
 
@@ -395,10 +386,12 @@ lemma actionT_fromConstPair {c1 c2 : C}
 
 -/
 
-/-- Rank-two tensors and their component matrices, as a linear equivalence: `fromMatrixT c0 c1 M`
-  is the tensor with component matrix `M`. -/
-noncomputable def fromMatrixT (c0 c1 : C) :
-    Matrix (basisIdx c0) (basisIdx c1) k ≃ₗ[k] S.Tensor ![c0, c1] where
+/--
+Rank-two tensors and their component matrices, as a linear equivalence: `fromMatrixT c0 c1 M`
+is the tensor with component matrix `M`.
+-/
+noncomputable def fromMatrixT (c0 c1 : C)
+    : Matrix (basisIdx c0) (basisIdx c1) k ≃ₗ[k] S.Tensor ![c0, c1] where
   toFun M := fromPairT ((Basis.tensorProduct (b c0) (b c1)).equivFun.symm fun p => M p.1 p.2)
   map_add' M N := by
     rw [← map_add, ← map_add]
@@ -418,43 +411,46 @@ noncomputable def fromMatrixT (c0 c1 : C) :
     rw [fromPairT_basis_repr, ← Basis.equivFun_apply, LinearEquiv.apply_symm_apply]
     exact congrArg _ (ComponentIdx.pair.symm_apply_apply φ)
 
-lemma fromMatrixT_basis_repr (c0 c1 : C) (M : Matrix (basisIdx c0) (basisIdx c1) k)
-    (φ : ComponentIdx ![c0, c1]) :
-    (basis ![c0, c1]).repr (fromMatrixT (S := S) c0 c1 M) φ = M (φ 0) (φ 1) := by
+lemma fromMatrixT_basis_repr
+    (c0 c1 : C) (M : Matrix (basisIdx c0) (basisIdx c1) k) (φ : ComponentIdx ![c0, c1])
+    : (basis ![c0, c1]).repr (fromMatrixT (S := S) c0 c1 M) φ = M (φ 0) (φ 1) := by
   change (basis ![c0, c1]).repr (fromPairT _) φ = _
   rw [fromPairT_basis_repr, ← Basis.equivFun_apply, LinearEquiv.apply_symm_apply]
 
-/-- The component matrix of a rank-two tensor: the `(x, y)` entry is
-  `repr t (ComponentIdx.pair.symm (x, y))`. -/
-noncomputable def toMatrix {cs : Fin 2 → C} (t : S.Tensor cs) :
-    Matrix (basisIdx (cs 0)) (basisIdx (cs 1)) k :=
+/--
+The component matrix of a rank-two tensor: the `(x, y)` entry is
+`repr t (ComponentIdx.pair.symm (x, y))`.
+-/
+noncomputable def toMatrix {cs : Fin 2 → C} (t : S.Tensor cs)
+    : Matrix (basisIdx (cs 0)) (basisIdx (cs 1)) k :=
   Matrix.of fun x y => (basis cs).repr t (ComponentIdx.pair.symm (x, y))
 
 @[simp]
-lemma toMatrix_apply {cs : Fin 2 → C} (t : S.Tensor cs)
-    (x : basisIdx (cs 0)) (y : basisIdx (cs 1)) :
-    toMatrix t x y = (basis cs).repr t (ComponentIdx.pair.symm (x, y)) := rfl
+lemma toMatrix_apply {cs : Fin 2 → C} (t : S.Tensor cs) (x : basisIdx (cs 0)) (y : basisIdx (cs 1))
+    : toMatrix t x y = (basis cs).repr t (ComponentIdx.pair.symm (x, y)) :=
+  rfl
 
-/-- `toMatrix_apply` at a `cons` colour list `![c0, c1]`, where the labels are named by the
-  colours. -/
+/--
+`toMatrix_apply` at a `cons` colour list `![c0, c1]`, where the labels are named by the
+colours.
+-/
 @[simp]
-lemma toMatrix_apply_cons {c0 c1 : C} (t : S.Tensor ![c0, c1])
-    (x : basisIdx c0) (y : basisIdx c1) :
-    toMatrix t x y = (basis ![c0, c1]).repr t (ComponentIdx.pair.symm (x, y)) := rfl
+lemma toMatrix_apply_cons {c0 c1 : C} (t : S.Tensor ![c0, c1]) (x : basisIdx c0) (y : basisIdx c1)
+    : toMatrix t x y = (basis ![c0, c1]).repr t (ComponentIdx.pair.symm (x, y)) :=
+  rfl
 
 @[simp]
-lemma toMatrix_fromMatrixT (c0 c1 : C) (M : Matrix (basisIdx c0) (basisIdx c1) k) :
-    toMatrix (fromMatrixT (S := S) c0 c1 M) = M :=
+lemma toMatrix_fromMatrixT (c0 c1 : C) (M : Matrix (basisIdx c0) (basisIdx c1) k)
+    : toMatrix (fromMatrixT (S := S) c0 c1 M) = M :=
   (fromMatrixT c0 c1).symm_apply_apply M
 
 @[simp]
-lemma fromMatrixT_toMatrix {c0 c1 : C} (t : S.Tensor ![c0, c1]) :
-    fromMatrixT (S := S) c0 c1 (toMatrix t) = t :=
+lemma fromMatrixT_toMatrix {c0 c1 : C} (t : S.Tensor ![c0, c1])
+    : fromMatrixT (S := S) c0 c1 (toMatrix t) = t :=
   (fromMatrixT c0 c1).apply_symm_apply t
 
 /-- Rank-two tensors with equal component matrices are equal. -/
-lemma toMatrix_injective {cs : Fin 2 → C} :
-    Function.Injective (toMatrix (S := S) (cs := cs)) := by
+lemma toMatrix_injective {cs : Fin 2 → C} : Function.Injective (toMatrix (S := S) (cs := cs)) := by
   intro t1 t2 h
   apply (basis cs).repr.injective
   ext φ
@@ -463,16 +459,16 @@ lemma toMatrix_injective {cs : Fin 2 → C} :
   exact congrFun (congrFun h (φ 0)) (φ 1)
 
 /-- Swapping the two slots of a rank-two tensor transposes its component matrix. -/
-lemma toMatrix_permT_swap {c c1 : Fin 2 → C} (h0 : c 1 = c1 0) (h1 : c 0 = c1 1)
-    (t : S.Tensor c) :
-    toMatrix (permT ![1, 0] (IsReindexing.swap_of_eq h0 h1) t) =
-      (toMatrix t).transpose.submatrix (basisIdxCongr h0.symm) (basisIdxCongr h1.symm) := by
+lemma toMatrix_permT_swap {c c1 : Fin 2 → C} (h0 : c 1 = c1 0) (h1 : c 0 = c1 1) (t : S.Tensor c)
+    : toMatrix (permT (![1, 0]) (IsReindexing.swap_of_eq h0 h1) t)
+      = (toMatrix t).transpose.submatrix (basisIdxCongr h0.symm) (basisIdxCongr h1.symm) := by
   ext u v
   rw [toMatrix_apply, permT_basis_repr_symm_apply]
   simp only [Matrix.submatrix_apply, Matrix.transpose_apply, toMatrix_apply]
   congr 1 with i
-  have hi := congr_arg_heq ((ComponentIdx.pair (S := S) (cs := c1)).symm (u, v))
-    ((IsReindexing.swap_of_eq h0 h1).apply_inv_apply _ (![1, 0] i))
+  have hi :=
+    congr_arg_heq ((ComponentIdx.pair (S := S) (cs := c1)).symm (u, v))
+      ((IsReindexing.swap_of_eq h0 h1).apply_inv_apply _ (![1, 0] i))
   fin_cases i
   · exact basisIdxCongr_heq_arg _ h1.symm hi
   · exact basisIdxCongr_heq_arg _ h0.symm hi
@@ -483,36 +479,35 @@ lemma toMatrix_permT_swap {c c1 : Fin 2 → C} (h0 : c 1 = c1 0) (h1 : c 0 = c1 
 
 -/
 
-/-- The construction of a tensor with two indices from the tensor product
-  `V c1 ⊗[k] V c2 ` defined
-  categorically. -/
-noncomputable def fromTripleT {c1 c2 c3 : C} :
-    V c1 ⊗[k] (V c2 ⊗[k] V c3) →ₗ[k] S.Tensor ![c1, c2, c3] where
+/--
+The construction of a tensor with two indices from the tensor product
+`V c1 ⊗[k] V c2 ` defined
+categorically.
+-/
+noncomputable def fromTripleT {c1 c2 c3 : C}
+    : V c1 ⊗[k] (V c2 ⊗[k] V c3) →ₗ[k] S.Tensor ![c1, c2, c3] where
   toFun x :=
     let x1 : S.Tensor ![c1] ⊗[k] (S.Tensor ![c2] ⊗[k] S.Tensor ![c3]) :=
       TensorProduct.map (fromSingleT (S := S) (c := c1))
         (TensorProduct.map (fromSingleT (S := S) (c := c2))
-        (fromSingleT (S := S) (c := c3)).toLinearMap) x
+          (fromSingleT (S := S) (c := c3)).toLinearMap)
+        x
     let x2 :=
       TensorProduct.lift prodT (TensorProduct.map LinearMap.id (TensorProduct.lift prodT) x1)
     permT id (And.intro Function.bijective_id (fun i => by fin_cases i <;> rfl)) x2
-  map_add' x y := by
-    simp
-  map_smul' r x := by
-    simp
+  map_add' x y := by simp
+  map_smul' r x := by simp
 
-lemma fromTripleT_tmul {c1 c2 c3 : C} (x : V c1)
-    (y : V c2) (z : V c3) :
-    fromTripleT (x ⊗ₜ[k] (y ⊗ₜ[k] z)) =
-    permT id (And.intro Function.bijective_id (fun i => by fin_cases i <;> rfl))
-      (prodT (fromSingleT (S := S) x) (prodT (fromSingleT y) (fromSingleT z))) := by
+lemma fromTripleT_tmul {c1 c2 c3 : C} (x : V c1) (y : V c2) (z : V c3)
+    : fromTripleT (x ⊗ₜ[k] (y ⊗ₜ[k] z))
+      = permT id (And.intro Function.bijective_id (fun i => by fin_cases i <;> rfl))
+        (prodT (fromSingleT (S := S) x) (prodT (fromSingleT y) (fromSingleT z))) := by
   rfl
 
 set_option backward.isDefEq.respectTransparency false in
-lemma actionT_fromTripleT {c1 c2 c3 : C}
-    (x : V c1 ⊗[k] (V c2 ⊗[k] V c3)) (g : G) :
-    g • fromTripleT (S := S) x = fromTripleT (TensorProduct.map (rep c1 g)
-      (TensorProduct.map (rep c2 g) (rep c3 g)) x) := by
+lemma actionT_fromTripleT {c1 c2 c3 : C} (x : V c1 ⊗[k] (V c2 ⊗[k] V c3)) (g : G)
+    : g • fromTripleT (S := S) x
+      = fromTripleT (TensorProduct.map (rep c1 g) (TensorProduct.map (rep c2 g) (rep c3 g)) x) := by
   induction x using TensorProduct.inductionOn with
   | tmul x yz =>
     induction yz using TensorProduct.inductionOn with
@@ -525,12 +520,10 @@ lemma actionT_fromTripleT {c1 c2 c3 : C}
   | add a b ha hb => simp [ha, hb]
 
 set_option backward.isDefEq.respectTransparency false in
-lemma fromTripleT_basis_repr {c c1 c2 : C}
-    (x : V c ⊗[k] (V c1 ⊗[k] V c2))
-    (φ : ComponentIdx ![c, c1, c2]) :
-    (basis ![c, c1, c2]).repr (fromTripleT (S := S) x) φ =
-    (Basis.tensorProduct (b c) (Basis.tensorProduct (b c1) (b c2))).repr x
-    (φ 0, φ 1, φ 2) := by
+lemma fromTripleT_basis_repr
+    {c c1 c2 : C} (x : V c ⊗[k] (V c1 ⊗[k] V c2)) (φ : ComponentIdx ![c, c1, c2])
+    : (basis ![c, c1, c2]).repr (fromTripleT (S := S) x) φ
+      = (Basis.tensorProduct (b c) (Basis.tensorProduct (b c1) (b c2))).repr x (φ 0, φ 1, φ 2) := by
   induction x using TensorProduct.inductionOn with
   | tmul x yz =>
     induction yz using TensorProduct.inductionOn with
@@ -549,7 +542,8 @@ lemma fromTripleT_basis_repr {c c1 c2 : C}
       rfl
     | add y1 y2 hx hy =>
       simp only [Nat.succ_eq_add_one, Nat.reduceAdd, Fin.isValue,
-        Basis.tensorProduct_repr_tmul_apply, smul_eq_mul] at hx hy
+          Basis.tensorProduct_repr_tmul_apply, smul_eq_mul]
+        at hx hy
       simp only [Nat.succ_eq_add_one, Nat.reduceAdd, Fin.isValue,
         Basis.tensorProduct_repr_tmul_apply, smul_eq_mul, tmul_add, map_add, Finsupp.coe_add,
         Pi.add_apply]
@@ -557,11 +551,12 @@ lemma fromTripleT_basis_repr {c c1 c2 : C}
   | add a b ha hb => simp_all
 
 set_option backward.isDefEq.respectTransparency false in
-lemma fromTripleT_apply_basis {c c1 c2 : C}
-    (b0 : basisIdx c) (b1 : basisIdx c1)
-    (b2 : basisIdx c2) :
-    fromTripleT (S := S) (b c b0 ⊗ₜ[k] (b c1 b1 ⊗ₜ[k] b c2 b2)) =
-    Tensor.basis ![c, c1, c2] (fun | 0 => b0 | 1 => b1 | 2 => b2) := by
+lemma fromTripleT_apply_basis {c c1 c2 : C} (b0 : basisIdx c) (b1 : basisIdx c1) (b2 : basisIdx c2)
+    : fromTripleT (S := S) (b c b0 ⊗ₜ[k] (b c1 b1 ⊗ₜ[k] b c2 b2))
+      = Tensor.basis (![c, c1, c2]) (fun
+        | 0 => b0
+        | 1 => b1
+        | 2 => b2) := by
   apply (Tensor.basis _).repr.injective
   simp only [Nat.succ_eq_add_one, Nat.reduceAdd, Basis.repr_self]
   ext b
@@ -580,8 +575,8 @@ lemma fromTripleT_apply_basis {c c1 c2 : C}
     next h =>
       subst h
       simp_all only [Fin.isValue, true_and]
-    next h => simp_all only [Fin.isValue, false_and, ↓reduceIte]
-  next h => simp_all only [Fin.isValue, false_and, ↓reduceIte]
+    next h => simp_all only [Fin.isValue, false_and, ↓ reduceIte]
+  next h => simp_all only [Fin.isValue, false_and, ↓ reduceIte]
 
 /-!
 
@@ -590,16 +585,19 @@ lemma fromTripleT_apply_basis {c c1 c2 : C}
 -/
 
 /-- A constant three tensor (e.g. the Pauli matrices). -/
-noncomputable def fromConstTriple {c1 c2 c3 : C}
-    (v : (Representation.trivial k G k).IntertwiningMap
-      ((rep c1).tprod ((rep c2).tprod (rep c3)))) :
-  S.Tensor ![c1, c2, c3] := fromTripleT (v (1 : k))
+noncomputable def fromConstTriple
+    {c1 c2 c3 : C}
+    (v : (Representation.trivial k G k).IntertwiningMap ((rep c1).tprod ((rep c2).tprod (rep c3))))
+    : S.Tensor ![c1, c2, c3] :=
+  fromTripleT (v (1 : k))
 
 /-- Tensors formed by `fromConstPair` are invariant under the group action. -/
 @[simp]
-lemma actionT_fromConstTriple {c1 c2 c3 : C}
+lemma actionT_fromConstTriple
+    {c1 c2 c3 : C}
     (v : (Representation.trivial k G k).IntertwiningMap ((rep c1).tprod ((rep c2).tprod (rep c3))))
-    (g : G) : g • fromConstTriple (S := S) v = fromConstTriple v := by
+    (g : G)
+    : g • fromConstTriple (S := S) v = fromConstTriple v := by
   rw [fromConstTriple, actionT_fromTripleT]
   exact congrArg _ (LinearMap.congr_fun (v.isIntertwining' g) 1).symm
 

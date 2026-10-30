@@ -53,14 +53,13 @@ open Filter Topology
 
 /-- The closed form of `C²` as a function of `n = N + 1`, written with `sinc`. -/
 noncomputable def uncertaintyRatioSqForm (n : ℝ) : ℝ :=
-  2 * (1 - 2 / n) / Real.cos (Real.pi / n) ^ 2 *
-    ((Real.pi ^ 2 * Real.sinc (Real.pi / n) ^ 2 + 2 * Real.sin (Real.pi / n) ^ 2) / 6 - 1)
+  2 * (1 - 2 / n) / Real.cos (Real.pi / n) ^ 2
+    * ((Real.pi ^ 2 * Real.sinc (Real.pi / n) ^ 2 + 2 * Real.sin (Real.pi / n) ^ 2) / 6 - 1)
 
 /-- The closed form tends to `π² / 3 - 2` as `n → ∞`. -/
-lemma tendsto_uncertaintyRatioSqForm :
-    Tendsto uncertaintyRatioSqForm atTop (𝓝 (Real.pi ^ 2 / 3 - 2)) := by
-  have hθ : Tendsto (fun n : ℝ => Real.pi / n) atTop (𝓝 0) :=
-    tendsto_id.const_div_atTop Real.pi
+lemma tendsto_uncertaintyRatioSqForm
+    : Tendsto uncertaintyRatioSqForm atTop (𝓝 (Real.pi ^ 2 / 3 - 2)) := by
+  have hθ : Tendsto (fun n : ℝ => Real.pi / n) atTop (𝓝 0) := tendsto_id.const_div_atTop Real.pi
   have hratio : Tendsto (fun n : ℝ => 1 - 2 / n) atTop (𝓝 1) := by
     simpa using tendsto_const_nhds.sub (tendsto_id.const_div_atTop (2 : ℝ))
   have hcos : Tendsto (fun n : ℝ => Real.cos (Real.pi / n) ^ 2) atTop (𝓝 1) := by
@@ -69,16 +68,19 @@ lemma tendsto_uncertaintyRatioSqForm :
     simpa using (Real.continuous_sinc.continuousAt.tendsto.comp hθ).pow 2
   have hsin : Tendsto (fun n : ℝ => Real.sin (Real.pi / n) ^ 2) atTop (𝓝 0) := by
     simpa using (Real.continuous_sin.continuousAt.tendsto.comp hθ).pow 2
-  have h := (((tendsto_const_nhds (x := (2 : ℝ))).mul hratio).div hcos one_ne_zero).mul
-    ((((tendsto_const_nhds (x := Real.pi ^ 2)).mul hsinc).add
-      ((tendsto_const_nhds (x := (2 : ℝ))).mul hsin)).div_const 6 |>.sub_const 1)
+  have h :=
+    (((tendsto_const_nhds (x := (2 : ℝ))).mul hratio).div hcos one_ne_zero).mul
+      ((((tendsto_const_nhds (x := Real.pi ^ 2)).mul hsinc).add
+            ((tendsto_const_nhds (x := (2 : ℝ))).mul hsin)).div_const
+          6
+        |>.sub_const 1)
   rw [show Real.pi ^ 2 / 3 - 2 = 2 * 1 / 1 * ((Real.pi ^ 2 * 1 + 2 * 0) / 6 - 1) by ring]
   exact h.congr fun n => by simp only [uncertaintyRatioSqForm, Pi.div_apply]
 
 /-- For `N ≥ 2`, `C²` is the closed form at `n = N + 1`. -/
-lemma uncertaintyRatio_sq_eq_uncertaintyRatioSqForm (T : TightBindingChain) (ht : T.t ≠ 0)
-    (hN : 2 ≤ T.N) :
-    T.uncertaintyRatio ^ 2 = uncertaintyRatioSqForm (T.N + 1) := by
+lemma uncertaintyRatio_sq_eq_uncertaintyRatioSqForm
+    (T : TightBindingChain) (ht : T.t ≠ 0) (hN : 2 ≤ T.N)
+    : T.uncertaintyRatio ^ 2 = uncertaintyRatioSqForm (T.N + 1) := by
   have hn : (T.N : ℝ) + 1 ≠ 0 := by positivity
   rw [T.uncertaintyRatio_sq_eq ht hN, uncertaintyRatioSqForm,
     Real.sinc_of_ne_zero (div_ne_zero Real.pi_ne_zero hn)]
@@ -91,11 +93,14 @@ lemma uncertaintyRatio_sq_eq_uncertaintyRatioSqForm (T : TightBindingChain) (ht 
 
 -/
 
-/-- **The long chain limit.** Along any family of chains whose number of sites tends to infinity,
-the constant `C` of the maximal current state tends to `√(π² / 3 - 2)`. -/
-lemma tendsto_uncertaintyRatio {ι : Type*} {l : Filter ι} (T : ι → TightBindingChain)
-    (ht : ∀ i, (T i).t ≠ 0) (hN : Tendsto (fun i => (T i).N) l atTop) :
-    Tendsto (fun i => (T i).uncertaintyRatio) l (𝓝 √(Real.pi ^ 2 / 3 - 2)) := by
+/--
+**The long chain limit.** Along any family of chains whose number of sites tends to infinity,
+the constant `C` of the maximal current state tends to `√(π² / 3 - 2)`.
+-/
+lemma tendsto_uncertaintyRatio
+    {ι : Type*} {l : Filter ι}
+    (T : ι → TightBindingChain) (ht : ∀ i, (T i).t ≠ 0) (hN : Tendsto (fun i => (T i).N) l atTop)
+    : Tendsto (fun i => (T i).uncertaintyRatio) l (𝓝 √(Real.pi ^ 2 / 3 - 2)) := by
   have hn : Tendsto (fun i => ((T i).N : ℝ) + 1) l atTop :=
     tendsto_atTop_add_const_right l 1 (tendsto_natCast_atTop_atTop.comp hN)
   refine ((Real.continuous_sqrt.tendsto _).comp (tendsto_uncertaintyRatioSqForm.comp hn)).congr' ?_

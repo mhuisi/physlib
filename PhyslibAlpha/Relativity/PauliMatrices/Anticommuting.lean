@@ -94,10 +94,12 @@ lemma trace_eq_zero {a b : ι} (hab : b ≠ a) : (τ a).trace = 0 := by
 
 -/
 
-/-- In a family with at least two members, the members together with `1` are linearly
-independent. -/
-lemma linearIndependent [Fintype ι] [Nontrivial ι] :
-    LinearIndependent ℂ (fun o : Option ι => o.elim (1 : Matrix (Fin 2) (Fin 2) ℂ) τ) := by
+/--
+In a family with at least two members, the members together with `1` are linearly
+independent.
+-/
+lemma linearIndependent [Fintype ι] [Nontrivial ι]
+    : LinearIndependent ℂ (fun o : Option ι => o.elim (1 : Matrix (Fin 2) (Fin 2) ℂ) τ) := by
   have htr (a : ι) : (τ a).trace = 0 := by
     obtain ⟨b, hb⟩ := exists_ne a
     exact hτ.trace_eq_zero hb
@@ -129,16 +131,17 @@ end IsAnticommuting
 -/
 
 /-- The Pauli matrices `σ1, σ2, σ3` are an anticommuting family. -/
-lemma isAnticommuting_pauliMatrix : IsAnticommuting fun i : Fin 3 => pauliMatrix (Sum.inr i) :=
-  fun i j => by
-    rw [pauliMatrix_anticommutator, KroneckerDelta.kroneckerDelta]
-    split_ifs <;> simp
+lemma isAnticommuting_pauliMatrix
+    : IsAnticommuting fun i : Fin 3 => pauliMatrix (Sum.inr i) := fun i j => by
+  rw [pauliMatrix_anticommutator, KroneckerDelta.kroneckerDelta]
+  split_ifs <;> simp
 
-/-- **The Pauli matrices are a maximal anticommuting family.** The largest anticommuting family
-of `2 × 2` matrices has three members. -/
-lemma isGreatest_card_isAnticommuting :
-    IsGreatest {n : ℕ | ∃ τ : Fin n → Matrix (Fin 2) (Fin 2) ℂ, IsAnticommuting τ} 3 :=
-  ⟨⟨_, isAnticommuting_pauliMatrix⟩, fun n ⟨_, hτ⟩ => by
-    simpa using hτ.card_le_three⟩
+/--
+**The Pauli matrices are a maximal anticommuting family.** The largest anticommuting family
+of `2 × 2` matrices has three members.
+-/
+lemma isGreatest_card_isAnticommuting
+    : IsGreatest ({n : ℕ | ∃ τ : Fin n → Matrix (Fin 2) (Fin 2) ℂ, IsAnticommuting τ}) 3 :=
+  ⟨⟨_, isAnticommuting_pauliMatrix⟩, fun n ⟨_, hτ⟩ => by simpa using hτ.card_le_three⟩
 
 end PauliMatrix

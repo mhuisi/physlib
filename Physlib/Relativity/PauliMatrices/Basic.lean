@@ -55,8 +55,7 @@ scoped[PauliMatrix] notation "σ2" => σ (Sum.inr 1)
 /-- The Pauli matrix corresponding to the matrix `!![1, 0; 0, -1]`. -/
 scoped[PauliMatrix] notation "σ3" => σ (Sum.inr 2)
 
-lemma pauliMatrix_inl_zero_eq_one : pauliMatrix (Sum.inl 0) = 1 := by
-  dsimp [pauliMatrix]
+lemma pauliMatrix_inl_zero_eq_one : pauliMatrix (Sum.inl 0) = 1 := by dsimp [pauliMatrix]
 
 /-!
 
@@ -64,8 +63,7 @@ lemma pauliMatrix_inl_zero_eq_one : pauliMatrix (Sum.inl 0) = 1 := by
 
 -/
 
-lemma pauliMatrix_selfAdjoint (μ : Fin 1 ⊕ Fin 3) :
-    (σ μ)ᴴ = σ μ := by
+lemma pauliMatrix_selfAdjoint (μ : Fin 1 ⊕ Fin 3) : (σ μ)ᴴ = σ μ := by
   fin_cases μ
   all_goals
     dsimp [pauliMatrix]
@@ -73,8 +71,7 @@ lemma pauliMatrix_selfAdjoint (μ : Fin 1 ⊕ Fin 3) :
     simp
   ext i j
   fin_cases i <;> fin_cases j
-  all_goals
-    simp
+  all_goals simp
 
 /-! ### Inversions
 
@@ -83,8 +80,7 @@ Lemmas related to the inversions of the Pauli matrices.
 -/
 
 @[simp]
-lemma pauliMatrix_mul_self (μ : Fin 1 ⊕ Fin 3) :
-    (σ μ) * (σ μ) = 1 := by
+lemma pauliMatrix_mul_self (μ : Fin 1 ⊕ Fin 3) : (σ μ) * (σ μ) = 1 := by
   fin_cases μ
   all_goals
     dsimp [pauliMatrix]
@@ -95,8 +91,7 @@ instance pauliMatrixInvertiable (μ : Fin 1 ⊕ Fin 3) : Invertible (σ μ) := b
   · simp
   · simp
 
-lemma pauliMatrix_inv (μ : Fin 1 ⊕ Fin 3) :
-    ⅟ (σ μ) = σ μ := by rfl
+lemma pauliMatrix_inv (μ : Fin 1 ⊕ Fin 3) : ⅟(σ μ) = σ μ := by rfl
 
 /-! ### Products
 
@@ -137,26 +132,22 @@ lemma σ1_σ0_trace : Matrix.trace (σ1 * σ0) = 0 := by simp [pauliMatrix]
 lemma σ1_σ1_trace : Matrix.trace (σ1 * σ1) = 2 := by simp
 
 /-- The trace of `σ1` multiplied by `σ2` is equal to `0`. -/
-lemma σ1_σ2_trace : Matrix.trace (σ1 * σ2) = 0 := by
-  simp [pauliMatrix]
+lemma σ1_σ2_trace : Matrix.trace (σ1 * σ2) = 0 := by simp [pauliMatrix]
 
 /-- The trace of `σ1` multiplied by `σ3` is equal to `0`. -/
-lemma σ1_σ3_trace : Matrix.trace (σ1 * σ3) = 0 := by
-  simp [pauliMatrix]
+lemma σ1_σ3_trace : Matrix.trace (σ1 * σ3) = 0 := by simp [pauliMatrix]
 
 /-- The trace of `σ2` multiplied by `σ0` is equal to `0`. -/
 lemma σ2_σ0_trace : Matrix.trace (σ2 * σ0) = 0 := by simp [pauliMatrix]
 
 /-- The trace of `σ2` multiplied by `σ1` is equal to `0`. -/
-lemma σ2_σ1_trace : Matrix.trace (σ2 * σ1) = 0 := by
-  simp [pauliMatrix]
+lemma σ2_σ1_trace : Matrix.trace (σ2 * σ1) = 0 := by simp [pauliMatrix]
 
 /-- The trace of `σ2` multiplied by `σ2` is equal to `2`. -/
 lemma σ2_σ2_trace : Matrix.trace (σ2 * σ2) = 2 := by simp
 
 /-- The trace of `σ2` multiplied by `σ3` is equal to `0`. -/
-lemma σ2_σ3_trace : Matrix.trace (σ2 * σ3) = 0 := by
-  simp [pauliMatrix]
+lemma σ2_σ3_trace : Matrix.trace (σ2 * σ3) = 0 := by simp [pauliMatrix]
 
 /-- The trace of `σ3` multiplied by `σ0` is equal to `0`. -/
 lemma σ3_σ0_trace : Matrix.trace (σ3 * σ0) = 0 := by simp [pauliMatrix]
@@ -183,7 +174,7 @@ lemma σ1_σ2_commutator : σ1 * σ2 - σ2 * σ1 = (2 * I) • σ3 := by
   simp only [true_and, and_true]
   exact List.ofFn_inj.mp rfl
 
-lemma σ1_σ3_commutator : σ1 * σ3 - σ3 * σ1 = - (2 * I) • σ2 := by
+lemma σ1_σ3_commutator : σ1 * σ3 - σ3 * σ1 = -(2 * I) • σ2 := by
   simp [pauliMatrix]
   ring_nf
   simp only [I_sq, neg_mul, one_mul, neg_neg, true_and]
@@ -214,60 +205,55 @@ lemma σ3_σ2_commutator : σ3 * σ2 - σ2 * σ3 = -(2 * I) • σ1 := by
   exact List.ofFn_inj.mp rfl
 
 /-- Pauli matrices satisfy `{σᵢ, σⱼ} = 2 δᵢⱼ I`. -/
-lemma pauliMatrix_anticommutator (i j : Fin 3) :
-    pauliMatrix (Sum.inr i) * pauliMatrix (Sum.inr j) +
-      pauliMatrix (Sum.inr j) * pauliMatrix (Sum.inr i) =
-        ((2 * kroneckerDelta i j : ℕ) : ℂ) •
-          (1 : Matrix (Fin 2) (Fin 2) ℂ) := by
-  fin_cases i <;> fin_cases j <;>
-    simp [kroneckerDelta, pauliMatrix] <;>
-    ext a b <;> fin_cases a <;> fin_cases b <;>
-    norm_num
+lemma pauliMatrix_anticommutator (i j : Fin 3)
+    : pauliMatrix (Sum.inr i) * pauliMatrix (Sum.inr j)
+        + pauliMatrix (Sum.inr j) * pauliMatrix (Sum.inr i)
+      = ((2 * kroneckerDelta i j : ℕ) : ℂ) • (1 : Matrix (Fin 2) (Fin 2) ℂ) := by
+  fin_cases i <;> fin_cases j <;> simp [kroneckerDelta, pauliMatrix] <;> ext a b <;> fin_cases a
+    <;> fin_cases b <;> norm_num
 
 /-- The matrix `a · σ` associated to a real three-vector `a`. -/
-noncomputable def vectorMatrix (a : Fin 3 → ℝ) :
-    Matrix (Fin 2) (Fin 2) ℂ :=
+noncomputable def vectorMatrix (a : Fin 3 → ℝ) : Matrix (Fin 2) (Fin 2) ℂ :=
   ∑ i : Fin 3, (a i : ℂ) • pauliMatrix (Sum.inr i)
 
-/-- The anticommutator of two Pauli vectors is twice their Euclidean dot product
-times the identity. -/
-lemma vectorMatrix_anticommutator (a b : Fin 3 → ℝ) :
-    vectorMatrix a * vectorMatrix b + vectorMatrix b * vectorMatrix a =
-      ((2 * (a ⬝ᵥ b) : ℝ) : ℂ) •
-        (1 : Matrix (Fin 2) (Fin 2) ℂ) := by
-  have h :
-      vectorMatrix a * vectorMatrix b + vectorMatrix b * vectorMatrix a =
-        ((a 0 : ℂ) * b 0) • (σ1 * σ1 + σ1 * σ1) +
-          ((a 1 : ℂ) * b 1) • (σ2 * σ2 + σ2 * σ2) +
-          ((a 2 : ℂ) * b 2) • (σ3 * σ3 + σ3 * σ3) +
-          ((a 0 : ℂ) * b 1 + (a 1 : ℂ) * b 0) • (σ1 * σ2 + σ2 * σ1) +
-          ((a 0 : ℂ) * b 2 + (a 2 : ℂ) * b 0) • (σ1 * σ3 + σ3 * σ1) +
-          ((a 1 : ℂ) * b 2 + (a 2 : ℂ) * b 1) • (σ2 * σ3 + σ3 * σ2) := by
+/--
+The anticommutator of two Pauli vectors is twice their Euclidean dot product
+times the identity.
+-/
+lemma vectorMatrix_anticommutator (a b : Fin 3 → ℝ)
+    : vectorMatrix a * vectorMatrix b + vectorMatrix b * vectorMatrix a
+      = ((2 * (a ⬝ᵥ b) : ℝ) : ℂ) • (1 : Matrix (Fin 2) (Fin 2) ℂ) := by
+  have h
+      : vectorMatrix a * vectorMatrix b + vectorMatrix b * vectorMatrix a
+        = ((a 0 : ℂ) * b 0) • (σ1 * σ1 + σ1 * σ1) + ((a 1 : ℂ) * b 1) • (σ2 * σ2 + σ2 * σ2)
+          + ((a 2 : ℂ) * b 2) • (σ3 * σ3 + σ3 * σ3)
+          + ((a 0 : ℂ) * b 1 + (a 1 : ℂ) * b 0) • (σ1 * σ2 + σ2 * σ1)
+          + ((a 0 : ℂ) * b 2 + (a 2 : ℂ) * b 0) • (σ1 * σ3 + σ3 * σ1)
+          + ((a 1 : ℂ) * b 2 + (a 2 : ℂ) * b 1) • (σ2 * σ3 + σ3 * σ2) := by
     simp only [vectorMatrix, Fin.sum_univ_three, add_mul, mul_add, Algebra.smul_mul_assoc,
       Algebra.mul_smul_comm]
     module
   rw [h]
-  rw [pauliMatrix_anticommutator 0 0,
-      pauliMatrix_anticommutator 1 1,
-      pauliMatrix_anticommutator 2 2,
-      pauliMatrix_anticommutator 0 1,
-      pauliMatrix_anticommutator 0 2,
-      pauliMatrix_anticommutator 1 2]
+  rw [pauliMatrix_anticommutator 0 0, pauliMatrix_anticommutator 1 1,
+    pauliMatrix_anticommutator 2 2, pauliMatrix_anticommutator 0 1, pauliMatrix_anticommutator 0 2,
+    pauliMatrix_anticommutator 1 2]
   norm_num [kroneckerDelta]
   simp only [dotProduct, Fin.sum_univ_three]
   push_cast
   module
 
-/-- The commutator of two Pauli vectors is twice `i` times the Pauli vector
-associated to their cross product. -/
-lemma vectorMatrix_commutator (a b : Fin 3 → ℝ) :
-    vectorMatrix a * vectorMatrix b - vectorMatrix b * vectorMatrix a =
-      (2 * Complex.I) • vectorMatrix (a ⨯₃ b) := by
-  have h :
-      vectorMatrix a * vectorMatrix b - vectorMatrix b * vectorMatrix a =
-        ((a 0 : ℂ) * b 1 - (a 1 : ℂ) * b 0) • (σ1 * σ2 - σ2 * σ1) +
-          ((a 0 : ℂ) * b 2 - (a 2 : ℂ) * b 0) • (σ1 * σ3 - σ3 * σ1) +
-          ((a 1 : ℂ) * b 2 - (a 2 : ℂ) * b 1) • (σ2 * σ3 - σ3 * σ2) := by
+/--
+The commutator of two Pauli vectors is twice `i` times the Pauli vector
+associated to their cross product.
+-/
+lemma vectorMatrix_commutator (a b : Fin 3 → ℝ)
+    : vectorMatrix a * vectorMatrix b - vectorMatrix b * vectorMatrix a
+      = (2 * Complex.I) • vectorMatrix (a ⨯₃ b) := by
+  have h
+      : vectorMatrix a * vectorMatrix b - vectorMatrix b * vectorMatrix a
+        = ((a 0 : ℂ) * b 1 - (a 1 : ℂ) * b 0) • (σ1 * σ2 - σ2 * σ1)
+          + ((a 0 : ℂ) * b 2 - (a 2 : ℂ) * b 0) • (σ1 * σ3 - σ3 * σ1)
+          + ((a 1 : ℂ) * b 2 - (a 2 : ℂ) * b 1) • (σ2 * σ3 - σ3 * σ2) := by
     simp only [vectorMatrix, Fin.sum_univ_three, add_mul, mul_add, Algebra.smul_mul_assoc,
       Algebra.mul_smul_comm]
     module
@@ -278,28 +264,29 @@ lemma vectorMatrix_commutator (a b : Fin 3 → ℝ) :
     cons_val, smul_add]
   module
 
-/-- Product formula for Pauli vectors:
-`(a · σ)(b · σ) = (a · b) I + i (a × b) · σ`. -/
-lemma vectorMatrix_mul_vectorMatrix (a b : Fin 3 → ℝ) :
-    vectorMatrix a * vectorMatrix b =
-      ((a ⬝ᵥ b : ℝ) : ℂ) •
-          (1 : Matrix (Fin 2) (Fin 2) ℂ) +
-        Complex.I • vectorMatrix (a ⨯₃ b) := by
+/--
+Product formula for Pauli vectors:
+`(a · σ)(b · σ) = (a · b) I + i (a × b) · σ`.
+-/
+lemma vectorMatrix_mul_vectorMatrix (a b : Fin 3 → ℝ)
+    : vectorMatrix a * vectorMatrix b
+      = ((a ⬝ᵥ b : ℝ) : ℂ) • (1 : Matrix (Fin 2) (Fin 2) ℂ)
+        + Complex.I • vectorMatrix (a ⨯₃ b) := by
   have hcomm := vectorMatrix_commutator a b
   have hanti := vectorMatrix_anticommutator a b
   refine smul_right_injective _ (two_ne_zero (α := ℂ)) ?_
   simp only
-  have h2 : (2 : ℂ) • (vectorMatrix a * vectorMatrix b) =
-      (vectorMatrix a * vectorMatrix b + vectorMatrix b * vectorMatrix a) +
-        (vectorMatrix a * vectorMatrix b - vectorMatrix b * vectorMatrix a) := by
+  have h2
+      : (2 : ℂ) • (vectorMatrix a * vectorMatrix b)
+        = (vectorMatrix a * vectorMatrix b + vectorMatrix b * vectorMatrix a)
+          + (vectorMatrix a * vectorMatrix b - vectorMatrix b * vectorMatrix a) := by
     rw [two_smul]; abel
   rw [h2, hanti, hcomm]
   module
 
 /-- The square of `a · σ` is `|a|² I`. -/
-lemma vectorMatrix_sq (a : Fin 3 → ℝ) :
-    vectorMatrix a * vectorMatrix a =
-      (∑ i : Fin 3, a i ^ 2 : ℝ) • 1 := by
+lemma vectorMatrix_sq (a : Fin 3 → ℝ)
+    : vectorMatrix a * vectorMatrix a = (∑ i : Fin 3, a i ^ 2 : ℝ) • 1 := by
   have hcross : a ⨯₃ a = 0 := by
     rw [cross_apply]
     ext i

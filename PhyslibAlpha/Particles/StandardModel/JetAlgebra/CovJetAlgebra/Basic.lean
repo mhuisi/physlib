@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Jinzheng Li, Nathaneal Sajan, Joseph Tooby-Smith
 -/
 module
+
 public import PhyslibAlpha.Mathematics.AlgebraRepresentation
 public import PhyslibAlpha.Particles.StandardModel.Realization.CovStandardModel
 public import PhyslibAlpha.Particles.StandardModel.JetAlgebra.Realization
@@ -77,9 +78,9 @@ open TensorProduct Matrix MatrixGroups Lorentz
 
 namespace AlgebraRealization
 
-variable {B : Type} [Ring B] [Algebra ℂ B]
-  {repJet : Representation ℂ JetGaugeGroupI B}
-  {repLorentz : Representation ℂ SL(2,ℂ) B}
+variable
+  {B : Type} [Ring B] [Algebra ℂ B]
+  {repJet : Representation ℂ JetGaugeGroupI B} {repLorentz : Representation ℂ (SL(2,ℂ)) B}
   {massWeightPoly : B →ₐ[ℂ] Polynomial B}
   (h : AlgebraRealization B repJet repLorentz massWeightPoly)
 
@@ -90,88 +91,100 @@ variable {B : Type} [Ring B] [Algebra ℂ B]
 -/
 
 /-- The field-strength tower lies in the covariant subalgebra. -/
-lemma covF_mem_covAlgebra {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3)) (μ ν : Fin 1 ⊕ Fin 3)
-    (φ : Module.Dual ℝ GaugeAlgebra) : h.covF l μ ν φ ∈ h.covAlgebra :=
-  Algebra.subset_adjoin <| Or.inl <| Or.inl <| Set.mem_iUnion_of_mem n <|
-    Set.mem_iUnion_of_mem l <| Set.mem_iUnion_of_mem μ <| Set.mem_iUnion_of_mem ν <| ⟨φ, rfl⟩
+lemma covF_mem_covAlgebra
+    {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3)) (μ ν : Fin 1 ⊕ Fin 3) (φ : Module.Dual ℝ GaugeAlgebra)
+    : h.covF l μ ν φ ∈ h.covAlgebra :=
+  Algebra.subset_adjoin <| Or.inl <| Or.inl <| Set.mem_iUnion_of_mem n <| Set.mem_iUnion_of_mem l <|
+    Set.mem_iUnion_of_mem μ <| Set.mem_iUnion_of_mem ν <| ⟨φ, rfl⟩
 
 /-- The Higgs tower lies in the covariant subalgebra. -/
-lemma covDerivH_mem_covAlgebra {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3))
-    (φ : Module.Dual ℂ HiggsVec) : h.covDerivH l φ ∈ h.covAlgebra :=
-  Algebra.subset_adjoin <| Or.inl <| Or.inr <| Set.mem_iUnion_of_mem n <|
-    Set.mem_iUnion_of_mem l <| Or.inl ⟨φ, rfl⟩
+lemma covDerivH_mem_covAlgebra {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3)) (φ : Module.Dual ℂ HiggsVec)
+    : h.covDerivH l φ ∈ h.covAlgebra :=
+  Algebra.subset_adjoin <| Or.inl <| Or.inr <| Set.mem_iUnion_of_mem n <| Set.mem_iUnion_of_mem l <|
+    Or.inl ⟨φ, rfl⟩
 
 /-- The conjugate Higgs tower lies in the covariant subalgebra. -/
-lemma covDerivBarH_mem_covAlgebra {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3))
-    (φ : Module.Dual ℂ (ConjModule HiggsVec)) : h.covDerivBarH l φ ∈ h.covAlgebra :=
-  Algebra.subset_adjoin <| Or.inl <| Or.inr <| Set.mem_iUnion_of_mem n <|
-    Set.mem_iUnion_of_mem l <| Or.inr ⟨φ, rfl⟩
+lemma covDerivBarH_mem_covAlgebra
+    {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3)) (φ : Module.Dual ℂ (ConjModule HiggsVec))
+    : h.covDerivBarH l φ ∈ h.covAlgebra :=
+  Algebra.subset_adjoin <| Or.inl <| Or.inr <| Set.mem_iUnion_of_mem n <| Set.mem_iUnion_of_mem l <|
+    Or.inr ⟨φ, rfl⟩
 
 /-- The down-type quark tower lies in the covariant subalgebra. -/
-lemma covDerivD_mem_covAlgebra (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3))
-    (φ : Module.Dual ℂ DownSinglet) : h.covDerivD i l φ ∈ h.covAlgebra :=
+lemma covDerivD_mem_covAlgebra
+    (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3)) (φ : Module.Dual ℂ DownSinglet)
+    : h.covDerivD i l φ ∈ h.covAlgebra :=
   Algebra.subset_adjoin <| Or.inr <| Set.mem_iUnion_of_mem i <| Set.mem_iUnion_of_mem n <|
-    Set.mem_iUnion_of_mem l <| Or.inl <| Or.inl <| Or.inl <| Or.inl <| Or.inl <| Or.inl <|
-      Or.inl <| Or.inl <| Or.inl <| ⟨φ, rfl⟩
+    Set.mem_iUnion_of_mem l <| Or.inl <| Or.inl <| Or.inl <| Or.inl <| Or.inl <| Or.inl <| Or.inl <|
+      Or.inl <| Or.inl <| ⟨φ, rfl⟩
 
 /-- The conjugate down-type quark tower lies in the covariant subalgebra. -/
-lemma covDerivBarD_mem_covAlgebra (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3))
-    (φ : Module.Dual ℂ (ConjModule DownSinglet)) : h.covDerivBarD i l φ ∈ h.covAlgebra :=
+lemma covDerivBarD_mem_covAlgebra
+    (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3)) (φ : Module.Dual ℂ (ConjModule DownSinglet))
+    : h.covDerivBarD i l φ ∈ h.covAlgebra :=
   Algebra.subset_adjoin <| Or.inr <| Set.mem_iUnion_of_mem i <| Set.mem_iUnion_of_mem n <|
-    Set.mem_iUnion_of_mem l <| Or.inl <| Or.inl <| Or.inl <| Or.inl <| Or.inl <| Or.inl <|
-      Or.inl <| Or.inl <| Or.inr <| ⟨φ, rfl⟩
-
-/-- The up-type quark tower lies in the covariant subalgebra. -/
-lemma covDerivU_mem_covAlgebra (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3))
-    (φ : Module.Dual ℂ UpSinglet) : h.covDerivU i l φ ∈ h.covAlgebra :=
-  Algebra.subset_adjoin <| Or.inr <| Set.mem_iUnion_of_mem i <| Set.mem_iUnion_of_mem n <|
-    Set.mem_iUnion_of_mem l <| Or.inl <| Or.inl <| Or.inl <| Or.inl <| Or.inl <| Or.inl <|
+    Set.mem_iUnion_of_mem l <| Or.inl <| Or.inl <| Or.inl <| Or.inl <| Or.inl <| Or.inl <| Or.inl <|
       Or.inl <| Or.inr <| ⟨φ, rfl⟩
 
-/-- The conjugate up-type quark tower lies in the covariant subalgebra. -/
-lemma covDerivBarU_mem_covAlgebra (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3))
-    (φ : Module.Dual ℂ (ConjModule UpSinglet)) : h.covDerivBarU i l φ ∈ h.covAlgebra :=
+/-- The up-type quark tower lies in the covariant subalgebra. -/
+lemma covDerivU_mem_covAlgebra
+    (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3)) (φ : Module.Dual ℂ UpSinglet)
+    : h.covDerivU i l φ ∈ h.covAlgebra :=
   Algebra.subset_adjoin <| Or.inr <| Set.mem_iUnion_of_mem i <| Set.mem_iUnion_of_mem n <|
-    Set.mem_iUnion_of_mem l <| Or.inl <| Or.inl <| Or.inl <| Or.inl <| Or.inl <| Or.inl <|
+    Set.mem_iUnion_of_mem l <| Or.inl <| Or.inl <| Or.inl <| Or.inl <| Or.inl <| Or.inl <| Or.inl <|
       Or.inr <| ⟨φ, rfl⟩
 
-/-- The quark doublet tower lies in the covariant subalgebra. -/
-lemma covDerivQ_mem_covAlgebra (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3))
-    (φ : Module.Dual ℂ QuarkDoublet) : h.covDerivQ i l φ ∈ h.covAlgebra :=
+/-- The conjugate up-type quark tower lies in the covariant subalgebra. -/
+lemma covDerivBarU_mem_covAlgebra
+    (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3)) (φ : Module.Dual ℂ (ConjModule UpSinglet))
+    : h.covDerivBarU i l φ ∈ h.covAlgebra :=
   Algebra.subset_adjoin <| Or.inr <| Set.mem_iUnion_of_mem i <| Set.mem_iUnion_of_mem n <|
-    Set.mem_iUnion_of_mem l <| Or.inl <| Or.inl <| Or.inl <| Or.inl <| Or.inl <| Or.inr <|
+    Set.mem_iUnion_of_mem l <| Or.inl <| Or.inl <| Or.inl <| Or.inl <| Or.inl <| Or.inl <| Or.inr <|
       ⟨φ, rfl⟩
 
+/-- The quark doublet tower lies in the covariant subalgebra. -/
+lemma covDerivQ_mem_covAlgebra
+    (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3)) (φ : Module.Dual ℂ QuarkDoublet)
+    : h.covDerivQ i l φ ∈ h.covAlgebra :=
+  Algebra.subset_adjoin <| Or.inr <| Set.mem_iUnion_of_mem i <| Set.mem_iUnion_of_mem n <|
+    Set.mem_iUnion_of_mem l <| Or.inl <| Or.inl <| Or.inl <| Or.inl <| Or.inl <| Or.inr <| ⟨φ, rfl⟩
+
 /-- The conjugate quark doublet tower lies in the covariant subalgebra. -/
-lemma covDerivBarQ_mem_covAlgebra (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3))
-    (φ : Module.Dual ℂ (ConjModule QuarkDoublet)) : h.covDerivBarQ i l φ ∈ h.covAlgebra :=
+lemma covDerivBarQ_mem_covAlgebra
+    (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3)) (φ : Module.Dual ℂ (ConjModule QuarkDoublet))
+    : h.covDerivBarQ i l φ ∈ h.covAlgebra :=
   Algebra.subset_adjoin <| Or.inr <| Set.mem_iUnion_of_mem i <| Set.mem_iUnion_of_mem n <|
     Set.mem_iUnion_of_mem l <| Or.inl <| Or.inl <| Or.inl <| Or.inl <| Or.inr <| ⟨φ, rfl⟩
 
 /-- The lepton doublet tower lies in the covariant subalgebra. -/
-lemma covDerivL_mem_covAlgebra (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3))
-    (φ : Module.Dual ℂ LeptonDoubletV) : h.covDerivL i l φ ∈ h.covAlgebra :=
+lemma covDerivL_mem_covAlgebra
+    (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3)) (φ : Module.Dual ℂ LeptonDoubletV)
+    : h.covDerivL i l φ ∈ h.covAlgebra :=
   Algebra.subset_adjoin <| Or.inr <| Set.mem_iUnion_of_mem i <| Set.mem_iUnion_of_mem n <|
     Set.mem_iUnion_of_mem l <| Or.inl <| Or.inl <| Or.inl <| Or.inr <| ⟨φ, rfl⟩
 
 /-- The conjugate lepton doublet tower lies in the covariant subalgebra. -/
-lemma covDerivBarL_mem_covAlgebra (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3))
-    (φ : Module.Dual ℂ (ConjModule LeptonDoubletV)) : h.covDerivBarL i l φ ∈ h.covAlgebra :=
+lemma covDerivBarL_mem_covAlgebra
+    (i : Fin 3)
+    {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3))
+    (φ : Module.Dual ℂ (ConjModule LeptonDoubletV))
+    : h.covDerivBarL i l φ ∈ h.covAlgebra :=
   Algebra.subset_adjoin <| Or.inr <| Set.mem_iUnion_of_mem i <| Set.mem_iUnion_of_mem n <|
     Set.mem_iUnion_of_mem l <| Or.inl <| Or.inl <| Or.inr <| ⟨φ, rfl⟩
 
 /-- The charged-lepton singlet tower lies in the covariant subalgebra. -/
-lemma covDerivE_mem_covAlgebra (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3))
-    (φ : Module.Dual ℂ LeptonSinglet) : h.covDerivE i l φ ∈ h.covAlgebra :=
+lemma covDerivE_mem_covAlgebra
+    (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3)) (φ : Module.Dual ℂ LeptonSinglet)
+    : h.covDerivE i l φ ∈ h.covAlgebra :=
   Algebra.subset_adjoin <| Or.inr <| Set.mem_iUnion_of_mem i <| Set.mem_iUnion_of_mem n <|
     Set.mem_iUnion_of_mem l <| Or.inl <| Or.inr <| ⟨φ, rfl⟩
 
 /-- The conjugate charged-lepton singlet tower lies in the covariant subalgebra. -/
-lemma covDerivBarE_mem_covAlgebra (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3))
-    (φ : Module.Dual ℂ (ConjModule LeptonSinglet)) : h.covDerivBarE i l φ ∈ h.covAlgebra :=
+lemma covDerivBarE_mem_covAlgebra
+    (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3)) (φ : Module.Dual ℂ (ConjModule LeptonSinglet))
+    : h.covDerivBarE i l φ ∈ h.covAlgebra :=
   Algebra.subset_adjoin <| Or.inr <| Set.mem_iUnion_of_mem i <| Set.mem_iUnion_of_mem n <|
     Set.mem_iUnion_of_mem l <| Or.inr <| ⟨φ, rfl⟩
-
 
 /-!
 
@@ -186,36 +199,44 @@ and a mass-weight grading of its own.
 -/
 
 include h in
-/-- A property that holds of every covariant tower holds of every covariant generator:
-  the case analysis of the generating set, done once. -/
-lemma covGenerators_induction {P : B → Prop}
+/--
+A property that holds of every covariant tower holds of every covariant generator:
+the case analysis of the generating set, done once.
+-/
+lemma covGenerators_induction
+    {P : B → Prop}
     (hF : ∀ {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3)) (μ ν : Fin 1 ⊕ Fin 3)
-      (φ : Module.Dual ℝ GaugeAlgebra), P (h.covF l μ ν φ))
-    (hH : ∀ {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3)) (φ : Module.Dual ℂ HiggsVec),
-      P (h.covDerivH l φ))
+        (φ : Module.Dual ℝ GaugeAlgebra),
+      P (h.covF l μ ν φ))
+    (hH : ∀ {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3)) (φ : Module.Dual ℂ HiggsVec), P (h.covDerivH l φ))
     (hBarH : ∀ {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3)) (φ : Module.Dual ℂ (ConjModule HiggsVec)),
       P (h.covDerivBarH l φ))
-    (hD : ∀ (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3))
-      (φ : Module.Dual ℂ DownSinglet), P (h.covDerivD i l φ))
+    (hD : ∀ (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3)) (φ : Module.Dual ℂ DownSinglet),
+      P (h.covDerivD i l φ))
     (hBarD : ∀ (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3))
-      (φ : Module.Dual ℂ (ConjModule DownSinglet)), P (h.covDerivBarD i l φ))
-    (hU : ∀ (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3))
-      (φ : Module.Dual ℂ UpSinglet), P (h.covDerivU i l φ))
+        (φ : Module.Dual ℂ (ConjModule DownSinglet)),
+      P (h.covDerivBarD i l φ))
+    (hU : ∀ (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3)) (φ : Module.Dual ℂ UpSinglet),
+      P (h.covDerivU i l φ))
     (hBarU : ∀ (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3))
-      (φ : Module.Dual ℂ (ConjModule UpSinglet)), P (h.covDerivBarU i l φ))
-    (hQ : ∀ (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3))
-      (φ : Module.Dual ℂ QuarkDoublet), P (h.covDerivQ i l φ))
+        (φ : Module.Dual ℂ (ConjModule UpSinglet)),
+      P (h.covDerivBarU i l φ))
+    (hQ : ∀ (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3)) (φ : Module.Dual ℂ QuarkDoublet),
+      P (h.covDerivQ i l φ))
     (hBarQ : ∀ (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3))
-      (φ : Module.Dual ℂ (ConjModule QuarkDoublet)), P (h.covDerivBarQ i l φ))
-    (hL : ∀ (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3))
-      (φ : Module.Dual ℂ LeptonDoubletV), P (h.covDerivL i l φ))
+        (φ : Module.Dual ℂ (ConjModule QuarkDoublet)),
+      P (h.covDerivBarQ i l φ))
+    (hL : ∀ (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3)) (φ : Module.Dual ℂ LeptonDoubletV),
+      P (h.covDerivL i l φ))
     (hBarL : ∀ (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3))
-      (φ : Module.Dual ℂ (ConjModule LeptonDoubletV)), P (h.covDerivBarL i l φ))
-    (hE : ∀ (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3))
-      (φ : Module.Dual ℂ LeptonSinglet), P (h.covDerivE i l φ))
+        (φ : Module.Dual ℂ (ConjModule LeptonDoubletV)),
+      P (h.covDerivBarL i l φ))
+    (hE : ∀ (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3)) (φ : Module.Dual ℂ LeptonSinglet),
+      P (h.covDerivE i l φ))
     (hBarE : ∀ (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3))
-      (φ : Module.Dual ℂ (ConjModule LeptonSinglet)), P (h.covDerivBarE i l φ)) :
-    ∀ x ∈ h.covGenerators, P x := by
+        (φ : Module.Dual ℂ (ConjModule LeptonSinglet)),
+      P (h.covDerivBarE i l φ))
+    : ∀ x ∈ h.covGenerators, P x := by
   rintro x hx
   rw [covGenerators] at hx
   rcases hx with hx | hx
@@ -230,8 +251,11 @@ lemma covGenerators_induction {P : B → Prop}
       · exact hBarH l φ
   · simp only [Set.mem_iUnion] at hx
     obtain ⟨i, n, l, hx⟩ := hx
-    rcases hx with (((((((((⟨φ, rfl⟩ | ⟨φ, rfl⟩) | ⟨φ, rfl⟩) | ⟨φ, rfl⟩) | ⟨φ, rfl⟩) |
-      ⟨φ, rfl⟩) | ⟨φ, rfl⟩) | ⟨φ, rfl⟩) | ⟨φ, rfl⟩) | ⟨φ, rfl⟩)
+    rcases hx with
+      (((((((((⟨φ, rfl⟩ | ⟨φ, rfl⟩) | ⟨φ, rfl⟩) | ⟨φ, rfl⟩) | ⟨φ, rfl⟩) | ⟨φ, rfl⟩) | ⟨φ, rfl⟩)
+        | ⟨φ, rfl⟩)
+        | ⟨φ, rfl⟩)
+        | ⟨φ, rfl⟩)
     · exact hD i l φ
     · exact hBarD i l φ
     · exact hU i l φ
@@ -243,14 +267,16 @@ lemma covGenerators_induction {P : B → Prop}
     · exact hE i l φ
     · exact hBarE i l φ
 
-
 include h in
-/-- A unital multiplicative endomorphism of the algebra that carries the covariant
-  generators into the covariant subalgebra carries the whole subalgebra into itself. -/
-lemma mapsTo_covAlgebra {f : B →ₗ[ℂ] B} (hone : f 1 = 1)
-    (hmul : ∀ b₁ b₂ : B, f (b₁ * b₂) = f b₁ * f b₂)
-    (hgen : ∀ x ∈ h.covGenerators, f x ∈ h.covAlgebra) {x : B} (hx : x ∈ h.covAlgebra) :
-    f x ∈ h.covAlgebra := by
+/--
+A unital multiplicative endomorphism of the algebra that carries the covariant
+generators into the covariant subalgebra carries the whole subalgebra into itself.
+-/
+lemma mapsTo_covAlgebra
+    {f : B →ₗ[ℂ] B} (hone : f 1 = 1) (hmul : ∀ b₁ b₂ : B, f (b₁ * b₂) = f b₁ * f b₂)
+    (hgen : ∀ x ∈ h.covGenerators, f x ∈ h.covAlgebra)
+    {x : B} (hx : x ∈ h.covAlgebra)
+    : f x ∈ h.covAlgebra := by
   induction hx using Algebra.adjoin_induction with
   | mem b hb => exact hgen b hb
   | algebraMap c =>
@@ -261,9 +287,10 @@ lemma mapsTo_covAlgebra {f : B →ₗ[ℂ] B} (hone : f 1 = 1)
 
 include h in
 /-- A Lorentz slot-mixing sum of covariant towers lies in the covariant subalgebra. -/
-lemma sum_smul_mem_covAlgebra {n : ℕ} {c : (Fin n → (Fin 1 ⊕ Fin 3)) → ℂ}
-    {G : (Fin n → (Fin 1 ⊕ Fin 3)) → B} (hG : ∀ p, G p ∈ h.covAlgebra) :
-    ∑ p : Fin n → (Fin 1 ⊕ Fin 3), c p • G p ∈ h.covAlgebra :=
+lemma sum_smul_mem_covAlgebra
+    {n : ℕ} {c : (Fin n → (Fin 1 ⊕ Fin 3)) → ℂ} {G : (Fin n → (Fin 1 ⊕ Fin 3)) → B}
+    (hG : ∀ p, G p ∈ h.covAlgebra)
+    : ∑ p : Fin n → (Fin 1 ⊕ Fin 3), c p • G p ∈ h.covAlgebra :=
   Subalgebra.sum_mem _ fun p _ => Subalgebra.smul_mem _ (hG p) _
 
 /-!
@@ -278,36 +305,33 @@ lemma repGlobal_one (g : GaugeGroupI) : repGlobal repJet g (1 : B) = 1 := by
   simpa using h.repJet_algebraMap (JetGaugeGroupI.ofConstant g) 1
 
 include h in
-/-- The global gauge action preserves the covariant subalgebra: it carries each covariant
-  tower to a tower of the same shape at a rotated value index, and it is multiplicative. -/
-lemma repGlobal_mem_covAlgebra (g : GaugeGroupI) {x : B} (hx : x ∈ h.covAlgebra) :
-    repGlobal repJet g x ∈ h.covAlgebra :=
+/--
+The global gauge action preserves the covariant subalgebra: it carries each covariant
+tower to a tower of the same shape at a rotated value index, and it is multiplicative.
+-/
+lemma repGlobal_mem_covAlgebra (g : GaugeGroupI) {x : B} (hx : x ∈ h.covAlgebra)
+    : repGlobal repJet g x ∈ h.covAlgebra :=
   h.mapsTo_covAlgebra (h.repGlobal_one g) (h.gaugeRealization.gauge_mul _)
     (h.covGenerators_induction
-    (fun l μ ν φ => by
-      rw [h.repGlobal_covF]; exact h.covF_mem_covAlgebra _ _ _ _)
-    (fun l φ => by rw [h.repGlobal_covDerivH]; exact h.covDerivH_mem_covAlgebra _ _)
-    (fun l φ => by rw [h.repGlobal_covDerivBarH]; exact h.covDerivBarH_mem_covAlgebra _ _)
-    (fun i {_n} l φ => by
-      rw [h.repGlobal_covDerivD]; exact h.covDerivD_mem_covAlgebra _ _ _)
-    (fun i {_n} l φ => by
-      rw [h.repGlobal_covDerivBarD]; exact h.covDerivBarD_mem_covAlgebra _ _ _)
-    (fun i {_n} l φ => by
-      rw [h.repGlobal_covDerivU]; exact h.covDerivU_mem_covAlgebra _ _ _)
-    (fun i {_n} l φ => by
-      rw [h.repGlobal_covDerivBarU]; exact h.covDerivBarU_mem_covAlgebra _ _ _)
-    (fun i {_n} l φ => by
-      rw [h.repGlobal_covDerivQ]; exact h.covDerivQ_mem_covAlgebra _ _ _)
-    (fun i {_n} l φ => by
-      rw [h.repGlobal_covDerivBarQ]; exact h.covDerivBarQ_mem_covAlgebra _ _ _)
-    (fun i {_n} l φ => by
-      rw [h.repGlobal_covDerivL]; exact h.covDerivL_mem_covAlgebra _ _ _)
-    (fun i {_n} l φ => by
-      rw [h.repGlobal_covDerivBarL]; exact h.covDerivBarL_mem_covAlgebra _ _ _)
-    (fun i {_n} l φ => by
-      rw [h.repGlobal_covDerivE]; exact h.covDerivE_mem_covAlgebra _ _ _)
-    (fun i {_n} l φ => by
-      rw [h.repGlobal_covDerivBarE]; exact h.covDerivBarE_mem_covAlgebra _ _ _)) hx
+      (fun l μ ν φ => by rw [h.repGlobal_covF]; exact h.covF_mem_covAlgebra _ _ _ _)
+      (fun l φ => by rw [h.repGlobal_covDerivH]; exact h.covDerivH_mem_covAlgebra _ _)
+      (fun l φ => by rw [h.repGlobal_covDerivBarH]; exact h.covDerivBarH_mem_covAlgebra _ _)
+      (fun i {_n} l φ => by rw [h.repGlobal_covDerivD]; exact h.covDerivD_mem_covAlgebra _ _ _)
+      (fun i {_n} l φ => by
+        rw [h.repGlobal_covDerivBarD]; exact h.covDerivBarD_mem_covAlgebra _ _ _)
+      (fun i {_n} l φ => by rw [h.repGlobal_covDerivU]; exact h.covDerivU_mem_covAlgebra _ _ _)
+      (fun i {_n} l φ => by
+        rw [h.repGlobal_covDerivBarU]; exact h.covDerivBarU_mem_covAlgebra _ _ _)
+      (fun i {_n} l φ => by rw [h.repGlobal_covDerivQ]; exact h.covDerivQ_mem_covAlgebra _ _ _)
+      (fun i {_n} l φ => by
+        rw [h.repGlobal_covDerivBarQ]; exact h.covDerivBarQ_mem_covAlgebra _ _ _)
+      (fun i {_n} l φ => by rw [h.repGlobal_covDerivL]; exact h.covDerivL_mem_covAlgebra _ _ _)
+      (fun i {_n} l φ => by
+        rw [h.repGlobal_covDerivBarL]; exact h.covDerivBarL_mem_covAlgebra _ _ _)
+      (fun i {_n} l φ => by rw [h.repGlobal_covDerivE]; exact h.covDerivE_mem_covAlgebra _ _ _)
+      (fun i {_n} l φ => by
+        rw [h.repGlobal_covDerivBarE]; exact h.covDerivBarE_mem_covAlgebra _ _ _))
+    hx
 
 /-!
 
@@ -318,63 +342,72 @@ lemma repGlobal_mem_covAlgebra (g : GaugeGroupI) {x : B} (hx : x ∈ h.covAlgebr
 include h in
 /-- The Lorentz action fixes the unit of the algebra. -/
 lemma repLorentz_one (Λ : SL(2,ℂ)) : repLorentz Λ (1 : B) = 1 := by
-  obtain ⟨v, hv⟩ : ∃ v, repLorentz Λ v = 1 :=
-    ⟨repLorentz Λ⁻¹ 1, by
+  obtain ⟨v, hv⟩ : ∃ v, repLorentz Λ v = 1 := ⟨
+    repLorentz Λ⁻¹ 1,
+    by
       rw [← Module.End.mul_apply, ← map_mul, mul_inv_cancel, map_one repLorentz,
-        Module.End.one_apply]⟩
+        Module.End.one_apply]
+  ⟩
   have h1 := h.repLorentz_mul Λ v 1
   rw [mul_one, hv, one_mul] at h1
   exact h1.symm
 
 include h in
-/-- The Lorentz action preserves the covariant subalgebra: it carries each covariant tower
-  to a slot-mixing sum of towers of the same shape, and it is multiplicative. -/
-lemma repLorentz_mem_covAlgebra (Λ : SL(2,ℂ)) {x : B} (hx : x ∈ h.covAlgebra) :
-    repLorentz Λ x ∈ h.covAlgebra :=
+/--
+The Lorentz action preserves the covariant subalgebra: it carries each covariant tower
+to a slot-mixing sum of towers of the same shape, and it is multiplicative.
+-/
+lemma repLorentz_mem_covAlgebra (Λ : SL(2,ℂ)) {x : B} (hx : x ∈ h.covAlgebra)
+    : repLorentz Λ x ∈ h.covAlgebra :=
   h.mapsTo_covAlgebra (h.repLorentz_one Λ) (h.repLorentz_mul Λ)
     (h.covGenerators_induction
-    (fun l μ ν φ => by
-      rw [h.repLorentz_covF]
-      exact Subalgebra.sum_mem _ fun p _ => Subalgebra.smul_mem _
-        (Subalgebra.sum_mem _ fun a _ => Subalgebra.smul_mem _
-          (Subalgebra.sum_mem _ fun b _ => Subalgebra.smul_mem _
-            (h.covF_mem_covAlgebra _ _ _ _) _) _) _)
-    (fun l φ => by
-      rw [h.repLorentz_covDerivH]
-      exact h.sum_smul_mem_covAlgebra fun p => h.covDerivH_mem_covAlgebra _ _)
-    (fun l φ => by
-      rw [h.repLorentz_covDerivBarH]
-      exact h.sum_smul_mem_covAlgebra fun p => h.covDerivBarH_mem_covAlgebra _ _)
-    (fun i {_n} l φ => by
-      rw [h.repLorentz_covDerivD]
-      exact h.sum_smul_mem_covAlgebra fun p => h.covDerivD_mem_covAlgebra _ _ _)
-    (fun i {_n} l φ => by
-      rw [h.repLorentz_covDerivBarD]
-      exact h.sum_smul_mem_covAlgebra fun p => h.covDerivBarD_mem_covAlgebra _ _ _)
-    (fun i {_n} l φ => by
-      rw [h.repLorentz_covDerivU]
-      exact h.sum_smul_mem_covAlgebra fun p => h.covDerivU_mem_covAlgebra _ _ _)
-    (fun i {_n} l φ => by
-      rw [h.repLorentz_covDerivBarU]
-      exact h.sum_smul_mem_covAlgebra fun p => h.covDerivBarU_mem_covAlgebra _ _ _)
-    (fun i {_n} l φ => by
-      rw [h.repLorentz_covDerivQ]
-      exact h.sum_smul_mem_covAlgebra fun p => h.covDerivQ_mem_covAlgebra _ _ _)
-    (fun i {_n} l φ => by
-      rw [h.repLorentz_covDerivBarQ]
-      exact h.sum_smul_mem_covAlgebra fun p => h.covDerivBarQ_mem_covAlgebra _ _ _)
-    (fun i {_n} l φ => by
-      rw [h.repLorentz_covDerivL]
-      exact h.sum_smul_mem_covAlgebra fun p => h.covDerivL_mem_covAlgebra _ _ _)
-    (fun i {_n} l φ => by
-      rw [h.repLorentz_covDerivBarL]
-      exact h.sum_smul_mem_covAlgebra fun p => h.covDerivBarL_mem_covAlgebra _ _ _)
-    (fun i {_n} l φ => by
-      rw [h.repLorentz_covDerivE]
-      exact h.sum_smul_mem_covAlgebra fun p => h.covDerivE_mem_covAlgebra _ _ _)
-    (fun i {_n} l φ => by
-      rw [h.repLorentz_covDerivBarE]
-      exact h.sum_smul_mem_covAlgebra fun p => h.covDerivBarE_mem_covAlgebra _ _ _)) hx
+      (fun l μ ν φ => by
+        rw [h.repLorentz_covF]
+        exact Subalgebra.sum_mem _ fun p _ =>
+          Subalgebra.smul_mem _
+            (Subalgebra.sum_mem _ fun a _ =>
+              Subalgebra.smul_mem _
+                (Subalgebra.sum_mem _ fun b _ =>
+                  Subalgebra.smul_mem _ (h.covF_mem_covAlgebra _ _ _ _) _)
+                _)
+            _)
+      (fun l φ => by
+        rw [h.repLorentz_covDerivH]
+        exact h.sum_smul_mem_covAlgebra fun p => h.covDerivH_mem_covAlgebra _ _)
+      (fun l φ => by
+        rw [h.repLorentz_covDerivBarH]
+        exact h.sum_smul_mem_covAlgebra fun p => h.covDerivBarH_mem_covAlgebra _ _)
+      (fun i {_n} l φ => by
+        rw [h.repLorentz_covDerivD]
+        exact h.sum_smul_mem_covAlgebra fun p => h.covDerivD_mem_covAlgebra _ _ _)
+      (fun i {_n} l φ => by
+        rw [h.repLorentz_covDerivBarD]
+        exact h.sum_smul_mem_covAlgebra fun p => h.covDerivBarD_mem_covAlgebra _ _ _)
+      (fun i {_n} l φ => by
+        rw [h.repLorentz_covDerivU]
+        exact h.sum_smul_mem_covAlgebra fun p => h.covDerivU_mem_covAlgebra _ _ _)
+      (fun i {_n} l φ => by
+        rw [h.repLorentz_covDerivBarU]
+        exact h.sum_smul_mem_covAlgebra fun p => h.covDerivBarU_mem_covAlgebra _ _ _)
+      (fun i {_n} l φ => by
+        rw [h.repLorentz_covDerivQ]
+        exact h.sum_smul_mem_covAlgebra fun p => h.covDerivQ_mem_covAlgebra _ _ _)
+      (fun i {_n} l φ => by
+        rw [h.repLorentz_covDerivBarQ]
+        exact h.sum_smul_mem_covAlgebra fun p => h.covDerivBarQ_mem_covAlgebra _ _ _)
+      (fun i {_n} l φ => by
+        rw [h.repLorentz_covDerivL]
+        exact h.sum_smul_mem_covAlgebra fun p => h.covDerivL_mem_covAlgebra _ _ _)
+      (fun i {_n} l φ => by
+        rw [h.repLorentz_covDerivBarL]
+        exact h.sum_smul_mem_covAlgebra fun p => h.covDerivBarL_mem_covAlgebra _ _ _)
+      (fun i {_n} l φ => by
+        rw [h.repLorentz_covDerivE]
+        exact h.sum_smul_mem_covAlgebra fun p => h.covDerivE_mem_covAlgebra _ _ _)
+      (fun i {_n} l φ => by
+        rw [h.repLorentz_covDerivBarE]
+        exact h.sum_smul_mem_covAlgebra fun p => h.covDerivBarE_mem_covAlgebra _ _ _))
+    hx
 
 /-!
 
@@ -383,60 +416,64 @@ lemma repLorentz_mem_covAlgebra (Λ : SL(2,ℂ)) {x : B} (hx : x ∈ h.covAlgebr
 -/
 
 include h in
-/-- A monomial with a coefficient in the covariant subalgebra is the image of a monomial
-  over the covariant subalgebra. -/
-private lemma monomial_mem_range {n : ℕ} {y : B} (hy : y ∈ h.covAlgebra) :
-    Polynomial.monomial n y ∈ (Polynomial.mapAlgHom h.covAlgebra.val).range :=
+/--
+A monomial with a coefficient in the covariant subalgebra is the image of a monomial
+over the covariant subalgebra.
+-/
+private lemma monomial_mem_range {n : ℕ} {y : B} (hy : y ∈ h.covAlgebra)
+    : Polynomial.monomial n y ∈ (Polynomial.mapAlgHom h.covAlgebra.val).range :=
   ⟨Polynomial.monomial n ⟨y, hy⟩, by simp⟩
 
 include h in
-/-- The mass-weight polynomial carries the covariant subalgebra into the polynomials with
-  coefficients in it: each covariant tower is an eigenvector whose eigenvector is the tower
-  itself, and the mass-weight polynomial is an algebra map. -/
-lemma massWeightPoly_mem_range_mapAlgHom {x : B} (hx : x ∈ h.covAlgebra) :
-    massWeightPoly x ∈ (Polynomial.mapAlgHom h.covAlgebra.val).range := by
-  have hgen : ∀ y ∈ h.covGenerators,
-      massWeightPoly y ∈ (Polynomial.mapAlgHom h.covAlgebra.val).range :=
+/--
+The mass-weight polynomial carries the covariant subalgebra into the polynomials with
+coefficients in it: each covariant tower is an eigenvector whose eigenvector is the tower
+itself, and the mass-weight polynomial is an algebra map.
+-/
+lemma massWeightPoly_mem_range_mapAlgHom {x : B} (hx : x ∈ h.covAlgebra)
+    : massWeightPoly x ∈ (Polynomial.mapAlgHom h.covAlgebra.val).range := by
+  have hgen
+      : ∀ y ∈ h.covGenerators, massWeightPoly y ∈ (Polynomial.mapAlgHom h.covAlgebra.val).range :=
     h.covGenerators_induction
-    (fun l μ ν φ => by
-      rw [h.massWeight_covF]
-      exact h.monomial_mem_range (h.covF_mem_covAlgebra l μ ν φ))
-    (fun l φ => by
-      rw [h.massWeight_covDerivH]
-      exact h.monomial_mem_range (h.covDerivH_mem_covAlgebra l φ))
-    (fun l φ => by
-      rw [h.massWeight_covDerivBarH]
-      exact h.monomial_mem_range (h.covDerivBarH_mem_covAlgebra l φ))
-    (fun i {_n} l φ => by
-      rw [h.massWeight_covDerivD]
-      exact h.monomial_mem_range (h.covDerivD_mem_covAlgebra i l φ))
-    (fun i {_n} l φ => by
-      rw [h.massWeight_covDerivBarD]
-      exact h.monomial_mem_range (h.covDerivBarD_mem_covAlgebra i l φ))
-    (fun i {_n} l φ => by
-      rw [h.massWeight_covDerivU]
-      exact h.monomial_mem_range (h.covDerivU_mem_covAlgebra i l φ))
-    (fun i {_n} l φ => by
-      rw [h.massWeight_covDerivBarU]
-      exact h.monomial_mem_range (h.covDerivBarU_mem_covAlgebra i l φ))
-    (fun i {_n} l φ => by
-      rw [h.massWeight_covDerivQ]
-      exact h.monomial_mem_range (h.covDerivQ_mem_covAlgebra i l φ))
-    (fun i {_n} l φ => by
-      rw [h.massWeight_covDerivBarQ]
-      exact h.monomial_mem_range (h.covDerivBarQ_mem_covAlgebra i l φ))
-    (fun i {_n} l φ => by
-      rw [h.massWeight_covDerivL]
-      exact h.monomial_mem_range (h.covDerivL_mem_covAlgebra i l φ))
-    (fun i {_n} l φ => by
-      rw [h.massWeight_covDerivBarL]
-      exact h.monomial_mem_range (h.covDerivBarL_mem_covAlgebra i l φ))
-    (fun i {_n} l φ => by
-      rw [h.massWeight_covDerivE]
-      exact h.monomial_mem_range (h.covDerivE_mem_covAlgebra i l φ))
-    (fun i {_n} l φ => by
-      rw [h.massWeight_covDerivBarE]
-      exact h.monomial_mem_range (h.covDerivBarE_mem_covAlgebra i l φ))
+      (fun l μ ν φ => by
+        rw [h.massWeight_covF]
+        exact h.monomial_mem_range (h.covF_mem_covAlgebra l μ ν φ))
+      (fun l φ => by
+        rw [h.massWeight_covDerivH]
+        exact h.monomial_mem_range (h.covDerivH_mem_covAlgebra l φ))
+      (fun l φ => by
+        rw [h.massWeight_covDerivBarH]
+        exact h.monomial_mem_range (h.covDerivBarH_mem_covAlgebra l φ))
+      (fun i {_n} l φ => by
+        rw [h.massWeight_covDerivD]
+        exact h.monomial_mem_range (h.covDerivD_mem_covAlgebra i l φ))
+      (fun i {_n} l φ => by
+        rw [h.massWeight_covDerivBarD]
+        exact h.monomial_mem_range (h.covDerivBarD_mem_covAlgebra i l φ))
+      (fun i {_n} l φ => by
+        rw [h.massWeight_covDerivU]
+        exact h.monomial_mem_range (h.covDerivU_mem_covAlgebra i l φ))
+      (fun i {_n} l φ => by
+        rw [h.massWeight_covDerivBarU]
+        exact h.monomial_mem_range (h.covDerivBarU_mem_covAlgebra i l φ))
+      (fun i {_n} l φ => by
+        rw [h.massWeight_covDerivQ]
+        exact h.monomial_mem_range (h.covDerivQ_mem_covAlgebra i l φ))
+      (fun i {_n} l φ => by
+        rw [h.massWeight_covDerivBarQ]
+        exact h.monomial_mem_range (h.covDerivBarQ_mem_covAlgebra i l φ))
+      (fun i {_n} l φ => by
+        rw [h.massWeight_covDerivL]
+        exact h.monomial_mem_range (h.covDerivL_mem_covAlgebra i l φ))
+      (fun i {_n} l φ => by
+        rw [h.massWeight_covDerivBarL]
+        exact h.monomial_mem_range (h.covDerivBarL_mem_covAlgebra i l φ))
+      (fun i {_n} l φ => by
+        rw [h.massWeight_covDerivE]
+        exact h.monomial_mem_range (h.covDerivE_mem_covAlgebra i l φ))
+      (fun i {_n} l φ => by
+        rw [h.massWeight_covDerivBarE]
+        exact h.monomial_mem_range (h.covDerivBarE_mem_covAlgebra i l φ))
   induction hx using Algebra.adjoin_induction with
   | mem b hb => exact hgen b hb
   | algebraMap c => exact ⟨algebraMap ℂ (Polynomial ↥h.covAlgebra) c, by simp⟩
@@ -457,52 +494,58 @@ subalgebra itself; the identification is through the injection
 
 -/
 
-/-- The global gauge action on the covariant subalgebra: the ambient global gauge action,
-  which section B shows preserves it. -/
+/--
+The global gauge action on the covariant subalgebra: the ambient global gauge action,
+which section B shows preserves it.
+-/
 noncomputable def covRepGauge : Representation ℂ GaugeGroupI ↥h.covAlgebra :=
-  (repGlobal repJet).restrictSubalgebra h.covAlgebra
-    fun g _ hx => h.repGlobal_mem_covAlgebra g hx
+  (repGlobal repJet).restrictSubalgebra h.covAlgebra fun g _ hx => h.repGlobal_mem_covAlgebra g hx
 
 @[simp]
-lemma coe_covRepGauge (g : GaugeGroupI) (x : ↥h.covAlgebra) :
-    (h.covRepGauge g x : B) = repGlobal repJet g (x : B) := rfl
+lemma coe_covRepGauge (g : GaugeGroupI) (x : ↥h.covAlgebra)
+    : (h.covRepGauge g x : B) = repGlobal repJet g (x : B) :=
+  rfl
 
-/-- The Lorentz action on the covariant subalgebra: the ambient Lorentz action, which
-  section B shows preserves it. -/
-noncomputable def covRepLorentz : Representation ℂ SL(2,ℂ) ↥h.covAlgebra :=
-  repLorentz.restrictSubalgebra h.covAlgebra
-    fun Λ _ hx => h.repLorentz_mem_covAlgebra Λ hx
+/--
+The Lorentz action on the covariant subalgebra: the ambient Lorentz action, which
+section B shows preserves it.
+-/
+noncomputable def covRepLorentz : Representation ℂ (SL(2,ℂ)) ↥h.covAlgebra :=
+  repLorentz.restrictSubalgebra h.covAlgebra fun Λ _ hx => h.repLorentz_mem_covAlgebra Λ hx
 
 @[simp]
-lemma coe_covRepLorentz (Λ : SL(2,ℂ)) (x : ↥h.covAlgebra) :
-    (h.covRepLorentz Λ x : B) = repLorentz Λ (x : B) := rfl
+lemma coe_covRepLorentz (Λ : SL(2,ℂ)) (x : ↥h.covAlgebra)
+    : (h.covRepLorentz Λ x : B) = repLorentz Λ (x : B) :=
+  rfl
 
 include h in
 /-- Polynomials over the covariant subalgebra inject into polynomials over the algebra. -/
-lemma mapAlgHom_val_injective :
-    Function.Injective (Polynomial.mapAlgHom h.covAlgebra.val) := by
+lemma mapAlgHom_val_injective : Function.Injective (Polynomial.mapAlgHom h.covAlgebra.val) := by
   rw [Polynomial.coe_mapAlgHom]
   exact Polynomial.map_injective _ Subtype.val_injective
 
-/-- The mass-weight polynomial of the covariant subalgebra: the ambient mass-weight
-  polynomial, whose value on the subalgebra has all of its coefficients in the subalgebra
-  by section B. -/
+/--
+The mass-weight polynomial of the covariant subalgebra: the ambient mass-weight
+polynomial, whose value on the subalgebra has all of its coefficients in the subalgebra
+by section B.
+-/
 noncomputable def covMassWeightPoly : ↥h.covAlgebra →ₐ[ℂ] Polynomial ↥h.covAlgebra :=
   (AlgEquiv.ofInjective (Polynomial.mapAlgHom h.covAlgebra.val)
       h.mapAlgHom_val_injective).symm.toAlgHom.comp
-    (AlgHom.codRestrict (massWeightPoly.comp h.covAlgebra.val) _
-      fun x => h.massWeightPoly_mem_range_mapAlgHom x.2)
+    (AlgHom.codRestrict (massWeightPoly.comp h.covAlgebra.val) _ fun x =>
+      h.massWeightPoly_mem_range_mapAlgHom x.2)
 
 @[simp]
-lemma mapAlgHom_covMassWeightPoly (x : ↥h.covAlgebra) :
-    Polynomial.mapAlgHom h.covAlgebra.val (h.covMassWeightPoly x) = massWeightPoly (x : B) :=
-  congrArg Subtype.val ((AlgEquiv.ofInjective (Polynomial.mapAlgHom h.covAlgebra.val)
-    h.mapAlgHom_val_injective).apply_symm_apply
+lemma mapAlgHom_covMassWeightPoly (x : ↥h.covAlgebra)
+    : Polynomial.mapAlgHom h.covAlgebra.val (h.covMassWeightPoly x) = massWeightPoly (x : B) :=
+  congrArg Subtype.val
+    ((AlgEquiv.ofInjective (Polynomial.mapAlgHom h.covAlgebra.val)
+        h.mapAlgHom_val_injective).apply_symm_apply
       ⟨massWeightPoly (x : B), h.massWeightPoly_mem_range_mapAlgHom x.2⟩)
 
 /-- A mass-weight eigenvalue equation in the covariant subalgebra is the ambient one. -/
-lemma covMassWeightPoly_eq_monomial_iff {n : ℕ} (x : ↥h.covAlgebra) :
-    h.covMassWeightPoly x = Polynomial.monomial n x
+lemma covMassWeightPoly_eq_monomial_iff {n : ℕ} (x : ↥h.covAlgebra)
+    : h.covMassWeightPoly x = Polynomial.monomial n x
       ↔ massWeightPoly (x : B) = Polynomial.monomial n (x : B) := by
   constructor
   · intro hx
@@ -513,39 +556,46 @@ lemma covMassWeightPoly_eq_monomial_iff {n : ℕ} (x : ↥h.covAlgebra) :
     rw [h.mapAlgHom_covMassWeightPoly, hx, Polynomial.mapAlgHom_monomial]
     rfl
 
-
 /-!
 
 ### C.1. Corestricting a family of symbols
 
 -/
 
-/-- A family of symbols whose values lie in the covariant subalgebra, read as a family
-  valued in that subalgebra. -/
-noncomputable def corestrict {V : Type} [AddCommGroup V] [Module ℂ V]
-    (G : Module.Dual ℂ V →ₗ[ℂ] B) (hG : ∀ φ, G φ ∈ h.covAlgebra) :
-    Module.Dual ℂ V →ₗ[ℂ] ↥h.covAlgebra where
+/--
+A family of symbols whose values lie in the covariant subalgebra, read as a family
+valued in that subalgebra.
+-/
+noncomputable def corestrict
+    {V : Type} [AddCommGroup V] [Module ℂ V]
+    (G : Module.Dual ℂ V →ₗ[ℂ] B) (hG : ∀ φ, G φ ∈ h.covAlgebra)
+    : Module.Dual ℂ V →ₗ[ℂ] ↥h.covAlgebra where
   toFun φ := ⟨G φ, hG φ⟩
   map_add' φ ψ := Subtype.ext (map_add G φ ψ)
   map_smul' c φ := Subtype.ext (map_smul G c φ)
 
 @[simp]
-lemma coe_corestrict {V : Type} [AddCommGroup V] [Module ℂ V]
-    (G : Module.Dual ℂ V →ₗ[ℂ] B) (hG : ∀ φ, G φ ∈ h.covAlgebra) (φ : Module.Dual ℂ V) :
-    (h.corestrict G hG φ : B) = G φ := rfl
+lemma coe_corestrict
+    {V : Type} [AddCommGroup V] [Module ℂ V]
+    (G : Module.Dual ℂ V →ₗ[ℂ] B) (hG : ∀ φ, G φ ∈ h.covAlgebra)
+    (φ : Module.Dual ℂ V)
+    : (h.corestrict G hG φ : B) = G φ :=
+  rfl
 
 /-- The real-linear analogue of `corestrict`, for the gauge-algebra valued family. -/
-noncomputable def corestrictReal (G : Module.Dual ℝ GaugeAlgebra →ₗ[ℝ] B)
-    (hG : ∀ φ, G φ ∈ h.covAlgebra) :
-    Module.Dual ℝ GaugeAlgebra →ₗ[ℝ] ↥h.covAlgebra where
+noncomputable def corestrictReal
+    (G : Module.Dual ℝ GaugeAlgebra →ₗ[ℝ] B) (hG : ∀ φ, G φ ∈ h.covAlgebra)
+    : Module.Dual ℝ GaugeAlgebra →ₗ[ℝ] ↥h.covAlgebra where
   toFun φ := ⟨G φ, hG φ⟩
   map_add' φ ψ := Subtype.ext (map_add G φ ψ)
   map_smul' c φ := Subtype.ext (map_smul G c φ)
 
 @[simp]
-lemma coe_corestrictReal (G : Module.Dual ℝ GaugeAlgebra →ₗ[ℝ] B)
-    (hG : ∀ φ, G φ ∈ h.covAlgebra) (φ : Module.Dual ℝ GaugeAlgebra) :
-    (h.corestrictReal G hG φ : B) = G φ := rfl
+lemma coe_corestrictReal
+    (G : Module.Dual ℝ GaugeAlgebra →ₗ[ℝ] B) (hG : ∀ φ, G φ ∈ h.covAlgebra)
+    (φ : Module.Dual ℝ GaugeAlgebra)
+    : (h.corestrictReal G hG φ : B) = G φ :=
+  rfl
 
 end AlgebraRealization
 
@@ -562,19 +612,25 @@ sense that `JetAlgebra` is the universal object of the theory in the bare symbol
 
 -/
 
-/-- The covariant jet algebra of the Standard Model: the covariant field algebra of the
-  jet algebra. Its elements are exactly the polynomial expressions in the covariant
-  derivatives of the field strength and of the twelve matter towers. -/
+/--
+The covariant jet algebra of the Standard Model: the covariant field algebra of the
+jet algebra. Its elements are exactly the polynomial expressions in the covariant
+derivatives of the field strength and of the twelve matter towers.
+-/
 abbrev CovJetAlgebra : Type := ↥(AlgebraRealization.id.covAlgebra)
 
-/-- The covariant jet algebra is a ring: it is a subalgebra of the jet algebra. The
-  instance is given explicitly because the generic `Subalgebra.toRing` is not found by
-  instance search at this concrete algebra. -/
+/--
+The covariant jet algebra is a ring: it is a subalgebra of the jet algebra. The
+instance is given explicitly because the generic `Subalgebra.toRing` is not found by
+instance search at this concrete algebra.
+-/
 noncomputable instance : Ring CovJetAlgebra :=
   @Subalgebra.toRing ℂ JetAlgebra _ _ _ AlgebraRealization.id.covAlgebra
 
-/-- The covariant jet algebra is a complex algebra, stated at the ring instance just
-  given. -/
+/--
+The covariant jet algebra is a complex algebra, stated at the ring instance just
+given.
+-/
 noncomputable instance : Algebra ℂ CovJetAlgebra :=
   @Subalgebra.algebra ℂ JetAlgebra _ _ _ AlgebraRealization.id.covAlgebra
 
@@ -585,164 +641,202 @@ noncomputable abbrev repGaugeGroupI : Representation ℂ GaugeGroupI CovJetAlgeb
   AlgebraRealization.id.covRepGauge
 
 /-- The action of the Lorentz group on the covariant jet algebra. -/
-noncomputable abbrev repLorentzGroup : Representation ℂ SL(2,ℂ) CovJetAlgebra :=
+noncomputable abbrev repLorentzGroup : Representation ℂ (SL(2,ℂ)) CovJetAlgebra :=
   AlgebraRealization.id.covRepLorentz
 
 /-- The mass-weight polynomial of the covariant jet algebra. -/
 noncomputable abbrev massWeightPoly : CovJetAlgebra →ₐ[ℂ] Polynomial CovJetAlgebra :=
   AlgebraRealization.id.covMassWeightPoly
 
-/-- In the covariant jet algebra, the tower of covariant derivatives of the field
-  strength. -/
-noncomputable def fieldStrength {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3)) (μ ν : Fin 1 ⊕ Fin 3) :
-    Module.Dual ℝ GaugeAlgebra →ₗ[ℝ] CovJetAlgebra :=
+/--
+In the covariant jet algebra, the tower of covariant derivatives of the field
+strength.
+-/
+noncomputable def fieldStrength {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3)) (μ ν : Fin 1 ⊕ Fin 3)
+    : Module.Dual ℝ GaugeAlgebra →ₗ[ℝ] CovJetAlgebra :=
   AlgebraRealization.id.corestrictReal (AlgebraRealization.id.covF l μ ν)
     (AlgebraRealization.id.covF_mem_covAlgebra l μ ν)
 
 @[simp]
-lemma coe_fieldStrength {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3)) (μ ν : Fin 1 ⊕ Fin 3)
-    (φ : Module.Dual ℝ GaugeAlgebra) :
-    (fieldStrength l μ ν φ : JetAlgebra) = AlgebraRealization.id.covF l μ ν φ := rfl
+lemma coe_fieldStrength
+    {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3)) (μ ν : Fin 1 ⊕ Fin 3) (φ : Module.Dual ℝ GaugeAlgebra)
+    : (fieldStrength l μ ν φ : JetAlgebra) = AlgebraRealization.id.covF l μ ν φ :=
+  rfl
 /-- In the covariant jet algebra, the tower of covariant derivatives of the Higgs field. -/
-noncomputable def higgsField {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3)) :
-    Module.Dual ℂ HiggsVec →ₗ[ℂ] CovJetAlgebra :=
+noncomputable def higgsField {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3))
+    : Module.Dual ℂ HiggsVec →ₗ[ℂ] CovJetAlgebra :=
   AlgebraRealization.id.corestrict (AlgebraRealization.id.covDerivH l)
     (AlgebraRealization.id.covDerivH_mem_covAlgebra l)
 
 @[simp]
-lemma coe_higgsField {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3))
-    (φ : Module.Dual ℂ HiggsVec) :
-    (higgsField l φ : JetAlgebra) = AlgebraRealization.id.covDerivH l φ := rfl
+lemma coe_higgsField {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3)) (φ : Module.Dual ℂ HiggsVec)
+    : (higgsField l φ : JetAlgebra) = AlgebraRealization.id.covDerivH l φ :=
+  rfl
 
-/-- In the covariant jet algebra, the tower of covariant derivatives of the conjugate Higgs
-  field. -/
-noncomputable def conjHiggsField {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3)) :
-    Module.Dual ℂ (ConjModule HiggsVec) →ₗ[ℂ] CovJetAlgebra :=
+/--
+In the covariant jet algebra, the tower of covariant derivatives of the conjugate Higgs
+field.
+-/
+noncomputable def conjHiggsField {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3))
+    : Module.Dual ℂ (ConjModule HiggsVec) →ₗ[ℂ] CovJetAlgebra :=
   AlgebraRealization.id.corestrict (AlgebraRealization.id.covDerivBarH l)
     (AlgebraRealization.id.covDerivBarH_mem_covAlgebra l)
 
 @[simp]
-lemma coe_conjHiggsField {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3))
-    (φ : Module.Dual ℂ (ConjModule HiggsVec)) :
-    (conjHiggsField l φ : JetAlgebra) = AlgebraRealization.id.covDerivBarH l φ := rfl
+lemma coe_conjHiggsField
+    {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3)) (φ : Module.Dual ℂ (ConjModule HiggsVec))
+    : (conjHiggsField l φ : JetAlgebra) = AlgebraRealization.id.covDerivBarH l φ :=
+  rfl
 
-/-- In the covariant jet algebra, the tower of covariant derivatives of the down-type quark
-  singlet of the `i`-th generation. -/
-noncomputable def downSingletField (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3)) :
-    Module.Dual ℂ DownSinglet →ₗ[ℂ] CovJetAlgebra :=
+/--
+In the covariant jet algebra, the tower of covariant derivatives of the down-type quark
+singlet of the `i`-th generation.
+-/
+noncomputable def downSingletField (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3))
+    : Module.Dual ℂ DownSinglet →ₗ[ℂ] CovJetAlgebra :=
   AlgebraRealization.id.corestrict (AlgebraRealization.id.covDerivD i l)
     (AlgebraRealization.id.covDerivD_mem_covAlgebra i l)
 
 @[simp]
-lemma coe_downSingletField (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3))
-    (φ : Module.Dual ℂ DownSinglet) :
-    (downSingletField i l φ : JetAlgebra) = AlgebraRealization.id.covDerivD i l φ := rfl
+lemma coe_downSingletField
+    (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3)) (φ : Module.Dual ℂ DownSinglet)
+    : (downSingletField i l φ : JetAlgebra) = AlgebraRealization.id.covDerivD i l φ :=
+  rfl
 
-/-- In the covariant jet algebra, the tower of covariant derivatives of the conjugate down-
-  type quark singlet of the `i`-th generation. -/
-noncomputable def conjDownSingletField (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3)) :
-    Module.Dual ℂ (ConjModule DownSinglet) →ₗ[ℂ] CovJetAlgebra :=
+/--
+In the covariant jet algebra, the tower of covariant derivatives of the conjugate down-
+type quark singlet of the `i`-th generation.
+-/
+noncomputable def conjDownSingletField (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3))
+    : Module.Dual ℂ (ConjModule DownSinglet) →ₗ[ℂ] CovJetAlgebra :=
   AlgebraRealization.id.corestrict (AlgebraRealization.id.covDerivBarD i l)
     (AlgebraRealization.id.covDerivBarD_mem_covAlgebra i l)
 
 @[simp]
-lemma coe_conjDownSingletField (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3))
-    (φ : Module.Dual ℂ (ConjModule DownSinglet)) :
-    (conjDownSingletField i l φ : JetAlgebra) = AlgebraRealization.id.covDerivBarD i l φ := rfl
+lemma coe_conjDownSingletField
+    (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3)) (φ : Module.Dual ℂ (ConjModule DownSinglet))
+    : (conjDownSingletField i l φ : JetAlgebra) = AlgebraRealization.id.covDerivBarD i l φ :=
+  rfl
 
-/-- In the covariant jet algebra, the tower of covariant derivatives of the up-type quark
-  singlet of the `i`-th generation. -/
-noncomputable def upSingletField (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3)) :
-    Module.Dual ℂ UpSinglet →ₗ[ℂ] CovJetAlgebra :=
+/--
+In the covariant jet algebra, the tower of covariant derivatives of the up-type quark
+singlet of the `i`-th generation.
+-/
+noncomputable def upSingletField (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3))
+    : Module.Dual ℂ UpSinglet →ₗ[ℂ] CovJetAlgebra :=
   AlgebraRealization.id.corestrict (AlgebraRealization.id.covDerivU i l)
     (AlgebraRealization.id.covDerivU_mem_covAlgebra i l)
 
 @[simp]
-lemma coe_upSingletField (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3))
-    (φ : Module.Dual ℂ UpSinglet) :
-    (upSingletField i l φ : JetAlgebra) = AlgebraRealization.id.covDerivU i l φ := rfl
+lemma coe_upSingletField
+    (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3)) (φ : Module.Dual ℂ UpSinglet)
+    : (upSingletField i l φ : JetAlgebra) = AlgebraRealization.id.covDerivU i l φ :=
+  rfl
 
-/-- In the covariant jet algebra, the tower of covariant derivatives of the conjugate up-type
-  quark singlet of the `i`-th generation. -/
-noncomputable def conjUpSingletField (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3)) :
-    Module.Dual ℂ (ConjModule UpSinglet) →ₗ[ℂ] CovJetAlgebra :=
+/--
+In the covariant jet algebra, the tower of covariant derivatives of the conjugate up-type
+quark singlet of the `i`-th generation.
+-/
+noncomputable def conjUpSingletField (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3))
+    : Module.Dual ℂ (ConjModule UpSinglet) →ₗ[ℂ] CovJetAlgebra :=
   AlgebraRealization.id.corestrict (AlgebraRealization.id.covDerivBarU i l)
     (AlgebraRealization.id.covDerivBarU_mem_covAlgebra i l)
 
 @[simp]
-lemma coe_conjUpSingletField (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3))
-    (φ : Module.Dual ℂ (ConjModule UpSinglet)) :
-    (conjUpSingletField i l φ : JetAlgebra) = AlgebraRealization.id.covDerivBarU i l φ := rfl
+lemma coe_conjUpSingletField
+    (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3)) (φ : Module.Dual ℂ (ConjModule UpSinglet))
+    : (conjUpSingletField i l φ : JetAlgebra) = AlgebraRealization.id.covDerivBarU i l φ :=
+  rfl
 
-/-- In the covariant jet algebra, the tower of covariant derivatives of the quark doublet of
-  the `i`-th generation. -/
-noncomputable def quarkDoubletField (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3)) :
-    Module.Dual ℂ QuarkDoublet →ₗ[ℂ] CovJetAlgebra :=
+/--
+In the covariant jet algebra, the tower of covariant derivatives of the quark doublet of
+the `i`-th generation.
+-/
+noncomputable def quarkDoubletField (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3))
+    : Module.Dual ℂ QuarkDoublet →ₗ[ℂ] CovJetAlgebra :=
   AlgebraRealization.id.corestrict (AlgebraRealization.id.covDerivQ i l)
     (AlgebraRealization.id.covDerivQ_mem_covAlgebra i l)
 
 @[simp]
-lemma coe_quarkDoubletField (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3))
-    (φ : Module.Dual ℂ QuarkDoublet) :
-    (quarkDoubletField i l φ : JetAlgebra) = AlgebraRealization.id.covDerivQ i l φ := rfl
+lemma coe_quarkDoubletField
+    (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3)) (φ : Module.Dual ℂ QuarkDoublet)
+    : (quarkDoubletField i l φ : JetAlgebra) = AlgebraRealization.id.covDerivQ i l φ :=
+  rfl
 
-/-- In the covariant jet algebra, the tower of covariant derivatives of the conjugate quark
-  doublet of the `i`-th generation. -/
-noncomputable def conjQuarkDoubletField (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3)) :
-    Module.Dual ℂ (ConjModule QuarkDoublet) →ₗ[ℂ] CovJetAlgebra :=
+/--
+In the covariant jet algebra, the tower of covariant derivatives of the conjugate quark
+doublet of the `i`-th generation.
+-/
+noncomputable def conjQuarkDoubletField (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3))
+    : Module.Dual ℂ (ConjModule QuarkDoublet) →ₗ[ℂ] CovJetAlgebra :=
   AlgebraRealization.id.corestrict (AlgebraRealization.id.covDerivBarQ i l)
     (AlgebraRealization.id.covDerivBarQ_mem_covAlgebra i l)
 
 @[simp]
-lemma coe_conjQuarkDoubletField (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3))
-    (φ : Module.Dual ℂ (ConjModule QuarkDoublet)) :
-    (conjQuarkDoubletField i l φ : JetAlgebra) = AlgebraRealization.id.covDerivBarQ i l φ := rfl
+lemma coe_conjQuarkDoubletField
+    (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3)) (φ : Module.Dual ℂ (ConjModule QuarkDoublet))
+    : (conjQuarkDoubletField i l φ : JetAlgebra) = AlgebraRealization.id.covDerivBarQ i l φ :=
+  rfl
 
-/-- In the covariant jet algebra, the tower of covariant derivatives of the lepton doublet of
-  the `i`-th generation. -/
-noncomputable def leptonDoubletField (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3)) :
-    Module.Dual ℂ LeptonDoubletV →ₗ[ℂ] CovJetAlgebra :=
+/--
+In the covariant jet algebra, the tower of covariant derivatives of the lepton doublet of
+the `i`-th generation.
+-/
+noncomputable def leptonDoubletField (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3))
+    : Module.Dual ℂ LeptonDoubletV →ₗ[ℂ] CovJetAlgebra :=
   AlgebraRealization.id.corestrict (AlgebraRealization.id.covDerivL i l)
     (AlgebraRealization.id.covDerivL_mem_covAlgebra i l)
 
-lemma coe_leptonDoubletField (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3))
-    (φ : Module.Dual ℂ LeptonDoubletV) :
-    (leptonDoubletField i l φ : JetAlgebra) = AlgebraRealization.id.covDerivL i l φ := rfl
+lemma coe_leptonDoubletField
+    (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3)) (φ : Module.Dual ℂ LeptonDoubletV)
+    : (leptonDoubletField i l φ : JetAlgebra) = AlgebraRealization.id.covDerivL i l φ :=
+  rfl
 
-/-- In the covariant jet algebra, the tower of covariant derivatives of the conjugate lepton
-  doublet of the `i`-th generation. -/
-noncomputable def conjLeptonDoubletField (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3)) :
-    Module.Dual ℂ (ConjModule LeptonDoubletV) →ₗ[ℂ] CovJetAlgebra :=
+/--
+In the covariant jet algebra, the tower of covariant derivatives of the conjugate lepton
+doublet of the `i`-th generation.
+-/
+noncomputable def conjLeptonDoubletField (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3))
+    : Module.Dual ℂ (ConjModule LeptonDoubletV) →ₗ[ℂ] CovJetAlgebra :=
   AlgebraRealization.id.corestrict (AlgebraRealization.id.covDerivBarL i l)
     (AlgebraRealization.id.covDerivBarL_mem_covAlgebra i l)
 
-lemma coe_conjLeptonDoubletField (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3))
-    (φ : Module.Dual ℂ (ConjModule LeptonDoubletV)) :
-    (conjLeptonDoubletField i l φ : JetAlgebra) = AlgebraRealization.id.covDerivBarL i l φ := rfl
+lemma coe_conjLeptonDoubletField
+    (i : Fin 3)
+    {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3))
+    (φ : Module.Dual ℂ (ConjModule LeptonDoubletV))
+    : (conjLeptonDoubletField i l φ : JetAlgebra) = AlgebraRealization.id.covDerivBarL i l φ :=
+  rfl
 
-/-- In the covariant jet algebra, the tower of covariant derivatives of the charged-lepton
-  singlet of the `i`-th generation. -/
-noncomputable def leptonSingletField (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3)) :
-    Module.Dual ℂ LeptonSinglet →ₗ[ℂ] CovJetAlgebra :=
+/--
+In the covariant jet algebra, the tower of covariant derivatives of the charged-lepton
+singlet of the `i`-th generation.
+-/
+noncomputable def leptonSingletField (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3))
+    : Module.Dual ℂ LeptonSinglet →ₗ[ℂ] CovJetAlgebra :=
   AlgebraRealization.id.corestrict (AlgebraRealization.id.covDerivE i l)
     (AlgebraRealization.id.covDerivE_mem_covAlgebra i l)
 
 @[simp]
-lemma coe_leptonSingletField (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3))
-    (φ : Module.Dual ℂ LeptonSinglet) :
-    (leptonSingletField i l φ : JetAlgebra) = AlgebraRealization.id.covDerivE i l φ := rfl
+lemma coe_leptonSingletField
+    (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3)) (φ : Module.Dual ℂ LeptonSinglet)
+    : (leptonSingletField i l φ : JetAlgebra) = AlgebraRealization.id.covDerivE i l φ :=
+  rfl
 
-/-- In the covariant jet algebra, the tower of covariant derivatives of the conjugate charged-
-  lepton singlet of the `i`-th generation. -/
-noncomputable def conjLeptonSingletField (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3)) :
-    Module.Dual ℂ (ConjModule LeptonSinglet) →ₗ[ℂ] CovJetAlgebra :=
+/--
+In the covariant jet algebra, the tower of covariant derivatives of the conjugate charged-
+lepton singlet of the `i`-th generation.
+-/
+noncomputable def conjLeptonSingletField (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3))
+    : Module.Dual ℂ (ConjModule LeptonSinglet) →ₗ[ℂ] CovJetAlgebra :=
   AlgebraRealization.id.corestrict (AlgebraRealization.id.covDerivBarE i l)
     (AlgebraRealization.id.covDerivBarE_mem_covAlgebra i l)
 
 @[simp]
-lemma coe_conjLeptonSingletField (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3))
-    (φ : Module.Dual ℂ (ConjModule LeptonSinglet)) :
-    (conjLeptonSingletField i l φ : JetAlgebra) = AlgebraRealization.id.covDerivBarE i l φ := rfl
+lemma coe_conjLeptonSingletField
+    (i : Fin 3) {n : ℕ} (l : Fin n → (Fin 1 ⊕ Fin 3)) (φ : Module.Dual ℂ (ConjModule LeptonSinglet))
+    : (conjLeptonSingletField i l φ : JetAlgebra) = AlgebraRealization.id.covDerivBarE i l φ :=
+  rfl
 
 /-!
 
@@ -758,39 +852,43 @@ be pushed through.
 -/
 
 /-- The global gauge action on the covariant jet algebra is multiplicative. -/
-lemma repGaugeGroupI_mul (g : GaugeGroupI) (x y : CovJetAlgebra) :
-    repGaugeGroupI g (x * y) = repGaugeGroupI g x * repGaugeGroupI g y :=
+lemma repGaugeGroupI_mul (g : GaugeGroupI) (x y : CovJetAlgebra)
+    : repGaugeGroupI g (x * y) = repGaugeGroupI g x * repGaugeGroupI g y :=
   Subtype.ext (AlgebraRealization.id.repGlobal_mul g (x : JetAlgebra) (y : JetAlgebra))
 
 /-- The Lorentz action on the covariant jet algebra is multiplicative. -/
-lemma repLorentzGroup_mul (Λ : SL(2,ℂ)) (x y : CovJetAlgebra) :
-    repLorentzGroup Λ (x * y) = repLorentzGroup Λ x * repLorentzGroup Λ y :=
+lemma repLorentzGroup_mul (Λ : SL(2,ℂ)) (x y : CovJetAlgebra)
+    : repLorentzGroup Λ (x * y) = repLorentzGroup Λ x * repLorentzGroup Λ y :=
   Subtype.ext (JetAlgebra.repLorentzGroup_apply_mul Λ (x : JetAlgebra) (y : JetAlgebra))
 
-/-- A mass-weight eigenvalue equation of the jet algebra, for an element of the covariant jet
-  algebra, is a mass-weight eigenvalue equation there. -/
-lemma massWeightPoly_eq_monomial {n : ℕ} {x : CovJetAlgebra}
-    (hx : JetAlgebra.massWeightPoly (x : JetAlgebra)
-      = Polynomial.monomial n (x : JetAlgebra)) :
-    massWeightPoly x = Polynomial.monomial n x :=
+/--
+A mass-weight eigenvalue equation of the jet algebra, for an element of the covariant jet
+algebra, is a mass-weight eigenvalue equation there.
+-/
+lemma massWeightPoly_eq_monomial
+    {n : ℕ} {x : CovJetAlgebra}
+    (hx : JetAlgebra.massWeightPoly (x : JetAlgebra) = Polynomial.monomial n (x : JetAlgebra))
+    : massWeightPoly x = Polynomial.monomial n x :=
   (AlgebraRealization.id.covMassWeightPoly_eq_monomial_iff x).mpr hx
 
-/-- A Lorentz law of the jet algebra, for a family valued in the covariant jet algebra, is a
-  Lorentz law there: the coercion is additive and commutes with scalar multiplication. -/
-lemma isLorentzCovDerivTransforms_of {V : Type} [AddCommGroup V] [Module ℂ V]
-    {rep : Representation ℂ SL(2,ℂ) V}
+/--
+A Lorentz law of the jet algebra, for a family valued in the covariant jet algebra, is a
+Lorentz law there: the coercion is additive and commutes with scalar multiplication.
+-/
+lemma isLorentzCovDerivTransforms_of
+    {V : Type} [AddCommGroup V] [Module ℂ V]
+    {rep : Representation ℂ (SL(2,ℂ)) V}
     {G : {n : ℕ} → (Fin n → (Fin 1 ⊕ Fin 3)) → Module.Dual ℂ V →ₗ[ℂ] CovJetAlgebra}
     (hG : ∀ (Λ : SL(2,ℂ)) (n : ℕ) (l : Fin n → (Fin 1 ⊕ Fin 3)) (φ : Module.Dual ℂ V),
-      JetAlgebra.repLorentzGroup Λ ((G l φ : CovJetAlgebra) : JetAlgebra) =
-        ∑ p : Fin n → (Fin 1 ⊕ Fin 3),
-          (∏ i, (((SL2C.toLorentzGroup Λ).1 (p i) (l i) : ℝ) : ℂ)) •
-            ((G p (rep.dual Λ φ) : CovJetAlgebra) : JetAlgebra)) :
-    IsLorentzCovDerivTransforms repLorentzGroup rep G := fun Λ n l φ =>
+      JetAlgebra.repLorentzGroup Λ ((G l φ : CovJetAlgebra) : JetAlgebra)
+        = ∑ p : Fin n → (Fin 1 ⊕ Fin 3),
+            (∏ i, (((SL2C.toLorentzGroup Λ).1 (p i) (l i) : ℝ) : ℂ)) •
+              ((G p (rep.dual Λ φ) : CovJetAlgebra) : JetAlgebra))
+    : IsLorentzCovDerivTransforms repLorentzGroup rep G := fun Λ n l φ =>
   Subtype.ext <| by
     simp only [AlgebraRealization.coe_covRepLorentz, AddSubmonoidClass.coe_finsetSum,
       SetLike.val_smul]
     exact hG Λ n l φ
-
 
 end CovJetAlgebra
 

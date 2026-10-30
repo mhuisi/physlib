@@ -57,11 +57,13 @@ from the `CommRing` `crossToEnd`/`crossToSlot` algebra.
 
 namespace TensorSpecies
 
-variable {k : Type} [RCLike k] {C : Type} {G : Type} [Group G]
-    {V : C → Type} [∀ c, AddCommGroup (V c)] [∀ c, Module k (V c)]
-    {basisIdx : C → Type} [∀ c, Fintype (basisIdx c)] [∀ c, DecidableEq (basisIdx c)]
-    {rep : (c : C) → Representation k G (V c)} {b : (c : C) → Module.Basis (basisIdx c) k (V c)}
-    {S : TensorSpecies k C G V basisIdx rep b}
+variable
+  {k : Type} [RCLike k]
+  {C : Type} {G : Type} [Group G]
+  {V : C → Type} [∀ c, AddCommGroup (V c)] [∀ c, Module k (V c)]
+  {basisIdx : C → Type} [∀ c, Fintype (basisIdx c)] [∀ c, DecidableEq (basisIdx c)]
+  {rep : (c : C) → Representation k G (V c)} {b : (c : C) → Module.Basis (basisIdx c) k (V c)}
+  {S : TensorSpecies k C G V basisIdx rep b}
 attribute [-simp] LinearEquiv.cast_apply
 
 namespace Tensor
@@ -76,42 +78,51 @@ survivor tail by `move_last`.
 -/
 
 set_option backward.isDefEq.respectTransparency false in
-/-- Cross-contracting the last slot of the product `E ⊗ B` (with `B` rank one) against the unit
-  tensor for that slot's color returns `E ⊗ B` unchanged, the contracted slot carried to the end.
-  The rank-one spectator case that seeds `crossToEnd_unitTensor_slot`. -/
-private lemma crossToEnd_prodT_unitTensor {nV : ℕ} {cE : Fin nV → C} {cB : C}
-    (E : Tensor S cE) (B : Tensor S ![cB]) :
-    crossToEnd (Fin.last nV) (0 : Fin 2)
-        (by rw [show (Fin.last nV : Fin (nV + 1)) = Fin.natAdd nV 0 from Fin.ext (by simp)]; simp :
-          S.τ ((Fin.append cE ![cB]) (Fin.last nV)) = ![S.τ cB, cB] 0)
-        (prodT E B) (unitTensor cB) =
-      permT id (IsReindexing.on_id.mpr (fun i => by
-        refine Fin.addCases (fun j => ?_) (fun j => ?_) i
-        · simp only [Fin.append_left, Function.comp_apply, Fin.succAbove_last]
-          exact (Fin.append_left cE ![cB] j).symm
-        · simp only [Fin.append_right, Function.comp_apply, Fin.succAbove_zero]
-          fin_cases j
-          rfl)) (prodT E B) := by
+/--
+Cross-contracting the last slot of the product `E ⊗ B` (with `B` rank one) against the unit
+tensor for that slot's color returns `E ⊗ B` unchanged, the contracted slot carried to the end.
+The rank-one spectator case that seeds `crossToEnd_unitTensor_slot`.
+-/
+private lemma crossToEnd_prodT_unitTensor
+    {nV : ℕ} {cE : Fin nV → C} {cB : C} (E : Tensor S cE) (B : Tensor S ![cB])
+    : crossToEnd (Fin.last nV) (0 : Fin 2)
+        (by rw [show (Fin.last nV : Fin (nV + 1)) = Fin.natAdd nV 0 from Fin.ext (by simp)]; simp
+          : S.τ ((Fin.append cE ![cB]) (Fin.last nV)) = ![S.τ cB, cB] 0)
+        (prodT E B) (unitTensor cB)
+      = permT id
+        (IsReindexing.on_id.mpr (fun i => by
+          refine Fin.addCases (fun j => ?_) (fun j => ?_) i
+          · simp only [Fin.append_left, Function.comp_apply, Fin.succAbove_last]
+            exact (Fin.append_left cE (![cB]) j).symm
+          · simp only [Fin.append_right, Function.comp_apply, Fin.succAbove_zero]
+            fin_cases j
+            rfl))
+        (prodT E B) := by
   simp only [crossToEnd, LinearMap.compr₂_apply, LinearMap.comp_apply]
   rw [contrT_congr (n := nV + 1) (⟨nV, by omega⟩ : Fin (nV + 1 + 1 + 1))
-      (⟨nV + 1, by omega⟩ : Fin (nV + 1 + 1 + 1)) _ (Fin.ext (by simp)) (Fin.ext (by simp))]
+    (⟨nV + 1, by omega⟩ : Fin (nV + 1 + 1 + 1)) _ (Fin.ext (by simp)) (Fin.ext (by simp))]
   rw [prodT_assoc E B (unitTensor cB)]
   simp only [permT_permT]
   rw [contrT_permT]
   simp only [Fin.cast_eq_self, Function.comp_apply]
-  have hij : (0 : Fin 3) ≠ (1 : Fin 3) ∧
-      S.τ (Fin.append ![cB] ![S.τ cB, cB] 0) = Fin.append ![cB] ![S.τ cB, cB] 1 :=
+  have hij
+      : (0 : Fin 3) ≠ (1 : Fin 3)
+        ∧ S.τ (Fin.append (![cB]) (![S.τ cB, cB]) 0) = Fin.append (![cB]) (![S.τ cB, cB]) 1 :=
     ⟨by decide, by rfl⟩
-  have key : (contrT (nV + 1) (⟨nV, by omega⟩ : Fin (nV + 1 + 1 + 1)) ⟨nV + 1, by omega⟩
-        (by refine ⟨by simp [Fin.ext_iff], ?_⟩
-            rw [show (⟨nV, by omega⟩ : Fin (nV + 1 + 1 + 1))
-                    = Fin.natAdd nV (0 : Fin 3) from Fin.ext (by simp),
-                show (⟨nV + 1, by omega⟩ : Fin (nV + 1 + 1 + 1))
-                    = Fin.natAdd nV (1 : Fin 3) from Fin.ext (by simp)]
-            rw [Fin.append_right, Fin.append_right]; exact hij.2)
-        (prodT E (prodT B (unitTensor cB)))) =
-      (permT id (IsReindexing.on_id_symm (IsReindexing.append_succSuccAbove_natAdd (0:Fin 3) 1)))
-        (prodT E (contrT 1 0 1 hij (prodT B (unitTensor cB)))) :=
+  have key
+      : (contrT (nV + 1) (⟨nV, by omega⟩ : Fin (nV + 1 + 1 + 1)) ⟨nV + 1, by omega⟩
+          (by
+            refine ⟨by simp [Fin.ext_iff], ?_⟩
+            rw [show (⟨nV, by omega⟩ : Fin (nV + 1 + 1 + 1)) = Fin.natAdd nV (0 : Fin 3) from
+                Fin.ext (by simp),
+              show (⟨nV + 1, by omega⟩ : Fin (nV + 1 + 1 + 1)) = Fin.natAdd nV (1 : Fin 3) from
+                Fin.ext (by simp)]
+            rw [Fin.append_right, Fin.append_right]
+            exact hij.2)
+          (prodT E (prodT B (unitTensor cB))))
+        = (permT id
+            (IsReindexing.on_id_symm (IsReindexing.append_succSuccAbove_natAdd (0 : Fin 3) 1)))
+          (prodT E (contrT 1 0 1 hij (prodT B (unitTensor cB)))) :=
     contrT_prodT_snd (0 : Fin 3) 1 hij (prodT B (unitTensor cB)) E
   rw [contrT_single_unitTensor] at key
   -- The `contrT_congr` pinning leaves slot proofs that match `key`'s only at `instances`
@@ -123,30 +134,38 @@ private lemma crossToEnd_prodT_unitTensor {nV : ℕ} {cE : Fin nV → C} {cB : C
   · funext i
     simp only [Function.comp_apply, id_eq, Fin.funPredPredAbove]
     apply Fin.ext
-    simp only [Nat.succ_eq_add_one, Nat.reduceAdd, CompTriple.comp_eq,
-      Fin.cast_eq_self, Fin.predPredAbove_succSuccAbove]
+    simp only [Nat.succ_eq_add_one, Nat.reduceAdd, CompTriple.comp_eq, Fin.cast_eq_self,
+      Fin.predPredAbove_succSuccAbove]
     refine Fin.addCases (fun j => ?_) (fun j => ?_) i <;> simp [Fin.append_left, Fin.append_right]
   · rfl
 
 set_option backward.isDefEq.respectTransparency false in
-/-- The boundary case of `crossToEnd_unitTensor`, proved by spectator decomposition along the last
-  slot (`eq_sum_evalT`). The last slot is threaded as a variable `i` with `hilast : i = last nA` so
-  that `crossToEnd_unitTensor` can apply it at the image of `i` under its transposition without a
-  dependent rewrite of the slot index. -/
-private lemma crossToEnd_unitTensor_slot {nA : ℕ} {cA : Fin (nA + 1) → C} {c : C}
-    {i : Fin (nA + 1)} (hilast : i = Fin.last nA) (hc : cA i = c) (t1 : Tensor S cA) :
-    crossToEnd i (0 : Fin 2) (by simp [hc] : S.τ (cA i) = ![S.τ c, c] 0) t1 (unitTensor c) =
-      permT (Fin.append i.succAbove (fun _ : Fin 1 => i)) (IsReindexing.move_last i hc) t1 := by
+/--
+The boundary case of `crossToEnd_unitTensor`, proved by spectator decomposition along the last
+slot (`eq_sum_evalT`). The last slot is threaded as a variable `i` with `hilast : i = last nA` so
+that `crossToEnd_unitTensor` can apply it at the image of `i` under its transposition without a
+dependent rewrite of the slot index.
+-/
+private lemma crossToEnd_unitTensor_slot
+    {nA : ℕ} {cA : Fin (nA + 1) → C} {c : C} {i : Fin (nA + 1)}
+    (hilast : i = Fin.last nA) (hc : cA i = c) (t1 : Tensor S cA)
+    : crossToEnd i (0 : Fin 2) (by simp [hc] : S.τ (cA i) = ![S.τ c, c] 0) t1 (unitTensor c)
+      = permT (Fin.append i.succAbove (fun _ : Fin 1 => i)) (IsReindexing.move_last i hc) t1 := by
   subst hilast
   subst hc
   rw [eq_sum_evalT t1, map_sum, LinearMap.sum_apply, map_sum]
   refine Finset.sum_congr rfl (fun i _ => ?_)
   change crossToEnd (Fin.last nA) 0 _
-    (permT (fun x => x) _
-      (prodT (evalT (Fin.last nA) i t1)
-        (basis ![cA (Fin.last nA)] (ComponentIdx.single.symm i))))
-    (unitTensor (S := S) (cA (Fin.last nA))) = _
-  rw [crossToEnd_permT_left (Fin.last nA) 0 (fun x => x) (fun x => x)
+      (permT
+        (fun x => x)
+        _
+        (prodT (evalT (Fin.last nA) i t1)
+          (basis (![cA (Fin.last nA)]) (ComponentIdx.single.symm i))))
+      (unitTensor (S := S) (cA (Fin.last nA)))
+    = _
+  rw [crossToEnd_permT_left (Fin.last nA) 0
+    (fun x => x)
+    (fun x => x)
     (IsReindexing.append_succ_last cA) (by rfl)]
   rw [crossToEnd_prodT_unitTensor]
   simp only [permT_permT]
@@ -157,32 +176,35 @@ private lemma crossToEnd_unitTensor_slot {nA : ℕ} {cA : Fin (nA + 1) → C} {c
   · simp only [Fin.append_right, Function.comp_apply]
     exact Fin.ext (by simp)
 
-/-- Contracting slot `i` of `t1` against the unit tensor for that slot's color returns `t1`, the
-  contracted slot relabelled by `move_last i`. The unit tensor acts as an identity for `crossToEnd`
-  at any named slot. -/
-lemma crossToEnd_unitTensor {nA : ℕ} {cA : Fin (nA + 1) → C} {c : C}
-    (i : Fin (nA + 1)) (hc : cA i = c) (t1 : Tensor S cA) :
-    crossToEnd i (0 : Fin 2) (by simp [hc] : S.τ (cA i) = ![S.τ c, c] 0) t1 (unitTensor c) =
-      permT (Fin.append i.succAbove (fun _ : Fin 1 => i)) (IsReindexing.move_last i hc) t1 := by
+/--
+Contracting slot `i` of `t1` against the unit tensor for that slot's color returns `t1`, the
+contracted slot relabelled by `move_last i`. The unit tensor acts as an identity for `crossToEnd`
+at any named slot.
+-/
+lemma crossToEnd_unitTensor
+    {nA : ℕ} {cA : Fin (nA + 1) → C} {c : C} (i : Fin (nA + 1)) (hc : cA i = c) (t1 : Tensor S cA)
+    : crossToEnd i (0 : Fin 2) (by simp [hc] : S.τ (cA i) = ![S.τ c, c] 0) t1 (unitTensor c)
+      = permT (Fin.append i.succAbove (fun _ : Fin 1 => i)) (IsReindexing.move_last i hc) t1 := by
   set τ : Fin (nA + 1) → Fin (nA + 1) := ⇑(Equiv.swap i (Fin.last nA)) with hτdef
   have hτbij : Function.Bijective τ := (Equiv.swap i (Fin.last nA)).bijective
   have hτi : τ i = Fin.last nA := Equiv.swap_apply_left i (Fin.last nA)
   have hself : ∀ x, τ (τ x) = x := fun x => Equiv.swap_apply_self i (Fin.last nA) x
   -- `τ` is injective, so it restricts to the survivors of `i`: some `τ'` fills the square
   -- `(τ i).succAbove ∘ τ' = τ ∘ i.succAbove`.
-  obtain ⟨τ', hτ'⟩ : ∃ τ' : Fin nA → Fin nA, (τ i).succAbove ∘ τ' = τ ∘ i.succAbove :=
-    ⟨fun a => (Fin.exists_succAbove_eq (hτbij.1.ne (Fin.succAbove_ne i a))).choose,
-      funext fun a => (Fin.exists_succAbove_eq (hτbij.1.ne (Fin.succAbove_ne i a))).choose_spec⟩
+  obtain ⟨τ', hτ'⟩ : ∃ τ' : Fin nA → Fin nA, (τ i).succAbove ∘ τ' = τ ∘ i.succAbove := ⟨
+    fun a => (Fin.exists_succAbove_eq (hτbij.1.ne (Fin.succAbove_ne i a))).choose,
+    funext fun a => (Fin.exists_succAbove_eq (hτbij.1.ne (Fin.succAbove_ne i a))).choose_spec
+  ⟩
   have hre2 : IsReindexing cA (cA ∘ τ) τ := Tensor.IsReindexing.swap i (Fin.last nA)
   have hre : IsReindexing (cA ∘ τ) cA τ :=
     ⟨hτbij, fun x => by simp only [Function.comp_apply, hself]⟩
   have ht1 : permT τ hre (permT τ hre2 t1) = t1 := by
     rw [permT_permT]; exact permT_congr_eq_id _ _ _ (funext hself)
   conv_lhs => rw [← ht1]
-  rw [crossToEnd_permT_left i (0 : Fin 2) τ τ' hre hτ' _
-      (permT τ hre2 t1) (unitTensor c),
+  rw [crossToEnd_permT_left i (0 : Fin 2) τ τ' hre hτ' _ (permT τ hre2 t1) (unitTensor c),
     crossToEnd_unitTensor_slot hτi (by simp only [Function.comp_apply, hself]; exact hc)
-      (permT τ hre2 t1), permT_permT, permT_permT]
+      (permT τ hre2 t1),
+    permT_permT, permT_permT]
   refine permT_congr (funext fun x => ?_) rfl
   refine Fin.addCases (fun a => ?_) (fun a => ?_) x
   · simp only [Function.comp_apply, Fin.append_left]
@@ -198,44 +220,51 @@ back `t`. The metric and its inverse are such a pair.
 
 -/
 
-/-- If `M₁_{μν} M₂^{νρ} = δ_μ^ρ`, contracting slot `i` of `t` with `M₁` and then with `M₂` gives
-  back `t` with that slot moved to the end, because `crossToEnd` places the surviving index last.
-  The last slot is a variable `j` with `hj : j = last nA`, so the lemma also applies where `j` is
-  last only up to an equality. -/
-lemma crossToEnd_round_trip_of_unit_slot {nA : ℕ} {c : Fin (nA + 1) → C} {d : C}
-    (i j : Fin (nA + 1)) (hj : j = Fin.last nA)
+/--
+If `M₁_{μν} M₂^{νρ} = δ_μ^ρ`, contracting slot `i` of `t` with `M₁` and then with `M₂` gives
+back `t` with that slot moved to the end, because `crossToEnd` places the surviving index last.
+The last slot is a variable `j` with `hj : j = last nA`, so the lemma also applies where `j` is
+last only up to an equality.
+-/
+lemma crossToEnd_round_trip_of_unit_slot
+    {nA : ℕ} {c : Fin (nA + 1) → C} {d : C} (i j : Fin (nA + 1)) (hj : j = Fin.last nA)
     (M₁ : Tensor S ![S.τ (c i), d]) (M₂ : Tensor S ![S.τ d, c i])
-    (hM : contractInnerT rfl M₁ M₂ =
-      permT (id : Fin 2 → Fin 2) (IsReindexing.unitTensor_of_tau_eq rfl)
+    (hM : contractInnerT rfl M₁ M₂
+      = permT (id : Fin 2 → Fin 2) (IsReindexing.unitTensor_of_tau_eq rfl)
         (unitTensor (S := S) (c i)))
-    (t : Tensor S c) :
-    crossToEnd j (0 : Fin 2)
-        (by subst hj
-            rw [show (Fin.last nA : Fin (nA + 1)) = Fin.natAdd nA (0 : Fin 1) from
-                  Fin.ext (by simp), Fin.append_right]; rfl)
-        (crossToEnd i (0 : Fin 2) rfl t M₁) M₂ =
-      permT (Fin.append i.succAbove (fun _ : Fin 1 => i))
+    (t : Tensor S c)
+    : crossToEnd j (0 : Fin 2)
         (by
           subst hj
-          exact ⟨by
-            rw [Fin.append_succAbove_const_eq_cycleIcc i]
-            exact (Fin.cycleIcc i (Fin.last nA)).bijective,
-          fun x => by
-            refine Fin.addCases (fun a => ?_) (fun a => ?_) x
-            · simp only [Function.comp_apply, Fin.append_left, Fin.succAbove_last,
-                show (Fin.castSucc a : Fin (nA + 1)) = Fin.castAdd 1 a from rfl]
-            · fin_cases a
-              simp [Fin.append_right, Fin.succAbove_zero]⟩)
+          rw [show (Fin.last nA : Fin (nA + 1)) = Fin.natAdd nA (0 : Fin 1) from Fin.ext (by simp),
+            Fin.append_right]
+          rfl)
+        (crossToEnd i (0 : Fin 2) rfl t M₁) M₂
+      = permT (Fin.append i.succAbove (fun _ : Fin 1 => i))
+        (by
+          subst hj
+          exact ⟨
+            by
+              rw [Fin.append_succAbove_const_eq_cycleIcc i]
+              exact (Fin.cycleIcc i (Fin.last nA)).bijective,
+            fun x => by
+              refine Fin.addCases (fun a => ?_) (fun a => ?_) x
+              · simp only [Function.comp_apply, Fin.append_left, Fin.succAbove_last,
+                  show (Fin.castSucc a : Fin (nA + 1)) = Fin.castAdd 1 a from rfl]
+              · fin_cases a
+                simp [Fin.append_right, Fin.succAbove_zero]
+          ⟩)
         t := by
   subst hj
-  have hM' : crossToEnd (Fin.last 1) (0 : Fin 2) rfl M₁ M₂ =
-      permT (id : Fin 2 → Fin 2) (IsReindexing.on_id.mpr fun j => by fin_cases j <;> rfl)
-        (unitTensor (S := S) (c i)) :=
+  have hM'
+      : crossToEnd (Fin.last 1) (0 : Fin 2) rfl M₁ M₂
+        = permT (id : Fin 2 → Fin 2) (IsReindexing.on_id.mpr fun j => by fin_cases j <;> rfl)
+          (unitTensor (S := S) (c i)) :=
     (crossToEnd_eq_permT_contractInnerT _ M₁ M₂).trans
       (by rw [hM]; exact (permT_permT ..).trans (permT_congr rfl rfl))
   rw [crossToEnd_assoc_rankTwo i rfl rfl t M₁ M₂, hM']
-  rw [crossToEnd_permT_right i (0 : Fin 2)
-    (id : Fin 2 → Fin 2) (fun x : Fin 1 => x)
+  rw [crossToEnd_permT_right i (0 : Fin 2) (id : Fin 2 → Fin 2)
+    (fun x : Fin 1 => x)
     (IsReindexing.on_id.mpr (fun i => by fin_cases i <;> rfl)) rfl]
   -- The `id`-spelled map leaves the contracted slot spelled `id 0`; reduce it so that `rw` can
   -- key on `crossToEnd_unitTensor`.
@@ -250,45 +279,49 @@ lemma crossToEnd_round_trip_of_unit_slot {nA : ℕ} {c : Fin (nA + 1) → C} {d 
   · rfl
 
 set_option backward.isDefEq.respectTransparency false in
-/-- Round trip for `crossToSlot` at an arbitrary slot, with the colors in their composite form.
-  The general-color statement `crossToSlot_raise_lower_round_trip` is obtained from this by
-  substituting its three color equalities. -/
-private lemma crossToSlot_round_trip_of_unit {nA : ℕ} {c : Fin (nA + 1) → C} {d : C}
-    (i : Fin (nA + 1))
-    (M₁ : Tensor S ![S.τ (c i), d]) (M₂ : Tensor S ![S.τ d, c i])
-    (hM : contractInnerT rfl M₁ M₂ =
-      permT (id : Fin 2 → Fin 2) (IsReindexing.unitTensor_of_tau_eq rfl)
+/--
+Round trip for `crossToSlot` at an arbitrary slot, with the colors in their composite form.
+The general-color statement `crossToSlot_raise_lower_round_trip` is obtained from this by
+substituting its three color equalities.
+-/
+private lemma crossToSlot_round_trip_of_unit
+    {nA : ℕ} {c : Fin (nA + 1) → C} {d : C}
+    (i : Fin (nA + 1)) (M₁ : Tensor S ![S.τ (c i), d]) (M₂ : Tensor S ![S.τ d, c i])
+    (hM : contractInnerT rfl M₁ M₂
+      = permT (id : Fin 2 → Fin 2) (IsReindexing.unitTensor_of_tau_eq rfl)
         (unitTensor (S := S) (c i)))
-    (t : Tensor S c) :
-    crossToSlot (S := S) i (0 : Fin 2)
+    (t : Tensor S c)
+    : crossToSlot (S := S) i (0 : Fin 2)
         (by rw [Function.update_self] : S.τ (Function.update c i d i) = S.τ d) M₂
-        (crossToSlot (S := S) i (0 : Fin 2) rfl M₁ t) =
-      permT (id : Fin (nA + 1) → Fin (nA + 1)) (IsReindexing.update_update_of_eq i rfl) t := by
+        (crossToSlot (S := S) i (0 : Fin 2) rfl M₁ t)
+      = permT (id : Fin (nA + 1) → Fin (nA + 1)) (IsReindexing.update_update_of_eq i rfl) t := by
   have hcycle : (⇑(Fin.cycleIcc i (Fin.last nA)).symm) i = Fin.last nA :=
     (Equiv.symm_apply_eq _).2 (Fin.cycleIcc_of_last (Fin.le_last i)).symm
   -- The inverse cycle carries a reinserted survivor `i.succAbove a` back to its position `a` in
   -- the survivor block.
-  have hcycle_succAbove : ∀ a : Fin nA,
-      (Fin.cycleIcc i (Fin.last nA)).symm (i.succAbove a) = Fin.castAdd 1 a := fun a =>
-    (Equiv.symm_apply_eq _).2
-      (by rw [← Fin.append_succAbove_const_eq_cycleIcc i, Fin.append_left])
+  have hcycle_succAbove
+      : ∀ a : Fin nA,
+        (Fin.cycleIcc i (Fin.last nA)).symm (i.succAbove a) = Fin.castAdd 1 a := fun a =>
+    (Equiv.symm_apply_eq _).2 (by rw [← Fin.append_succAbove_const_eq_cycleIcc i, Fin.append_left])
   rw [crossToSlot_eq_crossToEnd, crossToSlot_eq_crossToEnd]
   -- `crossToSlot`'s output color reduces to the clean one only at default transparency, so `rw`
   -- cannot key on the composite. Precompute the left commutator and `erw` it instead.
-  have hpl := crossToEnd_permT_left i (0 : Fin 2)
-    ⇑(Fin.cycleIcc i (Fin.last nA)).symm id (IsReindexing.crossToSlot_cycle i (0 : Fin 2))
-    (by
-      funext a
-      simp only [Function.comp_apply, id_eq]
-      rw [hcycle, hcycle_succAbove, Fin.succAbove_last]
-      rfl)
-    (show S.τ (Function.update c i d i) = ![S.τ d, c i] 0 by
-      rw [Function.update_self, Matrix.cons_val_zero])
-    (crossToEnd i (0 : Fin 2) rfl t M₁) M₂
+  have hpl :=
+    crossToEnd_permT_left i (0 : Fin 2) (⇑(Fin.cycleIcc i (Fin.last nA)).symm) id
+      (IsReindexing.crossToSlot_cycle i (0 : Fin 2))
+      (by
+        funext a
+        simp only [Function.comp_apply, id_eq]
+        rw [hcycle, hcycle_succAbove, Fin.succAbove_last]
+        rfl)
+      (show S.τ (Function.update c i d i) = ![S.τ d, c i] 0 by
+        rw [Function.update_self, Matrix.cons_val_zero])
+      (crossToEnd i (0 : Fin 2) rfl t M₁) M₂
   erw [hpl]
   erw [permT_permT]
-  rw [crossToEnd_round_trip_of_unit_slot i ((⇑(Fin.cycleIcc i (Fin.last nA)).symm) i)
-    hcycle M₁ M₂ hM t, permT_permT]
+  rw [crossToEnd_round_trip_of_unit_slot i ((⇑(Fin.cycleIcc i (Fin.last nA)).symm) i) hcycle M₁ M₂
+      hM t,
+    permT_permT]
   apply permT_congr
   · funext x
     simp only [Function.comp_id]
@@ -296,21 +329,23 @@ private lemma crossToSlot_round_trip_of_unit {nA : ℕ} {c : Fin (nA + 1) → C}
     simp [Function.comp_apply, Fin.append_succAbove_const_eq_cycleIcc]
   · rfl
 
-/-- If `M_{μν} M'^{νρ} = δ_μ^ρ`, contracting slot `i` of `t` with `M` and then with `M'` gives back
-  `t` in place, up to renaming the colour of slot `i`. The equalities `ha`, `hb` and `he` match
-  slot `i` with the indices of `M` and `M'`, so `M` and `M'` can have any colour lists. -/
-lemma crossToSlot_raise_lower_round_trip {nA : ℕ} {c : Fin (nA + 1) → C} {cs ds : Fin 2 → C}
-    (i : Fin (nA + 1)) (he : c i = ds 1) (ha : S.τ (c i) = cs 0) (hb : S.τ (cs 1) = ds 0)
-    (M : Tensor S cs) (M' : Tensor S ds)
-    (hM : contractInnerT hb M M' =
-      permT (id : Fin 2 → Fin 2)
+/--
+If `M_{μν} M'^{νρ} = δ_μ^ρ`, contracting slot `i` of `t` with `M` and then with `M'` gives back
+`t` in place, up to renaming the colour of slot `i`. The equalities `ha`, `hb` and `he` match
+slot `i` with the indices of `M` and `M'`, so `M` and `M'` can have any colour lists.
+-/
+lemma crossToSlot_raise_lower_round_trip
+    {nA : ℕ} {c : Fin (nA + 1) → C} {cs ds : Fin 2 → C} (i : Fin (nA + 1)) (he : c i = ds 1)
+    (ha : S.τ (c i) = cs 0) (hb : S.τ (cs 1) = ds 0) (M : Tensor S cs) (M' : Tensor S ds)
+    (hM : contractInnerT hb M M'
+      = permT (id : Fin 2 → Fin 2)
         (IsReindexing.unitTensor_of_tau_eq ((congrArg S.τ he.symm).trans ha))
         (unitTensor (S := S) (ds 1)))
-    (t : Tensor S c) :
-    crossToSlot (S := S) i (0 : Fin 2)
+    (t : Tensor S c)
+    : crossToSlot (S := S) i (0 : Fin 2)
         (by rw [Function.update_self]; exact hb : S.τ (Function.update c i (cs 1) i) = ds 0) M'
-        (crossToSlot (S := S) i (0 : Fin 2) ha M t) =
-      permT (id : Fin (nA + 1) → Fin (nA + 1)) (IsReindexing.update_update_of_eq i he) t := by
+        (crossToSlot (S := S) i (0 : Fin 2) ha M t)
+      = permT (id : Fin (nA + 1) → Fin (nA + 1)) (IsReindexing.update_update_of_eq i he) t := by
   obtain ⟨a, d, rfl⟩ : ∃ a d, cs = ![a, d] := ⟨cs 0, cs 1, by funext j; fin_cases j <;> rfl⟩
   obtain ⟨b, e, rfl⟩ : ∃ b e, ds = ![b, e] := ⟨ds 0, ds 1, by funext j; fin_cases j <;> rfl⟩
   change c i = e at he
@@ -334,22 +369,22 @@ the two indices of `M` are in bijection, as for a metric, the second law follows
 
 section RoundTripEquiv
 
-variable {nA : ℕ} {c : Fin (nA + 1) → C} {cs ds : Fin 2 → C} (i : Fin (nA + 1))
-    (he : c i = ds 1) (ha : S.τ (c i) = cs 0) (hb : S.τ (cs 1) = ds 0)
-    (M : Tensor S cs) (M' : Tensor S ds)
-    (hMM' : contractInnerT hb M M' =
-      permT (id : Fin 2 → Fin 2)
-        (IsReindexing.unitTensor_of_tau_eq ((congrArg S.τ he.symm).trans ha))
-        (unitTensor (S := S) (ds 1)))
-    (hM'M : contractInnerT ((congrArg S.τ he.symm).trans ha) M' M =
-      permT (id : Fin 2 → Fin 2) (IsReindexing.unitTensor_of_tau_eq hb)
-        (unitTensor (S := S) (cs 1)))
+variable
+  {nA : ℕ} {c : Fin (nA + 1) → C} {cs ds : Fin 2 → C} (i : Fin (nA + 1)) (he : c i = ds 1)
+  (ha : S.τ (c i) = cs 0) (hb : S.τ (cs 1) = ds 0) (M : Tensor S cs) (M' : Tensor S ds)
+  (hMM' : contractInnerT hb M M'
+    = permT (id : Fin 2 → Fin 2)
+      (IsReindexing.unitTensor_of_tau_eq ((congrArg S.τ he.symm).trans ha))
+      (unitTensor (S := S) (ds 1)))
+  (hM'M : contractInnerT ((congrArg S.τ he.symm).trans ha) M' M
+    = permT (id : Fin 2 → Fin 2) (IsReindexing.unitTensor_of_tau_eq hb)
+      (unitTensor (S := S) (cs 1)))
 
 set_option backward.isDefEq.respectTransparency false in
 include hMM' in
 /-- If `M_{μν} M'^{νρ} = δ_μ^ρ`, `crossToSlotInv` with `M'` undoes `crossToSlot` with `M`. -/
-lemma crossToSlotInv_crossToSlot (t : Tensor S c) :
-    crossToSlotInv i he hb M' (crossToSlot i (0 : Fin 2) ha M t) = t := by
+lemma crossToSlotInv_crossToSlot (t : Tensor S c)
+    : crossToSlotInv i he hb M' (crossToSlot i (0 : Fin 2) ha M t) = t := by
   simp only [crossToSlotInv, LinearMap.coe_comp, Function.comp_apply]
   -- Unfolding `crossToSlotInv` leaves the inner slot proof in a different form from the one in
   -- the round trip, so `rw` cannot key on it; `erw` matches.
@@ -357,17 +392,20 @@ lemma crossToSlotInv_crossToSlot (t : Tensor S c) :
   exact permT_congr_eq_id _ _ _ rfl
 
 include hMM' hM'M in
-/-- If also `M'^{νρ} M_{ρσ} = δ^ν_σ`, `crossToSlot` with `M` undoes `crossToSlotInv` with `M'`. The
-  second law makes `crossToSlotInv` injective, so its left inverse is also a right inverse. -/
-lemma crossToSlot_crossToSlotInv (t : Tensor S (Function.update c i (cs 1))) :
-    crossToSlot i (0 : Fin 2) ha M (crossToSlotInv i he hb M' t) = t := by
-  have hswap := crossToSlot_raise_lower_round_trip (S := S) (c := Function.update c i (cs 1)) i
-    (by simp : Function.update c i (cs 1) i = cs 1)
-    (by rw [Function.update_self]; exact hb : S.τ (Function.update c i (cs 1) i) = ds 0)
-    ((congrArg S.τ he.symm).trans ha) M' M hM'M
+/--
+If also `M'^{νρ} M_{ρσ} = δ^ν_σ`, `crossToSlot` with `M` undoes `crossToSlotInv` with `M'`. The
+second law makes `crossToSlotInv` injective, so its left inverse is also a right inverse.
+-/
+lemma crossToSlot_crossToSlotInv (t : Tensor S (Function.update c i (cs 1)))
+    : crossToSlot i (0 : Fin 2) ha M (crossToSlotInv i he hb M' t) = t := by
+  have hswap :=
+    crossToSlot_raise_lower_round_trip (S := S) (c := Function.update c i (cs 1)) i
+      (by simp : Function.update c i (cs 1) i = cs 1)
+      (by rw [Function.update_self]; exact hb : S.τ (Function.update c i (cs 1) i) = ds 0)
+      ((congrArg S.τ he.symm).trans ha) M' M hM'M
   have hgi : Function.Injective (crossToSlot (S := S) i (0 : Fin 2)
       (show S.τ (Function.update c i (cs 1) i) = ds 0 by rw [Function.update_self]; exact hb)
-        M') := by
+      M') := by
     intro x y hxy
     exact permT_injective _ (by rw [← hswap x, ← hswap y, hxy])
   have hinj : Function.Injective (crossToSlotInv (S := S) i he hb M') := by
@@ -376,10 +414,12 @@ lemma crossToSlot_crossToSlotInv (t : Tensor S (Function.update c i (cs 1))) :
   exact Function.LeftInverse.rightInverse_of_injective
     (crossToSlotInv_crossToSlot i he ha hb M M' hMM') hinj t
 
-/-- The linear equivalence `crossToSlot` with `M`, with inverse `crossToSlotInv` with `M'`, when
-  `M_{μν} M'^{νρ} = δ_μ^ρ` and `M'^{νρ} M_{ρσ} = δ^ν_σ`. Slot `i` has colour `c i` on one side and
-  the colour `cs 1` of the second index of `M` on the other. For the metric this lowers and raises
-  an index with `η_{μν}` and `η^{νρ}`. -/
+/--
+The linear equivalence `crossToSlot` with `M`, with inverse `crossToSlotInv` with `M'`, when
+`M_{μν} M'^{νρ} = δ_μ^ρ` and `M'^{νρ} M_{ρσ} = δ^ν_σ`. Slot `i` has colour `c i` on one side and
+the colour `cs 1` of the second index of `M` on the other. For the metric this lowers and raises
+an index with `η_{μν}` and `η^{νρ}`.
+-/
 noncomputable def crossToSlotEquiv : Tensor S c ≃ₗ[k] Tensor S (Function.update c i (cs 1)) :=
   LinearEquiv.mk (crossToSlot i (0 : Fin 2) ha M) (crossToSlotInv i he hb M').toFun
     (crossToSlotInv_crossToSlot i he ha hb M M' hMM')
@@ -394,30 +434,33 @@ end RoundTripEquiv
 -/
 
 open HasContrDualBases in
-/-- If the label sets of the two indices of `M` are in bijection, `M_{μν} M'^{νρ} = δ_μ^ρ` implies
+/--
+If the label sets of the two indices of `M` are in bijection, `M_{μν} M'^{νρ} = δ_μ^ρ` implies
 `M'^{νρ} M_{ρσ} = δ^ν_σ`. Without the bijection `e` this fails, since `A B = 1` does not imply
-`B A = 1` for rectangular matrices. -/
-lemma contractInnerT_eq_unitTensor_comm [HasContrDualBases S] {cs ds : Fin 2 → C}
-    (hb : S.τ (cs 1) = ds 0) (ha : S.τ (ds 1) = cs 0) (e : basisIdx (cs 0) ≃ basisIdx (cs 1))
-    (M : Tensor S cs) (M' : Tensor S ds)
-    (h : contractInnerT hb M M' =
-      permT id (IsReindexing.unitTensor_of_tau_eq ha) (unitTensor (S := S) (ds 1))) :
-    contractInnerT ha M' M =
-      permT id (IsReindexing.unitTensor_of_tau_eq hb) (unitTensor (S := S) (cs 1)) := by
+`B A = 1` for rectangular matrices.
+-/
+lemma contractInnerT_eq_unitTensor_comm
+    [HasContrDualBases S]
+    {cs ds : Fin 2 → C} (hb : S.τ (cs 1) = ds 0) (ha : S.τ (ds 1) = cs 0)
+    (e : basisIdx (cs 0) ≃ basisIdx (cs 1)) (M : Tensor S cs) (M' : Tensor S ds)
+    (h : contractInnerT hb M M'
+      = permT id (IsReindexing.unitTensor_of_tau_eq ha) (unitTensor (S := S) (ds 1)))
+    : contractInnerT ha M' M
+      = permT id (IsReindexing.unitTensor_of_tau_eq hb) (unitTensor (S := S) (cs 1)) := by
   apply toMatrix_injective
   have h := congrArg toMatrix h
   rw [toMatrix_contractInnerT, toMatrix_permT_unitTensor_of_tau_eq ha] at h
   rw [toMatrix_contractInnerT, toMatrix_permT_unitTensor_of_tau_eq hb]
   dsimp only [Matrix.cons_val_zero, Matrix.cons_val_one] at h ⊢
   have h1 := congrArg (fun A => A.submatrix (dualIdxEquiv ha) id) h
-  simp only [Matrix.submatrix_mul _ _ _ id _ Function.bijective_id,
-    Matrix.submatrix_id_id, Matrix.submatrix_submatrix, Equiv.symm_comp_self,
-    Function.comp_id] at h1
+  simp only [Matrix.submatrix_mul _ _ _ id _ Function.bijective_id, Matrix.submatrix_id_id,
+      Matrix.submatrix_submatrix, Equiv.symm_comp_self, Function.comp_id]
+    at h1
   have h2 := (Matrix.mul_eq_one_comm_of_equiv ((dualIdxEquiv ha).trans e)).1 h1
   apply Matrix.submatrix_injective (Equiv.surjective (dualIdxEquiv hb)) Function.surjective_id
-  simpa only [Matrix.submatrix_mul _ _ _ id _ Function.bijective_id,
-    Matrix.submatrix_id_id, Matrix.submatrix_submatrix, Equiv.symm_comp_self,
-    Function.comp_id] using h2
+  simpa only [Matrix.submatrix_mul _ _ _ id _ Function.bijective_id, Matrix.submatrix_id_id,
+      Matrix.submatrix_submatrix, Equiv.symm_comp_self, Function.comp_id]
+    using h2
 
 end Tensor
 

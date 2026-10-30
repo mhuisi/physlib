@@ -89,50 +89,62 @@ namespace TauCeti
 
 variable {M : Type*} [AddMonoid M] [StarAddMonoid M] {F G : M → ℂ}
 
-/-- A function `F : M → ℂ` on an involutive additive monoid is **positive definite** when, for
+/--
+A function `F : M → ℂ` on an involutive additive monoid is **positive definite** when, for
 every finite family of scalars `c : Fin n → ℂ` and points `v : Fin n → M`, the Hermitian form
 `∑_{i,j} c i · conj (c j) · F (v i + star (v j))` is a nonnegative real number (using the order on
-`ℂ` for which `0 ≤ z` means `z` is real and nonnegative). -/
-@[expose] def IsPositiveDefinite (F : M → ℂ) : Prop :=
-  ∀ (n : ℕ) (c : Fin n → ℂ) (v : Fin n → M),
-    0 ≤ ∑ i, ∑ j, c i * conj (c j) * F (v i + star (v j))
+`ℂ` for which `0 ≤ z` means `z` is real and nonnegative).
+-/
+@[expose]
+def IsPositiveDefinite (F : M → ℂ) : Prop :=
+  ∀ (n : ℕ) (c : Fin n → ℂ) (v : Fin n → M), 0 ≤ ∑ i, ∑ j, c i * conj (c j) * F (v i + star (v j))
 
 namespace IsPositiveDefinite
 
-/-- Positive-definiteness holds for an arbitrary finite index type, not just `Fin n`: for every
+/--
+Positive-definiteness holds for an arbitrary finite index type, not just `Fin n`: for every
 finite family of scalars `c : ι → ℂ` and points `v : ι → M`, the Hermitian form
-`∑_{i,j} c i · conj (c j) · F (v i + star (v j))` is a nonnegative real number. -/
-lemma sum_nonneg (hF : IsPositiveDefinite F) {ι : Type*} [Fintype ι] (c : ι → ℂ) (v : ι → M) :
-    0 ≤ ∑ i, ∑ j, c i * conj (c j) * F (v i + star (v j)) := by
+`∑_{i,j} c i · conj (c j) · F (v i + star (v j))` is a nonnegative real number.
+-/
+lemma sum_nonneg (hF : IsPositiveDefinite F) {ι : Type*} [Fintype ι] (c : ι → ℂ) (v : ι → M)
+    : 0 ≤ ∑ i, ∑ j, c i * conj (c j) * F (v i + star (v j)) := by
   classical
   let e : Fin (Fintype.card ι) ≃ ι := (Fintype.equivFin ι).symm
   have h := hF (Fintype.card ι) (fun i => c (e i)) (fun i => v (e i))
   refine le_of_le_of_eq h ?_
-  exact Fintype.sum_equiv e _ _ fun i =>
-    Fintype.sum_equiv e _ _ fun j => rfl
+  exact Fintype.sum_equiv e _ _ fun i => Fintype.sum_equiv e _ _ fun j => rfl
 
-/-- The `2 × 2` Hermitian sub-form of a positive-definite function at the points `a, b` with
-coefficients `c₀, c₁` is nonnegative. -/
-lemma quadForm_two_nonneg (hF : IsPositiveDefinite F) (a b : M) (c₀ c₁ : ℂ) :
-    0 ≤ c₀ * conj c₀ * F (a + star a) + c₀ * conj c₁ * F (a + star b)
-      + c₁ * conj c₀ * F (b + star a) + c₁ * conj c₁ * F (b + star b) := by
-  have h := hF 2 ![c₀, c₁] ![a, b]
+/--
+The `2 × 2` Hermitian sub-form of a positive-definite function at the points `a, b` with
+coefficients `c₀, c₁` is nonnegative.
+-/
+lemma quadForm_two_nonneg (hF : IsPositiveDefinite F) (a b : M) (c₀ c₁ : ℂ)
+    : 0
+      ≤ c₀ * conj c₀ * F (a + star a) + c₀ * conj c₁ * F (a + star b)
+        + c₁ * conj c₀ * F (b + star a) + c₁ * conj c₁ * F (b + star b) := by
+  have h := hF 2 (![c₀, c₁]) ![a, b]
   simp only [Fin.sum_univ_two, Matrix.cons_val_zero, Matrix.cons_val_one] at h
   exact le_of_le_of_eq h (by ring)
 
-/-- A positive-definite function takes a real, nonnegative value at every "norm point"
-`a + star a`. -/
+/--
+A positive-definite function takes a real, nonnegative value at every "norm point"
+`a + star a`.
+-/
 lemma add_star_self_nonneg (hF : IsPositiveDefinite F) (a : M) : 0 ≤ F (a + star a) := by
-  have h := hF 1 ![1] ![a]
+  have h := hF 1 (![1]) ![a]
   simpa [Fin.sum_univ_one] using h
 
-/-- The value of a positive-definite function at a "norm point" `a + star a` has zero imaginary
-part. -/
+/--
+The value of a positive-definite function at a "norm point" `a + star a` has zero imaginary
+part.
+-/
 lemma add_star_self_im (hF : IsPositiveDefinite F) (a : M) : (F (a + star a)).im = 0 :=
   ((Complex.nonneg_iff.mp (hF.add_star_self_nonneg a)).2).symm
 
-/-- The value of a positive-definite function at a "norm point" `a + star a` has nonnegative real
-part. -/
+/--
+The value of a positive-definite function at a "norm point" `a + star a` has nonnegative real
+part.
+-/
 lemma add_star_self_re_nonneg (hF : IsPositiveDefinite F) (a : M) : 0 ≤ (F (a + star a)).re :=
   (Complex.nonneg_iff.mp (hF.add_star_self_nonneg a)).1
 
@@ -149,17 +161,20 @@ lemma map_zero_im (hF : IsPositiveDefinite F) : (F 0).im = 0 :=
 lemma map_zero_re_nonneg (hF : IsPositiveDefinite F) : 0 ≤ (F 0).re :=
   (Complex.nonneg_iff.mp hF.map_zero_nonneg).1
 
-/-- The value at the origin of a positive-definite function is equal to the real number
-`(F 0).re`, viewed as a complex number. -/
+/--
+The value at the origin of a positive-definite function is equal to the real number
+`(F 0).re`, viewed as a complex number.
+-/
 lemma map_zero_eq_ofReal_re (hF : IsPositiveDefinite F) : F 0 = ((F 0).re : ℂ) := by
   apply Complex.ext
   · simp
   · simpa using hF.map_zero_im
 
-/-- If a positive-definite function is nonzero at the origin, then the real part of that value is
-strictly positive. -/
-lemma map_zero_re_pos_of_ne_zero (hF : IsPositiveDefinite F) (h0 : F 0 ≠ 0) :
-    0 < (F 0).re := by
+/--
+If a positive-definite function is nonzero at the origin, then the real part of that value is
+strictly positive.
+-/
+lemma map_zero_re_pos_of_ne_zero (hF : IsPositiveDefinite F) (h0 : F 0 ≠ 0) : 0 < (F 0).re := by
   refine lt_of_le_of_ne hF.map_zero_re_nonneg ?_
   intro hre
   apply h0
@@ -167,11 +182,12 @@ lemma map_zero_re_pos_of_ne_zero (hF : IsPositiveDefinite F) (h0 : F 0 ≠ 0) :
   · exact hre.symm
   · simpa using hF.map_zero_im
 
-/-- A positive-definite function is conjugate symmetric in the involution:
-`conj (F (b + star a)) = F (a + star b)`. -/
+/--
+A positive-definite function is conjugate symmetric in the involution:
+`conj (F (b + star a)) = F (a + star b)`.
+-/
 @[simp]
-lemma conj_symm (hF : IsPositiveDefinite F) (a b : M) :
-    conj (F (b + star a)) = F (a + star b) := by
+lemma conj_symm (hF : IsPositiveDefinite F) (a b : M) : conj (F (b + star a)) = F (a + star b) := by
   -- The diagonal entries `F (a + star a)`, `F (b + star b)` are real.
   have hp := hF.add_star_self_im a
   have hq := hF.add_star_self_im b
@@ -189,23 +205,27 @@ lemma conj_symm (hF : IsPositiveDefinite F) (a b : M) :
   · rw [Complex.conj_re]; exact hre
   · rw [Complex.conj_im]; linarith
 
-/-- A positive-definite function `F` induces the positive-definite kernel `K(a, b) = F(a + b⋆)`.
-This is the forward half of the function ↔ kernel correspondence. -/
-lemma posSemidef (hF : IsPositiveDefinite F) :
-    Matrix.PosSemidef (fun a b => F (a + star b)) :=
-  posSemidef_iff_finite_sum.mpr
-    ⟨fun a b => by simpa only [RCLike.star_def] using hF.conj_symm b a,
-      fun {_ι : Type} _ v x => by
+/--
+A positive-definite function `F` induces the positive-definite kernel `K(a, b) = F(a + b⋆)`.
+This is the forward half of the function ↔ kernel correspondence.
+-/
+lemma posSemidef (hF : IsPositiveDefinite F) : Matrix.PosSemidef (fun a b => F (a + star b)) :=
+  posSemidef_iff_finite_sum.mpr ⟨
+    fun a b => by simpa only [RCLike.star_def] using hF.conj_symm b a,
+    fun {_ι : Type} _ v x => by
       have h := hF.sum_nonneg (fun i => conj (x i)) v
       refine le_of_le_of_eq h ?_
       refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
       rw [RCLike.star_def, Complex.conj_conj]
-      ring⟩
+      ring
+  ⟩
 
-/-- If the kernel `K(a, b) = F(a + b⋆)` is positive definite, then so is the function `F`. This is
-the reverse half of the function ↔ kernel correspondence. -/
-lemma of_posSemidef
-    (hK : Matrix.PosSemidef (fun a b => F (a + star b))) : IsPositiveDefinite F := by
+/--
+If the kernel `K(a, b) = F(a + b⋆)` is positive definite, then so is the function `F`. This is
+the reverse half of the function ↔ kernel correspondence.
+-/
+lemma of_posSemidef (hK : Matrix.PosSemidef (fun a b => F (a + star b)))
+    : IsPositiveDefinite F := by
   obtain ⟨_, hpos⟩ := posSemidef_iff_finite_sum.mp hK
   intro n c v
   have h := hpos v (fun i => conj (c i))
@@ -214,17 +234,21 @@ lemma of_posSemidef
   rw [RCLike.star_def, Complex.conj_conj]
   ring
 
-/-- The Cauchy–Schwarz inequality for a positive-definite function: the squared norm of an
-off-diagonal value is bounded by the product of the two diagonal values. -/
-lemma normSq_le (hF : IsPositiveDefinite F) (a b : M) :
-    Complex.normSq (F (a + star b))
-      ≤ (F (a + star a)).re * (F (b + star b)).re :=
+/--
+The Cauchy–Schwarz inequality for a positive-definite function: the squared norm of an
+off-diagonal value is bounded by the product of the two diagonal values.
+-/
+lemma normSq_le (hF : IsPositiveDefinite F) (a b : M)
+    : Complex.normSq (F (a + star b)) ≤ (F (a + star a)).re * (F (b + star b)).re :=
   hF.posSemidef.normSq_le a b
 
-/-- If `a + star a = 0`, then a positive-definite function is bounded at `a` by its value at
-zero. -/
-lemma norm_apply_le_map_zero_re_of_add_star_eq_zero (hF : IsPositiveDefinite F)
-    (a : M) (ha : a + star a = 0) : ‖F a‖ ≤ (F 0).re := by
+/--
+If `a + star a = 0`, then a positive-definite function is bounded at `a` by its value at
+zero.
+-/
+lemma norm_apply_le_map_zero_re_of_add_star_eq_zero
+    (hF : IsPositiveDefinite F) (a : M) (ha : a + star a = 0)
+    : ‖F a‖ ≤ (F 0).re := by
   refine le_of_sq_le_sq ?_ hF.map_zero_re_nonneg
   simpa [Complex.normSq_eq_norm_sq, pow_two, ha, star_zero] using hF.normSq_le a 0
 
@@ -232,54 +256,53 @@ lemma norm_apply_le_map_zero_re_of_add_star_eq_zero (hF : IsPositiveDefinite F)
 -- a variable head symbol. Lean rejects the tag outright ("the theorem will be tried on every simp
 -- step"), and `warningAsError` makes that a build failure. The sibling bound
 -- `norm_apply_le_map_zero_re_of_add_star_eq_zero` is untagged for the same reason.
-/-- **A positive-definite function with `(F 0).re = 0` vanishes identically.**
+/--
+**A positive-definite function with `(F 0).re = 0` vanishes identically.**
 
 No hypothesis on the point is required, and none on the ambient structure beyond an
-involutive additive monoid (`AddMonoid` and `StarAddMonoid`). -/
-lemma apply_eq_zero_of_map_zero_re_eq_zero (hF : IsPositiveDefinite F)
-    (h0 : (F 0).re = 0) (a : M) : F a = 0 := by
+involutive additive monoid (`AddMonoid` and `StarAddMonoid`).
+-/
+lemma apply_eq_zero_of_map_zero_re_eq_zero (hF : IsPositiveDefinite F) (h0 : (F 0).re = 0) (a : M)
+    : F a = 0 := by
   have hzero : F (0 + star 0) = 0 := by simpa [h0] using hF.map_zero_eq_ofReal_re
-  simpa using hF.posSemidef.eq_zero_of_apply_self_eq_zero_right
-    (a := a) (b := 0) hzero
+  simpa using hF.posSemidef.eq_zero_of_apply_self_eq_zero_right (a := a) (b := 0) hzero
 
 section Group
 
 variable {N : Type*} [AddGroup N] [StarAddMonoid N] {H : N → ℂ}
 
-/-- If the involution negates the point `a`, then a positive-definite function is bounded at `a`
+/--
+If the involution negates the point `a`, then a positive-definite function is bounded at `a`
 by its value at zero. In particular this applies on an additive group whose involution is
-negation. -/
-lemma norm_apply_le_map_zero_re_of_star_eq_neg (hH : IsPositiveDefinite H)
-    (a : N) (hstar_a : star a = -a) : ‖H a‖ ≤ (H 0).re :=
+negation.
+-/
+lemma norm_apply_le_map_zero_re_of_star_eq_neg
+    (hH : IsPositiveDefinite H) (a : N) (hstar_a : star a = -a)
+    : ‖H a‖ ≤ (H 0).re :=
   hH.norm_apply_le_map_zero_re_of_add_star_eq_zero a (by rw [hstar_a, add_neg_cancel])
 
 end Group
 
 /-- Positive-definite functions are closed under addition. -/
-lemma add (hF : IsPositiveDefinite F) (hG : IsPositiveDefinite G) :
-    IsPositiveDefinite (fun x => F x + G x) :=
-  of_posSemidef <|
-    hF.posSemidef.add hG.posSemidef
+lemma add (hF : IsPositiveDefinite F) (hG : IsPositiveDefinite G)
+    : IsPositiveDefinite (fun x => F x + G x) :=
+  of_posSemidef <| hF.posSemidef.add hG.posSemidef
 
 /-- Positive-definite functions are closed under multiplication by a nonnegative complex scalar. -/
-lemma const_mul {k : ℂ} (hk : 0 ≤ k) (hF : IsPositiveDefinite F) :
-    IsPositiveDefinite (fun x => k * F x) :=
-  of_posSemidef <|
-    hF.posSemidef.smul hk
+lemma const_mul {k : ℂ} (hk : 0 ≤ k) (hF : IsPositiveDefinite F)
+    : IsPositiveDefinite (fun x => k * F x) :=
+  of_posSemidef <| hF.posSemidef.smul hk
 
 /-- Positive-definite functions are closed under pointwise multiplication (Schur product). -/
-lemma mul (hF : IsPositiveDefinite F) (hG : IsPositiveDefinite G) :
-    IsPositiveDefinite (fun x => F x * G x) :=
-  of_posSemidef <|
-    hF.posSemidef.hadamard hG.posSemidef
+lemma mul (hF : IsPositiveDefinite F) (hG : IsPositiveDefinite G)
+    : IsPositiveDefinite (fun x => F x * G x) :=
+  of_posSemidef <| hF.posSemidef.hadamard hG.posSemidef
 
 end IsPositiveDefinite
 
 /-- A nonnegative real constant is a positive-definite function. -/
-lemma isPositiveDefinite_const {k : ℂ} (hk : 0 ≤ k) :
-    IsPositiveDefinite (fun _ : M => k) :=
-  IsPositiveDefinite.of_posSemidef <|
-    posSemidef_const_of_nonneg hk
+lemma isPositiveDefinite_const {k : ℂ} (hk : 0 ≤ k) : IsPositiveDefinite (fun _ : M => k) :=
+  IsPositiveDefinite.of_posSemidef <| posSemidef_const_of_nonneg hk
 
 /-- The zero function is positive definite. -/
 lemma isPositiveDefinite_zero : IsPositiveDefinite (fun _ : M => (0 : ℂ)) :=
@@ -288,18 +311,19 @@ lemma isPositiveDefinite_zero : IsPositiveDefinite (fun _ : M => (0 : ℂ)) :=
 namespace IsPositiveDefinite
 
 /-- Positive-definite functions are closed under finite sums. -/
-lemma sum {ι : Type*} {s : Finset ι} {F : ι → M → ℂ} (hF : ∀ i ∈ s, IsPositiveDefinite (F i)) :
-    IsPositiveDefinite (fun x => ∑ i ∈ s, F i x) := by
+lemma sum {ι : Type*} {s : Finset ι} {F : ι → M → ℂ} (hF : ∀ i ∈ s, IsPositiveDefinite (F i))
+    : IsPositiveDefinite (fun x => ∑ i ∈ s, F i x) := by
   apply of_posSemidef
-  have heq : (∑ i ∈ s, fun a b : M => F i (a + star b)) =
-      (fun a b : M => ∑ i ∈ s, F i (a + star b)) := by ext; simp
+  have heq
+      : (∑ i ∈ s, fun a b : M => F i (a + star b))
+        = (fun a b : M => ∑ i ∈ s, F i (a + star b)) := by
+    ext; simp
   exact heq ▸ Matrix.posSemidef_sum s (fun i hi => (hF i hi).posSemidef)
 
 /-- Positive-definite functions are closed under finite products (Schur product). -/
-lemma prod {ι : Type*} {s : Finset ι} {F : ι → M → ℂ} (hF : ∀ i ∈ s, IsPositiveDefinite (F i)) :
-    IsPositiveDefinite (fun x => ∏ i ∈ s, F i x) :=
-  of_posSemidef <|
-    posSemidef_schur_finset_prod fun i hi => (hF i hi).posSemidef
+lemma prod {ι : Type*} {s : Finset ι} {F : ι → M → ℂ} (hF : ∀ i ∈ s, IsPositiveDefinite (F i))
+    : IsPositiveDefinite (fun x => ∏ i ∈ s, F i x) :=
+  of_posSemidef <| posSemidef_schur_finset_prod fun i hi => (hF i hi).posSemidef
 
 end IsPositiveDefinite
 

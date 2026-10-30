@@ -44,16 +44,17 @@ namespace ProbabilisticTheory
 
 open scoped CStarAlgebra
 
-variable {A₁ A₂ : Type*} [NonUnitalCStarAlgebra A₁] [NonUnitalCStarAlgebra A₂]
-  [PartialOrder A₁] [PartialOrder A₂] [StarOrderedRing A₁] [StarOrderedRing A₂]
-  [One A₁] [One A₂]
+variable
+  {A₁ A₂ : Type*} [NonUnitalCStarAlgebra A₁] [NonUnitalCStarAlgebra A₂] [PartialOrder A₁]
+  [PartialOrder A₂] [StarOrderedRing A₁] [StarOrderedRing A₂] [One A₁] [One A₂]
 
 /-! ## A. Quantum channels -/
 
 /-- A quantum channel: a unital completely positive map between C⋆-algebras. -/
-structure QuantumChannel (A₁ A₂ : Type*) [NonUnitalCStarAlgebra A₁] [NonUnitalCStarAlgebra A₂]
-    [PartialOrder A₁] [PartialOrder A₂] [StarOrderedRing A₁] [StarOrderedRing A₂]
-    [One A₁] [One A₂] extends A₁ →CP A₂, OneHom A₁ A₂
+structure QuantumChannel
+  (A₁ A₂ : Type*) [NonUnitalCStarAlgebra A₁] [NonUnitalCStarAlgebra A₂] [PartialOrder A₁]
+  [PartialOrder A₂] [StarOrderedRing A₁] [StarOrderedRing A₂] [One A₁] [One A₂]
+  extends A₁ →CP A₂, OneHom A₁ A₂
 
 -- The inherited `OneHom` projection has no separately attachable docstring.
 attribute [nolint docBlame] QuantumChannel.toOneHom
@@ -79,22 +80,21 @@ instance : CompletelyPositiveMapClass (QuantumChannel A₁ A₂) A₁ A₂ where
 instance : OneHomClass (QuantumChannel A₁ A₂) A₁ A₂ where
   map_one f := f.map_one'
 
-@[ext]
-lemma ext {f g : QuantumChannel A₁ A₂} (h : ∀ x, f x = g x) : f = g :=
-  DFunLike.ext f g h
+@[ext] lemma ext {f g : QuantumChannel A₁ A₂} (h : ∀ x, f x = g x) : f = g := DFunLike.ext f g h
 
 /-! ## B. The induced channel on observables -/
 
 section Observables
 
-variable {A₁ A₂ : Type*} [CStarAlgebra A₁] [CStarAlgebra A₂]
-    [PartialOrder A₁] [PartialOrder A₂] [StarOrderedRing A₁] [StarOrderedRing A₂]
+variable
+  {A₁ A₂ : Type*} [CStarAlgebra A₁] [CStarAlgebra A₂] [PartialOrder A₁] [PartialOrder A₂]
+  [StarOrderedRing A₁] [StarOrderedRing A₂]
 
 /-- The channel a quantum channel induces between the self-adjoint parts. -/
-noncomputable def toChannel (f : QuantumChannel A₁ A₂) :
-    Channel (selfAdjoint A₁) (selfAdjoint A₂) :=
-  ({ toPositiveLinearMap := PositiveLinearMap.ofClass f
-     map_one' := map_one f } : A₁ →ₚ₁[ℂ] A₂).restrictSA
+noncomputable def toChannel (f : QuantumChannel A₁ A₂)
+    : Channel (selfAdjoint A₁) (selfAdjoint A₂) :=
+  ({ toPositiveLinearMap := PositiveLinearMap.ofClass f, map_one' := map_one f }
+    : A₁ →ₚ₁[ℂ] A₂).restrictSA
 
 end Observables
 

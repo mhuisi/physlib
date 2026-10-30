@@ -8,7 +8,6 @@ module
 public import Mathlib.Analysis.Calculus.Deriv.Prod
 public import Physlib.Relativity.LorentzAlgebra.Basic
 public import Physlib.Relativity.LorentzGroup.Boosts.Basic
-
 import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
 
 /-!
@@ -64,7 +63,8 @@ namespace lorentzAlgebra
 
 /-! ## A. Generator definitions -/
 
-/-- The boost generator K_i in the Lorentz algebra so(1,3).
+/--
+The boost generator K_i in the Lorentz algebra so(1,3).
 
 This matrix generates infinitesimal Lorentz boosts in the i-th spatial direction.
 The matrix has non-zero entries only at positions (0, i+1) and (i+1, 0) with value 1,
@@ -79,12 +79,14 @@ where we use the index convention 0 = time, 1,2,3 = space.
 The native boost curve `LorentzGroup.boost i (Real.tanh r)` has tangent `-K_i` at
 rapidity zero, as proved by `hasDerivAt_boost_tanh_zero`.
 -/
-def boostGenerator (i : Fin 3) : Matrix (Fin 1 ⊕ Fin 3) (Fin 1 ⊕ Fin 3) ℝ :=
-  fun μ ν =>
-    if (μ = Sum.inl 0 ∧ ν = Sum.inr i) ∨ (μ = Sum.inr i ∧ ν = Sum.inl 0) then 1
-    else 0
+def boostGenerator (i : Fin 3) : Matrix (Fin 1 ⊕ Fin 3) (Fin 1 ⊕ Fin 3) ℝ := fun μ ν =>
+  if (μ = Sum.inl 0 ∧ ν = Sum.inr i) ∨ (μ = Sum.inr i ∧ ν = Sum.inl 0) then
+    1
+  else
+    0
 
-/-- The rotation generator J_i in the Lorentz algebra so(1,3).
+/--
+The rotation generator J_i in the Lorentz algebra so(1,3).
 
 This matrix generates infinitesimal rotations about the i-th axis following the right-hand rule.
 The matrix acts only on spatial indices in the antisymmetric pattern characteristic of
@@ -103,18 +105,29 @@ angular momentum generators.
 ## Physical Meaning
 Exponentiating θ·J_i produces a finite rotation by angle θ about axis i.
 -/
-def rotationGenerator (i : Fin 3) : Matrix (Fin 1 ⊕ Fin 3) (Fin 1 ⊕ Fin 3) ℝ :=
-  fun μ ν =>
-    match i with
-    | 0 => if μ = Sum.inr 1 ∧ ν = Sum.inr 2 then -1
-            else if μ = Sum.inr 2 ∧ ν = Sum.inr 1 then 1
-            else 0
-      | 1 => if μ = Sum.inr 0 ∧ ν = Sum.inr 2 then 1
-            else if μ = Sum.inr 2 ∧ ν = Sum.inr 0 then -1
-            else 0
-      | 2 => if μ = Sum.inr 0 ∧ ν = Sum.inr 1 then -1
-            else if μ = Sum.inr 1 ∧ ν = Sum.inr 0 then 1
-            else 0
+def rotationGenerator (i : Fin 3) : Matrix (Fin 1 ⊕ Fin 3) (Fin 1 ⊕ Fin 3) ℝ := fun μ ν =>
+  match i with
+  | 0 =>
+    if μ = Sum.inr 1 ∧ ν = Sum.inr 2 then
+      -1
+    else if μ = Sum.inr 2 ∧ ν = Sum.inr 1 then
+      1
+    else
+      0
+  | 1 =>
+    if μ = Sum.inr 0 ∧ ν = Sum.inr 2 then
+      1
+    else if μ = Sum.inr 2 ∧ ν = Sum.inr 0 then
+      -1
+    else
+      0
+  | 2 =>
+    if μ = Sum.inr 0 ∧ ν = Sum.inr 1 then
+      -1
+    else if μ = Sum.inr 1 ∧ ν = Sum.inr 0 then
+      1
+    else
+      0
 
 /-! ## B. Algebraic properties -/
 
@@ -122,51 +135,50 @@ def rotationGenerator (i : Fin 3) : Matrix (Fin 1 ⊕ Fin 3) (Fin 1 ⊕ Fin 3) �
 lemma boostGenerator_mem (i : Fin 3) : boostGenerator i ∈ lorentzAlgebra := by
   rw [lorentzAlgebra.mem_iff]
   ext μ ν
-  fin_cases μ <;> fin_cases ν <;>
-    simp [boostGenerator, minkowskiMatrix.as_diagonal, mul_diagonal, diagonal_mul, neg_ite]
+  fin_cases μ <;> fin_cases ν
+    <;> simp [boostGenerator, minkowskiMatrix.as_diagonal, mul_diagonal, diagonal_mul, neg_ite]
 
 /-- The rotation generator J_i is in the Lorentz algebra. -/
 lemma rotationGenerator_mem (i : Fin 3) : rotationGenerator i ∈ lorentzAlgebra := by
   rw [lorentzAlgebra.mem_iff]
   ext μ ν
-  fin_cases i <;> fin_cases μ <;> fin_cases ν <;>
-    simp [rotationGenerator, minkowskiMatrix.as_diagonal, mul_diagonal, diagonal_mul]
+  fin_cases i <;> fin_cases μ <;> fin_cases ν
+    <;> simp [rotationGenerator, minkowskiMatrix.as_diagonal, mul_diagonal, diagonal_mul]
 
 /-- The boost generators are symmetric. -/
 @[simp]
-lemma boostGenerator_transpose (i : Fin 3) :
-    (boostGenerator i)ᵀ = boostGenerator i := by
+lemma boostGenerator_transpose (i : Fin 3) : (boostGenerator i)ᵀ = boostGenerator i := by
   ext μ ν
   simp only [transpose_apply, boostGenerator, and_comm, or_comm]
 
 /-- The boost generators are traceless. -/
 @[simp]
-lemma boostGenerator_trace (i : Fin 3) :
-    Matrix.trace (boostGenerator i) = 0 := by
+lemma boostGenerator_trace (i : Fin 3) : Matrix.trace (boostGenerator i) = 0 := by
   simp [Matrix.trace, Matrix.diag, boostGenerator]
 
 /-- The rotation generators are antisymmetric. -/
 @[simp]
-lemma rotationGenerator_transpose (i : Fin 3) :
-    (rotationGenerator i)ᵀ = -rotationGenerator i := by
+lemma rotationGenerator_transpose (i : Fin 3) : (rotationGenerator i)ᵀ = - rotationGenerator i := by
   ext μ ν
   fin_cases i <;> fin_cases μ <;> fin_cases ν <;> simp [rotationGenerator]
 
 /-- The rotation generators are traceless. -/
 @[simp]
-lemma rotationGenerator_trace (i : Fin 3) :
-    Matrix.trace (rotationGenerator i) = 0 := by
+lemma rotationGenerator_trace (i : Fin 3) : Matrix.trace (rotationGenerator i) = 0 := by
   have h := Matrix.trace_transpose (rotationGenerator i)
   rw [rotationGenerator_transpose, Matrix.trace_neg] at h
   exact eq_zero_of_neg_eq h
 
 /-! ## C. Rapidity derivatives -/
 
-/-- The tangent at zero of the finite boost curve parametrized by rapidity
-is the negative of the named boost generator. -/
-lemma hasDerivAt_boost_tanh_zero (i : Fin 3) :
-    HasDerivAt (fun r : ℝ => (LorentzGroup.boost i (Real.tanh r) (Real.abs_tanh_lt_one r)).1)
-      (-boostGenerator i) 0 := by
+/--
+The tangent at zero of the finite boost curve parametrized by rapidity
+is the negative of the named boost generator.
+-/
+lemma hasDerivAt_boost_tanh_zero (i : Fin 3)
+    : HasDerivAt
+      (fun r : ℝ => (LorentzGroup.boost i (Real.tanh r) (Real.abs_tanh_lt_one r)).1)
+      (- boostGenerator i) 0 := by
   have hcosh (r : ℝ) : Real.cosh r * Real.tanh r = Real.sinh r := by
     rw [Real.tanh_eq_sinh_div_cosh]
     field_simp [ne_of_gt (Real.cosh_pos r)]
@@ -174,9 +186,10 @@ lemma hasDerivAt_boost_tanh_zero (i : Fin 3) :
   intro μ
   apply hasDerivAt_pi.mpr
   intro ν
-  fin_cases i <;> fin_cases μ <;> fin_cases ν <;>
-    simp [LorentzGroup.boost, boostGenerator, LorentzGroup.γ_tanh, hcosh, neg_mul]
-  all_goals first
+  fin_cases i <;> fin_cases μ <;> fin_cases ν
+    <;> simp [LorentzGroup.boost, boostGenerator, LorentzGroup.γ_tanh, hcosh, neg_mul]
+  all_goals
+    first
     | simpa only [Real.sinh_zero] using Real.hasDerivAt_cosh 0
     | simpa only [Real.cosh_zero] using (Real.hasDerivAt_sinh 0).fun_neg
     | exact hasDerivAt_const (0 : ℝ) (0 : ℝ)

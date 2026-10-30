@@ -69,13 +69,16 @@ def _root_.PositiveLinearMap.ofVec (ψ : H) : 𝓟[𝕜, H →L[𝕜] H] where
     simpa [inner_sub_right] using (ContinuousLinearMap.le_def.mp hxy).inner_nonneg_right ψ
 
 /-- The vector state associated with a unit vector. -/
-def UnitalPositiveLinearMap.ofVec {ψ : H} (h : ‖ψ‖ = 1) : 𝓢[𝕜, H →L[𝕜] H] :=
-  { PositiveLinearMap.ofVec ψ with map_one' := by simp [h] }
+def UnitalPositiveLinearMap.ofVec {ψ : H} (h : ‖ψ‖ = 1) : 𝓢[𝕜, H →L[𝕜] H] := {
+  PositiveLinearMap.ofVec ψ with
+  map_one' := by simp [h]
+}
 
 /-- Evaluation of a vector state is the corresponding quadratic form. -/
 @[simp]
-lemma UnitalPositiveLinearMap.ofVec_apply {ψ : H} (h : ‖ψ‖ = 1) (x : H →L[𝕜] H) :
-    UnitalPositiveLinearMap.ofVec h x = ⟪ψ, x • ψ⟫_𝕜 := rfl
+lemma UnitalPositiveLinearMap.ofVec_apply {ψ : H} (h : ‖ψ‖ = 1) (x : H →L[𝕜] H)
+    : UnitalPositiveLinearMap.ofVec h x = ⟪ψ, x • ψ⟫_𝕜 :=
+  rfl
 
 /-!
 
@@ -84,9 +87,9 @@ lemma UnitalPositiveLinearMap.ofVec_apply {ψ : H} (h : ‖ψ‖ = 1) (x : H →
 -/
 
 /-- Vector states do not see a global phase: `ofVec (c • ψ) = ofVec ψ` for `‖c‖ = 1`. -/
-lemma UnitalPositiveLinearMap.ofVec_smul {ψ : H} (h : ‖ψ‖ = 1) {c : 𝕜} (hc : ‖c‖ = 1)
-    (h' : ‖c • ψ‖ = 1) :
-    UnitalPositiveLinearMap.ofVec (𝕜 := 𝕜) h' = UnitalPositiveLinearMap.ofVec (𝕜 := 𝕜) h :=
+lemma UnitalPositiveLinearMap.ofVec_smul
+    {ψ : H} (h : ‖ψ‖ = 1) {c : 𝕜} (hc : ‖c‖ = 1) (h' : ‖c • ψ‖ = 1)
+    : UnitalPositiveLinearMap.ofVec (𝕜 := 𝕜) h' = UnitalPositiveLinearMap.ofVec (𝕜 := 𝕜) h :=
   UnitalPositiveLinearMap.ext fun x => by
     simp only [ofVec_apply, ContinuousLinearMap.smul_def, map_smul, inner_smul_left,
       inner_smul_right]
@@ -94,12 +97,15 @@ lemma UnitalPositiveLinearMap.ofVec_smul {ψ : H} (h : ‖ψ‖ = 1) {c : 𝕜} 
     simp
 
 /-- Unit vectors with different vector states are not parallel: `‖⟪ψ, φ⟫‖ < 1`. -/
-lemma UnitalPositiveLinearMap.norm_inner_lt_one_of_ofVec_ne {ψ φ : H} (hψ : ‖ψ‖ = 1)
-    (hφ : ‖φ‖ = 1) (h : ofVec (𝕜 := 𝕜) hψ ≠ ofVec (𝕜 := 𝕜) hφ) : ‖⟪ψ, φ⟫_𝕜‖ < 1 := by
+lemma UnitalPositiveLinearMap.norm_inner_lt_one_of_ofVec_ne
+    {ψ φ : H} (hψ : ‖ψ‖ = 1) (hφ : ‖φ‖ = 1) (h : ofVec (𝕜 := 𝕜) hψ ≠ ofVec (𝕜 := 𝕜) hφ)
+    : ‖⟪ψ, φ⟫_𝕜‖ < 1 := by
   refine ((norm_inner_le_norm ψ φ).trans_eq (by rw [hψ, hφ, one_mul])).lt_of_ne fun heq => h ?_
   -- equality in the Cauchy–Schwarz inequality: `φ` is a multiple of `ψ`
-  obtain ⟨c, -, rfl⟩ := (norm_inner_eq_norm_iff (𝕜 := 𝕜) (norm_ne_zero_iff.1 (hψ ▸ one_ne_zero))
-    (norm_ne_zero_iff.1 (hφ ▸ one_ne_zero))).1 (by rw [heq, hψ, hφ, one_mul])
+  obtain ⟨c, -, rfl⟩ :=
+    (norm_inner_eq_norm_iff (𝕜 := 𝕜) (norm_ne_zero_iff.1 (hψ ▸ one_ne_zero))
+        (norm_ne_zero_iff.1 (hφ ▸ one_ne_zero))).1
+      (by rw [heq, hψ, hφ, one_mul])
   exact (ofVec_smul hψ (by simpa [norm_smul, hψ] using hφ) hφ).symm
 
 end ofVec
@@ -116,8 +122,7 @@ open UnitalPositiveLinearMap
 
 variable {H : Type*} [NormedAddCommGroup H] [InnerProductSpace ℂ H] [CompleteSpace H]
 
-example (ψ : H) (h : ‖ψ‖ = 1) :
-    (ofVec h).restrictSAC (1 : selfAdjoint (H →L[ℂ] H)) = (1 : ℝ) := by
+example (ψ : H) (h : ‖ψ‖ = 1) : (ofVec h).restrictSAC (1 : selfAdjoint (H →L[ℂ] H)) = (1 : ℝ) := by
   simp
 
 end Example

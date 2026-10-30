@@ -68,8 +68,11 @@ open Matrix MatrixGroups TensorProduct
 
 namespace GaugeFieldData
 
-variable {G₀ : Type} [Group G₀] {𝔤 : Type} [LieRing 𝔤] [LieAlgebra ℝ 𝔤] [Module.Finite ℝ 𝔤]
-  {GJ : Type} [Group GJ] {𝔤J : Type} [LieRing 𝔤J] [LieAlgebra ℝ 𝔤J]
+variable
+  {G₀ : Type} [Group G₀]
+  {𝔤 : Type} [LieRing 𝔤] [LieAlgebra ℝ 𝔤] [Module.Finite ℝ 𝔤]
+  {GJ : Type} [Group GJ]
+  {𝔤J : Type} [LieRing 𝔤J] [LieAlgebra ℝ 𝔤J]
   {jets : LocalGaugeData G₀ 𝔤 GJ 𝔤J} (T : GaugeFieldData jets)
 
 /-!
@@ -78,25 +81,29 @@ variable {G₀ : Type} [Group G₀] {𝔤 : Type} [LieRing 𝔤] [LieAlgebra ℝ
 
 -/
 
-/-- **The bosonic matter field of a gauge theory**: the direct sum of the bosonic
-  species, valued in `T.BosonModule`, with the Lorentz group, the jets of gauge
-  transformations and the gauge algebra all acting species by species. It exists only for
-  a family degenerate in mass dimension: `w` is the common mass weight of the species and
-  `h` the proof that they all have it, which for the Standard Model, whose only scalar is
-  the Higgs doublet, is weight two. -/
-noncomputable def bosonMatterField (w : ℕ) (h : ∀ i, (T.boson i).massWeight = w) :
-    MatterField jets :=
+/--
+**The bosonic matter field of a gauge theory**: the direct sum of the bosonic
+species, valued in `T.BosonModule`, with the Lorentz group, the jets of gauge
+transformations and the gauge algebra all acting species by species. It exists only for
+a family degenerate in mass dimension: `w` is the common mass weight of the species and
+`h` the proof that they all have it, which for the Standard Model, whose only scalar is
+the Higgs doublet, is weight two.
+-/
+noncomputable def bosonMatterField (w : ℕ) (h : ∀ i, (T.boson i).massWeight = w)
+    : MatterField jets :=
   MatterField.pi T.boson w h
 
 variable {T}
 
-lemma bosonMatterField_V (w : ℕ) (h : ∀ i, (T.boson i).massWeight = w) :
-    (T.bosonMatterField w h).V = T.BosonModule := rfl
+lemma bosonMatterField_V (w : ℕ) (h : ∀ i, (T.boson i).massWeight = w)
+    : (T.bosonMatterField w h).V = T.BosonModule :=
+  rfl
 
 /-- The bosonic matter field carries the common mass weight of the species. -/
 @[simp]
-lemma bosonMatterField_massWeight (w : ℕ) (h : ∀ i, (T.boson i).massWeight = w) :
-    (T.bosonMatterField w h).massWeight = w := rfl
+lemma bosonMatterField_massWeight (w : ℕ) (h : ∀ i, (T.boson i).massWeight = w)
+    : (T.bosonMatterField w h).massWeight = w :=
+  rfl
 
 /-!
 
@@ -106,82 +113,93 @@ lemma bosonMatterField_massWeight (w : ℕ) (h : ∀ i, (T.boson i).massWeight =
 
 variable (T)
 
-/-- **The Lorentz action on the bosonic module**, acting species by species. This is the
-  Lorentz representation of the bosonic matter field, typed on `T.BosonModule` itself so
-  that it can be spoken of without fixing a common mass weight. -/
-noncomputable def repLorentzBosonModule : Representation ℂ SL(2,ℂ) T.BosonModule :=
+/--
+**The Lorentz action on the bosonic module**, acting species by species. This is the
+Lorentz representation of the bosonic matter field, typed on `T.BosonModule` itself so
+that it can be spoken of without fixing a common mass weight.
+-/
+noncomputable def repLorentzBosonModule : Representation ℂ (SL(2,ℂ)) T.BosonModule :=
   MatterField.repPi fun i => (T.boson i).repLorentz
 
 variable {T}
 
 @[simp]
-lemma repLorentzBosonModule_apply (Λ : SL(2,ℂ)) (v : T.BosonModule) (i : T.BosonSpecies) :
-    T.repLorentzBosonModule Λ v i = (T.boson i).repLorentz Λ (v i) := rfl
+lemma repLorentzBosonModule_apply (Λ : SL(2,ℂ)) (v : T.BosonModule) (i : T.BosonSpecies)
+    : T.repLorentzBosonModule Λ v i = (T.boson i).repLorentz Λ (v i) :=
+  rfl
 
 variable (T)
 
-/-- The action of the jets of gauge transformations on the jets of the bosonic
-  module, acting species by species, and typed on `T.BosonModule` itself so that it can
-  be spoken of without fixing a common mass weight. -/
-noncomputable def repJetBosonModule :
-    Representation ℂ GJ (SpaceTimeAlgebra ⊗[ℂ] T.BosonModule) :=
+/--
+The action of the jets of gauge transformations on the jets of the bosonic
+module, acting species by species, and typed on `T.BosonModule` itself so that it can
+be spoken of without fixing a common mass weight.
+-/
+noncomputable def repJetBosonModule : Representation ℂ GJ (SpaceTimeAlgebra ⊗[ℂ] T.BosonModule) :=
   MatterField.repJetPi T.boson
 
 variable {T}
 
 /-- The jet gauge action on the bosonic module is fibrewise, as each species is. -/
-lemma repJetBosonModule_smul (U : GJ) (χ : SpaceTimeAlgebra)
-    (z : SpaceTimeAlgebra ⊗[ℂ] T.BosonModule) :
-    T.repJetBosonModule U (χ • z) = χ • T.repJetBosonModule U z :=
+lemma repJetBosonModule_smul
+    (U : GJ) (χ : SpaceTimeAlgebra) (z : SpaceTimeAlgebra ⊗[ℂ] T.BosonModule)
+    : T.repJetBosonModule U (χ • z) = χ • T.repJetBosonModule U z :=
   MatterField.repJetPi_smul T.boson U χ z
 
-/-- A bosonic species is a subrepresentation of the jet gauge action on the bosonic
-  module: the projection onto its value space intertwines the two actions on the jets. -/
-lemma lTensor_projBosonValue_repJetBosonModule (j : T.BosonSpecies) (U : GJ) :
-    (LinearMap.lTensor SpaceTimeAlgebra (T.projBosonValue j)).comp (T.repJetBosonModule U)
-      = ((T.boson j).repJet U).comp
-        (LinearMap.lTensor SpaceTimeAlgebra (T.projBosonValue j)) :=
+/--
+A bosonic species is a subrepresentation of the jet gauge action on the bosonic
+module: the projection onto its value space intertwines the two actions on the jets.
+-/
+lemma lTensor_projBosonValue_repJetBosonModule (j : T.BosonSpecies) (U : GJ)
+    : (LinearMap.lTensor SpaceTimeAlgebra (T.projBosonValue j)).comp (T.repJetBosonModule U)
+      = ((T.boson j).repJet U).comp (LinearMap.lTensor SpaceTimeAlgebra (T.projBosonValue j)) :=
   MatterField.lTensor_proj_repJetPi T.boson j U
 
 /-- The jet gauge action of the bosonic matter field is that of the bosonic module. -/
-lemma bosonMatterField_repJet (w : ℕ) (h : ∀ i, (T.boson i).massWeight = w) :
-    (T.bosonMatterField w h).repJet = T.repJetBosonModule := rfl
+lemma bosonMatterField_repJet (w : ℕ) (h : ∀ i, (T.boson i).massWeight = w)
+    : (T.bosonMatterField w h).repJet = T.repJetBosonModule :=
+  rfl
 
 /-- The Lorentz action of the bosonic matter field is that of the bosonic module. -/
-lemma bosonMatterField_repLorentz (w : ℕ) (h : ∀ i, (T.boson i).massWeight = w) :
-    (T.bosonMatterField w h).repLorentz = T.repLorentzBosonModule := rfl
+lemma bosonMatterField_repLorentz (w : ℕ) (h : ∀ i, (T.boson i).massWeight = w)
+    : (T.bosonMatterField w h).repLorentz = T.repLorentzBosonModule :=
+  rfl
 
 /-- The Lorentz group acts on a bosonic configuration species by species. -/
 @[simp]
-lemma bosonMatterField_repLorentz_apply (w : ℕ)
-    (h : ∀ i, (T.boson i).massWeight = w) (Λ : SL(2,ℂ)) (v : T.BosonModule)
-    (i : T.BosonSpecies) :
-    (T.bosonMatterField w h).repLorentz Λ v i = (T.boson i).repLorentz Λ (v i) := rfl
+lemma bosonMatterField_repLorentz_apply
+    (w : ℕ) (h : ∀ i, (T.boson i).massWeight = w)
+    (Λ : SL(2,ℂ)) (v : T.BosonModule) (i : T.BosonSpecies)
+    : (T.bosonMatterField w h).repLorentz Λ v i = (T.boson i).repLorentz Λ (v i) :=
+  rfl
 
 /-- The gauge algebra acts on a bosonic configuration species by species. -/
 @[simp]
-lemma bosonMatterField_repAlgebra_apply (w : ℕ)
-    (h : ∀ i, (T.boson i).massWeight = w) (c : 𝔤) (v : T.BosonModule)
-    (i : T.BosonSpecies) :
-    (T.bosonMatterField w h).repAlgebra c v i = (T.boson i).repAlgebra c (v i) := rfl
+lemma bosonMatterField_repAlgebra_apply
+    (w : ℕ) (h : ∀ i, (T.boson i).massWeight = w) (c : 𝔤) (v : T.BosonModule) (i : T.BosonSpecies)
+    : (T.bosonMatterField w h).repAlgebra c v i = (T.boson i).repAlgebra c (v i) :=
+  rfl
 
-/-- The jets of gauge transformations act on the jets of the bosonic field species by
-  species, through the identification `jetPiEquiv` of the jets of the bosonic module
-  with the family of the jets of the species. -/
-lemma bosonMatterField_repJet_apply (w : ℕ)
-    (h : ∀ i, (T.boson i).massWeight = w) (U : GJ)
-    (z : SpaceTimeAlgebra ⊗[ℂ] T.BosonModule) :
-    (T.bosonMatterField w h).repJet U z =
-      (jetPiEquiv T.BosonValue).symm
-        (fun i => (T.boson i).repJet U (jetPiEquiv T.BosonValue z i)) := rfl
+/--
+The jets of gauge transformations act on the jets of the bosonic field species by
+species, through the identification `jetPiEquiv` of the jets of the bosonic module
+with the family of the jets of the species.
+-/
+lemma bosonMatterField_repJet_apply
+    (w : ℕ) (h : ∀ i, (T.boson i).massWeight = w) (U : GJ) (z : SpaceTimeAlgebra ⊗[ℂ] T.BosonModule)
+    : (T.bosonMatterField w h).repJet U z
+      = (jetPiEquiv T.BosonValue).symm
+        (fun i => (T.boson i).repJet U (jetPiEquiv T.BosonValue z i)) :=
+  rfl
 
-/-- The base-point Taylor coefficients of the bosonic jet action are those of the
-  species, index by index. -/
-lemma repCoeff_bosonMatterField (w : ℕ) (h : ∀ i, (T.boson i).massWeight = w) (U : GJ)
-    (x : Multiset (Fin 1 ⊕ Fin 3)) :
-    GaugeAlgebraRealization.repCoeff (T.bosonMatterField w h).repJet U x =
-      LinearMap.piMap fun i =>
-        GaugeAlgebraRealization.repCoeff (T.boson i).repJet U x :=
+/--
+The base-point Taylor coefficients of the bosonic jet action are those of the
+species, index by index.
+-/
+lemma repCoeff_bosonMatterField
+    (w : ℕ) (h : ∀ i, (T.boson i).massWeight = w) (U : GJ) (x : Multiset (Fin 1 ⊕ Fin 3))
+    : GaugeAlgebraRealization.repCoeff (T.bosonMatterField w h).repJet U x
+      = LinearMap.piMap fun i => GaugeAlgebraRealization.repCoeff (T.boson i).repJet U x :=
   MatterField.repCoeff_repJetPi T.boson U x
 
 /-!
@@ -190,42 +208,48 @@ lemma repCoeff_bosonMatterField (w : ℕ) (h : ∀ i, (T.boson i).massWeight = w
 
 -/
 
-/-- **A bosonic species is a Lorentz subrepresentation of the bosonic matter field**:
-  including a value of one species and then transforming is transforming and then
-  including. Assembling the species into one field therefore loses no Lorentz
-  information. -/
-lemma bosonMatterField_repLorentz_inclBosonValue (w : ℕ)
-    (h : ∀ i, (T.boson i).massWeight = w) (Λ : SL(2,ℂ)) (i : T.BosonSpecies)
-    (x : T.BosonValue i) :
-    (T.bosonMatterField w h).repLorentz Λ (T.inclBosonValue i x)
+/--
+**A bosonic species is a Lorentz subrepresentation of the bosonic matter field**:
+including a value of one species and then transforming is transforming and then
+including. Assembling the species into one field therefore loses no Lorentz
+information.
+-/
+lemma bosonMatterField_repLorentz_inclBosonValue
+    (w : ℕ) (h : ∀ i, (T.boson i).massWeight = w)
+    (Λ : SL(2,ℂ))
+    (i : T.BosonSpecies) (x : T.BosonValue i)
+    : (T.bosonMatterField w h).repLorentz Λ (T.inclBosonValue i x)
       = T.inclBosonValue i ((T.boson i).repLorentz Λ x) :=
-  funext fun j =>
-    Pi.apply_single (fun k => (T.boson k).repLorentz Λ) (fun _ => map_zero _) i x j
+  funext fun j => Pi.apply_single (fun k => (T.boson k).repLorentz Λ) (fun _ => map_zero _) i x j
 
-/-- **A bosonic species is a subrepresentation of the gauge algebra action** on the
-  bosonic matter field, for the same reason: the gauge algebra does not mix the
-  species. -/
-lemma bosonMatterField_repAlgebra_inclBosonValue (w : ℕ)
-    (h : ∀ i, (T.boson i).massWeight = w) (c : 𝔤) (i : T.BosonSpecies)
-    (x : T.BosonValue i) :
-    (T.bosonMatterField w h).repAlgebra c (T.inclBosonValue i x)
+/--
+**A bosonic species is a subrepresentation of the gauge algebra action** on the
+bosonic matter field, for the same reason: the gauge algebra does not mix the
+species.
+-/
+lemma bosonMatterField_repAlgebra_inclBosonValue
+    (w : ℕ) (h : ∀ i, (T.boson i).massWeight = w) (c : 𝔤) (i : T.BosonSpecies) (x : T.BosonValue i)
+    : (T.bosonMatterField w h).repAlgebra c (T.inclBosonValue i x)
       = T.inclBosonValue i ((T.boson i).repAlgebra c x) :=
-  funext fun j =>
-    Pi.apply_single (fun k => (T.boson k).repAlgebra c) (fun _ => map_zero _) i x j
+  funext fun j => Pi.apply_single (fun k => (T.boson k).repAlgebra c) (fun _ => map_zero _) i x j
 
-/-- The dimension of the bosonic matter field is the sum of the dimensions of the
-  species. -/
-lemma finrank_bosonMatterField (w : ℕ) (h : ∀ i, (T.boson i).massWeight = w) :
-    Module.finrank ℂ (T.bosonMatterField w h).V
-      = ∑ i, Module.finrank ℂ (T.BosonValue i) :=
+/--
+The dimension of the bosonic matter field is the sum of the dimensions of the
+species.
+-/
+lemma finrank_bosonMatterField (w : ℕ) (h : ∀ i, (T.boson i).massWeight = w)
+    : Module.finrank ℂ (T.bosonMatterField w h).V = ∑ i, Module.finrank ℂ (T.BosonValue i) :=
   T.finrank_bosonModule
 
-/-- The projection of the bosonic matter field onto one species, typed as a map out of
-  `(T.bosonMatterField w h).V` rather than out of `T.BosonModule`. The two are the same
-  type by definition, but naming the first keeps unification from having to unfold the
-  direct sum every time the projection meets the matter field. -/
-noncomputable abbrev projBosonField (w : ℕ) (h : ∀ i, (T.boson i).massWeight = w)
-    (i : T.BosonSpecies) : (T.bosonMatterField w h).V →ₗ[ℂ] (T.boson i).V :=
+/--
+The projection of the bosonic matter field onto one species, typed as a map out of
+`(T.bosonMatterField w h).V` rather than out of `T.BosonModule`. The two are the same
+type by definition, but naming the first keeps unification from having to unfold the
+direct sum every time the projection meets the matter field.
+-/
+noncomputable abbrev projBosonField
+    (w : ℕ) (h : ∀ i, (T.boson i).massWeight = w) (i : T.BosonSpecies)
+    : (T.bosonMatterField w h).V →ₗ[ℂ] (T.boson i).V :=
   LinearMap.proj i
 
 end GaugeFieldData

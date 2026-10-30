@@ -37,9 +37,9 @@ structure WithDim {B : Type} [DimensionBasis B] (d : Dimension B) (M : Type) whe
 namespace WithDim
 
 @[ext]
-lemma ext {B : Type} [DimensionBasis B] {d : Dimension B} {M}
-    (x1 x2 : WithDim d M) (h : x1.val = x2.val) :
-    x1 = x2 := by
+lemma ext
+    {B : Type} [DimensionBasis B] {d : Dimension B} {M} (x1 x2 : WithDim d M) (h : x1.val = x2.val)
+    : x1 = x2 := by
   cases x1
   cases x2
   simp_all
@@ -47,67 +47,68 @@ lemma ext {B : Type} [DimensionBasis B] {d : Dimension B} {M}
 instance (d : Dimension LTMCTDimensionBase) (M : Type) : HasDim (WithDim d M) where
   d := d
 
-@[simp]
-lemma dim_apply (d : Dimension LTMCTDimensionBase) (M : Type) :
-    dim (WithDim d M) = d := rfl
+@[simp] lemma dim_apply (d : Dimension LTMCTDimensionBase) (M : Type) : dim (WithDim d M) = d := rfl
 
 /-!
 ## Inherited instances
 -/
 
-instance {B : Type} [DimensionBasis B] (d : Dimension B) (M : Type) [Inhabited M] :
-    Inhabited (WithDim d M) where
+instance {B : Type} [DimensionBasis B] (d : Dimension B) (M : Type) [Inhabited M]
+    : Inhabited (WithDim d M) where
   default := ⟨default⟩
 
-instance {B : Type} [DimensionBasis B] (d : Dimension B) (M : Type) [Zero M] :
-    Zero (WithDim d M) where
+instance {B : Type} [DimensionBasis B] (d : Dimension B) (M : Type) [Zero M]
+    : Zero (WithDim d M) where
   zero := ⟨0⟩
 
 @[simp]
-lemma val_zero {B : Type} [DimensionBasis B] {d : Dimension B} {M : Type} [Zero M] :
-    (0 : WithDim d M).val = 0 := rfl
+lemma val_zero {B : Type} [DimensionBasis B] {d : Dimension B} {M : Type} [Zero M]
+    : (0 : WithDim d M).val = 0 :=
+  rfl
 
-instance {B : Type} [DimensionBasis B] (d : Dimension B) (M : Type) [Add M] :
-    Add (WithDim d M) where
+instance {B : Type} [DimensionBasis B] (d : Dimension B) (M : Type) [Add M]
+    : Add (WithDim d M) where
   add m1 m2 := ⟨m1.val + m2.val⟩
 
 @[simp]
-lemma val_add {B : Type} [DimensionBasis B] {d : Dimension B} {M : Type} [Add M]
-    (m1 m2 : WithDim d M) :
-    (m1 + m2).val = m1.val + m2.val := rfl
+lemma val_add
+    {B : Type} [DimensionBasis B] {d : Dimension B} {M : Type} [Add M] (m1 m2 : WithDim d M)
+    : (m1 + m2).val = m1.val + m2.val :=
+  rfl
 
-instance {B : Type} [DimensionBasis B] (d : Dimension B) (M : Type) [Neg M] :
-    Neg (WithDim d M) where
+instance {B : Type} [DimensionBasis B] (d : Dimension B) (M : Type) [Neg M]
+    : Neg (WithDim d M) where
   neg m := ⟨-m.val⟩
 
 @[simp]
-lemma val_neg {B : Type} [DimensionBasis B] {d : Dimension B} {M : Type} [Neg M]
-    (m : WithDim d M) :
-    (-m).val = -m.val := rfl
+lemma val_neg {B : Type} [DimensionBasis B] {d : Dimension B} {M : Type} [Neg M] (m : WithDim d M)
+    : (-m).val = -m.val :=
+  rfl
 
-instance {B : Type} [DimensionBasis B] (d : Dimension B) (M : Type) [Sub M] :
-    Sub (WithDim d M) where
+instance {B : Type} [DimensionBasis B] (d : Dimension B) (M : Type) [Sub M]
+    : Sub (WithDim d M) where
   sub m1 m2 := ⟨m1.val - m2.val⟩
 
 @[simp]
-lemma val_sub {B : Type} [DimensionBasis B] {d : Dimension B} {M : Type} [Sub M]
-    (m1 m2 : WithDim d M) :
-    (m1 - m2).val = m1.val - m2.val := rfl
+lemma val_sub
+    {B : Type} [DimensionBasis B] {d : Dimension B} {M : Type} [Sub M] (m1 m2 : WithDim d M)
+    : (m1 - m2).val = m1.val - m2.val :=
+  rfl
 
-instance {B : Type} [DimensionBasis B] (d : Dimension B) (M : Type) [AddSemigroup M] :
-    AddSemigroup (WithDim d M) where
+instance {B : Type} [DimensionBasis B] (d : Dimension B) (M : Type) [AddSemigroup M]
+    : AddSemigroup (WithDim d M) where
   add_assoc m1 m2 m3 := by
     ext
     simp [add_assoc]
 
-instance {B : Type} [DimensionBasis B] (d : Dimension B) (M : Type) [AddCommSemigroup M] :
-    AddCommSemigroup (WithDim d M) where
+instance {B : Type} [DimensionBasis B] (d : Dimension B) (M : Type) [AddCommSemigroup M]
+    : AddCommSemigroup (WithDim d M) where
   add_comm m1 m2 := by
     ext
     simp [add_comm]
 
-instance {B : Type} [DimensionBasis B] (d : Dimension B) (M : Type) [AddMonoid M] :
-    AddMonoid (WithDim d M) where
+instance {B : Type} [DimensionBasis B] (d : Dimension B) (M : Type) [AddMonoid M]
+    : AddMonoid (WithDim d M) where
   zero_add m := by
     ext
     simp [zero_add]
@@ -116,14 +117,14 @@ instance {B : Type} [DimensionBasis B] (d : Dimension B) (M : Type) [AddMonoid M
     simp [add_zero]
   nsmul := nsmulRec
 
-instance {B : Type} [DimensionBasis B] (d : Dimension B) (M : Type) [AddCommMonoid M] :
-    AddCommMonoid (WithDim d M) where
+instance {B : Type} [DimensionBasis B] (d : Dimension B) (M : Type) [AddCommMonoid M]
+    : AddCommMonoid (WithDim d M) where
   add_comm m1 m2 := by
     ext
     simp [add_comm]
 
-instance {B : Type} [DimensionBasis B] (d : Dimension B) (M : Type) [AddGroup M] :
-    AddGroup (WithDim d M) where
+instance {B : Type} [DimensionBasis B] (d : Dimension B) (M : Type) [AddGroup M]
+    : AddGroup (WithDim d M) where
   sub_eq_add_neg m1 m2 := by
     ext
     simp [sub_eq_add_neg]
@@ -132,34 +133,31 @@ instance {B : Type} [DimensionBasis B] (d : Dimension B) (M : Type) [AddGroup M]
     simp [neg_add_cancel]
   zsmul := zsmulRec
 
-instance {B : Type} [DimensionBasis B] (d : Dimension B) (M : Type) [AddCommGroup M] :
-    AddCommGroup (WithDim d M) where
+instance {B : Type} [DimensionBasis B] (d : Dimension B) (M : Type) [AddCommGroup M]
+    : AddCommGroup (WithDim d M) where
   add_comm m1 m2 := by
     ext
     simp [add_comm]
 
-instance {B : Type} [DimensionBasis B] (d : Dimension B) (M : Type) [LE M] :
-    LE (WithDim d M) where
+instance {B : Type} [DimensionBasis B] (d : Dimension B) (M : Type) [LE M] : LE (WithDim d M) where
   le m1 m2 := m1.val ≤ m2.val
 
 @[simp]
-lemma le_def {B : Type} [DimensionBasis B] {d : Dimension B} {M : Type} [LE M]
-    (m1 m2 : WithDim d M) :
-    m1 ≤ m2 ↔ m1.val ≤ m2.val := Iff.rfl
+lemma le_def {B : Type} [DimensionBasis B] {d : Dimension B} {M : Type} [LE M] (m1 m2 : WithDim d M)
+    : m1 ≤ m2 ↔ m1.val ≤ m2.val :=
+  Iff.rfl
 
-instance {B : Type} [DimensionBasis B] (d : Dimension B) (M : Type) [LT M] :
-    LT (WithDim d M) where
+instance {B : Type} [DimensionBasis B] (d : Dimension B) (M : Type) [LT M] : LT (WithDim d M) where
   lt m1 m2 := m1.val < m2.val
 
 @[simp]
-lemma lt_def {B : Type} [DimensionBasis B] {d : Dimension B} {M : Type} [LT M]
-    (m1 m2 : WithDim d M) :
-    m1 < m2 ↔ m1.val < m2.val := Iff.rfl
+lemma lt_def {B : Type} [DimensionBasis B] {d : Dimension B} {M : Type} [LT M] (m1 m2 : WithDim d M)
+    : m1 < m2 ↔ m1.val < m2.val :=
+  Iff.rfl
 
-instance {B : Type} [DimensionBasis B] (d : Dimension B) (M : Type) [Preorder M] :
-    Preorder (WithDim d M) where
-  le_refl m := by
-    exact le_refl m.val
+instance {B : Type} [DimensionBasis B] (d : Dimension B) (M : Type) [Preorder M]
+    : Preorder (WithDim d M) where
+  le_refl m := by exact le_refl m.val
   le_trans m1 m2 m3 h12 h23 := by
     change m1.val ≤ m3.val
     exact le_trans h12 h23
@@ -167,14 +165,14 @@ instance {B : Type} [DimensionBasis B] (d : Dimension B) (M : Type) [Preorder M]
     change m1.val < m2.val ↔ m1.val ≤ m2.val ∧ ¬ m2.val ≤ m1.val
     exact lt_iff_le_not_ge
 
-instance {B : Type} [DimensionBasis B] (d : Dimension B) (M : Type) [PartialOrder M] :
-    PartialOrder (WithDim d M) where
+instance {B : Type} [DimensionBasis B] (d : Dimension B) (M : Type) [PartialOrder M]
+    : PartialOrder (WithDim d M) where
   le_antisymm m1 m2 h12 h21 := by
     ext
     exact le_antisymm h12 h21
 
-instance {B : Type} [DimensionBasis B] (d : Dimension B) (M : Type) [MulAction ℝ≥0 M] :
-    MulAction ℝ≥0 (WithDim d M) where
+instance {B : Type} [DimensionBasis B] (d : Dimension B) (M : Type) [MulAction ℝ≥0 M]
+    : MulAction ℝ≥0 (WithDim d M) where
   smul a m := ⟨a • m.val⟩
   one_smul m := ext _ _ (one_smul ℝ≥0 m.val)
   mul_smul a b m := by
@@ -182,41 +180,51 @@ instance {B : Type} [DimensionBasis B] (d : Dimension B) (M : Type) [MulAction �
     exact mul_smul a b m.val
 
 @[simp]
-lemma smul_val {B : Type} [DimensionBasis B] {d : Dimension B} {M : Type} [MulAction ℝ≥0 M]
-    (a : ℝ≥0) (m : WithDim d M) :
-    (a • m).val = a • m.val := rfl
+lemma smul_val
+    {B : Type} [DimensionBasis B]
+    {d : Dimension B} {M : Type} [MulAction ℝ≥0 M]
+    (a : ℝ≥0) (m : WithDim d M)
+    : (a • m).val = a • m.val :=
+  rfl
 
 /-- The underlying value of a scaling by a unit of `ℝ≥0`, that is by a strictly positive real. -/
 @[simp]
-lemma smul_val_units {B : Type} [DimensionBasis B] {d : Dimension B} {M : Type}
-    [MulAction ℝ≥0 M] (a : ℝ≥0ˣ) (m : WithDim d M) :
-    (a • m).val = (a : ℝ≥0) • m.val := rfl
+lemma smul_val_units
+    {B : Type} [DimensionBasis B]
+    {d : Dimension B} {M : Type} [MulAction ℝ≥0 M]
+    (a : ℝ≥0ˣ) (m : WithDim d M)
+    : (a • m).val = (a : ℝ≥0) • m.val :=
+  rfl
 
-/-- A positive-real quantity which carries a dimension, regarded as a dimension-tagged real, so
-  that it can be used alongside the other dimension-tagged quantities. The dimension is read off
-  the `HasDim` instance, so the two cannot drift apart. -/
-def ofPositiveRealUnit {U : Type} [PositiveRealUnitCore U] [HasDim U] (x : U) :
-    WithDim (dim U) ℝ :=
+/--
+A positive-real quantity which carries a dimension, regarded as a dimension-tagged real, so
+that it can be used alongside the other dimension-tagged quantities. The dimension is read off
+the `HasDim` instance, so the two cannot drift apart.
+-/
+def ofPositiveRealUnit {U : Type} [PositiveRealUnitCore U] [HasDim U] (x : U) : WithDim (dim U) ℝ :=
   ⟨PositiveRealUnitCore.val x⟩
 
 @[simp]
-lemma ofPositiveRealUnit_val {U : Type} [PositiveRealUnitCore U] [HasDim U] (x : U) :
-    (ofPositiveRealUnit x).val = PositiveRealUnitCore.val x := rfl
+lemma ofPositiveRealUnit_val {U : Type} [PositiveRealUnitCore U] [HasDim U] (x : U)
+    : (ofPositiveRealUnit x).val = PositiveRealUnitCore.val x :=
+  rfl
 
 @[simp]
-lemma ofPositiveRealUnit_units_smul {U : Type} [PositiveRealUnitCore U] [HasDim U]
-    (a : ℝ≥0ˣ) (x : U) :
-    ofPositiveRealUnit (a • x) = a • ofPositiveRealUnit x := by
+lemma ofPositiveRealUnit_units_smul
+    {U : Type} [PositiveRealUnitCore U] [HasDim U] (a : ℝ≥0ˣ) (x : U)
+    : ofPositiveRealUnit (a • x) = a • ofPositiveRealUnit x := by
   apply WithDim.ext
   simp [PositiveRealUnitCore.val_units_smul, NNReal.smul_def]
 
-/-- A dimensionful positive-real quantity, such as the speed of light, may be tagged with its
-  dimension either before or after a change of units: `ofPositiveRealUnit` commutes with
-  `scaleUnit`. -/
-lemma ofPositiveRealUnit_of_scaleUnit {U : Type} [PositiveRealUnitCore U] [HasDim U]
-    {u1 u2 u : LTMCTUnitChoices} (c : Dimensionful U) :
-    ofPositiveRealUnit (c.1 (UnitDependent.scaleUnit u1 u2 u)) =
-    UnitDependent.scaleUnit u1 u2 (ofPositiveRealUnit (c.1 u)) := by
+/--
+A dimensionful positive-real quantity, such as the speed of light, may be tagged with its
+dimension either before or after a change of units: `ofPositiveRealUnit` commutes with
+`scaleUnit`.
+-/
+lemma ofPositiveRealUnit_of_scaleUnit
+    {U : Type} [PositiveRealUnitCore U] [HasDim U] {u1 u2 u : LTMCTUnitChoices} (c : Dimensionful U)
+    : ofPositiveRealUnit (c.1 (UnitDependent.scaleUnit u1 u2 u))
+      = UnitDependent.scaleUnit u1 u2 (ofPositiveRealUnit (c.1 u)) := by
   rw [Dimensionful.of_scaleUnit_units c, ofPositiveRealUnit_units_smul,
     HasDim.scaleUnit_apply_units]
   rfl
@@ -229,8 +237,9 @@ Real scalars here are dimensionless coefficients. This instance leaves the exist
 -/
 
 /-- Dimensionless real scalars act on the numerical value of a tagged quantity. -/
-instance instModuleReal {B : Type} [DimensionBasis B] (d : Dimension B) (M : Type)
-    [AddCommMonoid M] [Module ℝ M] : Module ℝ (WithDim d M) where
+instance instModuleReal
+    {B : Type} [DimensionBasis B] (d : Dimension B) (M : Type) [AddCommMonoid M] [Module ℝ M]
+    : Module ℝ (WithDim d M) where
   smul r x := ⟨r • x.val⟩
   one_smul x := WithDim.ext _ _ (one_smul ℝ x.val)
   mul_smul r s x := WithDim.ext _ _ (mul_smul r s x.val)
@@ -240,28 +249,31 @@ instance instModuleReal {B : Type} [DimensionBasis B] (d : Dimension B) (M : Typ
   zero_smul x := WithDim.ext _ _ (zero_smul ℝ x.val)
 
 @[simp]
-lemma real_smul_val {B : Type} [DimensionBasis B] {d : Dimension B} {M : Type}
-    [AddCommMonoid M] [Module ℝ M] (r : ℝ) (x : WithDim d M) :
-    (r • x).val = r • x.val := rfl
+lemma real_smul_val
+    {B : Type} [DimensionBasis B]
+    {d : Dimension B} {M : Type} [AddCommMonoid M] [Module ℝ M]
+    (r : ℝ) (x : WithDim d M)
+    : (r • x).val = r • x.val :=
+  rfl
 
-instance {B : Type} [DimensionBasis B] {d1 d2 : Dimension B} :
-    HMul (WithDim d1 ℝ) (WithDim d2 ℝ) (WithDim (d1 * d2) ℝ) where
+instance {B : Type} [DimensionBasis B] {d1 d2 : Dimension B}
+    : HMul (WithDim d1 ℝ) (WithDim d2 ℝ) (WithDim (d1 * d2) ℝ) where
   hMul m1 m2 := ⟨m1.val * m2.val⟩
 
-lemma withDim_hMul_val {B : Type} [DimensionBasis B] {d1 d2 : Dimension B}
-    (m1 : WithDim d1 ℝ) (m2 : WithDim d2 ℝ) :
-    (m1 * m2).val = m1.val * m2.val := rfl
+lemma withDim_hMul_val
+    {B : Type} [DimensionBasis B] {d1 d2 : Dimension B} (m1 : WithDim d1 ℝ) (m2 : WithDim d2 ℝ)
+    : (m1 * m2).val = m1.val * m2.val :=
+  rfl
 
-instance {d1 d2 : Dimension LTMCTDimensionBase} :
-    DMul (WithDim d1 ℝ) (WithDim d2 ℝ) (WithDim (d1 * d2) ℝ) where
+instance {d1 d2 : Dimension LTMCTDimensionBase}
+    : DMul (WithDim d1 ℝ) (WithDim d2 ℝ) (WithDim (d1 * d2) ℝ) where
   mul_dim m1 m2 := by
     intro u1 u2
     ext
     simp only [withDim_hMul_val, dim_apply]
     rw [m1.2 u1, m2.2 u1]
-    simp only [dim_apply, smul_val_units, withDim_hMul_val,
-      LTMCTUnitChoices.dimScaleUnits_mul_dim, Units.val_mul, Algebra.mul_smul_comm,
-      Algebra.smul_mul_assoc]
+    simp only [dim_apply, smul_val_units, withDim_hMul_val, LTMCTUnitChoices.dimScaleUnits_mul_dim,
+      Units.val_mul, Algebra.mul_smul_comm, Algebra.smul_mul_assoc]
     rw [smul_smul]
     congr 1
     rw [mul_comm]
@@ -269,42 +281,53 @@ instance {d1 d2 : Dimension LTMCTDimensionBase} :
 open UnitDependent
 
 @[simp]
-lemma val_mul_eq_mul {B : Type} [DimensionBasis B] {d1 d2 : Dimension B}
-    (m1 : WithDim d1 ℝ) (m2 : WithDim d2 ℝ) :
-    m1.val * m2.val = (m1 * m2).val := by
+lemma val_mul_eq_mul
+    {B : Type} [DimensionBasis B] {d1 d2 : Dimension B} (m1 : WithDim d1 ℝ) (m2 : WithDim d2 ℝ)
+    : m1.val * m2.val = (m1 * m2).val := by
   simp only [withDim_hMul_val]
 
 @[simp]
-lemma val_pow_two_eq_mul {B : Type} [DimensionBasis B] {d1 : Dimension B}
-    (m1 : WithDim d1 ℝ) :
-    m1.val ^ 2 = (m1 * m1).val := by
+lemma val_pow_two_eq_mul {B : Type} [DimensionBasis B] {d1 : Dimension B} (m1 : WithDim d1 ℝ)
+    : m1.val ^ 2 = (m1 * m1).val := by
   rw [sq]
   rfl
 
 @[simp]
-lemma scaleUnit_val_eq_scaleUnit_val {d : Dimension LTMCTDimensionBase} (M : Type) [MulAction ℝ≥0 M]
-    (u1 u2 : LTMCTUnitChoices) (m1 m2 : WithDim d M) :
-    (scaleUnit u1 u2 m1).val = (scaleUnit u1 u2 m2).val ↔ m1.val = m2.val := by
+lemma scaleUnit_val_eq_scaleUnit_val
+    {d : Dimension LTMCTDimensionBase}
+    (M : Type) [MulAction ℝ≥0 M]
+    (u1 u2 : LTMCTUnitChoices) (m1 m2 : WithDim d M)
+    : (scaleUnit u1 u2 m1).val = (scaleUnit u1 u2 m2).val ↔ m1.val = m2.val := by
   rw [← WithDim.ext_iff]
   simp only [scaleUnit_injective]
   exact WithDim.ext_iff
 
-lemma scaleUnit_val_eq_scaleUnit_val_of_dim_eq {d1 d2 : Dimension LTMCTDimensionBase} {M : Type}
-    [MulAction ℝ≥0 M]
+lemma scaleUnit_val_eq_scaleUnit_val_of_dim_eq
+    {d1 d2 : Dimension LTMCTDimensionBase} {M : Type} [MulAction ℝ≥0 M]
     {u1 u2 : LTMCTUnitChoices} {m1 : WithDim d1 M} {m2 : WithDim d2 M}
-    (h : d1 = d2 := by ext <;> {simp; try ring}) :
-    (scaleUnit u1 u2 m1).val = (scaleUnit u1 u2 m2).val ↔ m1.val = m2.val := by
+    (h : d1 = d2 := by
+      ext <;> {
+        simp; try ring
+      })
+    : (scaleUnit u1 u2 m1).val = (scaleUnit u1 u2 m2).val ↔ m1.val = m2.val := by
   subst h
   simp
 
-lemma scaleUnit_val {d : Dimension LTMCTDimensionBase} (M : Type) [MulAction ℝ≥0 M]
-    (u1 u2 : LTMCTUnitChoices) (m1 : WithDim d M) :
-    (scaleUnit u1 u2 m1).val = u1.dimScale u2 d • m1.val := rfl
+lemma scaleUnit_val
+    {d : Dimension LTMCTDimensionBase}
+    (M : Type) [MulAction ℝ≥0 M]
+    (u1 u2 : LTMCTUnitChoices) (m1 : WithDim d M)
+    : (scaleUnit u1 u2 m1).val = u1.dimScale u2 d • m1.val :=
+  rfl
 
-/-- Scaling by a change of units preserves positivity of the value of a dimensionful
-quantity. -/
-lemma scaleUnit_val_pos {d : Dimension LTMCTDimensionBase} (m : WithDim d ℝ≥0) (hm : 0 < m.val)
-    (u1 u2 : LTMCTUnitChoices) : 0 < (scaleUnit u1 u2 m).val := by
+/--
+Scaling by a change of units preserves positivity of the value of a dimensionful
+quantity.
+-/
+lemma scaleUnit_val_pos
+    {d : Dimension LTMCTDimensionBase} (m : WithDim d ℝ≥0) (hm : 0 < m.val)
+    (u1 u2 : LTMCTUnitChoices)
+    : 0 < (scaleUnit u1 u2 m).val := by
   rw [scaleUnit_val, smul_eq_mul]
   exact mul_pos (LTMCTUnitChoices.dimScale_pos u1 u2 d) hm
 
@@ -314,33 +337,40 @@ lemma scaleUnit_val_pos {d : Dimension LTMCTDimensionBase} (m : WithDim d ℝ≥
 
 -/
 
-noncomputable instance {B : Type} [DimensionBasis B] (d1 d2 : Dimension B) :
-    HDiv (WithDim d1 ℝ) (WithDim d2 ℝ) (WithDim (d1 * d2⁻¹) ℝ) where
+noncomputable instance {B : Type} [DimensionBasis B] (d1 d2 : Dimension B)
+    : HDiv (WithDim d1 ℝ) (WithDim d2 ℝ) (WithDim (d1 * d2⁻¹) ℝ) where
   hDiv m1 m2 := ⟨m1.val / m2.val⟩
 
 @[simp]
-lemma val_div_val {B : Type} [DimensionBasis B] {d1 d2 : Dimension B}
-    (m1 : WithDim d1 ℝ) (m2 : WithDim d2 ℝ) :
-    (m1.val / m2.val) = (m1 / m2).val := rfl
+lemma val_div_val
+    {B : Type} [DimensionBasis B] {d1 d2 : Dimension B} (m1 : WithDim d1 ℝ) (m2 : WithDim d2 ℝ)
+    : (m1.val / m2.val) = (m1 / m2).val :=
+  rfl
 
 @[simp]
-lemma div_scaleUnit {d1 d2 : Dimension LTMCTDimensionBase} (m1 : WithDim d1 ℝ) (m2 : WithDim d2 ℝ)
-    (u1 u2 : LTMCTUnitChoices) :
-    (scaleUnit u1 u2 m1) / (scaleUnit u1 u2 m2) = scaleUnit u1 u2 (m1 / m2) := by
+lemma div_scaleUnit
+    {d1 d2 : Dimension LTMCTDimensionBase} (m1 : WithDim d1 ℝ) (m2 : WithDim d2 ℝ)
+    (u1 u2 : LTMCTUnitChoices)
+    : (scaleUnit u1 u2 m1) / (scaleUnit u1 u2 m2) = scaleUnit u1 u2 (m1 / m2) := by
   symm
   ext
   simp only [← val_div_val, scaleUnit_val]
   simp only [map_mul, map_inv, val_div_val]
   field_simp
-  change ((u1.dimScale u2) d1 / (u1.dimScale u2) d2) * (m1 / m2).val =
-    u1.dimScale u2 d1 * m1.val / (u1.dimScale u2 d2 * m2.val)
+  change ((u1.dimScale u2) d1 / (u1.dimScale u2) d2) * (m1 / m2).val
+    = u1.dimScale u2 d1 * m1.val / (u1.dimScale u2 d2 * m2.val)
   rw [← val_div_val]
   exact div_mul_div_comm (↑((u1.dimScale u2) d1)) (↑((u1.dimScale u2) d2)) m1.val m2.val
 
 @[simp]
-lemma scaleUnit_dim_eq_zero {d : Dimension LTMCTDimensionBase} (m : WithDim d ℝ)
-    (u1 u2 : LTMCTUnitChoices) (h : d = 1 := by ext <;> {simp; try ring}) :
-    scaleUnit u1 u2 m = m := by
+lemma scaleUnit_dim_eq_zero
+    {d : Dimension LTMCTDimensionBase} (m : WithDim d ℝ)
+    (u1 u2 : LTMCTUnitChoices)
+    (h : d = 1 := by
+      ext <;> {
+        simp; try ring
+      })
+    : scaleUnit u1 u2 m = m := by
   subst h
   ext
   rw [scaleUnit_val]
@@ -353,18 +383,26 @@ lemma scaleUnit_dim_eq_zero {d : Dimension LTMCTDimensionBase} (m : WithDim d �
 set_option linter.unusedVariables false in
 /-- The casting from `WithDim d M` to `WithDim d2 M` when `d = d2`. -/
 @[nolint unusedArguments]
-def cast {B : Type} [DimensionBasis B] {d d2 : Dimension B} {M : Type} (m : WithDim d M)
-    (h : d = d2 := by ext <;> {simp; try ring}) : WithDim d2 M := ⟨m.val⟩
+def cast
+    {B : Type} [DimensionBasis B]
+    {d d2 : Dimension B} {M : Type} (m : WithDim d M)
+    (h : d = d2 := by
+      ext <;> {
+        simp; try ring
+      })
+    : WithDim d2 M :=
+  ⟨m.val⟩
 
 @[simp]
-lemma cast_refl {B : Type} [DimensionBasis B] {d : Dimension B} {M : Type} (m : WithDim d M) :
-    cast m rfl = m := rfl
+lemma cast_refl {B : Type} [DimensionBasis B] {d : Dimension B} {M : Type} (m : WithDim d M)
+    : cast m rfl = m :=
+  rfl
 
 @[simp]
-lemma cast_scaleUnit {d d2 : Dimension LTMCTDimensionBase} {M : Type} [MulAction ℝ≥0 M]
-    (m : WithDim d M)
-    (h : d = d2) (u1 u2 : LTMCTUnitChoices) :
-    cast (scaleUnit u1 u2 m) h = scaleUnit u1 u2 (cast m h) := by
+lemma cast_scaleUnit
+    {d d2 : Dimension LTMCTDimensionBase} {M : Type} [MulAction ℝ≥0 M]
+    (m : WithDim d M) (h : d = d2) (u1 u2 : LTMCTUnitChoices)
+    : cast (scaleUnit u1 u2 m) h = scaleUnit u1 u2 (cast m h) := by
   subst h
   simp
 

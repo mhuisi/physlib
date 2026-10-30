@@ -89,7 +89,6 @@ namespace AutoLabel
 
 -/
 
-
 /-- Maximal number of labels which can be added. If more are applicable, nothing will be added. -/
 def MAX_LABELS := 1
 
@@ -114,7 +113,6 @@ inductive Label where
   | «t-string-theory»
   | «t-thermodynamics»
   | «t-units»
-
   -- QuantumInfo
   | «t-capacity-qi»
   | «t-channels-qi»
@@ -126,11 +124,9 @@ inductive Label where
   | «t-resource-theory-qi»
   | «t-states-qi»
   | «CI»
-
   -- PhyslibAlpha
   | «PhyslibAlpha»
-
-  deriving BEq, Hashable, Repr
+deriving BEq, Hashable, Repr
 
 def physlibLabels : Array Label := #[
   .«t-classical-field-theory», .«t-classical-mechanics», .«t-condensed-matter», .«t-cosmology»,
@@ -138,41 +134,41 @@ def physlibLabels : Array Label := #[
   .«t-particles», .«t-qft», .«t-quantum-mechanics», .«t-relativity»,
   .«t-space-and-time», .«t-statistical-mechanics», .«t-string-theory», .«t-thermodynamics»,
   .«t-units», .«t-capacity-qi», .«t-channels-qi», .«t-classical-info-qi», .«t-entropy-qi»,
-  .«t-for-mathlib-qi», .«t-measurements-qi», .«t-operators-qi», .«t-resource-theory-qi», .«t-states-qi»,
+  .«t-for-mathlib-qi», .«t-measurements-qi», .«t-operators-qi», .«t-resource-theory-qi»,
+  .«t-states-qi»,
   .«CI», .«PhyslibAlpha»
 ]
 
-
 def Label.toString : Label → String
-  | .«t-classical-field-theory»                    => "t-classical-field-theory"
-  | .«t-classical-mechanics»         => "t-classical-mechanics"
-  | .«t-condensed-matter»         => "t-condensed-matter"
-  | .«t-cosmology»                   => "t-cosmology"
-  | .«t-electromagnetism»            => "t-electromagnetism"
-  | .«t-fluid-dynamics»            => "t-fluid-dynamics"
-  | .«t-mathematics»              => "t-mathematics"
-  | .«t-meta»                       => "t-meta"
-  | .«t-optics»                     => "t-optics"
-  | .«t-particles»                  => "t-particles"
-  | .«t-qft»                        => "t-qft"
-  | .«t-quantum-mechanics»          => "t-quantum-mechanics"
-  | .«t-relativity»                => "t-relativity"
-  | .«t-space-and-time»             => "t-space-and-time"
-  | .«t-statistical-mechanics»      => "t-statistical-mechanics"
-  | .«t-string-theory»              => "t-string-theory"
-  | .«t-thermodynamics»             => "t-thermodynamics"
-  | .«t-units»                      => "t-units"
-  | .«t-capacity-qi»                   => "t-capacity-qi"
-  | .«t-channels-qi»                   => "t-channels-qi"
-  | .«t-classical-info-qi»             => "t-classical-info-qi"
-  | .«t-entropy-qi»                    => "t-entropy-qi"
-  | .«t-for-mathlib-qi»                => "t-for-mathlib-qi"
-  | .«t-measurements-qi»               => "t-measurements-qi"
-  | .«t-operators-qi»                  => "t-operators-qi"
-  | .«t-resource-theory-qi»            => "t-resource-theory-qi"
-  | .«t-states-qi»                     => "t-states-qi"
-  | .«CI»                              => "CI"
-  | .«PhyslibAlpha»                    => "PhyslibAlpha"
+  | .«t-classical-field-theory» => "t-classical-field-theory"
+  | .«t-classical-mechanics» => "t-classical-mechanics"
+  | .«t-condensed-matter» => "t-condensed-matter"
+  | .«t-cosmology» => "t-cosmology"
+  | .«t-electromagnetism» => "t-electromagnetism"
+  | .«t-fluid-dynamics» => "t-fluid-dynamics"
+  | .«t-mathematics» => "t-mathematics"
+  | .«t-meta» => "t-meta"
+  | .«t-optics» => "t-optics"
+  | .«t-particles» => "t-particles"
+  | .«t-qft» => "t-qft"
+  | .«t-quantum-mechanics» => "t-quantum-mechanics"
+  | .«t-relativity» => "t-relativity"
+  | .«t-space-and-time» => "t-space-and-time"
+  | .«t-statistical-mechanics» => "t-statistical-mechanics"
+  | .«t-string-theory» => "t-string-theory"
+  | .«t-thermodynamics» => "t-thermodynamics"
+  | .«t-units» => "t-units"
+  | .«t-capacity-qi» => "t-capacity-qi"
+  | .«t-channels-qi» => "t-channels-qi"
+  | .«t-classical-info-qi» => "t-classical-info-qi"
+  | .«t-entropy-qi» => "t-entropy-qi"
+  | .«t-for-mathlib-qi» => "t-for-mathlib-qi"
+  | .«t-measurements-qi» => "t-measurements-qi"
+  | .«t-operators-qi» => "t-operators-qi"
+  | .«t-resource-theory-qi» => "t-resource-theory-qi"
+  | .«t-states-qi» => "t-states-qi"
+  | .«CI» => "CI"
+  | .«PhyslibAlpha» => "PhyslibAlpha"
 
 instance : ToString Label where
   toString := Label.toString
@@ -187,34 +183,47 @@ A `LabelData` consists of the
 * The `dependencies` field is the array of all labels, which are lower in the import hierarchy
   and which should be excluded if the label is present.
 * The `exclusive` field, if `true`, makes the label applicable only when every modified file
-  lies in one of `dirs`.-/
+  lies in one of `dirs`.
+-/
 structure LabelData (label : Label) where
-  /-- Array of paths which fall under this label. e.g. `"Physlib" / "Cosmology"`.
+  /--
+  Array of paths which fall under this label. e.g. `"Physlib" / "Cosmology"`.
 
   For a label of the form `t-cosmology` this defaults to `#["Physlib" / "Cosmology"]`.
-  For a label of the form `t-states-qi` this defaults to `#["QuantumInfo" / "States"]`. -/
-
-  dirs : Array FilePath := if label.toString.startsWith "t-" && label.toString.endsWith "-qi" then
-      #["QuantumInfo" / ("".intercalate (label.toString.splitOn "-" |>.drop 1 |>.dropLast |>.map .capitalize))]
-  else if label.toString.startsWith "t-" then
-    #["Physlib" / ("".intercalate (label.toString.splitOn "-" |>.drop 1 |>.map .capitalize))]
-    else #[]
-  /-- Array of paths which should be excluded.
-  Any modifications to a file in an excluded path are ignored for the purposes of labelling. -/
+  For a label of the form `t-states-qi` this defaults to `#["QuantumInfo" / "States"]`.
+  -/
+  dirs : Array FilePath :=
+    if label.toString.startsWith "t-" && label.toString.endsWith "-qi" then #[
+      "QuantumInfo"
+        / ("".intercalate (label.toString.splitOn "-" |>.drop 1 |>.dropLast |>.map .capitalize))
+    ]
+    else if label.toString.startsWith "t-" then
+      #["Physlib" / ("".intercalate (label.toString.splitOn "-" |>.drop 1 |>.map .capitalize))]
+    else
+      #[]
+  /--
+  Array of paths which should be excluded.
+  Any modifications to a file in an excluded path are ignored for the purposes of labelling.
+  -/
   exclusions : Array FilePath := #[]
-  /-- Labels which are "lower" in the Physlib import order. These labels will not be added
+  /--
+  Labels which are "lower" in the Physlib import order. These labels will not be added
   alongside the label. For example, in Mathlib, any PR to `t-ring-theory` might modify files from `t-algebra`
-  but should only get the former label -/
+  but should only get the former label
+  -/
   dependencies : Array Label := #[]
-  /-- If `true`, the label is only applicable when every (non-excluded) modified file lies in
-  one of `dirs`. -/
+  /--
+  If `true`, the label is only applicable when every (non-excluded) modified file lies in
+  one of `dirs`.
+  -/
   exclusive : Bool := false
-  deriving BEq, Hashable
+deriving BEq, Hashable
 
-
-/-- This function maps each label to the corresponding paths
-For now, no exclusions or dependencies are specified --/
-def physlibLabelData: (l: Label) → LabelData l
+/--
+This function maps each label to the corresponding paths
+For now, no exclusions or dependencies are specified -
+-/
+def physlibLabelData : (l : Label) → LabelData l
   | .«t-classical-field-theory» => {}
   | .«t-classical-mechanics» => {}
   | .«t-condensed-matter» => {}
@@ -245,15 +254,21 @@ def physlibLabelData: (l: Label) → LabelData l
   | .«CI» => { dirs := #["scripts"] }
   | .«PhyslibAlpha» => { dirs := #["PhyslibAlpha", "PhyslibAlpha.lean"], exclusive := true }
 
-/-- Exceptions inside `Physlib/` which are not covered by any label.
-(For the First versions, no exceptions) -/
-def physlibUnlabelled : Array FilePath := #[ ]
-/-- Exceptions inside `QuantumInfo/` which are not covered by any label.
-(For the First versions, no exceptions) -/
-def quantuminfoUnlabelled : Array FilePath := #[ ]
+/--
+Exceptions inside `Physlib/` which are not covered by any label.
+(For the First versions, no exceptions)
+-/
+def physlibUnlabelled : Array FilePath := #[]
+/--
+Exceptions inside `QuantumInfo/` which are not covered by any label.
+(For the First versions, no exceptions)
+-/
+def quantuminfoUnlabelled : Array FilePath := #[]
 
-/-- Checks if the folder `path` lies inside the folder `dir`.
-Copied verbatim from mathlib `scripts/autolabel.lean` -/
+/--
+Checks if the folder `path` lies inside the folder `dir`.
+Copied verbatim from mathlib `scripts/autolabel.lean`
+-/
 def _root_.System.FilePath.isPrefixOf (dir path : FilePath) : Bool :=
   -- use `dir / ""` to prevent partial matching of folder names
   (dir / "").normalize.toString.isPrefixOf (path / "").normalize.toString
@@ -262,30 +277,34 @@ def _root_.System.FilePath.isPrefixOf (dir path : FilePath) : Bool :=
 Return all labels in `physlibLabels` which match
 at least one of the `files`. A label with `exclusive := true` must instead match all of
 the `files`.
-* `files`: array of relative paths starting from the physlib root directory. -/
+* `files`: array of relative paths starting from the physlib root directory.
+-/
 def getMatchingLabels (files : Array FilePath) : Array Label :=
-  let applicable := physlibLabels.filter fun label ↦
-    -- first exclude all files the label excludes,
-    -- then see if any (or, for an exclusive label, every) remaining file is included by the label
-    let data := physlibLabelData label
-    let notExcludedFiles := files.filter fun file ↦
-      data.exclusions.all (!·.isPrefixOf file)
-    let isIncluded (file : FilePath) : Bool := data.dirs.any (·.isPrefixOf file)
-    notExcludedFiles.any isIncluded && (!data.exclusive || notExcludedFiles.all isIncluded)
+  let applicable :=
+    physlibLabels.filter fun label ↦
+      -- first exclude all files the label excludes,
+      -- then see if any (or, for an exclusive label, every) remaining file is included by the label
+      let data := physlibLabelData label
+      let notExcludedFiles := files.filter fun file ↦ data.exclusions.all (! ·.isPrefixOf file)
+      let isIncluded (file : FilePath) : Bool := data.dirs.any (·.isPrefixOf file)
+      notExcludedFiles.any isIncluded && (!data.exclusive || notExcludedFiles.all isIncluded)
   -- return sorted list of labels
   applicable |>.qsort (·.toString < ·.toString)
 
 /-- Helper function: union of all labels and all their dependent labels -/
-partial def collectLabelsAndDependentLabels (labels: Array Label) : Array Label :=
+partial def collectLabelsAndDependentLabels (labels : Array Label) : Array Label :=
   labels.flatMap fun label ↦
     (collectLabelsAndDependentLabels (physlibLabelData label).dependencies).push label
 
-/-- Reduce a list of labels to not include any which are dependencies of other
-labels in the list -/
-def dropDependentLabels (labels: Array Label) : Array Label :=
-  let dependentLabels := collectLabelsAndDependentLabels <|
-    labels.flatMap fun label ↦ (physlibLabelData label).dependencies
-  labels.filter (!dependentLabels.contains ·)
+/--
+Reduce a list of labels to not include any which are dependencies of other
+labels in the list
+-/
+def dropDependentLabels (labels : Array Label) : Array Label :=
+  let dependentLabels :=
+    collectLabelsAndDependentLabels <|
+      labels.flatMap fun label ↦ (physlibLabelData label).dependencies
+  labels.filter (! dependentLabels.contains ·)
 
 /-!
 Testing the functionality of the declarations defined in this script
@@ -293,19 +312,22 @@ Testing the functionality of the declarations defined in this script
 section Tests
 
 -- Test `FilePath.isPrefixOf`
-#guard ("Physlib" / "CondensedMatter" : FilePath).isPrefixOf ("Physlib" / "CondensedMatter" / "TightBindingChain" /"Basic.lean")
+#guard ("Physlib" / "CondensedMatter" : FilePath).isPrefixOf
+  ("Physlib" / "CondensedMatter" / "TightBindingChain" / "Basic.lean")
 
 -- Test `FilePath.isPrefixOf` does not trigger on partial prefixes
-#guard ! ("Physlib" / "Condensed" : FilePath).isPrefixOf ("Physlib" / "CondensedMatter" )
+#guard ! ("Physlib" / "Condensed" : FilePath).isPrefixOf ("Physlib" / "CondensedMatter")
 
 #guard getMatchingLabels #[] == #[]
 
 -- Test default value for `label.dirs` works
-#guard getMatchingLabels #["Physlib" / "CondensedMatter" / "TightBindingChain" / "Basic.lean"] == #[.«t-condensed-matter»]
+#guard getMatchingLabels #["Physlib" / "CondensedMatter" / "TightBindingChain" / "Basic.lean"]
+  == #[.«t-condensed-matter»]
 
 -- Test QuantumInfo labels resolve to their topic folders
 #guard getMatchingLabels #["QuantumInfo" / "Entropy" / "Basic.lean"] == #[.«t-entropy-qi»]
-#guard getMatchingLabels #["QuantumInfo" / "ResourceTheory" / "Basic.lean"] == #[.«t-resource-theory-qi»]
+#guard getMatchingLabels #["QuantumInfo" / "ResourceTheory" / "Basic.lean"]
+  == #[.«t-resource-theory-qi»]
 
 -- Test exclusion
 -- No exclusion exists in Physlib as of now
@@ -316,17 +338,19 @@ section Tests
 -- Test the exclusive `PhyslibAlpha` label: applied only if every file is in `PhyslibAlpha/`
 -- or is `PhyslibAlpha.lean`
 #guard getMatchingLabels #["PhyslibAlpha" / "Relativity" / "Basic.lean"] == #[.«PhyslibAlpha»]
-#guard getMatchingLabels #["PhyslibAlpha" / "Relativity" / "Basic.lean", "PhyslibAlpha.lean"] ==
-  #[.«PhyslibAlpha»]
+#guard getMatchingLabels #["PhyslibAlpha" / "Relativity" / "Basic.lean", "PhyslibAlpha.lean"]
+  == #[.«PhyslibAlpha»]
 #guard getMatchingLabels #["PhyslibAlpha.lean"] == #[.«PhyslibAlpha»]
-#guard getMatchingLabels #["PhyslibAlpha.lean", "Physlib" / "Cosmology" / "Basic.lean"] ==
-  #[.«t-cosmology»]
+#guard getMatchingLabels #["PhyslibAlpha.lean", "Physlib" / "Cosmology" / "Basic.lean"]
+  == #[.«t-cosmology»]
 #guard getMatchingLabels #["PhyslibAlpha.lean", "README.md"] == #[]
 
-/-- Testing function to ensure the labels defined in `physlibLabels` cover all
-subfolders of `Physlib/` and `QuantumInfo/`. -/
-partial def findUncoveredPaths (path : FilePath) (exceptions : Array FilePath := #[]) :
-    IO <| Array FilePath := do
+/--
+Testing function to ensure the labels defined in `physlibLabels` cover all
+subfolders of `Physlib/` and `QuantumInfo/`.
+-/
+partial def findUncoveredPaths (path : FilePath) (exceptions : Array FilePath := #[])
+    : IO <| Array FilePath := do
   let mut notMatched : Array FilePath := #[]
   -- all directories inside `path`
   let subDirs ← (← path.readDir).map (·.path) |>.filterM (do FilePath.isDir ·)
@@ -364,8 +388,8 @@ def githubAnnotation (type file title message : String) : String :=
 end AutoLabel
 
 open IO AutoLabel in
-
-/-- `args` is expected to have length 0 or 1, where the first argument is the PR number.
+/--
+`args` is expected to have length 0 or 1, where the first argument is the PR number.
 
 If a PR number is provided, the script requires GitHub CLI `gh` to be installed in order
 to add the label to the PR.
@@ -377,11 +401,11 @@ to add the label to the PR.
 - `2`: invalid labels defined
 - `3`: ~labels do not cover all of `Physlib/`~ (unused; only emitting warning)
 -/
-unsafe def main (args : List String): IO UInt32 := do
+unsafe def main (args : List String) : IO UInt32 := do
   if args.length > 1 then
     println s!"::error:: autolabel: invalid number of arguments ({args.length}), \
-    expected at most 1. Please run without arguments or provide the target PR's \
-    number as a single argument!"
+      expected at most 1. Please run without arguments or provide the target PR's \
+      number as a single argument!"
     return 1
   let prNumber? := args[0]?
 
@@ -393,17 +417,17 @@ unsafe def main (args : List String): IO UInt32 := do
       unless ← FilePath.pathExists dir do
         -- print github annotation error
         println <| AutoLabel.githubAnnotation "error" "scripts/github/autolabel.lean"
-          s!"Misformatted `{ ``AutoLabel.physlibLabelData }`"
+          s!"Misformatted `{``AutoLabel.physlibLabelData}`"
           s!"directory '{dir}' does not exist but is included by label '{label}'. \
-          Please update `{ ``AutoLabel.physlibLabelData }`!"
+            Please update `{``AutoLabel.physlibLabelData}`!"
         valid := false
     for dir in data.exclusions do
       unless ← FilePath.pathExists dir do
         -- print github annotation error
         println <| AutoLabel.githubAnnotation "error" "scripts/github/autolabel.lean"
-          s!"Misformatted `{ ``AutoLabel.physlibLabelData }`"
+          s!"Misformatted `{``AutoLabel.physlibLabelData}`"
           s!"directory '{dir}' does not exist but is excluded by label '{label}'. \
-          Please update `{ ``AutoLabel.physlibLabelData }`!"
+            Please update `{``AutoLabel.physlibLabelData}`!"
         valid := false
   unless valid do
     return 2
@@ -415,17 +439,18 @@ unsafe def main (args : List String): IO UInt32 := do
     -- note: only emitting a warning because the workflow is only triggered on the first commit
     -- of a PR and could therefore lead to unexpected behaviour if a folder was created later.
     println <| AutoLabel.githubAnnotation "warning" "scripts/github/autolabel.lean"
-      s!"Incomplete `{ ``AutoLabel.physlibLabelData }`"
+      s!"Incomplete `{``AutoLabel.physlibLabelData}`"
       s!"the following paths inside `Physlib/` are not covered \
-      by any label: {notMatchedPaths} Please modify `AutoLabel.physlibLabels` accordingly!"
-    -- return 3
+        by any label: {notMatchedPaths} Please modify `AutoLabel.physlibLabels` accordingly!"
+  -- return 3
 
   -- get the modified files
   println "Computing 'git diff --name-only origin/master...HEAD'"
-  let gitDiff ← IO.Process.run {
-    cmd := "git",
-    args := #["diff", "--name-only", "origin/master...HEAD"] }
-  println s!"---\n{gitDiff}\n---"
+  let gitDiff ←
+    IO.Process.run { cmd := "git", args := #["diff", "--name-only", "origin/master...HEAD"] }
+  println s!"---\
+    \n{gitDiff}\
+    \n---"
   -- drop the empty entry from the trailing newline, which would block exclusive labels
   let modifiedFiles : Array FilePath :=
     (gitDiff.splitOn "\n").toArray.filter (!·.isEmpty) |>.map (⟨·⟩)
@@ -435,29 +460,35 @@ unsafe def main (args : List String): IO UInt32 := do
   println s!"::notice::Applicable labels: {labels}"
 
   match labels with
-  | #[] =>
-    println s!"::warning::no label to add"
+  | #[] => println s!"::warning::no label to add"
   | newLabels =>
     match prNumber? with
     | some n =>
       if newLabels.size > MAX_LABELS then
         println s!"::notice::not adding more than {MAX_LABELS} labels: {newLabels}"
         return 0
-      let labelsPresent ← IO.Process.run {
-        cmd := "gh"
-        args := #["pr", "view", n, "--json", "labels", "--jq", ".labels .[] .name"]}
+      let labelsPresent ←
+        IO.Process.run {
+          cmd := "gh"
+          args := #["pr", "view", n, "--json", "labels", "--jq", ".labels .[] .name"]
+        }
       let labels := labelsPresent.splitToList (· == '\n')
       let autoLabels := physlibLabels.map (·.toString)
       match labels.filter autoLabels.contains with
       | [] => -- if the PR does not have a label that this script could add, then we add a label
-        let _ ← IO.Process.run {
-          cmd := "gh",
-          args := #["pr", "edit", n, "--add-label", s!"\"{",".intercalate <| newLabels.toList.map (·.toString)}\""] }
+        let _ ←
+          IO.Process.run {
+            cmd := "gh"
+            args := #[
+              "pr", "edit", n, "--add-label",
+              s!"\"{",".intercalate <| newLabels.toList.map (·.toString)}\""
+            ]
+          }
         println s!"::notice::added labels: {newLabels}"
       | t_labels_already_present =>
         println s!"::notice::Did not add labels '{newLabels}', \
-                  since {t_labels_already_present} were already present"
+          since {t_labels_already_present} were already present"
     | none =>
       println s!"::warning::no PR-number provided, not adding labels. \
-      (call `lake exe autolabel 150602` to add the labels to PR `150602`)"
+        (call `lake exe autolabel 150602` to add the labels to PR `150602`)"
   return 0

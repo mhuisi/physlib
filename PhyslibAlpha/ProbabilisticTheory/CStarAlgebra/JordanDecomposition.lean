@@ -52,16 +52,14 @@ namespace Observable
 /-! ## A. Positive observables -/
 
 /-- An observable is positive exactly when it is the square of an observable. -/
-lemma nonneg_iff_exists_observable_sq (a : Observable A) :
-    0 ≤ (a : A) ↔ ∃ b : Observable A, (a : A) = (b : A) * b := by
+lemma nonneg_iff_exists_observable_sq (a : Observable A)
+    : 0 ≤ (a : A) ↔ ∃ b : Observable A, (a : A) = (b : A) * b := by
   constructor
   · intro ha
-    obtain ⟨b, hb, hab⟩ :=
-      CStarAlgebra.nonneg_iff_exists_isSelfAdjoint_and_eq_mul_self.mp ha
+    obtain ⟨b, hb, hab⟩ := CStarAlgebra.nonneg_iff_exists_isSelfAdjoint_and_eq_mul_self.mp ha
     exact ⟨⟨b, hb⟩, hab⟩
   · rintro ⟨b, hab⟩
-    exact CStarAlgebra.nonneg_iff_exists_isSelfAdjoint_and_eq_mul_self.mpr
-      ⟨b, b.property, hab⟩
+    exact CStarAlgebra.nonneg_iff_exists_isSelfAdjoint_and_eq_mul_self.mpr ⟨b, b.property, hab⟩
 
 /-! ## B. Positive and negative parts -/
 
@@ -74,27 +72,26 @@ noncomputable def negPart (a : Observable A) : PositiveObservable A :=
   ⟨⟨(a : A)⁻, CFC.negPart_nonneg (a : A) |>.isSelfAdjoint⟩, CFC.negPart_nonneg (a : A)⟩
 
 /-- Every observable is the difference of its positive and negative parts. -/
-lemma posPart_sub_negPart (a : Observable A) :
-    (posPart a).1 - (negPart a).1 = a := by
+lemma posPart_sub_negPart (a : Observable A) : (posPart a).1 - (negPart a).1 = a := by
   apply Subtype.ext
   exact CFC.posPart_sub_negPart (a : A) a.property
 
 /-- The positive and negative parts of an observable are orthogonal. -/
-lemma posPart_mul_negPart (a : Observable A) :
-    ((posPart a).1 : A) * (negPart a).1 = 0 :=
+lemma posPart_mul_negPart (a : Observable A) : ((posPart a).1 : A) * (negPart a).1 = 0 :=
   CFC.posPart_mul_negPart (a : A)
 
 /-- The negative and positive parts are orthogonal in the opposite order as well. -/
-lemma negPart_mul_posPart (a : Observable A) :
-    ((negPart a).1 : A) * (posPart a).1 = 0 :=
+lemma negPart_mul_posPart (a : Observable A) : ((negPart a).1 : A) * (posPart a).1 = 0 :=
   CFC.negPart_mul_posPart (a : A)
 
-/-- The positive/negative decomposition is the unique decomposition into orthogonal positive
-observables: this is the Jordan decomposition theorem. -/
-lemma posPart_negPart_unique (a : Observable A) (b c : PositiveObservable A)
-    (hsub : (a : A) = (b.1 : A) - c.1)
-    (horth : (b.1 : A) * c.1 = 0) :
-    posPart a = b ∧ negPart a = c := by
+/--
+The positive/negative decomposition is the unique decomposition into orthogonal positive
+observables: this is the Jordan decomposition theorem.
+-/
+lemma posPart_negPart_unique
+    (a : Observable A) (b c : PositiveObservable A)
+    (hsub : (a : A) = (b.1 : A) - c.1) (horth : (b.1 : A) * c.1 = 0)
+    : posPart a = b ∧ negPart a = c := by
   obtain ⟨hb, hc⟩ := CFC.posPart_negPart_unique hsub horth b.property c.property
   exact ⟨Subtype.ext (Subtype.ext hb), Subtype.ext (Subtype.ext hc)⟩
 

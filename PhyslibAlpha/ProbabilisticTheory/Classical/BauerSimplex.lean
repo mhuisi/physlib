@@ -61,10 +61,11 @@ variable {E : Type*} [ArchimedeanOrderUnitSpace E]
 -/
 
 /-- With closed pure states, every state decomposes into pure states. -/
-lemma PureState.hasPureDecomposition [CompactSpace (PureState E)] (ω : 𝓢[ℝ, E]) :
-    ω.HasPureDecomposition :=
+lemma PureState.hasPureDecomposition [CompactSpace (PureState E)] (ω : 𝓢[ℝ, E])
+    : ω.HasPureDecomposition :=
   exists_regular_probabilityMeasure_integral_eq evalPure ω.toLinearMap
-    (fun a ha => map_nonneg ω (evalPure_le_iff.1 (by rwa [map_zero]))) evalPure_one (map_one ω)
+    (fun a ha => map_nonneg ω (evalPure_le_iff.1 (by rwa [map_zero])))
+    evalPure_one (map_one ω)
 
 /-!
 
@@ -74,17 +75,23 @@ lemma PureState.hasPureDecomposition [CompactSpace (PureState E)] (ω : 𝓢[ℝ
 
 /-- With closed pure states, the state space is a simplex exactly when ensembles refine. -/
 lemma isSimplexStateSpace_iff_ensemblesRefine_of_isClosed
-    (hP : IsClosed {ω : stateSpace E | (toState ω).IsPure}) :
-    IsSimplexStateSpace E ↔ EnsemblesRefine E :=
+    (hP : IsClosed {ω : stateSpace E | (toState ω).IsPure})
+    : IsSimplexStateSpace E ↔ EnsemblesRefine E :=
   have : CompactSpace (PureState E) := isCompact_iff_compactSpace.1 hP.isCompact
-  ⟨IsSimplexStateSpace.ensemblesRefine, fun hE ω =>
-    hE.hasUniquePureDecomposition (hasPureDecomposition ω)⟩
+  ⟨
+    IsSimplexStateSpace.ensemblesRefine,
+    fun hE ω => hE.hasUniquePureDecomposition (hasPureDecomposition ω)
+  ⟩
 
-/-- **Bauer simplices**: the state space is a Bauer simplex exactly when ensembles refine and the
-pure states are closed. -/
-lemma isBauerSimplexStateSpace_iff : IsBauerSimplexStateSpace E ↔
-    EnsemblesRefine E ∧ IsClosed {ω : stateSpace E | (toState ω).IsPure} :=
-  ⟨fun h => ⟨h.1.ensemblesRefine, h.2⟩,
-    fun ⟨hE, hP⟩ => ⟨(isSimplexStateSpace_iff_ensemblesRefine_of_isClosed hP).2 hE, hP⟩⟩
+/--
+**Bauer simplices**: the state space is a Bauer simplex exactly when ensembles refine and the
+pure states are closed.
+-/
+lemma isBauerSimplexStateSpace_iff
+    : IsBauerSimplexStateSpace E
+      ↔ EnsemblesRefine E ∧ IsClosed {ω : stateSpace E | (toState ω).IsPure} := ⟨
+  fun h => ⟨h.1.ensemblesRefine, h.2⟩,
+  fun ⟨hE, hP⟩ => ⟨(isSimplexStateSpace_iff_ensemblesRefine_of_isClosed hP).2 hE, hP⟩
+⟩
 
 end ProbabilisticTheory

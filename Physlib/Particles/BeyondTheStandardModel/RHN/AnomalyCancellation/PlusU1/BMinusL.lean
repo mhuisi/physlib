@@ -49,21 +49,19 @@ def BL₁ : (PlusU1 1).Sols where
   cubicSol := by with_unfolding_all rfl
 
 /-- $B - L$ in the $n$-family case. -/
-@[simps!]
-def BL (n : ℕ) : (PlusU1 n).Sols :=
-  familyUniversalAF n BL₁
+@[simps!] def BL (n : ℕ) : (PlusU1 n).Sols := familyUniversalAF n BL₁
 
 namespace BL
 
 variable {n : ℕ}
 
 set_option backward.isDefEq.respectTransparency false in
-lemma on_quadBiLin (S : (PlusU1 n).Charges) :
-    quadBiLin (BL n).val S = 1/2 * accYY S + 3/2 * accSU2 S - 2 * accSU3 S := by
+lemma on_quadBiLin (S : (PlusU1 n).Charges)
+    : quadBiLin (BL n).val S = 1 / 2 * accYY S + 3 / 2 * accSU2 S - 2 * accSU3 S := by
   refine (familyUniversal_quadBiLin (n := n) BL₁.val S).trans ?_
   rw [accYY_decomp, accSU2_decomp, accSU3_decomp]
-  simp only [Fin.isValue, BL₁_val, toSpecies_apply, one_mul, mul_neg,
-    mul_one, neg_mul, sub_neg_eq_add]
+  simp only [Fin.isValue, BL₁_val, toSpecies_apply, one_mul, mul_neg, mul_one, neg_mul,
+    sub_neg_eq_add]
   ring
 
 lemma on_quadBiLin_AFL (S : (PlusU1 n).LinSols) : quadBiLin (BL n).val S.val = 0 := by
@@ -71,16 +69,15 @@ lemma on_quadBiLin_AFL (S : (PlusU1 n).LinSols) : quadBiLin (BL n).val S.val = 0
   with_unfolding_all rfl
 
 set_option backward.isDefEq.respectTransparency false in
-lemma add_AFL_quad (S : (PlusU1 n).LinSols) (a b : ℚ) :
-    accQuad (a • S.val + b • (BL n).val) = a ^ 2 * accQuad S.val := by
+lemma add_AFL_quad (S : (PlusU1 n).LinSols) (a b : ℚ)
+    : accQuad (a • S.val + b • (BL n).val) = a ^ 2 * accQuad S.val := by
   have hb : accQuad (b • (BL n).val) = 0 := quadSol (b • (BL n)).1
   rw [accQuad, BiLinearSymm.toHomogeneousQuad_add, ← accQuad, hb]
   rw [quadBiLin.map_smul₁, quadBiLin.map_smul₂, quadBiLin.swap, on_quadBiLin_AFL]
   rw [accQuad.map_smul]
   simp
 
-lemma add_quad (S : (PlusU1 n).QuadSols) (a b : ℚ) :
-    accQuad (a • S.val + b • (BL n).val) = 0 := by
+lemma add_quad (S : (PlusU1 n).QuadSols) (a b : ℚ) : accQuad (a • S.val + b • (BL n).val) = 0 := by
   rw [add_AFL_quad, quadSol S]
   exact Rat.mul_zero (a ^ 2)
 
@@ -93,29 +90,26 @@ lemma addQuad_zero (S : (PlusU1 n).QuadSols) (a : ℚ) : addQuad S a 0 = a • S
   rfl
 
 set_option backward.isDefEq.respectTransparency false in
-lemma on_cubeTriLin (S : (PlusU1 n).Charges) :
-    cubeTriLin (BL n).val (BL n).val S = 9 * accGrav S - 24 * accSU3 S := by
+lemma on_cubeTriLin (S : (PlusU1 n).Charges)
+    : cubeTriLin (BL n).val (BL n).val S = 9 * accGrav S - 24 * accSU3 S := by
   refine (familyUniversal_cubeTriLin' (n := n) BL₁.val BL₁.val S).trans ?_
   rw [accGrav_decomp, accSU3_decomp]
-  simp only [Fin.isValue, BL₁_val, mul_one, toSpecies_apply, mul_neg,
-    neg_neg, neg_mul]
+  simp only [Fin.isValue, BL₁_val, mul_one, toSpecies_apply, mul_neg, neg_neg, neg_mul]
   ring
 
-lemma on_cubeTriLin_AFL (S : (PlusU1 n).LinSols) :
-    cubeTriLin (BL n).val (BL n).val S.val = 0 := by
+lemma on_cubeTriLin_AFL (S : (PlusU1 n).LinSols) : cubeTriLin (BL n).val (BL n).val S.val = 0 := by
   rw [on_cubeTriLin, gravSol S, SU3Sol S]
   with_unfolding_all rfl
 
 set_option backward.isDefEq.respectTransparency false in
-lemma add_AFL_cube (S : (PlusU1 n).LinSols) (a b : ℚ) :
-    accCube (a • S.val + b • (BL n).val) =
-    a ^ 2 * (a * accCube S.val + 3 * b * cubeTriLin S.val S.val (BL n).val) := by
+lemma add_AFL_cube (S : (PlusU1 n).LinSols) (a b : ℚ)
+    : accCube (a • S.val + b • (BL n).val)
+      = a ^ 2 * (a * accCube S.val + 3 * b * cubeTriLin S.val S.val (BL n).val) := by
   have hb : accCube (b • (BL n).val) = 0 := cubeSol (b • (BL n))
   rw [accCube, TriLinearSymm.toCubic_add, ← accCube, hb, accCube.map_smul]
   repeat rw [cubeTriLin.map_smul₁, cubeTriLin.map_smul₂, cubeTriLin.map_smul₃]
   rw [on_cubeTriLin_AFL]
-  simp only [HomogeneousCubic, accCube, TriLinearSymm.toCubic_apply,
-    add_zero, BL_val]
+  simp only [HomogeneousCubic, accCube, TriLinearSymm.toCubic_apply, add_zero, BL_val]
   ring
 
 end BL

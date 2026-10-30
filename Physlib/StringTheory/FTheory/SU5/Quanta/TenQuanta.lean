@@ -98,8 +98,10 @@ open SU5
 
 -/
 
-/-- The quanta of w0d representations corresponding to a multiset of
-  `(q, M, N)` for each particle. `(M, N)` are defined in the `FluxesFive` module. -/
+/--
+The quanta of w0d representations corresponding to a multiset of
+`(q, M, N)` for each particle. `(M, N)` are defined in the `FluxesFive` module.
+-/
 abbrev TenQuanta (𝓩 : Type := ℤ) : Type := Multiset (𝓩 × Fluxes)
 
 namespace TenQuanta
@@ -130,13 +132,15 @@ def toCharges (x : TenQuanta 𝓩) : Multiset 𝓩 := x.map Prod.fst
 
 -/
 
-/-- The map which takes a charge to the overall flux it
-  corresponds to in a `TenQuanta`. -/
-def toChargeMap [DecidableEq 𝓩] (x : TenQuanta 𝓩) : 𝓩 → Fluxes :=
-  fun z => ((x.filter fun p => p.1 = z).map Prod.snd).sum
+/--
+The map which takes a charge to the overall flux it
+corresponds to in a `TenQuanta`.
+-/
+def toChargeMap [DecidableEq 𝓩] (x : TenQuanta 𝓩) : 𝓩 → Fluxes := fun z =>
+  ((x.filter fun p => p.1 = z).map Prod.snd).sum
 
-lemma toChargeMap_of_not_mem [DecidableEq 𝓩] (x : TenQuanta 𝓩) {z : 𝓩} (h : z ∉ x.toCharges) :
-    x.toChargeMap z = 0 := by
+lemma toChargeMap_of_not_mem [DecidableEq 𝓩] (x : TenQuanta 𝓩) {z : 𝓩} (h : z ∉ x.toCharges)
+    : x.toChargeMap z = 0 := by
   have hl : x.filter (fun p => p.1 = z) = 0 :=
     Multiset.filter_eq_nil.2 fun p hp hpz => h (hpz ▸ Multiset.mem_map_of_mem Prod.fst hp)
   simp [toChargeMap, hl]
@@ -151,8 +155,10 @@ section reduce
 
 variable [DecidableEq 𝓩]
 
-/-- The `reduce` of `TenQuanta` is a new `TenQuanta` with all the fluxes
-  corresponding to the same charge (i.e. representation) added together. -/
+/--
+The `reduce` of `TenQuanta` is a new `TenQuanta` with all the fluxes
+corresponding to the same charge (i.e. representation) added together.
+-/
 def reduce (x : TenQuanta 𝓩) : TenQuanta 𝓩 :=
   x.toCharges.dedup.map fun q10 => (q10, ((x.filter (fun f => f.1 = q10)).map (fun y => y.2)).sum)
 
@@ -185,9 +191,9 @@ lemma reduce_toCharges (x : TenQuanta 𝓩) : x.reduce.toCharges = x.toCharges.d
 
 -/
 
-lemma mem_reduce_iff (x : TenQuanta 𝓩) (p : 𝓩 × Fluxes) :
-    p ∈ x.reduce ↔ p.1 ∈ x.toCharges ∧
-      p.2 = ((x.filter (fun f => f.1 = p.1)).map (fun y => y.2)).sum := by
+lemma mem_reduce_iff (x : TenQuanta 𝓩) (p : 𝓩 × Fluxes)
+    : p ∈ x.reduce
+      ↔ p.1 ∈ x.toCharges ∧ p.2 = ((x.filter (fun f => f.1 = p.1)).map (fun y => y.2)).sum := by
   simp [reduce]
   constructor
   · rintro ⟨q, hq, rfl⟩
@@ -201,9 +207,9 @@ lemma mem_reduce_iff (x : TenQuanta 𝓩) (p : 𝓩 × Fluxes) :
 
 -/
 
-lemma reduce_filter (x : TenQuanta 𝓩) (q : 𝓩) (h : q ∈ x.toCharges) :
-    x.reduce.filter (fun f => f.1 = q) =
-    {(q, ((x.filter (fun f => f.1 = q)).map (fun y => y.2)).sum)} := by
+lemma reduce_filter (x : TenQuanta 𝓩) (q : 𝓩) (h : q ∈ x.toCharges)
+    : x.reduce.filter (fun f => f.1 = q)
+      = {(q, ((x.filter (fun f => f.1 = q)).map (fun y => y.2)).sum)} := by
   simp [reduce]
   rw [Multiset.filter_map]
   simp only [Function.comp_apply]
@@ -219,8 +225,7 @@ lemma reduce_filter (x : TenQuanta 𝓩) (q : 𝓩) (h : q ∈ x.toCharges) :
 -/
 
 @[simp]
-lemma reduce_reduce (x : TenQuanta 𝓩) :
-    x.reduce.reduce = x.reduce := by
+lemma reduce_reduce (x : TenQuanta 𝓩) : x.reduce.reduce = x.reduce := by
   refine Multiset.Nodup.toFinset_inj (reduce_nodup x.reduce) (reduce_nodup x) ?_
   ext p
   simp only [Multiset.mem_toFinset]
@@ -235,64 +240,64 @@ lemma reduce_reduce (x : TenQuanta 𝓩) :
 
 -/
 
-lemma reduce_sum_eq_sum_toCharges {M} [AddCommMonoid M] (x : TenQuanta 𝓩) (f : 𝓩 → Fluxes →+ M) :
-    (x.reduce.map fun (q, x) => f q x).sum = (x.map fun (q, x) => f q x).sum := by
-  calc _
-      _ = ∑ q ∈ x.toCharges.toFinset,
-          f q ((x.filter (fun f => f.1 = q)).map (fun y => y.2)).sum := by
-        rw [reduce]
-        simp [Finset.sum]
-      _ = ∑ q ∈ x.toCharges.toFinset,
-          (((x.filter (fun f => f.1 = q)).map (fun y => f q y.2))).sum := by
+lemma reduce_sum_eq_sum_toCharges {M} [AddCommMonoid M] (x : TenQuanta 𝓩) (f : 𝓩 → Fluxes →+ M)
+    : (x.reduce.map fun (q, x) => f q x).sum = (x.map fun (q, x) => f q x).sum := by
+  calc
+    _
+    _ = ∑ q ∈ x.toCharges.toFinset,
+        f q ((x.filter (fun f => f.1 = q)).map (fun y => y.2)).sum := by
+      rw [reduce]
+      simp [Finset.sum]
+    _ = ∑ q ∈ x.toCharges.toFinset,
+        (((x.filter (fun f => f.1 = q)).map (fun y => f q y.2))).sum := by
+      congr
+      funext q5
+      rw [AddMonoidHom.map_multiset_sum, Multiset.map_map]
+      rfl
+    _ = (x.toCharges.dedup.bind fun q =>
+        ((x.filter (fun f => f.1 = q)).map (fun y => f q y.2))).sum := by
+      rw [Multiset.sum_bind]
+      simp [Finset.sum]
+    _ = (((x.toCharges.dedup.bind fun q => ((x.filter (fun f => f.1 = q)))).map
+        (fun y => f y.1 y.2))).sum := by
+      congr
+      rw [Multiset.map_bind]
+      congr
+      funext q
+      refine Multiset.map_congr rfl ?_
+      intro y hy
+      simp at hy
+      rw [hy.2]
+    _ = ((x.map (fun y => f y.1 y.2))).sum := by
+      congr
+      apply Multiset.ext.mpr
+      intro p
+      trans ((x.map Prod.fst).dedup.map (fun y => if p.1 = y then x.count p else 0)).sum
+      · rw [@Multiset.count_bind]
         congr
         funext q5
-        rw [AddMonoidHom.map_multiset_sum, Multiset.map_map]
-        rfl
-      _ = (x.toCharges.dedup.bind fun q =>
-          ((x.filter (fun f => f.1 = q)).map (fun y => f q y.2))).sum := by
-        rw [Multiset.sum_bind]
-        simp [Finset.sum]
-      _ = (((x.toCharges.dedup.bind fun q =>
-          ((x.filter (fun f => f.1 = q)))).map (fun y => f y.1 y.2))).sum := by
-        congr
-        rw [Multiset.map_bind]
-        congr
-        funext q
-        refine Multiset.map_congr rfl ?_
-        intro y hy
-        simp at hy
-        rw [hy.2]
-      _ = ((x.map (fun y => f y.1 y.2))).sum := by
-        congr
-        apply Multiset.ext.mpr
-        intro p
-        trans ((x.map Prod.fst).dedup.map (fun y => if p.1 = y then x.count p else 0)).sum
-        · rw [@Multiset.count_bind]
-          congr
-          funext q5
-          rw [Multiset.count_filter]
-        by_cases h_mem : p.1 ∈ x.map Prod.fst
-        · have h_mem_dedup : p.1 ∈ (x.map Prod.fst).dedup := by rwa [Multiset.mem_dedup]
-          rw [Multiset.sum_map_eq_nsmul_single p.1]
-          simp only [↓reduceIte, smul_eq_mul]
-          have h_count_one : Multiset.count p.1 (Multiset.map Prod.fst x).dedup = 1 := by
-            refine Multiset.count_eq_one_of_mem ?_ h_mem_dedup
-            exact Multiset.nodup_dedup (Multiset.map Prod.fst x)
-          simp [h_count_one]
-          intro q5' h h2
-          simp_all [eq_comm]
-        · rw [Multiset.sum_eq_zero]
-          refine Eq.symm (Multiset.count_eq_zero_of_notMem ?_)
-          intro h
-          have h_mem : p.1 ∈ Multiset.map Prod.fst x := by
-            simp_all
-          (expose_names; exact h_mem_1 h_mem)
-          intro p' hp
-          simp at hp
-          obtain ⟨q5', ⟨f1, hf⟩, hp'⟩ := hp
-          by_cases h_eq : p.1 = q5'
-          · simp_all
-          · simp_all
+        rw [Multiset.count_filter]
+      by_cases h_mem : p.1 ∈ x.map Prod.fst
+      · have h_mem_dedup : p.1 ∈ (x.map Prod.fst).dedup := by rwa [Multiset.mem_dedup]
+        rw [Multiset.sum_map_eq_nsmul_single p.1]
+        simp only [↓ reduceIte, smul_eq_mul]
+        have h_count_one : Multiset.count p.1 (Multiset.map Prod.fst x).dedup = 1 := by
+          refine Multiset.count_eq_one_of_mem ?_ h_mem_dedup
+          exact Multiset.nodup_dedup (Multiset.map Prod.fst x)
+        simp [h_count_one]
+        intro q5' h h2
+        simp_all [eq_comm]
+      · rw [Multiset.sum_eq_zero]
+        refine Eq.symm (Multiset.count_eq_zero_of_notMem ?_)
+        intro h
+        have h_mem : p.1 ∈ Multiset.map Prod.fst x := by simp_all
+        (expose_names; exact h_mem_1 h_mem)
+        intro p' hp
+        simp at hp
+        obtain ⟨q5', ⟨f1, hf⟩, hp'⟩ := hp
+        by_cases h_eq : p.1 = q5'
+        · simp_all
+        · simp_all
 
 /-!
 
@@ -300,8 +305,8 @@ lemma reduce_sum_eq_sum_toCharges {M} [AddCommMonoid M] (x : TenQuanta 𝓩) (f 
 
 -/
 
-lemma reduce_eq_self_of_ofCharges_nodup (x : TenQuanta 𝓩) (h : x.toCharges.Nodup) :
-    x.reduce = x := by
+lemma reduce_eq_self_of_ofCharges_nodup (x : TenQuanta 𝓩) (h : x.toCharges.Nodup)
+    : x.reduce = x := by
   rw [reduce, Multiset.Nodup.dedup h]
   simp [toCharges]
   conv_rhs => rw [← Multiset.map_id x]
@@ -329,8 +334,7 @@ lemma reduce_eq_self_of_ofCharges_nodup (x : TenQuanta 𝓩) (h : x.toCharges.No
 
 -/
 
-lemma reduce_toChargeMap_eq (x : TenQuanta 𝓩) :
-    x.reduce.toChargeMap = x.toChargeMap := by
+lemma reduce_toChargeMap_eq (x : TenQuanta 𝓩) : x.reduce.toChargeMap = x.toChargeMap := by
   funext q
   by_cases h : q ∈ x.toCharges
   · rw [toChargeMap, reduce_filter]
@@ -348,9 +352,9 @@ lemma reduce_toChargeMap_eq (x : TenQuanta 𝓩) :
 
 -/
 
-lemma mem_powerset_sum_of_mem_reduce_toFluxesTen {F : TenQuanta 𝓩}
-    {f : Fluxes} (hf : f ∈ F.reduce.toFluxesTen) :
-    f ∈ (Multiset.powerset F.toFluxesTen).map fun s => s.sum := by
+lemma mem_powerset_sum_of_mem_reduce_toFluxesTen
+    {F : TenQuanta 𝓩} {f : Fluxes} (hf : f ∈ F.reduce.toFluxesTen)
+    : f ∈ (Multiset.powerset F.toFluxesTen).map fun s => s.sum := by
   rw [toFluxesTen, Multiset.mem_map] at hf
   obtain ⟨⟨q, f⟩, hp, rfl⟩ := hf
   rw [mem_reduce_iff] at hp
@@ -363,9 +367,9 @@ lemma mem_powerset_sum_of_mem_reduce_toFluxesTen {F : TenQuanta 𝓩}
   refine Multiset.map_le_map ?_
   exact Multiset.filter_le (fun x => x.1 = q) F
 
-lemma mem_powerset_sum_of_mem_reduce_toFluxesTen_filter {F : TenQuanta 𝓩}
-    {f : Fluxes} (hf : f ∈ F.reduce.toFluxesTen) :
-    f ∈ (F.toFluxesTen.powerset.filter fun s => s ≠ 0).map fun s => s.sum := by
+lemma mem_powerset_sum_of_mem_reduce_toFluxesTen_filter
+    {F : TenQuanta 𝓩} {f : Fluxes} (hf : f ∈ F.reduce.toFluxesTen)
+    : f ∈ (F.toFluxesTen.powerset.filter fun s => s ≠ 0).map fun s => s.sum := by
   rw [toFluxesTen, Multiset.mem_map] at hf
   obtain ⟨⟨q, f⟩, hp, rfl⟩ := hf
   rw [mem_reduce_iff] at hp
@@ -393,16 +397,18 @@ lemma mem_powerset_sum_of_mem_reduce_toFluxesTen_filter {F : TenQuanta 𝓩}
 
 -/
 
-lemma reduce_numChiralU_of_mem_elemsNoExotics {F : TenQuanta 𝓩}
-    (hx : F.toFluxesTen ∈ FluxesTen.elemsNoExotics) :
-    F.reduce.toFluxesTen.numChiralU = 3 := by
+lemma reduce_numChiralU_of_mem_elemsNoExotics
+    {F : TenQuanta 𝓩} (hx : F.toFluxesTen ∈ FluxesTen.elemsNoExotics)
+    : F.reduce.toFluxesTen.numChiralU = 3 := by
   have hE : F.toFluxesTen.NoExotics := ((FluxesTen.noExotics_iff_mem_elemsNoExotics _).mpr hx).1
   have numChiralU_eq_sum := F.toFluxesTen.numChiralU_eq_sum_sub_numAntiChiralU
   rw [hE.2.2.1, hE.2.2.2.1, sub_zero, FluxesTen.chiralIndicesOfU] at numChiralU_eq_sum
-  have hmap : (F.reduce.toFluxesTen.map (fun f => f.M - f.N)).sum =
-      (F.toFluxesTen.map (fun f => f.M - f.N)).sum := by
-    have h := reduce_sum_eq_sum_toCharges F
-      (fun _ => (⟨⟨fun f => f.M - f.N, by simp⟩, fun a b => by simp; ring⟩ : Fluxes →+ ℤ))
+  have hmap
+      : (F.reduce.toFluxesTen.map (fun f => f.M - f.N)).sum
+        = (F.toFluxesTen.map (fun f => f.M - f.N)).sum := by
+    have h :=
+      reduce_sum_eq_sum_toCharges F
+        (fun _ => (⟨⟨fun f => f.M - f.N, by simp⟩, fun a b => by simp; ring⟩ : Fluxes →+ ℤ))
     simpa [toFluxesTen, Multiset.map_map, Function.comp] using h
   rw [FluxesTen.numChiralU, FluxesTen.chiralIndicesOfU, Multiset.filter_eq_self.mpr, hmap]
   · exact numChiralU_eq_sum.symm
@@ -421,9 +427,9 @@ lemma reduce_numChiralU_of_mem_elemsNoExotics {F : TenQuanta 𝓩}
 
 -/
 
-lemma reduce_numAntiChiralU_of_mem_elemsNoExotics {F : TenQuanta 𝓩}
-    (hx : F.toFluxesTen ∈ FluxesTen.elemsNoExotics) :
-    F.reduce.toFluxesTen.numAntiChiralU = 0 := by
+lemma reduce_numAntiChiralU_of_mem_elemsNoExotics
+    {F : TenQuanta 𝓩} (hx : F.toFluxesTen ∈ FluxesTen.elemsNoExotics)
+    : F.reduce.toFluxesTen.numAntiChiralU = 0 := by
   rw [FluxesTen.numAntiChiralU, FluxesTen.chiralIndicesOfU, Multiset.filter_eq_nil.mpr,
     Multiset.sum_zero]
   intro a ha
@@ -441,16 +447,17 @@ lemma reduce_numAntiChiralU_of_mem_elemsNoExotics {F : TenQuanta 𝓩}
 
 -/
 
-lemma reduce_numChiralQ_of_mem_elemsNoExotics {F : TenQuanta 𝓩}
-    (hx : F.toFluxesTen ∈ FluxesTen.elemsNoExotics) :
-    F.reduce.toFluxesTen.numChiralQ = 3 := by
+lemma reduce_numChiralQ_of_mem_elemsNoExotics
+    {F : TenQuanta 𝓩} (hx : F.toFluxesTen ∈ FluxesTen.elemsNoExotics)
+    : F.reduce.toFluxesTen.numChiralQ = 3 := by
   have hE : F.toFluxesTen.NoExotics := ((FluxesTen.noExotics_iff_mem_elemsNoExotics _).mpr hx).1
   have numChiralQ_eq_sum := F.toFluxesTen.numChiralQ_eq_sum_sub_numAntiChiralQ
   rw [hE.1, hE.2.1, sub_zero, FluxesTen.chiralIndicesOfQ] at numChiralQ_eq_sum
-  have hmap : (F.reduce.toFluxesTen.map (fun f => f.M)).sum =
-      (F.toFluxesTen.map (fun f => f.M)).sum := by
-    have h := reduce_sum_eq_sum_toCharges F
-      (fun _ => (⟨⟨fun f => f.M, by simp⟩, fun a b => by simp⟩ : Fluxes →+ ℤ))
+  have hmap
+      : (F.reduce.toFluxesTen.map (fun f => f.M)).sum = (F.toFluxesTen.map (fun f => f.M)).sum := by
+    have h :=
+      reduce_sum_eq_sum_toCharges F
+        (fun _ => (⟨⟨fun f => f.M, by simp⟩, fun a b => by simp⟩ : Fluxes →+ ℤ))
     simpa [toFluxesTen, Multiset.map_map, Function.comp] using h
   rw [FluxesTen.numChiralQ, FluxesTen.chiralIndicesOfQ, Multiset.filter_eq_self.mpr, hmap]
   · exact numChiralQ_eq_sum.symm
@@ -469,9 +476,9 @@ lemma reduce_numChiralQ_of_mem_elemsNoExotics {F : TenQuanta 𝓩}
 
 -/
 
-lemma reduce_numAntiChiralQ_of_mem_elemsNoExotics {F : TenQuanta 𝓩}
-    (hx : F.toFluxesTen ∈ FluxesTen.elemsNoExotics) :
-    F.reduce.toFluxesTen.numAntiChiralQ = 0 := by
+lemma reduce_numAntiChiralQ_of_mem_elemsNoExotics
+    {F : TenQuanta 𝓩} (hx : F.toFluxesTen ∈ FluxesTen.elemsNoExotics)
+    : F.reduce.toFluxesTen.numAntiChiralQ = 0 := by
   rw [FluxesTen.numAntiChiralQ, FluxesTen.chiralIndicesOfQ, Multiset.filter_eq_nil.mpr,
     Multiset.sum_zero]
   intro a ha
@@ -489,16 +496,18 @@ lemma reduce_numAntiChiralQ_of_mem_elemsNoExotics {F : TenQuanta 𝓩}
 
 -/
 
-lemma reduce_numChiralE_of_mem_elemsNoExotics {F : TenQuanta 𝓩}
-    (hx : F.toFluxesTen ∈ FluxesTen.elemsNoExotics) :
-    F.reduce.toFluxesTen.numChiralE = 3 := by
+lemma reduce_numChiralE_of_mem_elemsNoExotics
+    {F : TenQuanta 𝓩} (hx : F.toFluxesTen ∈ FluxesTen.elemsNoExotics)
+    : F.reduce.toFluxesTen.numChiralE = 3 := by
   have hE : F.toFluxesTen.NoExotics := ((FluxesTen.noExotics_iff_mem_elemsNoExotics _).mpr hx).1
   have numChiralE_eq_sum := F.toFluxesTen.numChiralE_eq_sum_sub_numAntiChiralE
   rw [hE.2.2.2.2.1, hE.2.2.2.2.2, sub_zero, FluxesTen.chiralIndicesOfE] at numChiralE_eq_sum
-  have hmap : (F.reduce.toFluxesTen.map (fun f => f.M + f.N)).sum =
-      (F.toFluxesTen.map (fun f => f.M + f.N)).sum := by
-    have h := reduce_sum_eq_sum_toCharges F
-      (fun _ => (⟨⟨fun f => f.M + f.N, by simp⟩, fun a b => by simp; ring⟩ : Fluxes →+ ℤ))
+  have hmap
+      : (F.reduce.toFluxesTen.map (fun f => f.M + f.N)).sum
+        = (F.toFluxesTen.map (fun f => f.M + f.N)).sum := by
+    have h :=
+      reduce_sum_eq_sum_toCharges F
+        (fun _ => (⟨⟨fun f => f.M + f.N, by simp⟩, fun a b => by simp; ring⟩ : Fluxes →+ ℤ))
     simpa [toFluxesTen, Multiset.map_map, Function.comp] using h
   rw [FluxesTen.numChiralE, FluxesTen.chiralIndicesOfE, Multiset.filter_eq_self.mpr, hmap]
   · exact numChiralE_eq_sum.symm
@@ -517,9 +526,9 @@ lemma reduce_numChiralE_of_mem_elemsNoExotics {F : TenQuanta 𝓩}
 
 -/
 
-lemma reduce_numAntiChiralE_of_mem_elemsNoExotics {F : TenQuanta 𝓩}
-    (hx : F.toFluxesTen ∈ FluxesTen.elemsNoExotics) :
-    F.reduce.toFluxesTen.numAntiChiralE = 0 := by
+lemma reduce_numAntiChiralE_of_mem_elemsNoExotics
+    {F : TenQuanta 𝓩} (hx : F.toFluxesTen ∈ FluxesTen.elemsNoExotics)
+    : F.reduce.toFluxesTen.numAntiChiralE = 0 := by
   rw [FluxesTen.numAntiChiralE, FluxesTen.chiralIndicesOfE, Multiset.filter_eq_nil.mpr,
     Multiset.sum_zero]
   intro a ha
@@ -537,9 +546,9 @@ lemma reduce_numAntiChiralE_of_mem_elemsNoExotics {F : TenQuanta 𝓩}
 
 -/
 
-lemma reduce_noExotics_of_mem_elemsNoExotics {F : TenQuanta 𝓩}
-    (hx : F.toFluxesTen ∈ FluxesTen.elemsNoExotics) :
-    F.reduce.toFluxesTen.NoExotics := by
+lemma reduce_noExotics_of_mem_elemsNoExotics
+    {F : TenQuanta 𝓩} (hx : F.toFluxesTen ∈ FluxesTen.elemsNoExotics)
+    : F.reduce.toFluxesTen.NoExotics := by
   rw [FluxesTen.NoExotics, reduce_numChiralU_of_mem_elemsNoExotics hx,
     reduce_numAntiChiralU_of_mem_elemsNoExotics hx, reduce_numChiralQ_of_mem_elemsNoExotics hx,
     reduce_numAntiChiralQ_of_mem_elemsNoExotics hx, reduce_numChiralE_of_mem_elemsNoExotics hx,
@@ -552,9 +561,8 @@ lemma reduce_noExotics_of_mem_elemsNoExotics {F : TenQuanta 𝓩}
 
 -/
 
-lemma reduce_mem_elemsNoExotics {F : TenQuanta 𝓩}
-    (hx : F.toFluxesTen ∈ FluxesTen.elemsNoExotics) :
-    F.reduce.toFluxesTen ∈ FluxesTen.elemsNoExotics := by
+lemma reduce_mem_elemsNoExotics {F : TenQuanta 𝓩} (hx : F.toFluxesTen ∈ FluxesTen.elemsNoExotics)
+    : F.reduce.toFluxesTen ∈ FluxesTen.elemsNoExotics := by
   rw [← FluxesTen.noExotics_iff_mem_elemsNoExotics]
   refine ⟨reduce_noExotics_of_mem_elemsNoExotics hx, ?_⟩
   intro h
@@ -579,17 +587,25 @@ end reduce
 
 /-- The decomposition of a relevant flux into `⟨1, 0⟩`, `⟨1, 1⟩` and `⟨1, -1⟩` . -/
 def decomposeFluxes (f : Fluxes) : Multiset Fluxes :=
-  if f = ⟨1, 0⟩ then {⟨1, 0⟩}
-  else if f = ⟨1, 1⟩ then {⟨1, 1⟩}
-  else if f = ⟨1, -1⟩ then {⟨1, -1⟩}
-  else if f = ⟨2, 1⟩ then {⟨1, 1⟩, ⟨1, 0⟩}
-  else if f = ⟨2, -1⟩ then {⟨1, -1⟩, ⟨1, 0⟩}
-  else if f = ⟨3, 0⟩ then {⟨1, 0⟩, ⟨1, 0⟩, ⟨1, 0⟩}
-  else if f = ⟨2, 0⟩ then {⟨1, 0⟩, ⟨1, 0⟩}
-  else {f}
+  if f = ⟨1, 0⟩ then
+    {⟨1, 0⟩}
+  else if f = ⟨1, 1⟩ then
+    {⟨1, 1⟩}
+  else if f = ⟨1, -1⟩ then
+    {⟨1, -1⟩}
+  else if f = ⟨2, 1⟩ then
+    {⟨1, 1⟩, ⟨1, 0⟩}
+  else if f = ⟨2, -1⟩ then
+    {⟨1, -1⟩, ⟨1, 0⟩}
+  else if f = ⟨3, 0⟩ then
+    {⟨1, 0⟩, ⟨1, 0⟩, ⟨1, 0⟩}
+  else if f = ⟨2, 0⟩ then
+    {⟨1, 0⟩, ⟨1, 0⟩}
+  else
+    {f}
 
-lemma decomposeFluxes_sum_of_noExotics (f : Fluxes) (hf : ∃ F ∈ FluxesTen.elemsNoExotics, f ∈ F) :
-    (decomposeFluxes f).sum = f := by
+lemma decomposeFluxes_sum_of_noExotics (f : Fluxes) (hf : ∃ F ∈ FluxesTen.elemsNoExotics, f ∈ F)
+    : (decomposeFluxes f).sum = f := by
   obtain ⟨F, hF, hfF⟩ := hf
   revert f
   revert F
@@ -601,10 +617,12 @@ lemma decomposeFluxes_sum_of_noExotics (f : Fluxes) (hf : ∃ F ∈ FluxesTen.el
 
 -/
 
-/-- The decomposition of a `TenQuanta` into a `TenQuanta` which has the
-  same `reduce` by has fluxes `{⟨1, 0⟩, ⟨1, 0⟩, ⟨1, 0⟩}` or `{⟨1, 1⟩, ⟨1, -1⟩, ⟨1, 0⟩}` only.
+/--
+The decomposition of a `TenQuanta` into a `TenQuanta` which has the
+same `reduce` by has fluxes `{⟨1, 0⟩, ⟨1, 0⟩, ⟨1, 0⟩}` or `{⟨1, 1⟩, ⟨1, -1⟩, ⟨1, 0⟩}` only.
 
-  This only works for fluxes which have no exotics or zeros. -/
+This only works for fluxes which have no exotics or zeros.
+-/
 def decompose (x : TenQuanta 𝓩) : TenQuanta 𝓩 :=
   x.bind fun p => (decomposeFluxes p.2).map fun f => (p.1, f)
 
@@ -614,8 +632,7 @@ def decompose (x : TenQuanta 𝓩) : TenQuanta 𝓩 :=
 
 -/
 
-lemma decompose_add (x y : TenQuanta 𝓩) :
-    (x + y).decompose = x.decompose + y.decompose := by
+lemma decompose_add (x y : TenQuanta 𝓩) : (x + y).decompose = x.decompose + y.decompose := by
   simp [decompose]
 
 /-!
@@ -624,9 +641,8 @@ lemma decompose_add (x y : TenQuanta 𝓩) :
 
 -/
 
-lemma decompose_filter_charge [DecidableEq 𝓩] (x : TenQuanta 𝓩) (q : 𝓩) :
-    (x.decompose).filter (fun p => p.1 = q) =
-    decompose (x.filter (fun p => p.1 = q)) := by
+lemma decompose_filter_charge [DecidableEq 𝓩] (x : TenQuanta 𝓩) (q : 𝓩)
+    : (x.decompose).filter (fun p => p.1 = q) = decompose (x.filter (fun p => p.1 = q)) := by
   rw [decompose]
   revert x
   apply Multiset.induction
@@ -648,9 +664,9 @@ lemma decompose_filter_charge [DecidableEq 𝓩] (x : TenQuanta 𝓩) (q : 𝓩)
 
 -/
 
-lemma decompose_toChargeMap [DecidableEq 𝓩] (x : TenQuanta 𝓩)
-    (hx : x.toFluxesTen ∈ FluxesTen.elemsNoExotics) :
-    x.decompose.toChargeMap = x.toChargeMap := by
+lemma decompose_toChargeMap
+    [DecidableEq 𝓩] (x : TenQuanta 𝓩) (hx : x.toFluxesTen ∈ FluxesTen.elemsNoExotics)
+    : x.decompose.toChargeMap = x.toChargeMap := by
   ext q
   rw [toChargeMap, decompose_filter_charge]
   simp [decompose]
@@ -671,9 +687,9 @@ lemma decompose_toChargeMap [DecidableEq 𝓩] (x : TenQuanta 𝓩)
 
 -/
 
-lemma decompose_toCharges_dedup [DecidableEq 𝓩] (x : TenQuanta 𝓩)
-    (hx : x.toFluxesTen ∈ FluxesTen.elemsNoExotics) :
-    x.decompose.toCharges.dedup = x.toCharges.dedup := by
+lemma decompose_toCharges_dedup
+    [DecidableEq 𝓩] (x : TenQuanta 𝓩) (hx : x.toFluxesTen ∈ FluxesTen.elemsNoExotics)
+    : x.decompose.toCharges.dedup = x.toCharges.dedup := by
   refine Multiset.dedup_ext.mpr ?_
   intro q
   simp [decompose, toCharges, -existsAndEq]
@@ -700,9 +716,9 @@ lemma decompose_toCharges_dedup [DecidableEq 𝓩] (x : TenQuanta 𝓩)
 
 -/
 
-lemma decompose_reduce (x : TenQuanta 𝓩) [DecidableEq 𝓩]
-    (hx : x.toFluxesTen ∈ FluxesTen.elemsNoExotics) :
-    x.decompose.reduce = x.reduce := by
+lemma decompose_reduce
+    (x : TenQuanta 𝓩) [DecidableEq 𝓩] (hx : x.toFluxesTen ∈ FluxesTen.elemsNoExotics)
+    : x.decompose.reduce = x.reduce := by
   rw [reduce, reduce]
   refine Multiset.map_congr (decompose_toCharges_dedup x hx) fun q hx' => ?_
   simp only [Prod.mk.injEq, true_and]
@@ -715,16 +731,16 @@ lemma decompose_reduce (x : TenQuanta 𝓩) [DecidableEq 𝓩]
 
 -/
 
-lemma decompose_toFluxesTen (x : TenQuanta 𝓩)
-    (hx : x.toFluxesTen ∈ FluxesTen.elemsNoExotics) :
-    x.decompose.toFluxesTen = {⟨1, 0⟩, ⟨1, 0⟩, ⟨1, 0⟩} ∨
-    x.decompose.toFluxesTen = {⟨1, 1⟩, ⟨1, -1⟩, ⟨1, 0⟩} := by
+lemma decompose_toFluxesTen (x : TenQuanta 𝓩) (hx : x.toFluxesTen ∈ FluxesTen.elemsNoExotics)
+    : x.decompose.toFluxesTen = {⟨1, 0⟩, ⟨1, 0⟩, ⟨1, 0⟩}
+      ∨ x.decompose.toFluxesTen = {⟨1, 1⟩, ⟨1, -1⟩, ⟨1, 0⟩} := by
   rw [toFluxesTen, decompose]
   rw [Multiset.map_bind]
   simp only [Multiset.map_map, Function.comp_apply, Multiset.map_id', Multiset.insert_eq_cons,
     Int.reduceNeg]
-  have hx : (Multiset.bind x fun a => decomposeFluxes a.2) =
-      (Multiset.bind x.toFluxesTen fun a => decomposeFluxes a) := by
+  have hx
+      : (Multiset.bind x fun a => decomposeFluxes a.2)
+        = (Multiset.bind x.toFluxesTen fun a => decomposeFluxes a) := by
     rw [toFluxesTen, Multiset.bind_map]
   rw [hx]
   clear hx
@@ -752,9 +768,11 @@ This is an efficient definition, we will later show that it gives the correct an
 
 -/
 
-/-- Given a finite set of charges `c` the `TenQuanta`
-  which do not have exotics, duplicate charges or zero fluxes, which map down to `c`.
-  This is defined to be as efficient as possible. -/
+/--
+Given a finite set of charges `c` the `TenQuanta`
+which do not have exotics, duplicate charges or zero fluxes, which map down to `c`.
+This is defined to be as efficient as possible.
+-/
 def liftCharge (c : Finset 𝓩) : Multiset (TenQuanta 𝓩) :=
   /- The {(1, 0), (1, 0), (1, 0)} case. -/
   /- The multisets of cardinality 3 containing 3 elements of `c`. -/
@@ -762,9 +780,11 @@ def liftCharge (c : Finset 𝓩) : Multiset (TenQuanta 𝓩) :=
   let F1 : Multiset (TenQuanta 𝓩) :=
     (S10.map (fun s => s.map (fun z => (z, ⟨1, 0⟩)))).filter (fun s => c.val ≤ s.toCharges)
   /- The {(1, 1), (1, -1), (1, 0)} case. -/
-  let F2 : Multiset (TenQuanta 𝓩) := ((c.product <| c.product <| c).val.map
-    fun (x, y, z) => {(x, ⟨1, 1⟩), (y, ⟨1, -1⟩), (z, ⟨1, 0⟩)}).filter (fun s => c.val ≤ s.toCharges)
-  /- All together-/
+  let F2 : Multiset (TenQuanta 𝓩) :=
+    ((c.product <| c.product <| c).val.map fun (x, y, z) =>
+        {(x, ⟨1, 1⟩), (y, ⟨1, -1⟩), (z, ⟨1, 0⟩)}).filter
+      (fun s => c.val ≤ s.toCharges)
+  /- All together -/
   (F1 + F2).map reduce
 
 /-!
@@ -773,9 +793,8 @@ def liftCharge (c : Finset 𝓩) : Multiset (TenQuanta 𝓩) :=
 
 -/
 
-lemma toCharge_toFinset_of_mem_liftCharge (c : Finset 𝓩)
-    {x : TenQuanta 𝓩} (h : x ∈ liftCharge c) :
-    x.toCharges.toFinset = c := by
+lemma toCharge_toFinset_of_mem_liftCharge (c : Finset 𝓩) {x : TenQuanta 𝓩} (h : x ∈ liftCharge c)
+    : x.toCharges.toFinset = c := by
   rw [liftCharge, Multiset.mem_map] at h
   obtain ⟨a, h, rfl⟩ := h
   rw [reduce_toCharges]
@@ -811,8 +830,8 @@ lemma toCharge_toFinset_of_mem_liftCharge (c : Finset 𝓩)
 
 -/
 
-lemma toCharges_nodup_of_mem_liftCharge (c : Finset 𝓩) {x : TenQuanta 𝓩}
-    (h : x ∈ liftCharge c) : x.toCharges.Nodup := by
+lemma toCharges_nodup_of_mem_liftCharge (c : Finset 𝓩) {x : TenQuanta 𝓩} (h : x ∈ liftCharge c)
+    : x.toCharges.Nodup := by
   rw [liftCharge, Multiset.mem_map] at h
   obtain ⟨x, h, rfl⟩ := h
   rw [reduce_toCharges]
@@ -824,11 +843,12 @@ lemma toCharges_nodup_of_mem_liftCharge (c : Finset 𝓩) {x : TenQuanta 𝓩}
 
 -/
 
-lemma exists_toCharges_toFluxesTen_of_mem_liftCharge (c : Finset 𝓩)
-    {x : TenQuanta 𝓩} (h : x ∈ liftCharge c) :
-    ∃ a : TenQuanta 𝓩, a.reduce = x ∧ a.toCharges.toFinset = c ∧
-    (a.toFluxesTen = {⟨1, 0⟩, ⟨1, 0⟩, ⟨1, 0⟩}
-    ∨ a.toFluxesTen = {⟨1, 1⟩, ⟨1, -1⟩, ⟨1, 0⟩}) := by
+lemma exists_toCharges_toFluxesTen_of_mem_liftCharge
+    (c : Finset 𝓩) {x : TenQuanta 𝓩} (h : x ∈ liftCharge c)
+    : ∃ a : TenQuanta 𝓩,
+      a.reduce = x ∧ a.toCharges.toFinset = c
+        ∧ (a.toFluxesTen = {⟨1, 0⟩, ⟨1, 0⟩, ⟨1, 0⟩}
+          ∨ a.toFluxesTen = {⟨1, 1⟩, ⟨1, -1⟩, ⟨1, 0⟩}) := by
   have h' := h
   rw [liftCharge, Multiset.mem_map] at h
   obtain ⟨a, h, rfl⟩ := h
@@ -847,11 +867,13 @@ lemma exists_toCharges_toFluxesTen_of_mem_liftCharge (c : Finset 𝓩)
   · obtain ⟨⟨q1, q2, q3, h, rfl⟩, h'⟩ := h
     simp [toFluxesTen]
 
-lemma mem_liftCharge_of_exists_toCharges_toFluxesTen (c : Finset 𝓩) {x : TenQuanta 𝓩}
-    (h :∃ a : TenQuanta 𝓩, a.reduce = x ∧ a.toCharges.toFinset = c ∧
-    (a.toFluxesTen = {⟨1, 0⟩, ⟨1, 0⟩, ⟨1, 0⟩}
-    ∨ a.toFluxesTen = {⟨1, 1⟩, ⟨1, -1⟩, ⟨1, 0⟩})) :
-    x ∈ liftCharge c := by
+lemma mem_liftCharge_of_exists_toCharges_toFluxesTen
+    (c : Finset 𝓩)
+    {x : TenQuanta 𝓩}
+    (h : ∃ a : TenQuanta 𝓩,
+      a.reduce = x ∧ a.toCharges.toFinset = c
+        ∧ (a.toFluxesTen = {⟨1, 0⟩, ⟨1, 0⟩, ⟨1, 0⟩} ∨ a.toFluxesTen = {⟨1, 1⟩, ⟨1, -1⟩, ⟨1, 0⟩}))
+    : x ∈ liftCharge c := by
   obtain ⟨x, rfl, h, h2⟩ := h
   rw [liftCharge, Multiset.mem_map]
   use x
@@ -934,11 +956,12 @@ lemma mem_liftCharge_of_exists_toCharges_toFluxesTen (c : Finset 𝓩) {x : TenQ
       simp only [Multiset.toFinset_val]
       exact Multiset.dedup_le x.toCharges
 
-lemma mem_liftCharge_iff_exists (c : Finset 𝓩) {x : TenQuanta 𝓩} :
-    x ∈ liftCharge c ↔
-    ∃ a : TenQuanta 𝓩, a.reduce = x ∧ a.toCharges.toFinset = c ∧
-    (a.toFluxesTen = {⟨1, 0⟩, ⟨1, 0⟩, ⟨1, 0⟩}
-    ∨ a.toFluxesTen = {⟨1, 1⟩, ⟨1, -1⟩, ⟨1, 0⟩}) := by
+lemma mem_liftCharge_iff_exists (c : Finset 𝓩) {x : TenQuanta 𝓩}
+    : x ∈ liftCharge c
+      ↔ ∃ a : TenQuanta 𝓩,
+        a.reduce = x ∧ a.toCharges.toFinset = c
+          ∧ (a.toFluxesTen = {⟨1, 0⟩, ⟨1, 0⟩, ⟨1, 0⟩}
+            ∨ a.toFluxesTen = {⟨1, 1⟩, ⟨1, -1⟩, ⟨1, 0⟩}) := by
   constructor
   · exact exists_toCharges_toFluxesTen_of_mem_liftCharge c
   · exact mem_liftCharge_of_exists_toCharges_toFluxesTen c
@@ -949,8 +972,8 @@ lemma mem_liftCharge_iff_exists (c : Finset 𝓩) {x : TenQuanta 𝓩} :
 
 -/
 
-lemma hasNoZero_of_mem_liftCharge (c : Finset 𝓩) {x : TenQuanta 𝓩}
-    (h : x ∈ liftCharge c) : x.toFluxesTen.HasNoZero := by
+lemma hasNoZero_of_mem_liftCharge (c : Finset 𝓩) {x : TenQuanta 𝓩} (h : x ∈ liftCharge c)
+    : x.toFluxesTen.HasNoZero := by
   rw [mem_liftCharge_iff_exists] at h
   obtain ⟨x, rfl, h1, h2⟩ := h
   intro hf
@@ -967,9 +990,8 @@ lemma hasNoZero_of_mem_liftCharge (c : Finset 𝓩) {x : TenQuanta 𝓩}
 
 -/
 
-lemma noExotics_of_mem_liftCharge (c : Finset 𝓩) (F : TenQuanta 𝓩)
-    (h : F ∈ liftCharge c) :
-    F.toFluxesTen.NoExotics := by
+lemma noExotics_of_mem_liftCharge (c : Finset 𝓩) (F : TenQuanta 𝓩) (h : F ∈ liftCharge c)
+    : F.toFluxesTen.NoExotics := by
   rw [mem_liftCharge_iff_exists] at h
   obtain ⟨x, rfl, h1, h2⟩ := h
   apply reduce_noExotics_of_mem_elemsNoExotics
@@ -984,10 +1006,11 @@ lemma noExotics_of_mem_liftCharge (c : Finset 𝓩) (F : TenQuanta 𝓩)
 
 -/
 
-lemma mem_liftCharge_of_mem_noExotics_hasNoZero (c : Finset 𝓩) {x : TenQuanta 𝓩}
-    (h1 : x.toFluxesTen.NoExotics) (h2 : x.toFluxesTen.HasNoZero)
-    (h3 : x.toCharges.toFinset = c) (h4 : x.toCharges.Nodup) :
-    x ∈ liftCharge c := by
+lemma mem_liftCharge_of_mem_noExotics_hasNoZero
+    (c : Finset 𝓩)
+    {x : TenQuanta 𝓩} (h1 : x.toFluxesTen.NoExotics) (h2 : x.toFluxesTen.HasNoZero)
+    (h3 : x.toCharges.toFinset = c) (h4 : x.toCharges.Nodup)
+    : x ∈ liftCharge c := by
   have hf : x.toFluxesTen ∈ FluxesTen.elemsNoExotics := by
     rw [← FluxesTen.noExotics_iff_mem_elemsNoExotics]
     exact ⟨h1, h2⟩
@@ -1001,9 +1024,10 @@ lemma mem_liftCharge_of_mem_noExotics_hasNoZero (c : Finset 𝓩) {x : TenQuanta
       simp
   · exact decompose_toFluxesTen x hf
 
-lemma mem_liftCharge_iff (c : Finset 𝓩) (x : TenQuanta 𝓩) :
-    x ∈ liftCharge c ↔ x.toFluxesTen ∈ FluxesTen.elemsNoExotics
-      ∧ x.toCharges.toFinset = c ∧ x.toCharges.Nodup := by
+lemma mem_liftCharge_iff (c : Finset 𝓩) (x : TenQuanta 𝓩)
+    : x ∈ liftCharge c
+      ↔ x.toFluxesTen ∈ FluxesTen.elemsNoExotics ∧ x.toCharges.toFinset = c
+        ∧ x.toCharges.Nodup := by
   constructor
   · intro h
     refine ⟨?_, ?_, ?_⟩
@@ -1021,9 +1045,11 @@ lemma mem_liftCharge_iff (c : Finset 𝓩) (x : TenQuanta 𝓩) :
 
 -/
 
-lemma map_liftCharge {𝓩 𝓩1 : Type}[DecidableEq 𝓩] [DecidableEq 𝓩1] [CommRing 𝓩] [CommRing 𝓩1]
-    (f : 𝓩 →+* 𝓩1) (c : Finset 𝓩) (F : TenQuanta 𝓩) (h : F ∈ liftCharge c) :
-    TenQuanta.reduce (F.map fun y => (f y.1, y.2)) ∈ liftCharge (c.image f) := by
+lemma map_liftCharge
+    {𝓩 𝓩1 : Type} [DecidableEq 𝓩] [DecidableEq 𝓩1] [CommRing 𝓩] [CommRing 𝓩1]
+    (f : 𝓩 →+* 𝓩1)
+    (c : Finset 𝓩) (F : TenQuanta 𝓩) (h : F ∈ liftCharge c)
+    : TenQuanta.reduce (F.map fun y => (f y.1, y.2)) ∈ liftCharge (c.image f) := by
   rw [mem_liftCharge_iff] at h ⊢
   refine ⟨?_, ?_, ?_⟩
   · apply reduce_mem_elemsNoExotics
@@ -1052,12 +1078,12 @@ variable [CommRing 𝓩]
 -/
 
 /--
-  The anomaly coefficient of a `TenQuanta` is given by the pair of integers:
-  `(∑ᵢ qᵢ Nᵢ, 3 * ∑ᵢ qᵢ² Nᵢ)`.
+The anomaly coefficient of a `TenQuanta` is given by the pair of integers:
+`(∑ᵢ qᵢ Nᵢ, 3 * ∑ᵢ qᵢ² Nᵢ)`.
 
-  The first components is for the mixed U(1)-MSSM, see equation (22) of arXiv:1401.5084
-  [ref: arxiv_1401_5084]. The second component is for the mixed U(1)Y-U(1)-U(1) gauge anomaly,
-  see equation (23) of arXiv:1401.5084 [ref: arxiv_1401_5084].
+The first components is for the mixed U(1)-MSSM, see equation (22) of arXiv:1401.5084
+[ref: arxiv_1401_5084]. The second component is for the mixed U(1)Y-U(1)-U(1) gauge anomaly,
+see equation (23) of arXiv:1401.5084 [ref: arxiv_1401_5084].
 -/
 def anomalyCoefficient (F : TenQuanta 𝓩) : 𝓩 × 𝓩 :=
   ((F.map fun x => x.2.2 • x.1).sum, 3 * (F.map fun x => x.2.2 • (x.1 * x.1)).sum)
@@ -1069,10 +1095,10 @@ def anomalyCoefficient (F : TenQuanta 𝓩) : 𝓩 × 𝓩 :=
 -/
 
 @[simp]
-lemma anomalyCoefficient_of_map {𝓩 𝓩1 : Type} [CommRing 𝓩] [CommRing 𝓩1]
-    (f : 𝓩 →+* 𝓩1) (F : TenQuanta 𝓩) :
-    TenQuanta.anomalyCoefficient (F.map fun y => (f y.1, y.2) : TenQuanta 𝓩1) =
-    (f.prodMap f) F.anomalyCoefficient := by
+lemma anomalyCoefficient_of_map
+    {𝓩 𝓩1 : Type} [CommRing 𝓩] [CommRing 𝓩1] (f : 𝓩 →+* 𝓩1) (F : TenQuanta 𝓩)
+    : TenQuanta.anomalyCoefficient (F.map fun y => (f y.1, y.2) : TenQuanta 𝓩1)
+      = (f.prodMap f) F.anomalyCoefficient := by
   simp [TenQuanta.anomalyCoefficient, map_multiset_sum, Multiset.map_map, map_ofNat]
 
 /-!
@@ -1081,15 +1107,17 @@ lemma anomalyCoefficient_of_map {𝓩 𝓩1 : Type} [CommRing 𝓩] [CommRing �
 
 -/
 
-lemma anomalyCoefficient_of_reduce [DecidableEq 𝓩] (F : TenQuanta 𝓩) :
-    F.reduce.anomalyCoefficient = F.anomalyCoefficient := by
-  have weighted_N_sum_eq : ∀ w : 𝓩 → 𝓩,
-      (Multiset.map (fun x => (x.2.N : 𝓩) * w x.1) F.reduce).sum =
-      (Multiset.map (fun x => (x.2.N : 𝓩) * w x.1) F).sum := fun w =>
-    reduce_sum_eq_sum_toCharges F fun q5 =>
-      { toFun := fun x => (x.N : 𝓩) * w q5
-        map_zero' := by simp
-        map_add' := fun x y => by simp [add_mul] }
+lemma anomalyCoefficient_of_reduce [DecidableEq 𝓩] (F : TenQuanta 𝓩)
+    : F.reduce.anomalyCoefficient = F.anomalyCoefficient := by
+  have weighted_N_sum_eq
+      : ∀ w : 𝓩 → 𝓩,
+        (Multiset.map (fun x => (x.2.N : 𝓩) * w x.1) F.reduce).sum
+          = (Multiset.map (fun x => (x.2.N : 𝓩) * w x.1) F).sum := fun w =>
+    reduce_sum_eq_sum_toCharges F fun q5 => {
+      toFun := fun x => (x.N : 𝓩) * w q5
+      map_zero' := by simp
+      map_add' := fun x y => by simp [add_mul]
+    }
   simp [anomalyCoefficient]
   exact ⟨weighted_N_sum_eq fun q => q, congrArg (3 * ·) (weighted_N_sum_eq fun q => q * q)⟩
 

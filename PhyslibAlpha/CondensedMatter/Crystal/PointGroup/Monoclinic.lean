@@ -49,60 +49,80 @@ open PeriodicGraph
 
 /-! ## A. The admissible triples -/
 
-/-- The four point operations of the primitive monoclinic lattice: the identity, the reflection
-`b ↦ -b`, the rotation by `π` about `b` and the inversion. -/
-def monoclinicPointTriples : Finset (Fin 3 → Fin 3 → ℤ) :=
-  {![![1, 0, 0], ![0, 1, 0], ![0, 0, 1]], ![![1, 0, 0], ![0, -1, 0], ![0, 0, 1]],
-    ![![-1, 0, 0], ![0, 1, 0], ![0, 0, -1]], ![![-1, 0, 0], ![0, -1, 0], ![0, 0, -1]]}
+/--
+The four point operations of the primitive monoclinic lattice: the identity, the reflection
+`b ↦ -b`, the rotation by `π` about `b` and the inversion.
+-/
+def monoclinicPointTriples : Finset (Fin 3 → Fin 3 → ℤ) := {
+  ![![1, 0, 0], ![0, 1, 0], ![0, 0, 1]], ![![1, 0, 0], ![0, -1, 0], ![0, 0, 1]],
+  ![![-1, 0, 0], ![0, 1, 0], ![0, 0, -1]], ![![-1, 0, 0], ![0, -1, 0], ![0, 0, -1]]
+}
 
-/-- The point operations of the primitive monoclinic lattice are the four of
-`monoclinicPointTriples`. -/
-lemma monoclinic_admissible_iff (v : Fin 3 → Fin 3 → ℤ) :
-    Admissible (bondNeighbors monoclinicBonds) v ↔ v ∈ monoclinicPointTriples :=
-  admissible_iff_of_tests (fun j => by fin_cases j <;> decide) [] [(-1, 1), (-2, 1)]
-    [![-2, 0, 1], ![-1, 0, -1], ![0, -1, -1]] (by decide +kernel) (by decide +kernel) v
+/--
+The point operations of the primitive monoclinic lattice are the four of
+`monoclinicPointTriples`.
+-/
+lemma monoclinic_admissible_iff (v : Fin 3 → Fin 3 → ℤ)
+    : Admissible (bondNeighbors monoclinicBonds) v ↔ v ∈ monoclinicPointTriples :=
+  admissible_iff_of_tests
+    (fun j => by fin_cases j <;> decide)
+    [] [(-1, 1), (-2, 1)] [![-2, 0, 1], ![-1, 0, -1], ![0, -1, -1]] (by decide +kernel)
+    (by decide +kernel) v
 
-/-- The four point operations of the base-centred monoclinic lattice, in the basis
-`baseCentredMonoclinicVectors`. -/
-def baseCentredMonoclinicPointTriples : Finset (Fin 3 → Fin 3 → ℤ) :=
-  {![![1, 0, 0], ![0, 1, 0], ![0, 0, 1]], ![![0, 1, 0], ![1, 0, 0], ![0, 0, 1]],
-    ![![0, -1, 0], ![-1, 0, 0], ![0, 0, -1]], ![![-1, 0, 0], ![0, -1, 0], ![0, 0, -1]]}
+/--
+The four point operations of the base-centred monoclinic lattice, in the basis
+`baseCentredMonoclinicVectors`.
+-/
+def baseCentredMonoclinicPointTriples : Finset (Fin 3 → Fin 3 → ℤ) := {
+  ![![1, 0, 0], ![0, 1, 0], ![0, 0, 1]], ![![0, 1, 0], ![1, 0, 0], ![0, 0, 1]],
+  ![![0, -1, 0], ![-1, 0, 0], ![0, 0, -1]], ![![-1, 0, 0], ![0, -1, 0], ![0, 0, -1]]
+}
 
-/-- The point operations of the base-centred monoclinic lattice are the four of
-`baseCentredMonoclinicPointTriples`. -/
-lemma baseCentredMonoclinic_admissible_iff (v : Fin 3 → Fin 3 → ℤ) :
-    Admissible (bondNeighbors baseCentredMonoclinicBonds) v ↔
-      v ∈ baseCentredMonoclinicPointTriples :=
-  admissible_iff_of_tests (fun j => by fin_cases j <;> decide) [] [(-2, 1), (-1, 2)]
-    [![0, -1, 1], ![-1, 1, -1], ![-1, 0, -1]] (by decide +kernel) (by decide +kernel) v
+/--
+The point operations of the base-centred monoclinic lattice are the four of
+`baseCentredMonoclinicPointTriples`.
+-/
+lemma baseCentredMonoclinic_admissible_iff (v : Fin 3 → Fin 3 → ℤ)
+    : Admissible (bondNeighbors baseCentredMonoclinicBonds) v
+      ↔ v ∈ baseCentredMonoclinicPointTriples :=
+  admissible_iff_of_tests
+    (fun j => by fin_cases j <;> decide)
+    [] [(-2, 1), (-1, 2)] [![0, -1, 1], ![-1, 1, -1], ![-1, 0, -1]] (by decide +kernel)
+    (by decide +kernel) v
 
 /-- The two point operations of the triclinic lattice: the identity and the inversion. -/
 def triclinicPointTriples : Finset (Fin 3 → Fin 3 → ℤ) :=
   {![![1, 0, 0], ![0, 1, 0], ![0, 0, 1]], ![![-1, 0, 0], ![0, -1, 0], ![0, 0, -1]]}
 
 /-- The point operations of the triclinic lattice are the identity and the inversion. -/
-lemma triclinic_admissible_iff (v : Fin 3 → Fin 3 → ℤ) :
-    Admissible (bondNeighbors triclinicBonds) v ↔ v ∈ triclinicPointTriples :=
-  admissible_iff_of_tests (fun j => by fin_cases j <;> decide) [-2] [(-1, -1)]
-    [![0, -1, 1], ![-1, -1, 1], ![-1, 1, -1], ![-1, 0, -1]] (by decide +kernel)
+lemma triclinic_admissible_iff (v : Fin 3 → Fin 3 → ℤ)
+    : Admissible (bondNeighbors triclinicBonds) v ↔ v ∈ triclinicPointTriples :=
+  admissible_iff_of_tests
+    (fun j => by fin_cases j <;> decide)
+    [-2] [(-1, -1)] [![0, -1, 1], ![-1, -1, 1], ![-1, 1, -1], ![-1, 0, -1]] (by decide +kernel)
     (by decide +kernel) v
 
 /-! ## B. The orders -/
 
 /-- **The point group of the primitive monoclinic lattice has order `4`.** -/
 lemma monoclinic_card_pointGroup : Nat.card monoclinicGraph.pointGroup = 4 :=
-  (card_pointGroup_ofBonds monoclinicBonds (fun j => by fin_cases j <;> decide)
-    monoclinic_admissible_iff).trans (by decide)
+  (card_pointGroup_ofBonds monoclinicBonds
+      (fun j => by fin_cases j <;> decide)
+      monoclinic_admissible_iff).trans
+    (by decide)
 
 /-- **The point group of the base-centred monoclinic lattice has order `4`.** -/
-lemma baseCentredMonoclinic_card_pointGroup :
-    Nat.card baseCentredMonoclinicGraph.pointGroup = 4 :=
-  (card_pointGroup_ofBonds baseCentredMonoclinicBonds (fun j => by fin_cases j <;> decide)
-    baseCentredMonoclinic_admissible_iff).trans (by decide)
+lemma baseCentredMonoclinic_card_pointGroup : Nat.card baseCentredMonoclinicGraph.pointGroup = 4 :=
+  (card_pointGroup_ofBonds baseCentredMonoclinicBonds
+      (fun j => by fin_cases j <;> decide)
+      baseCentredMonoclinic_admissible_iff).trans
+    (by decide)
 
 /-- **The point group of the triclinic lattice has order `2`.** -/
 lemma triclinic_card_pointGroup : Nat.card triclinicGraph.pointGroup = 2 :=
-  (card_pointGroup_ofBonds triclinicBonds (fun j => by fin_cases j <;> decide)
-    triclinic_admissible_iff).trans (by decide)
+  (card_pointGroup_ofBonds triclinicBonds
+      (fun j => by fin_cases j <;> decide)
+      triclinic_admissible_iff).trans
+    (by decide)
 
 end CondensedMatter.Crystal

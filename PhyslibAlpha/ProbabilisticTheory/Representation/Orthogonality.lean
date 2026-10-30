@@ -59,8 +59,7 @@ namespace QuantumMechanics
 /-- The injection of `ℚ/ℤ` into the circle, `q ↦ e^{2πi q}`. -/
 def rationalCircle : AddCircle (1 : ℚ) →+ Additive Circle :=
   QuotientAddGroup.lift (AddSubgroup.zmultiples (1 : ℚ))
-    (Circle.expHom.comp ((AddMonoidHom.mulLeft (2 * Real.pi)).comp
-      (Rat.castHom ℝ).toAddMonoidHom))
+    (Circle.expHom.comp ((AddMonoidHom.mulLeft (2 * Real.pi)).comp (Rat.castHom ℝ).toAddMonoidHom))
     (by
       intro q hq
       obtain ⟨n, rfl⟩ := AddSubgroup.mem_zmultiples_iff.mp hq
@@ -88,11 +87,16 @@ lemma rationalCircle_eq_zero {x : AddCircle (1 : ℚ)} (h : rationalCircle x = 0
 variable {G : Type*} [AddCommGroup G]
 
 /-- **Characters separate the points of a discrete abelian group.** -/
-lemma exists_character_apply_ne_one [TopologicalSpace G] [DiscreteTopology G] {g : G}
-    (hg : g ≠ 0) : ∃ χ : PontryaginDual (Multiplicative G), χ (Multiplicative.ofAdd g) ≠ 1 := by
+lemma exists_character_apply_ne_one [TopologicalSpace G] [DiscreteTopology G] {g : G} (hg : g ≠ 0)
+    : ∃ χ : PontryaginDual (Multiplicative G), χ (Multiplicative.ofAdd g) ≠ 1 := by
   obtain ⟨c, hc⟩ := CharacterModule.exists_character_apply_ne_zero_of_ne_zero hg
-  refine ⟨⟨⟨⟨fun a => Additive.toMul (rationalCircle (c (Multiplicative.toAdd a))), ?_⟩, ?_⟩,
-    continuous_of_discreteTopology⟩, ?_⟩
+  refine ⟨
+    ⟨
+      ⟨⟨fun a => Additive.toMul (rationalCircle (c (Multiplicative.toAdd a))), ?_⟩, ?_⟩,
+      continuous_of_discreteTopology
+    ⟩,
+    ?_
+  ⟩
   · simp
   · intro a b
     simp [map_add]
@@ -106,43 +110,48 @@ lemma exists_character_apply_ne_one [TopologicalSpace G] [DiscreteTopology G] {g
 section Haar
 
 variable [TopologicalSpace G] [DiscreteTopology G]
-variable [MeasurableSpace (PontryaginDual (Multiplicative G))]
+variable
+  [MeasurableSpace (PontryaginDual (Multiplicative G))]
   [BorelSpace (PontryaginDual (Multiplicative G))]
 
 /-- The normalized Haar measure of the compact dual group. -/
-def dualHaar : Measure (PontryaginDual (Multiplicative G)) :=
-  Measure.haarMeasure ⊤
+def dualHaar : Measure (PontryaginDual (Multiplicative G)) := Measure.haarMeasure ⊤
 
-instance : (dualHaar (G := G)).IsHaarMeasure := by
-  unfold dualHaar; infer_instance
+instance : (dualHaar (G := G)).IsHaarMeasure := by unfold dualHaar; infer_instance
 
-instance : IsProbabilityMeasure (dualHaar (G := G)) :=
-  ⟨by
-    have h : dualHaar (G := G) ((⊤ : TopologicalSpace.PositiveCompacts
-        (PontryaginDual (Multiplicative G))) : Set _) = 1 := Measure.haarMeasure_self
-    simpa using h⟩
+instance : IsProbabilityMeasure (dualHaar (G := G)) := ⟨by
+  have h
+      : dualHaar (G := G)
+          ((⊤ : TopologicalSpace.PositiveCompacts (PontryaginDual (Multiplicative G))) : Set _)
+        = 1 :=
+    Measure.haarMeasure_self
+  simpa using h⟩
 
 open scoped Classical in
-/-- **Orthogonality of characters**: the evaluation characters are orthonormal for the Haar
-probability measure of the dual group. -/
-lemma integral_character_dualHaar (g : G) :
-    ∫ χ, ((χ (Multiplicative.ofAdd g) : Circle) : ℂ) ∂(dualHaar (G := G)) =
-      if g = 0 then 1 else 0 := by
+/--
+**Orthogonality of characters**: the evaluation characters are orthonormal for the Haar
+probability measure of the dual group.
+-/
+lemma integral_character_dualHaar (g : G)
+    : ∫ χ, ((χ (Multiplicative.ofAdd g) : Circle) : ℂ) ∂(dualHaar (G := G))
+      = if g = 0 then 1 else 0 := by
   by_cases hg : g = 0
   · subst hg
     simp
   · rw [ite_eq_right hg]
     obtain ⟨χ₀, hχ₀⟩ := exists_character_apply_ne_one (G := G) hg
-    have h := integral_mul_left_eq_self
-      (fun χ : PontryaginDual (Multiplicative G) => ((χ (Multiplicative.ofAdd g) : Circle) : ℂ))
-      χ₀ (μ := dualHaar (G := G))
-    have hmul : ∀ χ : PontryaginDual (Multiplicative G),
-        (((χ₀ * χ) (Multiplicative.ofAdd g) : Circle) : ℂ) =
-          ((χ₀ (Multiplicative.ofAdd g) : Circle) : ℂ) *
-            ((χ (Multiplicative.ofAdd g) : Circle) : ℂ) := fun χ => rfl
+    have h :=
+      integral_mul_left_eq_self
+        (fun χ : PontryaginDual (Multiplicative G) => ((χ (Multiplicative.ofAdd g) : Circle) : ℂ))
+        χ₀ (μ := dualHaar (G := G))
+    have hmul
+        : ∀ χ : PontryaginDual (Multiplicative G),
+          (((χ₀ * χ) (Multiplicative.ofAdd g) : Circle) : ℂ)
+            = ((χ₀ (Multiplicative.ofAdd g) : Circle) : ℂ)
+              * ((χ (Multiplicative.ofAdd g) : Circle) : ℂ) := fun χ =>
+      rfl
     simp only [hmul, integral_const_mul] at h
-    have hne : ((χ₀ (Multiplicative.ofAdd g) : Circle) : ℂ) ≠ 1 := fun h1 =>
-      hχ₀ (Circle.ext h1)
+    have hne : ((χ₀ (Multiplicative.ofAdd g) : Circle) : ℂ) ≠ 1 := fun h1 => hχ₀ (Circle.ext h1)
     by_contra hI
     apply hne
     have := mul_right_cancel₀ hI (h.trans (one_mul _).symm)

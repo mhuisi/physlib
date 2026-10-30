@@ -56,37 +56,36 @@ namespace HiggsVec
 
 -/
 
-/-- The Higgs field as a matter field of `StandardModel.localGaugeData`, valued in
-  `HiggsVec`, in the `2_{3}` representation of the gauge group, a Lorentz scalar, of mass
-  weight two. -/
+/--
+The Higgs field as a matter field of `StandardModel.localGaugeData`, valued in
+`HiggsVec`, in the `2_{3}` representation of the gauge group, a Lorentz scalar, of mass
+weight two.
+-/
 noncomputable def matterField : MatterField localGaugeData where
   V := HiggsVec
-  repLorentz := Representation.trivial ℂ SL(2,ℂ) HiggsVec
+  repLorentz := Representation.trivial ℂ (SL(2,ℂ)) HiggsVec
   repJet := repJetGaugeGroupI
   repAlgebra := gaugeAlgebraAction
   repAlgebra_isInfinitesimalAction := isInfinitesimalActionOf
   repJet_smul := repJetGaugeGroupI_smul
   massWeight := 2
 
-@[simp]
-lemma matterField_V : matterField.V = HiggsVec := rfl
+@[simp] lemma matterField_V : matterField.V = HiggsVec := rfl
 
 @[simp]
-lemma matterField_repLorentz :
-    matterField.repLorentz = Representation.trivial ℂ SL(2,ℂ) HiggsVec := rfl
+lemma matterField_repLorentz
+    : matterField.repLorentz = Representation.trivial ℂ (SL(2,ℂ)) HiggsVec :=
+  rfl
 
-@[simp]
-lemma matterField_repJet : matterField.repJet = repJetGaugeGroupI := rfl
+@[simp] lemma matterField_repJet : matterField.repJet = repJetGaugeGroupI := rfl
 
-@[simp]
-lemma matterField_repAlgebra : matterField.repAlgebra = gaugeAlgebraAction := rfl
+@[simp] lemma matterField_repAlgebra : matterField.repAlgebra = gaugeAlgebraAction := rfl
 
-@[simp]
-lemma matterField_massWeight : matterField.massWeight = 2 := rfl
+@[simp] lemma matterField_massWeight : matterField.massWeight = 2 := rfl
 
 /-- Pure gauge jets act trivially on the Higgs at the base point. -/
-lemma matterField_pureJetsActTrivially : matterField.PureJetsActTrivially :=
-  fun hW => repCoeff_zero_of_eval_eq_one hW
+lemma matterField_pureJetsActTrivially : matterField.PureJetsActTrivially := fun hW =>
+  repCoeff_zero_of_eval_eq_one hW
 
 /-- The gauge action on the Higgs commutes with its (trivial) Lorentz action. -/
 lemma matterField_gaugeLorentzCompatible : matterField.GaugeLorentzCompatible :=

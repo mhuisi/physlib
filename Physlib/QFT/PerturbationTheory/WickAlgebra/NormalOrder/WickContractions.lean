@@ -30,47 +30,53 @@ variable {𝓕 : FieldSpecification}
 
 -/
 
-/-- For a list `φs = φ₀…φₙ` of `𝓕.FieldOp`, a Wick contraction `φsΛ` of `φs`, an element `φ` of
-  `𝓕.FieldOp`, and a `i ≤ φs.length`, then the following relation holds:
+/--
+For a list `φs = φ₀…φₙ` of `𝓕.FieldOp`, a Wick contraction `φsΛ` of `φs`, an element `φ` of
+`𝓕.FieldOp`, and a `i ≤ φs.length`, then the following relation holds:
 
-  `𝓝([φsΛ ↩Λ φ i none]ᵘᶜ) = s • 𝓝(φ :: [φsΛ]ᵘᶜ)`
+`𝓝([φsΛ ↩Λ φ i none]ᵘᶜ) = s • 𝓝(φ :: [φsΛ]ᵘᶜ)`
 
-  where `s` is the exchange sign for `φ` and the uncontracted fields in `φ₀…φᵢ₋₁`.
+where `s` is the exchange sign for `φ` and the uncontracted fields in `φ₀…φᵢ₋₁`.
 
-  The proof of this result ultimately is a consequence of `normalOrder_superCommute_eq_zero`.
+The proof of this result ultimately is a consequence of `normalOrder_superCommute_eq_zero`.
 -/
-lemma normalOrder_uncontracted_none (φ : 𝓕.FieldOp) (φs : List 𝓕.FieldOp)
-    (i : Fin φs.length.succ) (φsΛ : WickContraction φs.length) :
-    𝓝(ofFieldOpList [φsΛ ↩Λ φ i none]ᵘᶜ)
-    = 𝓢(𝓕 |>ₛ φ, 𝓕 |>ₛ ⟨φs.get, φsΛ.uncontracted.filter (fun x => i.succAbove x < i)⟩) •
-    𝓝(ofFieldOpList (φ :: [φsΛ]ᵘᶜ)) := by
+lemma normalOrder_uncontracted_none
+    (φ : 𝓕.FieldOp) (φs : List 𝓕.FieldOp) (i : Fin φs.length.succ) (φsΛ : WickContraction φs.length)
+    : 𝓝(ofFieldOpList [φsΛ ↩Λ φ i none]ᵘᶜ)
+      = 𝓢(𝓕 |>ₛ φ, 𝓕 |>ₛ ⟨φs.get, φsΛ.uncontracted.filter (fun x => i.succAbove x < i)⟩)
+        • 𝓝(ofFieldOpList (φ :: [φsΛ]ᵘᶜ)) := by
   simp only [Nat.succ_eq_add_one]
-  rw [ofFieldOpList_normalOrder_insert φ [φsΛ]ᵘᶜ
-    ⟨(φsΛ.uncontractedListOrderPos i), by simp [uncontractedListGet]⟩,
+  rw [ofFieldOpList_normalOrder_insert φ ([φsΛ]ᵘᶜ)
+      ⟨(φsΛ.uncontractedListOrderPos i), by simp [uncontractedListGet]⟩,
     smul_smul]
   refine (one_smul ℂ _).symm.trans ?_
   congr 1
   simp only [uncontractedListGet]
   rw [← List.map_take, take_uncontractedListOrderPos_eq_filter]
-  have h1 : (𝓕 |>ₛ List.map φs.get (List.filter (fun x => decide (↑x < i.1)) φsΛ.uncontractedList))
+  have h1
+      : (𝓕 |>ₛ List.map φs.get (List.filter (fun x => decide (↑x < i.1)) φsΛ.uncontractedList))
         = 𝓕 |>ₛ ⟨φs.get, (φsΛ.uncontracted.filter (fun x => x.val < i.1))⟩ := by
-      simp only [Nat.succ_eq_add_one, ofFinset]
-      congr
-      rw [uncontractedList_eq_sort]
-      have hdup : (List.filter (fun x => decide (x.1 < i.1))
-          (φsΛ.uncontracted.sort (fun x1 x2 => x1 ≤ x2))).Nodup :=
-        List.Nodup.filter _ (φsΛ.uncontracted.sort_nodup (fun x1 x2 => x1 ≤ x2))
-      have hsort : (List.filter (fun x => decide (x.1 < i.1))
-          (φsΛ.uncontracted.sort (fun x1 x2 => x1 ≤ x2))).Pairwise (· ≤ ·) :=
-        List.Pairwise.filter _ (φsΛ.uncontracted.pairwise_sort (fun x1 x2 => x1 ≤ x2))
-      rw [← (List.toFinset_sort (· ≤ ·) hdup).mpr hsort]
-      congr
-      ext a
-      simp
+    simp only [Nat.succ_eq_add_one, ofFinset]
+    congr
+    rw [uncontractedList_eq_sort]
+    have hdup : (List.filter
+        (fun x => decide (x.1 < i.1))
+        (φsΛ.uncontracted.sort (fun x1 x2 => x1 ≤ x2))).Nodup :=
+      List.Nodup.filter _ (φsΛ.uncontracted.sort_nodup (fun x1 x2 => x1 ≤ x2))
+    have hsort : (List.filter
+          (fun x => decide (x.1 < i.1))
+          (φsΛ.uncontracted.sort (fun x1 x2 => x1 ≤ x2))).Pairwise
+        (· ≤ ·) :=
+      List.Pairwise.filter _ (φsΛ.uncontracted.pairwise_sort (fun x1 x2 => x1 ≤ x2))
+    rw [← (List.toFinset_sort (· ≤ ·) hdup).mpr hsort]
+    congr
+    ext a
+    simp
   rw [h1]
   simp only [Nat.succ_eq_add_one]
-  have h2 : (Finset.filter (fun x => x.1 < i.1) φsΛ.uncontracted) =
-    (Finset.filter (fun x => i.succAbove x < i) φsΛ.uncontracted) := by
+  have h2
+      : (Finset.filter (fun x => x.1 < i.1) φsΛ.uncontracted)
+        = (Finset.filter (fun x => i.succAbove x < i) φsΛ.uncontracted) := by
     refine Finset.filter_congr fun a _ => ?_
     rw [Fin.succAbove_lt_iff_castSucc_lt, Fin.lt_def, Fin.val_castSucc]
   rw [h2]
@@ -79,17 +85,19 @@ lemma normalOrder_uncontracted_none (φ : 𝓕.FieldOp) (φs : List 𝓕.FieldOp
   rw [insertAndContract_uncontractedList_none_map]
 
 /--
-  For a list `φs = φ₀…φₙ` of `𝓕.FieldOp`, a Wick contraction `φsΛ` of `φs`, an element `φ` of
-  `𝓕.FieldOp`, a `i ≤ φs.length` and a `k` in `φsΛ.uncontracted`, then
-  `𝓝([φsΛ ↩Λ φ i (some k)]ᵘᶜ)` is equal to the normal ordering of `[φsΛ]ᵘᶜ` with the `𝓕.FieldOp`
-  corresponding to `k` removed.
+For a list `φs = φ₀…φₙ` of `𝓕.FieldOp`, a Wick contraction `φsΛ` of `φs`, an element `φ` of
+`𝓕.FieldOp`, a `i ≤ φs.length` and a `k` in `φsΛ.uncontracted`, then
+`𝓝([φsΛ ↩Λ φ i (some k)]ᵘᶜ)` is equal to the normal ordering of `[φsΛ]ᵘᶜ` with the `𝓕.FieldOp`
+corresponding to `k` removed.
 
-  The proof of this result ultimately is a consequence of definitions.
+The proof of this result ultimately is a consequence of definitions.
 -/
-lemma normalOrder_uncontracted_some (φ : 𝓕.FieldOp) (φs : List 𝓕.FieldOp)
-    (i : Fin φs.length.succ) (φsΛ : WickContraction φs.length) (k : φsΛ.uncontracted) :
-    𝓝(ofFieldOpList [φsΛ ↩Λ φ i (some k)]ᵘᶜ)
-    = 𝓝(ofFieldOpList (optionEraseZ [φsΛ]ᵘᶜ φ ((uncontractedFieldOpEquiv φs φsΛ) k))) := by
+lemma normalOrder_uncontracted_some
+    (φ : 𝓕.FieldOp)
+    (φs : List 𝓕.FieldOp) (i : Fin φs.length.succ) (φsΛ : WickContraction φs.length)
+    (k : φsΛ.uncontracted)
+    : 𝓝(ofFieldOpList [φsΛ ↩Λ φ i (some k)]ᵘᶜ)
+      = 𝓝(ofFieldOpList (optionEraseZ [φsΛ]ᵘᶜ φ ((uncontractedFieldOpEquiv φs φsΛ) k))) := by
   simp only [Nat.succ_eq_add_one, insertAndContract, optionEraseZ, uncontractedFieldOpEquiv,
     uncontractedListGet]
   congr

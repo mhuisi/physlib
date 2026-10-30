@@ -73,11 +73,11 @@ open scoped InnerProductSpace
 scoped[AngularMomentum] notation "𝐋₃" => QuantumMechanics.angularMomentumOperator3D
 
 /-- The Cartesian Hilbert-space components, ordered as `x, y, z`. -/
-def angularMomentumDimThreeOperator (i : Fin 3) :
-    SpaceDHilbertSpace 3 →ₗ.[ℂ] SpaceDHilbertSpace 3 where
+def angularMomentumDimThreeOperator (i : Fin 3)
+    : SpaceDHilbertSpace 3 →ₗ.[ℂ] SpaceDHilbertSpace 3 where
   domain := SchwartzSubmodule 3
-  toFun := (schwartzIncl volume).1 ∘ₗ (angularMomentumOperator3D i).1 ∘ₗ
-    (schwartzEquiv volume).symm.1
+  toFun :=
+    (schwartzIncl volume).1 ∘ₗ (angularMomentumOperator3D i).1 ∘ₗ (schwartzEquiv volume).symm.1
 
 @[inherit_doc QuantumMechanics.angularMomentumDimThreeOperator]
 scoped[AngularMomentum] notation "𝓛₃" => QuantumMechanics.angularMomentumDimThreeOperator
@@ -98,27 +98,31 @@ variable (i : Fin 3)
 
 lemma angularMomentumDimThreeOperator_domain_eq : (𝓛₃ i).domain = SchwartzSubmodule 3 := rfl
 
-lemma angularMomentumDimThreeOperator_apply (ψ : SchwartzSubmodule 3) :
-    𝓛₃ i ψ = schwartzEquiv volume (𝐋₃ i ((schwartzEquiv volume).symm ψ)) := rfl
+lemma angularMomentumDimThreeOperator_apply (ψ : SchwartzSubmodule 3)
+    : 𝓛₃ i ψ = schwartzEquiv volume (𝐋₃ i ((schwartzEquiv volume).symm ψ)) :=
+  rfl
 
-lemma angularMomentumDimThreeOperator_apply_ae (ψ : SchwartzSubmodule 3) :
-    𝓛₃ i ψ =ᵐ[volume] 𝐋₃ i ((schwartzEquiv volume).symm ψ) := schwartzEquiv_coe_ae _
+lemma angularMomentumDimThreeOperator_apply_ae (ψ : SchwartzSubmodule 3)
+    : 𝓛₃ i ψ =ᵐ[volume] 𝐋₃ i ((schwartzEquiv volume).symm ψ) :=
+  schwartzEquiv_coe_ae _
 
-lemma angularMomentumDimThreeOperator_range (ψ : SchwartzSubmodule 3) :
-    𝓛₃ i ψ ∈ SchwartzSubmodule 3 := by
+lemma angularMomentumDimThreeOperator_range (ψ : SchwartzSubmodule 3)
+    : 𝓛₃ i ψ ∈ SchwartzSubmodule 3 := by
   simp [angularMomentumDimThreeOperator_apply]
 
 /-- Composing two components stays on the common Schwartz domain. -/
-lemma angularMomentumDimThreeOperator_apply_apply (j : Fin 3) (ψ : SchwartzSubmodule 3) :
-    𝓛₃ i ⟨𝓛₃ j ψ, angularMomentumDimThreeOperator_range j ψ⟩ =
-      schwartzEquiv volume (𝐋₃ i (𝐋₃ j ((schwartzEquiv volume).symm ψ))) := by
-  change schwartzIncl volume (𝐋₃ i ((schwartzEquiv volume).symm
-    (schwartzEquiv volume (𝐋₃ j ((schwartzEquiv volume).symm ψ))))) = _
+lemma angularMomentumDimThreeOperator_apply_apply (j : Fin 3) (ψ : SchwartzSubmodule 3)
+    : 𝓛₃ i ⟨𝓛₃ j ψ, angularMomentumDimThreeOperator_range j ψ⟩
+      = schwartzEquiv volume (𝐋₃ i (𝐋₃ j ((schwartzEquiv volume).symm ψ))) := by
+  change schwartzIncl volume
+      (𝐋₃ i
+        ((schwartzEquiv volume).symm (schwartzEquiv volume (𝐋₃ j ((schwartzEquiv volume).symm ψ)))))
+    = _
   rw [LinearEquiv.symm_apply_apply]
   rfl
 
-lemma angularMomentumDimThreeOperator_hasDenseDomain :
-    (𝓛₃ i).HasDenseDomain := SchwartzSubmodule.dense 3 _
+lemma angularMomentumDimThreeOperator_hasDenseDomain : (𝓛₃ i).HasDenseDomain :=
+  SchwartzSubmodule.dense 3 _
 
 lemma angularMomentumDimThreeOperator_isSymmetric : (𝓛₃ i).IsSymmetric := by
   fin_cases i <;> exact angularMomentumOperator_isSymmetric _ _
@@ -133,18 +137,18 @@ lemma angularMomentumDimThreeOperator_isUnbounded : (𝓛₃ i).IsUnbounded :=
 
 /-- The antisymmetric-index definition agrees with the Cartesian sum of squares. -/
 lemma angularMomentumOperatorSqr_eq_sum_dimThree : 𝐋²[3] = ∑ i : Fin 3, 𝐋₃ i ∘L 𝐋₃ i := by
-  simp only [angularMomentumOperatorSqr, Fin.sum_univ_three,
-    angularMomentumDimThreeCLM_zero_eq, angularMomentumDimThreeCLM_one_eq,
-    angularMomentumDimThreeCLM_two_eq, angularMomentumCLM_eq_zero,
-    angularMomentumCLM_antisymm (0 : Fin 3) 2,
-    angularMomentumCLM_antisymm (1 : Fin 3) 0, angularMomentumCLM_antisymm (2 : Fin 3) 1,
-    comp_zero, neg_comp, comp_neg, neg_neg, add_zero, zero_add]
+  simp only [angularMomentumOperatorSqr, Fin.sum_univ_three, angularMomentumDimThreeCLM_zero_eq,
+    angularMomentumDimThreeCLM_one_eq, angularMomentumDimThreeCLM_two_eq,
+    angularMomentumCLM_eq_zero, angularMomentumCLM_antisymm (0 : Fin 3) 2,
+    angularMomentumCLM_antisymm (1 : Fin 3) 0, angularMomentumCLM_antisymm (2 : Fin 3) 1, comp_zero,
+    neg_comp, comp_neg, neg_neg, add_zero, zero_add]
   module
 
 /-- The same Cartesian sum of squares, evaluated on a Hilbert-space Schwartz vector. -/
-lemma angularMomentumSqOperator_apply_eq_sum_dimThree (ψ : SchwartzSubmodule 3) :
-    angularMomentumSqOperator ψ = ∑ i : Fin 3, 𝓛₃ i
-      ⟨𝓛₃ i ψ, angularMomentumDimThreeOperator_range i ψ⟩ := by
+lemma angularMomentumSqOperator_apply_eq_sum_dimThree (ψ : SchwartzSubmodule 3)
+    : angularMomentumSqOperator ψ
+      = ∑ i : Fin 3, 𝓛₃ i
+        ⟨𝓛₃ i ψ, angularMomentumDimThreeOperator_range i ψ⟩ := by
   simp [angularMomentumSqOperator_apply, angularMomentumOperatorSqr_eq_sum_dimThree,
     angularMomentumDimThreeOperator_apply_apply]
 
@@ -163,70 +167,75 @@ attribute [local instance 100] LieAlgebra.ofAssociativeAlgebra
 
 set_option backward.isDefEq.respectTransparency false in
 /-- The Cartesian angular momentum algebra, with the right-handed Levi-Civita symbol. -/
-lemma angularMomentumDimThree_commutation (j : Fin 3) : ⁅𝐋₃ i, 𝐋₃ j⁆ =
-    (I * ℏ) • ∑ k : Fin 3, (leviCivitaSymbol ![i, j, k] : ℂ) • 𝐋₃ k := by
+lemma angularMomentumDimThree_commutation (j : Fin 3)
+    : ⁅𝐋₃ i, 𝐋₃ j⁆ = (I * ℏ) • ∑ k : Fin 3, (leviCivitaSymbol ![i, j, k] : ℂ) • 𝐋₃ k := by
   simp only [leviCivitaSymbol_eq_det, Matrix.det_fin_three]
-  fin_cases i <;> fin_cases j <;>
-    norm_num [angularMomentumDimThreeCLM_zero_eq, angularMomentumDimThreeCLM_one_eq,
-      angularMomentumDimThreeCLM_two_eq, angularMomentum_commutation_angularMomentum,
-      kroneckerDelta, Fin.sum_univ_three, angularMomentumCLM_eq_zero,
-      angularMomentumCLM_antisymm (0 : Fin 3) 2, angularMomentumCLM_antisymm (1 : Fin 3) 0,
-      angularMomentumCLM_antisymm (2 : Fin 3) 1]
+  fin_cases i <;> fin_cases j
+    <;> norm_num [angularMomentumDimThreeCLM_zero_eq, angularMomentumDimThreeCLM_one_eq,
+          angularMomentumDimThreeCLM_two_eq, angularMomentum_commutation_angularMomentum,
+          kroneckerDelta, Fin.sum_univ_three, angularMomentumCLM_eq_zero,
+          angularMomentumCLM_antisymm (0 : Fin 3) 2, angularMomentumCLM_antisymm (1 : Fin 3) 0,
+          angularMomentumCLM_antisymm (2 : Fin 3) 1]
 
 /-- `[Lx, Ly] = iℏ Lz`. -/
 lemma angularMomentumDimThree_commutation_xy : ⁅𝐋₃ 0, 𝐋₃ 1⁆ = (I * ℏ) • 𝐋₃ 2 := by
   simpa [angularMomentumDimThreeCLM_zero_eq, angularMomentumDimThreeCLM_one_eq,
-    angularMomentumDimThreeCLM_two_eq, kroneckerDelta,
-    angularMomentumCLM_antisymm (1 : Fin 3) 0] using
-    angularMomentum_commutation_angularMomentum (d := 3) 1 2 2 0
+      angularMomentumDimThreeCLM_two_eq, kroneckerDelta, angularMomentumCLM_antisymm (1 : Fin 3) 0]
+    using angularMomentum_commutation_angularMomentum (d := 3) 1 2 2 0
 
 /-- `[Ly, Lz] = iℏ Lx`. -/
 lemma angularMomentumDimThree_commutation_yz : ⁅𝐋₃ 1, 𝐋₃ 2⁆ = (I * ℏ) • 𝐋₃ 0 := by
   simpa [angularMomentumDimThreeCLM_zero_eq, angularMomentumDimThreeCLM_one_eq,
-    angularMomentumDimThreeCLM_two_eq, kroneckerDelta,
-    angularMomentumCLM_antisymm (2 : Fin 3) 1] using
-    angularMomentum_commutation_angularMomentum (d := 3) 2 0 0 1
+      angularMomentumDimThreeCLM_two_eq, kroneckerDelta, angularMomentumCLM_antisymm (2 : Fin 3) 1]
+    using angularMomentum_commutation_angularMomentum (d := 3) 2 0 0 1
 
 /-- `[Lz, Lx] = iℏ Ly`. -/
 lemma angularMomentumDimThree_commutation_zx : ⁅𝐋₃ 2, 𝐋₃ 0⁆ = (I * ℏ) • 𝐋₃ 1 := by
   simpa [angularMomentumDimThreeCLM_zero_eq, angularMomentumDimThreeCLM_one_eq,
-    angularMomentumDimThreeCLM_two_eq, kroneckerDelta,
-    angularMomentumCLM_antisymm (0 : Fin 3) 2] using
-    angularMomentum_commutation_angularMomentum (d := 3) 0 1 1 2
+      angularMomentumDimThreeCLM_two_eq, kroneckerDelta, angularMomentumCLM_antisymm (0 : Fin 3) 2]
+    using angularMomentum_commutation_angularMomentum (d := 3) 0 1 1 2
 
 /-- Angular momentum squared commutes with every Cartesian component on Schwartz maps. -/
 lemma angularMomentumSqr_commutation_dimThree : ⁅𝐋²[3], 𝐋₃ i⁆ = 0 := by
   fin_cases i <;> exact angularMomentumSqr_commutation_angularMomentum _ _
 
 /-- The Cartesian commutation algebra on the common Hilbert-space Schwartz domain. -/
-lemma angularMomentumDimThreeOperator_commutation (j : Fin 3) (ψ : SchwartzSubmodule 3) :
-    𝓛₃ i ⟨𝓛₃ j ψ, angularMomentumDimThreeOperator_range j ψ⟩ -
-      𝓛₃ j ⟨𝓛₃ i ψ, angularMomentumDimThreeOperator_range i ψ⟩ =
-      (I * ℏ) • ∑ k : Fin 3, (leviCivitaSymbol ![i, j, k] : ℂ) • 𝓛₃ k ψ := by
+lemma angularMomentumDimThreeOperator_commutation (j : Fin 3) (ψ : SchwartzSubmodule 3)
+    : 𝓛₃ i ⟨𝓛₃ j ψ, angularMomentumDimThreeOperator_range j ψ⟩
+        - 𝓛₃ j ⟨𝓛₃ i ψ, angularMomentumDimThreeOperator_range i ψ⟩
+      = (I * ℏ) • ∑ k : Fin 3, (leviCivitaSymbol ![i, j, k] : ℂ) • 𝓛₃ k ψ := by
   rw [angularMomentumDimThreeOperator_apply_apply, angularMomentumDimThreeOperator_apply_apply]
-  have h := congrArg
-    (fun A : 𝓢(Space 3, ℂ) →L[ℂ] 𝓢(Space 3, ℂ) =>
-      schwartzIncl volume (A ((schwartzEquiv volume).symm ψ)))
-    (angularMomentumDimThree_commutation i j)
+  have h :=
+    congrArg
+      (fun A : 𝓢(Space 3, ℂ) →L[ℂ] 𝓢(Space 3, ℂ) =>
+        schwartzIncl volume (A ((schwartzEquiv volume).symm ψ)))
+      (angularMomentumDimThree_commutation i j)
   simpa only [Ring.lie_def, ContinuousLinearMap.mul_def, sub_apply, comp_apply, smul_apply,
-    _root_.sum_apply, map_sub, map_smul, map_sum,
-    angularMomentumDimThreeOperator_apply, schwartzEquiv_apply_coe] using h
+      _root_.sum_apply, map_sub, map_smul, map_sum, angularMomentumDimThreeOperator_apply,
+      schwartzEquiv_apply_coe]
+    using h
 
 /-- `[L², Li] = 0` on the common invariant Hilbert-space domain. -/
-lemma angularMomentumSqOperator_commutation_dimThree (ψ : SchwartzSubmodule 3) :
-    angularMomentumSqOperator ⟨𝓛₃ i ψ, angularMomentumDimThreeOperator_range i ψ⟩ -
-      𝓛₃ i ⟨angularMomentumSqOperator ψ, angularMomentumSqOperator_range ψ⟩ = 0 := by
-  change schwartzIncl volume (𝐋² ((schwartzEquiv volume).symm
-      (schwartzEquiv volume (𝐋₃ i ((schwartzEquiv volume).symm ψ))))) -
-    schwartzIncl volume (𝐋₃ i ((schwartzEquiv volume).symm
-      (schwartzEquiv volume (𝐋² ((schwartzEquiv volume).symm ψ))))) = 0
+lemma angularMomentumSqOperator_commutation_dimThree (ψ : SchwartzSubmodule 3)
+    : angularMomentumSqOperator ⟨𝓛₃ i ψ, angularMomentumDimThreeOperator_range i ψ⟩
+        - 𝓛₃ i ⟨angularMomentumSqOperator ψ, angularMomentumSqOperator_range ψ⟩
+      = 0 := by
+  change schwartzIncl volume
+        (𝐋² ((schwartzEquiv volume).symm
+          (schwartzEquiv volume (𝐋₃ i ((schwartzEquiv volume).symm ψ)))))
+      - schwartzIncl volume
+        (𝐋₃ i
+          ((schwartzEquiv volume).symm (schwartzEquiv volume (𝐋² ((schwartzEquiv volume).symm ψ)))))
+    = 0
   simp only [LinearEquiv.symm_apply_apply]
-  have h := congrArg
-    (fun A : 𝓢(Space 3, ℂ) →L[ℂ] 𝓢(Space 3, ℂ) =>
-      schwartzIncl volume (A ((schwartzEquiv volume).symm ψ)))
-    (angularMomentumSqr_commutation_dimThree i)
-  simpa only [Ring.lie_def, ContinuousLinearMap.mul_def, sub_apply, comp_apply, zero_apply,
-    map_sub, map_zero] using h
+  have h :=
+    congrArg
+      (fun A : 𝓢(Space 3, ℂ) →L[ℂ] 𝓢(Space 3, ℂ) =>
+        schwartzIncl volume (A ((schwartzEquiv volume).symm ψ)))
+      (angularMomentumSqr_commutation_dimThree i)
+  simpa only [Ring.lie_def, ContinuousLinearMap.mul_def, sub_apply, comp_apply, zero_apply, map_sub,
+      map_zero]
+    using h
 
 /-!
 ## C. Ladder operators
@@ -293,34 +302,38 @@ lemma angularMomentumRaisingOperator_domain_eq : (𝓛⁺).domain = SchwartzSubm
 
 lemma angularMomentumLoweringOperator_domain_eq : (𝓛⁻).domain = SchwartzSubmodule 3 := rfl
 
-lemma angularMomentumRaisingOperator_apply (ψ : SchwartzSubmodule 3) :
-    𝓛⁺ ψ = schwartzEquiv volume (𝐋⁺ ((schwartzEquiv volume).symm ψ)) := rfl
+lemma angularMomentumRaisingOperator_apply (ψ : SchwartzSubmodule 3)
+    : 𝓛⁺ ψ = schwartzEquiv volume (𝐋⁺ ((schwartzEquiv volume).symm ψ)) :=
+  rfl
 
-lemma angularMomentumLoweringOperator_apply (ψ : SchwartzSubmodule 3) :
-    𝓛⁻ ψ = schwartzEquiv volume (𝐋⁻ ((schwartzEquiv volume).symm ψ)) := rfl
+lemma angularMomentumLoweringOperator_apply (ψ : SchwartzSubmodule 3)
+    : 𝓛⁻ ψ = schwartzEquiv volume (𝐋⁻ ((schwartzEquiv volume).symm ψ)) :=
+  rfl
 
-lemma angularMomentumRaisingOperator_apply_eq (ψ : SchwartzSubmodule 3) :
-    𝓛⁺ ψ = 𝓛₃ 0 ψ + I • 𝓛₃ 1 ψ := by
+lemma angularMomentumRaisingOperator_apply_eq (ψ : SchwartzSubmodule 3)
+    : 𝓛⁺ ψ = 𝓛₃ 0 ψ + I • 𝓛₃ 1 ψ := by
   simp [angularMomentumRaisingOperator_apply, angularMomentumRaisingCLM,
     angularMomentumDimThreeOperator_apply]
 
-lemma angularMomentumLoweringOperator_apply_eq (ψ : SchwartzSubmodule 3) :
-    𝓛⁻ ψ = 𝓛₃ 0 ψ - I • 𝓛₃ 1 ψ := by
+lemma angularMomentumLoweringOperator_apply_eq (ψ : SchwartzSubmodule 3)
+    : 𝓛⁻ ψ = 𝓛₃ 0 ψ - I • 𝓛₃ 1 ψ := by
   simp [angularMomentumLoweringOperator_apply, angularMomentumLoweringCLM,
     angularMomentumDimThreeOperator_apply]
 
-lemma angularMomentumRaisingOperator_apply_ae (ψ : SchwartzSubmodule 3) :
-    𝓛⁺ ψ =ᵐ[volume] 𝐋⁺ ((schwartzEquiv volume).symm ψ) := schwartzEquiv_coe_ae _
+lemma angularMomentumRaisingOperator_apply_ae (ψ : SchwartzSubmodule 3)
+    : 𝓛⁺ ψ =ᵐ[volume] 𝐋⁺ ((schwartzEquiv volume).symm ψ) :=
+  schwartzEquiv_coe_ae _
 
-lemma angularMomentumLoweringOperator_apply_ae (ψ : SchwartzSubmodule 3) :
-    𝓛⁻ ψ =ᵐ[volume] 𝐋⁻ ((schwartzEquiv volume).symm ψ) := schwartzEquiv_coe_ae _
+lemma angularMomentumLoweringOperator_apply_ae (ψ : SchwartzSubmodule 3)
+    : 𝓛⁻ ψ =ᵐ[volume] 𝐋⁻ ((schwartzEquiv volume).symm ψ) :=
+  schwartzEquiv_coe_ae _
 
-lemma angularMomentumRaisingOperator_range (ψ : SchwartzSubmodule 3) :
-    𝓛⁺ ψ ∈ SchwartzSubmodule 3 := by
+lemma angularMomentumRaisingOperator_range (ψ : SchwartzSubmodule 3)
+    : 𝓛⁺ ψ ∈ SchwartzSubmodule 3 := by
   simp [angularMomentumRaisingOperator_apply]
 
-lemma angularMomentumLoweringOperator_range (ψ : SchwartzSubmodule 3) :
-    𝓛⁻ ψ ∈ SchwartzSubmodule 3 := by
+lemma angularMomentumLoweringOperator_range (ψ : SchwartzSubmodule 3)
+    : 𝓛⁻ ψ ∈ SchwartzSubmodule 3 := by
   simp [angularMomentumLoweringOperator_apply]
 
 lemma angularMomentumRaisingOperator_hasDenseDomain : (𝓛⁺).HasDenseDomain :=
@@ -334,70 +347,92 @@ lemma angularMomentumLoweringOperator_hasDenseDomain : (𝓛⁻).HasDenseDomain 
 -/
 
 /-- `[Lz, L₊] ψ = ℏ L₊ ψ` for every Schwartz vector in the Hilbert space. -/
-lemma angularMomentumZOperator_commutation_raising (ψ : SchwartzSubmodule 3) :
-    𝓛₃ 2 ⟨𝓛⁺ ψ, angularMomentumRaisingOperator_range ψ⟩ -
-      𝓛⁺ ⟨𝓛₃ 2 ψ, angularMomentumDimThreeOperator_range 2 ψ⟩ = (ℏ : ℂ) • 𝓛⁺ ψ := by
-  change schwartzIncl volume (𝐋₃ 2 ((schwartzEquiv volume).symm
-      (schwartzEquiv volume (𝐋⁺ ((schwartzEquiv volume).symm ψ))))) -
-    schwartzIncl volume (𝐋⁺ ((schwartzEquiv volume).symm
-      (schwartzEquiv volume (𝐋₃ 2 ((schwartzEquiv volume).symm ψ))))) =
-    (ℏ : ℂ) • schwartzIncl volume (𝐋⁺ ((schwartzEquiv volume).symm ψ))
+lemma angularMomentumZOperator_commutation_raising (ψ : SchwartzSubmodule 3)
+    : 𝓛₃ 2 ⟨𝓛⁺ ψ, angularMomentumRaisingOperator_range ψ⟩
+        - 𝓛⁺ ⟨𝓛₃ 2 ψ, angularMomentumDimThreeOperator_range 2 ψ⟩
+      = (ℏ : ℂ) • 𝓛⁺ ψ := by
+  change schwartzIncl volume
+        (𝐋₃ 2
+          ((schwartzEquiv volume).symm (schwartzEquiv volume (𝐋⁺ ((schwartzEquiv volume).symm ψ)))))
+      - schwartzIncl volume
+        (𝐋⁺ ((schwartzEquiv volume).symm
+          (schwartzEquiv volume (𝐋₃ 2 ((schwartzEquiv volume).symm ψ)))))
+    = (ℏ : ℂ) • schwartzIncl volume (𝐋⁺ ((schwartzEquiv volume).symm ψ))
   simp only [LinearEquiv.symm_apply_apply]
-  have h := congrArg
-    (fun A : 𝓢(Space 3, ℂ) →L[ℂ] 𝓢(Space 3, ℂ) =>
-      schwartzIncl volume (A ((schwartzEquiv volume).symm ψ)))
-    angularMomentumZ_commutation_raising
-  simpa only [Ring.lie_def, ContinuousLinearMap.mul_def, sub_apply, comp_apply, smul_apply,
-    map_sub, map_smul] using h
+  have h :=
+    congrArg
+      (fun A : 𝓢(Space 3, ℂ) →L[ℂ] 𝓢(Space 3, ℂ) =>
+        schwartzIncl volume (A ((schwartzEquiv volume).symm ψ)))
+      angularMomentumZ_commutation_raising
+  simpa only [Ring.lie_def, ContinuousLinearMap.mul_def, sub_apply, comp_apply, smul_apply, map_sub,
+      map_smul]
+    using h
 
 /-- `[Lz, L₋] ψ = -ℏ L₋ ψ` for every Schwartz vector in the Hilbert space. -/
-lemma angularMomentumZOperator_commutation_lowering (ψ : SchwartzSubmodule 3) :
-    𝓛₃ 2 ⟨𝓛⁻ ψ, angularMomentumLoweringOperator_range ψ⟩ -
-      𝓛⁻ ⟨𝓛₃ 2 ψ, angularMomentumDimThreeOperator_range 2 ψ⟩ = -(ℏ : ℂ) • 𝓛⁻ ψ := by
-  change schwartzIncl volume (𝐋₃ 2 ((schwartzEquiv volume).symm
-      (schwartzEquiv volume (𝐋⁻ ((schwartzEquiv volume).symm ψ))))) -
-    schwartzIncl volume (𝐋⁻ ((schwartzEquiv volume).symm
-      (schwartzEquiv volume (𝐋₃ 2 ((schwartzEquiv volume).symm ψ))))) =
-    -(ℏ : ℂ) • schwartzIncl volume (𝐋⁻ ((schwartzEquiv volume).symm ψ))
+lemma angularMomentumZOperator_commutation_lowering (ψ : SchwartzSubmodule 3)
+    : 𝓛₃ 2 ⟨𝓛⁻ ψ, angularMomentumLoweringOperator_range ψ⟩
+        - 𝓛⁻ ⟨𝓛₃ 2 ψ, angularMomentumDimThreeOperator_range 2 ψ⟩
+      = -(ℏ : ℂ) • 𝓛⁻ ψ := by
+  change schwartzIncl volume
+        (𝐋₃ 2
+          ((schwartzEquiv volume).symm (schwartzEquiv volume (𝐋⁻ ((schwartzEquiv volume).symm ψ)))))
+      - schwartzIncl volume
+        (𝐋⁻ ((schwartzEquiv volume).symm
+          (schwartzEquiv volume (𝐋₃ 2 ((schwartzEquiv volume).symm ψ)))))
+    = -(ℏ : ℂ) • schwartzIncl volume (𝐋⁻ ((schwartzEquiv volume).symm ψ))
   simp only [LinearEquiv.symm_apply_apply]
-  have h := congrArg
-    (fun A : 𝓢(Space 3, ℂ) →L[ℂ] 𝓢(Space 3, ℂ) =>
-      schwartzIncl volume (A ((schwartzEquiv volume).symm ψ)))
-    angularMomentumZ_commutation_lowering
-  simpa only [Ring.lie_def, ContinuousLinearMap.mul_def, sub_apply, comp_apply, smul_apply,
-    map_sub, map_smul] using h
+  have h :=
+    congrArg
+      (fun A : 𝓢(Space 3, ℂ) →L[ℂ] 𝓢(Space 3, ℂ) =>
+        schwartzIncl volume (A ((schwartzEquiv volume).symm ψ)))
+      angularMomentumZ_commutation_lowering
+  simpa only [Ring.lie_def, ContinuousLinearMap.mul_def, sub_apply, comp_apply, smul_apply, map_sub,
+      map_smul]
+    using h
 
 /-- `[L², L₊] ψ = 0` on the common invariant Schwartz domain. -/
-lemma angularMomentumSqOperator_commutation_raising (ψ : SchwartzSubmodule 3) :
-    𝓛² ⟨𝓛⁺ ψ, angularMomentumRaisingOperator_range ψ⟩ -
-      𝓛⁺ ⟨𝓛² ψ, angularMomentumSqOperator_range ψ⟩ = 0 := by
-  change schwartzIncl volume (𝐋² ((schwartzEquiv volume).symm
-      (schwartzEquiv volume (𝐋⁺ ((schwartzEquiv volume).symm ψ))))) -
-    schwartzIncl volume (𝐋⁺ ((schwartzEquiv volume).symm
-      (schwartzEquiv volume (𝐋² ((schwartzEquiv volume).symm ψ))))) = 0
+lemma angularMomentumSqOperator_commutation_raising (ψ : SchwartzSubmodule 3)
+    : 𝓛² ⟨𝓛⁺ ψ, angularMomentumRaisingOperator_range ψ⟩
+        - 𝓛⁺ ⟨𝓛² ψ, angularMomentumSqOperator_range ψ⟩
+      = 0 := by
+  change schwartzIncl volume
+        (𝐋² ((schwartzEquiv volume).symm
+          (schwartzEquiv volume (𝐋⁺ ((schwartzEquiv volume).symm ψ)))))
+      - schwartzIncl volume
+        (𝐋⁺ ((schwartzEquiv volume).symm
+          (schwartzEquiv volume (𝐋² ((schwartzEquiv volume).symm ψ)))))
+    = 0
   simp only [LinearEquiv.symm_apply_apply]
-  have h := congrArg
-    (fun A : 𝓢(Space 3, ℂ) →L[ℂ] 𝓢(Space 3, ℂ) =>
-      schwartzIncl volume (A ((schwartzEquiv volume).symm ψ)))
-    angularMomentumSqr_commutation_raising
-  simpa only [Ring.lie_def, ContinuousLinearMap.mul_def, sub_apply, comp_apply, zero_apply,
-    map_sub, map_zero] using h
+  have h :=
+    congrArg
+      (fun A : 𝓢(Space 3, ℂ) →L[ℂ] 𝓢(Space 3, ℂ) =>
+        schwartzIncl volume (A ((schwartzEquiv volume).symm ψ)))
+      angularMomentumSqr_commutation_raising
+  simpa only [Ring.lie_def, ContinuousLinearMap.mul_def, sub_apply, comp_apply, zero_apply, map_sub,
+      map_zero]
+    using h
 
 /-- `[L², L₋] ψ = 0` on the common invariant Schwartz domain. -/
-lemma angularMomentumSqOperator_commutation_lowering (ψ : SchwartzSubmodule 3) :
-    𝓛² ⟨𝓛⁻ ψ, angularMomentumLoweringOperator_range ψ⟩ -
-      𝓛⁻ ⟨𝓛² ψ, angularMomentumSqOperator_range ψ⟩ = 0 := by
-  change schwartzIncl volume (𝐋² ((schwartzEquiv volume).symm
-      (schwartzEquiv volume (𝐋⁻ ((schwartzEquiv volume).symm ψ))))) -
-    schwartzIncl volume (𝐋⁻ ((schwartzEquiv volume).symm
-      (schwartzEquiv volume (𝐋² ((schwartzEquiv volume).symm ψ))))) = 0
+lemma angularMomentumSqOperator_commutation_lowering (ψ : SchwartzSubmodule 3)
+    : 𝓛² ⟨𝓛⁻ ψ, angularMomentumLoweringOperator_range ψ⟩
+        - 𝓛⁻ ⟨𝓛² ψ, angularMomentumSqOperator_range ψ⟩
+      = 0 := by
+  change schwartzIncl volume
+        (𝐋² ((schwartzEquiv volume).symm
+          (schwartzEquiv volume (𝐋⁻ ((schwartzEquiv volume).symm ψ)))))
+      - schwartzIncl volume
+        (𝐋⁻ ((schwartzEquiv volume).symm
+          (schwartzEquiv volume (𝐋² ((schwartzEquiv volume).symm ψ)))))
+    = 0
   simp only [LinearEquiv.symm_apply_apply]
-  have h := congrArg
-    (fun A : 𝓢(Space 3, ℂ) →L[ℂ] 𝓢(Space 3, ℂ) =>
-      schwartzIncl volume (A ((schwartzEquiv volume).symm ψ)))
-    angularMomentumSqr_commutation_lowering
-  simpa only [Ring.lie_def, ContinuousLinearMap.mul_def, sub_apply, comp_apply, zero_apply,
-    map_sub, map_zero] using h
+  have h :=
+    congrArg
+      (fun A : 𝓢(Space 3, ℂ) →L[ℂ] 𝓢(Space 3, ℂ) =>
+        schwartzIncl volume (A ((schwartzEquiv volume).symm ψ)))
+      angularMomentumSqr_commutation_lowering
+  simpa only [Ring.lie_def, ContinuousLinearMap.mul_def, sub_apply, comp_apply, zero_apply, map_sub,
+      map_zero]
+    using h
 
 end
 end QuantumMechanics

@@ -67,30 +67,33 @@ namespace UnitalPositiveLinearMap
 -/
 
 /-- A positive functional vanishing at the order unit vanishes everywhere. -/
-lemma apply_eq_zero_of_apply_one_eq_zero {p : E →ₚ[ℝ] ℝ}
-    (h1 : p (1 : E) = 0) (A : E) :
-    p A = 0 := by
+lemma apply_eq_zero_of_apply_one_eq_zero {p : E →ₚ[ℝ] ℝ} (h1 : p (1 : E) = 0) (A : E)
+    : p A = 0 := by
   obtain ⟨n, hn⟩ := OrderUnitSpace.exists_nsmul_one_le A
   obtain ⟨m, hm⟩ := OrderUnitSpace.exists_nsmul_one_le (-A)
   exact le_antisymm (by simpa [h1] using p.monotone' hn) (by simpa [h1] using p.monotone' hm)
 
 /-- Every element outside the positive cone is strictly separated from it by a state. -/
 lemma exists_apply_neg_of_not_nonneg {A : E} (hA : ¬ 0 ≤ A) : ∃ ω : 𝓢[ℝ, E], ω A < 0 := by
-  obtain ⟨f, u, hfA, hcone⟩ := geometric_hahn_banach_point_closed
-    (convex_Ici (0 : E)) isClosed_Ici_zero hA
+  obtain ⟨f, u, hfA, hcone⟩ :=
+    geometric_hahn_banach_point_closed (convex_Ici (0 : E)) isClosed_Ici_zero hA
   have hu : u < 0 := by simpa using hcone 0 le_rfl
   have hf_nonneg : ∀ B : E, 0 ≤ B → 0 ≤ f B := fun B hB => by
     by_contra! hfB
-    have hsep := hcone (((u - 1) / f B) • B)
-      (smul_nonneg (div_nonneg_of_nonpos (by linarith) hfB.le) hB)
+    have hsep :=
+      hcone (((u - 1) / f B) • B) (smul_nonneg (div_nonneg_of_nonpos (by linarith) hfB.le) hB)
     rw [map_smul, smul_eq_mul, div_mul_cancel₀ _ hfB.ne] at hsep
     linarith
-  have hf_one_pos : 0 < f (1 : E) := (hf_nonneg 1 OrderUnitSpace.one_nonneg).lt_of_ne fun h1 => by
-    have : f A = 0 := apply_eq_zero_of_apply_one_eq_zero (p := .mk₀ _ hf_nonneg) h1.symm A
-    linarith [hfA.trans hu]
-  exact ⟨ofLinearMap ((f (1 : E))⁻¹ • f.toLinearMap)
-    (fun B hB => mul_nonneg (inv_nonneg.mpr hf_one_pos.le) (hf_nonneg B hB))
-    (by simp [hf_one_pos.ne']), mul_neg_of_pos_of_neg (inv_pos.mpr hf_one_pos) (hfA.trans hu)⟩
+  have hf_one_pos : 0 < f (1 : E) :=
+    (hf_nonneg 1 OrderUnitSpace.one_nonneg).lt_of_ne fun h1 => by
+      have : f A = 0 := apply_eq_zero_of_apply_one_eq_zero (p := .mk₀ _ hf_nonneg) h1.symm A
+      linarith [hfA.trans hu]
+  exact ⟨
+    ofLinearMap ((f (1 : E))⁻¹ • f.toLinearMap)
+      (fun B hB => mul_nonneg (inv_nonneg.mpr hf_one_pos.le) (hf_nonneg B hB))
+      (by simp [hf_one_pos.ne']),
+    mul_neg_of_pos_of_neg (inv_pos.mpr hf_one_pos) (hfA.trans hu)
+  ⟩
 
 /-!
 
@@ -122,27 +125,29 @@ instance instNonemptyState [Nontrivial E] : Nonempty (𝓢[ℝ, E]) := by
   exact hab ((hz a).trans (hz b).symm)
 
 /-- If `A ≤ r • 1` fails, some state predicts more than `r` for `A`. -/
-lemma exists_state_apply_gt_of_not_le {A : E} {r : ℝ} (h : ¬ A ≤ r • (1 : E)) :
-    ∃ ω : 𝓢[ℝ, E], r < ω A := by
+lemma exists_state_apply_gt_of_not_le {A : E} {r : ℝ} (h : ¬ A ≤ r • (1 : E))
+    : ∃ ω : 𝓢[ℝ, E], r < ω A := by
   obtain ⟨ω, hω⟩ := exists_apply_neg_of_not_nonneg (A := r • 1 - A) (by rwa [sub_nonneg])
   exact ⟨ω, by simpa [map_sub] using hω⟩
 
 /-- Any scalar below the order-unit norm of `A` is exceeded by `|ω A|` for some state `ω`. -/
-lemma exists_state_abs_apply_gt_of_lt_orderUnitNorm [Nontrivial E] (A : E) {r : ℝ}
-    (hr : r < orderUnitNorm A) : ∃ ω : 𝓢[ℝ, E], r < |ω A| := by
+lemma exists_state_abs_apply_gt_of_lt_orderUnitNorm
+    [Nontrivial E] (A : E) {r : ℝ} (hr : r < orderUnitNorm A)
+    : ∃ ω : 𝓢[ℝ, E], r < |ω A| := by
   rcases lt_or_ge r 0 with hr0 | hr0
   · obtain ⟨ω⟩ := (inferInstance : Nonempty (𝓢[ℝ, E]))
     exact ⟨ω, hr0.trans_le (abs_nonneg _)⟩
   rcases not_and_or.1 fun h : -(r • (1 : E)) ≤ A ∧ A ≤ r • 1 =>
-    (orderUnitNorm_le ⟨hr0, h.1, h.2⟩).not_gt hr with h | h
+      (orderUnitNorm_le ⟨hr0, h.1, h.2⟩).not_gt hr
+    with h | h
   · obtain ⟨ω, hω⟩ := exists_state_apply_gt_of_not_le (A := -A) (by rwa [neg_le] at h)
     exact ⟨ω, hω.trans_le (by simpa using neg_le_abs (ω A))⟩
   · obtain ⟨ω, hω⟩ := exists_state_apply_gt_of_not_le h
     exact ⟨ω, hω.trans_le (le_abs_self _)⟩
 
 /-- The order-unit norm is the supremum of `|ω A|` over all states `ω`. -/
-lemma sSup_abs_apply_eq_orderUnitNorm [Nontrivial E] (A : E) :
-    sSup (Set.range fun ω : 𝓢[ℝ, E] => |ω A|) = orderUnitNorm A := by
+lemma sSup_abs_apply_eq_orderUnitNorm [Nontrivial E] (A : E)
+    : sSup (Set.range fun ω : 𝓢[ℝ, E] => |ω A|) = orderUnitNorm A := by
   refine csSup_eq_of_forall_le_of_forall_lt_exists_gt (Set.range_nonempty _)
     (by rintro _ ⟨ω, rfl⟩; exact abs_apply_le_orderUnitNorm ω A) fun r hr => ?_
   obtain ⟨ω, hω⟩ := exists_state_abs_apply_gt_of_lt_orderUnitNorm A hr
@@ -162,8 +167,8 @@ lemma orderUnitNorm_one [Nontrivial E] : orderUnitNorm (1 : E) = 1 := by
 
 /-- States separate points: if `ω A = ω B` for every state `ω`, then `A = B`. -/
 lemma ext_of_forall_apply_eq {A B : E} (h : ∀ ω : 𝓢[ℝ, E], ω A = ω B) : A = B := by
-  apply le_antisymm <;> rw [← sub_nonneg, nonneg_iff_forall_state_nonneg] <;>
-    intro ω <;> rw [map_sub, h ω, sub_self]
+  apply le_antisymm <;> rw [← sub_nonneg, nonneg_iff_forall_state_nonneg] <;> intro ω
+    <;> rw [map_sub, h ω, sub_self]
 
 /-!
 
@@ -172,17 +177,17 @@ lemma ext_of_forall_apply_eq {A B : E} (h : ∀ ω : 𝓢[ℝ, E], ω A = ω B) 
 -/
 
 /-- A state as a continuous functional on the canonical order-unit-norm copy. -/
-noncomputable def toOrderUnitContinuousLinearMap (ω : 𝓢[ℝ, E]) :
-    WithOrderUnitNorm E →L[ℝ] ℝ :=
+noncomputable def toOrderUnitContinuousLinearMap (ω : 𝓢[ℝ, E]) : WithOrderUnitNorm E →L[ℝ] ℝ :=
   ω.toPositiveLinearMap.toOrderUnitContinuousLinearMap
 
 @[simp]
-lemma toOrderUnitContinuousLinearMap_apply (ω : 𝓢[ℝ, E]) (A : E) :
-    ω.toOrderUnitContinuousLinearMap A = ω A := rfl
+lemma toOrderUnitContinuousLinearMap_apply (ω : 𝓢[ℝ, E]) (A : E)
+    : ω.toOrderUnitContinuousLinearMap A = ω A :=
+  rfl
 
 /-- The continuous-dual realization of states is injective. -/
-lemma toOrderUnitContinuousLinearMap_injective :
-    Function.Injective
+lemma toOrderUnitContinuousLinearMap_injective
+    : Function.Injective
       (toOrderUnitContinuousLinearMap : 𝓢[ℝ, E] → WithOrderUnitNorm E →L[ℝ] ℝ) := by
   intro ω φ h
   ext A
@@ -191,8 +196,8 @@ lemma toOrderUnitContinuousLinearMap_injective :
 
 /-- Every state has continuous-dual norm one for the order-unit norm. -/
 @[simp]
-lemma norm_toOrderUnitContinuousLinearMap [Nontrivial E] (ω : 𝓢[ℝ, E]) :
-    ‖ω.toOrderUnitContinuousLinearMap‖ = 1 := by
+lemma norm_toOrderUnitContinuousLinearMap [Nontrivial E] (ω : 𝓢[ℝ, E])
+    : ‖ω.toOrderUnitContinuousLinearMap‖ = 1 := by
   apply le_antisymm
   · apply ContinuousLinearMap.opNorm_le_bound _ zero_le_one
     intro A
@@ -202,8 +207,7 @@ lemma norm_toOrderUnitContinuousLinearMap [Nontrivial E] (ω : 𝓢[ℝ, E]) :
       1 = ‖ω.toOrderUnitContinuousLinearMap (WithOrderUnitNorm.linearEquiv (1 : E))‖ := by
         change 1 = ‖ω (1 : E)‖
         simp
-      _ ≤ ‖ω.toOrderUnitContinuousLinearMap‖ *
-          ‖WithOrderUnitNorm.linearEquiv (1 : E)‖ :=
+      _ ≤ ‖ω.toOrderUnitContinuousLinearMap‖ * ‖WithOrderUnitNorm.linearEquiv (1 : E)‖ :=
         ω.toOrderUnitContinuousLinearMap.le_opNorm _
       _ = ‖ω.toOrderUnitContinuousLinearMap‖ := by
         rw [WithOrderUnitNorm.norm_eq_orderUnitNorm, WithOrderUnitNorm.linearEquiv_apply,

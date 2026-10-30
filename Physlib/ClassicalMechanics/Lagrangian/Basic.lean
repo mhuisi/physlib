@@ -49,7 +49,9 @@ namespace ClassicalMechanics
 open MeasureTheory
 open scoped Manifold ContDiff
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] {H : Type*} [TopologicalSpace H]
+variable
+  {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  {H : Type*} [TopologicalSpace H]
   (I : ModelWithCorners ℝ E H) (M : ConfigurationSpace I)
 
 /-!
@@ -57,11 +59,12 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] {H : Type*} [Top
 -/
 
 /-- A smooth time-dependent Lagrangian on `TM`, depending on first-order derivatives only. -/
-@[ext] structure LagrangianSystem where
+@[ext]
+structure LagrangianSystem where
   /-- `L(t, q, q̇)`. -/
   toFun : Time × TangentBundle I M → ℝ
   /-- `L` is smooth. -/
-  contMDiff : ContMDiff (𝓘(ℝ, ℝ).prod I.tangent) 𝓘(ℝ, ℝ) ∞ toFun
+  contMDiff : ContMDiff (𝓘(ℝ, ℝ).prod I.tangent) (𝓘(ℝ, ℝ)) ∞ toFun
 
 namespace LagrangianSystem
 
@@ -87,31 +90,35 @@ TODO "Add a constructor for `LagrangianSystem I M` from a point particle configu
 -/
 
 /-- The Lagrangian system on a normed space `E` given by a smooth `L(t, q, q̇)`. -/
-def ofNormedSpace (L : Time × E × E → ℝ)
-    (hL : ContMDiff (𝓘(ℝ, ℝ).prod 𝓘(ℝ, E × E)) 𝓘(ℝ, ℝ) ∞ L) :
-    LagrangianSystem 𝓘(ℝ, E) ⟨E⟩ :=
-  ⟨fun p ↦ L (p.1, p.2.1, p.2.2), hL.comp (contMDiff_fst.prodMk
-    (contMDiff_tangentBundleModelSpaceHomeomorph.comp contMDiff_snd))⟩
+def ofNormedSpace (L : Time × E × E → ℝ) (hL : ContMDiff (𝓘(ℝ, ℝ).prod 𝓘(ℝ, E × E)) (𝓘(ℝ, ℝ)) ∞ L)
+    : LagrangianSystem (𝓘(ℝ, E)) ⟨E⟩ := ⟨
+  fun p ↦ L (p.1, p.2.1, p.2.2),
+  hL.comp (contMDiff_fst.prodMk (contMDiff_tangentBundleModelSpaceHomeomorph.comp contMDiff_snd))
+⟩
 
 /-- `L` in the time coordinate `τ ↦ τ +ᵥ t₀`. -/
-noncomputable def coord (S : LagrangianSystem 𝓘(ℝ, E) ⟨E⟩) (t₀ : Time) (p : ℝ × E × E) : ℝ :=
+noncomputable def coord (S : LagrangianSystem (𝓘(ℝ, E)) ⟨E⟩) (t₀ : Time) (p : ℝ × E × E) : ℝ :=
   S (p.1 +ᵥ t₀, (tangentBundleModelSpaceHomeomorph 𝓘(ℝ, E)).symm p.2)
 
 /-- `S.coord t₀` is smooth. -/
-lemma contDiff_coord (S : LagrangianSystem 𝓘(ℝ, E) ⟨E⟩) (t₀ : Time) :
-    ContDiff ℝ ∞ (S.coord t₀) := by
-  have hs : ContMDiff 𝓘(ℝ, E × E) (𝓘(ℝ, E)).tangent ∞
+lemma contDiff_coord (S : LagrangianSystem (𝓘(ℝ, E)) ⟨E⟩) (t₀ : Time)
+    : ContDiff ℝ ∞ (S.coord t₀) := by
+  have hs : ContMDiff (𝓘(ℝ, E × E)) (𝓘(ℝ, E)).tangent ∞
       (fun p : E × E ↦ (tangentBundleModelSpaceHomeomorph 𝓘(ℝ, E)).symm p) :=
     contMDiff_tangentBundleModelSpaceHomeomorph_symm
-  have h : ContMDiff (𝓘(ℝ, ℝ).prod 𝓘(ℝ, E × E)) 𝓘(ℝ, ℝ) ∞ (S.coord t₀) :=
+  have h : ContMDiff (𝓘(ℝ, ℝ).prod 𝓘(ℝ, E × E)) (𝓘(ℝ, ℝ)) ∞ (S.coord t₀) :=
     S.contMDiff.comp (((Time.contMDiff_vadd t₀ ∞).comp contMDiff_fst).prodMk
       (hs.comp contMDiff_snd))
   rwa [← modelWithCornersSelf_prod (𝕜 := ℝ) (E := ℝ) (F := E × E),
-    chartedSpaceSelf_prod (H := ℝ) (H' := E × E), contMDiff_iff_contDiff] at h
+      chartedSpaceSelf_prod (H := ℝ) (H' := E × E), contMDiff_iff_contDiff]
+    at h
 
-@[simp] lemma coord_ofNormedSpace (L : Time × E × E → ℝ)
-    (hL : ContMDiff (𝓘(ℝ, ℝ).prod 𝓘(ℝ, E × E)) 𝓘(ℝ, ℝ) ∞ L) (t₀ : Time) (p : ℝ × E × E) :
-    (ofNormedSpace L hL).coord t₀ p = L (p.1 +ᵥ t₀, p.2) := rfl
+@[simp]
+lemma coord_ofNormedSpace
+    (L : Time × E × E → ℝ) (hL : ContMDiff (𝓘(ℝ, ℝ).prod 𝓘(ℝ, E × E)) (𝓘(ℝ, ℝ)) ∞ L)
+    (t₀ : Time) (p : ℝ × E × E)
+    : (ofNormedSpace L hL).coord t₀ p = L (p.1 +ᵥ t₀, p.2) :=
+  rfl
 
 variable {I M} (S : LagrangianSystem I M) {γ : Time → M} {t₀ t₁ : Time}
 
@@ -129,11 +136,14 @@ noncomputable def action (γ : Time → M) (t₀ t₁ : Time) : ℝ :=
 lemma action_eq_zero_of_vsub_nonpos (h : t₁ -ᵥ t₀ ≤ 0) : S.action γ t₀ t₁ = 0 :=
   setIntegral_measure_zero _ ((Set.subsingleton_Icc_of_ge h).measure_zero _)
 
-/-- The action is the integral over `[0, t₁ -ᵥ t₀]` of `S.coord t₀ (s, q s, q' s)`, where
-`q τ = γ (τ +ᵥ t₀)` and `q' = deriv q`. -/
-lemma action_eq_integral_coord (S : LagrangianSystem 𝓘(ℝ, E) ⟨E⟩) (γ : Time → E) (t₀ t₁ : Time) :
-    S.action γ t₀ t₁ = ∫ s in Set.Icc 0 (t₁ -ᵥ t₀),
-      S.coord t₀ (s, γ (s +ᵥ t₀), deriv (fun τ : ℝ ↦ γ (τ +ᵥ t₀)) s) := by
+/--
+The action is the integral over `[0, t₁ -ᵥ t₀]` of `S.coord t₀ (s, q s, q' s)`, where
+`q τ = γ (τ +ᵥ t₀)` and `q' = deriv q`.
+-/
+lemma action_eq_integral_coord (S : LagrangianSystem (𝓘(ℝ, E)) ⟨E⟩) (γ : Time → E) (t₀ t₁ : Time)
+    : S.action γ t₀ t₁
+      = ∫ s in Set.Icc 0 (t₁ -ᵥ t₀),
+        S.coord t₀ (s, γ (s +ᵥ t₀), deriv (fun τ : ℝ ↦ γ (τ +ᵥ t₀)) s) := by
   simp only [action, coord, Time.tangentMap_eq_deriv_vadd]
   rfl
 

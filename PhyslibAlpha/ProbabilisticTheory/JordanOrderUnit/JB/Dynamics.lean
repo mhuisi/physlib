@@ -52,8 +52,7 @@ variable {E : Type*} [NormedJordanAlgebra E]
 /-! ## A. The Jordan product is bounded bilinear -/
 
 /-- The Jordan product of a normed Jordan algebra is bounded bilinear, with bound constant `1`. -/
-lemma isBoundedBilinearMap_mul :
-    IsBoundedBilinearMap ℝ (fun p : E × E => p.1 * p.2) where
+lemma isBoundedBilinearMap_mul : IsBoundedBilinearMap ℝ (fun p : E × E => p.1 * p.2) where
   add_left := add_mul
   smul_left c x y := smul_mul_assoc c x y
   add_right := mul_add
@@ -75,13 +74,14 @@ open scoped JordanAlgebra
 
 /-- Left Jordan multiplication as a bounded linear operator, with operator bound `‖a‖`. -/
 noncomputable def mulLeftCLM (a : E) : E →L[ℝ] E :=
-  LinearMap.mkContinuous (L a) ‖a‖ fun b => NormedJordanAlgebra.norm_mul_le a b
+  LinearMap.mkContinuous (L a) (‖a‖) fun b => NormedJordanAlgebra.norm_mul_le a b
 
-@[simp]
-lemma mulLeftCLM_apply (a b : E) : mulLeftCLM a b = a * b := rfl
+@[simp] lemma mulLeftCLM_apply (a b : E) : mulLeftCLM a b = a * b := rfl
 
-/-- A uniform norm bound for the quadratic representation:
-`‖U_a b‖ ≤ 3 ‖a‖² ‖b‖`. The sharp constant is not needed for continuity. -/
+/--
+A uniform norm bound for the quadratic representation:
+`‖U_a b‖ ≤ 3 ‖a‖² ‖b‖`. The sharp constant is not needed for continuity.
+-/
 lemma norm_quadRep_le (a b : E) : ‖U a b‖ ≤ 3 * ‖a‖ ^ 2 * ‖b‖ := by
   rw [quadRep_apply, jpow_two]
   have hleft : ‖(2 : ℝ) • (a * (a * b))‖ ≤ 2 * (‖a‖ * (‖a‖ * ‖b‖)) := by
@@ -95,24 +95,23 @@ lemma norm_quadRep_le (a b : E) : ‖U a b‖ ≤ 3 * ‖a‖ ^ 2 * ‖b‖ := b
       (mul_le_mul_of_nonneg_right (NormedJordanAlgebra.norm_mul_le a a) (norm_nonneg b))
   calc
     ‖(2 : ℝ) • (a * (a * b)) - (a * a) * b‖
-        ≤ ‖(2 : ℝ) • (a * (a * b))‖ + ‖(a * a) * b‖ := norm_sub_le _ _
-    _ ≤ 2 * (‖a‖ * (‖a‖ * ‖b‖)) + (‖a‖ * ‖a‖) * ‖b‖ := by
-      exact add_le_add hleft hright
+      ≤ ‖(2 : ℝ) • (a * (a * b))‖ + ‖(a * a) * b‖ := norm_sub_le _ _
+    _ ≤ 2 * (‖a‖ * (‖a‖ * ‖b‖)) + (‖a‖ * ‖a‖) * ‖b‖ := by exact add_le_add hleft hright
     _ = 3 * ‖a‖ ^ 2 * ‖b‖ := by ring
 
 /-- The quadratic representation as a bounded linear operator. -/
 noncomputable def quadRepCLM (a : E) : E →L[ℝ] E :=
   LinearMap.mkContinuous (U a) (3 * ‖a‖ ^ 2) (norm_quadRep_le a)
 
-@[simp]
-lemma quadRepCLM_apply (a b : E) : quadRepCLM a b = U a b := rfl
+@[simp] lemma quadRepCLM_apply (a b : E) : quadRepCLM a b = U a b := rfl
 
 /-! ## C. The derivation corollary -/
 
 /-- **The generator of a differentiable family of Jordan automorphisms is a Jordan derivation.** -/
-lemma isDerivation_of_isAutomorphismFamily {α : ℝ → E → E}
-    (hα0 : ∀ a, α 0 a = a) (hmul : ∀ t a b, α t (a * b) = α t a * α t b)
-    {D : E →ₗ[ℝ] E} (hD : IsGenerator α D) : IsDerivation D :=
+lemma isDerivation_of_isAutomorphismFamily
+    {α : ℝ → E → E} (hα0 : ∀ a, α 0 a = a) (hmul : ∀ t a b, α t (a * b) = α t a * α t b)
+    {D : E →ₗ[ℝ] E} (hD : IsGenerator α D)
+    : IsDerivation D :=
   IsGenerator.isDerivation_of_isAutomorphismFamily isBoundedBilinearMap_mul hα0 hmul hD
 
 end NormedJordanAlgebra

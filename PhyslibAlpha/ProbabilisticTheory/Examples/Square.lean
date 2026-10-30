@@ -77,9 +77,7 @@ def mk (v : Fin 4 → ℝ) (h : v 0 + v 3 = v 1 + v 2) : Square := (⟨v, h⟩ :
 
 @[simp] lemma val_mk (v : Fin 4 → ℝ) (h) (i : Fin 4) : (mk v h).val i = v i := rfl
 
-@[ext]
-lemma ext {q r : Square} (h : ∀ i, q.val i = r.val i) : q = r :=
-  Subtype.ext (funext h)
+@[ext] lemma ext {q r : Square} (h : ∀ i, q.val i = r.val i) : q = r := Subtype.ext (funext h)
 
 lemma diagonal (q : Square) : q.val 0 + q.val 3 = q.val 1 + q.val 2 :=
   (show squareSubmodule from q).2
@@ -111,12 +109,12 @@ instance : OrderUnitSpace Square where
     refine ⟨n, fun i => ?_⟩
     show q.val i ≤ (n • (1 : Square)).val i
     rw [← Nat.cast_smul_eq_nsmul ℝ, val_smul, val_one, mul_one]
-    exact (le_abs_self _).trans ((Finset.single_le_sum (fun j _ => abs_nonneg (q.val j))
-      (Finset.mem_univ i)).trans hn)
+    exact (le_abs_self _).trans
+      ((Finset.single_le_sum (fun j _ => abs_nonneg (q.val j)) (Finset.mem_univ i)).trans hn)
 
 instance : ArchimedeanOrderUnitSpace Square where
-  le_zero_of_forall_pos_smul_one_le q h i := le_of_forall_pos_le_add fun ε hε => by
-    simpa using h ε hε i
+  le_zero_of_forall_pos_smul_one_le q h i :=
+    le_of_forall_pos_le_add fun ε hε => by simpa using h ε hε i
 
 /-- Evaluation at the `i`-th vertex: a pure state of the square. -/
 def ev (i : Fin 4) : Square →ₚ[ℝ] ℝ :=
@@ -126,13 +124,15 @@ def ev (i : Fin 4) : Square →ₚ[ℝ] ℝ :=
 
 /-! ## B. Facets -/
 
-/-- The four facets: `facet 0` vanishes on vertices `0, 2`, `facet 1` on `0, 1`, `facet 2` on
-`1, 3`, and `facet 3` on `2, 3`. -/
+/--
+The four facets: `facet 0` vanishes on vertices `0, 2`, `facet 1` on `0, 1`, `facet 2` on
+`1, 3`, and `facet 3` on `2, 3`.
+-/
 def facet : Fin 4 → Square
-  | 0 => mk ![0, 1, 0, 1] (by simp)
-  | 1 => mk ![0, 0, 1, 1] (by simp)
-  | 2 => mk ![1, 0, 1, 0] (by simp)
-  | 3 => mk ![1, 1, 0, 0] (by simp)
+  | 0 => mk (![0, 1, 0, 1]) (by simp)
+  | 1 => mk (![0, 0, 1, 1]) (by simp)
+  | 2 => mk (![1, 0, 1, 0]) (by simp)
+  | 3 => mk (![1, 1, 0, 0]) (by simp)
 
 lemma facet_nonneg (j : Fin 4) : 0 ≤ facet j := fun i => by
   fin_cases j <;> fin_cases i <;> simp [facet]
@@ -141,10 +141,13 @@ lemma val_sum (q : Fin 4 → Square) (i : Fin 4) : (∑ j, q j).val i = ∑ j, (
   rw [← ev_apply, map_sum]; rfl
 
 /-- Every nonnegative observable of the square is a nonnegative combination of the facets. -/
-lemma exists_eq_sum_facet {q : Square} (hq : 0 ≤ q) :
-    ∃ c : Fin 4 → ℝ, (∀ j, 0 ≤ c j) ∧ q = ∑ j, c j • facet j := by
+lemma exists_eq_sum_facet {q : Square} (hq : 0 ≤ q)
+    : ∃ c : Fin 4 → ℝ, (∀ j, 0 ≤ c j) ∧ q = ∑ j, c j • facet j := by
   have h := q.diagonal
-  have h₀ := hq 0; have h₁ := hq 1; have h₂ := hq 2; have h₃ := hq 3
+  have h₀ := hq 0
+  have h₁ := hq 1
+  have h₂ := hq 2
+  have h₃ := hq 3
   simp only [val_zero] at h₀ h₁ h₂ h₃
   rcases min_cases (q.val 0) (q.val 1) with ⟨-, hle⟩ | ⟨-, hlt⟩
   · refine ⟨![q.val 1 - q.val 0, q.val 2, 0, q.val 0], fun j => ?_, ext fun i => ?_⟩
@@ -155,11 +158,12 @@ lemma exists_eq_sum_facet {q : Square} (hq : 0 ≤ q) :
     · rw [val_sum]; fin_cases i <;> simp [Fin.sum_univ_four, facet]; linarith
 
 /-- An observable of the square is determined by its values at the vertices `0, 1, 2`. -/
-lemma eq_add_facet (q : Square) :
-    q = q.val 0 • 1 + (q.val 1 - q.val 0) • facet 0 + (q.val 2 - q.val 0) • facet 1 := by
+lemma eq_add_facet (q : Square)
+    : q = q.val 0 • 1 + (q.val 1 - q.val 0) • facet 0 + (q.val 2 - q.val 0) • facet 1 := by
   have h := q.diagonal
   ext i
-  fin_cases i <;> simp [facet]; linarith
+  fin_cases i <;> simp [facet]
+  linarith
 
 end Square
 
@@ -172,8 +176,7 @@ open PositiveLinearMap
 variable {E : Type*} [OrderUnitSpace E]
 
 /-- The vertex values of an observable of the composite with the square. -/
-noncomputable def vals : E ⊗[ℝ] Square →ₗ[ℝ] (Fin 4 → E) :=
-  LinearMap.pi fun i => rslice (ev i)
+noncomputable def vals : E ⊗[ℝ] Square →ₗ[ℝ] (Fin 4 → E) := LinearMap.pi fun i => rslice (ev i)
 
 @[simp]
 lemma vals_tmul (x : E) (q : Square) : vals (x ⊗ₜ[ℝ] q) = fun i => q.val i • x := by
@@ -202,38 +205,47 @@ lemma ofVals_vals (z : E ⊗[ℝ] Square) : ofVals (vals z) = z := by
     simp only [ofVals, vals_tmul, ← sub_smul, smul_tmul, tmul_add]
   | add z z' hz hz' => rw [map_add, ofVals_add, hz, hz']
 
-/-- Vertex values satisfying the diagonal relation are the vertex values of a composite
-observable. -/
+/--
+Vertex values satisfying the diagonal relation are the vertex values of a composite
+observable.
+-/
 lemma vals_ofVals {A : Fin 4 → E} (hA : A 0 + A 3 = A 1 + A 2) : vals (ofVals A) = A := by
   ext i
   fin_cases i <;> simp [ofVals, facet]
-  rw [← add_sub_assoc, ← hA]; abel
+  rw [← add_sub_assoc, ← hA]
+  abel
 
 /-- Vertex values determine the composite observable. -/
 lemma vals_injective : Function.Injective (vals : E ⊗[ℝ] Square →ₗ[ℝ] (Fin 4 → E)) :=
   Function.LeftInverse.injective ofVals_vals
 
-/-- Applying a positive functional to the `E` factor gives the observable of the square whose
-vertex values are the values of the functional on the vertex values. -/
-lemma val_lslice (φ : E →ₚ[ℝ] ℝ) (z : E ⊗[ℝ] Square) (i : Fin 4) :
-    (lslice φ z).val i = φ (vals z i) := by
-  change (ev i).toLinearMap.comp (lslice φ) z =
-    (φ.toLinearMap.comp ((LinearMap.proj i).comp vals)) z
+/--
+Applying a positive functional to the `E` factor gives the observable of the square whose
+vertex values are the values of the functional on the vertex values.
+-/
+lemma val_lslice (φ : E →ₚ[ℝ] ℝ) (z : E ⊗[ℝ] Square) (i : Fin 4)
+    : (lslice φ z).val i = φ (vals z i) := by
+  change (ev i).toLinearMap.comp (lslice φ) z
+    = (φ.toLinearMap.comp ((LinearMap.proj i).comp vals)) z
   congr 1
   exact TensorProduct.ext' fun x q => by simp [mul_comm]
 
 /-- A composite observable whose vertex values are nonnegative is in the maximal cone. -/
-lemma mem_maxTensorCone_of_vals_nonneg {z : E ⊗[ℝ] Square} (h : ∀ i, 0 ≤ vals z i) :
-    z ∈ maxTensorCone E Square := mem_maxTensorCone.2 fun φ ψ => by
-  rw [tensor_apply_eq_lslice]
-  exact map_nonneg ψ fun i => by simpa [val_lslice] using map_nonneg φ (h i)
+lemma mem_maxTensorCone_of_vals_nonneg {z : E ⊗[ℝ] Square} (h : ∀ i, 0 ≤ vals z i)
+    : z ∈ maxTensorCone E Square :=
+  mem_maxTensorCone.2 fun φ ψ => by
+    rw [tensor_apply_eq_lslice]
+    exact map_nonneg ψ fun i => by simpa [val_lslice] using map_nonneg φ (h i)
 
-/-- For Archimedean `E`, the maximal cone of the composite with the square consists of the
-observables with nonnegative vertex values. -/
-lemma mem_maxTensorCone_iff {E : Type*} [ArchimedeanOrderUnitSpace E] {z : E ⊗[ℝ] Square} :
-    z ∈ maxTensorCone E Square ↔ ∀ i, 0 ≤ vals z i :=
-  ⟨fun h i => by simpa [vals] using mem_maxTensorCone_iff_rslice.1 h (ev i),
-    mem_maxTensorCone_of_vals_nonneg⟩
+/--
+For Archimedean `E`, the maximal cone of the composite with the square consists of the
+observables with nonnegative vertex values.
+-/
+lemma mem_maxTensorCone_iff {E : Type*} [ArchimedeanOrderUnitSpace E] {z : E ⊗[ℝ] Square}
+    : z ∈ maxTensorCone E Square ↔ ∀ i, 0 ≤ vals z i := ⟨
+  fun h i => by simpa [vals] using mem_maxTensorCone_iff_rslice.1 h (ev i),
+  mem_maxTensorCone_of_vals_nonneg
+⟩
 
 end Square
 

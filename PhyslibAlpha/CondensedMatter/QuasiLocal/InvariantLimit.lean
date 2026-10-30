@@ -64,49 +64,64 @@ variable {ι : Type*}
 
 /-! ## A. Invariant states of a uniform lattice system -/
 
-/-- **The invariant limit of a state of a uniform lattice system**: the Følner limit of its
-averages over the site symmetries. -/
-def invariantLimit (φ : AlgState (uniformNet (S := S) Ω₀).Quasilocal) (F : ι → Finset Γ)
-    (hne : ∀ i, (F i).Nonempty) (𝒰 : Ultrafilter ι) :
-    AlgState (uniformNet (S := S) Ω₀).Quasilocal :=
+/--
+**The invariant limit of a state of a uniform lattice system**: the Følner limit of its
+averages over the site symmetries.
+-/
+def invariantLimit
+    (φ : AlgState (uniformNet (S := S) Ω₀).Quasilocal)
+    (F : ι → Finset Γ) (hne : ∀ i, (F i).Nonempty)
+    (𝒰 : Ultrafilter ι)
+    : AlgState (uniformNet (S := S) Ω₀).Quasilocal :=
   AlgState.invariantLimit (symAction (Γ := Γ) (Ω₀ := Ω₀)) F hne φ
     (AlgebraNet.isBounded_of_isLocallyBounded quantumNet_isLocallyBounded) 𝒰
 
 /-- **The invariant limit of a state is invariant under the site symmetries.** -/
-lemma invariantLimit_invariant (φ : AlgState (uniformNet (S := S) Ω₀).Quasilocal)
-    (F : ι → Finset Γ) (hne : ∀ i, (F i).Nonempty) (𝒰 : Ultrafilter ι)
-    (hF : IsRightFolner F 𝒰) (γ : Γ) (a : (uniformNet (S := S) Ω₀).Quasilocal) :
-    invariantLimit φ F hne 𝒰 (symAction (Ω₀ := Ω₀) γ a) = invariantLimit φ F hne 𝒰 a :=
+lemma invariantLimit_invariant
+    (φ : AlgState (uniformNet (S := S) Ω₀).Quasilocal)
+    (F : ι → Finset Γ) (hne : ∀ i, (F i).Nonempty)
+    (𝒰 : Ultrafilter ι) (hF : IsRightFolner F 𝒰)
+    (γ : Γ) (a : (uniformNet (S := S) Ω₀).Quasilocal)
+    : invariantLimit φ F hne 𝒰 (symAction (Ω₀ := Ω₀) γ a) = invariantLimit φ F hne 𝒰 a :=
   AlgState.invariantLimit_invariant _ F hne φ _ 𝒰 hF γ a
 
-/-- **Existence of invariant states**: if the finite sets of site symmetries are asymptotically
-invariant, every state of the quasi-local algebra has an invariant limit state. -/
-lemma exists_invariant_state (φ : AlgState (uniformNet (S := S) Ω₀).Quasilocal)
-    (F : ι → Finset Γ) (hne : ∀ i, (F i).Nonempty) (𝒰 : Ultrafilter ι)
-    (hF : IsRightFolner F 𝒰) :
-    ∃ ψ : AlgState (uniformNet (S := S) Ω₀).Quasilocal,
-      ∀ (γ : Γ) a, ψ (symAction (Ω₀ := Ω₀) γ a) = ψ a :=
+/--
+**Existence of invariant states**: if the finite sets of site symmetries are asymptotically
+invariant, every state of the quasi-local algebra has an invariant limit state.
+-/
+lemma exists_invariant_state
+    (φ : AlgState (uniformNet (S := S) Ω₀).Quasilocal)
+    (F : ι → Finset Γ) (hne : ∀ i, (F i).Nonempty)
+    (𝒰 : Ultrafilter ι) (hF : IsRightFolner F 𝒰)
+    : ∃ ψ : AlgState (uniformNet (S := S) Ω₀).Quasilocal, ∀ (γ : Γ) a,
+      ψ (symAction (Ω₀ := Ω₀) γ a) = ψ a :=
   ⟨invariantLimit φ F hne 𝒰, invariantLimit_invariant φ F hne 𝒰 hF⟩
 
 /-! ## B. The ensembles of an interaction -/
 
 variable [Nonempty Ω₀]
 
-/-- **The symmetric thermodynamic limit state of the canonical ensemble** of an interaction on a
-uniform lattice system. -/
-def Interaction.invariantLimitState (I : Interaction (fun _ : S => Ω₀)) (β : ℝ)
-    (𝒰₀ : Ultrafilter (Finset S)) (h𝒰₀ : (𝒰₀ : Filter (Finset S)) ≤ atTop) (F : ι → Finset Γ)
-    (hne : ∀ i, (F i).Nonempty) (𝒰 : Ultrafilter ι) :
-    AlgState (uniformNet (S := S) Ω₀).Quasilocal :=
+/--
+**The symmetric thermodynamic limit state of the canonical ensemble** of an interaction on a
+uniform lattice system.
+-/
+def Interaction.invariantLimitState
+    (I : Interaction (fun _ : S => Ω₀)) (β : ℝ)
+    (𝒰₀ : Ultrafilter (Finset S)) (h𝒰₀ : (𝒰₀ : Filter (Finset S)) ≤ atTop)
+    (F : ι → Finset Γ) (hne : ∀ i, (F i).Nonempty)
+    (𝒰 : Ultrafilter ι)
+    : AlgState (uniformNet (S := S) Ω₀).Quasilocal :=
   invariantLimit (I.canonicalLimitState β 𝒰₀ h𝒰₀) F hne 𝒰
 
 /-- The symmetric limit state of an interaction is invariant under the site symmetries. -/
-lemma Interaction.invariantLimitState_invariant (I : Interaction (fun _ : S => Ω₀)) (β : ℝ)
-    (𝒰₀ : Ultrafilter (Finset S)) (h𝒰₀ : (𝒰₀ : Filter (Finset S)) ≤ atTop) (F : ι → Finset Γ)
-    (hne : ∀ i, (F i).Nonempty) (𝒰 : Ultrafilter ι) (hF : IsRightFolner F 𝒰) (γ : Γ)
-    (a : (uniformNet (S := S) Ω₀).Quasilocal) :
-    I.invariantLimitState β 𝒰₀ h𝒰₀ F hne 𝒰 (symAction (Ω₀ := Ω₀) γ a) =
-      I.invariantLimitState β 𝒰₀ h𝒰₀ F hne 𝒰 a :=
+lemma Interaction.invariantLimitState_invariant
+    (I : Interaction (fun _ : S => Ω₀)) (β : ℝ)
+    (𝒰₀ : Ultrafilter (Finset S)) (h𝒰₀ : (𝒰₀ : Filter (Finset S)) ≤ atTop)
+    (F : ι → Finset Γ) (hne : ∀ i, (F i).Nonempty)
+    (𝒰 : Ultrafilter ι) (hF : IsRightFolner F 𝒰)
+    (γ : Γ) (a : (uniformNet (S := S) Ω₀).Quasilocal)
+    : I.invariantLimitState β 𝒰₀ h𝒰₀ F hne 𝒰 (symAction (Ω₀ := Ω₀) γ a)
+      = I.invariantLimitState β 𝒰₀ h𝒰₀ F hne 𝒰 a :=
   invariantLimit_invariant _ F hne 𝒰 hF γ a
 
 end QuasiLocal

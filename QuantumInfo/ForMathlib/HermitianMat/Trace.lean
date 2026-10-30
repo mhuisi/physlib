@@ -32,14 +32,15 @@ variable {R n m α : Type*} [Star R] [TrivialStar R] [Fintype n] [Fintype m]
 section star
 variable [Ring α] [StarAddMonoid α] [CommSemiring R] [Algebra R α] [IsMaximalSelfAdjoint R α]
 
-/-- The trace of the matrix. This requires a `IsMaximalSelfAdjoint R α` instance, and then maps from
-  `HermitianMat n α` to `R`. This means that the trace of (say) a `HermitianMat n ℤ` gives values in ℤ,
-  but that the trace of a `HermitianMat n ℂ` gives values in ℝ. The fact that traces are "automatically"
-  real reduces coercions down the line. -/
-def trace (A : HermitianMat n α) : R :=
-  IsMaximalSelfAdjoint.selfadjMap (A.mat.trace)
+/--
+The trace of the matrix. This requires a `IsMaximalSelfAdjoint R α` instance, and then maps from
+`HermitianMat n α` to `R`. This means that the trace of (say) a `HermitianMat n ℤ` gives values in ℤ,
+but that the trace of a `HermitianMat n ℂ` gives values in ℝ. The fact that traces are "automatically"
+real reduces coercions down the line.
+-/
+def trace (A : HermitianMat n α) : R := IsMaximalSelfAdjoint.selfadjMap (A.mat.trace)
 
-/-- `HermitianMat.trace` reduces to `Matrix.trace` in the algebra.-/
+/-- `HermitianMat.trace` reduces to `Matrix.trace` in the algebra. -/
 theorem trace_eq_trace (A : HermitianMat n α) : algebraMap R α A.trace = Matrix.trace A.mat := by
   rw [trace, Matrix.trace, map_sum, map_sum]
   congr! 1
@@ -54,34 +55,28 @@ end star
 section semiring
 variable [CommSemiring R] [Ring α] [StarAddMonoid α] [Algebra R α] [IsMaximalSelfAdjoint R α]
 
-@[simp]
-lemma trace_zero : (0 : HermitianMat n α).trace = 0 := by
-  simp [trace]
+@[simp] lemma trace_zero : (0 : HermitianMat n α).trace = 0 := by simp [trace]
 
 @[simp]
-lemma trace_add (A B : HermitianMat n α) : (A + B).trace = A.trace + B.trace := by
-  simp [trace]
+lemma trace_add (A B : HermitianMat n α) : (A + B).trace = A.trace + B.trace := by simp [trace]
 
 end semiring
 section ring
 
 variable [CommRing R] [Ring α] [StarAddMonoid α] [Algebra R α] [IsMaximalSelfAdjoint R α]
-@[simp]
-lemma trace_neg (A : HermitianMat n α) : (-A).trace = -A.trace := by
-  simp [trace]
+@[simp] lemma trace_neg (A : HermitianMat n α) : (-A).trace = -A.trace := by simp [trace]
 
 @[simp]
-lemma trace_sub (A B : HermitianMat n α) : (A - B).trace = A.trace - B.trace := by
-  simp [trace]
+lemma trace_sub (A B : HermitianMat n α) : (A - B).trace = A.trace - B.trace := by simp [trace]
 
 end ring
 section starring
 
 variable [CommRing R] [CommRing α] [StarRing α] [Algebra R α] [IsMaximalSelfAdjoint R α]
 
---Move somewhere else? Needs to import `IsMaximalSelfAdjoint`, so maybe just here.
-lemma _root_.Matrix.IsHermitian.isSelfAdjoint_trace {A : Matrix n n α} (hA : A.IsHermitian) :
-    IsSelfAdjoint A.trace := by
+-- Move somewhere else? Needs to import `IsMaximalSelfAdjoint`, so maybe just here.
+lemma _root_.Matrix.IsHermitian.isSelfAdjoint_trace {A : Matrix n n α} (hA : A.IsHermitian)
+    : IsSelfAdjoint A.trace := by
   simp [Matrix.trace, IsSelfAdjoint, ← Matrix.star_apply, show star A = A from hA]
 
 variable (A : HermitianMat m α) (B : HermitianMat n α)
@@ -115,8 +110,7 @@ section RCLike
 
 variable {n m 𝕜 : Type*} [Fintype n] [Fintype m] [RCLike 𝕜]
 
-lemma trace_eq_re_trace (A : HermitianMat n 𝕜) : A.trace = RCLike.re A.mat.trace := by
-  rfl
+lemma trace_eq_re_trace (A : HermitianMat n 𝕜) : A.trace = RCLike.re A.mat.trace := by rfl
 
 @[simp]
 lemma trace_one [DecidableEq n] : (1 : HermitianMat n 𝕜).trace = Fintype.card n := by
@@ -129,18 +123,18 @@ theorem trace_eq_trace_rc (A : HermitianMat n 𝕜) : A.trace = A.mat.trace := b
   congr 1
   exact Matrix.IsHermitian.coe_re_diag A.H
 
-lemma trace_diagonal {T : Type*} [Fintype T] [DecidableEq T] (f : T → ℝ) :
-    (diagonal 𝕜 f).trace = ∑ i, f i := by
+lemma trace_diagonal {T : Type*} [Fintype T] [DecidableEq T] (f : T → ℝ)
+    : (diagonal 𝕜 f).trace = ∑ i, f i := by
   rw [trace_eq_re_trace]
   simp [HermitianMat.diagonal, Matrix.trace]
 
-lemma sum_eigenvalues_eq_trace [DecidableEq n] (A : HermitianMat n 𝕜) :
-    ∑ i, A.H.eigenvalues i = A.trace := by
+lemma sum_eigenvalues_eq_trace [DecidableEq n] (A : HermitianMat n 𝕜)
+    : ∑ i, A.H.eigenvalues i = A.trace := by
   convert! congrArg RCLike.re A.H.sum_eigenvalues_eq_trace
   rw [RCLike.ofReal_re]
 
---Proving that traces are 0 or 1 is common enough that we have a convenience lemma here for turning
---statements about HermitianMat traces into Matrix traces.
+-- Proving that traces are 0 or 1 is common enough that we have a convenience lemma here for turning
+-- statements about HermitianMat traces into Matrix traces.
 lemma trace_eq_zero_iff (A : HermitianMat n 𝕜) : A.trace = 0 ↔ A.mat.trace = 0 := by
   rw [← trace_eq_trace_rc]
   exact ⟨mod_cast id, mod_cast id⟩
@@ -151,8 +145,7 @@ lemma trace_eq_one_iff (A : HermitianMat n 𝕜) : A.trace = 1 ↔ A.mat.trace =
 
 set_option backward.isDefEq.respectTransparency false in
 @[simp]
-lemma trace_reindex (A : HermitianMat n ℂ) (e : n ≃ m) :
-    (A.reindex e).trace = A.trace := by
+lemma trace_reindex (A : HermitianMat n ℂ) (e : n ≃ m) : (A.reindex e).trace = A.trace := by
   simp [reindex, trace_eq_re_trace]
 
 end RCLike
@@ -162,48 +155,29 @@ section addCommGroup
 variable [AddCommGroup α] [StarAddMonoid α]
 omit [Fintype n]
 
-def traceLeft (A : HermitianMat (m × n) α) : HermitianMat n α :=
-  ⟨A.mat.traceLeft, A.H.traceLeft⟩
+def traceLeft (A : HermitianMat (m × n) α) : HermitianMat n α := ⟨A.mat.traceLeft, A.H.traceLeft⟩
 
-def traceRight (A : HermitianMat (m × n) α) : HermitianMat m α :=
-  ⟨A.mat.traceRight, A.H.traceRight⟩
+def traceRight (A : HermitianMat (m × n) α) : HermitianMat m α := ⟨A.mat.traceRight, A.H.traceRight⟩
 
 variable (A B : HermitianMat (m × n) α)
 
-@[simp]
-lemma traceLeft_mat : A.traceLeft.mat = A.mat.traceLeft := by
-  rfl
+@[simp] lemma traceLeft_mat : A.traceLeft.mat = A.mat.traceLeft := by rfl
 
-@[simp]
-lemma traceLeft_add : (A + B).traceLeft = A.traceLeft + B.traceLeft := by
-  ext1; simp
+@[simp] lemma traceLeft_add : (A + B).traceLeft = A.traceLeft + B.traceLeft := by ext1; simp
 
-@[simp]
-lemma traceLeft_neg : (-A).traceLeft = -A.traceLeft := by
-  ext1; simp
+@[simp] lemma traceLeft_neg : (-A).traceLeft = -A.traceLeft := by ext1; simp
 
-@[simp]
-lemma traceLeft_sub : (A - B).traceLeft = A.traceLeft - B.traceLeft := by
-  ext1; simp
+@[simp] lemma traceLeft_sub : (A - B).traceLeft = A.traceLeft - B.traceLeft := by ext1; simp
 
 variable (A B : HermitianMat (n × m) α)
 
-@[simp]
-lemma traceRight_mat :
-    (traceRight A).mat = A.mat.traceRight := by
-  rfl
+@[simp] lemma traceRight_mat : (traceRight A).mat = A.mat.traceRight := by rfl
 
-@[simp]
-lemma traceRight_add : (A + B).traceRight = A.traceRight + B.traceRight := by
-  ext1; simp
+@[simp] lemma traceRight_add : (A + B).traceRight = A.traceRight + B.traceRight := by ext1; simp
 
-@[simp]
-lemma traceRight_neg : (-A).traceRight = -A.traceRight := by
-  ext1; simp
+@[simp] lemma traceRight_neg : (-A).traceRight = -A.traceRight := by ext1; simp
 
-@[simp]
-lemma traceRight_sub : (A - B).traceRight = A.traceRight - B.traceRight := by
-  ext1; simp
+@[simp] lemma traceRight_sub : (A - B).traceRight = A.traceRight - B.traceRight := by ext1; simp
 
 end addCommGroup
 section rcLike
@@ -212,22 +186,14 @@ variable {𝕜} [RCLike 𝕜]
 variable (A : HermitianMat (m × n) 𝕜)
 
 omit [Fintype n] in
-@[simp]
-lemma traceLeft_smul (r : ℝ) : (r • A).traceLeft = r • A.traceLeft := by
-  ext1; simp
+@[simp] lemma traceLeft_smul (r : ℝ) : (r • A).traceLeft = r • A.traceLeft := by ext1; simp
 
 omit [Fintype m] in
-@[simp]
-lemma traceRight_smul (r : ℝ) : (r • A).traceRight = r • A.traceRight := by
-  ext1; simp
+@[simp] lemma traceRight_smul (r : ℝ) : (r • A).traceRight = r • A.traceRight := by ext1; simp
 
-@[simp]
-lemma traceLeft_trace : A.traceLeft.trace = A.trace := by
-  simp [trace_eq_re_trace]
+@[simp] lemma traceLeft_trace : A.traceLeft.trace = A.trace := by simp [trace_eq_re_trace]
 
-@[simp]
-lemma traceRight_trace : A.traceRight.trace = A.trace := by
-  simp [trace_eq_re_trace]
+@[simp] lemma traceRight_trace : A.traceRight.trace = A.trace := by simp [trace_eq_re_trace]
 
 end rcLike
 section kron

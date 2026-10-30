@@ -55,21 +55,22 @@ variable {E : Type*} [OrderUnitSpace E]
 
 -/
 
-/-- Randomize between two states with probability `t` of choosing the first, so
-`t • ω + σ t • φ` with `σ t = 1 - t`. -/
+/--
+Randomize between two states with probability `t` of choosing the first, so
+`t • ω + σ t • φ` with `σ t = 1 - t`.
+-/
 def mix (ω φ : 𝓢[ℝ, E]) (t : unitInterval) : 𝓢[ℝ, E] :=
-  .ofPositiveLinearMap (toNNReal t • ω + toNNReal (σ t) • φ)
-    (by simp [NNReal.smul_def])
+  .ofPositiveLinearMap (toNNReal t • ω + toNNReal (σ t) • φ) (by simp [NNReal.smul_def])
 
 /-- Evaluation of a mixture is the pointwise convex combination. -/
 @[simp]
-lemma mix_apply (ω φ : 𝓢[ℝ, E]) (t : unitInterval) (A : E) :
-    mix ω φ t A = (t : ℝ) * ω A + (1 - (t : ℝ)) * φ A := by
+lemma mix_apply (ω φ : 𝓢[ℝ, E]) (t : unitInterval) (A : E)
+    : mix ω φ t A = (t : ℝ) * ω A + (1 - (t : ℝ)) * φ A := by
   simp [mix, NNReal.smul_def]
 
 /-- The underlying linear map of a mixture is the corresponding combination of linear maps. -/
-lemma toLinearMap_mix (ω φ : 𝓢[ℝ, E]) (t : unitInterval) :
-    (mix ω φ t).toLinearMap = (t : ℝ) • ω.toLinearMap + (1 - (t : ℝ)) • φ.toLinearMap := by
+lemma toLinearMap_mix (ω φ : 𝓢[ℝ, E]) (t : unitInterval)
+    : (mix ω φ t).toLinearMap = (t : ℝ) • ω.toLinearMap + (1 - (t : ℝ)) • φ.toLinearMap := by
   ext A
   simp
 
@@ -85,8 +86,7 @@ lemma mix_symm (ω φ : 𝓢[ℝ, E]) (t : unitInterval) : mix ω φ t = mix φ 
 -/
 
 /-- States embedded into the algebraic dual. -/
-def stateSpace : Set (E →ₗ[ℝ] ℝ) :=
-  Set.range fun ω : 𝓢[ℝ, E] => ω.toLinearMap
+def stateSpace : Set (E →ₗ[ℝ] ℝ) := Set.range fun ω : 𝓢[ℝ, E] => ω.toLinearMap
 
 /-- The state space is convex in the algebraic dual. -/
 lemma stateSpace_convex : Convex ℝ (stateSpace (E := E)) := by
@@ -105,34 +105,36 @@ lemma stateSpace_convex : Convex ℝ (stateSpace (E := E)) := by
 def IsPure (ω : 𝓢[ℝ, E]) : Prop := ω.toLinearMap ∈ stateSpace.extremePoints ℝ
 
 /-- A state is mixed when it isn't pure. -/
-def IsMixed (ω : 𝓢[ℝ, E]) : Prop := ¬ ω.IsPure
+def IsMixed (ω : 𝓢[ℝ, E]) : Prop := ¬ω.IsPure
 
 /-- A state is pure exactly when any open segment containing it has both endpoints equal to it. -/
-lemma isPure_iff_forall_mem_openSegment {ω : 𝓢[ℝ, E]} :
-    ω.IsPure ↔ ∀ φ ψ : 𝓢[ℝ, E],
-      ω.toLinearMap ∈ openSegment ℝ φ.toLinearMap ψ.toLinearMap → φ = ω ∧ ψ = ω := by
+lemma isPure_iff_forall_mem_openSegment {ω : 𝓢[ℝ, E]}
+    : ω.IsPure
+      ↔ ∀ φ ψ : 𝓢[ℝ, E],
+        ω.toLinearMap ∈ openSegment ℝ φ.toLinearMap ψ.toLinearMap → φ = ω ∧ ψ = ω := by
   simp only [IsPure, mem_extremePoints, stateSpace, Set.forall_mem_range,
     toLinearMap_injective.eq_iff, Set.mem_range_self, true_and]
 
 /-- A state is mixed exactly when it lies in an open segment with a different endpoint. -/
-lemma isMixed_iff_exists_mem_openSegment {ω : 𝓢[ℝ, E]} :
-    ω.IsMixed ↔ ∃ φ ψ : 𝓢[ℝ, E],
-      ω.toLinearMap ∈ openSegment ℝ φ.toLinearMap ψ.toLinearMap ∧ (φ ≠ ω ∨ ψ ≠ ω) := by
+lemma isMixed_iff_exists_mem_openSegment {ω : 𝓢[ℝ, E]}
+    : ω.IsMixed
+      ↔ ∃ φ ψ : 𝓢[ℝ, E],
+        ω.toLinearMap ∈ openSegment ℝ φ.toLinearMap ψ.toLinearMap ∧ (φ ≠ ω ∨ ψ ≠ ω) := by
   simp [IsMixed, isPure_iff_forall_mem_openSegment, imp_iff_not_or]
 
 /-- Open segments between states consist exactly of their genuine mixtures. -/
-lemma mem_openSegment_iff_exists_mix (ω φ ψ : 𝓢[ℝ, E]) :
-    ω.toLinearMap ∈ openSegment ℝ φ.toLinearMap ψ.toLinearMap ↔
-      ∃ t : unitInterval, 0 < t ∧ t < 1 ∧ mix φ ψ t = ω := by
+lemma mem_openSegment_iff_exists_mix (ω φ ψ : 𝓢[ℝ, E])
+    : ω.toLinearMap ∈ openSegment ℝ φ.toLinearMap ψ.toLinearMap
+      ↔ ∃ t : unitInterval, 0 < t ∧ t < 1 ∧ mix φ ψ t = ω := by
   rw [openSegment_symm, openSegment_eq_image]
-  simp only [Set.mem_image, Set.mem_Ioo, Subtype.exists,
-    ← toLinearMap_injective.eq_iff, toLinearMap_mix, add_comm]
+  simp only [Set.mem_image, Set.mem_Ioo, Subtype.exists, ← toLinearMap_injective.eq_iff,
+    toLinearMap_mix, add_comm]
   aesop (add safe forward le_of_lt)
 
 /-- A state is pure exactly when every genuine binary mixture producing it is trivial. -/
-lemma isPure_iff_forall_mix_eq {ω : 𝓢[ℝ, E]} :
-    ω.IsPure ↔ ∀ φ ψ t, 0 < t → t < 1 → mix φ ψ t = ω → φ = ω ∧ ψ = ω := by
-  simp only [isPure_iff_forall_mem_openSegment, mem_openSegment_iff_exists_mix,
-    forall_exists_index, and_imp]
+lemma isPure_iff_forall_mix_eq {ω : 𝓢[ℝ, E]}
+    : ω.IsPure ↔ ∀ φ ψ t, 0 < t → t < 1 → mix φ ψ t = ω → φ = ω ∧ ψ = ω := by
+  simp only [isPure_iff_forall_mem_openSegment, mem_openSegment_iff_exists_mix, forall_exists_index,
+    and_imp]
 
 end UnitalPositiveLinearMap

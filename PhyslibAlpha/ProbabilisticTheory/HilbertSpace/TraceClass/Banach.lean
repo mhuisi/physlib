@@ -61,16 +61,14 @@ lemma isTraceClass_zero : IsTraceClass (0 : H →L[ℂ] H) := by
   exact ⟨w, b, by simp [CFC.abs_zero]⟩
 
 /-- Trace-class operators are closed under scalar multiplication. -/
-lemma isTraceClass_smul (c : ℂ) {T : H →L[ℂ] H} (hT : IsTraceClass T) :
-    IsTraceClass (c • T) := by
+lemma isTraceClass_smul (c : ℂ) {T : H →L[ℂ] H} (hT : IsTraceClass T) : IsTraceClass (c • T) := by
   obtain ⟨w, b, hb⟩ := hT
   refine ⟨w, b, ?_⟩
   have habs : CFC.abs (c • T) = ‖c‖ • CFC.abs T := CFC.abs_smul c T
-  have heq : ∀ i : w, (⟪b i, CFC.abs (c • T) (b i)⟫_ℂ).re
-      = ‖c‖ * (⟪b i, CFC.abs T (b i)⟫_ℂ).re := by
+  have heq
+      : ∀ i : w, (⟪b i, CFC.abs (c • T) (b i)⟫_ℂ).re = ‖c‖ * (⟪b i, CFC.abs T (b i)⟫_ℂ).re := by
     intro i
-    rw [habs, smul_apply,
-      RCLike.real_smul_eq_coe_smul (K := ℂ), inner_smul_right]
+    rw [habs, smul_apply, RCLike.real_smul_eq_coe_smul (K := ℂ), inner_smul_right]
     simp [Complex.mul_re]
   simpa only [heq] using hb.mul_left ‖c‖
 
@@ -90,30 +88,31 @@ lemma traceNorm_zero : traceNorm (0 : H →L[ℂ] H) isTraceClass_zero = 0 := by
   simp [CFC.abs_zero]
 
 /-- The trace norm is absolutely homogeneous: `‖c • T‖₁ = ‖c‖ ‖T‖₁`. -/
-lemma traceNorm_smul (c : ℂ) {T : H →L[ℂ] H} (hT : IsTraceClass T) :
-    traceNorm (c • T) (isTraceClass_smul c hT) = ‖c‖ * traceNorm T hT := by
+lemma traceNorm_smul (c : ℂ) {T : H →L[ℂ] H} (hT : IsTraceClass T)
+    : traceNorm (c • T) (isTraceClass_smul c hT) = ‖c‖ * traceNorm T hT := by
   set w₀ : Set H := hT.choose with hw₀
   set b₀ : HilbertBasis w₀ ℂ H := hT.choose_spec.choose with hb₀def
   have habs : CFC.abs (c • T) = ‖c‖ • CFC.abs T := CFC.abs_smul c T
-  have heq : ∀ i : w₀, (⟪b₀ i, CFC.abs (c • T) (b₀ i)⟫_ℂ).re
-      = ‖c‖ * (⟪b₀ i, CFC.abs T (b₀ i)⟫_ℂ).re := by
+  have heq
+      : ∀ i : w₀,
+        (⟪b₀ i, CFC.abs (c • T) (b₀ i)⟫_ℂ).re = ‖c‖ * (⟪b₀ i, CFC.abs T (b₀ i)⟫_ℂ).re := by
     intro i
-    rw [habs, smul_apply,
-      RCLike.real_smul_eq_coe_smul (K := ℂ), inner_smul_right]
+    rw [habs, smul_apply, RCLike.real_smul_eq_coe_smul (K := ℂ), inner_smul_right]
     simp [Complex.mul_re]
   rw [traceNorm_eq_of_hilbertBasis (isTraceClass_smul c hT) b₀]
-  calc ∑' i : w₀, (⟪b₀ i, CFC.abs (c • T) (b₀ i)⟫_ℂ).re
+  calc
+    ∑' i : w₀, (⟪b₀ i, CFC.abs (c • T) (b₀ i)⟫_ℂ).re
       = ∑' i : w₀, ‖c‖ * (⟪b₀ i, CFC.abs T (b₀ i)⟫_ℂ).re := tsum_congr heq
     _ = ‖c‖ * ∑' i : w₀, (⟪b₀ i, CFC.abs T (b₀ i)⟫_ℂ).re := tsum_mul_left
     _ = ‖c‖ * traceNorm T hT := rfl
 
-lemma traceNorm_neg {T : H →L[ℂ] H} (hT : IsTraceClass T) (hnegT : IsTraceClass (-T)) :
-    traceNorm (-T) hnegT = traceNorm T hT := by
+lemma traceNorm_neg {T : H →L[ℂ] H} (hT : IsTraceClass T) (hnegT : IsTraceClass (-T))
+    : traceNorm (-T) hnegT = traceNorm T hT := by
   have h1 := traceNorm_smul (-1 : ℂ) hT
   have h2 := traceNorm_transport (neg_one_smul ℂ T) (isTraceClass_smul (-1) hT)
   calc
-    traceNorm (-T) hnegT =
-        traceNorm (-T) (neg_one_smul ℂ T ▸ isTraceClass_smul (-1) hT) := traceNorm_congr
+    traceNorm (-T) hnegT
+      = traceNorm (-T) (neg_one_smul ℂ T ▸ isTraceClass_smul (-1) hT) := traceNorm_congr
     _ = traceNorm ((-1 : ℂ) • T) (isTraceClass_smul (-1) hT) := h2.symm
     _ = ‖(-1 : ℂ)‖ * traceNorm T hT := h1
     _ = traceNorm T hT := by norm_num
@@ -123,8 +122,10 @@ lemma traceNorm_neg {T : H →L[ℂ] H} (hT : IsTraceClass T) (hnegT : IsTraceCl
 -- this signature, so it is used directly (e.g. in `traceClassAddGroupNorm` below) rather than
 -- restated here.
 
-/-- **The operator norm is at most the trace norm.** With `S = √|T|`, Parseval and Cauchy–Schwarz
-give `‖S x‖² ≤ ‖T‖₁ ‖x‖²`, and `‖T‖ = ‖S‖²`. -/
+/--
+**The operator norm is at most the trace norm.** With `S = √|T|`, Parseval and Cauchy–Schwarz
+give `‖S x‖² ≤ ‖T‖₁ ‖x‖²`, and `‖T‖ = ‖S‖²`.
+-/
 lemma opNorm_le_traceNorm {T : H →L[ℂ] H} (hT : IsTraceClass T) : ‖T‖ ≤ traceNorm T hT := by
   set A : H →L[ℂ] H := CFC.abs T with hAdef
   have hAnonneg : 0 ≤ A := CFC.abs_nonneg T
@@ -146,7 +147,8 @@ lemma opNorm_le_traceNorm {T : H →L[ℂ] H} (hT : IsTraceClass T) : ‖T‖ �
       show ⟪b₀ i, (S * S) (b₀ i)⟫_ℂ = _
       rw [ContinuousLinearMap.mul_def, ContinuousLinearMap.comp_apply]
       rw [← ContinuousLinearMap.adjoint_inner_left S (S (b₀ i)) (b₀ i), hSstar]
-    rw [hinner, inner_self_eq_norm_sq_to_K]; norm_cast
+    rw [hinner, inner_self_eq_norm_sq_to_K]
+    norm_cast
   have hSum : Summable (fun i : w₀ => ‖S (b₀ i)‖ ^ 2) := hb₀.congr hpt
   have htrEq : traceNorm T hT = ∑' i : w₀, ‖S (b₀ i)‖ ^ 2 := tsum_congr hpt
   have htrNonneg : 0 ≤ traceNorm T hT := traceNorm_nonneg T hT
@@ -162,8 +164,9 @@ lemma opNorm_le_traceNorm {T : H →L[ℂ] H} (hT : IsTraceClass T) : ‖T‖ �
       simpa [heq2] using hpar
     have hCS : ∀ i : w₀, ‖⟪S (b₀ i), x⟫_ℂ‖ ^ 2 ≤ ‖S (b₀ i)‖ ^ 2 * ‖x‖ ^ 2 := fun i => by
       have h : ‖⟪S (b₀ i), x⟫_ℂ‖ ≤ ‖S (b₀ i)‖ * ‖x‖ := norm_inner_le_norm _ _
-      calc ‖⟪S (b₀ i), x⟫_ℂ‖ ^ 2 ≤ (‖S (b₀ i)‖ * ‖x‖) ^ 2 :=
-            pow_le_pow_left₀ (norm_nonneg _) h 2
+      calc
+        ‖⟪S (b₀ i), x⟫_ℂ‖ ^ 2
+          ≤ (‖S (b₀ i)‖ * ‖x‖) ^ 2 := pow_le_pow_left₀ (norm_nonneg _) h 2
         _ = ‖S (b₀ i)‖ ^ 2 * ‖x‖ ^ 2 := by ring
     have hdom : HasSum (fun i : w₀ => ‖S (b₀ i)‖ ^ 2 * ‖x‖ ^ 2) (traceNorm T hT * ‖x‖ ^ 2) := by
       rw [htrEq]; exact hSum.hasSum.mul_right (‖x‖ ^ 2)
@@ -171,10 +174,8 @@ lemma opNorm_le_traceNorm {T : H →L[ℂ] H} (hT : IsTraceClass T) : ‖T‖ �
   have hboundNorm : ∀ x : H, ‖S x‖ ≤ Real.sqrt (traceNorm T hT) * ‖x‖ := by
     intro x
     have h1 : ‖S x‖ ^ 2 ≤ traceNorm T hT * ‖x‖ ^ 2 := hbound x
-    have h2 : Real.sqrt (‖S x‖ ^ 2) ≤ Real.sqrt (traceNorm T hT * ‖x‖ ^ 2) :=
-      Real.sqrt_le_sqrt h1
-    rwa [Real.sqrt_sq (norm_nonneg _), Real.sqrt_mul htrNonneg,
-      Real.sqrt_sq (norm_nonneg _)] at h2
+    have h2 : Real.sqrt (‖S x‖ ^ 2) ≤ Real.sqrt (traceNorm T hT * ‖x‖ ^ 2) := Real.sqrt_le_sqrt h1
+    rwa [Real.sqrt_sq (norm_nonneg _), Real.sqrt_mul htrNonneg, Real.sqrt_sq (norm_nonneg _)] at h2
   have hSnorm_le : ‖S‖ ≤ Real.sqrt (traceNorm T hT) :=
     S.opNorm_le_bound (Real.sqrt_nonneg _) hboundNorm
   have hSsq_le : ‖S‖ ^ 2 ≤ traceNorm T hT := by
@@ -186,17 +187,19 @@ lemma opNorm_le_traceNorm {T : H →L[ℂ] H} (hT : IsTraceClass T) : ‖T‖ �
 /-! ## B. The trace-class submodule and Banach space -/
 
 /-- The trace-class operators, as a submodule of the bounded operators. -/
-def traceClassSubmodule (H : Type*) [NormedAddCommGroup H] [InnerProductSpace ℂ H]
-    [CompleteSpace H] : Submodule ℂ (H →L[ℂ] H) where
+def traceClassSubmodule (H : Type*) [NormedAddCommGroup H] [InnerProductSpace ℂ H] [CompleteSpace H]
+    : Submodule ℂ (H →L[ℂ] H) where
   carrier := {T | IsTraceClass T}
   zero_mem' := isTraceClass_zero
   add_mem' ha hb := isTraceClass_add ha hb
   smul_mem' c _ ha := isTraceClass_smul c ha
 
-/-- **The trace-class Banach space `𝒮₁(H)`**, normed by the trace norm. It is a `def` so that the
-operator norm inherited from the ambient submodule is not found as an instance. -/
-def TraceClass (H : Type*) [NormedAddCommGroup H] [InnerProductSpace ℂ H] [CompleteSpace H] :
-    Type _ :=
+/--
+**The trace-class Banach space `𝒮₁(H)`**, normed by the trace norm. It is a `def` so that the
+operator norm inherited from the ambient submodule is not found as an instance.
+-/
+def TraceClass (H : Type*) [NormedAddCommGroup H] [InnerProductSpace ℂ H] [CompleteSpace H]
+    : Type _ :=
   traceClassSubmodule H
 
 namespace TraceClass
@@ -215,18 +218,19 @@ lemma isTraceClass_coe (T : TraceClass H) : IsTraceClass T.1 := T.2
 /-- The element of `TraceClass H` given by a trace-class operator. -/
 def ofOperator (T : H →L[ℂ] H) (hT : IsTraceClass T) : TraceClass H := ⟨T, hT⟩
 
-@[simp] lemma ofOperator_coe (T : H →L[ℂ] H) (hT : IsTraceClass T) :
-    (ofOperator T hT).1 = T := rfl
+@[simp] lemma ofOperator_coe (T : H →L[ℂ] H) (hT : IsTraceClass T) : (ofOperator T hT).1 = T := rfl
 
-/-- **The trace norm as an `AddGroupNorm`** on the trace-class submodule: nonnegativity, the
+/--
+**The trace norm as an `AddGroupNorm`** on the trace-class submodule: nonnegativity, the
 triangle inequality (`traceNorm_add_le`), invariance under negation, and the zero-detection
-property (via `opNorm_le_traceNorm`). -/
+property (via `opNorm_le_traceNorm`).
+-/
 noncomputable def traceClassAddGroupNorm : AddGroupNorm (TraceClass H) where
   toFun T := traceNorm T.1 (isTraceClass_coe T)
   map_zero' := traceNorm_zero
   neg' T := traceNorm_neg (isTraceClass_coe T) (isTraceClass_coe (-T))
-  add_le' T T' := traceNorm_add_le (isTraceClass_coe T) (isTraceClass_coe T')
-    (isTraceClass_coe (T + T'))
+  add_le' T T' :=
+    traceNorm_add_le (isTraceClass_coe T) (isTraceClass_coe T') (isTraceClass_coe (T + T'))
   eq_zero_of_map_eq_zero' T hT0 := by
     have hop : ‖T.1‖ ≤ traceNorm T.1 (isTraceClass_coe T) :=
       opNorm_le_traceNorm (isTraceClass_coe T)
@@ -238,11 +242,12 @@ noncomputable def traceClassAddGroupNorm : AddGroupNorm (TraceClass H) where
 noncomputable instance instNormedAddCommGroup : NormedAddCommGroup (TraceClass H) :=
   AddGroupNorm.toNormedAddCommGroup traceClassAddGroupNorm
 
-lemma norm_eq_traceNorm (T : TraceClass H) :
-    ‖T‖ = traceNorm T.1 (isTraceClass_coe T) := rfl
+lemma norm_eq_traceNorm (T : TraceClass H) : ‖T‖ = traceNorm T.1 (isTraceClass_coe T) := rfl
 
-/-- **The trace-class Banach space's `NormedSpace ℂ` instance**: scalar multiplication scales the
-trace norm exactly, by `traceNorm_smul`. -/
+/--
+**The trace-class Banach space's `NormedSpace ℂ` instance**: scalar multiplication scales the
+trace norm exactly, by `traceNorm_smul`.
+-/
 noncomputable instance instNormedSpace : NormedSpace ℂ (TraceClass H) where
   norm_smul_le c T := by
     rw [norm_eq_traceNorm, norm_eq_traceNorm]
@@ -251,26 +256,28 @@ noncomputable instance instNormedSpace : NormedSpace ℂ (TraceClass H) where
     rw [h]
     exact le_of_eq (traceNorm_smul c (isTraceClass_coe T))
 
-/-- **Lower semicontinuity of the trace norm.** An operator-norm limit of trace-class operators with
-trace norms bounded by `C` is trace class, with trace norm at most `C`. -/
-lemma isTraceClass_of_tendsto_of_traceNorm_bounded {Tn : ℕ → H →L[ℂ] H} {T : H →L[ℂ] H} {C : ℝ}
-    (hTn : ∀ n, IsTraceClass (Tn n)) (hbound : ∀ n, traceNorm (Tn n) (hTn n) ≤ C)
-    (htendsto : Tendsto Tn atTop (𝓝 T)) :
-    ∃ hT : IsTraceClass T, traceNorm T hT ≤ C := by
+/--
+**Lower semicontinuity of the trace norm.** An operator-norm limit of trace-class operators with
+trace norms bounded by `C` is trace class, with trace norm at most `C`.
+-/
+lemma isTraceClass_of_tendsto_of_traceNorm_bounded
+    {Tn : ℕ → H →L[ℂ] H} {T : H →L[ℂ] H} {C : ℝ} (hTn : ∀ n, IsTraceClass (Tn n))
+    (hbound : ∀ n, traceNorm (Tn n) (hTn n) ≤ C) (htendsto : Tendsto Tn atTop (𝓝 T))
+    : ∃ hT : IsTraceClass T, traceNorm T hT ≤ C := by
   obtain ⟨w, b, _⟩ := exists_hilbertBasis ℂ H
   set W : H →L[ℂ] H := Polar.polarFactor T with hWdef
   have hWnorm : ‖W‖ ≤ 1 := Polar.polarFactor_opNorm_le T
-  have hcont : ∀ i : w, Tendsto (fun n => ‖⟪W (b i), Tn n (b i)⟫_ℂ‖) atTop
-      (𝓝 ‖⟪W (b i), T (b i)⟫_ℂ‖) := by
+  have hcont
+      : ∀ i : w, Tendsto (fun n => ‖⟪W (b i), Tn n (b i)⟫_ℂ‖) atTop (𝓝 ‖⟪W (b i), T (b i)⟫_ℂ‖) := by
     intro i
     have h1 : Tendsto (fun n => Tn n (b i)) atTop (𝓝 (T (b i))) := by
       have hev : Continuous (fun X : H →L[ℂ] H => X (b i)) :=
         (ContinuousLinearMap.apply ℂ H (b i : H)).continuous
       exact hev.continuousAt.tendsto.comp htendsto
-    have h2 : Tendsto (fun n => ⟪W (b i), Tn n (b i)⟫_ℂ) atTop
-        (𝓝 ⟪W (b i), T (b i)⟫_ℂ) :=
+    have h2 : Tendsto (fun n => ⟪W (b i), Tn n (b i)⟫_ℂ) atTop (𝓝 ⟪W (b i), T (b i)⟫_ℂ) :=
       ((continuous_const.inner continuous_id).continuousAt.tendsto.comp h1
-        |>.congr (fun _ => rfl)).mono_left le_rfl
+          |>.congr (fun _ => rfl)).mono_left
+        le_rfl
     exact continuous_norm.continuousAt.tendsto.comp h2
   have hFinset : ∀ u : Finset w, (∑ i ∈ u, ‖⟪W (b i), T (b i)⟫_ℂ‖) ≤ C := by
     intro u
@@ -281,8 +288,9 @@ lemma isTraceClass_of_tendsto_of_traceNorm_bounded {Tn : ℕ → H →L[ℂ] H} 
       have hall : (∑' i : w, ‖⟪W (b i), Tn n (b i)⟫_ℂ‖) ≤ C :=
         (tsum_norm_inner_contraction_le_traceNorm (hTn n) hWnorm b).trans (hbound n)
       exact (hsum.sum_le_tsum u (fun i _ => norm_nonneg _)).trans hall
-    have hlim : Tendsto (fun n => ∑ i ∈ u, ‖⟪W (b i), Tn n (b i)⟫_ℂ‖) atTop
-        (𝓝 (∑ i ∈ u, ‖⟪W (b i), T (b i)⟫_ℂ‖)) :=
+    have hlim : Tendsto
+        (fun n => ∑ i ∈ u, ‖⟪W (b i), Tn n (b i)⟫_ℂ‖)
+        atTop (𝓝 (∑ i ∈ u, ‖⟪W (b i), T (b i)⟫_ℂ‖)) :=
       tendsto_finsetSum u (fun i _ => hcont i)
     exact le_of_tendsto hlim (Eventually.of_forall hpt)
   have hsummable : Summable (fun i : w => ‖⟪W (b i), T (b i)⟫_ℂ‖) :=
@@ -294,8 +302,7 @@ lemma isTraceClass_of_tendsto_of_traceNorm_bounded {Tn : ℕ → H →L[ℂ] H} 
     have hval : ⟪b i, CFC.abs T (b i)⟫_ℂ = ⟪W (b i), T (b i)⟫_ℂ := by
       have habs : CFC.abs T = star W * T := (Polar.star_polarFactor_mul_self T).symm
       rw [habs, ContinuousLinearMap.star_eq_adjoint, ContinuousLinearMap.mul_def,
-        ContinuousLinearMap.comp_apply,
-        ContinuousLinearMap.adjoint_inner_right W (b i) (T (b i))]
+        ContinuousLinearMap.comp_apply, ContinuousLinearMap.adjoint_inner_right W (b i) (T (b i))]
     have hpos : (CFC.abs T).IsPositive := (CFC.abs T).nonneg_iff_isPositive.mp (CFC.abs_nonneg T)
     have hx := (ContinuousLinearMap.isPositive_iff_complex (CFC.abs T)).mp hpos (b i)
     have h1 : ⟪CFC.abs T (b i), b i⟫_ℂ = ((⟪CFC.abs T (b i), b i⟫_ℂ).re : ℂ) := hx.1.symm
@@ -309,20 +316,26 @@ lemma isTraceClass_of_tendsto_of_traceNorm_bounded {Tn : ℕ → H →L[ℂ] H} 
         _ = ((⟪CFC.abs T (b i), b i⟫_ℂ).re : ℂ) := by simp
         _ = ((⟪b i, CFC.abs T (b i)⟫_ℂ).re : ℂ) := by rw [hre]
     have hnonneg : 0 ≤ (⟪b i, CFC.abs T (b i)⟫_ℂ).re := by rw [← hre]; exact hx.2
-    rw [show ‖⟪W (b i), T (b i)⟫_ℂ‖ = ‖⟪b i, CFC.abs T (b i)⟫_ℂ‖ from by rw [hval],
-      heq, Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg hnonneg, Complex.ofReal_re]
-  have hT : IsTraceClass T := ⟨w, b, by
-    apply hsummable.congr
-    exact fun i => (hpoint i).symm⟩
+    rw [show ‖⟪W (b i), T (b i)⟫_ℂ‖ = ‖⟪b i, CFC.abs T (b i)⟫_ℂ‖ from by rw [hval], heq,
+      Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg hnonneg, Complex.ofReal_re]
+  have hT : IsTraceClass T := ⟨
+    w,
+    b,
+    by
+      apply hsummable.congr
+      exact fun i => (hpoint i).symm
+  ⟩
   refine ⟨hT, ?_⟩
   rw [traceNorm_eq_of_hilbertBasis hT b]
   calc
-    (∑' i : w, (⟪b i, CFC.abs T (b i)⟫_ℂ).re) = ∑' i : w, ‖⟪W (b i), T (b i)⟫_ℂ‖ :=
-      tsum_congr hpoint
+    (∑' i : w, (⟪b i, CFC.abs T (b i)⟫_ℂ).re)
+      = ∑' i : w, ‖⟪W (b i), T (b i)⟫_ℂ‖ := tsum_congr hpoint
     _ ≤ C := htsum_le
 
-/-- **The trace-class operators form a Banach space.** The partial sums of an absolutely convergent
-series converge in operator norm, and lower semicontinuity bounds the trace norm of the tails. -/
+/--
+**The trace-class operators form a Banach space.** The partial sums of an absolutely convergent
+series converge in operator norm, and lower semicontinuity bounds the trace norm of the tails.
+-/
 noncomputable instance instCompleteSpace : CompleteSpace (TraceClass H) := by
   apply NormedAddCommGroup.completeSpace_of_summable_imp_tendsto
   intro u hu
@@ -340,38 +353,43 @@ noncomputable instance instCompleteSpace : CompleteSpace (TraceClass H) := by
     intro n m hnm
     simp only [hSndef]
     rw [Finset.sum_Ico_eq_sub _ hnm]
-  have hpsum_split : ∀ n m : ℕ, n ≤ m →
-      (∑ i ∈ Finset.Ico n m, ‖u i‖) = psum m - psum n := by
+  have hpsum_split : ∀ n m : ℕ, n ≤ m → (∑ i ∈ Finset.Ico n m, ‖u i‖) = psum m - psum n := by
     intro n m hnm
     simp only [hpartialdef]
     rw [Finset.sum_Ico_eq_sub _ hnm]
   have htrace_tail_bound : ∀ n m : ℕ, n ≤ m → ‖Sn m - Sn n‖ ≤ tail n := by
     intro n m hnm
     rw [hSn_diff n m hnm]
-    calc ‖∑ i ∈ Finset.Ico n m, u i‖ ≤ ∑ i ∈ Finset.Ico n m, ‖u i‖ := norm_sum_le _ _
+    calc
+      ‖∑ i ∈ Finset.Ico n m, u i‖
+        ≤ ∑ i ∈ Finset.Ico n m, ‖u i‖ := norm_sum_le _ _
       _ = psum m - psum n := hpsum_split n m hnm
       _ ≤ tail n := by simp only [htaildef]; linarith [hpartial_le_M m]
-  have hSn_diff_coe : ∀ n m : ℕ, ((Sn m - Sn n : TraceClass H)).1 = Tn m - Tn n :=
-    fun n m => Submodule.coe_sub _ _ _
+  have hSn_diff_coe : ∀ n m : ℕ, ((Sn m - Sn n : TraceClass H)).1 = Tn m - Tn n := fun n m =>
+    Submodule.coe_sub _ _ _
   have htn_cauchy : CauchySeq Tn := by
     apply cauchySeq_of_le_tendsto_0' tail _ htail_tendsto
     intro n m hnm
     rw [dist_eq_norm]
     have heqop : Tn n - Tn m = -(Tn m - Tn n) := by abel
     rw [heqop, norm_neg, ← hSn_diff_coe n m]
-    calc ‖((Sn m - Sn n : TraceClass H)).1‖ ≤ ‖(Sn m - Sn n : TraceClass H)‖ :=
-          opNorm_le_traceNorm (isTraceClass_coe (Sn m - Sn n))
+    calc
+      ‖((Sn m - Sn n : TraceClass H)).1‖
+        ≤ ‖(Sn m - Sn n : TraceClass H)‖ := opNorm_le_traceNorm (isTraceClass_coe (Sn m - Sn n))
       _ ≤ tail n := htrace_tail_bound n m hnm
   obtain ⟨S, hStendsto⟩ := cauchySeq_tendsto_of_complete htn_cauchy
   have hSn_bound : ∀ n, traceNorm (Sn n).1 (isTraceClass_coe (Sn n)) ≤ M := by
     intro n
     show ‖Sn n‖ ≤ M
-    calc ‖Sn n‖ ≤ ∑ i ∈ Finset.range n, ‖u i‖ := by
-          simp only [hSndef]; exact norm_sum_le _ _
+    calc
+      ‖Sn n‖
+        ≤ ∑ i ∈ Finset.range n, ‖u i‖ := by simp only [hSndef]; exact norm_sum_le _ _
       _ = psum n := rfl
       _ ≤ M := hpartial_le_M n
-  obtain ⟨hS, -⟩ := isTraceClass_of_tendsto_of_traceNorm_bounded
-    (fun n => isTraceClass_coe (Sn n)) hSn_bound hStendsto
+  obtain ⟨hS, -⟩ :=
+    isTraceClass_of_tendsto_of_traceNorm_bounded
+      (fun n => isTraceClass_coe (Sn n))
+      hSn_bound hStendsto
   refine ⟨ofOperator S hS, ?_⟩
   apply tendsto_iff_dist_tendsto_zero.mpr
   have hbound_S : ∀ n, dist (Sn n) (ofOperator S hS : TraceClass H) ≤ tail n := by
@@ -383,9 +401,10 @@ noncomputable instance instCompleteSpace : CompleteSpace (TraceClass H) := by
       exact isTraceClass_coe (Sn (n + m) - Sn n)
     have hVbound : ∀ m, traceNorm (Tn (n + m) - Tn n) (hVtrace m) ≤ tail n := by
       intro m
-      have h1 : traceNorm (Tn (n + m) - Tn n) (hVtrace m) =
-          traceNorm ((Sn (n + m) - Sn n : TraceClass H)).1
-            (isTraceClass_coe (Sn (n + m) - Sn n)) := by
+      have h1
+          : traceNorm (Tn (n + m) - Tn n) (hVtrace m)
+            = traceNorm ((Sn (n + m) - Sn n : TraceClass H)).1
+              (isTraceClass_coe (Sn (n + m) - Sn n)) := by
         have hEq : Tn (n + m) - Tn n = ((Sn (n + m) - Sn n : TraceClass H)).1 :=
           (hSn_diff_coe n (n + m)).symm
         exact traceNorm_transport hEq (hVtrace m)
@@ -398,16 +417,18 @@ noncomputable instance instCompleteSpace : CompleteSpace (TraceClass H) := by
           hStendsto.comp (tendsto_add_atTop_nat n)
         simpa only [add_comm] using h2
       exact h1.sub tendsto_const_nhds
-    obtain ⟨hSTn, hSTnbound⟩ := isTraceClass_of_tendsto_of_traceNorm_bounded hVtrace hVbound
-      hVtendsto
+    obtain ⟨hSTn, hSTnbound⟩ :=
+      isTraceClass_of_tendsto_of_traceNorm_bounded hVtrace hVbound hVtendsto
     have heqfinal : ((ofOperator S hS : TraceClass H) - Sn n).1 = S - Tn n := rfl
     have hnorm_eq : ‖(ofOperator S hS : TraceClass H) - Sn n‖ = traceNorm (S - Tn n) hSTn := by
-      have h3 : ‖(ofOperator S hS : TraceClass H) - Sn n‖ =
-          traceNorm ((ofOperator S hS : TraceClass H) - Sn n).1
-            (isTraceClass_coe ((ofOperator S hS : TraceClass H) - Sn n)) := rfl
+      have h3
+          : ‖(ofOperator S hS : TraceClass H) - Sn n‖
+            = traceNorm ((ofOperator S hS : TraceClass H) - Sn n).1
+              (isTraceClass_coe ((ofOperator S hS : TraceClass H) - Sn n)) :=
+        rfl
       rw [h3]
-      exact traceNorm_transport heqfinal (isTraceClass_coe ((ofOperator S hS : TraceClass H) - Sn
-          n))
+      exact traceNorm_transport heqfinal
+        (isTraceClass_coe ((ofOperator S hS : TraceClass H) - Sn n))
     rw [norm_sub_rev]
     rw [hnorm_eq]
     exact hSTnbound

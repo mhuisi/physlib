@@ -38,23 +38,28 @@ open Module
 variable {k : Type*} [CommRing k] [StarRing k]
 variable {M : Type*} [AddCommGroup M] [Module k M]
 
-/-- The conjugate module of `M`: the same additive group with the scalar action twisted by
-conjugation, `r • v = star r • v`. A type synonym so the twisted action stays off `M`. -/
+/--
+The conjugate module of `M`: the same additive group with the scalar action twisted by
+conjugation, `r • v = star r • v`. A type synonym so the twisted action stays off `M`.
+-/
 def ConjModule (M : Type*) := M
 
 namespace ConjModule
 
 instance : AddCommGroup (ConjModule M) := inferInstanceAs (AddCommGroup M)
 
-/-- The twisted action `r • v = star r • v`, obtained by restricting scalars along the
-conjugation ring endomorphism `starRingEnd k`. -/
-instance instModule : Module k (ConjModule M) :=
-  Module.compHom M (starRingEnd k)
+/--
+The twisted action `r • v = star r • v`, obtained by restricting scalars along the
+conjugation ring endomorphism `starRingEnd k`.
+-/
+instance instModule : Module k (ConjModule M) := Module.compHom M (starRingEnd k)
 
 end ConjModule
 
-/-- The canonical conjugate-linear equivalence `M ≃ₛₗ[starRingEnd k] ConjModule M`, the identity on
-the underlying additive group. -/
+/--
+The canonical conjugate-linear equivalence `M ≃ₛₗ[starRingEnd k] ConjModule M`, the identity on
+the underlying additive group.
+-/
 def conjEquiv : M ≃ₛₗ[starRingEnd k] ConjModule M where
   toFun v := v
   map_add' _ _ := rfl
@@ -65,9 +70,11 @@ def conjEquiv : M ≃ₛₗ[starRingEnd k] ConjModule M where
 
 namespace ConjModule
 
-/-- Conjugating twice returns the original module: the `k`-linear isomorphism
+/--
+Conjugating twice returns the original module: the `k`-linear isomorphism
 `ConjModule (ConjModule M) ≃ₗ[k] M`. It is `k`-linear, not merely semilinear, because
-`starRingEnd k` composed with itself is the identity. -/
+`starRingEnd k` composed with itself is the identity.
+-/
 def involution : ConjModule (ConjModule M) ≃ₗ[k] M :=
   ((conjEquiv (k := k) (M := M)).trans (conjEquiv (k := k) (M := ConjModule M))).symm
 
@@ -85,19 +92,23 @@ noncomputable def starFinsupp : (ι →₀ k) ≃ₛₗ[starRingEnd k] (ι →�
   left_inv f := by ext i; simp [Finsupp.mapRange_apply]
   right_inv f := by ext i; simp [Finsupp.mapRange_apply]
 
-/-- A basis of `M` transported to a basis of `ConjModule M`: the same basis vectors, with
-coordinates conjugated (`(Basis.conj b).repr v = star ∘ b.repr v`). -/
+/--
+A basis of `M` transported to a basis of `ConjModule M`: the same basis vectors, with
+coordinates conjugated (`(Basis.conj b).repr v = star ∘ b.repr v`).
+-/
 noncomputable def _root_.Basis.conj (b : Basis ι k M) : Basis ι k (ConjModule M) :=
-  Basis.ofRepr
-    (((conjEquiv (k := k) (M := M)).symm.trans b.repr).trans starFinsupp)
+  Basis.ofRepr (((conjEquiv (k := k) (M := M)).symm.trans b.repr).trans starFinsupp)
 
 /-- Coordinates in `Basis.conj b` are the `star` of the coordinates in `b`. -/
-@[simp] lemma _root_.Basis.conj_repr_apply (b : Basis ι k M) (v : ConjModule M) (i : ι) :
-    (Basis.conj b).repr v i = star (b.repr ((conjEquiv (k := k) (M := M)).symm v) i) := rfl
+@[simp]
+lemma _root_.Basis.conj_repr_apply (b : Basis ι k M) (v : ConjModule M) (i : ι)
+    : (Basis.conj b).repr v i = star (b.repr ((conjEquiv (k := k) (M := M)).symm v) i) :=
+  rfl
 
 /-- The basis vectors of `Basis.conj b` are those of `b`, viewed through `conjEquiv`. -/
-@[simp] lemma _root_.Basis.conj_apply (b : Basis ι k M) (i : ι) :
-    Basis.conj b i = conjEquiv (k := k) (M := M) (b i) := by
+@[simp]
+lemma _root_.Basis.conj_apply (b : Basis ι k M) (i : ι)
+    : Basis.conj b i = conjEquiv (k := k) (M := M) (b i) := by
   apply (Basis.conj b).repr.injective
   ext j
   rcases eq_or_ne j i with h | h

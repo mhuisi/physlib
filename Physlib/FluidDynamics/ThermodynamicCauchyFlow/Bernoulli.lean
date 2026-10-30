@@ -47,9 +47,9 @@ namespace FluidDynamics
 
 /-- The Bernoulli function `|u|^2 / 2 + h + Phi`. -/
 noncomputable def bernoulliFunction
-    (d : ℕ) (flow : ThermodynamicCauchyFlow d) (potential : Space d → ℝ) : ScalarField d :=
-  fun t x => FluidFlow.specificKineticEnergy d flow.toFluidFlow t x + flow.enthalpy t x +
-    potential x
+    (d : ℕ) (flow : ThermodynamicCauchyFlow d) (potential : Space d → ℝ)
+    : ScalarField d := fun t x =>
+  FluidFlow.specificKineticEnergy d flow.toFluidFlow t x + flow.enthalpy t x + potential x
 
 /-!
 
@@ -58,13 +58,11 @@ noncomputable def bernoulliFunction
 -/
 
 /-- A local Bernoulli law: the Bernoulli function has zero spatial gradient. -/
-def LocalBernoulliLaw
-    (d : ℕ) (flow : ThermodynamicCauchyFlow d) (potential : Space d → ℝ) : Prop :=
+def LocalBernoulliLaw (d : ℕ) (flow : ThermodynamicCauchyFlow d) (potential : Space d → ℝ) : Prop :=
   ∀ t x, (∇ (bernoulliFunction d flow potential t)) x = 0
 
 /-- A global Bernoulli law: the Bernoulli function is spatially constant at each time. -/
-def BernoulliLaw
-    (d : ℕ) (flow : ThermodynamicCauchyFlow d) (potential : Space d → ℝ) : Prop :=
+def BernoulliLaw (d : ℕ) (flow : ThermodynamicCauchyFlow d) (potential : Space d → ℝ) : Prop :=
   ∀ t x y, bernoulliFunction d flow potential t x = bernoulliFunction d flow potential t y
 
 end FluidDynamics

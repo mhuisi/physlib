@@ -45,8 +45,10 @@ namespace CauchyFlow
 
 -/
 
-/-- A flow has body-force potential `Phi` when its specific body force is minus the gradient of
-`Phi`. -/
+/--
+A flow has body-force potential `Phi` when its specific body force is minus the gradient of
+`Phi`.
+-/
 def HasBodyForcePotential (d : ℕ) (flow : CauchyFlow d) (potential : Space d → ℝ) : Prop :=
   ∀ t x, flow.specificBodyForce t x = -(∇ potential x)
 

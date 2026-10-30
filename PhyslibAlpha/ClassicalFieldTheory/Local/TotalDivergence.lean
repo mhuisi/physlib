@@ -61,16 +61,20 @@ namespace Local
 
 -/
 
-/-- A lagrangian density has total-divergence form if, along every field, it is the sum of the
+/--
+A lagrangian density has total-divergence form if, along every field, it is the sum of the
 total derivatives of a jet-dependent current. A current of order `k` gives a density of order
-`k + 1`. -/
-def HasTotalDivergenceDensity (L : Lagrangian d m (k + 1))
-    (current : Fin d → JetPoint d m k → ℝ) : Prop :=
+`k + 1`.
+-/
+def HasTotalDivergenceDensity (L : Lagrangian d m (k + 1)) (current : Fin d → JetPoint d m k → ℝ)
+    : Prop :=
   ∀ f : Space d → EuclideanSpace ℝ (Fin m),
     actionDensity L f = fun x => ∑ i : Fin d, totalDerivative k i (current i) f x
 
-/-- A local lagrangian is Euler-Lagrange-trivial if its Euler-Lagrange operator vanishes along
-every field. -/
+/--
+A local lagrangian is Euler-Lagrange-trivial if its Euler-Lagrange operator vanishes along
+every field.
+-/
 def IsEulerLagrangeTrivial (L : Lagrangian d m k) : Prop :=
   ∀ f : Space d → EuclideanSpace ℝ (Fin m), eulerLagrangeOp L f = 0
 
@@ -79,11 +83,13 @@ def IsEulerLagrangeTrivial (L : Lagrangian d m k) : Prop :=
 
 -/
 
-/-- A packaged local total divergence.
+/--
+A packaged local total divergence.
 
 The current has order `k`, while the associated lagrangian has order `k + 1`, matching the
 coordinate expression `L = ∑ i, Dᵢ Bᵢ`. The Euler-Lagrange-triviality field records the
-variationally trivial direction needed by later equivalence results. -/
+variationally trivial direction needed by later equivalence results.
+-/
 structure TotalDivergence (d m k : ℕ) where
   /-- The lagrangian represented by the total divergence of the current. -/
   lagrangian : Lagrangian d m (k + 1)
@@ -102,25 +108,22 @@ instance : CoeFun (TotalDivergence d m k) (fun _ => Lagrangian d m (k + 1)) wher
   coe T := T.lagrangian
 
 @[simp]
-lemma actionDensity_eq (T : TotalDivergence d m k)
-    (f : Space d → EuclideanSpace ℝ (Fin m)) :
-    actionDensity T.lagrangian f =
-      fun x => ∑ i : Fin d, totalDerivative k i (T.current i) f x :=
+lemma actionDensity_eq (T : TotalDivergence d m k) (f : Space d → EuclideanSpace ℝ (Fin m))
+    : actionDensity T.lagrangian f = fun x => ∑ i : Fin d, totalDerivative k i (T.current i) f x :=
   T.hasTotalDivergenceDensity f
 
-lemma eulerLagrangeOp_eq_zero (T : TotalDivergence d m k)
-    (f : Space d → EuclideanSpace ℝ (Fin m)) :
-    eulerLagrangeOp T.lagrangian f = 0 :=
+lemma eulerLagrangeOp_eq_zero (T : TotalDivergence d m k) (f : Space d → EuclideanSpace ℝ (Fin m))
+    : eulerLagrangeOp T.lagrangian f = 0 :=
   T.isEulerLagrangeTrivial f
 
-lemma isCritical (T : TotalDivergence d m k)
-    (f : Space d → EuclideanSpace ℝ (Fin m))
+lemma isCritical
+    (T : TotalDivergence d m k) (f : Space d → EuclideanSpace ℝ (Fin m))
     (hTf : IsAdmissibleForAction T.lagrangian f)
-    (hT : Lagrangian.SmoothInCoordinates T.lagrangian) :
-    IsCritical T.lagrangian f := by
-  exact
-    (isCritical_iff_eulerLagrange_zero_of_admissibleForAction_and_smoothInCoordinates
-      T.lagrangian f hTf hT).2 (T.eulerLagrangeOp_eq_zero f)
+    (hT : Lagrangian.SmoothInCoordinates T.lagrangian)
+    : IsCritical T.lagrangian f := by
+  exact (isCritical_iff_eulerLagrange_zero_of_admissibleForAction_and_smoothInCoordinates
+      T.lagrangian f hTf hT).2
+    (T.eulerLagrangeOp_eq_zero f)
 
 end TotalDivergence
 

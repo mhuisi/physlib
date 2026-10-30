@@ -67,12 +67,17 @@ open scoped InnerProductSpace TensorProduct
 ## A. Definition
 -/
 
-/-- The _completion_ of the tensor product of two inner product spaces `E` and `F` over `𝕜`.
-  By construction this produces a Hilbert space. The localized notations are `E ⊗ₕ F`
-  and `E ⊗ₕ[𝕜] F`, accessed by `open scoped CompleteTensorProduct`. -/
-def CompleteTensorProduct (𝕜 : Type*) [RCLike 𝕜]
+/--
+The _completion_ of the tensor product of two inner product spaces `E` and `F` over `𝕜`.
+By construction this produces a Hilbert space. The localized notations are `E ⊗ₕ F`
+and `E ⊗ₕ[𝕜] F`, accessed by `open scoped CompleteTensorProduct`.
+-/
+def CompleteTensorProduct
+    (𝕜 : Type*) [RCLike 𝕜]
     (E : Type*) [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
-    (F : Type*) [NormedAddCommGroup F] [InnerProductSpace 𝕜 F] : Type _ := Completion (E ⊗[𝕜] F)
+    (F : Type*) [NormedAddCommGroup F] [InnerProductSpace 𝕜 F]
+    : Type _ :=
+  Completion (E ⊗[𝕜] F)
 deriving NormedAddCommGroup, InnerProductSpace 𝕜, CompleteSpace
 
 @[inherit_doc CompleteTensorProduct]
@@ -118,29 +123,23 @@ section Coercion
 variable {𝕜 E F} (c : 𝕜) (x y : E ⊗[𝕜] F)
 
 /-- The canonical embedding of the tensor product into its completion. -/
-@[coe]
-def coe' : E ⊗[𝕜] F → E ⊗ₕ[𝕜] F := Completion.coe'
+@[coe] def coe' : E ⊗[𝕜] F → E ⊗ₕ[𝕜] F := Completion.coe'
 
 /-- Coercion from `E ⊗[𝕜] F` to its completion. -/
 instance : Coe (E ⊗[𝕜] F) (E ⊗ₕ[𝕜] F) := ⟨coe'⟩
 
 lemma denseRange_coe : DenseRange (coe' : E ⊗[𝕜] F → E ⊗ₕ[𝕜] F) := Completion.denseRange_coe
 
-@[norm_cast]
-lemma coe_zero : (0 : E ⊗[𝕜] F) = (0 : E ⊗ₕ[𝕜] F) := rfl
+@[norm_cast] lemma coe_zero : (0 : E ⊗[𝕜] F) = (0 : E ⊗ₕ[𝕜] F) := rfl
 
 variable {x} in
-@[simp]
-lemma coe_eq_zero_iff : (x : E ⊗ₕ[𝕜] F) = 0 ↔ x = 0 := Completion.coe_eq_zero_iff
+@[simp] lemma coe_eq_zero_iff : (x : E ⊗ₕ[𝕜] F) = 0 ↔ x = 0 := Completion.coe_eq_zero_iff
 
-@[norm_cast]
-lemma coe_neg : (-x : E ⊗[𝕜] F) = (-x : E ⊗ₕ[𝕜] F) := Completion.coe_neg _
+@[norm_cast] lemma coe_neg : (-x : E ⊗[𝕜] F) = (-x : E ⊗ₕ[𝕜] F) := Completion.coe_neg _
 
-@[norm_cast]
-lemma coe_sub : (x - y : E ⊗[𝕜] F) = (x - y : E ⊗ₕ[𝕜] F) := Completion.coe_sub _ _
+@[norm_cast] lemma coe_sub : (x - y : E ⊗[𝕜] F) = (x - y : E ⊗ₕ[𝕜] F) := Completion.coe_sub _ _
 
-@[norm_cast]
-lemma coe_add : (x + y : E ⊗[𝕜] F) = (x + y : E ⊗ₕ[𝕜] F) := Completion.coe_add _ _
+@[norm_cast] lemma coe_add : (x + y : E ⊗[𝕜] F) = (x + y : E ⊗ₕ[𝕜] F) := Completion.coe_add _ _
 
 @[simp, norm_cast]
 lemma coe_smul : (c • x : E ⊗[𝕜] F) = (c • x : E ⊗ₕ[𝕜] F) := Completion.coe_smul _ _
@@ -148,20 +147,17 @@ lemma coe_smul : (c • x : E ⊗[𝕜] F) = (c • x : E ⊗ₕ[𝕜] F) := Com
 @[simp]
 lemma inner_coe : ⟪(x : E ⊗ₕ[𝕜] F), (y : E ⊗ₕ[𝕜] F)⟫_𝕜 = ⟪x, y⟫_𝕜 := Completion.inner_coe _ _
 
-@[simp]
-lemma norm_coe : ‖(x : E ⊗ₕ[𝕜] F)‖ = ‖x‖ := Completion.norm_coe _
+@[simp] lemma norm_coe : ‖(x : E ⊗ₕ[𝕜] F)‖ = ‖x‖ := Completion.norm_coe _
 
 /-- The canonical embedding of the tensor product into its completion as a linear isometry. -/
 def tInclₗᵢ : E ⊗[𝕜] F →ₗᵢ[𝕜] E ⊗ₕ[𝕜] F := Completion.toComplₗᵢ
 
-@[simp]
-lemma coe_tInclₗᵢ : ⇑(tInclₗᵢ : E ⊗ F →ₗᵢ[𝕜] E ⊗ₕ F) = coe' := rfl
+@[simp] lemma coe_tInclₗᵢ : ⇑(tInclₗᵢ : E ⊗ F →ₗᵢ[𝕜] E ⊗ₕ F) = coe' := rfl
 
 /-- The canonical embedding of the tensor product into its completion as a continuous linear map. -/
 def tInclL : E ⊗[𝕜] F →L[𝕜] E ⊗ₕ[𝕜] F := tInclₗᵢ.toContinuousLinearMap
 
-@[simp]
-lemma coe_tInclL : ⇑(tInclL : E ⊗ F →L[𝕜] E ⊗ₕ F) = coe' := rfl
+@[simp] lemma coe_tInclL : ⇑(tInclL : E ⊗ F →L[𝕜] E ⊗ₕ F) = coe' := rfl
 
 @[simp]
 lemma norm_tInclL [Nontrivial E] [Nontrivial F] : ‖(tInclL : E ⊗ F →L[𝕜] E ⊗ₕ F)‖ = 1 :=
@@ -177,13 +173,17 @@ section Induction
 
 variable {𝕜 E F}
 
-/-- An induction principle for `CompleteTensorProduct` combining those of `Completion`
-  and `TensorProduct`. -/
+/--
+An induction principle for `CompleteTensorProduct` combining those of `Completion`
+and `TensorProduct`.
+-/
 @[elab_as_elim]
-lemma induction_on {motive : E ⊗ₕ[𝕜] F → Prop} (z : E ⊗ₕ[𝕜] F)
-    (tmul : ∀ (x : E) (y : F), motive (x ⊗ₜ[𝕜] y))
+lemma induction_on
+    {motive : E ⊗ₕ[𝕜] F → Prop}
+    (z : E ⊗ₕ[𝕜] F) (tmul : ∀ (x : E) (y : F), motive (x ⊗ₜ[𝕜] y))
     (add : ∀ x y : E ⊗[𝕜] F, motive x → motive y → motive ↑(x + y))
-    (closed : IsClosed {x | motive x}) : motive z :=
+    (closed : IsClosed {x | motive x})
+    : motive z :=
   Completion.induction_on z closed fun x ↦ x.inductionOn tmul add
 
 end Induction
@@ -194,14 +194,15 @@ end Induction
 
 section Commutative
 
-/-- The complete tensor product of inner product spaces is commutative,
-  up to linear isometric equivalence. -/
+/--
+The complete tensor product of inner product spaces is commutative,
+up to linear isometric equivalence.
+-/
 def comm : E ⊗ₕ[𝕜] F ≃ₗᵢ[𝕜] F ⊗ₕ[𝕜] E :=
-  (TensorProduct.comm 𝕜 E F).extendOfIsometry tInclₗᵢ.toLinearMap tInclₗᵢ.toLinearMap
-    denseRange_coe denseRange_coe (by simp)
+  (TensorProduct.comm 𝕜 E F).extendOfIsometry tInclₗᵢ.toLinearMap tInclₗᵢ.toLinearMap denseRange_coe
+    denseRange_coe (by simp)
 
-@[simp]
-lemma comm_symm : (comm 𝕜 E F).symm = comm 𝕜 F E := rfl
+@[simp] lemma comm_symm : (comm 𝕜 E F).symm = comm 𝕜 F E := rfl
 
 variable {𝕜 E F} in
 @[simp]
@@ -218,12 +219,15 @@ section Associative
 
 /-- The tensor product of a pair of linear maps with dense range also has dense range. -/
 lemma _root_.TensorProduct.denseRange_map
-    {R 𝕜 : Type*} [CommSemiring R] [RCLike 𝕜] {σ : R →+* 𝕜} [RingHomSurjective σ]
-    {M : Type*} [AddCommMonoid M] [Module R M] {N : Type*} [AddCommMonoid N] [Module R N]
+    {R 𝕜 : Type*} [CommSemiring R] [RCLike 𝕜]
+    {σ : R →+* 𝕜} [RingHomSurjective σ]
+    {M : Type*} [AddCommMonoid M] [Module R M]
+    {N : Type*} [AddCommMonoid N] [Module R N]
     {E : Type*} [NormedAddCommGroup E] [InnerProductSpace 𝕜 E]
     {F : Type*} [NormedAddCommGroup F] [InnerProductSpace 𝕜 F]
-    {f : M →ₛₗ[σ] E} (hf : DenseRange f) {g : N →ₛₗ[σ] F} (hg : DenseRange g) :
-    DenseRange (TensorProduct.map f g) := by
+    {f : M →ₛₗ[σ] E} (hf : DenseRange f)
+    {g : N →ₛₗ[σ] F} (hg : DenseRange g)
+    : DenseRange (TensorProduct.map f g) := by
   intro x
   change x ∈ (TensorProduct.map f g).range.topologicalClosure
   refine x.inductionOn (fun a b ↦ ?_) (fun _ _ ↦ Submodule.add_mem _)
@@ -242,11 +246,13 @@ lemma _root_.TensorProduct.denseRange_map
 
 variable (G : Type*) [NormedAddCommGroup G] [InnerProductSpace 𝕜 G]
 
-/-- The compete tensor product of inner product spaces is associative,
-  up to linear isometric equivalence. -/
+/--
+The compete tensor product of inner product spaces is associative,
+up to linear isometric equivalence.
+-/
 def assoc : E ⊗ₕ[𝕜] F ⊗ₕ[𝕜] G ≃ₗᵢ[𝕜] E ⊗ₕ[𝕜] (F ⊗ₕ[𝕜] G) :=
-  (TensorProduct.assoc 𝕜 E F G).extendOfIsometry
-    (tInclₗᵢ.comp (tInclₗᵢ.rTensor G)).toLinearMap (tInclₗᵢ.comp (tInclₗᵢ.lTensor E)).toLinearMap
+  (TensorProduct.assoc 𝕜 E F G).extendOfIsometry (tInclₗᵢ.comp (tInclₗᵢ.rTensor G)).toLinearMap
+    (tInclₗᵢ.comp (tInclₗᵢ.lTensor E)).toLinearMap
     (by
       rw [LinearIsometry.coe_toLinearMap, LinearIsometry.coe_comp]
       refine DenseRange.comp denseRange_coe ?_ tInclₗᵢ.continuous
@@ -265,57 +271,65 @@ section ThreefoldInclusions
 
 variable {𝕜 E F G}
 
-/-- The embedding of the algebraic threefold tensor product `E ⊗[𝕜] F ⊗[𝕜] G` into the complete
-  tensor product `E ⊗ₕ[𝕜] F ⊗ₕ[𝕜] G` as a linear isometry: `E ⊗[𝕜] F` is first embedded into
-  `E ⊗ₕ[𝕜] F`, then `(E ⊗ₕ[𝕜] F) ⊗[𝕜] G` is embedded into its completion. -/
-def tIncl₃ₗᵢ : E ⊗[𝕜] F ⊗[𝕜] G →ₗᵢ[𝕜] E ⊗ₕ[𝕜] F ⊗ₕ[𝕜] G :=
-  tInclₗᵢ.comp (tInclₗᵢ.rTensor G)
+/--
+The embedding of the algebraic threefold tensor product `E ⊗[𝕜] F ⊗[𝕜] G` into the complete
+tensor product `E ⊗ₕ[𝕜] F ⊗ₕ[𝕜] G` as a linear isometry: `E ⊗[𝕜] F` is first embedded into
+`E ⊗ₕ[𝕜] F`, then `(E ⊗ₕ[𝕜] F) ⊗[𝕜] G` is embedded into its completion.
+-/
+def tIncl₃ₗᵢ : E ⊗[𝕜] F ⊗[𝕜] G →ₗᵢ[𝕜] E ⊗ₕ[𝕜] F ⊗ₕ[𝕜] G := tInclₗᵢ.comp (tInclₗᵢ.rTensor G)
 
-/-- The embedding of the algebraic threefold tensor product `E ⊗[𝕜] (F ⊗[𝕜] G)` into the
-  complete tensor product `E ⊗ₕ[𝕜] (F ⊗ₕ[𝕜] G)` as a linear isometry: `F ⊗[𝕜] G` is first
-  embedded into `F ⊗ₕ[𝕜] G`, then `E ⊗[𝕜] (F ⊗ₕ[𝕜] G)` is embedded into its completion. -/
-def tIncl₃'ₗᵢ : E ⊗[𝕜] (F ⊗[𝕜] G) →ₗᵢ[𝕜] E ⊗ₕ[𝕜] (F ⊗ₕ[𝕜] G) :=
-  tInclₗᵢ.comp (tInclₗᵢ.lTensor E)
+/--
+The embedding of the algebraic threefold tensor product `E ⊗[𝕜] (F ⊗[𝕜] G)` into the
+complete tensor product `E ⊗ₕ[𝕜] (F ⊗ₕ[𝕜] G)` as a linear isometry: `F ⊗[𝕜] G` is first
+embedded into `F ⊗ₕ[𝕜] G`, then `E ⊗[𝕜] (F ⊗ₕ[𝕜] G)` is embedded into its completion.
+-/
+def tIncl₃'ₗᵢ : E ⊗[𝕜] (F ⊗[𝕜] G) →ₗᵢ[𝕜] E ⊗ₕ[𝕜] (F ⊗ₕ[𝕜] G) := tInclₗᵢ.comp (tInclₗᵢ.lTensor E)
 
 /-- On a simple tensor `x ⊗ₜ y ⊗ₜ z`, the embedding `tIncl₃ₗᵢ` is the nested coercion. -/
 @[simp]
-lemma tIncl₃ₗᵢ_tmul (x : E) (y : F) (z : G) :
-    tIncl₃ₗᵢ (x ⊗ₜ[𝕜] y ⊗ₜ[𝕜] z) = (x ⊗ₜ[𝕜] y ⊗ₜ[𝕜] z : (E ⊗ₕ[𝕜] F) ⊗[𝕜] G) :=
+lemma tIncl₃ₗᵢ_tmul (x : E) (y : F) (z : G)
+    : tIncl₃ₗᵢ (x ⊗ₜ[𝕜] y ⊗ₜ[𝕜] z) = (x ⊗ₜ[𝕜] y ⊗ₜ[𝕜] z : (E ⊗ₕ[𝕜] F) ⊗[𝕜] G) :=
   rfl
 
 /-- On a simple tensor `x ⊗ₜ (y ⊗ₜ z)`, the embedding `tIncl₃'ₗᵢ` is the nested coercion. -/
 @[simp]
-lemma tIncl₃'ₗᵢ_tmul (x : E) (y : F) (z : G) :
-    tIncl₃'ₗᵢ (x ⊗ₜ[𝕜] (y ⊗ₜ[𝕜] z)) = (x ⊗ₜ[𝕜] (y ⊗ₜ[𝕜] z) : E ⊗[𝕜] (F ⊗ₕ[𝕜] G)) :=
+lemma tIncl₃'ₗᵢ_tmul (x : E) (y : F) (z : G)
+    : tIncl₃'ₗᵢ (x ⊗ₜ[𝕜] (y ⊗ₜ[𝕜] z)) = (x ⊗ₜ[𝕜] (y ⊗ₜ[𝕜] z) : E ⊗[𝕜] (F ⊗ₕ[𝕜] G)) :=
   rfl
 
-/-- `CompleteTensorProduct.assoc` acting on an element of the algebraic threefold tensor product
-  reduces to `TensorProduct.assoc`. -/
+/--
+`CompleteTensorProduct.assoc` acting on an element of the algebraic threefold tensor product
+reduces to `TensorProduct.assoc`.
+-/
 @[simp]
-lemma assoc_tIncl₃ₗᵢ (x : E ⊗[𝕜] F ⊗[𝕜] G) :
-    assoc 𝕜 E F G (tIncl₃ₗᵢ x) = tIncl₃'ₗᵢ (TensorProduct.assoc 𝕜 E F G x) :=
+lemma assoc_tIncl₃ₗᵢ (x : E ⊗[𝕜] F ⊗[𝕜] G)
+    : assoc 𝕜 E F G (tIncl₃ₗᵢ x) = tIncl₃'ₗᵢ (TensorProduct.assoc 𝕜 E F G x) :=
   LinearEquiv.extendOfIsometry_eq _ _ _ _ _ _ x
 
-/-- The inverse of `CompleteTensorProduct.assoc` acting on an element of the algebraic threefold
-  tensor product reduces to the inverse of `TensorProduct.assoc`. -/
+/--
+The inverse of `CompleteTensorProduct.assoc` acting on an element of the algebraic threefold
+tensor product reduces to the inverse of `TensorProduct.assoc`.
+-/
 @[simp]
-lemma assoc_symm_tIncl₃'ₗᵢ (x : E ⊗[𝕜] (F ⊗[𝕜] G)) :
-    (assoc 𝕜 E F G).symm (tIncl₃'ₗᵢ x) = tIncl₃ₗᵢ ((TensorProduct.assoc 𝕜 E F G).symm x) :=
+lemma assoc_symm_tIncl₃'ₗᵢ (x : E ⊗[𝕜] (F ⊗[𝕜] G))
+    : (assoc 𝕜 E F G).symm (tIncl₃'ₗᵢ x) = tIncl₃ₗᵢ ((TensorProduct.assoc 𝕜 E F G).symm x) :=
   LinearEquiv.extendOfIsometry_symm_eq _ _ _ _ _ _ x
 
 /-- `CompleteTensorProduct.assoc` on simple tensors (c.f. `TensorProduct.assoc_tmul`). -/
 @[simp]
-lemma assoc_tmul (x : E) (y : F) (z : G) :
-    assoc 𝕜 E F G (x ⊗ₜ[𝕜] y ⊗ₜ[𝕜] z : (E ⊗ₕ[𝕜] F) ⊗[𝕜] G) =
-      (x ⊗ₜ[𝕜] (y ⊗ₜ[𝕜] z) : E ⊗[𝕜] (F ⊗ₕ[𝕜] G)) :=
+lemma assoc_tmul (x : E) (y : F) (z : G)
+    : assoc 𝕜 E F G (x ⊗ₜ[𝕜] y ⊗ₜ[𝕜] z : (E ⊗ₕ[𝕜] F) ⊗[𝕜] G)
+      = (x ⊗ₜ[𝕜] (y ⊗ₜ[𝕜] z) : E ⊗[𝕜] (F ⊗ₕ[𝕜] G)) :=
   assoc_tIncl₃ₗᵢ (x ⊗ₜ[𝕜] y ⊗ₜ[𝕜] z)
 
-/-- The inverse of `CompleteTensorProduct.assoc` on simple tensors
-  (c.f. `TensorProduct.assoc_symm_tmul`). -/
+/--
+The inverse of `CompleteTensorProduct.assoc` on simple tensors
+(c.f. `TensorProduct.assoc_symm_tmul`).
+-/
 @[simp]
-lemma assoc_symm_tmul (x : E) (y : F) (z : G) :
-    (assoc 𝕜 E F G).symm (x ⊗ₜ[𝕜] (y ⊗ₜ[𝕜] z) : E ⊗[𝕜] (F ⊗ₕ[𝕜] G)) =
-      (x ⊗ₜ[𝕜] y ⊗ₜ[𝕜] z : (E ⊗ₕ[𝕜] F) ⊗[𝕜] G) :=
+lemma assoc_symm_tmul (x : E) (y : F) (z : G)
+    : (assoc 𝕜 E F G).symm (x ⊗ₜ[𝕜] (y ⊗ₜ[𝕜] z) : E ⊗[𝕜] (F ⊗ₕ[𝕜] G))
+      = (x ⊗ₜ[𝕜] y ⊗ₜ[𝕜] z : (E ⊗ₕ[𝕜] F) ⊗[𝕜] G) :=
   assoc_symm_tIncl₃'ₗᵢ (x ⊗ₜ[𝕜] (y ⊗ₜ[𝕜] z))
 
 end ThreefoldInclusions

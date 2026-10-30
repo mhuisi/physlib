@@ -49,23 +49,27 @@ namespace FluidDynamics
 
 -/
 
-/-- The conservative Navier-Stokes equations: continuity, Cauchy momentum, and Newtonian
-stress. -/
+/--
+The conservative Navier-Stokes equations: continuity, Cauchy momentum, and Newtonian
+stress.
+-/
 def NavierStokes
-    (d : ℕ) (flow : CauchyFlow d)
-    (pressure shearViscosity secondViscosity : ScalarField d) : Prop :=
-  FluidFlow.ClassicalContinuityEquation d flow.toFluidFlow ∧
-    CauchyFlow.CauchyMomentumEquation d flow ∧
-      CauchyFlow.IsNewtonian d flow pressure shearViscosity secondViscosity
+    (d : ℕ) (flow : CauchyFlow d) (pressure shearViscosity secondViscosity : ScalarField d)
+    : Prop :=
+  FluidFlow.ClassicalContinuityEquation d flow.toFluidFlow
+    ∧ CauchyFlow.CauchyMomentumEquation d flow
+    ∧ CauchyFlow.IsNewtonian d flow pressure shearViscosity secondViscosity
 
-/-- The convective Navier-Stokes equations: continuity, convective Cauchy momentum, and
-Newtonian stress. -/
+/--
+The convective Navier-Stokes equations: continuity, convective Cauchy momentum, and
+Newtonian stress.
+-/
 def ConvectiveNavierStokes
-    (d : ℕ) (flow : CauchyFlow d)
-    (pressure shearViscosity secondViscosity : ScalarField d) : Prop :=
-  FluidFlow.ClassicalContinuityEquation d flow.toFluidFlow ∧
-    CauchyFlow.ConvectiveCauchyMomentumEquation d flow ∧
-      CauchyFlow.IsNewtonian d flow pressure shearViscosity secondViscosity
+    (d : ℕ) (flow : CauchyFlow d) (pressure shearViscosity secondViscosity : ScalarField d)
+    : Prop :=
+  FluidFlow.ClassicalContinuityEquation d flow.toFluidFlow
+    ∧ CauchyFlow.ConvectiveCauchyMomentumEquation d flow
+    ∧ CauchyFlow.IsNewtonian d flow pressure shearViscosity secondViscosity
 
 /-!
 
@@ -73,30 +77,28 @@ def ConvectiveNavierStokes
 
 -/
 
-/-- The conservative and convective Navier-Stokes forms are equivalent when the fields are
-differentiable enough for the product rules. -/
+/--
+The conservative and convective Navier-Stokes forms are equivalent when the fields are
+differentiable enough for the product rules.
+-/
 theorem navier_stokes_iff_convective_navier_stokes
-    (d : ℕ) (flow : CauchyFlow d)
-    (pressure shearViscosity secondViscosity : ScalarField d)
+    (d : ℕ) (flow : CauchyFlow d) (pressure shearViscosity secondViscosity : ScalarField d)
     (hRhoTime : ∀ t x, DifferentiableAt ℝ (flow.rho · x) t)
     (hVelocityTime : ∀ t x, DifferentiableAt ℝ (flow.velocity · x) t)
-    (hMomentumDensity : ∀ t,
-      Differentiable ℝ (FluidFlow.momentumDensity d flow.toFluidFlow t))
-    (hVelocitySpace : ∀ t, Differentiable ℝ (flow.velocity t)) :
-    NavierStokes d flow pressure shearViscosity secondViscosity ↔
-      ConvectiveNavierStokes d flow pressure shearViscosity secondViscosity := by
+    (hMomentumDensity : ∀ t, Differentiable ℝ (FluidFlow.momentumDensity d flow.toFluidFlow t))
+    (hVelocitySpace : ∀ t, Differentiable ℝ (flow.velocity t))
+    : NavierStokes d flow pressure shearViscosity secondViscosity
+      ↔ ConvectiveNavierStokes d flow pressure shearViscosity secondViscosity := by
   constructor
   · intro hConservative
     refine ⟨hConservative.1, ?_, hConservative.2.2⟩
-    exact
-      (CauchyFlow.cauchyMomentumEquation_iff_convectiveCauchyMomentumEquation d flow
+    exact (CauchyFlow.cauchyMomentumEquation_iff_convectiveCauchyMomentumEquation d flow
         hConservative.1 hRhoTime hVelocityTime hMomentumDensity hVelocitySpace).mp
-          hConservative.2.1
+      hConservative.2.1
   · intro hConvective
     refine ⟨hConvective.1, ?_, hConvective.2.2⟩
-    exact
-      (CauchyFlow.cauchyMomentumEquation_iff_convectiveCauchyMomentumEquation d flow
+    exact (CauchyFlow.cauchyMomentumEquation_iff_convectiveCauchyMomentumEquation d flow
         hConvective.1 hRhoTime hVelocityTime hMomentumDensity hVelocitySpace).mpr
-          hConvective.2.1
+      hConvective.2.1
 
 end FluidDynamics

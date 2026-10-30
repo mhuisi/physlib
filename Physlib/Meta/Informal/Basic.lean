@@ -23,16 +23,20 @@ Everything else about informal definitions and lemmas are in the `Informal.Post`
 structure InformalDefinition where
   /-- The names of top-level commands we expect this definition to depend on. -/
   deps : List Lean.Name
-  /-- The tag of the informal definition. This should be unique amongst informal results
-    and todo items. -/
+  /--
+  The tag of the informal definition. This should be unique amongst informal results
+  and todo items.
+  -/
   tag : String
 
 /-- The structure representing an informal lemma. -/
 structure InformalLemma where
   /-- The names of top-level commands we expect this lemma to depend on. -/
   deps : List Lean.Name
-  /-- The tag of the informal lemma. This should be unique amongst informal results
-    and todo items. -/
+  /--
+  The tag of the informal lemma. This should be unique amongst informal results
+  and todo items.
+  -/
   tag : String
 
 namespace Informal
@@ -50,20 +54,24 @@ and `lake_exe` don't show docstrings and infer the type `Lean.Name`.
 
 open Lean.Parser.Term
 
-/-- A placeholder for definitions to be formalized in the future. Docstrings of informal definitions
+/--
+A placeholder for definitions to be formalized in the future. Docstrings of informal definitions
 should outline its mathematical or physical content and specify useful references. Use the attribute
 `note_attr_informal` from `Physlib.Meta.Notes.Basic` to mark the informal definition as a note.
 -/
 macro (name := informalDefinitionDecl)
-doc?:(docComment)? attrs?:(attributes)? "informal_definition " name:ident body:declVal : command =>
+    doc?:(docComment)? attrs?:(attributes)? "informal_definition " name:ident body:declVal
+    : command =>
   `($[$doc?]? $[$attrs?]? def $name : InformalDefinition $body:declVal)
 
-/-- A placeholder for lemmas to be formalized in the future. Docstrings of informal lemmas
+/--
+A placeholder for lemmas to be formalized in the future. Docstrings of informal lemmas
 should outline its mathematical or physical content and specify useful references. Use the attribute
 `note_attr_informal` from `Physlib.Meta.Notes.Basic` to mark the informal definition as a note.
 -/
 macro (name := informalLemmaDecl)
-doc?:(docComment)? attrs?:(attributes)? "informal_lemma " name:ident body:declVal : command =>
+    doc?:(docComment)? attrs?:(attributes)? "informal_lemma " name:ident body:declVal
+    : command =>
   `($[$doc?]? $[$attrs?]? def $name : InformalLemma $body:declVal)
 
 end Informal

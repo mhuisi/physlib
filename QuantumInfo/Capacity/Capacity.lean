@@ -6,7 +6,6 @@ Authors: Alex Meiburg
 module
 
 public import Mathlib.Analysis.SpecialFunctions.Log.Base
-
 public import QuantumInfo.Entropy.VonNeumann
 public import QuantumInfo.Channels.Bundled
 public import QuantumInfo.Channels.CPTP
@@ -107,9 +106,7 @@ variable [DecidableEq d₁] [DecidableEq d₂]
 -/
 
 variable [DecidableEq d₃] [DecidableEq d₄] in
-/--
-A channel Λ₁ `Emulates` another channel Λ₂ if there are D and E such that D∘Λ₁∘E = Λ₂.
--/
+/-- A channel Λ₁ `Emulates` another channel Λ₂ if there are D and E such that D∘Λ₁∘E = Λ₂. -/
 def Emulates (Λ₁ : CPTPMap d₁ d₂) (Λ₂ : CPTPMap d₃ d₄) : Prop :=
   ∃ (E : CPTPMap d₃ d₁) (D : CPTPMap d₂ d₄), D.compose (Λ₁.compose E) = Λ₂
 
@@ -118,24 +115,25 @@ A channel A `εApproximates` channel B of the same dimensions if for every state
 fidelity F(A(ρ), B(ρ)) is at least 1-ε.
 -/
 def εApproximates (A B : CPTPMap d₁ d₂) (ε : ℝ) : Prop :=
-  ∀ (ρ : MState d₁), (A ρ).fidelity (B ρ) ≥ 1-ε
+  ∀ (ρ : MState d₁), (A ρ).fidelity (B ρ) ≥ 1 - ε
 
 /--
 A channel A `AchievesRate` R:ℝ if for every ε>0, some n copies of A emulates a channel B such
 that log2(dimout(B))/n ≥ R, and that B εApproximates the identity channel.
 -/
 def AchievesRate (A : CPTPMap d₁ d₂) (R : ℝ) : Prop :=
-  ∀ ε : ℝ, ε > 0 →
-    ∃ n > 0, ∃ (dimB : ℕ) (B : CPTPMap (Fin dimB) (Fin dimB)),
-      (CPTPMap.piProd (fun (_ : Fin n) ↦ A)).Emulates B ∧
-      Real.logb 2 dimB ≥ R*n ∧
-      B.εApproximates CPTPMap.id ε
+  ∀ ε : ℝ,
+    ε > 0
+      → ∃ n > 0, ∃ (dimB : ℕ) (B : CPTPMap (Fin dimB) (Fin dimB)),
+        (CPTPMap.piProd (fun (_ : Fin n) ↦ A)).Emulates B ∧ Real.logb 2 dimB ≥ R * n
+          ∧ B.εApproximates CPTPMap.id ε
 
-/-- The quantum capacity of a channel A: the supremum of all rates R such that
+/--
+The quantum capacity of a channel A: the supremum of all rates R such that
 `A.AchievesRate R`, i.e. the maximum asymptotic rate at which quantum information can be
-coherently transmitted through the channel. -/
-noncomputable def quantumCapacity (A : CPTPMap d₁ d₂) : ℝ :=
-  sSup { R : ℝ | AchievesRate A R }
+coherently transmitted through the channel.
+-/
+noncomputable def quantumCapacity (A : CPTPMap d₁ d₂) : ℝ := sSup { R : ℝ | AchievesRate A R }
 
 /-!
 
@@ -148,16 +146,23 @@ variable [DecidableEq d₃] [DecidableEq d₄] [DecidableEq d₅]
 
 /-- Every quantum channel emulates itself. -/
 @[refl]
-theorem emulates_self (Λ : CPTPMap d₁ d₂) : Λ.Emulates Λ :=
-  ⟨CPTPMap.id, CPTPMap.id, by simp⟩
+theorem emulates_self (Λ : CPTPMap d₁ d₂) : Λ.Emulates Λ := ⟨CPTPMap.id, CPTPMap.id, by simp⟩
 
 /-- If a quantum channel A emulates B, and B emulates C, then A emulates C. -/
 @[trans]
-theorem emulates_trans (Λ₁ : CPTPMap d₁ d₂) (Λ₂ : CPTPMap d₃ d₄) (Λ₃ : CPTPMap d₅ d₆)
-    (h₁₂ : Λ₁.Emulates Λ₂) (h₂₃ : Λ₂.Emulates Λ₃) : Λ₁.Emulates Λ₃ := by
+theorem emulates_trans
+    (Λ₁ : CPTPMap d₁ d₂) (Λ₂ : CPTPMap d₃ d₄) (Λ₃ : CPTPMap d₅ d₆)
+    (h₁₂ : Λ₁.Emulates Λ₂) (h₂₃ : Λ₂.Emulates Λ₃)
+    : Λ₁.Emulates Λ₃ := by
   obtain ⟨E₁, D₁, hED₁⟩ := h₁₂
   obtain ⟨E₂, D₂, hED₂⟩ := h₂₃
-  exact ⟨E₁.compose E₂, D₂.compose D₁, by classical simp [← hED₁, ← hED₂, compose_assoc]⟩
+  exact ⟨
+    E₁.compose E₂,
+    D₂.compose D₁,
+    by
+      classical
+      simp [← hED₁, ← hED₂, compose_assoc]
+  ⟩
 
 end emulates
 
@@ -170,13 +175,14 @@ end emulates
 section εApproximates
 
 /-- Every quantum channel perfectly approximates itself, that is, `εApproximates` with `ε = 0`. -/
-theorem εApproximates_self (Λ : CPTPMap d₁ d₂) : Λ.εApproximates Λ 0 :=
-  fun ρ ↦ ((Λ ρ).fidelity_self_eq_one.trans (sub_zero 1).symm).ge
+theorem εApproximates_self (Λ : CPTPMap d₁ d₂) : Λ.εApproximates Λ 0 := fun ρ ↦
+  ((Λ ρ).fidelity_self_eq_one.trans (sub_zero 1).symm).ge
 
 /-- If a quantum channel A approximates B with ε₀, it also approximates B with all larger ε₁. -/
-theorem εApproximates_monotone {A B : CPTPMap d₁ d₂} {ε₀ : ℝ} (h : A.εApproximates B ε₀)
-    {ε₁ : ℝ} (h₂ : ε₀ ≤ ε₁) : A.εApproximates B ε₁ :=
-  fun ρ ↦ (tsub_le_tsub_left h₂ 1).trans (h ρ)
+theorem εApproximates_monotone
+    {A B : CPTPMap d₁ d₂} {ε₀ : ℝ} (h : A.εApproximates B ε₀) {ε₁ : ℝ} (h₂ : ε₀ ≤ ε₁)
+    : A.εApproximates B ε₁ := fun ρ ↦
+  (tsub_le_tsub_left h₂ 1).trans (h ρ)
 
 end εApproximates
 
@@ -196,15 +202,16 @@ theorem achievesRate_0 (Λ : CPTPMap d₁ d₂) [Nonempty d₁] : Λ.AchievesRat
     εApproximates_monotone (εApproximates_self (id (dIn := Fin 1))) hε.le
 
 /-- The identity channel on D dimensional space achieves a rate of log2(D). -/
-theorem id_achievesRate_log_dim :
-    (id (dIn := d₁)).AchievesRate (Real.logb 2 (Fintype.card d₁)) := by
+theorem id_achievesRate_log_dim
+    : (id (dIn := d₁)).AchievesRate (Real.logb 2 (Fintype.card d₁)) := by
   intro ε hε
   use 1, zero_lt_one, Fintype.card d₁, id
   constructor
-  · --piProd of id's is id, then use emulates_self up to equivalence
+  · -- piProd of id's is id, then use emulates_self up to equivalence
     rw [show (fun (_ : Fin 1) ↦ id (dIn := d₁)) = (fun _ ↦ id) from rfl, piProd_id]
-    exact let σ := Fintype.equivFinOfCardEq (by simp +decide :
-            Fintype.card (Fin 1 → d₁) = Fintype.card d₁)
+    exact
+      let σ :=
+        Fintype.equivFinOfCardEq (by simp +decide : Fintype.card (Fin 1 → d₁) = Fintype.card d₁)
       ⟨ofEquiv σ.symm, ofEquiv σ, by ext1; simp⟩
   constructor
   · norm_num
@@ -251,8 +258,7 @@ end AchievesRate
 section capacity
 
 /-- Quantum channel capacity is nonnegative for channels out of a nonempty space. -/
-theorem zero_le_quantumCapacity (Λ : CPTPMap d₁ d₂) [Nonempty d₁] :
-    0 ≤ Λ.quantumCapacity := by
+theorem zero_le_quantumCapacity (Λ : CPTPMap d₁ d₂) [Nonempty d₁] : 0 ≤ Λ.quantumCapacity := by
   by_cases h : BddAbove {R | Λ.AchievesRate R}
   · exact le_csSup h (achievesRate_0 Λ)
   · exact (Real.sSup_of_not_bddAbove h).ge

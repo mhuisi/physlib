@@ -43,10 +43,12 @@ These matrices form the Lorentz group, which we will define in the next section 
 variable {d : ℕ}
 
 open minkowskiMatrix in
-/-- The Lorentz group is the subset of matrices for which
-  `Λ * dual Λ = 1`. -/
+/--
+The Lorentz group is the subset of matrices for which
+`Λ * dual Λ = 1`.
+-/
 def LorentzGroup (d : ℕ) : Set (Matrix (Fin 1 ⊕ Fin d) (Fin 1 ⊕ Fin d) ℝ) :=
-    {Λ : Matrix (Fin 1 ⊕ Fin d) (Fin 1 ⊕ Fin d) ℝ | Λ * dual Λ = 1}
+  {Λ : Matrix (Fin 1 ⊕ Fin d) (Fin 1 ⊕ Fin d) ℝ | Λ * dual Λ = 1}
 
 namespace LorentzGroup
 /-- Notation for the Lorentz group. -/
@@ -61,8 +63,7 @@ variable {Λ Λ' : Matrix (Fin 1 ⊕ Fin d) (Fin 1 ⊕ Fin d) ℝ}
 
 -/
 
-lemma mem_iff_self_mul_dual : Λ ∈ LorentzGroup d ↔ Λ * dual Λ = 1 := by
-  rfl
+lemma mem_iff_self_mul_dual : Λ ∈ LorentzGroup d ↔ Λ * dual Λ = 1 := by rfl
 
 lemma mem_iff_dual_mul_self : Λ ∈ LorentzGroup d ↔ dual Λ * Λ = 1 := by
   rw [mem_iff_self_mul_dual]
@@ -72,12 +73,14 @@ lemma mem_iff_transpose : Λ ∈ LorentzGroup d ↔ Λᵀ ∈ LorentzGroup d := 
   refine Iff.intro (fun h ↦ ?_) (fun h ↦ ?_)
   · have h1 := congrArg transpose ((mem_iff_dual_mul_self).mp h)
     rw [dual, transpose_mul, transpose_mul, transpose_mul, minkowskiMatrix.eq_transpose,
-      ← mul_assoc, transpose_one] at h1
+        ← mul_assoc, transpose_one]
+      at h1
     rw [mem_iff_self_mul_dual, ← h1, dual]
     noncomm_ring
   · have h1 := congrArg transpose ((mem_iff_dual_mul_self).mp h)
     rw [dual, transpose_mul, transpose_mul, transpose_mul, minkowskiMatrix.eq_transpose,
-      ← mul_assoc, transpose_one, transpose_transpose] at h1
+        ← mul_assoc, transpose_one, transpose_transpose]
+      at h1
     rw [mem_iff_self_mul_dual, ← h1, dual]
     noncomm_ring
 
@@ -100,12 +103,9 @@ lemma dual_mem (h : Λ ∈ LorentzGroup d) : dual Λ ∈ LorentzGroup d := by
   rw [mem_iff_dual_mul_self, dual_dual]
   exact mem_iff_self_mul_dual.mp h
 
-/--
-A matrix `Λ` is in the Lorentz group if and only if it satisfies `Λᵀ * η * Λ = η`.
--/
-lemma mem_iff_transpose_mul_minkowskiMatrix_mul_self
-    (Λ : Matrix (Fin 1 ⊕ Fin d) (Fin 1 ⊕ Fin d) ℝ) :
-    Λ ∈ LorentzGroup d ↔ Λᵀ * η * Λ = η := by
+/-- A matrix `Λ` is in the Lorentz group if and only if it satisfies `Λᵀ * η * Λ = η`. -/
+lemma mem_iff_transpose_mul_minkowskiMatrix_mul_self (Λ : Matrix (Fin 1 ⊕ Fin d) (Fin 1 ⊕ Fin d) ℝ)
+    : Λ ∈ LorentzGroup d ↔ Λᵀ * η * Λ = η := by
   rw [mem_iff_dual_mul_self]
   rw [dual]
   constructor
@@ -116,7 +116,8 @@ lemma mem_iff_transpose_mul_minkowskiMatrix_mul_self
     exact h'
   · intro h
     calc
-      (η * Λᵀ * η) * Λ = η * (Λᵀ * η * Λ) := by simp_rw [mul_assoc]
+      (η * Λᵀ * η) * Λ
+        = η * (Λᵀ * η * Λ) := by simp_rw [mul_assoc]
       _ = η * η := by rw [h]
       _ = 1 := by rw [minkowskiMatrix.sq]
 
@@ -154,20 +155,20 @@ variable {Λ Λ' : LorentzGroup d}
 
 -/
 
-lemma continuous_self_mul_dual {d : ℕ} :
-    Continuous (fun Λ : Matrix (Fin 1 ⊕ Fin d) (Fin 1 ⊕ Fin d) ℝ => Λ * dual Λ) := by
+lemma continuous_self_mul_dual {d : ℕ}
+    : Continuous (fun Λ : Matrix (Fin 1 ⊕ Fin d) (Fin 1 ⊕ Fin d) ℝ => Λ * dual Λ) := by
   unfold dual
   fun_prop
 
 /-- The Lorentz group is closed in the ambient matrix space. -/
-lemma isClosed (d : ℕ) :
-    IsClosed (LorentzGroup d : Set (Matrix (Fin 1 ⊕ Fin d) (Fin 1 ⊕ Fin d) ℝ)) := by
+lemma isClosed (d : ℕ)
+    : IsClosed (LorentzGroup d : Set (Matrix (Fin 1 ⊕ Fin d) (Fin 1 ⊕ Fin d) ℝ)) := by
   rw [LorentzGroup]
   exact isClosed_singleton.preimage continuous_self_mul_dual
 
 /-- The coercion from the Lorentz group to its ambient matrix space is a closed embedding. -/
-lemma isClosedEmbedding_val {d : ℕ} :
-    Topology.IsClosedEmbedding
+lemma isClosedEmbedding_val {d : ℕ}
+    : Topology.IsClosedEmbedding
       (Subtype.val : LorentzGroup d → Matrix (Fin 1 ⊕ Fin d) (Fin 1 ⊕ Fin d) ℝ) :=
   (isClosed d).isClosedEmbedding_subtypeVal
 
@@ -176,11 +177,11 @@ lemma isClosedEmbedding_val {d : ℕ} :
 ## Inverses
 
 -/
-lemma inv_eq_dual (Λ : LorentzGroup d) :
-    (Λ⁻¹ : LorentzGroup d) = ⟨minkowskiMatrix.dual Λ.1, LorentzGroup.dual_mem Λ.2⟩ := by
+lemma inv_eq_dual (Λ : LorentzGroup d)
+    : (Λ⁻¹ : LorentzGroup d) = ⟨minkowskiMatrix.dual Λ.1, LorentzGroup.dual_mem Λ.2⟩ := by
   rfl
 
-lemma coe_inv : (Λ⁻¹).1 = Λ.1⁻¹:= (inv_eq_left_inv (mem_iff_dual_mul_self.mp Λ.2)).symm
+lemma coe_inv : (Λ⁻¹).1 = Λ.1⁻¹ := (inv_eq_left_inv (mem_iff_dual_mul_self.mp Λ.2)).symm
 
 /-- The underlying matrix of a Lorentz transformation is invertible. -/
 instance (M : LorentzGroup d) : Invertible M.1 where
@@ -197,8 +198,8 @@ lemma subtype_inv_mul : (Subtype.val Λ)⁻¹ * (Subtype.val Λ) = 1 := inv_mul_
 lemma subtype_mul_inv : (Subtype.val Λ) * (Subtype.val Λ)⁻¹ = 1 := mul_inv_of_invertible _
 
 @[simp]
-lemma mul_minkowskiMatrix_mul_transpose :
-    (Subtype.val Λ) * minkowskiMatrix * (Subtype.val Λ).transpose = minkowskiMatrix := by
+lemma mul_minkowskiMatrix_mul_transpose
+    : (Subtype.val Λ) * minkowskiMatrix * (Subtype.val Λ).transpose = minkowskiMatrix := by
   have h2 := Λ.prop
   rw [LorentzGroup.mem_iff_self_mul_dual] at h2
   simp only [dual] at h2
@@ -207,8 +208,8 @@ lemma mul_minkowskiMatrix_mul_transpose :
   noncomm_ring
 
 @[simp]
-lemma transpose_mul_minkowskiMatrix_mul_self :
-    (Subtype.val Λ).transpose * minkowskiMatrix * (Subtype.val Λ) = minkowskiMatrix := by
+lemma transpose_mul_minkowskiMatrix_mul_self
+    : (Subtype.val Λ).transpose * minkowskiMatrix * (Subtype.val Λ) = minkowskiMatrix := by
   have h2 := Λ.prop
   rw [LorentzGroup.mem_iff_dual_mul_self] at h2
   simp only [dual] at h2
@@ -223,11 +224,9 @@ lemma transpose_mul_minkowskiMatrix_mul_self :
 -/
 
 /-- The transpose of a matrix in the Lorentz group is an element of the Lorentz group. -/
-def transpose (Λ : LorentzGroup d) : LorentzGroup d :=
-  ⟨Λ.1ᵀ, mem_iff_transpose.mp Λ.2⟩
+def transpose (Λ : LorentzGroup d) : LorentzGroup d := ⟨Λ.1ᵀ, mem_iff_transpose.mp Λ.2⟩
 
-@[simp]
-lemma transpose_one : @transpose d 1 = 1 := Subtype.ext Matrix.transpose_one
+@[simp] lemma transpose_one : @transpose d 1 = 1 := Subtype.ext Matrix.transpose_one
 
 @[simp]
 lemma transpose_mul : transpose (Λ * Λ') = transpose Λ' * transpose Λ :=
@@ -264,8 +263,7 @@ lemma minkowskiMatrix_comm : minkowskiMatrix * Λ.1 = (transpose Λ⁻¹).1 * mi
 instance : Neg (LorentzGroup d) where
   neg Λ := ⟨-Λ.1, mem_iff_neg_mem.mp Λ.2⟩
 
-@[simp]
-lemma coe_neg : (-Λ).1 = -Λ.1 := rfl
+@[simp] lemma coe_neg : (-Λ).1 = -Λ.1 := rfl
 
 lemma inv_neg : (-Λ)⁻¹ = -Λ⁻¹ := by
   refine Subtype.ext ?_
@@ -283,23 +281,29 @@ embedding.
 
 /-- The homomorphism of the Lorentz group into `GL (Fin 4) ℝ`. -/
 def toGL : LorentzGroup d →* GL (Fin 1 ⊕ Fin d) ℝ where
-  toFun A := ⟨A.1, (A⁻¹).1, _root_.mul_eq_one_comm.mpr $ mem_iff_dual_mul_self.mp A.2,
-    mem_iff_dual_mul_self.mp A.2⟩
-  map_one' :=
-    (GeneralLinearGroup.ext_iff _ 1).mpr fun _ => congrFun rfl
-  map_mul' _ _ :=
-    (GeneralLinearGroup.ext_iff _ _).mpr fun _ => congrFun rfl
+  toFun A := ⟨
+    A.1,
+    (A⁻¹).1,
+    _root_.mul_eq_one_comm.mpr $ mem_iff_dual_mul_self.mp A.2,
+    mem_iff_dual_mul_self.mp A.2
+  ⟩
+  map_one' := (GeneralLinearGroup.ext_iff _ 1).mpr fun _ => congrFun rfl
+  map_mul' _ _ := (GeneralLinearGroup.ext_iff _ _).mpr fun _ => congrFun rfl
 
 lemma toGL_injective : Function.Injective (@toGL d) := by
   refine fun A B h => Subtype.ext ?_
   rw [@Units.ext_iff] at h
   exact h
 
-/-- The homomorphism from the Lorentz Group into the monoid of matrices times the opposite of
-  the monoid of matrices. -/
+/--
+The homomorphism from the Lorentz Group into the monoid of matrices times the opposite of
+the monoid of matrices.
+-/
 @[simps!]
-def toProd : LorentzGroup d →* (Matrix (Fin 1 ⊕ Fin d) (Fin 1 ⊕ Fin d) ℝ) ×
-    (Matrix (Fin 1 ⊕ Fin d) (Fin 1 ⊕ Fin d) ℝ)ᵐᵒᵖ :=
+def toProd
+    : LorentzGroup d
+      →* (Matrix (Fin 1 ⊕ Fin d) (Fin 1 ⊕ Fin d) ℝ)
+        × (Matrix (Fin 1 ⊕ Fin d) (Fin 1 ⊕ Fin d) ℝ)ᵐᵒᵖ :=
   MonoidHom.comp (Units.embedProduct _) toGL
 
 lemma toProd_eq_transpose_η : toProd Λ = (Λ.1, MulOpposite.op $ minkowskiMatrix.dual Λ.1) := rfl
@@ -311,19 +315,25 @@ lemma toProd_injective : Function.Injective (@toProd d) := by
   exact Subtype.ext h.1
 
 lemma toProd_continuous : Continuous (@toProd d) := by
-  refine continuous_prodMk.mpr ⟨continuous_iff_le_induced.mpr fun U a ↦ a,
+  refine continuous_prodMk.mpr ⟨
+    continuous_iff_le_induced.mpr fun U a ↦ a,
     MulOpposite.continuous_op.comp' ((continuous_const.matrix_mul (continuous_iff_le_induced.mpr
-      fun U a => a).matrix_transpose).matrix_mul continuous_const)⟩
+        fun U a => a).matrix_transpose).matrix_mul
+      continuous_const)
+  ⟩
 
 open Topology
 
-/-- The embedding from the Lorentz Group into the monoid of matrices times the opposite of
-  the monoid of matrices. -/
+/--
+The embedding from the Lorentz Group into the monoid of matrices times the opposite of
+the monoid of matrices.
+-/
 lemma toProd_embedding : IsEmbedding (@toProd d) where
   injective := toProd_injective
   eq_induced :=
-    (isInducing_iff ⇑toProd).mp (IsInducing.of_comp toProd_continuous continuous_fst
-      ((isInducing_iff (Prod.fst ∘ ⇑toProd)).mpr rfl))
+    (isInducing_iff ⇑toProd).mp
+      (IsInducing.of_comp toProd_continuous continuous_fst
+        ((isInducing_iff (Prod.fst ∘ ⇑toProd)).mpr rfl))
 
 /-- The embedding from the Lorentz Group into `GL (Fin 4) ℝ`. -/
 lemma toGL_embedding : IsEmbedding (@toGL d).toFun where
@@ -334,8 +344,10 @@ lemma toGL_embedding : IsEmbedding (@toGL d).toFun where
       isOpen_induced_iff]
     exact exists_exists_and_eq_and
 
-/-- The embedding of the Lorentz group into `GL(n, ℝ)` gives `LorentzGroup d` an instance
-  of a topological group. -/
+/--
+The embedding of the Lorentz group into `GL(n, ℝ)` gives `LorentzGroup d` an instance
+of a topological group.
+-/
 instance : IsTopologicalGroup (LorentzGroup d) :=
   IsInducing.isTopologicalGroup toGL toGL_embedding.toIsInducing
 
@@ -358,12 +370,14 @@ Lorentz algebra therefore remain open; see the `TODO` at the top of this file.
 
 -/
 
-/-- The range of `toGL`, as a set in `GL (Fin 1 ⊕ Fin d) ℝ`, is exactly the preimage of the
+/--
+The range of `toGL`, as a set in `GL (Fin 1 ⊕ Fin d) ℝ`, is exactly the preimage of the
 Lorentz group under the coercion `GL (Fin 1 ⊕ Fin d) ℝ → Matrix _ _ ℝ`: an element of the general
-linear group lies in the image precisely when its underlying matrix is a Lorentz transformation. -/
-lemma range_toGL :
-    Set.range (@toGL d).toFun =
-      Units.val ⁻¹' (LorentzGroup d : Set (Matrix (Fin 1 ⊕ Fin d) (Fin 1 ⊕ Fin d) ℝ)) := by
+linear group lies in the image precisely when its underlying matrix is a Lorentz transformation.
+-/
+lemma range_toGL
+    : Set.range (@toGL d).toFun
+      = Units.val ⁻¹' (LorentzGroup d : Set (Matrix (Fin 1 ⊕ Fin d) (Fin 1 ⊕ Fin d) ℝ)) := by
   ext x
   constructor
   · rintro ⟨A, rfl⟩
@@ -371,43 +385,48 @@ lemma range_toGL :
   · intro hx
     exact ⟨⟨x.val, hx⟩, Units.ext rfl⟩
 
-/-- The homomorphism `toGL` is a closed embedding of the Lorentz group into
+/--
+The homomorphism `toGL` is a closed embedding of the Lorentz group into
 `GL (Fin 1 ⊕ Fin d) ℝ`. This strengthens `toGL_embedding`: the image is closed because it is the
 preimage, under the continuous coercion `GL (Fin 1 ⊕ Fin d) ℝ → Matrix _ _ ℝ`, of the closed set
-`LorentzGroup d` (`LorentzGroup.isClosed`). -/
+`LorentzGroup d` (`LorentzGroup.isClosed`).
+-/
 lemma toGL_isClosedEmbedding : Topology.IsClosedEmbedding (@toGL d).toFun where
   toIsEmbedding := toGL_embedding
   isClosed_range := by
     rw [range_toGL]
     exact (isClosed d).preimage Units.continuous_val
 
-/-- The Lorentz group realised as a subgroup of `GL (Fin 1 ⊕ Fin d) ℝ`, namely the range of the
-embedding `toGL`. -/
+/--
+The Lorentz group realised as a subgroup of `GL (Fin 1 ⊕ Fin d) ℝ`, namely the range of the
+embedding `toGL`.
+-/
 def toGLSubgroup (d : ℕ) : Subgroup (GL (Fin 1 ⊕ Fin d) ℝ) := (@toGL d).range
 
 @[simp]
-lemma mem_toGLSubgroup {x : GL (Fin 1 ⊕ Fin d) ℝ} :
-    x ∈ toGLSubgroup d ↔
-      (x : Matrix (Fin 1 ⊕ Fin d) (Fin 1 ⊕ Fin d) ℝ) ∈ LorentzGroup d := by
+lemma mem_toGLSubgroup {x : GL (Fin 1 ⊕ Fin d) ℝ}
+    : x ∈ toGLSubgroup d ↔ (x : Matrix (Fin 1 ⊕ Fin d) (Fin 1 ⊕ Fin d) ℝ) ∈ LorentzGroup d := by
   constructor
   · rintro ⟨A, rfl⟩
     exact A.2
   · intro hx
     exact ⟨⟨x.val, hx⟩, Units.ext rfl⟩
 
-lemma coe_toGLSubgroup :
-    (toGLSubgroup d : Set (GL (Fin 1 ⊕ Fin d) ℝ)) =
-      Units.val ⁻¹' (LorentzGroup d : Set (Matrix (Fin 1 ⊕ Fin d) (Fin 1 ⊕ Fin d) ℝ)) :=
+lemma coe_toGLSubgroup
+    : (toGLSubgroup d : Set (GL (Fin 1 ⊕ Fin d) ℝ))
+      = Units.val ⁻¹' (LorentzGroup d : Set (Matrix (Fin 1 ⊕ Fin d) (Fin 1 ⊕ Fin d) ℝ)) :=
   range_toGL
 
-/-- The Lorentz group realised as a *closed* subgroup of `GL (Fin 1 ⊕ Fin d) ℝ`. The closedness is
+/--
+The Lorentz group realised as a *closed* subgroup of `GL (Fin 1 ⊕ Fin d) ℝ`. The closedness is
 exactly the content of `toGL_isClosedEmbedding`, and is the hypothesis that the (not-yet-formalised)
-closed subgroup theorem would consume to produce a Lie group structure. -/
+closed subgroup theorem would consume to produce a Lie group structure.
+-/
 def toClosedSubgroup (d : ℕ) : ClosedSubgroup (GL (Fin 1 ⊕ Fin d) ℝ) where
   toSubgroup := toGLSubgroup d
   isClosed' := by
-    rw [show (toGLSubgroup d).carrier =
-        Units.val ⁻¹' (LorentzGroup d : Set (Matrix (Fin 1 ⊕ Fin d) (Fin 1 ⊕ Fin d) ℝ)) from
+    rw [show (toGLSubgroup d).carrier
+        = Units.val ⁻¹' (LorentzGroup d : Set (Matrix (Fin 1 ⊕ Fin d) (Fin 1 ⊕ Fin d) ℝ)) from
       coe_toGLSubgroup]
     exact (isClosed d).preimage Units.continuous_val
 
@@ -451,14 +470,14 @@ lemma toComplex_inv (Λ : LorentzGroup d) : (toComplex Λ)⁻¹ = toComplex Λ�
 
 /-- The entries of `toComplex Λ` are real. -/
 @[simp]
-lemma star_toComplex_apply (Λ : LorentzGroup d) (i j : Fin 1 ⊕ Fin d) :
-    star (toComplex Λ i j) = toComplex Λ i j := by
+lemma star_toComplex_apply (Λ : LorentzGroup d) (i j : Fin 1 ⊕ Fin d)
+    : star (toComplex Λ i j) = toComplex Λ i j := by
   simp [toComplex]
 
 @[simp]
-lemma toComplex_mul_minkowskiMatrix_mul_transpose (Λ : LorentzGroup d) :
-    toComplex Λ * minkowskiMatrix.map ofRealHom * (toComplex Λ)ᵀ =
-    minkowskiMatrix.map ofRealHom := by
+lemma toComplex_mul_minkowskiMatrix_mul_transpose (Λ : LorentzGroup d)
+    : toComplex Λ * minkowskiMatrix.map ofRealHom * (toComplex Λ)ᵀ
+      = minkowskiMatrix.map ofRealHom := by
   simp only [toComplex, MonoidHom.coe_mk, OneHom.coe_mk]
   have h1 : ((Λ.1).map ⇑ofRealHom)ᵀ = (Λ.1ᵀ).map ofRealHom := rfl
   rw [h1]
@@ -467,9 +486,9 @@ lemma toComplex_mul_minkowskiMatrix_mul_transpose (Λ : LorentzGroup d) :
   simp only [mul_minkowskiMatrix_mul_transpose]
 
 @[simp]
-lemma toComplex_transpose_mul_minkowskiMatrix_mul_self (Λ : LorentzGroup d) :
-    (toComplex Λ)ᵀ * minkowskiMatrix.map ofRealHom * toComplex Λ =
-    minkowskiMatrix.map ofRealHom := by
+lemma toComplex_transpose_mul_minkowskiMatrix_mul_self (Λ : LorentzGroup d)
+    : (toComplex Λ)ᵀ * minkowskiMatrix.map ofRealHom * toComplex Λ
+      = minkowskiMatrix.map ofRealHom := by
   simp only [toComplex, MonoidHom.coe_mk, OneHom.coe_mk]
   have h1 : ((Λ.1).map ofRealHom)ᵀ = (Λ.1ᵀ).map ofRealHom := rfl
   rw [h1]
@@ -477,17 +496,20 @@ lemma toComplex_transpose_mul_minkowskiMatrix_mul_self (Λ : LorentzGroup d) :
   · simp only [Matrix.map_mul]
   simp only [transpose_mul_minkowskiMatrix_mul_self]
 
-lemma toComplex_mulVec_ofReal (v : Fin 1 ⊕ Fin d → ℝ) (Λ : LorentzGroup d) :
-    toComplex Λ *ᵥ (ofRealHom ∘ v) = ofRealHom ∘ (Λ *ᵥ v) := by
+lemma toComplex_mulVec_ofReal (v : Fin 1 ⊕ Fin d → ℝ) (Λ : LorentzGroup d)
+    : toComplex Λ *ᵥ (ofRealHom ∘ v) = ofRealHom ∘ (Λ *ᵥ v) := by
   simp only [toComplex, MonoidHom.coe_mk, OneHom.coe_mk]
   funext i
   rw [← RingHom.map_mulVec]
   rfl
 
 /-- The parity transformation. -/
-def parity : LorentzGroup d := ⟨minkowskiMatrix, by
-  rw [mem_iff_dual_mul_self]
-  simp only [dual_eta, minkowskiMatrix.sq]⟩
+def parity : LorentzGroup d := ⟨
+  minkowskiMatrix,
+  by
+    rw [mem_iff_dual_mul_self]
+    simp only [dual_eta, minkowskiMatrix.sq]
+⟩
 
 /-!
 
@@ -495,8 +517,8 @@ def parity : LorentzGroup d := ⟨minkowskiMatrix, by
 
 -/
 
-lemma eq_of_mulVec_eq {Λ Λ' : LorentzGroup d}
-    (h : ∀ (x : Fin 1 ⊕ Fin d → ℝ), Λ.1 *ᵥ x = Λ'.1 *ᵥ x) : Λ = Λ' := by
+lemma eq_of_mulVec_eq {Λ Λ' : LorentzGroup d} (h : ∀ (x : Fin 1 ⊕ Fin d → ℝ), Λ.1 *ᵥ x = Λ'.1 *ᵥ x)
+    : Λ = Λ' := by
   apply Subtype.ext
   exact ext_of_mulVec_single fun i => h (Pi.single i 1)
 

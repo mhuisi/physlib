@@ -52,10 +52,13 @@ open scoped JB selfAdjoint
 
 -/
 
-/-- A witness that `E` is special: an isometric unital Jordan embedding into the self-adjoint part
-of a Cstar algebra whose range is norm closed. -/
-structure JBAlgebra.IsSpecialWitness (E : Type*) [NormedJordanAlgebra E]
-    [JBAlgebra E] (A : Type*) [CStarAlgebra A] [PartialOrder A] [StarOrderedRing A] where
+/--
+A witness that `E` is special: an isometric unital Jordan embedding into the self-adjoint part
+of a Cstar algebra whose range is norm closed.
+-/
+structure JBAlgebra.IsSpecialWitness
+    (E : Type*) [NormedJordanAlgebra E] [JBAlgebra E]
+    (A : Type*) [CStarAlgebra A] [PartialOrder A] [StarOrderedRing A] where
   /-- The underlying injective isometric real-linear map. -/
   toLinearIsometry : E →ₗᵢ[ℝ] selfAdjoint A
   /-- The order unit is preserved. -/
@@ -65,10 +68,11 @@ structure JBAlgebra.IsSpecialWitness (E : Type*) [NormedJordanAlgebra E]
   /-- The represented Jordan subalgebra is norm closed. -/
   isClosed_range : IsClosed (Set.range toLinearIsometry)
 
-/-- `E` is special when it embeds as a closed Jordan subalgebra of the self-adjoint part of a
-Cstar algebra in the same universe. -/
-def JBAlgebra.IsSpecial (E : Type u) [NormedJordanAlgebra E]
-    [JBAlgebra E] : Prop :=
+/--
+`E` is special when it embeds as a closed Jordan subalgebra of the self-adjoint part of a
+Cstar algebra in the same universe.
+-/
+def JBAlgebra.IsSpecial (E : Type u) [NormedJordanAlgebra E] [JBAlgebra E] : Prop :=
   ∃ (A : Type u) (_ : CStarAlgebra A) (_ : PartialOrder A) (_ : StarOrderedRing A),
     Nonempty (JBAlgebra.IsSpecialWitness E A)
 
@@ -80,20 +84,25 @@ def JBAlgebra.IsSpecial (E : Type u) [NormedJordanAlgebra E]
 
 namespace JBAlgebra.IsSpecialWitness
 
-variable {E A : Type*} [IsJBOrderUnit E] [Nontrivial E] [CStarAlgebra A] [PartialOrder A]
-  [StarOrderedRing A]
+variable
+  {E A : Type*}
+  [IsJBOrderUnit E] [Nontrivial E] [CStarAlgebra A] [PartialOrder A] [StarOrderedRing A]
 
-/-- A special-JB embedding preserves positivity. Exact-cone reconstruction supplies a square
+/--
+A special-JB embedding preserves positivity. Exact-cone reconstruction supplies a square
 witness in the source; multiplicativity carries that witness to a square in the represented
-self-adjoint algebra. -/
-lemma map_nonneg (j : JBAlgebra.IsSpecialWitness E A) {x : E} (hx : 0 ≤ x) :
-    0 ≤ (j.toLinearIsometry x : selfAdjoint A) := by
+self-adjoint algebra.
+-/
+lemma map_nonneg (j : JBAlgebra.IsSpecialWitness E A) {x : E} (hx : 0 ≤ x)
+    : 0 ≤ (j.toLinearIsometry x : selfAdjoint A) := by
   obtain ⟨y, hy⟩ := JBAlgebra.nonneg_iff_exists_mul_self x |>.mp hx
   rw [← hy, j.map_mul]
   exact IsJordanOrderUnit.mul_self_nonneg _
 
-/-- A special-JB embedding is order preserving. This is derived from exact cone reconstruction,
-not assumed in the definition of specialness. -/
+/--
+A special-JB embedding is order preserving. This is derived from exact cone reconstruction,
+not assumed in the definition of specialness.
+-/
 lemma monotone (j : JBAlgebra.IsSpecialWitness E A) : Monotone j.toLinearIsometry := by
   intro x y hxy
   rw [← sub_nonneg]

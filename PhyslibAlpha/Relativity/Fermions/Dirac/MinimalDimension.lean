@@ -112,19 +112,21 @@ lemma even : Even n := by
 -/
 
 /-- `γ^0, i γ^1, i γ^2, i γ^3`: four involutions that anticommute. -/
-noncomputable def involutions (γ : Fin 1 ⊕ Fin 3 → Matrix (Fin n) (Fin n) ℂ)
-    (μ : Fin 1 ⊕ Fin 3) : Matrix (Fin n) (Fin n) ℂ :=
+noncomputable def involutions (γ : Fin 1 ⊕ Fin 3 → Matrix (Fin n) (Fin n) ℂ) (μ : Fin 1 ⊕ Fin 3)
+    : Matrix (Fin n) (Fin n) ℂ :=
   (Sum.elim (fun _ => (1 : ℂ)) (fun _ => I) μ) • γ μ
 
 omit hγ in
-lemma involutions_anticomm (μ ν : Fin 1 ⊕ Fin 3) :
-    involutions γ μ * involutions γ ν + involutions γ ν * involutions γ μ =
-      (Sum.elim (fun _ => (1 : ℂ)) (fun _ => I) μ * Sum.elim (fun _ => (1 : ℂ)) (fun _ => I) ν) •
-        (γ μ * γ ν + γ ν * γ μ) := by
+lemma involutions_anticomm (μ ν : Fin 1 ⊕ Fin 3)
+    : involutions γ μ * involutions γ ν + involutions γ ν * involutions γ μ
+      = (Sum.elim (fun _ => (1 : ℂ)) (fun _ => I) μ * Sum.elim (fun _ => (1 : ℂ)) (fun _ => I) ν)
+        • (γ μ * γ ν + γ ν * γ μ) := by
   simp only [involutions, smul_mul_smul_comm, smul_add, mul_comm (Sum.elim _ _ ν)]
 
-/-- **There are no `2 × 2` Clifford families**: they would give four anticommuting `2 × 2`
-involutions. -/
+/--
+**There are no `2 × 2` Clifford families**: they would give four anticommuting `2 × 2`
+involutions.
+-/
 lemma ne_two : n ≠ 2 := by
   rintro rfl
   have h : PauliMatrix.IsAnticommuting (involutions γ) := fun μ ν => by
@@ -160,11 +162,15 @@ end IsCliffordFamily
 lemma isCliffordFamily_gamma : IsCliffordFamily fun μ => endEquivMatrix (gamma μ) := fun μ ν => by
   rw [← map_mul, ← map_mul, ← map_add, gamma_anticomm, map_smul, map_one]
 
-/-- **The gamma matrices need four dimensions (Dirac, 1928).** The smallest size of a nonempty
-Clifford family is four. -/
-lemma isLeast_size_isCliffordFamily :
-    IsLeast {n : ℕ | n ≠ 0 ∧ ∃ γ : Fin 1 ⊕ Fin 3 → Matrix (Fin n) (Fin n) ℂ,
-      IsCliffordFamily γ} 4 :=
+/--
+**The gamma matrices need four dimensions (Dirac, 1928).** The smallest size of a nonempty
+Clifford family is four.
+-/
+lemma isLeast_size_isCliffordFamily
+    : IsLeast
+      ({n : ℕ | n ≠ 0 ∧ ∃ γ : Fin 1 ⊕ Fin 3 → Matrix (Fin n) (Fin n) ℂ,
+        IsCliffordFamily γ})
+      4 :=
   ⟨⟨by norm_num, _, isCliffordFamily_gamma⟩, fun _ ⟨hn, _, hγ⟩ => hγ.four_le hn⟩
 
 end Fermion.Dirac

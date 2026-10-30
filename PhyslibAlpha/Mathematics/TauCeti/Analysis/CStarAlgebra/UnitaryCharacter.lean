@@ -48,19 +48,20 @@ namespace TauCeti
 
 variable {G B : Type*} [Monoid G] [TopologicalSpace G] [CStarAlgebra B]
 
-/-- A character nonzero on a commuting operator with norm-continuous unitary translates
+/--
+A character nonzero on a commuting operator with norm-continuous unitary translates
 induces a unique continuous circle-valued character. It describes every translate in the subalgebra,
-not just the translates of the witnessing operator. -/
+not just the translates of the witnessing operator.
+-/
 lemma _root_.MonoidHom.existsUnique_pontryaginDual_of_unitary_translate
     (ρ : G →* B) (hρ : ∀ g, ρ g ∈ unitary B)
     (A : StarSubalgebra ℂ B) [CompleteSpace A]
-    (a : A) (hcomm : ∀ g, Commute (ρ g) (a : B))
-    (hmem : ∀ g, ρ g * (a : B) ∈ A)
+    (a : A) (hcomm : ∀ g, Commute (ρ g) (a : B)) (hmem : ∀ g, ρ g * (a : B) ∈ A)
     (hcont : Continuous fun g => ρ g * (a : B))
-    (ω : characterSpace ℂ A) (ha : ω a ≠ 0) :
-    ∃! χ : PontryaginDual G,
-      ∀ (g : G) (b : A) (hb : ρ g * (b : B) ∈ A),
-        ω ⟨ρ g * (b : B), hb⟩ = (χ g : ℂ) * ω b := by
+    (ω : characterSpace ℂ A) (ha : ω a ≠ 0)
+    : ∃! χ : PontryaginDual G,
+        ∀ (g : G) (b : A) (hb : ρ g * (b : B) ∈ A),
+          ω ⟨ρ g * (b : B), hb⟩ = (χ g : ℂ) * ω b := by
   let : CStarAlgebra A := {}
   -- Translate one witnessing operator, and compare products and squared absolute values.
   let v (g : G) : A := ⟨ρ g * (a : B), hmem g⟩
@@ -69,8 +70,7 @@ lemma _root_.MonoidHom.existsUnique_pontryaginDual_of_unitary_translate
     simp [v]
   have hvmul (g h : G) : v (g * h) * a = v g * v h := by
     apply Subtype.ext
-    simpa [v, map_mul, mul_assoc] using
-      congrArg (fun x : B => ρ g * x * (a : B)) (hcomm h).eq
+    simpa [v, map_mul, mul_assoc] using congrArg (fun x : B => ρ g * x * (a : B)) (hcomm h).eq
   have hvstar (g : G) : star (v g) * v g = star a * a := by
     apply Subtype.ext
     simp only [MulMemClass.coe_mul, StarMemClass.coe_star, v, star_mul]
@@ -91,17 +91,18 @@ lemma _root_.MonoidHom.existsUnique_pontryaginDual_of_unitary_translate
     exact heq
   have hcnorm (g : G) : ‖c g‖ = 1 := by
     simp only [c, norm_div, hvnorm g, div_self (norm_ne_zero_iff.mpr ha)]
-  let χ : PontryaginDual G :=
-    { toFun := fun g => ⟨c g, mem_sphere_zero_iff_norm.mpr (hcnorm g)⟩
-      map_one' := Circle.ext hc1
-      map_mul' g h := Circle.ext (hcmul g h)
-      continuous_toFun :=
-        (((CharacterSpace.toCLM ω).continuous.comp
-          (hcont.subtype_mk hmem)).div_const (ω a)).subtype_mk _ }
+  let χ : PontryaginDual G := {
+    toFun := fun g => ⟨c g, mem_sphere_zero_iff_norm.mpr (hcnorm g)⟩
+    map_one' := Circle.ext hc1
+    map_mul' g h := Circle.ext (hcmul g h)
+    continuous_toFun :=
+      (((CharacterSpace.toCLM ω).continuous.comp (hcont.subtype_mk hmem)).div_const
+          (ω a)).subtype_mk
+        _
+  }
   -- Commutation with the witness determines the multiplier on every admissible operator.
   have hχcoe (g : G) : (χ g : ℂ) = c g := rfl
-  have hχ (g : G) (b : A) (hb : ρ g * (b : B) ∈ A) :
-      ω ⟨ρ g * (b : B), hb⟩ = (χ g : ℂ) * ω b := by
+  have hχ (g : G) (b : A) (hb : ρ g * (b : B) ∈ A) : ω ⟨ρ g * (b : B), hb⟩ = (χ g : ℂ) * ω b := by
     have hcross : v g * b = a * ⟨ρ g * (b : B), hb⟩ := by
       apply Subtype.ext
       simpa [v, mul_assoc] using congrArg (fun x : B => x * (b : B)) (hcomm g).eq
@@ -111,8 +112,8 @@ lemma _root_.MonoidHom.existsUnique_pontryaginDual_of_unitary_translate
     dsimp only [c]
     apply mul_right_cancel₀ ha
     calc
-      ω ⟨ρ g * (b : B), hb⟩ * ω a = ω (v g) * ω b := by
-        simpa only [mul_comm] using heq.symm
+      ω ⟨ρ g * (b : B), hb⟩ * ω a
+        = ω (v g) * ω b := by simpa only [mul_comm] using heq.symm
       _ = ω (v g) / ω a * ω b * ω a := by field_simp
   refine ⟨χ, hχ, fun ψ hψ => ?_⟩
   apply PontryaginDual.ext

@@ -77,28 +77,44 @@ namespace Algebra
 
 section Generation
 
-variable {R A B : Type*} [CommSemiring R] [Semiring A] [Algebra R A] [Semiring B]
-  [Algebra R B]
+variable {R A B : Type*} [CommSemiring R] [Semiring A] [Algebra R A] [Semiring B] [Algebra R B]
 
-/-- If `s` generates `A` and a subalgebra `S` of `B` contains the image of `s`, then it
-  contains the whole range of an algebra map `A →ₐ[R] B`. -/
-lemma range_le_of_adjoin_eq_top {s : Set A} (hs : Algebra.adjoin R s = ⊤) (φ : A →ₐ[R] B)
-    {S : Subalgebra R B} (h : ∀ x ∈ s, φ x ∈ S) : φ.range ≤ S := by
+/--
+If `s` generates `A` and a subalgebra `S` of `B` contains the image of `s`, then it
+contains the whole range of an algebra map `A →ₐ[R] B`.
+-/
+lemma range_le_of_adjoin_eq_top
+    {s : Set A} (hs : Algebra.adjoin R s = ⊤)
+    (φ : A →ₐ[R] B)
+    {S : Subalgebra R B} (h : ∀ x ∈ s, φ x ∈ S)
+    : φ.range ≤ S := by
   rw [← Algebra.map_top, ← hs, AlgHom.map_adjoin]
   exact Algebra.adjoin_le (Set.image_subset_iff.mpr h)
 
-/-- An algebra map carrying a generating set into a subalgebra `S` carries the generated
-  subalgebra into `S`. This is what extends the stability of a subalgebra under an
-  endomorphism from its generators to all of its elements. -/
-lemma apply_mem_of_mem_adjoin {s : Set A} (φ : A →ₐ[R] B) {S : Subalgebra R B}
-    (h : ∀ x ∈ s, φ x ∈ S) {x : A} (hx : x ∈ Algebra.adjoin R s) : φ x ∈ S :=
+/--
+An algebra map carrying a generating set into a subalgebra `S` carries the generated
+subalgebra into `S`. This is what extends the stability of a subalgebra under an
+endomorphism from its generators to all of its elements.
+-/
+lemma apply_mem_of_mem_adjoin
+    {s : Set A}
+    (φ : A →ₐ[R] B)
+    {S : Subalgebra R B} (h : ∀ x ∈ s, φ x ∈ S)
+    {x : A} (hx : x ∈ Algebra.adjoin R s)
+    : φ x ∈ S :=
   (Subalgebra.mem_comap S φ x).mp (Algebra.adjoin_le (S := S.comap φ) h hx)
 
-/-- If `s` generates `A` and `y` commutes with the image of `s` under an algebra map, then
-  `y` commutes with the whole image. This is what extends a commutation relation from
-  generators to a factor of a tensor product. -/
-lemma commute_of_adjoin_eq_top {s : Set A} (hs : Algebra.adjoin R s = ⊤) (φ : A →ₐ[R] B)
-    {y : B} (h : ∀ x ∈ s, Commute (φ x) y) (a : A) : Commute (φ a) y := by
+/--
+If `s` generates `A` and `y` commutes with the image of `s` under an algebra map, then
+`y` commutes with the whole image. This is what extends a commutation relation from
+generators to a factor of a tensor product.
+-/
+lemma commute_of_adjoin_eq_top
+    {s : Set A} (hs : Algebra.adjoin R s = ⊤)
+    (φ : A →ₐ[R] B)
+    {y : B} (h : ∀ x ∈ s, Commute (φ x) y)
+    (a : A)
+    : Commute (φ a) y := by
   have ha : a ∈ Algebra.adjoin R s := hs ▸ Algebra.mem_top
   induction ha using Algebra.adjoin_induction with
   | mem x hx => exact h x hx
@@ -120,14 +136,17 @@ namespace TensorProduct
 
 section Factors
 
-variable {R A B : Type*} [CommSemiring R] [Semiring A] [Algebra R A] [Semiring B]
-  [Algebra R B]
+variable {R A B : Type*} [CommSemiring R] [Semiring A] [Algebra R A] [Semiring B] [Algebra R B]
 
-/-- A subalgebra of `A ⊗[R] B` containing every `a ⊗ₜ 1` and every `1 ⊗ₜ b` contains
-  everything, since a pure tensor is the product of the two. -/
-lemma mem_of_tmul_one_of_one_tmul {S : Subalgebra R (A ⊗[R] B)}
+/--
+A subalgebra of `A ⊗[R] B` containing every `a ⊗ₜ 1` and every `1 ⊗ₜ b` contains
+everything, since a pure tensor is the product of the two.
+-/
+lemma mem_of_tmul_one_of_one_tmul
+    {S : Subalgebra R (A ⊗[R] B)}
     (hA : ∀ a : A, a ⊗ₜ[R] (1 : B) ∈ S) (hB : ∀ b : B, (1 : A) ⊗ₜ[R] b ∈ S)
-    (x : A ⊗[R] B) : x ∈ S := by
+    (x : A ⊗[R] B)
+    : x ∈ S := by
   induction x using _root_.TensorProduct.inductionOn with
   | add u v hu hv => exact add_mem hu hv
   | tmul a b =>
@@ -135,24 +154,29 @@ lemma mem_of_tmul_one_of_one_tmul {S : Subalgebra R (A ⊗[R] B)}
       rw [Algebra.TensorProduct.tmul_mul_tmul, mul_one, one_mul]
     exact h ▸ mul_mem (hA a) (hB b)
 
-/-- A subalgebra of `A ⊗[R] B` containing every `a ⊗ₜ 1` and every `1 ⊗ₜ b` is the whole
-  algebra. -/
-lemma eq_top_of_tmul_one_of_one_tmul {S : Subalgebra R (A ⊗[R] B)}
-    (hA : ∀ a : A, a ⊗ₜ[R] (1 : B) ∈ S) (hB : ∀ b : B, (1 : A) ⊗ₜ[R] b ∈ S) : S = ⊤ :=
+/--
+A subalgebra of `A ⊗[R] B` containing every `a ⊗ₜ 1` and every `1 ⊗ₜ b` is the whole
+algebra.
+-/
+lemma eq_top_of_tmul_one_of_one_tmul
+    {S : Subalgebra R (A ⊗[R] B)}
+    (hA : ∀ a : A, a ⊗ₜ[R] (1 : B) ∈ S) (hB : ∀ b : B, (1 : A) ⊗ₜ[R] b ∈ S)
+    : S = ⊤ :=
   _root_.Algebra.eq_top_iff.mpr fun x => mem_of_tmul_one_of_one_tmul hA hB x
 
 end Factors
 
 section Central
 
-variable {R A B : Type*} [CommSemiring R] [Semiring A] [Algebra R A] [CommSemiring B]
-  [Algebra R B]
+variable {R A B : Type*} [CommSemiring R] [Semiring A] [Algebra R A] [CommSemiring B] [Algebra R B]
 
-/-- A commutative right factor is central in the tensor product. Stated as an equation of
-  products at abstract types, so that it can be instantiated on a concrete tensor product
-  without unifying its multiplication instances. -/
-lemma includeRight_mul_comm (b : B) (x : A ⊗[R] B) :
-    x * includeRight (R := R) (A := A) b = includeRight (R := R) (A := A) b * x := by
+/--
+A commutative right factor is central in the tensor product. Stated as an equation of
+products at abstract types, so that it can be instantiated on a concrete tensor product
+without unifying its multiplication instances.
+-/
+lemma includeRight_mul_comm (b : B) (x : A ⊗[R] B)
+    : x * includeRight (R := R) (A := A) b = includeRight (R := R) (A := A) b * x := by
   induction x using _root_.TensorProduct.inductionOn with
   | add u v hu hv => rw [add_mul, mul_add, hu, hv]
   | tmul a c =>
@@ -171,21 +195,23 @@ section BaseChange
 variable {R A : Type*} [CommSemiring R] [Semiring A] [Algebra R A]
 variable (S : Type*) [CommSemiring S] [Algebra R S] (s : Set A)
 
-/-- Extension of scalars on the elements `1 ⊗ₜ a`. If `s` generates `A` over `R` then
-  every `1 ⊗ₜ a` lies in the `S`-subalgebra of `S ⊗[R] A` generated by `1 ⊗ₜ s`. -/
-lemma mem_adjoin_one_tmul (hs : Algebra.adjoin R s = ⊤) (a : A) :
-    (1 : S) ⊗ₜ[R] a ∈ Algebra.adjoin S ((fun a : A => (1 : S) ⊗ₜ[R] a) '' s) := by
+/--
+Extension of scalars on the elements `1 ⊗ₜ a`. If `s` generates `A` over `R` then
+every `1 ⊗ₜ a` lies in the `S`-subalgebra of `S ⊗[R] A` generated by `1 ⊗ₜ s`.
+-/
+lemma mem_adjoin_one_tmul (hs : Algebra.adjoin R s = ⊤) (a : A)
+    : (1 : S) ⊗ₜ[R] a ∈ Algebra.adjoin S ((fun a : A => (1 : S) ⊗ₜ[R] a) '' s) := by
   have ha : a ∈ Algebra.adjoin R s := hs ▸ Algebra.mem_top
   induction ha using Algebra.adjoin_induction with
   | mem x hx => exact Algebra.subset_adjoin ⟨x, hx, rfl⟩
   | algebraMap r =>
-    have h : (1 : S) ⊗ₜ[R] (algebraMap R A r)
-        = algebraMap S (S ⊗[R] A) (algebraMap R S r) := by
+    have h : (1 : S) ⊗ₜ[R] (algebraMap R A r) = algebraMap S (S ⊗[R] A) (algebraMap R S r) := by
       simp [Algebra.algebraMap_eq_smul_one, _root_.TensorProduct.tmul_smul,
         _root_.TensorProduct.smul_tmul', Algebra.TensorProduct.one_def]
     rw [h]
     exact Subalgebra.algebraMap_mem _ _
-  | add x y _ _ hx hy => rw [_root_.TensorProduct.tmul_add]; exact add_mem hx hy
+  | add x y _ _ hx hy =>
+    rw [_root_.TensorProduct.tmul_add]; exact add_mem hx hy
   | mul x y _ _ hx hy =>
     have h : (1 : S) ⊗ₜ[R] (x * y) = ((1 : S) ⊗ₜ[R] x) * ((1 : S) ⊗ₜ[R] y) := by
       rw [Algebra.TensorProduct.tmul_mul_tmul, one_mul]
@@ -193,8 +219,8 @@ lemma mem_adjoin_one_tmul (hs : Algebra.adjoin R s = ⊤) (a : A) :
     exact mul_mem hx hy
 
 /-- Every element of a base change lies in the subalgebra generated by the `1 ⊗ₜ s`. -/
-lemma mem_adjoin_one_tmul_of_generates (hs : Algebra.adjoin R s = ⊤) (x : S ⊗[R] A) :
-    x ∈ Algebra.adjoin S ((fun a : A => (1 : S) ⊗ₜ[R] a) '' s) := by
+lemma mem_adjoin_one_tmul_of_generates (hs : Algebra.adjoin R s = ⊤) (x : S ⊗[R] A)
+    : x ∈ Algebra.adjoin S ((fun a : A => (1 : S) ⊗ₜ[R] a) '' s) := by
   induction x using _root_.TensorProduct.inductionOn with
   | add u v hu hv => exact add_mem hu hv
   | tmul z a =>
@@ -202,11 +228,12 @@ lemma mem_adjoin_one_tmul_of_generates (hs : Algebra.adjoin R s = ⊤) (x : S �
       rw [_root_.TensorProduct.smul_tmul', smul_eq_mul, mul_one]
     exact h ▸ Subalgebra.smul_mem _ (mem_adjoin_one_tmul S s hs a) z
 
-/-- Extension of scalars preserves generation. If `s` generates `A` over `R` then the
-  elements `1 ⊗ₜ a`, for `a ∈ s`, generate `S ⊗[R] A` over `S`. -/
-lemma adjoin_one_tmul_eq_top (hs : Algebra.adjoin R s = ⊤) :
-    Algebra.adjoin S ((fun a : A => (1 : S) ⊗ₜ[R] a) '' s)
-      = (⊤ : Subalgebra S (S ⊗[R] A)) :=
+/--
+Extension of scalars preserves generation. If `s` generates `A` over `R` then the
+elements `1 ⊗ₜ a`, for `a ∈ s`, generate `S ⊗[R] A` over `S`.
+-/
+lemma adjoin_one_tmul_eq_top (hs : Algebra.adjoin R s = ⊤)
+    : Algebra.adjoin S ((fun a : A => (1 : S) ⊗ₜ[R] a) '' s) = (⊤ : Subalgebra S (S ⊗[R] A)) :=
   _root_.Algebra.eq_top_iff.mpr fun x => mem_adjoin_one_tmul_of_generates S s hs x
 
 end BaseChange
@@ -221,13 +248,17 @@ end Algebra
 
 -/
 
-/-- Polarization. If every value of a linear map into a ring squares to zero, then any two
-  values anticommute. Applied to a space of fermionic generators, this is what makes the
-  single relation "every vector squares to zero" carry the anticommutation of distinct
-  generators, including generators of different species, which sit in the same space. -/
-lemma LinearMap.mul_swap_of_mul_self {R M B : Type*} [CommSemiring R] [AddCommMonoid M]
-    [Module R M] [Ring B] [Algebra R B] (f : M →ₗ[R] B) (h : ∀ v, f v * f v = 0) (v w : M) :
-    f v * f w = -(f w * f v) := by
+/--
+Polarization. If every value of a linear map into a ring squares to zero, then any two
+values anticommute. Applied to a space of fermionic generators, this is what makes the
+single relation "every vector squares to zero" carry the anticommutation of distinct
+generators, including generators of different species, which sit in the same space.
+-/
+lemma LinearMap.mul_swap_of_mul_self
+    {R M B : Type*} [CommSemiring R] [AddCommMonoid M] [Module R M] [Ring B] [Algebra R B]
+    (f : M →ₗ[R] B) (h : ∀ v, f v * f v = 0)
+    (v w : M)
+    : f v * f w = -(f w * f v) := by
   have hvw := h (v + w)
   rw [map_add, add_mul, mul_add, mul_add, h v, h w, zero_add, add_zero] at hvw
   exact eq_neg_of_add_eq_zero_left hvw
@@ -247,7 +278,8 @@ namespace DirectSum
 
 section OfLof
 
-variable {R ι κ : Type*} [CommSemiring R] [DecidableEq ι] [DecidableEq κ]
+variable
+  {R ι κ : Type*} [CommSemiring R] [DecidableEq ι] [DecidableEq κ]
   {M : ι → Type*} [∀ i, AddCommMonoid (M i)] [∀ i, Module R (M i)]
   {N : κ → Type*} [∀ j, AddCommMonoid (N j)] [∀ j, Module R (N j)]
 
@@ -262,30 +294,37 @@ section Semiring
 variable {B : Type*} [Semiring B] [Algebra R B]
 
 /-- If a subalgebra contains the image of every summand, it contains the whole image. -/
-lemma mem_of_lof {S : Subalgebra R B} {F : (⨁ i, M i) →ₗ[R] B}
-    (h : ∀ i x, F (lof R ι M i x) ∈ S) (v : ⨁ i, M i) : F v ∈ S := by
+lemma mem_of_lof
+    {S : Subalgebra R B} {F : (⨁ i, M i) →ₗ[R] B} (h : ∀ i x, F (lof R ι M i x) ∈ S) (v : ⨁ i, M i)
+    : F v ∈ S := by
   induction v using DirectSum.induction_on with
   | zero => rw [map_zero]; exact zero_mem S
   | of i x => rw [← lof_eq_of R]; exact h i x
   | add v w hv hw => rw [map_add]; exact add_mem hv hw
 
-/-- If the image of every summand commutes with a fixed element, so does the whole
-  image. -/
-lemma commute_of_lof_left {F : (⨁ i, M i) →ₗ[R] B} {b : B}
-    (h : ∀ i x, Commute (F (lof R ι M i x)) b) (v : ⨁ i, M i) : Commute (F v) b := by
+/--
+If the image of every summand commutes with a fixed element, so does the whole
+image.
+-/
+lemma commute_of_lof_left
+    {F : (⨁ i, M i) →ₗ[R] B} {b : B} (h : ∀ i x, Commute (F (lof R ι M i x)) b) (v : ⨁ i, M i)
+    : Commute (F v) b := by
   induction v using DirectSum.induction_on with
   | zero => rw [map_zero]; exact Commute.zero_left b
   | of i x => rw [← lof_eq_of R]; exact h i x
   | add v w hv hw => rw [map_add]; exact hv.add_left hw
 
-/-- Commutation extends from the summands. If the image of every summand of one direct
-  sum commutes with the image of every summand of another, then the two images commute
-  elementwise. -/
-lemma commute_of_lof {F : (⨁ i, M i) →ₗ[R] B} {G : (⨁ j, N j) →ₗ[R] B}
+/--
+Commutation extends from the summands. If the image of every summand of one direct
+sum commutes with the image of every summand of another, then the two images commute
+elementwise.
+-/
+lemma commute_of_lof
+    {F : (⨁ i, M i) →ₗ[R] B} {G : (⨁ j, N j) →ₗ[R] B}
     (h : ∀ i j x y, Commute (F (lof R ι M i x)) (G (lof R κ N j y)))
-    (v : ⨁ i, M i) (w : ⨁ j, N j) : Commute (F v) (G w) :=
-  commute_of_lof_left (fun i x =>
-    (commute_of_lof_left (fun j y => (h i j x y).symm) w).symm) v
+    (v : ⨁ i, M i) (w : ⨁ j, N j)
+    : Commute (F v) (G w) :=
+  commute_of_lof_left (fun i x => (commute_of_lof_left (fun j y => (h i j x y).symm) w).symm) v
 
 end Semiring
 
@@ -300,10 +339,12 @@ section Ring
 variable {B : Type*} [Ring B] [Algebra R B]
 
 /-- Anticommutation extends from the summands. -/
-lemma mul_swap_of_lof {F : (⨁ i, M i) →ₗ[R] B}
-    (h : ∀ i j x y, F (lof R ι M i x) * F (lof R ι M j y)
-      = -(F (lof R ι M j y) * F (lof R ι M i x)))
-    (v w : ⨁ i, M i) : F v * F w = -(F w * F v) := by
+lemma mul_swap_of_lof
+    {F : (⨁ i, M i) →ₗ[R] B}
+    (h
+      : ∀ i j x y, F (lof R ι M i x) * F (lof R ι M j y) = -(F (lof R ι M j y) * F (lof R ι M i x)))
+    (v w : ⨁ i, M i)
+    : F v * F w = -(F w * F v) := by
   induction v using DirectSum.induction_on with
   | zero => simp
   | of i x =>
@@ -314,37 +355,42 @@ lemma mul_swap_of_lof {F : (⨁ i, M i) →ₗ[R] B}
     | add w₁ w₂ h₁ h₂ => rw [map_add, mul_add, add_mul, h₁, h₂, neg_add]
   | add v₁ v₂ h₁ h₂ => rw [map_add, add_mul, mul_add, h₁, h₂, neg_add]
 
-/-- Square-zero extends from the summands, given anticommutation across them. The
-  cross terms of `(x + y) * (x + y)` cancel exactly because the two images anticommute;
-  square-zero on each summand alone would leave them. -/
-lemma mul_self_of_lof {F : (⨁ i, M i) →ₗ[R] B}
-    (hsq : ∀ i x, F (lof R ι M i x) * F (lof R ι M i x) = 0)
-    (hswap : ∀ i j x y, F (lof R ι M i x) * F (lof R ι M j y)
-      = -(F (lof R ι M j y) * F (lof R ι M i x)))
-    (v : ⨁ i, M i) : F v * F v = 0 := by
+/--
+Square-zero extends from the summands, given anticommutation across them. The
+cross terms of `(x + y) * (x + y)` cancel exactly because the two images anticommute;
+square-zero on each summand alone would leave them.
+-/
+lemma mul_self_of_lof
+    {F : (⨁ i, M i) →ₗ[R] B} (hsq : ∀ i x, F (lof R ι M i x) * F (lof R ι M i x) = 0)
+    (hswap
+      : ∀ i j x y, F (lof R ι M i x) * F (lof R ι M j y) = -(F (lof R ι M j y) * F (lof R ι M i x)))
+    (v : ⨁ i, M i)
+    : F v * F v = 0 := by
   have key := mul_swap_of_lof hswap
   induction v using DirectSum.induction_on with
   | zero => simp
   | of i x => rw [← lof_eq_of R]; exact hsq i x
   | add v w hv hw =>
-    have h : F (v + w) * F (v + w)
-        = F v * F v + (F v * F w + F w * F v) + F w * F w := by
+    have h : F (v + w) * F (v + w) = F v * F v + (F v * F w + F w * F v) + F w * F w := by
       rw [map_add]; noncomm_ring
     rw [h, hv, hw, key v w]
     abel
 
-/-- Square-zero on a direct sum is not square-zero summand by summand. It is equivalent to
-  square-zero on each summand together with anticommutation between the images of any two
-  summands, the second condition being vacuous only when there is at most one summand.
-  This is the precise sense in which Fermi statistics for a family of species is more than
-  the Fermi statistics of the individual species. -/
-lemma mul_self_iff_lof {F : (⨁ i, M i) →ₗ[R] B} :
-    (∀ v, F v * F v = 0) ↔
-      ((∀ i x, F (lof R ι M i x) * F (lof R ι M i x) = 0) ∧
-        ∀ i j x y, F (lof R ι M i x) * F (lof R ι M j y)
-          = -(F (lof R ι M j y) * F (lof R ι M i x))) :=
-  ⟨fun h => ⟨fun _ _ => h _, fun _ _ _ _ => F.mul_swap_of_mul_self h _ _⟩,
-    fun h v => mul_self_of_lof h.1 h.2 v⟩
+/--
+Square-zero on a direct sum is not square-zero summand by summand. It is equivalent to
+square-zero on each summand together with anticommutation between the images of any two
+summands, the second condition being vacuous only when there is at most one summand.
+This is the precise sense in which Fermi statistics for a family of species is more than
+the Fermi statistics of the individual species.
+-/
+lemma mul_self_iff_lof {F : (⨁ i, M i) →ₗ[R] B}
+    : (∀ v, F v * F v = 0)
+      ↔ ((∀ i x, F (lof R ι M i x) * F (lof R ι M i x) = 0)
+        ∧ ∀ i j x y,
+          F (lof R ι M i x) * F (lof R ι M j y) = -(F (lof R ι M j y) * F (lof R ι M i x))) := ⟨
+  fun h => ⟨fun _ _ => h _, fun _ _ _ _ => F.mul_swap_of_mul_self h _ _⟩,
+  fun h v => mul_self_of_lof h.1 h.2 v
+⟩
 
 end Ring
 

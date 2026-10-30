@@ -72,24 +72,25 @@ instance instOrderUnitSpace : OrderUnitSpace (Bidual E) where
     exact (le_abs_self _).trans (hn φ)
 
 instance instArchimedeanOrderUnitSpace : ArchimedeanOrderUnitSpace (Bidual E) where
-  le_zero_of_forall_pos_smul_one_le x h φ := le_of_forall_pos_le_add fun ε hε => by
-    have h1 := map_nonneg φ OrderUnitSpace.one_nonneg
-    have := h (ε / (φ 1 + 1)) (by positivity) φ
-    simp only [coe_smul, coe_one, coe_zero] at this ⊢
-    have : ε / (φ 1 + 1) * φ 1 ≤ ε := by
-      rw [div_mul_eq_mul_div, div_le_iff₀ (by positivity)]; nlinarith
-    linarith
+  le_zero_of_forall_pos_smul_one_le x h φ :=
+    le_of_forall_pos_le_add fun ε hε => by
+      have h1 := map_nonneg φ OrderUnitSpace.one_nonneg
+      have := h (ε / (φ 1 + 1)) (by positivity) φ
+      simp only [coe_smul, coe_one, coe_zero] at this ⊢
+      have : ε / (φ 1 + 1) * φ 1 ≤ ε := by
+        rw [div_mul_eq_mul_div, div_le_iff₀ (by positivity)]; nlinarith
+      linarith
 
-/-- A positive functional's value on an element of the bidual below the unit is at most its total
-weight. -/
-lemma apply_le_of_le_one {x : Bidual E} (hx : x ≤ 1) (φ : E →ₚ[ℝ] ℝ) : x φ ≤ φ 1 :=
-  hx φ
+/--
+A positive functional's value on an element of the bidual below the unit is at most its total
+weight.
+-/
+lemma apply_le_of_le_one {x : Bidual E} (hx : x ≤ 1) (φ : E →ₚ[ℝ] ℝ) : x φ ≤ φ 1 := hx φ
 
 /-! ## B. The bidual of a classical system -/
 
 /-- The bidual of a classical system is an order-unit lattice. -/
-noncomputable instance instOrderUnitLattice [Fact (HasLatticeDualCone E)] :
-    OrderUnitLattice (Bidual E) where
+noncomputable instance instOrderUnitLattice [Fact (HasLatticeDualCone E)]
+  : OrderUnitLattice (Bidual E) where
 
 end Bidual
-

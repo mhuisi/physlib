@@ -53,47 +53,54 @@ open Matrix MatrixGroups SL2C Invariants TensorSpecies Tensor complexLorentzTens
 -/
 
 /-- The matrix of `g` on the left-handed Weyl colour is `g`. -/
-lemma toMatrix_rep_upL (g : SL(2,ℂ)) :
-    LinearMap.toMatrix (complexLorentzTensor.basis .upL) (complexLorentzTensor.basis .upL)
-      (complexLorentzTensor.rep .upL g) = g.1 :=
+lemma toMatrix_rep_upL (g : SL(2,ℂ))
+    : LinearMap.toMatrix (complexLorentzTensor.basis .upL) (complexLorentzTensor.basis .upL)
+        (complexLorentzTensor.rep .upL g)
+      = g.1 :=
   Fermion.LeftHandedWeyl.rep_toMatrix g
 
 /-- The matrix of `g` on the dual left-handed Weyl colour is `(g⁻¹)ᵀ`. -/
-lemma toMatrix_rep_downL (g : SL(2,ℂ)) :
-    LinearMap.toMatrix (complexLorentzTensor.basis .downL) (complexLorentzTensor.basis .downL)
-      (complexLorentzTensor.rep .downL g) = (g.1⁻¹)ᵀ :=
+lemma toMatrix_rep_downL (g : SL(2,ℂ))
+    : LinearMap.toMatrix (complexLorentzTensor.basis .downL) (complexLorentzTensor.basis .downL)
+        (complexLorentzTensor.rep .downL g)
+      = (g.1⁻¹)ᵀ :=
   Fermion.DualLeftHandedWeyl.rep_toMatrix g
 
 /-- The matrix of `g` on the right-handed Weyl colour is the entrywise conjugate of `g`. -/
-lemma toMatrix_rep_upR (g : SL(2,ℂ)) :
-    LinearMap.toMatrix (complexLorentzTensor.basis .upR) (complexLorentzTensor.basis .upR)
-      (complexLorentzTensor.rep .upR g) = g.1.map star :=
+lemma toMatrix_rep_upR (g : SL(2,ℂ))
+    : LinearMap.toMatrix (complexLorentzTensor.basis .upR) (complexLorentzTensor.basis .upR)
+        (complexLorentzTensor.rep .upR g)
+      = g.1.map star :=
   Fermion.RightHandedWeyl.rep_toMatrix g
 
 /-- The matrix of `g` on the dual right-handed Weyl colour is `(g⁻¹)ᴴ`. -/
-lemma toMatrix_rep_downR (g : SL(2,ℂ)) :
-    LinearMap.toMatrix (complexLorentzTensor.basis .downR) (complexLorentzTensor.basis .downR)
-      (complexLorentzTensor.rep .downR g) = (g.1⁻¹)ᴴ :=
+lemma toMatrix_rep_downR (g : SL(2,ℂ))
+    : LinearMap.toMatrix (complexLorentzTensor.basis .downR) (complexLorentzTensor.basis .downR)
+        (complexLorentzTensor.rep .downR g)
+      = (g.1⁻¹)ᴴ :=
   Fermion.DualRightHandedWeyl.rep_toMatrix g
 
 /-- The matrix of `g` on the contravariant vector colour is the Lorentz matrix of `g`. -/
-lemma toMatrix_rep_up_apply (g : SL(2,ℂ)) (μ ν : Fin 1 ⊕ Fin 3) :
-    LinearMap.toMatrix (complexLorentzTensor.basis .up) (complexLorentzTensor.basis .up)
-      (complexLorentzTensor.rep .up g) μ ν
+lemma toMatrix_rep_up_apply (g : SL(2,ℂ)) (μ ν : Fin 1 ⊕ Fin 3)
+    : LinearMap.toMatrix (complexLorentzTensor.basis .up) (complexLorentzTensor.basis .up)
+        (complexLorentzTensor.rep .up g) μ ν
       = (((SL2C.toLorentzGroup g).1 μ ν : ℝ) : ℂ) := by
-  change LinearMap.toMatrix ComplexVector.basis ComplexVector.basis
-    (ComplexVector.SL2CRep g) μ ν = _
+  change LinearMap.toMatrix ComplexVector.basis ComplexVector.basis (ComplexVector.SL2CRep g) μ ν
+    = _
   rw [ComplexVector.basis_ρ_apply]
   rfl
 
-/-- The matrix of `g` on the covariant vector colour is the transpose of the inverse of the
-  Lorentz matrix of `g`. -/
-lemma toMatrix_rep_down_apply (g : SL(2,ℂ)) (μ ν : Fin 1 ⊕ Fin 3) :
-    LinearMap.toMatrix (complexLorentzTensor.basis .down) (complexLorentzTensor.basis .down)
-      (complexLorentzTensor.rep .down g) μ ν
+/--
+The matrix of `g` on the covariant vector colour is the transpose of the inverse of the
+Lorentz matrix of `g`.
+-/
+lemma toMatrix_rep_down_apply (g : SL(2,ℂ)) (μ ν : Fin 1 ⊕ Fin 3)
+    : LinearMap.toMatrix (complexLorentzTensor.basis .down) (complexLorentzTensor.basis .down)
+        (complexLorentzTensor.rep .down g) μ ν
       = (((SL2C.toLorentzGroup g)⁻¹.1 ν μ : ℝ) : ℂ) := by
-  change LinearMap.toMatrix ComplexCoVector.basis ComplexCoVector.basis
-    (ComplexCoVector.SL2CRep g) μ ν = _
+  change LinearMap.toMatrix ComplexCoVector.basis ComplexCoVector.basis (ComplexCoVector.SL2CRep g)
+      μ ν
+    = _
   rw [ComplexCoVector.basis_ρ_apply, Matrix.transpose_apply, LorentzGroup.toComplex_inv]
   rfl
 
@@ -109,18 +116,21 @@ lemma inv_dagger (g : SL(2,ℂ)) : (dagger g)⁻¹ = dagger g⁻¹ := by
 
 -/
 
-/-- A colour is dagger compatible when, in its basis, the matrix of `g†` is the conjugate
-  transpose of the matrix of `g`. -/
+/--
+A colour is dagger compatible when, in its basis, the matrix of `g†` is the conjugate
+transpose of the matrix of `g`.
+-/
 def IsDaggerCompatible (k : complexLorentzTensor.Color) : Prop :=
   ∀ g : SL(2,ℂ),
     LinearMap.toMatrix (complexLorentzTensor.basis k) (complexLorentzTensor.basis k)
-      (complexLorentzTensor.rep k (dagger g))
-    = (LinearMap.toMatrix (complexLorentzTensor.basis k) (complexLorentzTensor.basis k)
-      (complexLorentzTensor.rep k g))ᴴ
+        (complexLorentzTensor.rep k (dagger g))
+      = (LinearMap.toMatrix (complexLorentzTensor.basis k) (complexLorentzTensor.basis k)
+        (complexLorentzTensor.rep k g))ᴴ
 
 /-- The four Weyl colours are dagger compatible. -/
-lemma isDaggerCompatible_of_weyl {k : complexLorentzTensor.Color}
-    (hk : k = .upL ∨ k = .downL ∨ k = .upR ∨ k = .downR) : IsDaggerCompatible k := by
+lemma isDaggerCompatible_of_weyl
+    {k : complexLorentzTensor.Color} (hk : k = .upL ∨ k = .downL ∨ k = .upR ∨ k = .downR)
+    : IsDaggerCompatible k := by
   rcases hk with rfl | rfl | rfl | rfl <;> intro g
   · rw [toMatrix_rep_upL, toMatrix_rep_upL]
     rfl
@@ -135,16 +145,20 @@ lemma isDaggerCompatible_of_weyl {k : complexLorentzTensor.Color}
     change ((g.1ᴴ)⁻¹)ᴴ = _
     rw [← Matrix.conjTranspose_nonsing_inv]
 
-/-- The contravariant vector colour is dagger compatible: the Lorentz matrix of `g†` is the
-  transpose of that of `g`, and it is real. -/
+/--
+The contravariant vector colour is dagger compatible: the Lorentz matrix of `g†` is the
+transpose of that of `g`, and it is real.
+-/
 lemma isDaggerCompatible_up : IsDaggerCompatible .up := by
   intro g
   ext μ ν
   rw [Matrix.conjTranspose_apply, toMatrix_rep_up_apply, toMatrix_rep_up_apply,
     toLorentzGroup_dagger, Matrix.transpose_apply, Complex.star_def, Complex.conj_ofReal]
 
-/-- The covariant vector colour is dagger compatible: the inverse Lorentz matrix of `g†` is the
-  transpose of that of `g`, and it is real. -/
+/--
+The covariant vector colour is dagger compatible: the inverse Lorentz matrix of `g†` is the
+transpose of that of `g`, and it is real.
+-/
 lemma isDaggerCompatible_down : IsDaggerCompatible .down := by
   intro g
   ext μ ν
@@ -163,14 +177,17 @@ lemma isDaggerCompatible (k : complexLorentzTensor.Color) : IsDaggerCompatible k
   · exact isDaggerCompatible_down
 
 /-- Colours that are all dagger compatible are closed under adjoints, with `g' = g†`. -/
-lemma isAdjointClosed_of_isDaggerCompatible {n : ℕ} {c : Fin n → complexLorentzTensor.Color}
-    (hc : ∀ i, IsDaggerCompatible (c i)) : complexLorentzTensor.IsAdjointClosed c :=
-  fun g => ⟨dagger g, fun i => hc i g⟩
+lemma isAdjointClosed_of_isDaggerCompatible
+    {n : ℕ} {c : Fin n → complexLorentzTensor.Color} (hc : ∀ i, IsDaggerCompatible (c i))
+    : complexLorentzTensor.IsAdjointClosed c := fun g =>
+  ⟨dagger g, fun i => hc i g⟩
 
 end Lorentz
 
-/-- Every list of colours of complex Lorentz tensors is closed under adjoints, with
-  `g' = g†`. -/
-lemma complexLorentzTensor.isAdjointClosed {n : ℕ} (c : Fin n → complexLorentzTensor.Color) :
-    complexLorentzTensor.IsAdjointClosed c :=
+/--
+Every list of colours of complex Lorentz tensors is closed under adjoints, with
+`g' = g†`.
+-/
+lemma complexLorentzTensor.isAdjointClosed {n : ℕ} (c : Fin n → complexLorentzTensor.Color)
+    : complexLorentzTensor.IsAdjointClosed c :=
   Lorentz.isAdjointClosed_of_isDaggerCompatible fun i => Lorentz.isDaggerCompatible (c i)

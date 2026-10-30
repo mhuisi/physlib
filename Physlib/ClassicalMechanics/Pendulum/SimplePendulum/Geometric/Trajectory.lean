@@ -81,21 +81,28 @@ namespace Trajectory
 def ofLift (θ : Time → EuclideanSpace ℝ (Fin 1)) : Trajectory := fun t =>
   ConfigurationSpace.ofAngle (θ t 0)
 
-/-- At time `t` the trajectory described by a lift `θ` of the angle is the configuration at
-  angle `θ t 0`. -/
-lemma ofLift_apply (θ : Time → EuclideanSpace ℝ (Fin 1)) (t : Time) :
-    ofLift θ t = ConfigurationSpace.ofAngle (θ t 0) := rfl
+/--
+At time `t` the trajectory described by a lift `θ` of the angle is the configuration at
+angle `θ t 0`.
+-/
+lemma ofLift_apply (θ : Time → EuclideanSpace ℝ (Fin 1)) (t : Time)
+    : ofLift θ t = ConfigurationSpace.ofAngle (θ t 0) :=
+  rfl
 
-/-- Two lifts of the angle describe the same trajectory exactly when at each time they differ by
-  a whole number of turns. -/
-lemma ofLift_eq_iff (θ₁ θ₂ : Time → EuclideanSpace ℝ (Fin 1)) :
-    ofLift θ₁ = ofLift θ₂ ↔ ∀ t, ∃ n : ℤ, θ₂ t 0 = θ₁ t 0 + n * (2 * Real.pi) := by
+/--
+Two lifts of the angle describe the same trajectory exactly when at each time they differ by
+a whole number of turns.
+-/
+lemma ofLift_eq_iff (θ₁ θ₂ : Time → EuclideanSpace ℝ (Fin 1))
+    : ofLift θ₁ = ofLift θ₂ ↔ ∀ t, ∃ n : ℤ, θ₂ t 0 = θ₁ t 0 + n * (2 * Real.pi) := by
   simp only [funext_iff, ofLift_apply, ConfigurationSpace.ofAngle_eq_iff]
 
-/-- Shifting a lift of the angle by a whole number of turns leaves the described trajectory
-  unchanged. -/
-lemma ofLift_add_int_mul_two_pi (θ : Time → EuclideanSpace ℝ (Fin 1)) (n : ℤ) :
-    ofLift (fun t => θ t + (n * (2 * Real.pi)) • EuclideanSpace.single 0 1) = ofLift θ := by
+/--
+Shifting a lift of the angle by a whole number of turns leaves the described trajectory
+unchanged.
+-/
+lemma ofLift_add_int_mul_two_pi (θ : Time → EuclideanSpace ℝ (Fin 1)) (n : ℤ)
+    : ofLift (fun t => θ t + (n * (2 * Real.pi)) • EuclideanSpace.single 0 1) = ofLift θ := by
   rw [ofLift_eq_iff]
   intro
   exact ⟨-n, by simp⟩
@@ -113,15 +120,16 @@ manifold smoothness into the circle.
 -/
 
 /-- The trajectory described by a continuous lift of the angle is continuous. -/
-lemma continuous_ofLift {θ : Time → EuclideanSpace ℝ (Fin 1)} (hθ : Continuous θ) :
-    Continuous (ofLift θ) :=
-  ConfigurationSpace.continuous_ofAngle.comp
-    ((EuclideanSpace.proj (0 : Fin 1)).continuous.comp hθ)
+lemma continuous_ofLift {θ : Time → EuclideanSpace ℝ (Fin 1)} (hθ : Continuous θ)
+    : Continuous (ofLift θ) :=
+  ConfigurationSpace.continuous_ofAngle.comp ((EuclideanSpace.proj (0 : Fin 1)).continuous.comp hθ)
 
-/-- The trajectory described by a `C^n` lift of the angle is a `C^n` curve in the configuration
-  circle. -/
-lemma contMDiff_ofLift {n : WithTop ℕ∞} {θ : Time → EuclideanSpace ℝ (Fin 1)}
-    (hθ : ContDiff ℝ n θ) : ContMDiff 𝓘(ℝ, Time) (𝓡 1) n (ofLift θ) := by
+/--
+The trajectory described by a `C^n` lift of the angle is a `C^n` curve in the configuration
+circle.
+-/
+lemma contMDiff_ofLift {n : WithTop ℕ∞} {θ : Time → EuclideanSpace ℝ (Fin 1)} (hθ : ContDiff ℝ n θ)
+    : ContMDiff (𝓘(ℝ, Time)) (𝓡 1) n (ofLift θ) := by
   apply (ConfigurationSpace.contMDiff_ofAngle.of_le le_top).comp (contMDiff_iff_contDiff.mpr _)
   exact (ContinuousLinearMap.contDiff (𝕜 := ℝ) (EuclideanSpace.proj (0 : Fin 1))).comp hθ
 
@@ -138,21 +146,26 @@ constraint holds at all times: the bob stays on the circle of radius `|ℓ|` abo
 /-- The physical position of the bob along a trajectory, over time, for a rod of length `ℓ`. -/
 def toSpace (ℓ : ℝ) (γ : Trajectory) (t : Time) : Space 2 := (γ t).toSpace ℓ
 
-/-- Along the trajectory described by a lift `θ` of the angle the bob is at
-  `(ℓ sin (θ t 0), -ℓ cos (θ t 0))`. -/
-lemma toSpace_ofLift (ℓ : ℝ) (θ : Time → EuclideanSpace ℝ (Fin 1)) (t : Time) :
-    toSpace ℓ (ofLift θ) t = ⟨![ℓ * Real.sin (θ t 0), -ℓ * Real.cos (θ t 0)]⟩ :=
+/--
+Along the trajectory described by a lift `θ` of the angle the bob is at
+`(ℓ sin (θ t 0), -ℓ cos (θ t 0))`.
+-/
+lemma toSpace_ofLift (ℓ : ℝ) (θ : Time → EuclideanSpace ℝ (Fin 1)) (t : Time)
+    : toSpace ℓ (ofLift θ) t = ⟨![ℓ * Real.sin (θ t 0), -ℓ * Real.cos (θ t 0)]⟩ :=
   ConfigurationSpace.toSpace_ofAngle ℓ (θ t 0)
 
-/-- The rod-length constraint along a trajectory: the bob stays at distance `|ℓ|` from the
-  pivot. -/
+/--
+The rod-length constraint along a trajectory: the bob stays at distance `|ℓ|` from the
+pivot.
+-/
 lemma norm_toSpace (ℓ : ℝ) (γ : Trajectory) (t : Time) : ‖toSpace ℓ γ t‖ = |ℓ| :=
   ConfigurationSpace.toSpace_norm ℓ (γ t)
 
-/-- The physical position of the bob along a continuous trajectory depends continuously on the
-  time. -/
-lemma continuous_toSpace (ℓ : ℝ) {γ : Trajectory} (hγ : Continuous γ) :
-    Continuous (toSpace ℓ γ) :=
+/--
+The physical position of the bob along a continuous trajectory depends continuously on the
+time.
+-/
+lemma continuous_toSpace (ℓ : ℝ) {γ : Trajectory} (hγ : Continuous γ) : Continuous (toSpace ℓ γ) :=
   (ConfigurationSpace.continuous_toSpace ℓ).comp hγ
 
 end ClassicalMechanics.SimplePendulum.Trajectory

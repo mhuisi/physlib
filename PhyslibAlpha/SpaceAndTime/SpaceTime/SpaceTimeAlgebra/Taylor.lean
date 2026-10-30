@@ -49,43 +49,44 @@ open MvPowerSeries
 
 -/
 
-lemma star_ofDerivValues (f : Multiset (Fin 1 ⊕ Fin 3) → ℂ) :
-    star (ofDerivValues f) = ofDerivValues fun s => star (f s) := by
+lemma star_ofDerivValues (f : Multiset (Fin 1 ⊕ Fin 3) → ℂ)
+    : star (ofDerivValues f) = ofDerivValues fun s => star (f s) := by
   ext m
-  rw [coeff_star, coeff_ofDerivValues, coeff_ofDerivValues, star_mul', star_inv₀,
-    star_natCast]
+  rw [coeff_star, coeff_ofDerivValues, coeff_ofDerivValues, star_mul', star_inv₀, star_natCast]
 
-lemma ofDerivValues_sum {ι : Type} (t : Finset ι) (f : ι → Multiset (Fin 1 ⊕ Fin 3) → ℂ) :
-    ofDerivValues (fun s => ∑ i ∈ t, f i s) = ∑ i ∈ t, ofDerivValues (f i) := by
+lemma ofDerivValues_sum {ι : Type} (t : Finset ι) (f : ι → Multiset (Fin 1 ⊕ Fin 3) → ℂ)
+    : ofDerivValues (fun s => ∑ i ∈ t, f i s) = ∑ i ∈ t, ofDerivValues (f i) := by
   ext m
   simp only [coeff_ofDerivValues, map_sum, Finset.mul_sum]
 
 /-- The matrix of jets with prescribed base-point Taylor data `M`, entrywise. -/
-noncomputable def taylorMatrix {κ : Type} (M : Multiset (Fin 1 ⊕ Fin 3) → Matrix κ κ ℂ) :
-    Matrix κ κ SpaceTimeAlgebra :=
+noncomputable def taylorMatrix {κ : Type} (M : Multiset (Fin 1 ⊕ Fin 3) → Matrix κ κ ℂ)
+    : Matrix κ κ SpaceTimeAlgebra :=
   Matrix.of fun i j => ofDerivValues fun s => M s i j
 
-lemma taylorMatrix_apply {κ : Type} (M : Multiset (Fin 1 ⊕ Fin 3) → Matrix κ κ ℂ) (i j : κ) :
-    taylorMatrix M i j = ofDerivValues fun s => M s i j :=
+lemma taylorMatrix_apply {κ : Type} (M : Multiset (Fin 1 ⊕ Fin 3) → Matrix κ κ ℂ) (i j : κ)
+    : taylorMatrix M i j = ofDerivValues fun s => M s i j :=
   rfl
 
-lemma star_taylorMatrix {κ : Type} {M : Multiset (Fin 1 ⊕ Fin 3) → Matrix κ κ ℂ}
-    (hM : ∀ s, star (M s) = M s) : star (taylorMatrix M) = taylorMatrix M := by
+lemma star_taylorMatrix
+    {κ : Type} {M : Multiset (Fin 1 ⊕ Fin 3) → Matrix κ κ ℂ} (hM : ∀ s, star (M s) = M s)
+    : star (taylorMatrix M) = taylorMatrix M := by
   ext i j : 1
   rw [Matrix.star_apply, taylorMatrix_apply, taylorMatrix_apply, star_ofDerivValues]
   exact congrArg ofDerivValues (funext fun s => by rw [← Matrix.star_apply, hM s])
 
-lemma trace_taylorMatrix {κ : Type} [Fintype κ] {M : Multiset (Fin 1 ⊕ Fin 3) → Matrix κ κ ℂ}
-    (hM : ∀ s, (M s).trace = 0) : (taylorMatrix M).trace = 0 := by
+lemma trace_taylorMatrix
+    {κ : Type} [Fintype κ] {M : Multiset (Fin 1 ⊕ Fin 3) → Matrix κ κ ℂ} (hM : ∀ s, (M s).trace = 0)
+    : (taylorMatrix M).trace = 0 := by
   have h : ∀ s, ∑ i, M s i i = 0 := fun s => hM s
   simp only [Matrix.trace, Matrix.diag_apply, taylorMatrix_apply, ← ofDerivValues_sum, h]
   ext m
   simp [coeff_ofDerivValues]
 
 /-- The base-point Taylor data of `taylorMatrix M` are `M`, entrywise. -/
-lemma map_constantCoeff_iteratedPDeriv_taylorMatrix {κ : Type}
-    (M : Multiset (Fin 1 ⊕ Fin 3) → Matrix κ κ ℂ) (s : Multiset (Fin 1 ⊕ Fin 3)) :
-    (taylorMatrix M).map (fun f => constantCoeff (iteratedPDeriv s f)) = M s := by
+lemma map_constantCoeff_iteratedPDeriv_taylorMatrix
+    {κ : Type} (M : Multiset (Fin 1 ⊕ Fin 3) → Matrix κ κ ℂ) (s : Multiset (Fin 1 ⊕ Fin 3))
+    : (taylorMatrix M).map (fun f => constantCoeff (iteratedPDeriv s f)) = M s := by
   ext i j
   rw [Matrix.map_apply, taylorMatrix_apply, constantCoeff_iteratedPDeriv_ofDerivValues]
 

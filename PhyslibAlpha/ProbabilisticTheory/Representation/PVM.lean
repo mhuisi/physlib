@@ -70,19 +70,19 @@ section CStarAlgebra
 variable {A : Type*} [CStarAlgebra A] [PartialOrder A] [StarOrderedRing A]
 
 /-- A POVM whose values are projections is a PVM. -/
-lemma POVM.isPVM_of_forall_isIdempotentElem {Ω : Type*} [MeasurableSpace Ω]
+lemma POVM.isPVM_of_forall_isIdempotentElem
+    {Ω : Type*} [MeasurableSpace Ω]
     {μ : POVM Ω (selfAdjoint A)}
-    (h : ∀ s hs, IsIdempotentElem (((μ s hs : Effect (selfAdjoint A)) : selfAdjoint A) : A)) :
-    μ.IsPVM :=
-  fun s hs => (h s hs).isSharp
+    (h : ∀ s hs, IsIdempotentElem (((μ s hs : Effect (selfAdjoint A)) : selfAdjoint A) : A))
+    : μ.IsPVM := fun s hs =>
+  (h s hs).isSharp
 
 end CStarAlgebra
 
 /-! ## C. PVMs -/
 
 /-- Projection-valued measures: POVMs whose values are sharp effects. -/
-def PVM (Ω E : Type*) [MeasurableSpace Ω] [OrderUnitSpace E] :=
-  {μ : POVM Ω E // μ.IsPVM}
+def PVM (Ω E : Type*) [MeasurableSpace Ω] [OrderUnitSpace E] := {μ : POVM Ω E // μ.IsPVM}
 
 namespace PVM
 
@@ -94,8 +94,8 @@ lemma ext {π ρ : PVM Ω E} (h : ∀ s hs, (π : POVM Ω E) s hs = (ρ : POVM �
   Subtype.ext (EffectValuedMeasure.ext h)
 
 /-- Every effect of a PVM is sharp: unfolding what it means to be one. -/
-lemma isSharp_apply (π : PVM Ω E) (s : Set Ω) (hs : MeasurableSet s) :
-    Effect.IsSharp ((π : POVM Ω E) s hs) :=
+lemma isSharp_apply (π : PVM Ω E) (s : Set Ω) (hs : MeasurableSet s)
+    : Effect.IsSharp ((π : POVM Ω E) s hs) :=
   π.2 s hs
 
 end PVM

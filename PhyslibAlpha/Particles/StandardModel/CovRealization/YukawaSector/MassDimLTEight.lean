@@ -66,9 +66,9 @@ open TensorProduct Matrix MatrixGroups Lorentz Lorentz.Invariants
 
 namespace CovAlgebraRealization
 
-variable {B : Type} [Ring B] [Algebra ℂ B]
-  {repGauge : Representation ℂ GaugeGroupI B}
-  {repLorentz : Representation ℂ SL(2,ℂ) B}
+variable
+  {B : Type} [Ring B] [Algebra ℂ B]
+  {repGauge : Representation ℂ GaugeGroupI B} {repLorentz : Representation ℂ (SL(2,ℂ)) B}
   {massWeightPoly : B →ₐ[ℂ] Polynomial B}
   (h : CovAlgebraRealization B repGauge repLorentz massWeightPoly)
 
@@ -86,26 +86,31 @@ total `-1`.
 
 -/
 
-/-- A Higgs derivative submodule against a fermion one is of half-integer spin: `+1` times
-  `-1`. -/
-private lemma higgsFermion_le_centreEigenspace (a b : ℕ) :
-    h.isHiggsSector.derivSubmodule a * h.isFermionSector.derivSubmodule b
+/--
+A Higgs derivative submodule against a fermion one is of half-integer spin: `+1` times
+`-1`.
+-/
+private lemma higgsFermion_le_centreEigenspace (a b : ℕ)
+    : h.isHiggsSector.derivSubmodule a * h.isFermionSector.derivSubmodule b
       ≤ centreEigenspace repLorentz (-1) := by
-  simpa using mul_le_centreEigenspace h.repLorentz_mul
-    (h.isHiggsSector.derivSubmodule_le_centreEigenspace a)
-    (h.isFermionSector.derivSubmodule_le_centreEigenspace b)
+  simpa using
+    mul_le_centreEigenspace h.repLorentz_mul (h.isHiggsSector.derivSubmodule_le_centreEigenspace a)
+      (h.isFermionSector.derivSubmodule_le_centreEigenspace b)
 
-/-- Two Higgs derivative submodules against a fermion one is of half-integer spin: `+1`
-  times `+1` times `-1`. -/
-private lemma higgsSqFermion_le_centreEigenspace (a b c : ℕ) :
-    h.isHiggsSector.derivSubmodule a * h.isHiggsSector.derivSubmodule b
+/--
+Two Higgs derivative submodules against a fermion one is of half-integer spin: `+1`
+times `+1` times `-1`.
+-/
+private lemma higgsSqFermion_le_centreEigenspace (a b c : ℕ)
+    : h.isHiggsSector.derivSubmodule a * h.isHiggsSector.derivSubmodule b
         * h.isFermionSector.derivSubmodule c
       ≤ centreEigenspace repLorentz (-1) := by
-  simpa using mul_le_centreEigenspace h.repLorentz_mul
-    (mul_le_centreEigenspace h.repLorentz_mul
-      (h.isHiggsSector.derivSubmodule_le_centreEigenspace a)
-      (h.isHiggsSector.derivSubmodule_le_centreEigenspace b))
-    (h.isFermionSector.derivSubmodule_le_centreEigenspace c)
+  simpa using
+    mul_le_centreEigenspace h.repLorentz_mul
+      (mul_le_centreEigenspace h.repLorentz_mul
+        (h.isHiggsSector.derivSubmodule_le_centreEigenspace a)
+        (h.isHiggsSector.derivSubmodule_le_centreEigenspace b))
+      (h.isFermionSector.derivSubmodule_le_centreEigenspace c)
 
 /-!
 
@@ -119,30 +124,37 @@ them the sign `-1`, the join included, and the invariant is left in `S`.
 
 -/
 
-/-- Mass weight five carries no Lorentz invariant modulo a Lorentz-stable submodule: a
-  Lorentz invariant of `sectorMassWeight {higgs, fermion} 5 ⊔ S` lies in `S`. The weight is
-  one Higgs field against the underived fermion towers, of half-integer spin. -/
-lemma mem_of_lorentz_invariant_sectorMassWeight_higgs_fermion_five_sup (S : Submodule ℂ B)
-    (hSL : ∀ g : SL(2,ℂ), ∀ y ∈ S, repLorentz g y ∈ S) {x : B}
-    (hx : x ∈ h.sectorMassWeight {GeneratorClass.higgs, GeneratorClass.fermion} 5 ⊔ S)
-    (hL : ∀ g : SL(2,ℂ), repLorentz g x = x) : x ∈ S := by
+/--
+Mass weight five carries no Lorentz invariant modulo a Lorentz-stable submodule: a
+Lorentz invariant of `sectorMassWeight {higgs, fermion} 5 ⊔ S` lies in `S`. The weight is
+one Higgs field against the underived fermion towers, of half-integer spin.
+-/
+lemma mem_of_lorentz_invariant_sectorMassWeight_higgs_fermion_five_sup
+    (S : Submodule ℂ B) (hSL : ∀ g : SL(2,ℂ), ∀ y ∈ S, repLorentz g y ∈ S)
+    {x : B} (hx : x ∈ h.sectorMassWeight {GeneratorClass.higgs, GeneratorClass.fermion} 5 ⊔ S)
+    (hL : ∀ g : SL(2,ℂ), repLorentz g x = x)
+    : x ∈ S := by
   rw [h.sectorMassWeight_higgs_fermion_five] at hx
   exact mem_of_invariant_of_mem_sup_centreEigenspace_neg_one
     (h.higgsFermion_le_centreEigenspace 0 0) S hSL hx hL
 
-/-- Mass weight seven carries no Lorentz invariant modulo a Lorentz-stable submodule: a
-  Lorentz invariant of `sectorMassWeight {higgs, fermion} 7 ⊔ S` lies in `S`. Each of the
-  three products making up the weight has a single fermion factor, so each is of
-  half-integer spin and so is their join. -/
+/--
+Mass weight seven carries no Lorentz invariant modulo a Lorentz-stable submodule: a
+Lorentz invariant of `sectorMassWeight {higgs, fermion} 7 ⊔ S` lies in `S`. Each of the
+three products making up the weight has a single fermion factor, so each is of
+half-integer spin and so is their join.
+-/
 lemma mem_of_lorentz_invariant_sectorMassWeight_higgs_fermion_seven_sup
-    (S : Submodule ℂ B) (hSL : ∀ g : SL(2,ℂ), ∀ y ∈ S, repLorentz g y ∈ S) {x : B}
-    (hx : x ∈ h.sectorMassWeight {GeneratorClass.higgs, GeneratorClass.fermion} 7 ⊔ S)
-    (hL : ∀ g : SL(2,ℂ), repLorentz g x = x) : x ∈ S := by
+    (S : Submodule ℂ B) (hSL : ∀ g : SL(2,ℂ), ∀ y ∈ S, repLorentz g y ∈ S)
+    {x : B} (hx : x ∈ h.sectorMassWeight {GeneratorClass.higgs, GeneratorClass.fermion} 7 ⊔ S)
+    (hL : ∀ g : SL(2,ℂ), repLorentz g x = x)
+    : x ∈ S := by
   rw [h.sectorMassWeight_higgs_fermion_seven] at hx
   exact mem_of_invariant_of_mem_sup_centreEigenspace_neg_one
-    (sup_le (sup_le (h.higgsFermion_le_centreEigenspace 0 1)
-      (h.higgsFermion_le_centreEigenspace 1 0))
-      (h.higgsSqFermion_le_centreEigenspace 0 0 0)) S hSL hx hL
+    (sup_le
+      (sup_le (h.higgsFermion_le_centreEigenspace 0 1) (h.higgsFermion_le_centreEigenspace 1 0))
+      (h.higgsSqFermion_le_centreEigenspace 0 0 0))
+    S hSL hx hL
 
 /-!
 
@@ -160,15 +172,18 @@ scalars, which are what force `0 < w` there, never appear.
 
 -/
 
-/-- Below mass weight eight the Yukawa sector carries no Lorentz invariant: a Lorentz
-  invariant of `sectorMassWeight {higgs, fermion} w ⊔ S` for `w < 8` lies in `S`. Weights
-  below five and weight six are trivial submodules, and weights five and seven are section
-  B. -/
-lemma mem_of_lorentz_invariant_sectorMassWeight_higgs_fermion_lt_eight_sup (w : ℕ)
-    (hw : w < 8) (S : Submodule ℂ B)
-    (hSL : ∀ g : SL(2,ℂ), ∀ y ∈ S, repLorentz g y ∈ S) {x : B}
-    (hx : x ∈ h.sectorMassWeight {GeneratorClass.higgs, GeneratorClass.fermion} w ⊔ S)
-    (hL : ∀ g : SL(2,ℂ), repLorentz g x = x) : x ∈ S := by
+/--
+Below mass weight eight the Yukawa sector carries no Lorentz invariant: a Lorentz
+invariant of `sectorMassWeight {higgs, fermion} w ⊔ S` for `w < 8` lies in `S`. Weights
+below five and weight six are trivial submodules, and weights five and seven are section
+B.
+-/
+lemma mem_of_lorentz_invariant_sectorMassWeight_higgs_fermion_lt_eight_sup
+    (w : ℕ) (hw : w < 8)
+    (S : Submodule ℂ B) (hSL : ∀ g : SL(2,ℂ), ∀ y ∈ S, repLorentz g y ∈ S)
+    {x : B} (hx : x ∈ h.sectorMassWeight {GeneratorClass.higgs, GeneratorClass.fermion} w ⊔ S)
+    (hL : ∀ g : SL(2,ℂ), repLorentz g x = x)
+    : x ∈ S := by
   rcases lt_or_ge w 5 with hw5 | hw5
   · rwa [h.sectorMassWeight_higgs_fermion_eq_bot_of_lt_five hw5, bot_sup_eq] at hx
   interval_cases w
@@ -176,39 +191,52 @@ lemma mem_of_lorentz_invariant_sectorMassWeight_higgs_fermion_lt_eight_sup (w : 
   · rwa [h.sectorMassWeight_higgs_fermion_six, bot_sup_eq] at hx
   · exact h.mem_of_lorentz_invariant_sectorMassWeight_higgs_fermion_seven_sup S hSL hx hL
 
-/-- The classification below mass weight eight as an equivalence, in the shape of the
-  gauge-sector statement `mem_massWeightSubmodule_lt_eight_sup_and_gauge_lorentz_invariant_iff`:
-  an element of `sectorMassWeight {higgs, fermion} w ⊔ S` for `w < 8` is fixed by both
-  groups exactly when it is itself an element of `S` fixed by both groups. Gauge stability
-  of `S` is not needed, and neither is gauge invariance of `x`: the forward direction is
-  the spin parity argument, which uses the Lorentz group alone. -/
+/--
+The classification below mass weight eight as an equivalence, in the shape of the
+gauge-sector statement `mem_massWeightSubmodule_lt_eight_sup_and_gauge_lorentz_invariant_iff`:
+an element of `sectorMassWeight {higgs, fermion} w ⊔ S` for `w < 8` is fixed by both
+groups exactly when it is itself an element of `S` fixed by both groups. Gauge stability
+of `S` is not needed, and neither is gauge invariance of `x`: the forward direction is
+the spin parity argument, which uses the Lorentz group alone.
+-/
 lemma mem_sectorMassWeight_higgs_fermion_lt_eight_sup_and_gauge_lorentz_invariant_iff
-    (w : ℕ) (hw : w < 8) (S : Submodule ℂ B)
-    (hSL : ∀ g : SL(2,ℂ), ∀ y ∈ S, repLorentz g y ∈ S) (x : B) :
-    (x ∈ h.sectorMassWeight {GeneratorClass.higgs, GeneratorClass.fermion} w ⊔ S
+    (w : ℕ) (hw : w < 8)
+    (S : Submodule ℂ B) (hSL : ∀ g : SL(2,ℂ), ∀ y ∈ S, repLorentz g y ∈ S)
+    (x : B)
+    : (x ∈ h.sectorMassWeight {GeneratorClass.higgs, GeneratorClass.fermion} w ⊔ S
         ∧ (∀ g : GaugeGroupI, repGauge g x = x) ∧ ∀ g : SL(2,ℂ), repLorentz g x = x)
-      ↔ ∃ y ∈ S, (∀ g : GaugeGroupI, repGauge g y = y)
-          ∧ (∀ g : SL(2,ℂ), repLorentz g y = y)
-          ∧ x = y := by
+      ↔ ∃ y ∈ S,
+        (∀ g : GaugeGroupI, repGauge g y = y) ∧ (∀ g : SL(2,ℂ), repLorentz g y = y) ∧ x = y := by
   constructor
   · rintro ⟨hx, hG, hL⟩
-    exact ⟨x, h.mem_of_lorentz_invariant_sectorMassWeight_higgs_fermion_lt_eight_sup w hw S
-      hSL hx hL, hG, hL, rfl⟩
+    exact ⟨
+      x,
+      h.mem_of_lorentz_invariant_sectorMassWeight_higgs_fermion_lt_eight_sup w hw S hSL hx hL,
+      hG,
+      hL,
+      rfl
+    ⟩
   · rintro ⟨y, hyS, hyG, hyL, rfl⟩
     exact ⟨Submodule.mem_sup_right hyS, hyG, hyL⟩
 
-/-- The same classification without the existential: below mass weight eight an element of
-  `sectorMassWeight {higgs, fermion} w ⊔ S` fixed by both groups is an element of `S` fixed
-  by both groups, and conversely. -/
+/--
+The same classification without the existential: below mass weight eight an element of
+`sectorMassWeight {higgs, fermion} w ⊔ S` fixed by both groups is an element of `S` fixed
+by both groups, and conversely.
+-/
 lemma mem_sectorMassWeight_higgs_fermion_lt_eight_sup_and_gauge_lorentz_invariant_iff_mem
-    (w : ℕ) (hw : w < 8) (S : Submodule ℂ B)
-    (hSL : ∀ g : SL(2,ℂ), ∀ y ∈ S, repLorentz g y ∈ S) (x : B) :
-    (x ∈ h.sectorMassWeight {GeneratorClass.higgs, GeneratorClass.fermion} w ⊔ S
+    (w : ℕ) (hw : w < 8)
+    (S : Submodule ℂ B) (hSL : ∀ g : SL(2,ℂ), ∀ y ∈ S, repLorentz g y ∈ S)
+    (x : B)
+    : (x ∈ h.sectorMassWeight {GeneratorClass.higgs, GeneratorClass.fermion} w ⊔ S
         ∧ (∀ g : GaugeGroupI, repGauge g x = x) ∧ ∀ g : SL(2,ℂ), repLorentz g x = x)
-      ↔ (x ∈ S ∧ (∀ g : GaugeGroupI, repGauge g x = x)
-          ∧ ∀ g : SL(2,ℂ), repLorentz g x = x) :=
-  ⟨fun hx => ⟨h.mem_of_lorentz_invariant_sectorMassWeight_higgs_fermion_lt_eight_sup w hw S
-    hSL hx.1 hx.2.2, hx.2⟩, fun hx => ⟨Submodule.mem_sup_right hx.1, hx.2⟩⟩
+      ↔ (x ∈ S ∧ (∀ g : GaugeGroupI, repGauge g x = x) ∧ ∀ g : SL(2,ℂ), repLorentz g x = x) := ⟨
+  fun hx => ⟨
+    h.mem_of_lorentz_invariant_sectorMassWeight_higgs_fermion_lt_eight_sup w hw S hSL hx.1 hx.2.2,
+    hx.2
+  ⟩,
+  fun hx => ⟨Submodule.mem_sup_right hx.1, hx.2⟩
+⟩
 
 end CovAlgebraRealization
 

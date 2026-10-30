@@ -56,33 +56,36 @@ lemma finrank_standardSl2Module (k : ℕ) : Module.finrank K (StandardSl2Module 
 
 section Joint
 
-variable [IsAlgClosed K] [CharZero K] [FiniteDimensional K V]
-    {h1 e1 f1 h2 e2 f2 : Module.End K V}
-    (t1 : IsSl2Triple h1 e1 f1) (t2 : IsSl2Triple h2 e2 f2)
-    (hcomm : ∀ x ∈ ({h1, e1, f1} : Set (Module.End K V)),
-      ∀ y ∈ ({h2, e2, f2} : Set (Module.End K V)), ⁅x, y⁆ = 0)
-    (hirr : JointlyIrreducible h1 e1 f1 h2 e2 f2)
+variable
+  [IsAlgClosed K] [CharZero K] [FiniteDimensional K V]
+  {h1 e1 f1 h2 e2 f2 : Module.End K V} (t1 : IsSl2Triple h1 e1 f1) (t2 : IsSl2Triple h2 e2 f2)
+  (hcomm : ∀ x ∈ ({h1, e1, f1} : Set (Module.End K V)), ∀ y ∈ ({h2, e2, f2} : Set (Module.End K V)),
+    ⁅x, y⁆ = 0)
+  (hirr : JointlyIrreducible h1 e1 f1 h2 e2 f2)
 
 include t1 t2 hcomm hirr
 
 /-- Dimension consequence of `commuting_classification`: `finrank K V = (m+1)(n+1)`. -/
-lemma commuting_classification_finrank :
-    ∃ m n : ℕ, Module.finrank K V = (m + 1) * (n + 1) := by
+lemma commuting_classification_finrank : ∃ m n : ℕ, Module.finrank K V = (m + 1) * (n + 1) := by
   obtain ⟨n1, n2, B, -⟩ := exists_bivariate_basis t1 t2 hcomm hirr
-  exact ⟨n1, n2, by
-    rw [Module.finrank_eq_card_basis B, Fintype.card_prod, Fintype.card_fin, Fintype.card_fin]⟩
+  exact ⟨
+    n1,
+    n2,
+    by rw [Module.finrank_eq_card_basis B, Fintype.card_prod, Fintype.card_fin, Fintype.card_fin]
+  ⟩
 
-
-/-- Classification of jointly irreducible commuting `sl₂`-actions.
+/--
+Classification of jointly irreducible commuting `sl₂`-actions.
 Two `sl₂`-triples of operators on a
 finite-dimensional space `V`, commuting with each other and with no proper
 subspace invariant under both, force `V` to be linearly isomorphic to a tensor
 product `V(m) ⊗ V(n)` of standard modules.
 
 The equivalence is obtained from a dimension count. An equivalence intertwining the two
-actions remains to be constructed. -/
-lemma commuting_classification :
-    ∃ m n : ℕ, Nonempty (V ≃ₗ[K] StandardSl2Module K m ⊗[K] StandardSl2Module K n) := by
+actions remains to be constructed.
+-/
+lemma commuting_classification
+    : ∃ m n : ℕ, Nonempty (V ≃ₗ[K] StandardSl2Module K m ⊗[K] StandardSl2Module K n) := by
   obtain ⟨n1, n2, hdim⟩ := commuting_classification_finrank t1 t2 hcomm hirr
   refine ⟨n1, n2, FiniteDimensional.nonempty_linearEquiv_of_finrank_eq ?_⟩
   rw [hdim, Module.finrank_tensorProduct, finrank_standardSl2Module, finrank_standardSl2Module]

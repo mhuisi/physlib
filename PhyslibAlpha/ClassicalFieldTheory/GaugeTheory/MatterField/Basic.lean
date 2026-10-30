@@ -59,13 +59,18 @@ open Matrix MatrixGroups TensorProduct
 
 -/
 
-/-- **A matter field** of a gauge theory over the gauge context `jets : LocalGaugeData G₀ 𝔤 GJ 𝔤J`:
-  a finite-dimensional complex target space `V`, the Lorentz representation on `V`, a
-  fibrewise action of `GJ` on the jets `SpaceTimeAlgebra ⊗[ℂ] V` of the field, the infinitesimal
-  action of the gauge algebra generating it, and the mass weight of the field (in the units
-  in which a derivative has weight `2`). -/
-structure MatterField {G₀ : Type} [Group G₀] {𝔤 : Type} [LieRing 𝔤] [LieAlgebra ℝ 𝔤]
-    {GJ : Type} [Group GJ] {𝔤J : Type} [LieRing 𝔤J] [LieAlgebra ℝ 𝔤J]
+/--
+**A matter field** of a gauge theory over the gauge context `jets : LocalGaugeData G₀ 𝔤 GJ 𝔤J`:
+a finite-dimensional complex target space `V`, the Lorentz representation on `V`, a
+fibrewise action of `GJ` on the jets `SpaceTimeAlgebra ⊗[ℂ] V` of the field, the infinitesimal
+action of the gauge algebra generating it, and the mass weight of the field (in the units
+in which a derivative has weight `2`).
+-/
+structure MatterField
+    {G₀ : Type} [Group G₀]
+    {𝔤 : Type} [LieRing 𝔤] [LieAlgebra ℝ 𝔤]
+    {GJ : Type} [Group GJ]
+    {𝔤J : Type} [LieRing 𝔤J] [LieAlgebra ℝ 𝔤J]
     (jets : LocalGaugeData G₀ 𝔤 GJ 𝔤J) where
   /-- The target space of the field. -/
   V : Type
@@ -74,29 +79,35 @@ structure MatterField {G₀ : Type} [Group G₀] {𝔤 : Type} [LieRing 𝔤] [L
   [instFree : Module.Free ℂ V]
   [instFinite : Module.Finite ℂ V]
   /-- The representation of the Lorentz group on the target space. -/
-  repLorentz : Representation ℂ SL(2,ℂ) V
+  repLorentz : Representation ℂ (SL(2,ℂ)) V
   /-- The action of the jets of gauge transformations on the jets of the field. -/
   repJet : Representation ℂ GJ (SpaceTimeAlgebra ⊗[ℂ] V)
   /-- The action of the gauge algebra. -/
   repAlgebra : 𝔤 →ₗ[ℝ] V →ₗ[ℂ] V
   /-- The gauge action is fibrewise: it commutes with multiplication by scalar jets. -/
-  repJet_smul : ∀ (U : GJ) (χ : SpaceTimeAlgebra) (z : SpaceTimeAlgebra ⊗[ℂ] V), repJet U (χ • z) =
-      χ • repJet U z
-  /-- The action of the gauge algebra generates the action of the jets of gauge
-    transformations: it is the infinitesimal action underlying `repJet`, the physicists'
-    `i dρ(T^a)`. This is what makes the covariant derivative of the field transform
-    covariantly. -/
+  repJet_smul
+    : ∀ (U : GJ) (χ : SpaceTimeAlgebra) (z : SpaceTimeAlgebra ⊗[ℂ] V),
+      repJet U (χ • z) = χ • repJet U z
+  /--
+  The action of the gauge algebra generates the action of the jets of gauge
+  transformations: it is the infinitesimal action underlying `repJet`, the physicists'
+  `i dρ(T^a)`. This is what makes the covariant derivative of the field transform
+  covariantly.
+  -/
   repAlgebra_isInfinitesimalAction : jets.IsInfinitesimalActionOf repAlgebra repJet
   /-- The mass weight of the field. -/
   massWeight : ℕ
 
-attribute [instance] MatterField.instAddCommGroup MatterField.instModule
-  MatterField.instFree MatterField.instFinite
+attribute [instance]
+  MatterField.instAddCommGroup MatterField.instModule MatterField.instFree MatterField.instFinite
 
 namespace MatterField
 
-variable {G₀ : Type} [Group G₀] {𝔤 : Type} [LieRing 𝔤] [LieAlgebra ℝ 𝔤]
-  {GJ : Type} [Group GJ] {𝔤J : Type} [LieRing 𝔤J] [LieAlgebra ℝ 𝔤J]
+variable
+  {G₀ : Type} [Group G₀]
+  {𝔤 : Type} [LieRing 𝔤] [LieAlgebra ℝ 𝔤]
+  {GJ : Type} [Group GJ]
+  {𝔤J : Type} [LieRing 𝔤J] [LieAlgebra ℝ 𝔤J]
   {jets : LocalGaugeData G₀ 𝔤 GJ 𝔤J} (M : MatterField jets)
 
 /-!
@@ -114,14 +125,18 @@ the second for the Lorentz law of the covariant derivatives.
 
 -/
 
-/-- Pure gauge jets act trivially at the base point: a jet with trivial value has identity
-  zeroth Taylor coefficient on the value space. With the fibrewise law, the base-point
-  value of the jet action is then a function of the value of the jet. -/
+/--
+Pure gauge jets act trivially at the base point: a jet with trivial value has identity
+zeroth Taylor coefficient on the value space. With the fibrewise law, the base-point
+value of the jet action is then a function of the value of the jet.
+-/
 def PureJetsActTrivially : Prop :=
   ∀ {W : GJ}, jets.eval W = 1 → GaugeAlgebraRealization.repCoeff M.repJet W 0 = LinearMap.id
 
-/-- The infinitesimal gauge action commutes with the Lorentz representation on the value
-  space. -/
+/--
+The infinitesimal gauge action commutes with the Lorentz representation on the value
+space.
+-/
 def GaugeLorentzCompatible : Prop :=
   ∀ (c : 𝔤) (Λ : SL(2,ℂ)) (v : M.V),
     M.repAlgebra c (M.repLorentz Λ v) = M.repLorentz Λ (M.repAlgebra c v)

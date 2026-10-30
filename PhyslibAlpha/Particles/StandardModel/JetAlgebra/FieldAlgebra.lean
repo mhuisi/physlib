@@ -81,21 +81,23 @@ open TensorProduct Matrix MatrixGroups
 
 -/
 
-/-- The derivative symbols of every field of the Standard Model: the gauge field, the Higgs
-  and its conjugate, and the three generations of each of the five fermion species with
-  their conjugates. The set is written in exactly the shape of the body of
-  `AlgebraRealization.fieldAlgebra`, so that the field algebra of the eventual
-  `AlgebraRealization` instance on the jet algebra is this set adjoined. -/
+/--
+The derivative symbols of every field of the Standard Model: the gauge field, the Higgs
+and its conjugate, and the three generations of each of the five fermion species with
+their conjugates. The set is written in exactly the shape of the body of
+`AlgebraRealization.fieldAlgebra`, so that the field algebra of the eventual
+`AlgebraRealization` instance on the jet algebra is this set adjoined.
+-/
 noncomputable def generators : Set JetAlgebra :=
-  (⋃ (s : Multiset (Fin 1 ⊕ Fin 3)) (μ : Fin 1 ⊕ Fin 3), Set.range (gaugeField s μ)) ∪
-    (⋃ (s : Multiset (Fin 1 ⊕ Fin 3)),
-      Set.range (higgsField s) ∪ Set.range (conjHiggsField s)) ∪
-    (⋃ (i : Fin 3) (s : Multiset (Fin 1 ⊕ Fin 3)),
-      Set.range (downSingletField i s) ∪ Set.range (conjDownSingletField i s) ∪
-      Set.range (upSingletField i s) ∪ Set.range (conjUpSingletField i s) ∪
-      Set.range (quarkDoubletField i s) ∪ Set.range (conjQuarkDoubletField i s) ∪
-      Set.range (leptonDoubletField i s) ∪ Set.range (conjLeptonDoubletField i s) ∪
-      Set.range (leptonSingletField i s) ∪ Set.range (conjLeptonSingletField i s))
+  (⋃ (s : Multiset (Fin 1 ⊕ Fin 3)) (μ : Fin 1 ⊕ Fin 3), Set.range (gaugeField s μ))
+    ∪ (⋃ (s : Multiset (Fin 1 ⊕ Fin 3)),
+        Set.range (higgsField s) ∪ Set.range (conjHiggsField s))
+    ∪ (⋃ (i : Fin 3) (s : Multiset (Fin 1 ⊕ Fin 3)),
+        Set.range (downSingletField i s) ∪ Set.range (conjDownSingletField i s) ∪
+        Set.range (upSingletField i s) ∪ Set.range (conjUpSingletField i s) ∪
+        Set.range (quarkDoubletField i s) ∪ Set.range (conjQuarkDoubletField i s) ∪
+        Set.range (leptonDoubletField i s) ∪ Set.range (conjLeptonDoubletField i s) ∪
+        Set.range (leptonSingletField i s) ∪ Set.range (conjLeptonSingletField i s))
 
 /-!
 
@@ -104,89 +106,129 @@ noncomputable def generators : Set JetAlgebra :=
 -/
 
 /-- The gauge-field symbols are generators. -/
-lemma gaugeField_mem_generators (s : Multiset (Fin 1 ⊕ Fin 3)) (μ : Fin 1 ⊕ Fin 3)
-    (φ : Module.Dual ℝ GaugeAlgebra) : gaugeField s μ φ ∈ generators :=
+lemma gaugeField_mem_generators
+    (s : Multiset (Fin 1 ⊕ Fin 3)) (μ : Fin 1 ⊕ Fin 3) (φ : Module.Dual ℝ GaugeAlgebra)
+    : gaugeField s μ φ ∈ generators :=
   Or.inl (Or.inl (Set.mem_iUnion.mpr ⟨s, Set.mem_iUnion.mpr ⟨μ, ⟨φ, rfl⟩⟩⟩))
 
 /-- The Higgs symbols are generators. -/
-lemma higgsField_mem_generators (s : Multiset (Fin 1 ⊕ Fin 3))
-    (φ : Module.Dual ℂ HiggsVec) : higgsField s φ ∈ generators :=
+lemma higgsField_mem_generators (s : Multiset (Fin 1 ⊕ Fin 3)) (φ : Module.Dual ℂ HiggsVec)
+    : higgsField s φ ∈ generators :=
   Or.inl (Or.inr (Set.mem_iUnion.mpr ⟨s, Or.inl ⟨φ, rfl⟩⟩))
 
 /-- The conjugate Higgs symbols are generators. -/
-lemma conjHiggsField_mem_generators (s : Multiset (Fin 1 ⊕ Fin 3))
-    (φ : Module.Dual ℂ (ConjModule HiggsVec)) : conjHiggsField s φ ∈ generators :=
+lemma conjHiggsField_mem_generators
+    (s : Multiset (Fin 1 ⊕ Fin 3)) (φ : Module.Dual ℂ (ConjModule HiggsVec))
+    : conjHiggsField s φ ∈ generators :=
   Or.inl (Or.inr (Set.mem_iUnion.mpr ⟨s, Or.inr ⟨φ, rfl⟩⟩))
 
-/-- The symbols of the `i`-th generation down-type quark singlet are
-  generators. -/
-lemma downSingletField_mem_generators (i : Fin 3) (s : Multiset (Fin 1 ⊕ Fin 3))
-    (φ : Module.Dual ℂ DownSinglet) : downSingletField i s φ ∈ generators :=
-  Or.inr (Set.mem_iUnion.mpr ⟨i, Set.mem_iUnion.mpr ⟨s,
-    Or.inl (Or.inl (Or.inl (Or.inl (Or.inl (Or.inl (Or.inl (Or.inl (Or.inl (⟨φ, rfl⟩)))))))))⟩⟩)
+/--
+The symbols of the `i`-th generation down-type quark singlet are
+generators.
+-/
+lemma downSingletField_mem_generators
+    (i : Fin 3) (s : Multiset (Fin 1 ⊕ Fin 3)) (φ : Module.Dual ℂ DownSinglet)
+    : downSingletField i s φ ∈ generators :=
+  Or.inr (Set.mem_iUnion.mpr ⟨
+    i,
+    Set.mem_iUnion.mpr
+      ⟨s, Or.inl (Or.inl (Or.inl (Or.inl (Or.inl (Or.inl (Or.inl (Or.inl (Or.inl (⟨φ, rfl⟩)))))))))⟩
+  ⟩)
 
-/-- The conjugate symbols of the `i`-th generation down-type quark singlet are
-  generators. -/
-lemma conjDownSingletField_mem_generators (i : Fin 3) (s : Multiset (Fin 1 ⊕ Fin 3))
-    (φ : Module.Dual ℂ (ConjModule DownSinglet)) : conjDownSingletField i s φ ∈ generators :=
-  Or.inr (Set.mem_iUnion.mpr ⟨i, Set.mem_iUnion.mpr ⟨s,
-    Or.inl (Or.inl (Or.inl (Or.inl (Or.inl (Or.inl (Or.inl (Or.inl (Or.inr ⟨φ, rfl⟩))))))))⟩⟩)
+/--
+The conjugate symbols of the `i`-th generation down-type quark singlet are
+generators.
+-/
+lemma conjDownSingletField_mem_generators
+    (i : Fin 3) (s : Multiset (Fin 1 ⊕ Fin 3)) (φ : Module.Dual ℂ (ConjModule DownSinglet))
+    : conjDownSingletField i s φ ∈ generators :=
+  Or.inr (Set.mem_iUnion.mpr ⟨
+    i,
+    Set.mem_iUnion.mpr
+      ⟨s, Or.inl (Or.inl (Or.inl (Or.inl (Or.inl (Or.inl (Or.inl (Or.inl (Or.inr ⟨φ, rfl⟩))))))))⟩
+  ⟩)
 
-/-- The symbols of the `i`-th generation up-type quark singlet are
-  generators. -/
-lemma upSingletField_mem_generators (i : Fin 3) (s : Multiset (Fin 1 ⊕ Fin 3))
-    (φ : Module.Dual ℂ UpSinglet) : upSingletField i s φ ∈ generators :=
-  Or.inr (Set.mem_iUnion.mpr ⟨i, Set.mem_iUnion.mpr ⟨s,
-    Or.inl (Or.inl (Or.inl (Or.inl (Or.inl (Or.inl (Or.inl (Or.inr ⟨φ, rfl⟩)))))))⟩⟩)
+/--
+The symbols of the `i`-th generation up-type quark singlet are
+generators.
+-/
+lemma upSingletField_mem_generators
+    (i : Fin 3) (s : Multiset (Fin 1 ⊕ Fin 3)) (φ : Module.Dual ℂ UpSinglet)
+    : upSingletField i s φ ∈ generators :=
+  Or.inr (Set.mem_iUnion.mpr ⟨
+    i,
+    Set.mem_iUnion.mpr
+      ⟨s, Or.inl (Or.inl (Or.inl (Or.inl (Or.inl (Or.inl (Or.inl (Or.inr ⟨φ, rfl⟩)))))))⟩
+  ⟩)
 
-/-- The conjugate symbols of the `i`-th generation up-type quark singlet are
-  generators. -/
-lemma conjUpSingletField_mem_generators (i : Fin 3) (s : Multiset (Fin 1 ⊕ Fin 3))
-    (φ : Module.Dual ℂ (ConjModule UpSinglet)) : conjUpSingletField i s φ ∈ generators :=
-  Or.inr (Set.mem_iUnion.mpr ⟨i, Set.mem_iUnion.mpr ⟨s,
-    Or.inl (Or.inl (Or.inl (Or.inl (Or.inl (Or.inl (Or.inr ⟨φ, rfl⟩))))))⟩⟩)
+/--
+The conjugate symbols of the `i`-th generation up-type quark singlet are
+generators.
+-/
+lemma conjUpSingletField_mem_generators
+    (i : Fin 3) (s : Multiset (Fin 1 ⊕ Fin 3)) (φ : Module.Dual ℂ (ConjModule UpSinglet))
+    : conjUpSingletField i s φ ∈ generators :=
+  Or.inr (Set.mem_iUnion.mpr ⟨
+    i,
+    Set.mem_iUnion.mpr ⟨s, Or.inl (Or.inl (Or.inl (Or.inl (Or.inl (Or.inl (Or.inr ⟨φ, rfl⟩))))))⟩
+  ⟩)
 
-/-- The symbols of the `i`-th generation quark doublet are
-  generators. -/
-lemma quarkDoubletField_mem_generators (i : Fin 3) (s : Multiset (Fin 1 ⊕ Fin 3))
-    (φ : Module.Dual ℂ QuarkDoublet) : quarkDoubletField i s φ ∈ generators :=
-  Or.inr (Set.mem_iUnion.mpr ⟨i, Set.mem_iUnion.mpr ⟨s,
-    Or.inl (Or.inl (Or.inl (Or.inl (Or.inl (Or.inr ⟨φ, rfl⟩)))))⟩⟩)
+/--
+The symbols of the `i`-th generation quark doublet are
+generators.
+-/
+lemma quarkDoubletField_mem_generators
+    (i : Fin 3) (s : Multiset (Fin 1 ⊕ Fin 3)) (φ : Module.Dual ℂ QuarkDoublet)
+    : quarkDoubletField i s φ ∈ generators :=
+  Or.inr (Set.mem_iUnion.mpr
+    ⟨i, Set.mem_iUnion.mpr ⟨s, Or.inl (Or.inl (Or.inl (Or.inl (Or.inl (Or.inr ⟨φ, rfl⟩)))))⟩⟩)
 
-/-- The conjugate symbols of the `i`-th generation quark doublet are
-  generators. -/
-lemma conjQuarkDoubletField_mem_generators (i : Fin 3) (s : Multiset (Fin 1 ⊕ Fin 3))
-    (φ : Module.Dual ℂ (ConjModule QuarkDoublet)) : conjQuarkDoubletField i s φ ∈ generators :=
-  Or.inr (Set.mem_iUnion.mpr ⟨i, Set.mem_iUnion.mpr ⟨s,
-    Or.inl (Or.inl (Or.inl (Or.inl (Or.inr ⟨φ, rfl⟩))))⟩⟩)
+/--
+The conjugate symbols of the `i`-th generation quark doublet are
+generators.
+-/
+lemma conjQuarkDoubletField_mem_generators
+    (i : Fin 3) (s : Multiset (Fin 1 ⊕ Fin 3)) (φ : Module.Dual ℂ (ConjModule QuarkDoublet))
+    : conjQuarkDoubletField i s φ ∈ generators :=
+  Or.inr (Set.mem_iUnion.mpr
+    ⟨i, Set.mem_iUnion.mpr ⟨s, Or.inl (Or.inl (Or.inl (Or.inl (Or.inr ⟨φ, rfl⟩))))⟩⟩)
 
-/-- The symbols of the `i`-th generation lepton doublet are
-  generators. -/
-lemma leptonDoubletField_mem_generators (i : Fin 3) (s : Multiset (Fin 1 ⊕ Fin 3))
-    (φ : Module.Dual ℂ LeptonDoubletV) : leptonDoubletField i s φ ∈ generators :=
-  Or.inr (Set.mem_iUnion.mpr ⟨i, Set.mem_iUnion.mpr ⟨s,
-    Or.inl (Or.inl (Or.inl (Or.inr ⟨φ, rfl⟩)))⟩⟩)
+/--
+The symbols of the `i`-th generation lepton doublet are
+generators.
+-/
+lemma leptonDoubletField_mem_generators
+    (i : Fin 3) (s : Multiset (Fin 1 ⊕ Fin 3)) (φ : Module.Dual ℂ LeptonDoubletV)
+    : leptonDoubletField i s φ ∈ generators :=
+  Or.inr (Set.mem_iUnion.mpr
+    ⟨i, Set.mem_iUnion.mpr ⟨s, Or.inl (Or.inl (Or.inl (Or.inr ⟨φ, rfl⟩)))⟩⟩)
 
-/-- The conjugate symbols of the `i`-th generation lepton doublet are
-  generators. -/
-lemma conjLeptonDoubletField_mem_generators (i : Fin 3) (s : Multiset (Fin 1 ⊕ Fin 3))
-    (φ : Module.Dual ℂ (ConjModule LeptonDoubletV)) : conjLeptonDoubletField i s φ ∈ generators :=
-  Or.inr (Set.mem_iUnion.mpr ⟨i, Set.mem_iUnion.mpr ⟨s,
-    Or.inl (Or.inl (Or.inr ⟨φ, rfl⟩))⟩⟩)
+/--
+The conjugate symbols of the `i`-th generation lepton doublet are
+generators.
+-/
+lemma conjLeptonDoubletField_mem_generators
+    (i : Fin 3) (s : Multiset (Fin 1 ⊕ Fin 3)) (φ : Module.Dual ℂ (ConjModule LeptonDoubletV))
+    : conjLeptonDoubletField i s φ ∈ generators :=
+  Or.inr (Set.mem_iUnion.mpr ⟨i, Set.mem_iUnion.mpr ⟨s, Or.inl (Or.inl (Or.inr ⟨φ, rfl⟩))⟩⟩)
 
-/-- The symbols of the `i`-th generation charged-lepton singlet are
-  generators. -/
-lemma leptonSingletField_mem_generators (i : Fin 3) (s : Multiset (Fin 1 ⊕ Fin 3))
-    (φ : Module.Dual ℂ LeptonSinglet) : leptonSingletField i s φ ∈ generators :=
-  Or.inr (Set.mem_iUnion.mpr ⟨i, Set.mem_iUnion.mpr ⟨s,
-    Or.inl (Or.inr ⟨φ, rfl⟩)⟩⟩)
+/--
+The symbols of the `i`-th generation charged-lepton singlet are
+generators.
+-/
+lemma leptonSingletField_mem_generators
+    (i : Fin 3) (s : Multiset (Fin 1 ⊕ Fin 3)) (φ : Module.Dual ℂ LeptonSinglet)
+    : leptonSingletField i s φ ∈ generators :=
+  Or.inr (Set.mem_iUnion.mpr ⟨i, Set.mem_iUnion.mpr ⟨s, Or.inl (Or.inr ⟨φ, rfl⟩)⟩⟩)
 
-/-- The conjugate symbols of the `i`-th generation charged-lepton singlet are
-  generators. -/
-lemma conjLeptonSingletField_mem_generators (i : Fin 3) (s : Multiset (Fin 1 ⊕ Fin 3))
-    (φ : Module.Dual ℂ (ConjModule LeptonSinglet)) : conjLeptonSingletField i s φ ∈ generators :=
-  Or.inr (Set.mem_iUnion.mpr ⟨i, Set.mem_iUnion.mpr ⟨s,
-    Or.inr ⟨φ, rfl⟩⟩⟩)
+/--
+The conjugate symbols of the `i`-th generation charged-lepton singlet are
+generators.
+-/
+lemma conjLeptonSingletField_mem_generators
+    (i : Fin 3) (s : Multiset (Fin 1 ⊕ Fin 3)) (φ : Module.Dual ℂ (ConjModule LeptonSinglet))
+    : conjLeptonSingletField i s φ ∈ generators :=
+  Or.inr (Set.mem_iUnion.mpr ⟨i, Set.mem_iUnion.mpr ⟨s, Or.inr ⟨φ, rfl⟩⟩⟩)
 
 /-!
 
@@ -200,13 +242,18 @@ lemma conjLeptonSingletField_mem_generators (i : Fin 3) (s : Multiset (Fin 1 ⊕
 
 -/
 
-/-- If a set generates an algebra, then every image of that algebra under an algebra map
-  lies in any subalgebra of the target containing the image of the generating set. This is
-  the step that transports each sector's own generation theorem into the jet algebra. -/
-private lemma mem_of_adjoin_eq_top {R A B : Type*} [CommSemiring R] [Semiring A]
-    [Algebra R A] [Semiring B] [Algebra R B] (f : A →ₐ[R] B) {T : Set A}
-    (hT : Algebra.adjoin R T = ⊤) {C : Subalgebra R B} (hfT : f '' T ⊆ (C : Set B))
-    (x : A) : f x ∈ C := by
+/--
+If a set generates an algebra, then every image of that algebra under an algebra map
+lies in any subalgebra of the target containing the image of the generating set. This is
+the step that transports each sector's own generation theorem into the jet algebra.
+-/
+private lemma mem_of_adjoin_eq_top
+    {R A B : Type*} [CommSemiring R] [Semiring A] [Algebra R A] [Semiring B] [Algebra R B]
+    (f : A →ₐ[R] B)
+    {T : Set A} (hT : Algebra.adjoin R T = ⊤)
+    {C : Subalgebra R B} (hfT : f '' T ⊆ (C : Set B))
+    (x : A)
+    : f x ∈ C := by
   have hmap : (Algebra.adjoin R T).map f ≤ C := by
     rw [AlgHom.map_adjoin]
     exact Algebra.adjoin_le hfT
@@ -214,11 +261,15 @@ private lemma mem_of_adjoin_eq_top {R A B : Type*} [CommSemiring R] [Semiring A]
   rw [hT]
   exact Algebra.mem_top
 
-/-- Membership in the generated algebra transported along an equation. It is stated at
-  variable endpoints so that the substitution never has to abstract a pattern out of a goal
-  mentioning the jet algebra. -/
-private lemma mem_adjoin_generators_of_eq {x y : JetAlgebra} (h : x = y)
-    (hx : x ∈ Algebra.adjoin ℂ generators) : y ∈ Algebra.adjoin ℂ generators := h ▸ hx
+/--
+Membership in the generated algebra transported along an equation. It is stated at
+variable endpoints so that the substitution never has to abstract a pattern out of a goal
+mentioning the jet algebra.
+-/
+private lemma mem_adjoin_generators_of_eq
+    {x y : JetAlgebra} (h : x = y) (hx : x ∈ Algebra.adjoin ℂ generators)
+    : y ∈ Algebra.adjoin ℂ generators :=
+  h ▸ hx
 
 /-!
 
@@ -227,30 +278,32 @@ private lemma mem_adjoin_generators_of_eq {x y : JetAlgebra} (h : x = y)
 -/
 
 /-- A Higgs symbol is the Higgs sector's own derivative symbol, included. -/
-lemma higgsField_eq_includeHiggs (s : Multiset (Fin 1 ⊕ Fin 3))
-    (φ : Module.Dual ℂ HiggsVec) :
-    higgsField s φ
+lemma higgsField_eq_includeHiggs (s : Multiset (Fin 1 ⊕ Fin 3)) (φ : Module.Dual ℂ HiggsVec)
+    : higgsField s φ
       = includeHiggs (BosonicAlgebra.iteratedJetDeriv s (BosonicAlgebra.ofField φ)) :=
   (higgsField_apply s φ).trans
-    (congrArg includeHiggs (BosonicAlgebra.iteratedJetDeriv_ofField (M := HiggsVec.matterField)
-      s φ).symm)
+    (congrArg includeHiggs
+      (BosonicAlgebra.iteratedJetDeriv_ofField (M := HiggsVec.matterField) s φ).symm)
 
-/-- A conjugate Higgs symbol is the Higgs sector's own conjugate derivative symbol,
-  included. -/
-lemma conjHiggsField_eq_includeHiggs (s : Multiset (Fin 1 ⊕ Fin 3))
-    (φ : Module.Dual ℂ (ConjModule HiggsVec)) :
-    conjHiggsField s φ
-      = includeHiggs (BosonicAlgebra.iteratedJetDeriv s
-          (BosonicAlgebra.ofConjField φ)) :=
+/--
+A conjugate Higgs symbol is the Higgs sector's own conjugate derivative symbol,
+included.
+-/
+lemma conjHiggsField_eq_includeHiggs
+    (s : Multiset (Fin 1 ⊕ Fin 3)) (φ : Module.Dual ℂ (ConjModule HiggsVec))
+    : conjHiggsField s φ
+      = includeHiggs (BosonicAlgebra.iteratedJetDeriv s (BosonicAlgebra.ofConjField φ)) :=
   (conjHiggsField_apply s φ).trans
-    (congrArg includeHiggs (BosonicAlgebra.iteratedJetDeriv_ofConjField (M := HiggsVec.matterField)
-      s φ).symm)
+    (congrArg includeHiggs
+      (BosonicAlgebra.iteratedJetDeriv_ofConjField (M := HiggsVec.matterField) s φ).symm)
 
-/-- Every element of the Higgs sector lies in the algebra generated by the symbols: the
-  Higgs jet algebra is generated by the Higgs field, its conjugate and their derivatives,
-  and those are exactly the two Higgs families. -/
-lemma includeHiggs_mem_adjoin_generators (h : HiggsJetAlgebra) :
-    includeHiggs h ∈ Algebra.adjoin ℂ generators := by
+/--
+Every element of the Higgs sector lies in the algebra generated by the symbols: the
+Higgs jet algebra is generated by the Higgs field, its conjugate and their derivatives,
+and those are exactly the two Higgs families.
+-/
+lemma includeHiggs_mem_adjoin_generators (h : HiggsJetAlgebra)
+    : includeHiggs h ∈ Algebra.adjoin ℂ generators := by
   refine mem_of_adjoin_eq_top includeHiggs
     (BosonicAlgebra.adjoin_iteratedJetDeriv_eq_top (M := HiggsVec.matterField)) ?_ h
   rintro _ ⟨y, hy, rfl⟩
@@ -274,32 +327,34 @@ the symbol map is linear, so the families reach every symbol.
 -/
 
 /-- A fermionic symbol is the fermionic sector's own derivative symbol, included. -/
-lemma fermionSymbol_eq_includeFermion (s : Multiset (Fin 1 ⊕ Fin 3))
-    (φ : Module.Dual ℂ FermionSpace) :
-    fermionSymbol s φ
-      = includeFermion (FermionicAlgebra.iteratedJetDeriv s
-          (FermionicAlgebra.ofField φ)) :=
+lemma fermionSymbol_eq_includeFermion
+    (s : Multiset (Fin 1 ⊕ Fin 3)) (φ : Module.Dual ℂ FermionSpace)
+    : fermionSymbol s φ
+      = includeFermion (FermionicAlgebra.iteratedJetDeriv s (FermionicAlgebra.ofField φ)) :=
   (fermionSymbol_apply s φ).trans
-    (congrArg includeFermion (FermionicAlgebra.iteratedJetDeriv_ofField (M := fermionMatterField)
-      s φ).symm)
+    (congrArg includeFermion
+      (FermionicAlgebra.iteratedJetDeriv_ofField (M := fermionMatterField) s φ).symm)
 
-/-- A conjugate fermionic symbol is the fermionic sector's own conjugate derivative symbol,
-  included. -/
-lemma conjFermionSymbol_eq_includeFermion (s : Multiset (Fin 1 ⊕ Fin 3))
-    (φ : Module.Dual ℂ (ConjModule FermionSpace)) :
-    conjFermionSymbol s φ
-      = includeFermion (FermionicAlgebra.iteratedJetDeriv s
-          (FermionicAlgebra.ofConjField φ)) :=
+/--
+A conjugate fermionic symbol is the fermionic sector's own conjugate derivative symbol,
+included.
+-/
+lemma conjFermionSymbol_eq_includeFermion
+    (s : Multiset (Fin 1 ⊕ Fin 3)) (φ : Module.Dual ℂ (ConjModule FermionSpace))
+    : conjFermionSymbol s φ
+      = includeFermion (FermionicAlgebra.iteratedJetDeriv s (FermionicAlgebra.ofConjField φ)) :=
   (conjFermionSymbol_apply s φ).trans
-    (congrArg includeFermion (FermionicAlgebra.iteratedJetDeriv_ofConjField
-      (M := fermionMatterField) s φ).symm)
+    (congrArg includeFermion
+      (FermionicAlgebra.iteratedJetDeriv_ofConjField (M := fermionMatterField) s φ).symm)
 
-/-- Every fermionic symbol lies in the generated algebra. The families give the symbols of
-  the covectors pulled back from a single species and generation; those span every covector
-  on the total fermionic target space, and the symbol map is linear. -/
-lemma fermionSymbol_mem_adjoin_generators (s : Multiset (Fin 1 ⊕ Fin 3))
-    (φ : Module.Dual ℂ FermionSpace) :
-    fermionSymbol s φ ∈ Algebra.adjoin ℂ generators := by
+/--
+Every fermionic symbol lies in the generated algebra. The families give the symbols of
+the covectors pulled back from a single species and generation; those span every covector
+on the total fermionic target space, and the symbol map is linear.
+-/
+lemma fermionSymbol_mem_adjoin_generators
+    (s : Multiset (Fin 1 ⊕ Fin 3)) (φ : Module.Dual ℂ FermionSpace)
+    : fermionSymbol s φ ∈ Algebra.adjoin ℂ generators := by
   have hφ : φ ∈ Submodule.span ℂ FermionSpace.speciesDual := by
     rw [FermionSpace.span_speciesDual_eq_top]
     trivial
@@ -324,25 +379,24 @@ lemma fermionSymbol_mem_adjoin_generators (s : Multiset (Fin 1 ⊕ Fin 3))
     exact mem_adjoin_generators_of_eq (map_smul (fermionSymbol s) c x).symm
       (Subalgebra.smul_mem _ hx c)
 
-/-- Every conjugate fermionic symbol lies in the generated algebra, by the conjugate form
-  of the spanning argument. -/
-lemma conjFermionSymbol_mem_adjoin_generators (s : Multiset (Fin 1 ⊕ Fin 3))
-    (φ : Module.Dual ℂ (ConjModule FermionSpace)) :
-    conjFermionSymbol s φ ∈ Algebra.adjoin ℂ generators := by
+/--
+Every conjugate fermionic symbol lies in the generated algebra, by the conjugate form
+of the spanning argument.
+-/
+lemma conjFermionSymbol_mem_adjoin_generators
+    (s : Multiset (Fin 1 ⊕ Fin 3)) (φ : Module.Dual ℂ (ConjModule FermionSpace))
+    : conjFermionSymbol s φ ∈ Algebra.adjoin ℂ generators := by
   have hφ : φ ∈ Submodule.span ℂ FermionSpace.speciesConjDual := by
     rw [FermionSpace.span_speciesConjDual_eq_top]
     trivial
   induction hφ using Submodule.span_induction with
   | mem ψ hψ =>
     rcases hψ with ⟨i, χ, rfl⟩ | ⟨i, χ, rfl⟩ | ⟨i, χ, rfl⟩ | ⟨i, χ, rfl⟩ | ⟨i, χ, rfl⟩
-    · exact mem_adjoin_generators_of_eq
-        (conjLeptonDoubletField_eq_conjFermionSymbol i s χ)
+    · exact mem_adjoin_generators_of_eq (conjLeptonDoubletField_eq_conjFermionSymbol i s χ)
         (Algebra.subset_adjoin (conjLeptonDoubletField_mem_generators i s χ))
-    · exact mem_adjoin_generators_of_eq
-        (conjLeptonSingletField_eq_conjFermionSymbol i s χ)
+    · exact mem_adjoin_generators_of_eq (conjLeptonSingletField_eq_conjFermionSymbol i s χ)
         (Algebra.subset_adjoin (conjLeptonSingletField_mem_generators i s χ))
-    · exact mem_adjoin_generators_of_eq
-        (conjQuarkDoubletField_eq_conjFermionSymbol i s χ)
+    · exact mem_adjoin_generators_of_eq (conjQuarkDoubletField_eq_conjFermionSymbol i s χ)
         (Algebra.subset_adjoin (conjQuarkDoubletField_mem_generators i s χ))
     · exact mem_adjoin_generators_of_eq (conjUpSingletField_eq_conjFermionSymbol i s χ)
         (Algebra.subset_adjoin (conjUpSingletField_mem_generators i s χ))
@@ -351,15 +405,14 @@ lemma conjFermionSymbol_mem_adjoin_generators (s : Multiset (Fin 1 ⊕ Fin 3))
   | zero =>
     exact mem_adjoin_generators_of_eq (map_zero (conjFermionSymbol s)).symm (zero_mem _)
   | add x y _ _ hx hy =>
-    exact mem_adjoin_generators_of_eq (map_add (conjFermionSymbol s) x y).symm
-      (add_mem hx hy)
+    exact mem_adjoin_generators_of_eq (map_add (conjFermionSymbol s) x y).symm (add_mem hx hy)
   | smul c x _ hx =>
     exact mem_adjoin_generators_of_eq (map_smul (conjFermionSymbol s) c x).symm
       (Subalgebra.smul_mem _ hx c)
 
 /-- Every element of the fermionic sector lies in the algebra generated by the symbols. -/
-lemma includeFermion_mem_adjoin_generators (f : FermionJetAlgebra) :
-    includeFermion f ∈ Algebra.adjoin ℂ generators := by
+lemma includeFermion_mem_adjoin_generators (f : FermionJetAlgebra)
+    : includeFermion f ∈ Algebra.adjoin ℂ generators := by
   refine mem_of_adjoin_eq_top includeFermion
     (FermionicAlgebra.adjoin_iteratedJetDeriv_eq_top (M := fermionMatterField)) ?_ f
   rintro _ ⟨y, hy, rfl⟩
@@ -384,11 +437,13 @@ supplied by `z ⊗ₜ x = (z ⊗ₜ 1) * (1 ⊗ₜ x)`, whose first factor is th
 
 -/
 
-/-- The iterated derivative of the complexification acts on a pure tensor through the
-  gauge sector's own iterated derivative. -/
-lemma iteratedD_complexJetDeriv_tmul (s : Multiset (Fin 1 ⊕ Fin 3)) (z : ℂ)
-    (x : (LocalGaugeFieldAlgebra GaugeAlgebra)) :
-    Lorentz.iteratedD (LocalGaugeFieldAlgebra.complexJetDeriv GaugeAlgebra)
+/--
+The iterated derivative of the complexification acts on a pure tensor through the
+gauge sector's own iterated derivative.
+-/
+lemma iteratedD_complexJetDeriv_tmul
+    (s : Multiset (Fin 1 ⊕ Fin 3)) (z : ℂ) (x : (LocalGaugeFieldAlgebra GaugeAlgebra))
+    : Lorentz.iteratedD (LocalGaugeFieldAlgebra.complexJetDeriv GaugeAlgebra)
         LocalGaugeFieldAlgebra.complexJetDeriv_comm s (z ⊗ₜ[ℝ] x)
       = z ⊗ₜ[ℝ] (LocalGaugeFieldAlgebra.iteratedJetDeriv GaugeAlgebra) s x := by
   induction s using Multiset.induction_on with
@@ -396,42 +451,50 @@ lemma iteratedD_complexJetDeriv_tmul (s : Multiset (Fin 1 ⊕ Fin 3)) (z : ℂ)
     rw [Lorentz.iteratedD_zero, LocalGaugeFieldAlgebra.iteratedJetDeriv_zero, LinearMap.id_apply,
       LinearMap.id_apply]
   | cons μ s ih =>
-    rw [Lorentz.iteratedD_cons, LocalGaugeFieldAlgebra.iteratedJetDeriv_cons,
-      LinearMap.comp_apply, LinearMap.comp_apply, ih,
-      LocalGaugeFieldAlgebra.complexJetDeriv_tmul]
+    rw [Lorentz.iteratedD_cons, LocalGaugeFieldAlgebra.iteratedJetDeriv_cons, LinearMap.comp_apply,
+      LinearMap.comp_apply, ih, LocalGaugeFieldAlgebra.complexJetDeriv_tmul]
 
-/-- The real gauge-boson jet algebra inside the jet algebra of the Standard Model: the
-  inclusion of the gauge sector precomposed with the inclusion of the real part of the
-  complexification. It is a map of `ℝ`-algebras, which is the level at which the gauge
-  sector's generation theorem is stated. -/
+/--
+The real gauge-boson jet algebra inside the jet algebra of the Standard Model: the
+inclusion of the gauge sector precomposed with the inclusion of the real part of the
+complexification. It is a map of `ℝ`-algebras, which is the level at which the gauge
+sector's generation theorem is stated.
+-/
 noncomputable def includeGaugeReal : (LocalGaugeFieldAlgebra GaugeAlgebra) →ₐ[ℝ] JetAlgebra :=
   (AlgHom.restrictScalars ℝ includeGauge).comp
     (Algebra.TensorProduct.includeRight (R := ℝ) (A := ℂ)
       (B := (LocalGaugeFieldAlgebra GaugeAlgebra)))
 
-/-- The real gauge inclusion is the gauge inclusion of the pure tensor with complex part
-  one. -/
+/--
+The real gauge inclusion is the gauge inclusion of the pure tensor with complex part
+one.
+-/
 @[simp]
-lemma includeGaugeReal_apply (x : (LocalGaugeFieldAlgebra GaugeAlgebra)) :
-    includeGaugeReal x = includeGauge ((1 : ℂ) ⊗ₜ[ℝ] x) := rfl
+lemma includeGaugeReal_apply (x : (LocalGaugeFieldAlgebra GaugeAlgebra))
+    : includeGaugeReal x = includeGauge ((1 : ℂ) ⊗ₜ[ℝ] x) :=
+  rfl
 
-/-- A gauge-field symbol is the gauge sector's own derivative symbol, included through the
-  real part of the complexification. -/
-lemma gaugeField_eq_includeGaugeReal (s : Multiset (Fin 1 ⊕ Fin 3)) (μ : Fin 1 ⊕ Fin 3)
-    (φ : Module.Dual ℝ GaugeAlgebra) :
-    gaugeField s μ φ
+/--
+A gauge-field symbol is the gauge sector's own derivative symbol, included through the
+real part of the complexification.
+-/
+lemma gaugeField_eq_includeGaugeReal
+    (s : Multiset (Fin 1 ⊕ Fin 3)) (μ : Fin 1 ⊕ Fin 3) (φ : Module.Dual ℝ GaugeAlgebra)
+    : gaugeField s μ φ
       = includeGaugeReal ((LocalGaugeFieldAlgebra.iteratedJetDeriv GaugeAlgebra) s
-          ((LocalGaugeFieldAlgebra.ofA GaugeAlgebra) μ φ)) :=
+        ((LocalGaugeFieldAlgebra.ofA GaugeAlgebra) μ φ)) :=
   (gaugeField_apply s μ φ).trans
     ((congrArg includeGauge
         (iteratedD_complexJetDeriv_tmul s 1 (LocalGaugeFieldAlgebra.ofA GaugeAlgebra μ φ))).trans
       (includeGaugeReal_apply _).symm)
 
-/-- Every element of the real gauge sector lies in the algebra generated by the symbols:
-  the gauge-boson jet algebra is generated over `ℝ` by the derivative symbols of the gauge
-  field, and those are the gauge family. -/
-lemma includeGaugeReal_mem_adjoin_generators (x : (LocalGaugeFieldAlgebra GaugeAlgebra)) :
-    includeGaugeReal x ∈ Algebra.adjoin ℂ generators := by
+/--
+Every element of the real gauge sector lies in the algebra generated by the symbols:
+the gauge-boson jet algebra is generated over `ℝ` by the derivative symbols of the gauge
+field, and those are the gauge family.
+-/
+lemma includeGaugeReal_mem_adjoin_generators (x : (LocalGaugeFieldAlgebra GaugeAlgebra))
+    : includeGaugeReal x ∈ Algebra.adjoin ℂ generators := by
   have h : includeGaugeReal x ∈ (Algebra.adjoin ℂ generators).restrictScalars ℝ := by
     refine mem_of_adjoin_eq_top includeGaugeReal
       LocalGaugeFieldAlgebra.adjoin_iteratedJetDeriv_eq_top ?_ x
@@ -442,18 +505,22 @@ lemma includeGaugeReal_mem_adjoin_generators (x : (LocalGaugeFieldAlgebra GaugeA
       (Algebra.subset_adjoin (gaugeField_mem_generators s μ φ))
   exact h
 
-/-- Every element of the complexified gauge sector lies in the algebra generated by the
-  symbols: a pure tensor splits as a complex scalar times the image of its real part. -/
-lemma includeGauge_mem_adjoin_generators (y : ℂ ⊗[ℝ] (LocalGaugeFieldAlgebra GaugeAlgebra)) :
-    includeGauge y ∈ Algebra.adjoin ℂ generators := by
+/--
+Every element of the complexified gauge sector lies in the algebra generated by the
+symbols: a pure tensor splits as a complex scalar times the image of its real part.
+-/
+lemma includeGauge_mem_adjoin_generators (y : ℂ ⊗[ℝ] (LocalGaugeFieldAlgebra GaugeAlgebra))
+    : includeGauge y ∈ Algebra.adjoin ℂ generators := by
   induction y using TensorProduct.inductionOn with
   | add a b ha hb =>
     exact mem_adjoin_generators_of_eq (map_add includeGauge a b).symm (add_mem ha hb)
   | tmul z x =>
-    have hsplit : (z ⊗ₜ[ℝ] x : ℂ ⊗[ℝ] (LocalGaugeFieldAlgebra GaugeAlgebra))
-        = algebraMap ℂ (ℂ ⊗[ℝ] (LocalGaugeFieldAlgebra GaugeAlgebra)) z * ((1 : ℂ) ⊗ₜ[ℝ] x) := by
+    have hsplit
+        : (z ⊗ₜ[ℝ] x : ℂ ⊗[ℝ] (LocalGaugeFieldAlgebra GaugeAlgebra))
+          = algebraMap ℂ (ℂ ⊗[ℝ] (LocalGaugeFieldAlgebra GaugeAlgebra)) z * ((1 : ℂ) ⊗ₜ[ℝ] x) := by
       rw [show algebraMap ℂ (ℂ ⊗[ℝ] (LocalGaugeFieldAlgebra GaugeAlgebra)) z
-          = z ⊗ₜ[ℝ] (1 : (LocalGaugeFieldAlgebra GaugeAlgebra)) from rfl,
+            = z ⊗ₜ[ℝ] (1 : (LocalGaugeFieldAlgebra GaugeAlgebra)) from
+          rfl,
         Algebra.TensorProduct.tmul_mul_tmul, mul_one, one_mul]
     refine mem_adjoin_generators_of_eq (congrArg includeGauge hsplit).symm ?_
     exact mem_adjoin_generators_of_eq (map_mul includeGauge _ _).symm
@@ -472,18 +539,16 @@ the carrier is a sector element read through one of them.
 -/
 
 /-- Every element of the fermionic factor of the carrier lies in the generated algebra. -/
-lemma includeFermionFactor_mem_adjoin_generators
-    (a : ExteriorAlgebra ℂ fieldData.FermionGenerators) :
-    fieldData.includeFermion a ∈ Algebra.adjoin ℂ generators :=
+lemma includeFermionFactor_mem_adjoin_generators (a : ExteriorAlgebra ℂ fieldData.FermionGenerators)
+    : fieldData.includeFermion a ∈ Algebra.adjoin ℂ generators :=
   mem_adjoin_generators_of_eq
     ((includeFermion_apply_equiv (fermionAlgebraEquiv.symm a)).trans
       (congrArg fieldData.includeFermion (fermionAlgebraEquiv.apply_symm_apply a)))
     (includeFermion_mem_adjoin_generators (fermionAlgebraEquiv.symm a))
 
 /-- Every element of the bosonic factor of the carrier lies in the generated algebra. -/
-lemma includeBosonFactor_mem_adjoin_generators
-    (b : SymmetricAlgebra ℂ fieldData.BosonGenerators) :
-    fieldData.includeBoson b ∈ Algebra.adjoin ℂ generators :=
+lemma includeBosonFactor_mem_adjoin_generators (b : SymmetricAlgebra ℂ fieldData.BosonGenerators)
+    : fieldData.includeBoson b ∈ Algebra.adjoin ℂ generators :=
   mem_adjoin_generators_of_eq
     ((includeHiggs_apply_equiv (higgsAlgebraEquiv.symm b)).trans
       (congrArg fieldData.includeBoson (higgsAlgebraEquiv.apply_symm_apply b)))
@@ -495,37 +560,45 @@ lemma includeBosonFactor_mem_adjoin_generators
 
 -/
 
-/-- A triple pure tensor is the product of the three factors placed in their own slots:
-  the abstract statement, proved at abstract types so that it can be instantiated on the
-  jet algebra without rewriting inside it. -/
-private lemma tensor_tmul_tmul {A B C : Type*} [Ring A] [Algebra ℂ A] [Ring B]
-    [Algebra ℂ B] [Ring C] [Algebra ℂ C] (a : A) (b : B) (c : C) :
-    ((a ⊗ₜ[ℂ] (1 : B)) ⊗ₜ[ℂ] (1 : C)) * (((1 : A) ⊗ₜ[ℂ] b) ⊗ₜ[ℂ] (1 : C))
+/--
+A triple pure tensor is the product of the three factors placed in their own slots:
+the abstract statement, proved at abstract types so that it can be instantiated on the
+jet algebra without rewriting inside it.
+-/
+private lemma tensor_tmul_tmul
+    {A B C : Type*} [Ring A] [Algebra ℂ A] [Ring B] [Algebra ℂ B] [Ring C] [Algebra ℂ C]
+    (a : A) (b : B) (c : C)
+    : ((a ⊗ₜ[ℂ] (1 : B)) ⊗ₜ[ℂ] (1 : C)) * (((1 : A) ⊗ₜ[ℂ] b) ⊗ₜ[ℂ] (1 : C))
         * (((1 : A) ⊗ₜ[ℂ] (1 : B)) ⊗ₜ[ℂ] c)
       = (a ⊗ₜ[ℂ] b) ⊗ₜ[ℂ] c := by
   simp only [Algebra.TensorProduct.tmul_mul_tmul, mul_one, one_mul]
 
-/-- A pure tensor of the jet algebra is the product of the three factor inclusions applied
-  to its factors. The three inclusions are unfolded through the abstract `GaugeFieldData`
-  rules, which is what keeps the computation out of the carrier's own instances. -/
+/--
+A pure tensor of the jet algebra is the product of the three factor inclusions applied
+to its factors. The three inclusions are unfolded through the abstract `GaugeFieldData`
+rules, which is what keeps the computation out of the carrier's own instances.
+-/
 lemma includeFermionFactor_mul_includeBosonFactor_mul_includeConnection
     (a : ExteriorAlgebra ℂ fieldData.FermionGenerators)
     (b : SymmetricAlgebra ℂ fieldData.BosonGenerators)
-    (c : ℂ ⊗[ℝ] (LocalGaugeFieldAlgebra GaugeAlgebra)) :
-    fieldData.includeFermion a * fieldData.includeBoson b * fieldData.includeConnection c
+    (c : ℂ ⊗[ℝ] (LocalGaugeFieldAlgebra GaugeAlgebra))
+    : fieldData.includeFermion a * fieldData.includeBoson b * fieldData.includeConnection c
       = ((a ⊗ₜ[ℂ] b) ⊗ₜ[ℂ] c : JetAlgebra) :=
-  (congrArg₂ (fun x y : JetAlgebra => x * y)
-      (congrArg₂ (fun x y : JetAlgebra => x * y)
+  (congrArg₂
+      (fun x y : JetAlgebra => x * y)
+      (congrArg₂
+        (fun x y : JetAlgebra => x * y)
         (GaugeFieldData.includeFermion_apply a) (GaugeFieldData.includeBoson_apply b))
       ((GaugeFieldData.includeConnection_apply c).trans
-        (congrArg (fun w : fieldData.MatterAlgebra => (w ⊗ₜ[ℂ] c : JetAlgebra))
+        (congrArg
+          (fun w : fieldData.MatterAlgebra => (w ⊗ₜ[ℂ] c : JetAlgebra))
           GaugeFieldData.one_matterAlgebra))).trans
     (tensor_tmul_tmul a b c)
 
 /-- Every pure tensor of the jet algebra lies in the algebra generated by the symbols. -/
-lemma tmul_mem_adjoin_generators (w : fieldData.MatterAlgebra)
-    (y : ℂ ⊗[ℝ] (LocalGaugeFieldAlgebra GaugeAlgebra)) :
-    (w ⊗ₜ[ℂ] y : JetAlgebra) ∈ Algebra.adjoin ℂ generators := by
+lemma tmul_mem_adjoin_generators
+    (w : fieldData.MatterAlgebra) (y : ℂ ⊗[ℝ] (LocalGaugeFieldAlgebra GaugeAlgebra))
+    : (w ⊗ₜ[ℂ] y : JetAlgebra) ∈ Algebra.adjoin ℂ generators := by
   induction w using TensorProduct.inductionOn with
   | add a b ha hb =>
     exact mem_adjoin_generators_of_eq (TensorProduct.add_tmul a b y).symm (add_mem ha hb)
@@ -537,17 +610,18 @@ lemma tmul_mem_adjoin_generators (w : fieldData.MatterAlgebra)
           (includeBosonFactor_mem_adjoin_generators b))
         (includeGauge_mem_adjoin_generators y))
 
-/-- The fields of the Standard Model generate its jet algebra. As a `ℂ`-algebra,
-  `JetAlgebra` is adjoined by the derivative symbols of the gauge field, the Higgs and its
-  conjugate, and the three generations of each of the five fermion species with their
-  conjugates.
+/--
+The fields of the Standard Model generate its jet algebra. As a `ℂ`-algebra,
+`JetAlgebra` is adjoined by the derivative symbols of the gauge field, the Higgs and its
+conjugate, and the three generations of each of the five fermion species with their
+conjugates.
 
-  Physically: every element of the algebra in which a Standard Model Lagrangian lives is a
-  polynomial in the fields and their spacetime derivatives — nothing else is available to
-  write down. Formally it is the statement that the field algebra of the eventual
-  `AlgebraRealization` instance on the jet algebra is the whole of it. -/
-lemma adjoin_generators_eq_top :
-    Algebra.adjoin ℂ generators = (⊤ : Subalgebra ℂ JetAlgebra) := by
+Physically: every element of the algebra in which a Standard Model Lagrangian lives is a
+polynomial in the fields and their spacetime derivatives — nothing else is available to
+write down. Formally it is the statement that the field algebra of the eventual
+`AlgebraRealization` instance on the jet algebra is the whole of it.
+-/
+lemma adjoin_generators_eq_top : Algebra.adjoin ℂ generators = (⊤ : Subalgebra ℂ JetAlgebra) := by
   refine top_le_iff.mp ?_
   rw [← Algebra.TensorProduct.adjoin_tmul_eq_top ℂ fieldData.MatterAlgebra
     (ℂ ⊗[ℝ] (LocalGaugeFieldAlgebra GaugeAlgebra))]

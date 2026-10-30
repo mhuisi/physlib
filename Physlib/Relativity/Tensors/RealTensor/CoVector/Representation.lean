@@ -20,7 +20,6 @@ by its tensor structure.
 
 @[expose] public section
 
-
 open Module Matrix MatrixGroups Complex TensorProduct
 
 noncomputable section
@@ -45,23 +44,25 @@ def rep {d : ℕ} : Representation ℝ (LorentzGroup d) (CoVector d) where
 
 -/
 
-lemma rep_apply_eq_mulVec (d : ℕ) (Λ : LorentzGroup d) (v : CoVector d) :
-    rep Λ v = (LorentzGroup.transpose Λ⁻¹) *ᵥ v := by rfl
+lemma rep_apply_eq_mulVec (d : ℕ) (Λ : LorentzGroup d) (v : CoVector d)
+    : rep Λ v = (LorentzGroup.transpose Λ⁻¹) *ᵥ v := by
+  rfl
 
-lemma rep_apply_eq_sum (d : ℕ) (Λ : LorentzGroup d) (v : CoVector d) (k : Fin 1 ⊕ Fin d) :
-    rep Λ v k = ∑ j, (Λ⁻¹).1 j k • v j := rfl
+lemma rep_apply_eq_sum (d : ℕ) (Λ : LorentzGroup d) (v : CoVector d) (k : Fin 1 ⊕ Fin d)
+    : rep Λ v k = ∑ j, (Λ⁻¹).1 j k • v j :=
+  rfl
 
-lemma rep_apply_eq_sum_coe (d : ℕ) (Λ : LorentzGroup d) (v : CoVector d) (k : Fin 1 ⊕ Fin d) :
-    rep Λ v k = ∑ j, Λ.1⁻¹ j k • v j := by
+lemma rep_apply_eq_sum_coe (d : ℕ) (Λ : LorentzGroup d) (v : CoVector d) (k : Fin 1 ⊕ Fin d)
+    : rep Λ v k = ∑ j, Λ.1⁻¹ j k • v j := by
   rw [rep_apply_eq_sum, LorentzGroup.coe_inv]
 
-lemma rep_apply_basis {d} (μ : Fin 1 ⊕ Fin d) (Λ : LorentzGroup d) :
-    rep Λ (basis μ) = ∑ j, Λ.1⁻¹ μ j • basis j := by
+lemma rep_apply_basis {d} (μ : Fin 1 ⊕ Fin d) (Λ : LorentzGroup d)
+    : rep Λ (basis μ) = ∑ j, Λ.1⁻¹ μ j • basis j := by
   ext k
   simp [rep_apply_eq_sum_coe, apply_sum]
 
-lemma rep_toMatrix (d : ℕ) (Λ : LorentzGroup d) :
-    LinearMap.toMatrix basis basis (rep Λ) = Λ.1⁻¹ᵀ := by
+lemma rep_toMatrix (d : ℕ) (Λ : LorentzGroup d)
+    : LinearMap.toMatrix basis basis (rep Λ) = Λ.1⁻¹ᵀ := by
   simp only [rep, MonoidHom.coe_mk, OneHom.coe_mk]
   rw [← LorentzGroup.coe_inv]
   exact (LinearEquiv.eq_symm_apply (LinearMap.toMatrix basis basis)).mp rfl

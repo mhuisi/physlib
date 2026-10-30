@@ -59,14 +59,12 @@ attribute [-simp] Fintype.sum_sum_type
 attribute [-simp] Nat.succ_eq_add_one
 
 /-- The vector potential of an electromagnetic potential which is a distribution. -/
-noncomputable def vectorPotential {d} (c : SpeedOfLight) :
-    TempDistElectromagneticPotential d →ₗ[ℝ]
-    (Time × Space d) →d[ℝ] EuclideanSpace ℝ (Fin d) where
+noncomputable def vectorPotential {d} (c : SpeedOfLight)
+    : TempDistElectromagneticPotential d →ₗ[ℝ]
+      (Time × Space d) →d[ℝ] EuclideanSpace ℝ (Fin d) where
   toFun A := Lorentz.Vector.spatialCLM d ∘L distTimeSlice c A
-  map_add' A₁ A₂ := by
-    simp [distTimeSlice]
-  map_smul' r A := by
-    simp [distTimeSlice]
+  map_add' A₁ A₂ := by simp [distTimeSlice]
+  map_smul' r A := by simp [distTimeSlice]
 
 end TempDistElectromagneticPotential
 

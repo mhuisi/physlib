@@ -68,14 +68,17 @@ variable {A : Type*} [Ring A] [Algebra ℂ A] [StarRing A] [StarModule ℂ A]
 
 /-! ## A. Bounded observables -/
 
-/-- An observable `a` is **bounded** if some multiple `c · 1` of the identity exceeds `a* a` by a
-sum of squares. -/
-def IsBounded (a : A) : Prop :=
-  ∃ c : ℝ, ∃ p ∈ sumSq A, star a * a + p = (c : ℂ) • (1 : A)
+/--
+An observable `a` is **bounded** if some multiple `c · 1` of the identity exceeds `a* a` by a
+sum of squares.
+-/
+def IsBounded (a : A) : Prop := ∃ c : ℝ, ∃ p ∈ sumSq A, star a * a + p = (c : ℂ) • (1 : A)
 
 /-- **Every state is bounded on a bounded observable**, by the same constant. -/
-lemma AlgState.norm_sq_le_of_isBounded {a : A} {c : ℝ} {p : A} (hp : p ∈ sumSq A)
-    (h : star a * a + p = (c : ℂ) • (1 : A)) (ω : AlgState A) : ‖ω a‖ ^ 2 ≤ c := by
+lemma AlgState.norm_sq_le_of_isBounded
+    {a : A} {c : ℝ} {p : A} (hp : p ∈ sumSq A) (h : star a * a + p = (c : ℂ) • (1 : A))
+    (ω : AlgState A)
+    : ‖ω a‖ ^ 2 ≤ c := by
   have h1 := ω.normSq_le a
   have h2 := ω.nonneg_of_mem_sumSq hp
   have h3 : ω (star a * a) = (c : ℂ) - ω p := by
@@ -83,15 +86,17 @@ lemma AlgState.norm_sq_le_of_isBounded {a : A} {c : ℝ} {p : A} (hp : p ∈ sum
     rw [ω.map_add, ω.map_smul, ω.map_one, mul_one] at this
     linear_combination this
   have h4 : ((‖ω a‖ ^ 2 : ℝ) : ℂ) ≤ (c : ℂ) := by
-    calc _ ≤ _ := h1
+    calc
+      _ ≤ _ := h1
       _ = _ := h3
       _ ≤ _ := sub_le_self _ h2
   exact Complex.real_le_real.1 h4
 
 omit [StarModule ℂ A] in
 /-- A star-algebra equivalence maps sums of squares to sums of squares. -/
-lemma sumSq_map {B : Type*} [Ring B] [Algebra ℂ B] [StarRing B]
-    (σ : A ≃⋆ₐ[ℂ] B) {p : A} (hp : p ∈ sumSq A) : σ p ∈ sumSq B := by
+lemma sumSq_map
+    {B : Type*} [Ring B] [Algebra ℂ B] [StarRing B] (σ : A ≃⋆ₐ[ℂ] B) {p : A} (hp : p ∈ sumSq A)
+    : σ p ∈ sumSq B := by
   induction hp using AddSubmonoid.closure_induction with
   | mem x hx =>
     obtain ⟨s, rfl⟩ := hx
@@ -114,54 +119,49 @@ section Limit
 variable {ι : Type*}
 
 /-- The values of a bounded net of states on an observable have a limit along an ultrafilter. -/
-lemma exists_tendsto_state (ψ : ι → AlgState A) (𝒰 : Ultrafilter ι)
-    (hb : ∀ a : A, ∃ c : ℝ, ∀ i, ‖ψ i a‖ ≤ c) (a : A) :
-    ∃ z, Tendsto (fun i => ψ i a) 𝒰 (𝓝 z) := by
+lemma exists_tendsto_state
+    (ψ : ι → AlgState A) (𝒰 : Ultrafilter ι) (hb : ∀ a : A, ∃ c : ℝ, ∀ i, ‖ψ i a‖ ≤ c) (a : A)
+    : ∃ z, Tendsto (fun i => ψ i a) 𝒰 (𝓝 z) := by
   obtain ⟨c, hc⟩ := hb a
-  obtain ⟨z, -, hz⟩ := (isCompact_closedBall (0 : ℂ) c).ultrafilter_le_nhds'
-    (𝒰.map fun i => ψ i a)
-    (Filter.eventually_map.2 (Filter.Eventually.of_forall fun i => by
-      simpa [mem_closedBall_zero_iff] using hc i))
+  obtain ⟨z, -, hz⟩ :=
+    (isCompact_closedBall (0 : ℂ) c).ultrafilter_le_nhds' (𝒰.map fun i => ψ i a)
+      (Filter.eventually_map.2 (Filter.Eventually.of_forall fun i => by
+        simpa [mem_closedBall_zero_iff] using hc i))
   exact ⟨z, hz⟩
 
 /-- **The limit of a bounded net of states along an ultrafilter** is a state. -/
-def AlgState.limit (ψ : ι → AlgState A) (𝒰 : Ultrafilter ι)
-    (hb : ∀ a : A, ∃ c : ℝ, ∀ i, ‖ψ i a‖ ≤ c) : AlgState A where
-  toLinearMap :=
-    { toFun a := Classical.choose (exists_tendsto_state ψ 𝒰 hb a)
-      map_add' a b := by
-        refine tendsto_nhds_unique (Classical.choose_spec (exists_tendsto_state ψ 𝒰 hb (a + b)))
-          ?_
-        have : (fun i => ψ i (a + b)) = fun i => ψ i a + ψ i b := by
-          funext i; exact (ψ i).map_add a b
-        rw [this]
-        exact (Classical.choose_spec (exists_tendsto_state ψ 𝒰 hb a)).add
-          (Classical.choose_spec (exists_tendsto_state ψ 𝒰 hb b))
-      map_smul' c a := by
-        refine tendsto_nhds_unique (Classical.choose_spec (exists_tendsto_state ψ 𝒰 hb (c • a)))
-          ?_
-        have : (fun i => ψ i (c • a)) = fun i => c * ψ i a := by
-          funext i; exact (ψ i).map_smul c a
-        rw [this]
-        exact (Classical.choose_spec (exists_tendsto_state ψ 𝒰 hb a)).const_mul c }
+def AlgState.limit
+    (ψ : ι → AlgState A) (𝒰 : Ultrafilter ι) (hb : ∀ a : A, ∃ c : ℝ, ∀ i, ‖ψ i a‖ ≤ c)
+    : AlgState A where
+  toLinearMap := {
+    toFun a := Classical.choose (exists_tendsto_state ψ 𝒰 hb a)
+    map_add' a b := by
+      refine tendsto_nhds_unique (Classical.choose_spec (exists_tendsto_state ψ 𝒰 hb (a + b))) ?_
+      have : (fun i => ψ i (a + b)) = fun i => ψ i a + ψ i b := by funext i; exact (ψ i).map_add a b
+      rw [this]
+      exact (Classical.choose_spec (exists_tendsto_state ψ 𝒰 hb a)).add
+        (Classical.choose_spec (exists_tendsto_state ψ 𝒰 hb b))
+    map_smul' c a := by
+      refine tendsto_nhds_unique (Classical.choose_spec (exists_tendsto_state ψ 𝒰 hb (c • a))) ?_
+      have : (fun i => ψ i (c • a)) = fun i => c * ψ i a := by funext i; exact (ψ i).map_smul c a
+      rw [this]
+      exact (Classical.choose_spec (exists_tendsto_state ψ 𝒰 hb a)).const_mul c
+  }
   map_one' := by
     refine tendsto_nhds_unique (Classical.choose_spec (exists_tendsto_state ψ 𝒰 hb 1)) ?_
     exact tendsto_const_nhds.congr fun i => ((ψ i).map_one).symm
   map_star' a := by
     refine tendsto_nhds_unique (Classical.choose_spec (exists_tendsto_state ψ 𝒰 hb (star a))) ?_
-    have : (fun i => ψ i (star a)) = fun i => star (ψ i a) := by
-      funext i; exact (ψ i).map_star a
+    have : (fun i => ψ i (star a)) = fun i => star (ψ i a) := by funext i; exact (ψ i).map_star a
     rw [this]
-    exact ((continuous_star).tendsto _).comp
-      (Classical.choose_spec (exists_tendsto_state ψ 𝒰 hb a))
+    exact ((continuous_star).tendsto _).comp (Classical.choose_spec (exists_tendsto_state ψ 𝒰 hb a))
   nonneg' a := by
-    refine ge_of_tendsto
-      (Classical.choose_spec (exists_tendsto_state ψ 𝒰 hb (star a * a))) ?_
+    refine ge_of_tendsto (Classical.choose_spec (exists_tendsto_state ψ 𝒰 hb (star a * a))) ?_
     exact Filter.Eventually.of_forall fun i => (ψ i).nonneg a
 
-lemma AlgState.tendsto_limit (ψ : ι → AlgState A) (𝒰 : Ultrafilter ι)
-    (hb : ∀ a : A, ∃ c : ℝ, ∀ i, ‖ψ i a‖ ≤ c) (a : A) :
-    Tendsto (fun i => ψ i a) 𝒰 (𝓝 (AlgState.limit ψ 𝒰 hb a)) :=
+lemma AlgState.tendsto_limit
+    (ψ : ι → AlgState A) (𝒰 : Ultrafilter ι) (hb : ∀ a : A, ∃ c : ℝ, ∀ i, ‖ψ i a‖ ≤ c) (a : A)
+    : Tendsto (fun i => ψ i a) 𝒰 (𝓝 (AlgState.limit ψ 𝒰 hb a)) :=
   Classical.choose_spec (exists_tendsto_state ψ 𝒰 hb a)
 
 end Limit
@@ -173,24 +173,23 @@ section Average
 variable {Γ : Type*}
 
 omit [StarModule ℂ A] in
-lemma starAlgEquiv_smul (σ : A ≃⋆ₐ[ℂ] A) (c : ℂ) (a : A) : σ (c • a) = c • σ a :=
-  σ.map_smul' c a
+lemma starAlgEquiv_smul (σ : A ≃⋆ₐ[ℂ] A) (c : ℂ) (a : A) : σ (c • a) = c • σ a := σ.map_smul' c a
 
 /-- The linear functional `a ↦ |F|⁻¹ ∑_{g ∈ F} φ (α g a)`. -/
 def averageMap (φ : AlgState A) (α : Γ → (A ≃⋆ₐ[ℂ] A)) (F : Finset Γ) : A →ₗ[ℂ] ℂ where
   toFun a := ((F.card : ℂ))⁻¹ * ∑ g ∈ F, φ (α g a)
-  map_add' a b := by
-    simp only [map_add, φ.map_add, Finset.sum_add_distrib, mul_add]
+  map_add' a b := by simp only [map_add, φ.map_add, Finset.sum_add_distrib, mul_add]
   map_smul' c a := by
     simp only [starAlgEquiv_smul, φ.map_smul, ← Finset.mul_sum, RingHom.id_apply, smul_eq_mul]
     ring
 
-lemma averageMap_apply (φ : AlgState A) (α : Γ → (A ≃⋆ₐ[ℂ] A)) (F : Finset Γ) (a : A) :
-    averageMap φ α F a = ((F.card : ℂ))⁻¹ * ∑ g ∈ F, φ (α g a) := rfl
+lemma averageMap_apply (φ : AlgState A) (α : Γ → (A ≃⋆ₐ[ℂ] A)) (F : Finset Γ) (a : A)
+    : averageMap φ α F a = ((F.card : ℂ))⁻¹ * ∑ g ∈ F, φ (α g a) :=
+  rfl
 
 /-- **The average of a state over a finite set of automorphisms** is a state. -/
-def AlgState.average (φ : AlgState A) (α : Γ → (A ≃⋆ₐ[ℂ] A)) (F : Finset Γ)
-    (hF : F.Nonempty) : AlgState A where
+def AlgState.average (φ : AlgState A) (α : Γ → (A ≃⋆ₐ[ℂ] A)) (F : Finset Γ) (hF : F.Nonempty)
+    : AlgState A where
   toLinearMap := averageMap φ α F
   map_one' := by
     have hc : (F.card : ℂ) ≠ 0 := by exact_mod_cast hF.card_pos.ne'
@@ -211,9 +210,10 @@ def AlgState.average (φ : AlgState A) (α : Γ → (A ≃⋆ₐ[ℂ] A)) (F : F
     · rw [_root_.map_mul, StarHomClass.map_star]
       exact φ.nonneg _
 
-lemma AlgState.average_apply (φ : AlgState A) (α : Γ → (A ≃⋆ₐ[ℂ] A)) (F : Finset Γ)
-    (hF : F.Nonempty) (a : A) :
-    φ.average α F hF a = ((F.card : ℂ))⁻¹ * ∑ g ∈ F, φ (α g a) := rfl
+lemma AlgState.average_apply
+    (φ : AlgState A) (α : Γ → (A ≃⋆ₐ[ℂ] A)) (F : Finset Γ) (hF : F.Nonempty) (a : A)
+    : φ.average α F hF a = ((F.card : ℂ))⁻¹ * ∑ g ∈ F, φ (α g a) :=
+  rfl
 
 end Average
 
@@ -235,26 +235,28 @@ lemma compMap_apply (φ : AlgState A) (σ : A ≃⋆ₐ[ℂ] A) (a : A) : compMa
 def AlgState.comp (φ : AlgState A) (σ : A ≃⋆ₐ[ℂ] A) : AlgState A where
   toLinearMap := compMap φ σ
   map_one' := by rw [compMap_apply, _root_.map_one, φ.map_one]
-  map_star' a := by
-    rw [compMap_apply, compMap_apply, StarHomClass.map_star, φ.map_star]
+  map_star' a := by rw [compMap_apply, compMap_apply, StarHomClass.map_star, φ.map_star]
   nonneg' a := by
     rw [compMap_apply, _root_.map_mul, StarHomClass.map_star]
     exact φ.nonneg _
 
-lemma AlgState.comp_apply (φ : AlgState A) (σ : A ≃⋆ₐ[ℂ] A) (a : A) : φ.comp σ a = φ (σ a) :=
-  rfl
+lemma AlgState.comp_apply (φ : AlgState A) (σ : A ≃⋆ₐ[ℂ] A) (a : A) : φ.comp σ a = φ (σ a) := rfl
 
 /-- The bound on a state on a bounded observable, as a norm bound. -/
-lemma AlgState.norm_le_of_isBounded {a : A} {c : ℝ} {p : A} (hp : p ∈ sumSq A)
-    (h : star a * a + p = (c : ℂ) • (1 : A)) (ω : AlgState A) : ‖ω a‖ ≤ c + 1 := by
+lemma AlgState.norm_le_of_isBounded
+    {a : A} {c : ℝ} {p : A} (hp : p ∈ sumSq A) (h : star a * a + p = (c : ℂ) • (1 : A))
+    (ω : AlgState A)
+    : ‖ω a‖ ≤ c + 1 := by
   have := AlgState.norm_sq_le_of_isBounded hp h ω
   nlinarith [sq_nonneg (‖ω a‖ - 1), norm_nonneg (ω a)]
 
 omit [Group Γ] in
-/-- A difference of two sums of a bounded function is bounded by the size of the symmetric
-difference of the index sets. -/
-lemma norm_sum_sub_le (f : Γ → ℂ) (C : ℝ) (hf : ∀ k, ‖f k‖ ≤ C) (S T : Finset Γ) :
-    ‖∑ k ∈ S, f k - ∑ k ∈ T, f k‖ ≤ ((S \ T).card + (T \ S).card) * C := by
+/--
+A difference of two sums of a bounded function is bounded by the size of the symmetric
+difference of the index sets.
+-/
+lemma norm_sum_sub_le (f : Γ → ℂ) (C : ℝ) (hf : ∀ k, ‖f k‖ ≤ C) (S T : Finset Γ)
+    : ‖∑ k ∈ S, f k - ∑ k ∈ T, f k‖ ≤ ((S \ T).card + (T \ S).card) * C := by
   have e1 := Finset.sum_inter_add_sum_sdiff S T f
   have e2 := Finset.sum_inter_add_sum_sdiff T S f
   rw [Finset.inter_comm] at e2
@@ -268,60 +270,72 @@ lemma norm_sum_sub_le (f : Γ → ℂ) (C : ℝ) (hf : ∀ k, ‖f k‖ ≤ C) (
     (norm_sum_le _ _).trans ((Finset.sum_le_sum fun k _ => hf k).trans (by simp))
   linarith
 
-/-- The finite sets `F i` are **asymptotically invariant under right translation** along an
-ultrafilter (a Følner condition): `|F h Δ F| / |F| → 0` for every `h`. -/
+/--
+The finite sets `F i` are **asymptotically invariant under right translation** along an
+ultrafilter (a Følner condition): `|F h Δ F| / |F| → 0` for every `h`.
+-/
 def IsRightFolner (F : ι → Finset Γ) (𝒰 : Ultrafilter ι) : Prop :=
-  ∀ h : Γ, Tendsto (fun i => ((((F i).image (· * h)) \ F i).card +
-    (F i \ (F i).image (· * h)).card : ℝ) / (F i).card) 𝒰 (𝓝 0)
+  ∀ h : Γ,
+    Tendsto
+      (fun i =>
+        ((((F i).image (· * h)) \ F i).card + (F i \ (F i).image (· * h)).card : ℝ) / (F i).card)
+      𝒰 (𝓝 0)
 
 variable (α : Γ →* (A ≃⋆ₐ[ℂ] A)) (F : ι → Finset Γ) (hne : ∀ i, (F i).Nonempty)
 
 omit [DecidableEq Γ] in
 /-- The averaged states of a state over the sets `F i` are bounded on every observable. -/
-lemma average_bounded (φ : AlgState A) (hb : ∀ a : A, IsBounded a) (a : A) :
-    ∃ c : ℝ, ∀ i, ‖(φ.average (fun g => α g) (F i) (hne i)) a‖ ≤ c := by
+lemma average_bounded (φ : AlgState A) (hb : ∀ a : A, IsBounded a) (a : A)
+    : ∃ c : ℝ, ∀ i, ‖(φ.average (fun g => α g) (F i) (hne i)) a‖ ≤ c := by
   obtain ⟨c, p, hp, h⟩ := hb a
   refine ⟨c + 1, fun i => ?_⟩
   rw [AlgState.average_apply, norm_mul]
   have hterm : ∀ g, ‖φ (α g a)‖ ≤ c + 1 := fun g => by
     have h' := congrArg (α g) h
-    rw [_root_.map_add, _root_.map_mul, StarHomClass.map_star, starAlgEquiv_smul,
-      _root_.map_one] at h'
+    rw [_root_.map_add, _root_.map_mul, StarHomClass.map_star, starAlgEquiv_smul, _root_.map_one]
+      at h'
     exact AlgState.norm_le_of_isBounded (sumSq_map (α g) hp) h' φ
   have hn : (F i).card ≠ 0 := (hne i).card_pos.ne'
   have hsum : ‖∑ g ∈ F i, φ (α g a)‖ ≤ (F i).card * (c + 1) :=
     (norm_sum_le _ _).trans ((Finset.sum_le_sum fun g _ => hterm g).trans (by simp [mul_add]))
   have hpos : (0 : ℝ) < (F i).card := by exact_mod_cast (hne i).card_pos
-  calc ‖((F i).card : ℂ)⁻¹‖ * ‖∑ g ∈ F i, φ (α g a)‖
-      ≤ ((F i).card : ℝ)⁻¹ * ((F i).card * (c + 1)) := by
-        rw [norm_inv, Complex.norm_natCast]
-        gcongr
+  calc
+    ‖((F i).card : ℂ)⁻¹‖ * ‖∑ g ∈ F i, φ (α g a)‖
+        ≤ ((F i).card : ℝ)⁻¹ * ((F i).card * (c + 1)) := by
+      rw [norm_inv, Complex.norm_natCast]
+      gcongr
     _ = c + 1 := by field_simp
 
 /-- **The Følner limit of a state**: the ultrafilter limit of its averages over the sets `F i`. -/
-def AlgState.invariantLimit (φ : AlgState A) (hb : ∀ a : A, IsBounded a) (𝒰 : Ultrafilter ι) :
-    AlgState A :=
-  AlgState.limit (fun i => φ.average (fun g => α g) (F i) (hne i)) 𝒰
-    (average_bounded α F hne φ hb)
+def AlgState.invariantLimit (φ : AlgState A) (hb : ∀ a : A, IsBounded a) (𝒰 : Ultrafilter ι)
+    : AlgState A :=
+  AlgState.limit (fun i => φ.average (fun g => α g) (F i) (hne i)) 𝒰 (average_bounded α F hne φ hb)
 
-/-- **The Følner limit of a state is invariant.** When the sets `F i` are asymptotically invariant
+/--
+**The Følner limit of a state is invariant.** When the sets `F i` are asymptotically invariant
 under right translation along `𝒰`, every limit of the averages of a state over them is invariant
-under the group. -/
-lemma AlgState.invariantLimit_invariant (φ : AlgState A) (hb : ∀ a : A, IsBounded a)
-    (𝒰 : Ultrafilter ι) (hF : IsRightFolner F 𝒰) (h : Γ) (a : A) :
-    AlgState.invariantLimit α F hne φ hb 𝒰 (α h a) = AlgState.invariantLimit α F hne φ hb 𝒰 a := by
+under the group.
+-/
+lemma AlgState.invariantLimit_invariant
+    (φ : AlgState A) (hb : ∀ a : A, IsBounded a)
+    (𝒰 : Ultrafilter ι) (hF : IsRightFolner F 𝒰)
+    (h : Γ) (a : A)
+    : AlgState.invariantLimit α F hne φ hb 𝒰 (α h a)
+      = AlgState.invariantLimit α F hne φ hb 𝒰 a := by
   set ψ : ι → AlgState A := fun i => φ.average (fun g => α g) (F i) (hne i) with hψ
   have t1 := AlgState.tendsto_limit ψ 𝒰 (average_bounded α F hne φ hb) (α h a)
   have t2 := AlgState.tendsto_limit ψ 𝒰 (average_bounded α F hne φ hb) a
   obtain ⟨c, p, hp, hc⟩ := hb a
   have hterm : ∀ k, ‖φ (α k a)‖ ≤ c + 1 := fun k => by
     have h' := congrArg (α k) hc
-    rw [_root_.map_add, _root_.map_mul, StarHomClass.map_star, starAlgEquiv_smul,
-      _root_.map_one] at h'
+    rw [_root_.map_add, _root_.map_mul, StarHomClass.map_star, starAlgEquiv_smul, _root_.map_one]
+      at h'
     exact AlgState.norm_le_of_isBounded (sumSq_map (α k) hp) h' φ
-  have hdiff : ∀ i, ‖ψ i (α h a) - ψ i a‖ ≤
-      ((((F i).image (· * h)) \ F i).card + (F i \ (F i).image (· * h)).card : ℝ) /
-        (F i).card * (c + 1) := by
+  have hdiff
+      : ∀ i,
+        ‖ψ i (α h a) - ψ i a‖
+          ≤ ((((F i).image (· * h)) \ F i).card + (F i \ (F i).image (· * h)).card : ℝ) / (F i).card
+            * (c + 1) := by
     intro i
     have hpos : (0 : ℝ) < (F i).card := by exact_mod_cast (hne i).card_pos
     have hshift : ∑ g ∈ F i, φ (α g (α h a)) = ∑ k ∈ (F i).image (· * h), φ (α k a) := by
@@ -329,8 +343,9 @@ lemma AlgState.invariantLimit_invariant (φ : AlgState A) (hb : ∀ a : A, IsBou
       refine Finset.sum_congr rfl fun g _ => ?_
       rw [_root_.map_mul]
       rfl
-    have e : ψ i (α h a) - ψ i a = ((F i).card : ℂ)⁻¹ *
-        (∑ k ∈ (F i).image (· * h), φ (α k a) - ∑ k ∈ F i, φ (α k a)) := by
+    have e
+        : ψ i (α h a) - ψ i a
+          = ((F i).card : ℂ)⁻¹ * (∑ k ∈ (F i).image (· * h), φ (α k a) - ∑ k ∈ F i, φ (α k a)) := by
       simp only [hψ, AlgState.average_apply, hshift]
       ring
     rw [e, norm_mul, norm_inv, Complex.norm_natCast, div_mul_eq_mul_div, inv_mul_eq_div]
@@ -352,8 +367,9 @@ variable {S : Type*} [DecidableEq S] {N : AlgebraNet S}
 
 omit [StarModule ℂ A] in
 /-- A star-algebra homomorphism maps sums of squares to sums of squares. -/
-lemma sumSq_map_hom {B : Type*} [Ring B] [Algebra ℂ B] [StarRing B]
-    (σ : A →⋆ₐ[ℂ] B) {p : A} (hp : p ∈ sumSq A) : σ p ∈ sumSq B := by
+lemma sumSq_map_hom
+    {B : Type*} [Ring B] [Algebra ℂ B] [StarRing B] (σ : A →⋆ₐ[ℂ] B) {p : A} (hp : p ∈ sumSq A)
+    : σ p ∈ sumSq B := by
   induction hp using AddSubmonoid.closure_induction with
   | mem x hx =>
     obtain ⟨s, rfl⟩ := hx
@@ -363,8 +379,8 @@ lemma sumSq_map_hom {B : Type*} [Ring B] [Algebra ℂ B] [StarRing B]
 
 omit [DecidableEq S] in
 /-- **Every observable of the quasi-local algebra of a locally bounded net is bounded.** -/
-lemma AlgebraNet.isBounded_of_isLocallyBounded (hb : N.IsLocallyBounded) (x : N.Quasilocal) :
-    IsBounded x := by
+lemma AlgebraNet.isBounded_of_isLocallyBounded (hb : N.IsLocallyBounded) (x : N.Quasilocal)
+    : IsBounded x := by
   obtain ⟨X, a, rfl⟩ := N.exists_of x
   obtain ⟨c, p, hp, h⟩ := hb X a
   refine ⟨c, N.of X p, sumSq_map_hom (N.of X) hp, ?_⟩

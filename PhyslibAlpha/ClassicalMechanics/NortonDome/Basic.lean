@@ -116,9 +116,11 @@ is fixed by Norton's formula.
 
 -/
 
-/-- The Norton dome is specified by the mass `m` of the particle sliding on it and the
-  gravitational acceleration `g`, both positive. The configuration of the particle is the arc
-  length from the apex. -/
+/--
+The Norton dome is specified by the mass `m` of the particle sliding on it and the
+gravitational acceleration `g`, both positive. The configuration of the particle is the arc
+length from the apex.
+-/
 structure NortonDome where
   /-- The mass of the particle. -/
   m : ℝ
@@ -132,12 +134,10 @@ namespace NortonDome
 variable (S : NortonDome)
 
 /-- The mass of the particle is not equal to zero. -/
-@[simp]
-lemma m_ne_zero : S.m ≠ 0 := S.m_pos.ne'
+@[simp] lemma m_ne_zero : S.m ≠ 0 := S.m_pos.ne'
 
 /-- The gravitational acceleration is not equal to zero. -/
-@[simp]
-lemma g_ne_zero : S.g ≠ 0 := S.g_pos.ne'
+@[simp] lemma g_ne_zero : S.g ≠ 0 := S.g_pos.ne'
 
 /-!
 
@@ -154,8 +154,10 @@ length `r`, written here as `(2/(3g)) √r ^ 3` so that it is defined, and vanis
 
 -/
 
-/-- The depth of the surface of the dome below its apex at arc length `r` from the apex,
-  `(2/(3g)) r^{3/2}`. It vanishes at the apex and for negative arguments. -/
+/--
+The depth of the surface of the dome below its apex at arc length `r` from the apex,
+`(2/(3g)) r^{3/2}`. It vanishes at the apex and for negative arguments.
+-/
 noncomputable def height (r : ℝ) : ℝ := 2 / (3 * S.g) * √r ^ 3
 
 /-- The depth of the dome below its apex, written out. -/
@@ -181,8 +183,10 @@ The slope `√r / g` of the profile is continuous and vanishes at the apex, so t
 
 -/
 
-/-- The derivative of the depth of the dome with respect to the arc length is `√r / g`, at
-  every `r`, including the apex. -/
+/--
+The derivative of the depth of the dome with respect to the arc length is `√r / g`, at
+every `r`, including the apex.
+-/
 lemma hasDerivAt_height (r : ℝ) : HasDerivAt S.height (√r / S.g) r := by
   have h := (hasDerivAt_sqrt_pow_three r).const_mul (2 / (3 * S.g))
   refine h.congr_deriv ?_
@@ -190,8 +194,8 @@ lemma hasDerivAt_height (r : ℝ) : HasDerivAt S.height (√r / S.g) r := by
 
 /-- The depth of the dome is a differentiable function of the arc length. -/
 @[fun_prop]
-lemma height_differentiable : Differentiable ℝ S.height :=
-  fun r => (S.hasDerivAt_height r).differentiableAt
+lemma height_differentiable : Differentiable ℝ S.height := fun r =>
+  (S.hasDerivAt_height r).differentiableAt
 
 /-- The derivative of the depth of the dome with respect to the arc length is `√r / g`. -/
 lemma deriv_height : deriv S.height = fun r => √r / S.g :=
@@ -219,14 +223,18 @@ potential energy is `-m g h(r)`, normalized to vanish at the apex.
 
 -/
 
-/-- The kinetic energy of the particle on the dome along a curve `r` of the arc length is
-  `½ m ‖ṙ‖²`. -/
+/--
+The kinetic energy of the particle on the dome along a curve `r` of the arc length is
+`½ m ‖ṙ‖²`.
+-/
 noncomputable def kineticEnergy (r : Time → EuclideanSpace ℝ (Fin 1)) : Time → ℝ := fun t =>
   (1 / (2 : ℝ)) * S.m * ⟪∂ₜ r t, ∂ₜ r t⟫_ℝ
 
-/-- The potential energy of the particle on the dome at arc length `x` from the apex is
-  `-m g h(x 0)`, the gravitational potential at depth `h` below the apex, which vanishes at the
-  apex. -/
+/--
+The potential energy of the particle on the dome at arc length `x` from the apex is
+`-m g h(x 0)`, the gravitational potential at depth `h` below the apex, which vanishes at the
+apex.
+-/
 noncomputable def potentialEnergy (x : EuclideanSpace ℝ (Fin 1)) : ℝ :=
   -(S.m * S.g * S.height (x 0))
 
@@ -235,30 +243,38 @@ noncomputable def energy (r : Time → EuclideanSpace ℝ (Fin 1)) : Time → �
   S.kineticEnergy r t + S.potentialEnergy (r t)
 
 /-- The kinetic energy of the particle on the dome, written out. -/
-lemma kineticEnergy_eq (r : Time → EuclideanSpace ℝ (Fin 1)) :
-    S.kineticEnergy r = fun t => (1 / (2 : ℝ)) * S.m * ⟪∂ₜ r t, ∂ₜ r t⟫_ℝ := rfl
+lemma kineticEnergy_eq (r : Time → EuclideanSpace ℝ (Fin 1))
+    : S.kineticEnergy r = fun t => (1 / (2 : ℝ)) * S.m * ⟪∂ₜ r t, ∂ₜ r t⟫_ℝ :=
+  rfl
 
-/-- The potential energy of the particle on the dome is `-(2m/3) r^{3/2}`: the gravitational
-  acceleration cancels against the shape of the dome. -/
-lemma potentialEnergy_eq (x : EuclideanSpace ℝ (Fin 1)) :
-    S.potentialEnergy x = -(2 * S.m / 3) * √(x 0) ^ 3 := by
+/--
+The potential energy of the particle on the dome is `-(2m/3) r^{3/2}`: the gravitational
+acceleration cancels against the shape of the dome.
+-/
+lemma potentialEnergy_eq (x : EuclideanSpace ℝ (Fin 1))
+    : S.potentialEnergy x = -(2 * S.m / 3) * √(x 0) ^ 3 := by
   rw [potentialEnergy, height_eq]
   field_simp
 
 /-- The energy of the particle on the dome, written out. -/
-lemma energy_eq (r : Time → EuclideanSpace ℝ (Fin 1)) :
-    S.energy r = fun t => S.kineticEnergy r t + S.potentialEnergy (r t) := rfl
+lemma energy_eq (r : Time → EuclideanSpace ℝ (Fin 1))
+    : S.energy r = fun t => S.kineticEnergy r t + S.potentialEnergy (r t) :=
+  rfl
 
-/-- The potential energy of the particle on the dome is non-positive, the apex being the
-  highest point of the dome. -/
+/--
+The potential energy of the particle on the dome is non-positive, the apex being the
+highest point of the dome.
+-/
 lemma potentialEnergy_nonpos (x : EuclideanSpace ℝ (Fin 1)) : S.potentialEnergy x ≤ 0 := by
   rw [potentialEnergy, neg_nonpos]
   exact mul_nonneg (mul_pos S.m_pos S.g_pos).le (S.height_nonneg _)
 
-/-- The potential energy of the particle on the dome vanishes exactly at the apex, that is for
-  arc length `≤ 0`. -/
-lemma potentialEnergy_eq_zero_iff (x : EuclideanSpace ℝ (Fin 1)) :
-    S.potentialEnergy x = 0 ↔ x 0 ≤ 0 := by
+/--
+The potential energy of the particle on the dome vanishes exactly at the apex, that is for
+arc length `≤ 0`.
+-/
+lemma potentialEnergy_eq_zero_iff (x : EuclideanSpace ℝ (Fin 1))
+    : S.potentialEnergy x = 0 ↔ x 0 ≤ 0 := by
   rw [potentialEnergy, neg_eq_zero, mul_eq_zero, or_iff_right (mul_pos S.m_pos S.g_pos).ne',
     height_eq_zero_iff]
 
@@ -271,56 +287,68 @@ arc-length coordinate. It is `C¹` but not `C²`, since `√r` is not differenti
 
 -/
 
-/-- The cube of the square root of the arc-length coordinate is differentiable on the Euclidean
-  lift, at every point. -/
-lemma differentiableAt_sqrt_coord_pow_three (x : EuclideanSpace ℝ (Fin 1)) :
-    DifferentiableAt ℝ (fun y : EuclideanSpace ℝ (Fin 1) => √(y 0) ^ 3) x := by
+/--
+The cube of the square root of the arc-length coordinate is differentiable on the Euclidean
+lift, at every point.
+-/
+lemma differentiableAt_sqrt_coord_pow_three (x : EuclideanSpace ℝ (Fin 1))
+    : DifferentiableAt ℝ (fun y : EuclideanSpace ℝ (Fin 1) => √(y 0) ^ 3) x := by
   have h : HasFDerivAt ((fun y : ℝ => √y ^ 3) ∘ ⇑(EuclideanSpace.proj (𝕜 := ℝ) (0 : Fin 1))) _ x :=
     (hasDerivAt_sqrt_pow_three (x 0)).comp_hasFDerivAt x
       (EuclideanSpace.proj (𝕜 := ℝ) (0 : Fin 1)).hasFDerivAt
   exact h.differentiableAt
 
-/-- The potential energy of the particle on the dome is a differentiable function of the arc
-  length. -/
+/--
+The potential energy of the particle on the dome is a differentiable function of the arc
+length.
+-/
 @[fun_prop]
 lemma differentiable_potentialEnergy : Differentiable ℝ S.potentialEnergy := by
   intro x
-  have h : S.potentialEnergy = fun y => -(2 * S.m / 3) * √(y 0) ^ 3 :=
-    funext S.potentialEnergy_eq
+  have h : S.potentialEnergy = fun y => -(2 * S.m / 3) * √(y 0) ^ 3 := funext S.potentialEnergy_eq
   rw [h]
   exact (differentiableAt_sqrt_coord_pow_three x).const_mul _
 
-/-- The gradient of the potential energy of the particle on the dome is `-m √r` times the unit
-  vector of the arc-length coordinate. -/
-lemma gradient_potentialEnergy (x : EuclideanSpace ℝ (Fin 1)) :
-    gradient S.potentialEnergy x = -(S.m * √(x 0)) • EuclideanSpace.single 0 1 := by
-  have h : S.potentialEnergy = fun y => -(2 * S.m / 3) * √(y 0) ^ 3 :=
-    funext S.potentialEnergy_eq
+/--
+The gradient of the potential energy of the particle on the dome is `-m √r` times the unit
+vector of the arc-length coordinate.
+-/
+lemma gradient_potentialEnergy (x : EuclideanSpace ℝ (Fin 1))
+    : gradient S.potentialEnergy x = -(S.m * √(x 0)) • EuclideanSpace.single 0 1 := by
+  have h : S.potentialEnergy = fun y => -(2 * S.m / 3) * √(y 0) ^ 3 := funext S.potentialEnergy_eq
   rw [h, gradient_const_mul _ (differentiableAt_sqrt_coord_pow_three x),
     gradient_comp_coord 0 x (hasDerivAt_sqrt_pow_three (x 0)), smul_smul]
   congr 1
   ring
 
-/-- Along a curve of the arc length with differentiable velocity the kinetic energy is
-  differentiable in time. -/
+/--
+Along a curve of the arc length with differentiable velocity the kinetic energy is
+differentiable in time.
+-/
 @[fun_prop]
-lemma kineticEnergy_differentiable (r : Time → EuclideanSpace ℝ (Fin 1))
-    (hr' : Differentiable ℝ (∂ₜ r)) : Differentiable ℝ (S.kineticEnergy r) := by
+lemma kineticEnergy_differentiable
+    (r : Time → EuclideanSpace ℝ (Fin 1)) (hr' : Differentiable ℝ (∂ₜ r))
+    : Differentiable ℝ (S.kineticEnergy r) := by
   rw [kineticEnergy_eq]
   fun_prop
 
-/-- Along a differentiable curve of the arc length the potential energy is a differentiable
-  function of the time. -/
+/--
+Along a differentiable curve of the arc length the potential energy is a differentiable
+function of the time.
+-/
 @[fun_prop]
-lemma potentialEnergy_differentiable (r : Time → EuclideanSpace ℝ (Fin 1))
-    (hr : Differentiable ℝ r) : Differentiable ℝ (fun t => S.potentialEnergy (r t)) :=
+lemma potentialEnergy_differentiable (r : Time → EuclideanSpace ℝ (Fin 1)) (hr : Differentiable ℝ r)
+    : Differentiable ℝ (fun t => S.potentialEnergy (r t)) :=
   S.differentiable_potentialEnergy.comp hr
 
-/-- Along a twice differentiable curve of the arc length the energy is differentiable in
-  time. -/
+/--
+Along a twice differentiable curve of the arc length the energy is differentiable in
+time.
+-/
 @[fun_prop]
-lemma energy_differentiable (r : Time → EuclideanSpace ℝ (Fin 1)) (hr : Differentiable ℝ r)
-    (hr' : Differentiable ℝ (∂ₜ r)) : Differentiable ℝ (S.energy r) := by
+lemma energy_differentiable
+    (r : Time → EuclideanSpace ℝ (Fin 1)) (hr : Differentiable ℝ r) (hr' : Differentiable ℝ (∂ₜ r))
+    : Differentiable ℝ (S.energy r) := by
   rw [energy_eq]
   fun_prop
 
@@ -334,9 +362,8 @@ inner products against the velocity; the equation of motion makes the two contri
 -/
 
 /-- The rate of change of the kinetic energy is the velocity paired with `m r̈`. -/
-lemma kineticEnergy_deriv (r : Time → EuclideanSpace ℝ (Fin 1))
-    (hr' : Differentiable ℝ (∂ₜ r)) :
-    ∂ₜ (S.kineticEnergy r) = fun t => ⟪∂ₜ r t, S.m • ∂ₜ (∂ₜ r) t⟫_ℝ := by
+lemma kineticEnergy_deriv (r : Time → EuclideanSpace ℝ (Fin 1)) (hr' : Differentiable ℝ (∂ₜ r))
+    : ∂ₜ (S.kineticEnergy r) = fun t => ⟪∂ₜ r t, S.m • ∂ₜ (∂ₜ r) t⟫_ℝ := by
   funext t
   unfold kineticEnergy
   have hd : DifferentiableAt ℝ (∂ₜ r) t := hr' t
@@ -345,27 +372,32 @@ lemma kineticEnergy_deriv (r : Time → EuclideanSpace ℝ (Fin 1))
   simp [inner_smul_right, real_inner_comm]
   ring
 
-/-- The rate of change of the potential energy is the velocity paired with the gradient of the
-  potential. -/
-lemma potentialEnergy_deriv (r : Time → EuclideanSpace ℝ (Fin 1)) (hr : Differentiable ℝ r) :
-    ∂ₜ (fun t => S.potentialEnergy (r t)) =
-      fun t => ⟪∂ₜ r t, gradient S.potentialEnergy (r t)⟫_ℝ := by
+/--
+The rate of change of the potential energy is the velocity paired with the gradient of the
+potential.
+-/
+lemma potentialEnergy_deriv (r : Time → EuclideanSpace ℝ (Fin 1)) (hr : Differentiable ℝ r)
+    : ∂ₜ (fun t => S.potentialEnergy (r t))
+      = fun t => ⟪∂ₜ r t, gradient S.potentialEnergy (r t)⟫_ℝ := by
   funext t
   have hf : HasFDerivAt (fun t => S.potentialEnergy (r t)) _ t :=
     (S.differentiable_potentialEnergy (r t)).hasFDerivAt.comp t (hr t).hasFDerivAt
   rw [Time.deriv_eq, hf.fderiv]
   simp [Time.deriv_eq]
 
-/-- The rate of change of the energy is the velocity paired with the sum of `m r̈` and the
-  gradient of the potential; the equation of motion is exactly the vanishing of that sum. -/
-lemma energy_deriv (r : Time → EuclideanSpace ℝ (Fin 1)) (hr : Differentiable ℝ r)
-    (hr' : Differentiable ℝ (∂ₜ r)) :
-    ∂ₜ (S.energy r) =
-      fun t => ⟪∂ₜ r t, S.m • ∂ₜ (∂ₜ r) t + gradient S.potentialEnergy (r t)⟫_ℝ := by
+/--
+The rate of change of the energy is the velocity paired with the sum of `m r̈` and the
+gradient of the potential; the equation of motion is exactly the vanishing of that sum.
+-/
+lemma energy_deriv
+    (r : Time → EuclideanSpace ℝ (Fin 1)) (hr : Differentiable ℝ r) (hr' : Differentiable ℝ (∂ₜ r))
+    : ∂ₜ (S.energy r)
+      = fun t => ⟪∂ₜ r t, S.m • ∂ₜ (∂ₜ r) t + gradient S.potentialEnergy (r t)⟫_ℝ := by
   unfold energy
   funext t
-  rw [Time.deriv_eq, fderiv_fun_add (S.kineticEnergy_differentiable r hr' t)
-    (S.potentialEnergy_differentiable r hr t)]
+  rw [Time.deriv_eq,
+    fderiv_fun_add (S.kineticEnergy_differentiable r hr' t)
+      (S.potentialEnergy_differentiable r hr t)]
   simp only [_root_.add_apply, ← Time.deriv_eq, S.kineticEnergy_deriv r hr',
     S.potentialEnergy_deriv r hr, ← inner_add_right]
 
@@ -380,26 +412,34 @@ are the force of section E and the momentum `m ṙ`.
 -/
 
 set_option linter.unusedVariables false in
-/-- The Lagrangian of the particle on the dome, `L(t, r, ṙ) = ½ m ‖ṙ‖² - V(r)`, the kinetic
-  energy minus the potential energy as a function on phase space. It does not depend on the
-  time. -/
+/--
+The Lagrangian of the particle on the dome, `L(t, r, ṙ) = ½ m ‖ṙ‖² - V(r)`, the kinetic
+energy minus the potential energy as a function on phase space. It does not depend on the
+time.
+-/
 @[nolint unusedArguments]
 noncomputable def lagrangian (t : Time) (x v : EuclideanSpace ℝ (Fin 1)) : ℝ :=
   (1 / (2 : ℝ)) * S.m * ⟪v, v⟫_ℝ - S.potentialEnergy x
 
-/-- Along a curve of the arc length the Lagrangian of the particle on the dome is the kinetic
-  energy minus the potential energy. -/
-lemma lagrangian_eq_kineticEnergy_sub_potentialEnergy (t : Time)
-    (r : Time → EuclideanSpace ℝ (Fin 1)) :
-    S.lagrangian t (r t) (∂ₜ r t) = S.kineticEnergy r t - S.potentialEnergy (r t) := rfl
+/--
+Along a curve of the arc length the Lagrangian of the particle on the dome is the kinetic
+energy minus the potential energy.
+-/
+lemma lagrangian_eq_kineticEnergy_sub_potentialEnergy
+    (t : Time) (r : Time → EuclideanSpace ℝ (Fin 1))
+    : S.lagrangian t (r t) (∂ₜ r t) = S.kineticEnergy r t - S.potentialEnergy (r t) :=
+  rfl
 
-/-- The gradient of the Lagrangian of the particle on the dome in the arc length is minus the
-  gradient of the potential energy, `m √r` times the unit vector of the arc-length
-  coordinate. -/
-lemma gradient_lagrangian_position_eq (t : Time) (x v : EuclideanSpace ℝ (Fin 1)) :
-    gradient (fun x => S.lagrangian t x v) x = (S.m * √(x 0)) • EuclideanSpace.single 0 1 := by
-  have h : (fun y : EuclideanSpace ℝ (Fin 1) => S.lagrangian t y v) =
-      fun y => (-1 : ℝ) * S.potentialEnergy y + (1 / (2 : ℝ)) * S.m * ⟪v, v⟫_ℝ := by
+/--
+The gradient of the Lagrangian of the particle on the dome in the arc length is minus the
+gradient of the potential energy, `m √r` times the unit vector of the arc-length
+coordinate.
+-/
+lemma gradient_lagrangian_position_eq (t : Time) (x v : EuclideanSpace ℝ (Fin 1))
+    : gradient (fun x => S.lagrangian t x v) x = (S.m * √(x 0)) • EuclideanSpace.single 0 1 := by
+  have h
+      : (fun y : EuclideanSpace ℝ (Fin 1) => S.lagrangian t y v)
+        = fun y => (-1 : ℝ) * S.potentialEnergy y + (1 / (2 : ℝ)) * S.m * ⟪v, v⟫_ℝ := by
     funext y
     rw [lagrangian]
     ring
@@ -407,12 +447,16 @@ lemma gradient_lagrangian_position_eq (t : Time) (x v : EuclideanSpace ℝ (Fin 
     gradient_potentialEnergy]
   module
 
-/-- The gradient of the Lagrangian of the particle on the dome in the velocity is the momentum
-  `m ṙ`. -/
-lemma gradient_lagrangian_velocity_eq (t : Time) (x v : EuclideanSpace ℝ (Fin 1)) :
-    gradient (S.lagrangian t x) v = S.m • v := by
-  have h : S.lagrangian t x = fun y : EuclideanSpace ℝ (Fin 1) =>
-      ((1 / (2 : ℝ)) * S.m) * ⟪y, y⟫_ℝ + -S.potentialEnergy x := by
+/--
+The gradient of the Lagrangian of the particle on the dome in the velocity is the momentum
+`m ṙ`.
+-/
+lemma gradient_lagrangian_velocity_eq (t : Time) (x v : EuclideanSpace ℝ (Fin 1))
+    : gradient (S.lagrangian t x) v = S.m • v := by
+  have h
+      : S.lagrangian t x
+        = fun y : EuclideanSpace ℝ (Fin 1) =>
+          ((1 / (2 : ℝ)) * S.m) * ⟪y, y⟫_ℝ + - S.potentialEnergy x := by
     funext y
     rw [lagrangian]
     ring
@@ -436,15 +480,19 @@ smooth.
 
 -/
 
-/-- The generalized force on the particle on the dome conjugate to the arc length, minus the
-  gradient of the potential energy, `F = -∂V/∂r`. -/
+/--
+The generalized force on the particle on the dome conjugate to the arc length, minus the
+gradient of the potential energy, `F = -∂V/∂r`.
+-/
 noncomputable def force (x : EuclideanSpace ℝ (Fin 1)) : EuclideanSpace ℝ (Fin 1) :=
-  -gradient S.potentialEnergy x
+  - gradient S.potentialEnergy x
 
-/-- The force on the particle on the dome is `m √r` times the unit vector of the arc-length
-  coordinate: it points away from the apex, and vanishes there. -/
-lemma force_eq (x : EuclideanSpace ℝ (Fin 1)) :
-    S.force x = (S.m * √(x 0)) • EuclideanSpace.single 0 1 := by
+/--
+The force on the particle on the dome is `m √r` times the unit vector of the arc-length
+coordinate: it points away from the apex, and vanishes there.
+-/
+lemma force_eq (x : EuclideanSpace ℝ (Fin 1))
+    : S.force x = (S.m * √(x 0)) • EuclideanSpace.single 0 1 := by
   rw [force, gradient_potentialEnergy, neg_smul, neg_neg]
 
 /-- The single component of the force on the particle on the dome is `m √r`. -/
@@ -474,31 +522,36 @@ lemma force_continuous : Continuous S.force := by
   rw [h]
   fun_prop
 
-/-- The distance between two multiples of the unit vector of the arc-length coordinate is the
-  distance between the coefficients. -/
-lemma dist_smul_single (a b : ℝ) :
-    dist (a • EuclideanSpace.single (0 : Fin 1) (1 : ℝ)) (b • EuclideanSpace.single 0 1) =
-      |a - b| := by
-  rw [dist_eq_norm, ← sub_smul, norm_smul, PiLp.norm_single, norm_one, mul_one,
-    Real.norm_eq_abs]
+/--
+The distance between two multiples of the unit vector of the arc-length coordinate is the
+distance between the coefficients.
+-/
+lemma dist_smul_single (a b : ℝ)
+    : dist (a • EuclideanSpace.single (0 : Fin 1) (1 : ℝ)) (b • EuclideanSpace.single 0 1)
+      = |a - b| := by
+  rw [dist_eq_norm, ← sub_smul, norm_smul, PiLp.norm_single, norm_one, mul_one, Real.norm_eq_abs]
 
-/-- The force on the particle on the dome is not Lipschitz on any closed ball about the apex,
-  for any Lipschitz constant. -/
-lemma not_lipschitzOnWith_force (K : NNReal) {ε : ℝ} (hε : 0 < ε) :
-    ¬ LipschitzOnWith K S.force (Metric.closedBall 0 ε) := by
+/--
+The force on the particle on the dome is not Lipschitz on any closed ball about the apex,
+for any Lipschitz constant.
+-/
+lemma not_lipschitzOnWith_force (K : NNReal) {ε : ℝ} (hε : 0 < ε)
+    : ¬ LipschitzOnWith K S.force (Metric.closedBall 0 ε) := by
   intro h
   refine not_lipschitzOnWith_sqrt ⟨(K : ℝ) / S.m, div_nonneg K.2 S.m_pos.le⟩ hε ?_
   refine LipschitzOnWith.of_dist_le_mul fun y hy z hz => ?_
-  have hmem : ∀ w ∈ Set.Icc (0 : ℝ) ε,
-      w • EuclideanSpace.single (0 : Fin 1) (1 : ℝ) ∈ Metric.closedBall 0 ε := by
+  have hmem
+      : ∀ w ∈ Set.Icc (0 : ℝ) ε,
+        w • EuclideanSpace.single (0 : Fin 1) (1 : ℝ) ∈ Metric.closedBall 0 ε := by
     intro w hw
-    rw [Metric.mem_closedBall, dist_zero_right, norm_smul, PiLp.norm_single, norm_one,
-      mul_one, Real.norm_eq_abs, abs_of_nonneg hw.1]
+    rw [Metric.mem_closedBall, dist_zero_right, norm_smul, PiLp.norm_single, norm_one, mul_one,
+      Real.norm_eq_abs, abs_of_nonneg hw.1]
     exact hw.2
   have := h.dist_le_mul _ (hmem y hy) _ (hmem z hz)
   rw [force_eq, force_eq, dist_smul_single, dist_smul_single] at this
-  simp only [PiLp.smul_apply, PiLp.single_apply, ite_true, smul_eq_mul, mul_one,
-    ← mul_sub, abs_mul, abs_of_pos S.m_pos] at this
+  simp only [PiLp.smul_apply, PiLp.single_apply, ite_true, smul_eq_mul, mul_one, ← mul_sub, abs_mul,
+      abs_of_pos S.m_pos]
+    at this
   show dist √y √z ≤ (K : ℝ) / S.m * dist y z
   rw [Real.dist_eq, Real.dist_eq, div_mul_eq_mul_div, le_div_iff₀ S.m_pos, mul_comm]
   exact this
@@ -509,25 +562,30 @@ lemma not_lipschitzOnWith_force (K : NNReal) {ε : ℝ} (hε : 0 < ε) :
 
 -/
 
-/-- The equation of motion of the particle on the dome: at every instant `m r̈` equals the
-  generalized force `F(r) = m √r`. This pointwise relation is the definition; for curves with
-  differentiable velocity it is the vanishing of the Euler–Lagrange operator of the Lagrangian,
-  `equationOfMotion_iff_eulerLagrangeOp_zero`. -/
+/--
+The equation of motion of the particle on the dome: at every instant `m r̈` equals the
+generalized force `F(r) = m √r`. This pointwise relation is the definition; for curves with
+differentiable velocity it is the vanishing of the Euler–Lagrange operator of the Lagrangian,
+`equationOfMotion_iff_eulerLagrangeOp_zero`.
+-/
 def EquationOfMotion (r : Time → EuclideanSpace ℝ (Fin 1)) : Prop :=
   ∀ t, S.m • ∂ₜ (∂ₜ r) t = S.force (r t)
 
-/-- The equation of motion with all terms on one side: at every instant `m r̈` plus the
-  gradient of the potential energy vanishes. This is the combination `energy_deriv` pairs with
-  the velocity. -/
-lemma equationOfMotion_iff_newtons_2nd_law (r : Time → EuclideanSpace ℝ (Fin 1)) :
-    S.EquationOfMotion r ↔
-      ∀ t, S.m • ∂ₜ (∂ₜ r) t + gradient S.potentialEnergy (r t) = 0 := by
+/--
+The equation of motion with all terms on one side: at every instant `m r̈` plus the
+gradient of the potential energy vanishes. This is the combination `energy_deriv` pairs with
+the velocity.
+-/
+lemma equationOfMotion_iff_newtons_2nd_law (r : Time → EuclideanSpace ℝ (Fin 1))
+    : S.EquationOfMotion r ↔ ∀ t, S.m • ∂ₜ (∂ₜ r) t + gradient S.potentialEnergy (r t) = 0 := by
   simp only [EquationOfMotion, force, eq_neg_iff_add_eq_zero]
 
-/-- The equation of motion of the particle on the dome in scalar form, `r̈ = √r`. Both the mass
-  and the gravitational acceleration have cancelled. -/
-lemma equationOfMotion_iff_scalar (r : Time → EuclideanSpace ℝ (Fin 1)) :
-    S.EquationOfMotion r ↔ ∀ t, ∂ₜ (∂ₜ r) t 0 = √(r t 0) := by
+/--
+The equation of motion of the particle on the dome in scalar form, `r̈ = √r`. Both the mass
+and the gravitational acceleration have cancelled.
+-/
+lemma equationOfMotion_iff_scalar (r : Time → EuclideanSpace ℝ (Fin 1))
+    : S.EquationOfMotion r ↔ ∀ t, ∂ₜ (∂ₜ r) t 0 = √(r t 0) := by
   simp only [EquationOfMotion]
   refine forall_congr' fun t => ?_
   rw [force_eq]
@@ -552,22 +610,30 @@ solutions. Smoothness is not demanded: the motions leaving the apex are `C³` bu
 
 -/
 
-/-- A solution of the dome is a twice differentiable curve of the arc length, its position and
-  velocity both differentiable, satisfying the equation of motion. -/
+/--
+A solution of the dome is a twice differentiable curve of the arc length, its position and
+velocity both differentiable, satisfying the equation of motion.
+-/
 def IsSolution (r : Time → EuclideanSpace ℝ (Fin 1)) : Prop :=
   Differentiable ℝ r ∧ Differentiable ℝ (∂ₜ r) ∧ S.EquationOfMotion r
 
 /-- The position along a solution of the dome is differentiable. -/
-lemma IsSolution.differentiable {S : NortonDome} {r : Time → EuclideanSpace ℝ (Fin 1)}
-    (h : S.IsSolution r) : Differentiable ℝ r := h.1
+lemma IsSolution.differentiable
+    {S : NortonDome} {r : Time → EuclideanSpace ℝ (Fin 1)} (h : S.IsSolution r)
+    : Differentiable ℝ r :=
+  h.1
 
 /-- The velocity along a solution of the dome is differentiable. -/
-lemma IsSolution.deriv_differentiable {S : NortonDome} {r : Time → EuclideanSpace ℝ (Fin 1)}
-    (h : S.IsSolution r) : Differentiable ℝ (∂ₜ r) := h.2.1
+lemma IsSolution.deriv_differentiable
+    {S : NortonDome} {r : Time → EuclideanSpace ℝ (Fin 1)} (h : S.IsSolution r)
+    : Differentiable ℝ (∂ₜ r) :=
+  h.2.1
 
 /-- A solution of the dome satisfies the equation of motion. -/
-lemma IsSolution.equationOfMotion {S : NortonDome} {r : Time → EuclideanSpace ℝ (Fin 1)}
-    (h : S.IsSolution r) : S.EquationOfMotion r := h.2.2
+lemma IsSolution.equationOfMotion
+    {S : NortonDome} {r : Time → EuclideanSpace ℝ (Fin 1)} (h : S.IsSolution r)
+    : S.EquationOfMotion r :=
+  h.2.2
 
 /-!
 
@@ -580,21 +646,25 @@ The identification of this operator with the variational derivative of the actio
 
 -/
 
-/-- Along a curve of the arc length with differentiable velocity the Euler–Lagrange operator of
-  the Lagrangian of the dome is the force minus `m r̈`. -/
-lemma eulerLagrangeOp_lagrangian (r : Time → EuclideanSpace ℝ (Fin 1))
-    (hr' : Differentiable ℝ (∂ₜ r)) :
-    eulerLagrangeOp S.lagrangian r = fun t => S.force (r t) - S.m • ∂ₜ (∂ₜ r) t := by
+/--
+Along a curve of the arc length with differentiable velocity the Euler–Lagrange operator of
+the Lagrangian of the dome is the force minus `m r̈`.
+-/
+lemma eulerLagrangeOp_lagrangian
+    (r : Time → EuclideanSpace ℝ (Fin 1)) (hr' : Differentiable ℝ (∂ₜ r))
+    : eulerLagrangeOp S.lagrangian r = fun t => S.force (r t) - S.m • ∂ₜ (∂ₜ r) t := by
   funext t
   rw [eulerLagrangeOp]
   simp [S.gradient_lagrangian_position_eq, S.gradient_lagrangian_velocity_eq, S.force_eq,
     Time.deriv_smul _ S.m hr']
 
-/-- For a curve of the arc length with differentiable velocity the equation of motion of the
-  dome holds if and only if the Euler–Lagrange operator of its Lagrangian vanishes along it. -/
-lemma equationOfMotion_iff_eulerLagrangeOp_zero (r : Time → EuclideanSpace ℝ (Fin 1))
-    (hr' : Differentiable ℝ (∂ₜ r)) :
-    S.EquationOfMotion r ↔ eulerLagrangeOp S.lagrangian r = 0 := by
+/--
+For a curve of the arc length with differentiable velocity the equation of motion of the
+dome holds if and only if the Euler–Lagrange operator of its Lagrangian vanishes along it.
+-/
+lemma equationOfMotion_iff_eulerLagrangeOp_zero
+    (r : Time → EuclideanSpace ℝ (Fin 1)) (hr' : Differentiable ℝ (∂ₜ r))
+    : S.EquationOfMotion r ↔ eulerLagrangeOp S.lagrangian r = 0 := by
   rw [S.eulerLagrangeOp_lagrangian r hr', funext_iff]
   simp only [EquationOfMotion, Pi.zero_apply, sub_eq_zero]
   exact forall_congr' fun t => eq_comm
@@ -610,21 +680,28 @@ at rest at the apex and every motion leaving it all have zero energy, which is p
 
 -/
 
-/-- Along a twice differentiable curve of the arc length satisfying the equation of motion the
-  time derivative of the energy of the dome vanishes. -/
-lemma energy_conservation_of_equationOfMotion (r : Time → EuclideanSpace ℝ (Fin 1))
-    (hr : Differentiable ℝ r) (hr' : Differentiable ℝ (∂ₜ r)) (h : S.EquationOfMotion r) :
-    ∂ₜ (S.energy r) = 0 := by
+/--
+Along a twice differentiable curve of the arc length satisfying the equation of motion the
+time derivative of the energy of the dome vanishes.
+-/
+lemma energy_conservation_of_equationOfMotion
+    (r : Time → EuclideanSpace ℝ (Fin 1))
+    (hr : Differentiable ℝ r) (hr' : Differentiable ℝ (∂ₜ r)) (h : S.EquationOfMotion r)
+    : ∂ₜ (S.energy r) = 0 := by
   rw [S.equationOfMotion_iff_newtons_2nd_law r] at h
   funext t
   rw [S.energy_deriv r hr hr']
   simp [h t]
 
-/-- Along a twice differentiable curve of the arc length satisfying the equation of motion the
-  energy of the dome at any time is equal to its initial value. -/
-lemma energy_conservation_of_equationOfMotion' (r : Time → EuclideanSpace ℝ (Fin 1))
+/--
+Along a twice differentiable curve of the arc length satisfying the equation of motion the
+energy of the dome at any time is equal to its initial value.
+-/
+lemma energy_conservation_of_equationOfMotion'
+    (r : Time → EuclideanSpace ℝ (Fin 1))
     (hr : Differentiable ℝ r) (hr' : Differentiable ℝ (∂ₜ r)) (h : S.EquationOfMotion r)
-    (t : Time) : S.energy r t = S.energy r 0 := by
+    (t : Time)
+    : S.energy r t = S.energy r 0 := by
   apply is_const_of_fderiv_eq_zero (𝕜 := ℝ) (S.energy_differentiable r hr hr')
   intro t
   ext p
@@ -633,8 +710,9 @@ lemma energy_conservation_of_equationOfMotion' (r : Time → EuclideanSpace ℝ 
   simp
 
 /-- The energy of the dome along a solution at any time is equal to its initial value. -/
-lemma IsSolution.energy_eq {S : NortonDome} {r : Time → EuclideanSpace ℝ (Fin 1)}
-    (h : S.IsSolution r) (t : Time) : S.energy r t = S.energy r 0 :=
+lemma IsSolution.energy_eq
+    {S : NortonDome} {r : Time → EuclideanSpace ℝ (Fin 1)} (h : S.IsSolution r) (t : Time)
+    : S.energy r t = S.energy r 0 :=
   S.energy_conservation_of_equationOfMotion' r h.differentiable h.deriv_differentiable
     h.equationOfMotion t
 

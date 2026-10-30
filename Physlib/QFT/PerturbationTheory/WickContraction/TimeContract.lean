@@ -23,51 +23,58 @@ variable {n : ℕ} (c : WickContraction n)
 open Physlib.List
 open WickAlgebra
 
-/-- For a list `φs` of `𝓕.FieldOp` and a Wick contraction `φsΛ` the
-  element of the center of `𝓕.WickAlgebra`, `φsΛ.timeContract` is defined as the product
-  of `timeContract φs[j] φs[k]` over contracted pairs `{j, k}` in `φsΛ`
-  with `j < k`. -/
-noncomputable def timeContract {φs : List 𝓕.FieldOp}
-    (φsΛ : WickContraction φs.length) :
-    Subalgebra.center ℂ 𝓕.WickAlgebra :=
+/--
+For a list `φs` of `𝓕.FieldOp` and a Wick contraction `φsΛ` the
+element of the center of `𝓕.WickAlgebra`, `φsΛ.timeContract` is defined as the product
+of `timeContract φs[j] φs[k]` over contracted pairs `{j, k}` in `φsΛ`
+with `j < k`.
+-/
+noncomputable def timeContract {φs : List 𝓕.FieldOp} (φsΛ : WickContraction φs.length)
+    : Subalgebra.center ℂ 𝓕.WickAlgebra :=
   ∏ (a : φsΛ.1), ⟨WickAlgebra.timeContract
     (φs.get (φsΛ.fstFieldOfContract a)) (φs.get (φsΛ.sndFieldOfContract a)),
     timeContract_mem_center _ _⟩
 
-/-- For a list `φs = φ₀…φₙ` of `𝓕.FieldOp`, a Wick contraction `φsΛ` of `φs`, an element `φ` of
-  `𝓕.FieldOp`, and a `i ≤ φs.length` the following relation holds
+/--
+For a list `φs = φ₀…φₙ` of `𝓕.FieldOp`, a Wick contraction `φsΛ` of `φs`, an element `φ` of
+`𝓕.FieldOp`, and a `i ≤ φs.length` the following relation holds
 
-  `(φsΛ ↩Λ φ i none).timeContract = φsΛ.timeContract`
+`(φsΛ ↩Λ φ i none).timeContract = φsΛ.timeContract`
 
-  The proof of this result ultimately is a consequence of definitions. -/
+The proof of this result ultimately is a consequence of definitions.
+-/
 @[simp]
-lemma timeContract_insert_none (φ : 𝓕.FieldOp) (φs : List 𝓕.FieldOp)
-    (φsΛ : WickContraction φs.length) (i : Fin φs.length.succ) :
-    (φsΛ ↩Λ φ i none).timeContract = φsΛ.timeContract := by
+lemma timeContract_insert_none
+    (φ : 𝓕.FieldOp) (φs : List 𝓕.FieldOp) (φsΛ : WickContraction φs.length) (i : Fin φs.length.succ)
+    : (φsΛ ↩Λ φ i none).timeContract = φsΛ.timeContract := by
   rw [timeContract, insertAndContract_none_prod_contractions]
   congr
   ext a
   simp
 
-/-- For a list `φs = φ₀…φₙ` of `𝓕.FieldOp`, a Wick contraction `φsΛ` of `φs`, an element `φ` of
-  `𝓕.FieldOp`, a `i ≤ φs.length` and a `k` in `φsΛ.uncontracted`, then
-  `(φsΛ ↩Λ φ i (some k)).timeContract` is equal to the product of
-  - `timeContract φ φs[k]` if `i ≤ k` or `timeContract φs[k] φ` if `k < i`
-  - `φsΛ.timeContract`.
+/--
+For a list `φs = φ₀…φₙ` of `𝓕.FieldOp`, a Wick contraction `φsΛ` of `φs`, an element `φ` of
+`𝓕.FieldOp`, a `i ≤ φs.length` and a `k` in `φsΛ.uncontracted`, then
+`(φsΛ ↩Λ φ i (some k)).timeContract` is equal to the product of
+- `timeContract φ φs[k]` if `i ≤ k` or `timeContract φs[k] φ` if `k < i`
+- `φsΛ.timeContract`.
 
-  The proof of this result ultimately is a consequence of definitions. -/
+The proof of this result ultimately is a consequence of definitions.
+-/
 lemma timeContract_insertAndContract_some
-    (φ : 𝓕.FieldOp) (φs : List 𝓕.FieldOp)
-    (φsΛ : WickContraction φs.length) (i : Fin φs.length.succ) (j : φsΛ.uncontracted) :
-    (φsΛ ↩Λ φ i (some j)).timeContract =
-    (if i < i.succAbove j then
-      ⟨WickAlgebra.timeContract φ φs[j.1], timeContract_mem_center _ _⟩
-    else ⟨WickAlgebra.timeContract φs[j.1] φ, timeContract_mem_center _ _⟩) *
-    φsΛ.timeContract := by
+    (φ : 𝓕.FieldOp)
+    (φs : List 𝓕.FieldOp) (φsΛ : WickContraction φs.length)
+    (i : Fin φs.length.succ) (j : φsΛ.uncontracted)
+    : (φsΛ ↩Λ φ i (some j)).timeContract
+      = (if i < i.succAbove j then
+           ⟨WickAlgebra.timeContract φ φs[j.1], timeContract_mem_center _ _⟩
+         else
+           ⟨WickAlgebra.timeContract φs[j.1] φ, timeContract_mem_center _ _⟩)
+        * φsΛ.timeContract := by
   rw [timeContract, insertAndContract_some_prod_contractions]
   congr 1
   · simp only [Nat.succ_eq_add_one, insertAndContract_fstFieldOfContract_some_incl, finCongr_apply,
-    List.get_eq_getElem, insertAndContract_sndFieldOfContract_some_incl, Fin.getElem_fin]
+      List.get_eq_getElem, insertAndContract_sndFieldOfContract_some_incl, Fin.getElem_fin]
     split
     · simp
     · simp
@@ -76,48 +83,50 @@ lemma timeContract_insertAndContract_some
     simp
 
 @[simp]
-lemma timeContract_empty (φs : List 𝓕.FieldOp) :
-    (@empty φs.length).timeContract = 1 := by
+lemma timeContract_empty (φs : List 𝓕.FieldOp) : (@empty φs.length).timeContract = 1 := by
   rw [timeContract, empty]
   simp
 
 open FieldStatistic
 
 set_option backward.isDefEq.respectTransparency false in
-/-- For a list `φs = φ₀…φₙ` of `𝓕.FieldOp`, a Wick contraction `φsΛ` of `φs`, an element `φ` of
-  `𝓕.FieldOp`, a `i ≤ φs.length` and a `k` in `φsΛ.uncontracted` such that `i ≤ k`, with the
-  condition that `φ` has greater or equal time to `φs[k]`, then
-  `(φsΛ ↩Λ φ i (some k)).timeContract` is equal to the product of
-  - `[anPart φ, φs[k]]ₛ`
-  - `φsΛ.timeContract`
-  - two copies of the exchange sign of `φ` with the uncontracted fields in `φ₀…φₖ₋₁`.
-    These two exchange signs cancel each other out but are included for convenience.
+/--
+For a list `φs = φ₀…φₙ` of `𝓕.FieldOp`, a Wick contraction `φsΛ` of `φs`, an element `φ` of
+`𝓕.FieldOp`, a `i ≤ φs.length` and a `k` in `φsΛ.uncontracted` such that `i ≤ k`, with the
+condition that `φ` has greater or equal time to `φs[k]`, then
+`(φsΛ ↩Λ φ i (some k)).timeContract` is equal to the product of
+- `[anPart φ, φs[k]]ₛ`
+- `φsΛ.timeContract`
+- two copies of the exchange sign of `φ` with the uncontracted fields in `φ₀…φₖ₋₁`.
+  These two exchange signs cancel each other out but are included for convenience.
 
-  The proof of this result ultimately is a consequence of definitions and
-  `timeContract_of_timeOrderRel`. -/
+The proof of this result ultimately is a consequence of definitions and
+`timeContract_of_timeOrderRel`.
+-/
 lemma timeContract_insert_some_of_lt
-    (φ : 𝓕.FieldOp) (φs : List 𝓕.FieldOp)
-    (φsΛ : WickContraction φs.length) (i : Fin φs.length.succ) (k : φsΛ.uncontracted)
-    (ht : 𝓕.timeOrderRel φ φs[k.1]) (hik : i < i.succAbove k) :
-    (φsΛ ↩Λ φ i (some k)).timeContract =
-    𝓢(𝓕 |>ₛ φ, 𝓕 |>ₛ ⟨φs.get, (φsΛ.uncontracted.filter (fun x => x < k))⟩)
-    • (contractStateAtIndex φ [φsΛ]ᵘᶜ ((uncontractedFieldOpEquiv φs φsΛ) (some k)) *
-      φsΛ.timeContract) := by
+    (φ : 𝓕.FieldOp) (φs : List 𝓕.FieldOp) (φsΛ : WickContraction φs.length) (i : Fin φs.length.succ)
+    (k : φsΛ.uncontracted) (ht : 𝓕.timeOrderRel φ φs[k.1]) (hik : i < i.succAbove k)
+    : (φsΛ ↩Λ φ i (some k)).timeContract
+      = 𝓢(𝓕 |>ₛ φ, 𝓕 |>ₛ ⟨φs.get, (φsΛ.uncontracted.filter (fun x => x < k))⟩)
+        • (contractStateAtIndex φ ([φsΛ]ᵘᶜ) ((uncontractedFieldOpEquiv φs φsΛ) (some k))
+          * φsΛ.timeContract) := by
   rw [timeContract_insertAndContract_some]
-  simp only [Nat.succ_eq_add_one, Fin.getElem_fin, ite_mul,
-    contractStateAtIndex, uncontractedFieldOpEquiv, Equiv.optionCongr_apply,
-    Equiv.coe_trans, Option.map_some, Function.comp_apply, finCongr_apply, Fin.val_cast,
-    List.getElem_map, uncontractedList_getElem_uncontractedIndexEquiv_symm, List.get_eq_getElem,
+  simp only [Nat.succ_eq_add_one, Fin.getElem_fin, ite_mul, contractStateAtIndex,
+    uncontractedFieldOpEquiv, Equiv.optionCongr_apply, Equiv.coe_trans, Option.map_some,
+    Function.comp_apply, finCongr_apply, Fin.val_cast, List.getElem_map,
+    uncontractedList_getElem_uncontractedIndexEquiv_symm, List.get_eq_getElem,
     Algebra.smul_mul_assoc, uncontractedListGet]
-  · simp only [hik, ↓reduceIte, MulMemClass.coe_mul]
+  · simp only [hik, ↓ reduceIte, MulMemClass.coe_mul]
     rw [timeContract_of_timeOrderRel]
     trans (1 : ℂ) • ((superCommute (anPart φ)) (ofFieldOp φs[k.1]) * ↑φsΛ.timeContract)
     · simp
     simp only [smul_smul]
     congr 1
-    have h1 : ofList 𝓕.fieldOpStatistic (List.take (↑(φsΛ.uncontractedIndexEquiv.symm k))
-        (List.map φs.get φsΛ.uncontractedList))
-        = (𝓕 |>ₛ ⟨φs.get, (Finset.filter (fun x => x < k) φsΛ.uncontracted)⟩) := by
+    have h1
+        : ofList 𝓕.fieldOpStatistic
+            (List.take (↑(φsΛ.uncontractedIndexEquiv.symm k))
+              (List.map φs.get φsΛ.uncontractedList))
+          = (𝓕 |>ₛ ⟨φs.get, (Finset.filter (fun x => x < k) φsΛ.uncontracted)⟩) := by
       simp only [ofFinset]
       congr
       rw [← List.map_take]
@@ -129,38 +138,40 @@ lemma timeContract_insert_some_of_lt
     · exact ht
 
 set_option backward.isDefEq.respectTransparency false in
-/-- For a list `φs = φ₀…φₙ` of `𝓕.FieldOp`, a Wick contraction `φsΛ` of `φs`, an element `φ` of
-  `𝓕.FieldOp`, a `i ≤ φs.length` and a `k` in `φsΛ.uncontracted` such that `k < i`, with the
-  condition that `φs[k]` does not have time greater or equal to `φ`, then
-  `(φsΛ ↩Λ φ i (some k)).timeContract` is equal to the product of
-  - `[anPart φ, φs[k]]ₛ`
-  - `φsΛ.timeContract`
-  - the exchange sign of `φ` with the uncontracted fields in `φ₀…φₖ₋₁`.
-  - the exchange sign of `φ` with the uncontracted fields in `φ₀…φₖ`.
+/--
+For a list `φs = φ₀…φₙ` of `𝓕.FieldOp`, a Wick contraction `φsΛ` of `φs`, an element `φ` of
+`𝓕.FieldOp`, a `i ≤ φs.length` and a `k` in `φsΛ.uncontracted` such that `k < i`, with the
+condition that `φs[k]` does not have time greater or equal to `φ`, then
+`(φsΛ ↩Λ φ i (some k)).timeContract` is equal to the product of
+- `[anPart φ, φs[k]]ₛ`
+- `φsΛ.timeContract`
+- the exchange sign of `φ` with the uncontracted fields in `φ₀…φₖ₋₁`.
+- the exchange sign of `φ` with the uncontracted fields in `φ₀…φₖ`.
 
-  The proof of this result ultimately is a consequence of definitions and
-  `timeContract_of_not_timeOrderRel_expand`. -/
+The proof of this result ultimately is a consequence of definitions and
+`timeContract_of_not_timeOrderRel_expand`.
+-/
 lemma timeContract_insert_some_of_not_lt
-    (φ : 𝓕.FieldOp) (φs : List 𝓕.FieldOp)
-    (φsΛ : WickContraction φs.length) (i : Fin φs.length.succ) (k : φsΛ.uncontracted)
-    (ht : ¬ 𝓕.timeOrderRel φs[k.1] φ) (hik : ¬ i < i.succAbove k) :
-    (φsΛ ↩Λ φ i (some k)).timeContract =
-    𝓢(𝓕 |>ₛ φ, 𝓕 |>ₛ ⟨φs.get, (φsΛ.uncontracted.filter (fun x => x ≤ k))⟩)
-    • (contractStateAtIndex φ [φsΛ]ᵘᶜ
-      ((uncontractedFieldOpEquiv φs φsΛ) (some k)) * φsΛ.timeContract) := by
+    (φ : 𝓕.FieldOp) (φs : List 𝓕.FieldOp) (φsΛ : WickContraction φs.length) (i : Fin φs.length.succ)
+    (k : φsΛ.uncontracted) (ht : ¬ 𝓕.timeOrderRel φs[k.1] φ) (hik : ¬ i < i.succAbove k)
+    : (φsΛ ↩Λ φ i (some k)).timeContract
+      = 𝓢(𝓕 |>ₛ φ, 𝓕 |>ₛ ⟨φs.get, (φsΛ.uncontracted.filter (fun x => x ≤ k))⟩)
+        • (contractStateAtIndex φ ([φsΛ]ᵘᶜ) ((uncontractedFieldOpEquiv φs φsΛ) (some k))
+          * φsΛ.timeContract) := by
   rw [timeContract_insertAndContract_some]
-  simp only [Nat.succ_eq_add_one, Fin.getElem_fin, ite_mul,
-    contractStateAtIndex, uncontractedFieldOpEquiv, Equiv.optionCongr_apply,
-    Equiv.coe_trans, Option.map_some, Function.comp_apply, finCongr_apply, Fin.val_cast,
-    List.getElem_map, uncontractedList_getElem_uncontractedIndexEquiv_symm, List.get_eq_getElem,
+  simp only [Nat.succ_eq_add_one, Fin.getElem_fin, ite_mul, contractStateAtIndex,
+    uncontractedFieldOpEquiv, Equiv.optionCongr_apply, Equiv.coe_trans, Option.map_some,
+    Function.comp_apply, finCongr_apply, Fin.val_cast, List.getElem_map,
+    uncontractedList_getElem_uncontractedIndexEquiv_symm, List.get_eq_getElem,
     Algebra.smul_mul_assoc, uncontractedListGet]
-  simp only [hik, ↓reduceIte, MulMemClass.coe_mul]
+  simp only [hik, ↓ reduceIte, MulMemClass.coe_mul]
   rw [timeContract_of_not_timeOrderRel, timeContract_of_timeOrderRel]
   simp only [Algebra.smul_mul_assoc, smul_smul]
   congr
-  have h1 : ofList 𝓕.fieldOpStatistic (List.take (↑(φsΛ.uncontractedIndexEquiv.symm k))
-      (List.map φs.get φsΛ.uncontractedList))
-      = (𝓕 |>ₛ ⟨φs.get, (Finset.filter (fun x => x < k) φsΛ.uncontracted)⟩) := by
+  have h1
+      : ofList 𝓕.fieldOpStatistic
+          (List.take (↑(φsΛ.uncontractedIndexEquiv.symm k)) (List.map φs.get φsΛ.uncontractedList))
+        = (𝓕 |>ₛ ⟨φs.get, (Finset.filter (fun x => x < k) φsΛ.uncontracted)⟩) := by
     simp only [ofFinset]
     congr
     rw [← List.map_take]
@@ -192,9 +203,9 @@ lemma timeContract_insert_some_of_not_lt
   simp_all only [Fin.getElem_fin, Nat.succ_eq_add_one, not_lt, false_or]
   exact ht
 
-lemma timeContract_of_not_gradingCompliant (φs : List 𝓕.FieldOp)
-    (φsΛ : WickContraction φs.length) (h : ¬ GradingCompliant φs φsΛ) :
-    φsΛ.timeContract = 0 := by
+lemma timeContract_of_not_gradingCompliant
+    (φs : List 𝓕.FieldOp) (φsΛ : WickContraction φs.length) (h : ¬ GradingCompliant φs φsΛ)
+    : φsΛ.timeContract = 0 := by
   rw [timeContract]
   simp only [GradingCompliant, Subtype.forall, not_forall] at h
   obtain ⟨a, ha⟩ := h

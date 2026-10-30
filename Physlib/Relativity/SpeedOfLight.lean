@@ -50,8 +50,10 @@ open scoped NNReal
 
 -/
 
-/-- The speed of light in a vacuum. An element of this type should be thought of as
-  the speed of light in some chosen but arbitrary system of units. -/
+/--
+The speed of light in a vacuum. An element of this type should be thought of as
+the speed of light in some chosen but arbitrary system of units.
+-/
 structure SpeedOfLight where
   /-- The underlying value of the speed of light. -/
   val : ℝ
@@ -90,11 +92,12 @@ This is useful when we are working in units where the speed of light is equal to
 
 instance : One SpeedOfLight := ⟨1, by grind⟩
 
-@[simp]
-lemma val_one : (1 : SpeedOfLight).val = 1 := rfl
+@[simp] lemma val_one : (1 : SpeedOfLight).val = 1 := rfl
 
-/-- The magnitude supplied to `PositiveRealUnitCore` is the underlying value, so that the
-  generic positive-real lemmas apply to `SpeedOfLight`. -/
+/--
+The magnitude supplied to `PositiveRealUnitCore` is the underlying value, so that the
+generic positive-real lemmas apply to `SpeedOfLight`.
+-/
 @[simp]
 lemma positiveRealUnitCore_val (c : SpeedOfLight) : PositiveRealUnitCore.val c = c.val := rfl
 
@@ -104,14 +107,11 @@ lemma positiveRealUnitCore_val (c : SpeedOfLight) : PositiveRealUnitCore.val c =
 
 -/
 
-@[simp]
-lemma val_pos (c : SpeedOfLight) : 0 < (c : ℝ) := c.pos
+@[simp] lemma val_pos (c : SpeedOfLight) : 0 < (c : ℝ) := c.pos
 
-@[simp]
-lemma val_nonneg (c : SpeedOfLight) : 0 ≤ (c : ℝ) := le_of_lt c.pos
+@[simp] lemma val_nonneg (c : SpeedOfLight) : 0 ≤ (c : ℝ) := le_of_lt c.pos
 
-@[simp]
-lemma val_ne_zero (c : SpeedOfLight) : (c : ℝ) ≠ 0 := ne_of_gt c.pos
+@[simp] lemma val_ne_zero (c : SpeedOfLight) : (c : ℝ) ≠ 0 := ne_of_gt c.pos
 
 /-!
 
@@ -119,50 +119,61 @@ lemma val_ne_zero (c : SpeedOfLight) : (c : ℝ) ≠ 0 := ne_of_gt c.pos
 
 -/
 
-/-- The speed of light as a quantity carrying the dimension of length over time,
+/--
+The speed of light as a quantity carrying the dimension of length over time,
 in nonnegative real values. The underlying value is the same as that of the
-`SpeedOfLight`. -/
+`SpeedOfLight`.
+-/
 def toWithDim (c : SpeedOfLight) : WithDim (L𝓭 * T𝓭⁻¹) ℝ≥0 := ⟨⟨c.val, le_of_lt c.pos⟩⟩
 
-/-- The underlying value of the speed of light as a dimensioned quantity agrees with
-the original value. -/
-@[simp]
-lemma toWithDim_val (c : SpeedOfLight) : (c.toWithDim.val : ℝ) = c.val := rfl
+/--
+The underlying value of the speed of light as a dimensioned quantity agrees with
+the original value.
+-/
+@[simp] lemma toWithDim_val (c : SpeedOfLight) : (c.toWithDim.val : ℝ) = c.val := rfl
 
 /-- The speed of light as a dimensioned quantity is positive. -/
 @[simp]
-lemma toWithDim_val_pos (c : SpeedOfLight) : 0 < c.toWithDim.val :=
-  NNReal.coe_pos.mp c.val_pos
+lemma toWithDim_val_pos (c : SpeedOfLight) : 0 < c.toWithDim.val := NNReal.coe_pos.mp c.val_pos
 
-/-- The speed of light scales under a change of units by the scale factor of the
-  dimension of length over time. -/
+/--
+The speed of light scales under a change of units by the scale factor of the
+dimension of length over time.
+-/
 noncomputable instance : UnitDependent SpeedOfLight where
-  scaleUnit u1 u2 c :=
-    ⟨(u1.dimScale u2 (L𝓭 * T𝓭⁻¹) : ℝ) * c.val,
-      mul_pos (NNReal.coe_pos.mpr (LTMCTUnitChoices.dimScale_pos u1 u2 (L𝓭 * T𝓭⁻¹))) c.pos⟩
-  scaleUnit_trans u1 u2 u3 c := PositiveRealUnitCore.ext (by
-    show (u2.dimScale u3 (L𝓭 * T𝓭⁻¹) : ℝ) * ((u1.dimScale u2 (L𝓭 * T𝓭⁻¹) : ℝ) * c.val) = _
-    rw [← mul_assoc, ← NNReal.coe_mul, mul_comm (u2.dimScale u3 (L𝓭 * T𝓭⁻¹)),
-      LTMCTUnitChoices.dimScale_transitive]
-    rfl)
-  scaleUnit_trans' u1 u2 u3 c := PositiveRealUnitCore.ext (by
-    show (u1.dimScale u2 (L𝓭 * T𝓭⁻¹) : ℝ) * ((u2.dimScale u3 (L𝓭 * T𝓭⁻¹) : ℝ) * c.val) = _
-    rw [← mul_assoc, ← NNReal.coe_mul, LTMCTUnitChoices.dimScale_transitive]
-    rfl)
-  scaleUnit_id u c := PositiveRealUnitCore.ext (by
-    show (u.dimScale u (L𝓭 * T𝓭⁻¹) : ℝ) * c.val = c.val
-    rw [LTMCTUnitChoices.dimScale_self, NNReal.coe_one, one_mul])
+  scaleUnit u1 u2 c := ⟨
+    (u1.dimScale u2 (L𝓭 * T𝓭⁻¹) : ℝ) * c.val,
+    mul_pos (NNReal.coe_pos.mpr (LTMCTUnitChoices.dimScale_pos u1 u2 (L𝓭 * T𝓭⁻¹))) c.pos
+  ⟩
+  scaleUnit_trans u1 u2 u3 c :=
+    PositiveRealUnitCore.ext (by
+      show (u2.dimScale u3 (L𝓭 * T𝓭⁻¹) : ℝ) * ((u1.dimScale u2 (L𝓭 * T𝓭⁻¹) : ℝ) * c.val) = _
+      rw [← mul_assoc, ← NNReal.coe_mul, mul_comm (u2.dimScale u3 (L𝓭 * T𝓭⁻¹)),
+        LTMCTUnitChoices.dimScale_transitive]
+      rfl)
+  scaleUnit_trans' u1 u2 u3 c :=
+    PositiveRealUnitCore.ext (by
+      show (u1.dimScale u2 (L𝓭 * T𝓭⁻¹) : ℝ) * ((u2.dimScale u3 (L𝓭 * T𝓭⁻¹) : ℝ) * c.val) = _
+      rw [← mul_assoc, ← NNReal.coe_mul, LTMCTUnitChoices.dimScale_transitive]
+      rfl)
+  scaleUnit_id u c :=
+    PositiveRealUnitCore.ext (by
+      show (u.dimScale u (L𝓭 * T𝓭⁻¹) : ℝ) * c.val = c.val
+      rw [LTMCTUnitChoices.dimScale_self, NNReal.coe_one, one_mul])
 
-/-- Scaling a speed of light multiplies its value by the scale factor of the
-  dimension of length over time. -/
+/--
+Scaling a speed of light multiplies its value by the scale factor of the
+dimension of length over time.
+-/
 @[simp]
-lemma scaleUnit_val (c : SpeedOfLight) (u1 u2 : LTMCTUnitChoices) :
-    (scaleUnit u1 u2 c).val = (u1.dimScale u2 (L𝓭 * T𝓭⁻¹) : ℝ) * c.val := rfl
+lemma scaleUnit_val (c : SpeedOfLight) (u1 u2 : LTMCTUnitChoices)
+    : (scaleUnit u1 u2 c).val = (u1.dimScale u2 (L𝓭 * T𝓭⁻¹) : ℝ) * c.val :=
+  rfl
 
 /-- The map `toWithDim` commutes with changes of units. -/
 @[simp]
-lemma toWithDim_scaleUnit (c : SpeedOfLight) (u1 u2 : LTMCTUnitChoices) :
-    (scaleUnit u1 u2 c).toWithDim = scaleUnit u1 u2 c.toWithDim := by
+lemma toWithDim_scaleUnit (c : SpeedOfLight) (u1 u2 : LTMCTUnitChoices)
+    : (scaleUnit u1 u2 c).toWithDim = scaleUnit u1 u2 c.toWithDim := by
   refine WithDim.ext _ _ ?_
   simp only [toWithDim, WithDim.scaleUnit_val, scaleUnit_val]
   exact Subtype.ext rfl

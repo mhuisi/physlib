@@ -34,7 +34,7 @@ unsafe def main (args : List String) : IO UInt32 := do
   let env ← importModules (loadExts := true) (toCheck.map ({ module := · })) {} 0
   let fileName := ""
   let options : Options := {}
-  let ctx : Core.Context := {fileName, options, fileMap := default }
-  let state := {env}
+  let ctx : Core.Context := { fileName, options, fileMap := default }
+  let state := { env }
   let (passed, _) ← (Lean.Core.CoreM.toIO · ctx state) do (Physlib.pseudoTest toCheck).run'
   return if passed then 0 else 1

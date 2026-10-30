@@ -78,41 +78,49 @@ open TensorProduct Matrix MatrixGroups
 
 -/
 
-/-- The gauge-field derivative symbols of the jet algebra of the Standard Model: the
-  gauge sector's symbols, included into the full algebra. It is written as a composite of
-  two existing linear maps rather than as an anonymous constructor, so that its real
-  linearity is inherited rather than proved by rewriting inside the jet algebra. -/
-noncomputable def gaugeField (s : Multiset (Fin 1 ⊕ Fin 3)) (μ : Fin 1 ⊕ Fin 3) :
-    Module.Dual ℝ GaugeAlgebra →ₗ[ℝ] JetAlgebra :=
+/--
+The gauge-field derivative symbols of the jet algebra of the Standard Model: the
+gauge sector's symbols, included into the full algebra. It is written as a composite of
+two existing linear maps rather than as an anonymous constructor, so that its real
+linearity is inherited rather than proved by rewriting inside the jet algebra.
+-/
+noncomputable def gaugeField (s : Multiset (Fin 1 ⊕ Fin 3)) (μ : Fin 1 ⊕ Fin 3)
+    : Module.Dual ℝ GaugeAlgebra →ₗ[ℝ] JetAlgebra :=
   (includeGauge.toLinearMap.restrictScalars ℝ).comp
     ((LocalGaugeFieldAlgebra.gaugeField GaugeAlgebra) s μ)
 
 @[simp]
-lemma gaugeField_apply (s : Multiset (Fin 1 ⊕ Fin 3)) (μ : Fin 1 ⊕ Fin 3)
-    (φ : Module.Dual ℝ GaugeAlgebra) :
-    gaugeField s μ φ = includeGauge ((LocalGaugeFieldAlgebra.gaugeField GaugeAlgebra) s μ φ) := rfl
+lemma gaugeField_apply
+    (s : Multiset (Fin 1 ⊕ Fin 3)) (μ : Fin 1 ⊕ Fin 3) (φ : Module.Dual ℝ GaugeAlgebra)
+    : gaugeField s μ φ = includeGauge ((LocalGaugeFieldAlgebra.gaugeField GaugeAlgebra) s μ φ) :=
+  rfl
 
-/-- The gauge-field symbols `∂_s A_μ^φ` are the connection generators of the field datum:
-  the derivative label, the spacetime index and the adjoint covector are unchanged, and the
-  real generator enters the complexification with the scalar one. -/
-lemma gaugeField_eq_ιConnection (s : Multiset (Fin 1 ⊕ Fin 3)) (μ : Fin 1 ⊕ Fin 3)
-    (φ : Module.Dual ℝ GaugeAlgebra) :
-    gaugeField s μ φ
+/--
+The gauge-field symbols `∂_s A_μ^φ` are the connection generators of the field datum:
+the derivative label, the spacetime index and the adjoint covector are unchanged, and the
+real generator enters the complexification with the scalar one.
+-/
+lemma gaugeField_eq_ιConnection
+    (s : Multiset (Fin 1 ⊕ Fin 3)) (μ : Fin 1 ⊕ Fin 3) (φ : Module.Dual ℝ GaugeAlgebra)
+    : gaugeField s μ φ
       = fieldData.ιConnection (SpaceTimeDerivAlgebraℝ.basisMultiset s ⊗ₜ[ℝ]
-          GaugeBoson.componentDual GaugeAlgebra
-            (Lorentz.CoVector.basis.dualBasis μ) φ) := by
-  have hsector : (LocalGaugeFieldAlgebra.gaugeField GaugeAlgebra) s μ φ
-      = (1 : ℂ) ⊗ₜ[ℝ] SymmetricAlgebra.ι ℝ (GaugeBoson.JetComponentSpace GaugeAlgebra)
-          (SpaceTimeDerivAlgebraℝ.basisMultiset s ⊗ₜ[ℝ]
-            GaugeBoson.componentDual GaugeAlgebra
-              (Lorentz.CoVector.basis.dualBasis μ) φ) :=
+        GaugeBoson.componentDual GaugeAlgebra
+          (Lorentz.CoVector.basis.dualBasis μ) φ) := by
+  have hsector
+      : (LocalGaugeFieldAlgebra.gaugeField GaugeAlgebra) s μ φ
+        = (1 : ℂ) ⊗ₜ[ℝ] SymmetricAlgebra.ι ℝ (GaugeBoson.JetComponentSpace GaugeAlgebra)
+            (SpaceTimeDerivAlgebraℝ.basisMultiset s ⊗ₜ[ℝ]
+              GaugeBoson.componentDual GaugeAlgebra
+                (Lorentz.CoVector.basis.dualBasis μ) φ) :=
     (LocalGaugeFieldAlgebra.gaugeField_apply s μ φ).trans
       ((LocalGaugeFieldAlgebra.iteratedD_complexJetDeriv_one_tmul s
-            ((LocalGaugeFieldAlgebra.ofA GaugeAlgebra) μ φ)).trans
-        (congrArg (fun g : LocalGaugeFieldAlgebra GaugeAlgebra => (1 : ℂ) ⊗ₜ[ℝ] g)
+          ((LocalGaugeFieldAlgebra.ofA GaugeAlgebra) μ φ)).trans
+        (congrArg
+          (fun g : LocalGaugeFieldAlgebra GaugeAlgebra => (1 : ℂ) ⊗ₜ[ℝ] g)
           (LocalGaugeFieldAlgebra.iteratedJetDeriv_ofA s μ φ)))
   exact ((gaugeField_apply s μ φ).trans
-      (congrArg (fun y : ℂ ⊗[ℝ] LocalGaugeFieldAlgebra GaugeAlgebra => includeGauge y)
+      (congrArg
+        (fun y : ℂ ⊗[ℝ] LocalGaugeFieldAlgebra GaugeAlgebra => includeGauge y)
         hsector)).trans
     (includeGauge_one_tmul_ι _)
 
@@ -123,8 +131,8 @@ lemma gaugeField_eq_ιConnection (s : Multiset (Fin 1 ⊕ Fin 3)) (μ : Fin 1 �
 -/
 
 /-- The gauge sector lands in the centre of the jet algebra. -/
-lemma includeGauge_mem_center (y : ℂ ⊗[ℝ] (LocalGaugeFieldAlgebra GaugeAlgebra)) :
-    includeGauge y ∈ Subring.center JetAlgebra :=
+lemma includeGauge_mem_center (y : ℂ ⊗[ℝ] (LocalGaugeFieldAlgebra GaugeAlgebra))
+    : includeGauge y ∈ Subring.center JetAlgebra :=
   Subring.mem_center_iff.mpr fun z => includeGauge_commute y z
 
 /-!
@@ -133,11 +141,13 @@ lemma includeGauge_mem_center (y : ℂ ⊗[ℝ] (LocalGaugeFieldAlgebra GaugeAlg
 
 -/
 
-/-- The jet algebra of the Standard Model realizes the gauge-boson jet algebra through the
-  central inclusion of the gauge sector, equivariantly for the jet gauge group and the
-  Lorentz group. -/
-noncomputable def gaugeRealization :
-    GaugeAlgebraRealization localGaugeData JetAlgebra repJetGaugeGroupI repLorentzGroup where
+/--
+The jet algebra of the Standard Model realizes the gauge-boson jet algebra through the
+central inclusion of the gauge sector, equivariantly for the jet gauge group and the
+Lorentz group.
+-/
+noncomputable def gaugeRealization
+    : GaugeAlgebraRealization localGaugeData JetAlgebra repJetGaugeGroupI repLorentzGroup where
   toAlgHom := includeGauge
   A := gaugeField
   A_eq _ _ _ := rfl
@@ -154,28 +164,35 @@ lemma gaugeRealization_A : gaugeRealization.A = gaugeField := rfl
 
 -/
 
-/-- **The classification of gauge invariants of the jet algebra of the Standard Model**:
-  a gauge-invariant element of the subalgebra generated by the gauge-field symbols
-  `∂_s A_μ^φ` and a set `S` of elements fixed by the pure jets — such as the covariant
-  towers of the fermion and Higgs fields — is a polynomial in the covariant derivatives
-  of the field strength and the elements of `S`.
+/--
+**The classification of gauge invariants of the jet algebra of the Standard Model**:
+a gauge-invariant element of the subalgebra generated by the gauge-field symbols
+`∂_s A_μ^φ` and a set `S` of elements fixed by the pure jets — such as the covariant
+towers of the fermion and Higgs fields — is a polynomial in the covariant derivatives
+of the field strength and the elements of `S`.
 
-  This is the covariance reduction of the Standard Model jet algebra: gauge invariance
-  eliminates the bare gauge-field symbols in favour of the field strength, its covariant
-  derivatives, and the matter content `S`. -/
-lemma invariant_mem_adjoin_fieldStrength (S : Set JetAlgebra)
+This is the covariance reduction of the Standard Model jet algebra: gauge invariance
+eliminates the bare gauge-field symbols in favour of the field strength, its covariant
+derivatives, and the matter content `S`.
+-/
+lemma invariant_mem_adjoin_fieldStrength
+    (S : Set JetAlgebra)
     (hS : ∀ y ∈ S, ∀ U : localGaugeData.truncationKer 0, repJetGaugeGroupI U.1 y = y)
     {x : JetAlgebra}
-    (hx : x ∈ Algebra.adjoin ℂ ({b : JetAlgebra |
-      ∃ (p : Multiset (Fin 1 ⊕ Fin 3)) (μ : Fin 1 ⊕ Fin 3)
-        (φ : Module.Dual ℝ GaugeAlgebra),
-      b = gaugeField p μ φ} ∪ S))
-    (hinv : ∀ U : JetGaugeGroupI, repJetGaugeGroupI U x = x) :
-    x ∈ Algebra.adjoin ℂ ({b : JetAlgebra |
-      ∃ (l : List (Fin 1 ⊕ Fin 3)) (ν lam : Fin 1 ⊕ Fin 3)
-        (φ : Module.Dual ℝ GaugeAlgebra),
-      b = GaugeAlgebraRealization.iteratedCovDerivAdjoint gaugeField l
-        (GaugeAlgebraRealization.fieldStrength gaugeField ν lam) 0 φ} ∪ S) :=
+    (hx : x ∈ Algebra.adjoin ℂ
+      ({b : JetAlgebra |
+          ∃ (p : Multiset (Fin 1 ⊕ Fin 3)) (μ : Fin 1 ⊕ Fin 3)
+            (φ : Module.Dual ℝ GaugeAlgebra),
+          b = gaugeField p μ φ}
+        ∪ S))
+    (hinv : ∀ U : JetGaugeGroupI, repJetGaugeGroupI U x = x)
+    : x ∈ Algebra.adjoin ℂ
+      ({b : JetAlgebra |
+          ∃ (l : List (Fin 1 ⊕ Fin 3)) (ν lam : Fin 1 ⊕ Fin 3)
+            (φ : Module.Dual ℝ GaugeAlgebra),
+          b = GaugeAlgebraRealization.iteratedCovDerivAdjoint gaugeField l
+            (GaugeAlgebraRealization.fieldStrength gaugeField ν lam) 0 φ}
+        ∪ S) :=
   GaugeAlgebraRealization.invariant_mem_adjoin_fieldStrength gaugeRealization S
     (fun p μ φ y _ =>
       Subring.mem_center_iff.mp

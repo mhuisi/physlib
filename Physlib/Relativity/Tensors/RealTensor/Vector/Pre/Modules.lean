@@ -50,30 +50,32 @@ def toFin1dℝFun : ContrMod d ≃ (Fin 1 ⊕ Fin d → ℝ) where
   left_inv _ := rfl
   right_inv _ := rfl
 
-/-- The instance of `AddCommGroup` on `ContrMod` defined via its equivalence
-  with `Fin 1 ⊕ Fin d → ℝ`. -/
+/--
+The instance of `AddCommGroup` on `ContrMod` defined via its equivalence
+with `Fin 1 ⊕ Fin d → ℝ`.
+-/
 instance : AddCommGroup (ContrMod d) := Equiv.addCommGroup toFin1dℝFun
 
 /-- The additive equivalence between `ContrMod` and `Fin 1 ⊕ Fin d → ℝ`. -/
-def toFin1dℝAddEquiv : ContrMod d ≃+ (Fin 1 ⊕ Fin d → ℝ) :=
-  { toFin1dℝFun with map_add' _ _ := rfl }
+def toFin1dℝAddEquiv : ContrMod d ≃+ (Fin 1 ⊕ Fin d → ℝ) := { toFin1dℝFun with map_add' _ _ := rfl }
 
-/-- The instance of `Module` on `ContrMod` defined via its equivalence
-  with `Fin 1 ⊕ Fin d → ℝ`. -/
+/--
+The instance of `Module` on `ContrMod` defined via its equivalence
+with `Fin 1 ⊕ Fin d → ℝ`.
+-/
 instance : Module ℝ (ContrMod d) := AddEquiv.module ℝ toFin1dℝAddEquiv
 
-@[simp]
-lemma val_add (ψ ψ' : ContrMod d) : (ψ + ψ').val = ψ.val + ψ'.val := rfl
+@[simp] lemma val_add (ψ ψ' : ContrMod d) : (ψ + ψ').val = ψ.val + ψ'.val := rfl
 
-@[simp]
-lemma val_smul (r : ℝ) (ψ : ContrMod d) : (r • ψ).val = r • ψ.val := rfl
+@[simp] lemma val_smul (r : ℝ) (ψ : ContrMod d) : (r • ψ).val = r • ψ.val := rfl
 
 /-- The linear equivalence between `ContrMod` and `(Fin 1 ⊕ Fin d → ℝ)`. -/
-def toFin1dℝEquiv : ContrMod d ≃ₗ[ℝ] (Fin 1 ⊕ Fin d → ℝ) :=
-  AddEquiv.linearEquiv ℝ toFin1dℝAddEquiv
+def toFin1dℝEquiv : ContrMod d ≃ₗ[ℝ] (Fin 1 ⊕ Fin d → ℝ) := AddEquiv.linearEquiv ℝ toFin1dℝAddEquiv
 
-/-- The underlying element of `Fin 1 ⊕ Fin d → ℝ` of a element in `ContrMod` defined
-  through the linear equivalence `toFin1dℝEquiv`. -/
+/--
+The underlying element of `Fin 1 ⊕ Fin d → ℝ` of a element in `ContrMod` defined
+through the linear equivalence `toFin1dℝEquiv`.
+-/
 abbrev toFin1dℝ (ψ : ContrMod d) := toFin1dℝEquiv ψ
 
 lemma toFin1dℝ_eq_val (ψ : ContrMod d) : ψ.toFin1dℝ = ψ.val := by rfl
@@ -87,8 +89,7 @@ lemma toFin1dℝ_eq_val (ψ : ContrMod d) : ψ.toFin1dℝ = ψ.val := by rfl
 def stdBasis : Basis (Fin 1 ⊕ Fin d) ℝ (ContrMod d) := Basis.ofEquivFun toFin1dℝEquiv
 
 @[simp]
-lemma stdBasis_toFin1dℝEquiv_apply_same (μ : Fin 1 ⊕ Fin d) :
-    toFin1dℝEquiv (stdBasis μ) μ = 1 := by
+lemma stdBasis_toFin1dℝEquiv_apply_same (μ : Fin 1 ⊕ Fin d) : toFin1dℝEquiv (stdBasis μ) μ = 1 := by
   simp only [stdBasis, Basis.ofEquivFun, Basis.coe_ofRepr, LinearEquiv.trans_symm,
     LinearEquiv.symm_symm, LinearEquiv.trans_apply, Finsupp.linearEquivFunOnFinite_single]
   rw [@LinearEquiv.apply_symm_apply]
@@ -98,8 +99,8 @@ lemma stdBasis_toFin1dℝEquiv_apply_same (μ : Fin 1 ⊕ Fin d) :
 lemma stdBasis_apply_same (μ : Fin 1 ⊕ Fin d) : (stdBasis μ).val μ = 1 :=
   stdBasis_toFin1dℝEquiv_apply_same μ
 
-lemma stdBasis_toFin1dℝEquiv_apply_ne {μ ν : Fin 1 ⊕ Fin d} (h : μ ≠ ν) :
-    toFin1dℝEquiv (stdBasis μ) ν = 0 := by
+lemma stdBasis_toFin1dℝEquiv_apply_ne {μ ν : Fin 1 ⊕ Fin d} (h : μ ≠ ν)
+    : toFin1dℝEquiv (stdBasis μ) ν = 0 := by
   simp only [stdBasis, Basis.ofEquivFun, Basis.coe_ofRepr, LinearEquiv.trans_symm,
     LinearEquiv.symm_symm, LinearEquiv.trans_apply, Finsupp.linearEquivFunOnFinite_single]
   rw [@LinearEquiv.apply_symm_apply]
@@ -137,40 +138,40 @@ lemma stdBasis_decomp (v : ContrMod d) : v = ∑ i, v.toFin1dℝ i • stdBasis 
 -/
 
 /-- Multiplication of a matrix with a vector in `ContrMod`. -/
-abbrev mulVec (M : Matrix (Fin 1 ⊕ Fin d) (Fin 1 ⊕ Fin d) ℝ) (v : ContrMod d) :
-    ContrMod d := Matrix.toLinAlgEquiv stdBasis M v
+abbrev mulVec (M : Matrix (Fin 1 ⊕ Fin d) (Fin 1 ⊕ Fin d) ℝ) (v : ContrMod d) : ContrMod d :=
+  Matrix.toLinAlgEquiv stdBasis M v
 
 /-- Multiplication of a matrix with a vector in `ContrMod`. -/
 scoped[Lorentz] infixr:73 " *ᵥ " => ContrMod.mulVec
 
 @[simp]
-lemma mulVec_toFin1dℝ (M : Matrix (Fin 1 ⊕ Fin d) (Fin 1 ⊕ Fin d) ℝ) (v : ContrMod d) :
-    (M *ᵥ v).toFin1dℝ = M *ᵥ v.toFin1dℝ := by
+lemma mulVec_toFin1dℝ (M : Matrix (Fin 1 ⊕ Fin d) (Fin 1 ⊕ Fin d) ℝ) (v : ContrMod d)
+    : (M *ᵥ v).toFin1dℝ = M *ᵥ v.toFin1dℝ := by
   rfl
 
 @[simp]
-lemma mulVec_val (M : Matrix (Fin 1 ⊕ Fin d) (Fin 1 ⊕ Fin d) ℝ) (v : ContrMod d) :
-    (M *ᵥ v).val = M *ᵥ v.val := by
+lemma mulVec_val (M : Matrix (Fin 1 ⊕ Fin d) (Fin 1 ⊕ Fin d) ℝ) (v : ContrMod d)
+    : (M *ᵥ v).val = M *ᵥ v.val := by
   rfl
 
-lemma mulVec_sub (M : Matrix (Fin 1 ⊕ Fin d) (Fin 1 ⊕ Fin d) ℝ) (v w : ContrMod d) :
-    M *ᵥ (v - w) = M *ᵥ v - M *ᵥ w := by
+lemma mulVec_sub (M : Matrix (Fin 1 ⊕ Fin d) (Fin 1 ⊕ Fin d) ℝ) (v w : ContrMod d)
+    : M *ᵥ (v - w) = M *ᵥ v - M *ᵥ w := by
   simp only [mulVec, LinearMap.map_sub]
 
-lemma sub_mulVec (M N : Matrix (Fin 1 ⊕ Fin d) (Fin 1 ⊕ Fin d) ℝ) (v : ContrMod d) :
-    (M - N) *ᵥ v = M *ᵥ v - N *ᵥ v := by
+lemma sub_mulVec (M N : Matrix (Fin 1 ⊕ Fin d) (Fin 1 ⊕ Fin d) ℝ) (v : ContrMod d)
+    : (M - N) *ᵥ v = M *ᵥ v - N *ᵥ v := by
   simp only [mulVec, map_sub, LinearMap.sub_apply]
 
-lemma mulVec_add (M : Matrix (Fin 1 ⊕ Fin d) (Fin 1 ⊕ Fin d) ℝ) (v w : ContrMod d) :
-    M *ᵥ (v + w) = M *ᵥ v + M *ᵥ w := by
+lemma mulVec_add (M : Matrix (Fin 1 ⊕ Fin d) (Fin 1 ⊕ Fin d) ℝ) (v w : ContrMod d)
+    : M *ᵥ (v + w) = M *ᵥ v + M *ᵥ w := by
   simp only [mulVec, LinearMap.map_add]
 
 @[simp]
 lemma one_mulVec (v : ContrMod d) : (1 : Matrix (Fin 1 ⊕ Fin d) (Fin 1 ⊕ Fin d) ℝ) *ᵥ v = v := by
   simp [mulVec, _root_.map_one]
 
-lemma mulVec_mulVec (M N : Matrix (Fin 1 ⊕ Fin d) (Fin 1 ⊕ Fin d) ℝ) (v : ContrMod d) :
-    M *ᵥ (N *ᵥ v) = (M * N) *ᵥ v := by
+lemma mulVec_mulVec (M N : Matrix (Fin 1 ⊕ Fin d) (Fin 1 ⊕ Fin d) ℝ) (v : ContrMod d)
+    : M *ᵥ (N *ᵥ v) = (M * N) *ᵥ v := by
   simp [mulVec, _root_.map_mul]
 
 /-!
@@ -180,8 +181,10 @@ lemma mulVec_mulVec (M N : Matrix (Fin 1 ⊕ Fin d) (Fin 1 ⊕ Fin d) ℝ) (v : 
 (Not the Minkowski norm, but the norm of a vector in `ContrMod d`.)
 -/
 
-/-- A `NormedAddCommGroup` structure on `ContrMod`. This is not an instance, as we
-  don't want it to be applied always. -/
+/--
+A `NormedAddCommGroup` structure on `ContrMod`. This is not an instance, as we
+don't want it to be applied always.
+-/
 @[reducible]
 def norm : NormedAddCommGroup (ContrMod d) where
   norm v := ‖v.val‖₊
@@ -191,8 +194,10 @@ def norm : NormedAddCommGroup (ContrMod d) where
   eq_of_dist_eq_zero {x y} := fun h => ext (MetricSpace.eq_of_dist_eq_zero h)
   dist_eq x y := Pi.normedAddCommGroup.dist_eq x.val y.val
 
-/-- The underlying space part of a `ContrMod` formed by removing the first element.
-  A better name for this might be `tail`. -/
+/--
+The underlying space part of a `ContrMod` formed by removing the first element.
+A better name for this might be `tail`.
+-/
 def toSpace (v : ContrMod d) : EuclideanSpace ℝ (Fin d) := WithLp.toLp 2 (v.val ∘ Sum.inr)
 
 /-!
@@ -205,11 +210,10 @@ def toSpace (v : ContrMod d) : EuclideanSpace ℝ (Fin d) := WithLp.toLp 2 (v.va
 def rep : Representation ℝ (LorentzGroup d) (ContrMod d) where
   toFun g := Matrix.toLinAlgEquiv stdBasis g
   map_one' := EmbeddingLike.map_eq_one_iff.mpr rfl
-  map_mul' x y := by
-    simp only [lorentzGroupIsGroup_mul_coe, _root_.map_mul]
+  map_mul' x y := by simp only [lorentzGroupIsGroup_mul_coe, _root_.map_mul]
 
-lemma rep_apply_toFin1dℝ (g : LorentzGroup d) (ψ : ContrMod d) :
-    (rep g ψ).toFin1dℝ = g.1 *ᵥ ψ.toFin1dℝ := by
+lemma rep_apply_toFin1dℝ (g : LorentzGroup d) (ψ : ContrMod d)
+    : (rep g ψ).toFin1dℝ = g.1 *ᵥ ψ.toFin1dℝ := by
   rfl
 
 /-!
@@ -217,18 +221,21 @@ lemma rep_apply_toFin1dℝ (g : LorentzGroup d) (ψ : ContrMod d) :
 ## To Self-Adjoint Matrix
 -/
 
-/-- The linear equivalence between the vector-space `ContrMod 3` and self-adjoint
-  `2×2`-complex matrices. -/
+/--
+The linear equivalence between the vector-space `ContrMod 3` and self-adjoint
+`2×2`-complex matrices.
+-/
 def toSelfAdjoint : ContrMod 3 ≃ₗ[ℝ] selfAdjoint (Matrix (Fin 2) (Fin 2) ℂ) :=
-  toFin1dℝEquiv ≪≫ₗ (Finsupp.linearEquivFunOnFinite ℝ ℝ (Fin 1 ⊕ Fin 3)).symm ≪≫ₗ
-  PauliMatrix.pauliBasis'.repr.symm
+  toFin1dℝEquiv ≪≫ₗ (Finsupp.linearEquivFunOnFinite ℝ ℝ (Fin 1 ⊕ Fin 3)).symm
+    ≪≫ₗ PauliMatrix.pauliBasis'.repr.symm
 
 open PauliMatrix in
-lemma toSelfAdjoint_apply (x : ContrMod 3) : toSelfAdjoint x =
-    x.toFin1dℝ (Sum.inl 0) • ⟨pauliMatrix (Sum.inl 0), pauliMatrix_selfAdjoint _⟩
-    - x.toFin1dℝ (Sum.inr 0) • ⟨pauliMatrix (Sum.inr 0), pauliMatrix_selfAdjoint _⟩
-    - x.toFin1dℝ (Sum.inr 1) • ⟨pauliMatrix (Sum.inr 1), pauliMatrix_selfAdjoint _⟩
-    - x.toFin1dℝ (Sum.inr 2) • ⟨pauliMatrix (Sum.inr 2), pauliMatrix_selfAdjoint _⟩ := by
+lemma toSelfAdjoint_apply (x : ContrMod 3)
+    : toSelfAdjoint x
+      = x.toFin1dℝ (Sum.inl 0) • ⟨pauliMatrix (Sum.inl 0), pauliMatrix_selfAdjoint _⟩
+        - x.toFin1dℝ (Sum.inr 0) • ⟨pauliMatrix (Sum.inr 0), pauliMatrix_selfAdjoint _⟩
+        - x.toFin1dℝ (Sum.inr 1) • ⟨pauliMatrix (Sum.inr 1), pauliMatrix_selfAdjoint _⟩
+        - x.toFin1dℝ (Sum.inr 2) • ⟨pauliMatrix (Sum.inr 2), pauliMatrix_selfAdjoint _⟩ := by
   simp only [toSelfAdjoint, PauliMatrix.pauliBasis', LinearEquiv.trans_apply, Basis.repr_symm_apply,
     Basis.coe_mk, Fin.isValue]
   rw [Finsupp.linearCombination_apply_of_mem_supported ℝ (s := Finset.univ)]
@@ -241,16 +248,17 @@ lemma toSelfAdjoint_apply (x : ContrMod 3) : toSelfAdjoint x =
     simp only [add_assoc, sub_eq_add_neg]
   · simp_all only [Finset.coe_univ, Finsupp.supported_univ, Submodule.mem_top]
 
-lemma toSelfAdjoint_apply_coe (x : ContrMod 3) : (toSelfAdjoint x).1 =
-    x.toFin1dℝ (Sum.inl 0) • PauliMatrix.pauliMatrix (Sum.inl 0)
-    - x.toFin1dℝ (Sum.inr 0) • PauliMatrix.pauliMatrix (Sum.inr 0)
-    - x.toFin1dℝ (Sum.inr 1) • PauliMatrix.pauliMatrix (Sum.inr 1)
-    - x.toFin1dℝ (Sum.inr 2) • PauliMatrix.pauliMatrix (Sum.inr 2) := by
+lemma toSelfAdjoint_apply_coe (x : ContrMod 3)
+    : (toSelfAdjoint x).1
+      = x.toFin1dℝ (Sum.inl 0) • PauliMatrix.pauliMatrix (Sum.inl 0)
+        - x.toFin1dℝ (Sum.inr 0) • PauliMatrix.pauliMatrix (Sum.inr 0)
+        - x.toFin1dℝ (Sum.inr 1) • PauliMatrix.pauliMatrix (Sum.inr 1)
+        - x.toFin1dℝ (Sum.inr 2) • PauliMatrix.pauliMatrix (Sum.inr 2) := by
   rw [toSelfAdjoint_apply]
   rfl
 
-lemma toSelfAdjoint_stdBasis (i : Fin 1 ⊕ Fin 3) :
-    toSelfAdjoint (stdBasis i) = PauliMatrix.pauliBasis' i := by
+lemma toSelfAdjoint_stdBasis (i : Fin 1 ⊕ Fin 3)
+    : toSelfAdjoint (stdBasis i) = PauliMatrix.pauliBasis' i := by
   rw [toSelfAdjoint_apply]
   match i with
   | Sum.inl 0 =>
@@ -278,8 +286,8 @@ lemma toSelfAdjoint_stdBasis (i : Fin 1 ⊕ Fin 3) :
     rfl
 
 @[simp]
-lemma toSelfAdjoint_symm_basis (i : Fin 1 ⊕ Fin 3) :
-    toSelfAdjoint.symm (PauliMatrix.pauliBasis' i) = (stdBasis i) := by
+lemma toSelfAdjoint_symm_basis (i : Fin 1 ⊕ Fin 3)
+    : toSelfAdjoint.symm (PauliMatrix.pauliBasis' i) = (stdBasis i) := by
   refine (LinearEquiv.symm_apply_eq toSelfAdjoint).mpr ?_
   rw [toSelfAdjoint_stdBasis]
 
@@ -287,10 +295,12 @@ lemma toSelfAdjoint_symm_basis (i : Fin 1 ⊕ Fin 3) :
 ## Topology
 -/
 
-/-- The type `ContrMod d` carries an instance of a topological group, induced by
-  it's equivalence to `Fin 1 ⊕ Fin d → ℝ`. -/
-instance : TopologicalSpace (ContrMod d) := TopologicalSpace.induced
-  ContrMod.toFin1dℝEquiv (Pi.topologicalSpace)
+/--
+The type `ContrMod d` carries an instance of a topological group, induced by
+it's equivalence to `Fin 1 ⊕ Fin d → ℝ`.
+-/
+instance : TopologicalSpace (ContrMod d) :=
+  TopologicalSpace.induced ContrMod.toFin1dℝEquiv (Pi.topologicalSpace)
 
 open Topology
 
@@ -298,8 +308,8 @@ lemma toFin1dℝEquiv_isInducing : IsInducing (@ContrMod.toFin1dℝEquiv d) := b
   exact { eq_induced := rfl }
 
 lemma toFin1dℝEquiv_symm_isInducing : IsInducing ((@ContrMod.toFin1dℝEquiv d).symm) := by
-  let x := Equiv.toHomeomorphOfIsInducing (@ContrMod.toFin1dℝEquiv d).toEquiv
-    toFin1dℝEquiv_isInducing
+  let x :=
+    Equiv.toHomeomorphOfIsInducing (@ContrMod.toFin1dℝEquiv d).toEquiv toFin1dℝEquiv_isInducing
   exact Homeomorph.isInducing x.symm
 
 end ContrMod
@@ -327,24 +337,28 @@ def toFin1dℝFun : CoMod d ≃ (Fin 1 ⊕ Fin d → ℝ) where
   left_inv _ := rfl
   right_inv _ := rfl
 
-/-- The instance of `AddCommGroup` on `CoℝModule` defined via its equivalence
-  with `Fin 1 ⊕ Fin d → ℝ`. -/
+/--
+The instance of `AddCommGroup` on `CoℝModule` defined via its equivalence
+with `Fin 1 ⊕ Fin d → ℝ`.
+-/
 instance : AddCommGroup (CoMod d) := Equiv.addCommGroup toFin1dℝFun
 
 /-- The additive equivalence between `CoℝModule` and `Fin 1 ⊕ Fin d → ℝ`. -/
-def toFin1dℝAddEquiv : CoMod d ≃+ (Fin 1 ⊕ Fin d → ℝ) :=
-  { toFin1dℝFun with map_add' _ _ := rfl }
+def toFin1dℝAddEquiv : CoMod d ≃+ (Fin 1 ⊕ Fin d → ℝ) := { toFin1dℝFun with map_add' _ _ := rfl }
 
-/-- The instance of `Module` on `CoℝModule` defined via its equivalence
-  with `Fin 1 ⊕ Fin d → ℝ`. -/
+/--
+The instance of `Module` on `CoℝModule` defined via its equivalence
+with `Fin 1 ⊕ Fin d → ℝ`.
+-/
 instance : Module ℝ (CoMod d) := AddEquiv.module ℝ toFin1dℝAddEquiv
 
 /-- The linear equivalence between `CoℝModule` and `(Fin 1 ⊕ Fin d → ℝ)`. -/
-def toFin1dℝEquiv : CoMod d ≃ₗ[ℝ] (Fin 1 ⊕ Fin d → ℝ) :=
-  AddEquiv.linearEquiv ℝ toFin1dℝAddEquiv
+def toFin1dℝEquiv : CoMod d ≃ₗ[ℝ] (Fin 1 ⊕ Fin d → ℝ) := AddEquiv.linearEquiv ℝ toFin1dℝAddEquiv
 
-/-- The underlying element of `Fin 1 ⊕ Fin d → ℝ` of a element in `CoℝModule` defined
-  through the linear equivalence `toFin1dℝEquiv`. -/
+/--
+The underlying element of `Fin 1 ⊕ Fin d → ℝ` of a element in `CoℝModule` defined
+through the linear equivalence `toFin1dℝEquiv`.
+-/
 abbrev toFin1dℝ (ψ : CoMod d) := toFin1dℝEquiv ψ
 
 /-!
@@ -357,8 +371,7 @@ abbrev toFin1dℝ (ψ : CoMod d) := toFin1dℝEquiv ψ
 def stdBasis : Basis (Fin 1 ⊕ Fin d) ℝ (CoMod d) := Basis.ofEquivFun toFin1dℝEquiv
 
 @[simp]
-lemma stdBasis_toFin1dℝEquiv_apply_same (μ : Fin 1 ⊕ Fin d) :
-    toFin1dℝEquiv (stdBasis μ) μ = 1 := by
+lemma stdBasis_toFin1dℝEquiv_apply_same (μ : Fin 1 ⊕ Fin d) : toFin1dℝEquiv (stdBasis μ) μ = 1 := by
   simp only [stdBasis, Basis.ofEquivFun, Basis.coe_ofRepr, LinearEquiv.trans_symm,
     LinearEquiv.symm_symm, LinearEquiv.trans_apply, Finsupp.linearEquivFunOnFinite_single]
   rw [@LinearEquiv.apply_symm_apply]
@@ -368,8 +381,8 @@ lemma stdBasis_toFin1dℝEquiv_apply_same (μ : Fin 1 ⊕ Fin d) :
 lemma stdBasis_apply_same (μ : Fin 1 ⊕ Fin d) : (stdBasis μ).val μ = 1 :=
   stdBasis_toFin1dℝEquiv_apply_same μ
 
-lemma stdBasis_toFin1dℝEquiv_apply_ne {μ ν : Fin 1 ⊕ Fin d} (h : μ ≠ ν) :
-    toFin1dℝEquiv (stdBasis μ) ν = 0 := by
+lemma stdBasis_toFin1dℝEquiv_apply_ne {μ ν : Fin 1 ⊕ Fin d} (h : μ ≠ ν)
+    : toFin1dℝEquiv (stdBasis μ) ν = 0 := by
   simp only [stdBasis, Basis.ofEquivFun, Basis.coe_ofRepr, LinearEquiv.trans_symm,
     LinearEquiv.symm_symm, LinearEquiv.trans_apply, Finsupp.linearEquivFunOnFinite_single]
   rw [@LinearEquiv.apply_symm_apply]
@@ -402,20 +415,20 @@ lemma stdBasis_decomp (v : CoMod d) : v = ∑ i, v.toFin1dℝ i • stdBasis i :
 -/
 
 /-- Multiplication of a matrix with a vector in `CoMod`. -/
-abbrev mulVec (M : Matrix (Fin 1 ⊕ Fin d) (Fin 1 ⊕ Fin d) ℝ) (v : CoMod d) :
-    CoMod d := Matrix.toLinAlgEquiv stdBasis M v
+abbrev mulVec (M : Matrix (Fin 1 ⊕ Fin d) (Fin 1 ⊕ Fin d) ℝ) (v : CoMod d) : CoMod d :=
+  Matrix.toLinAlgEquiv stdBasis M v
 
 /-- Multiplication of a matrix with a vector in `CoMod`. -/
 scoped[Lorentz] infixr:73 " *ᵥ " => CoMod.mulVec
 
 @[simp]
-lemma mulVec_toFin1dℝ (M : Matrix (Fin 1 ⊕ Fin d) (Fin 1 ⊕ Fin d) ℝ) (v : CoMod d) :
-    (M *ᵥ v).toFin1dℝ = M *ᵥ v.toFin1dℝ := by
+lemma mulVec_toFin1dℝ (M : Matrix (Fin 1 ⊕ Fin d) (Fin 1 ⊕ Fin d) ℝ) (v : CoMod d)
+    : (M *ᵥ v).toFin1dℝ = M *ᵥ v.toFin1dℝ := by
   rfl
 
 @[simp]
-lemma mulVec_val (M : Matrix (Fin 1 ⊕ Fin d) (Fin 1 ⊕ Fin d) ℝ) (v : CoMod d) :
-    (M *ᵥ v).val = M *ᵥ v.val := by
+lemma mulVec_val (M : Matrix (Fin 1 ⊕ Fin d) (Fin 1 ⊕ Fin d) ℝ) (v : CoMod d)
+    : (M *ᵥ v).val = M *ᵥ v.val := by
   rfl
 /-!
 

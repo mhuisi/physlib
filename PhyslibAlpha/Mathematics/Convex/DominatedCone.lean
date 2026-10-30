@@ -57,8 +57,9 @@ structure IsDominatedCone (C : Set V) (u : V) : Prop where
 
 namespace IsDominatedCone
 
-variable {C : Set V} {u : V} (hC : IsDominatedCone C u) {Λ₀ : V →ₗ[ℝ] ℝ}
-  (hΛ₀ : ∀ c ∈ C, 0 ≤ Λ₀ c) (hΛ₀u : 0 < Λ₀ u)
+variable
+  {C : Set V} {u : V} (hC : IsDominatedCone C u)
+  {Λ₀ : V →ₗ[ℝ] ℝ} (hΛ₀ : ∀ c ∈ C, 0 ≤ Λ₀ c) (hΛ₀u : 0 < Λ₀ u)
 include hC
 
 /-- The multiples `t` of `u` with `t • u - w` in the cone. -/
@@ -72,29 +73,31 @@ lemma gaugeSet_nonempty (hC : IsDominatedCone C u) (w : V) : (gaugeSet C u w).No
 include hΛ₀ hΛ₀u
 
 omit hC in
-lemma bddBelow_gaugeSet (w : V) : BddBelow (gaugeSet C u w) :=
-  ⟨Λ₀ w / Λ₀ u, fun t ht => by
+lemma bddBelow_gaugeSet (w : V) : BddBelow (gaugeSet C u w) := ⟨
+  Λ₀ w / Λ₀ u,
+  fun t ht => by
     have := hΛ₀ _ ht
     rw [map_sub, map_smul, smul_eq_mul, sub_nonneg] at this
-    rwa [div_le_iff₀ hΛ₀u]⟩
+    rwa [div_le_iff₀ hΛ₀u]
+⟩
 
 omit hΛ₀ hΛ₀u in
-lemma add_mem_gaugeSet {w w' : V} {t t' : ℝ} (ht : t ∈ gaugeSet C u w)
-    (ht' : t' ∈ gaugeSet C u w') : t + t' ∈ gaugeSet C u (w + w') := by
+lemma add_mem_gaugeSet {w w' : V} {t t' : ℝ} (ht : t ∈ gaugeSet C u w) (ht' : t' ∈ gaugeSet C u w')
+    : t + t' ∈ gaugeSet C u (w + w') := by
   have := hC.add_mem _ ht _ ht'
   simp only [gaugeSet, Set.mem_ofPred_eq, add_smul] at this ⊢
-  convert this using 1; abel
+  convert this using 1
+  abel
 
 omit hΛ₀ hΛ₀u in
-lemma gaugeSet_smul {c : ℝ} (hc : 0 < c) (w : V) :
-    gaugeSet C u (c • w) = c • gaugeSet C u w := by
+lemma gaugeSet_smul {c : ℝ} (hc : 0 < c) (w : V) : gaugeSet C u (c • w) = c • gaugeSet C u w := by
   ext t
   constructor
   · intro ht
     refine ⟨c⁻¹ * t, ?_, by simp [hc.ne']⟩
     have := hC.smul_mem c⁻¹ (inv_nonneg.2 hc.le) _ ht
-    simp only [gaugeSet, Set.mem_ofPred_eq, smul_sub, smul_smul, inv_mul_cancel₀ hc.ne',
-      one_smul] at this ⊢
+    simp only [gaugeSet, Set.mem_ofPred_eq, smul_sub, smul_smul, inv_mul_cancel₀ hc.ne', one_smul]
+      at this ⊢
     exact this
   · rintro ⟨t, ht, rfl⟩
     have := hC.smul_mem c hc.le _ ht
@@ -129,22 +132,29 @@ lemma gauge_zero : gauge C u 0 = 0 := by
 
 /-! ## B. Separation -/
 
-/-- **Separation from a cone.** If `v + ε • u` is outside the cone, a linear functional that is
-nonnegative on the cone is negative at `v`. -/
-lemma exists_apply_neg {v : V} {ε : ℝ} (hε : 0 < ε) (hv : v + ε • u ∉ C) :
-    ∃ Λ : V →ₗ[ℝ] ℝ, (∀ c ∈ C, 0 ≤ Λ c) ∧ Λ v < 0 := by
-  obtain ⟨Λ, hΛ, hΛv⟩ := exists_linearMap_le_eq_of_sublinear (N := gauge C u)
-    (fun _ hc w => hC.gauge_smul hc w) (hC.gauge_add_le hΛ₀ hΛ₀u) (-v)
+/--
+**Separation from a cone.** If `v + ε • u` is outside the cone, a linear functional that is
+nonnegative on the cone is negative at `v`.
+-/
+lemma exists_apply_neg {v : V} {ε : ℝ} (hε : 0 < ε) (hv : v + ε • u ∉ C)
+    : ∃ Λ : V →ₗ[ℝ] ℝ, (∀ c ∈ C, 0 ≤ Λ c) ∧ Λ v < 0 := by
+  obtain ⟨Λ, hΛ, hΛv⟩ :=
+    exists_linearMap_le_eq_of_sublinear (N := gauge C u)
+      (fun _ hc w => hC.gauge_smul hc w)
+      (hC.gauge_add_le hΛ₀ hΛ₀u) (-v)
   refine ⟨Λ, fun c hc => ?_, ?_⟩
   · have := (hΛ (-c)).trans (gauge_le hΛ₀ hΛ₀u (t := 0) (by simpa [gaugeSet] using hc))
-    rw [map_neg] at this; linarith
-  · have hge : ε ≤ gauge C u (-v) := le_csInf (hC.gaugeSet_nonempty _) fun t ht => by
-      by_contra! htε
-      refine hv ?_
-      have := hC.add_mem _ ht _ (hC.smul_mem (ε - t) (by linarith) _ hC.mem)
-      simp only [sub_neg_eq_add] at this
-      convert this using 1
-      rw [sub_smul]; abel
+    rw [map_neg] at this
+    linarith
+  · have hge : ε ≤ gauge C u (-v) :=
+      le_csInf (hC.gaugeSet_nonempty _) fun t ht => by
+        by_contra! htε
+        refine hv ?_
+        have := hC.add_mem _ ht _ (hC.smul_mem (ε - t) (by linarith) _ hC.mem)
+        simp only [sub_neg_eq_add] at this
+        convert this using 1
+        rw [sub_smul]
+        abel
     rw [map_neg] at hΛv
     linarith
 

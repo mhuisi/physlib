@@ -51,8 +51,7 @@ open TensorProduct Matrix MatrixGroups SL2C Invariants complexLorentzTensor
 
 namespace RankOne
 
-variable {B : Type*} [AddCommGroup B] [Module ℂ B]
-  {repLorentz : Representation ℂ SL(2,ℂ) B}
+variable {B : Type*} [AddCommGroup B] [Module ℂ B] {repLorentz : Representation ℂ (SL(2,ℂ)) B}
 
 /-!
 
@@ -67,17 +66,16 @@ itself transverse.
 -/
 
 /-- A direction transverse to the boost along axis `i`: neither time nor the axis. -/
-def Transverse (i : Fin 3) (μ : Fin 1 ⊕ Fin 3) : Prop :=
-  μ = Sum.inr (i + 1) ∨ μ = Sum.inr (i + 2)
+def Transverse (i : Fin 3) (μ : Fin 1 ⊕ Fin 3) : Prop := μ = Sum.inr (i + 1) ∨ μ = Sum.inr (i + 2)
 
 instance (i : Fin 3) (μ : Fin 1 ⊕ Fin 3) : Decidable (Transverse i μ) :=
   inferInstanceAs (Decidable (_ ∨ _))
 
 /-- A non-transverse direction has no weight-zero light-cone coefficient. -/
-lemma prod_lightConeCoeffInv_eq_zero {i : Fin 3} {d : Fin 1 → Fin 1 ⊕ Fin 3}
-    (hd : ¬ Transverse i (d 0)) {κ : Fin 1 → Fin 4}
-    (hκ : ∑ s, lightConeWeight (κ s) = 0) :
-    ∏ s, lightConeCoeffInv i (d s) (κ s) = 0 := by
+lemma prod_lightConeCoeffInv_eq_zero
+    {i : Fin 3} {d : Fin 1 → Fin 1 ⊕ Fin 3} (hd : ¬ Transverse i (d 0))
+    {κ : Fin 1 → Fin 4} (hκ : ∑ s, lightConeWeight (κ s) = 0)
+    : ∏ s, lightConeCoeffInv i (d s) (κ s) = 0 := by
   have h : ∀ κ : Fin 4, lightConeWeight κ = 0 → κ = 2 ∨ κ = 3 := by decide
   rw [Fin.sum_univ_one] at hκ
   rw [Fin.prod_univ_one]
@@ -86,8 +84,11 @@ lemma prod_lightConeCoeffInv_eq_zero {i : Fin 3} {d : Fin 1 → Fin 1 ⊕ Fin 3}
   · exact hk ▸ lightConeCoeffInv_three_eq_zero i fun h => hd (Or.inr h)
 
 /-- An invariant coefficient tensor vanishes off the two directions transverse to the axis. -/
-lemma eq_zero_of_not_transverse {c : (Fin 1 → Fin 1 ⊕ Fin 3) → ℂ} (hc : IsInvariantCoeff c)
-    (i : Fin 3) {d : Fin 1 → Fin 1 ⊕ Fin 3} (hd : ¬ Transverse i (d 0)) : c d = 0 := by
+lemma eq_zero_of_not_transverse
+    {c : (Fin 1 → Fin 1 ⊕ Fin 3) → ℂ} (hc : IsInvariantCoeff c)
+    (i : Fin 3)
+    {d : Fin 1 → Fin 1 ⊕ Fin 3} (hd : ¬ Transverse i (d 0))
+    : c d = 0 := by
   rw [eq_sum_lightConeComponent i c d]
   refine Finset.sum_eq_zero fun κ _ => ?_
   by_cases hκ : ∑ s, lightConeWeight (κ s) = 0
@@ -104,14 +105,14 @@ leaves no coefficient standing.
 -/
 
 /-- No direction is transverse to all three axes at once, a finite check. -/
-lemma not_transverse_all (μ : Fin 1 ⊕ Fin 3) :
-    ¬(Transverse 0 μ ∧ Transverse 1 μ ∧ Transverse 2 μ) := by
+lemma not_transverse_all (μ : Fin 1 ⊕ Fin 3)
+    : ¬(Transverse 0 μ ∧ Transverse 1 μ ∧ Transverse 2 μ) := by
   revert μ
   decide
 
 /-- An invariant coefficient tensor is zero. -/
-lemma eq_zero_of_isInvariantCoeff {c : (Fin 1 → Fin 1 ⊕ Fin 3) → ℂ}
-    (hc : IsInvariantCoeff c) : c = 0 := by
+lemma eq_zero_of_isInvariantCoeff {c : (Fin 1 → Fin 1 ⊕ Fin 3) → ℂ} (hc : IsInvariantCoeff c)
+    : c = 0 := by
   funext d
   show c d = 0
   by_cases h0 : Transverse 0 (d 0)
@@ -133,16 +134,22 @@ tensors are invariant, so section B leaves none of them.
 
 variable {f : ℂT(fun _ : Fin 1 => Color.up) →ₗ[ℂ] B}
 
-/-- Every Lorentz invariant in the range of `f` is zero: one index carry no invariant
-  contraction. -/
-lemma eq_zero_of_invariant (hf : IsLorentzCovariant 1 B repLorentz f) {x : B}
-    (hx : x ∈ LinearMap.range f) (hinv : ∀ g : SL(2,ℂ), repLorentz g x = x) : x = 0 :=
+/--
+Every Lorentz invariant in the range of `f` is zero: one index carry no invariant
+contraction.
+-/
+lemma eq_zero_of_invariant
+    (hf : IsLorentzCovariant 1 B repLorentz f)
+    {x : B} (hx : x ∈ LinearMap.range f) (hinv : ∀ g : SL(2,ℂ), repLorentz g x = x)
+    : x = 0 :=
   hf.eq_zero_of_isInvariantCoeff (fun _ hc => eq_zero_of_isInvariantCoeff hc) hx hinv
 
-/-- The range of `f` reduces to `⊥`: a Lorentz invariant of `LinearMap.range f ⊔ S`, for `S` a
-  Lorentz-stable submodule, lies in `S`. -/
-lemma reducesInvariantsTo_bot (hf : IsLorentzCovariant 1 B repLorentz f) :
-    ReducesInvariantsTo (fun g : SL(2,ℂ) => repLorentz g) (LinearMap.range f) ⊥ :=
+/--
+The range of `f` reduces to `⊥`: a Lorentz invariant of `LinearMap.range f ⊔ S`, for `S` a
+Lorentz-stable submodule, lies in `S`.
+-/
+lemma reducesInvariantsTo_bot (hf : IsLorentzCovariant 1 B repLorentz f)
+    : ReducesInvariantsTo (fun g : SL(2,ℂ) => repLorentz g) (LinearMap.range f) ⊥ :=
   hf.reducesInvariantsTo_bot_of_isInvariantCoeff fun _ hc => eq_zero_of_isInvariantCoeff hc
 
 end RankOne

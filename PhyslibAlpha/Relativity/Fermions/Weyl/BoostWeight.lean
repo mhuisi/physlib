@@ -47,25 +47,25 @@ open Matrix MatrixGroups
 
 -/
 
-/-- The boost weight of a Weyl-spinor index. Along the `z`-axis the `SL(2,ℂ)` boost is
-  the diagonal matrix `diag (t, t⁻¹)`, so the first spinor component carries weight `+1` and
-  the second weight `-1`; a Weyl spinor is a half-vector. -/
+/--
+The boost weight of a Weyl-spinor index. Along the `z`-axis the `SL(2,ℂ)` boost is
+the diagonal matrix `diag (t, t⁻¹)`, so the first spinor component carries weight `+1` and
+the second weight `-1`; a Weyl spinor is a half-vector.
+-/
 def weylWeight (k : Fin 2) : ℤ := if k = 0 then 1 else -1
 
 /-- The right-handed Weyl basis diagonalises the `z`-boost, with weights `±1`. -/
-lemma rightHandedWeyl_rep_boostAxis_two_basis (t : ℝ) (ht : t ≠ 0) (k : Fin 2) :
-    Fermion.RightHandedWeyl.rep (SL2C.boostAxis 2 t ht) (Fermion.RightHandedWeyl.basis k)
+lemma rightHandedWeyl_rep_boostAxis_two_basis (t : ℝ) (ht : t ≠ 0) (k : Fin 2)
+    : Fermion.RightHandedWeyl.rep (SL2C.boostAxis 2 t ht) (Fermion.RightHandedWeyl.basis k)
       = ((t : ℝ) : ℂ) ^ (weylWeight k) • Fermion.RightHandedWeyl.basis k := by
   rw [Fermion.RightHandedWeyl.rep_apply_basis]
-  fin_cases k <;>
-    simp [weylWeight, Fin.sum_univ_two]
+  fin_cases k <;> simp [weylWeight, Fin.sum_univ_two]
 
 /-- The left-handed Weyl basis diagonalises the `z`-boost, with weights `±1`. -/
-lemma leftHandedWeyl_rep_boostAxis_two_basis (t : ℝ) (ht : t ≠ 0) (k : Fin 2) :
-    Fermion.LeftHandedWeyl.rep (SL2C.boostAxis 2 t ht) (Fermion.LeftHandedWeyl.basis k)
+lemma leftHandedWeyl_rep_boostAxis_two_basis (t : ℝ) (ht : t ≠ 0) (k : Fin 2)
+    : Fermion.LeftHandedWeyl.rep (SL2C.boostAxis 2 t ht) (Fermion.LeftHandedWeyl.basis k)
       = ((t : ℝ) : ℂ) ^ (weylWeight k) • Fermion.LeftHandedWeyl.basis k := by
   rw [Fermion.LeftHandedWeyl.rep_apply_basis]
-  fin_cases k <;>
-    simp [weylWeight, Fin.sum_univ_two]
+  fin_cases k <;> simp [weylWeight, Fin.sum_univ_two]
 
 end Lorentz

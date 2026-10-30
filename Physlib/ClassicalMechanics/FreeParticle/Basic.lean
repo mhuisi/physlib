@@ -96,9 +96,7 @@ The velocity of a trajectory at a given time.
 This is defined as the time derivative of the position function.
 -/
 @[nolint unusedArguments]
-noncomputable
-def velocity (s : FreeParticle) (q : Trajectory) (t : Time) : ℝ :=
-  deriv q t
+noncomputable def velocity (s : FreeParticle) (q : Trajectory) (t : Time) : ℝ := deriv q t
 
 /--
 The linear momentum of the free particle along a trajectory.
@@ -106,8 +104,7 @@ The linear momentum of the free particle along a trajectory.
 This is given by the classical one-dimensional expression `p = m v`,
 where `m` is the particle mass and `v` is the velocity.
 -/
-noncomputable
-def linearMomentum (s : FreeParticle) (q : Trajectory) (t : Time) : ℝ :=
+noncomputable def linearMomentum (s : FreeParticle) (q : Trajectory) (t : Time) : ℝ :=
   s.mass * s.velocity q t
 
 /--
@@ -116,9 +113,8 @@ The kinetic energy of the free particle along a trajectory.
 This is given by the classical expression `E = (1 / 2) m v²`,
 where `m` is the particle mass and `v` is the velocity.
 -/
-noncomputable
-def kineticEnergy (s : FreeParticle) (q : Trajectory) (t : Time) : ℝ :=
-  (1 / 2) * s.mass * (s.velocity q t)^2
+noncomputable def kineticEnergy (s : FreeParticle) (q : Trajectory) (t : Time) : ℝ :=
+  (1 / 2) * s.mass * (s.velocity q t) ^ 2
 
 /--
 Newton's second law for the free particle.
@@ -138,9 +134,9 @@ Since the particle mass is strictly positive, the equation
 `m q'' = 0` can be simplified to `q'' = 0` by cancelling the mass
 factor.
 -/
-lemma accel_zero (s : FreeParticle) (q : Trajectory) (h : ∀ t, s.NewtonsSecondLaw q t) :
-    ∀ t, deriv (deriv q) t = 0 :=
-  fun t => (mul_eq_zero.mp (h t)).resolve_left s.mass_pos.ne'
+lemma accel_zero (s : FreeParticle) (q : Trajectory) (h : ∀ t, s.NewtonsSecondLaw q t)
+    : ∀ t, deriv (deriv q) t = 0 := fun t =>
+  (mul_eq_zero.mp (h t)).resolve_left s.mass_pos.ne'
 
 /--
 If the acceleration of a trajectory vanishes everywhere, then the
@@ -154,8 +150,9 @@ The second-order differentiability assumption is included to apply
 standard results from real analysis relating vanishing derivatives to
 constant functions.
 -/
-lemma velocity_const_of_zero_acc (q : Time → ℝ) (h : ∀ t, deriv (deriv q) t = 0)
-    (hcont : ContDiff ℝ 2 q) : ∃ v₀, ∀ t, deriv q t = v₀ := by
+lemma velocity_const_of_zero_acc
+    (q : Time → ℝ) (h : ∀ t, deriv (deriv q) t = 0) (hcont : ContDiff ℝ 2 q)
+    : ∃ v₀, ∀ t, deriv q t = v₀ := by
   refine ⟨deriv q 0, fun t => ?_⟩
   refine is_const_of_fderiv_eq_zero (𝕜 := ℝ) (f := deriv q) ?_ ?_ t 0
   · unfold Time.deriv
@@ -165,12 +162,10 @@ lemma velocity_const_of_zero_acc (q : Time → ℝ) (h : ∀ t, deriv (deriv q) 
     have hp : p = p.val • (1 : Time) := Time.ext (by simp)
     rw [hp, zero_apply, map_smul, smul_eq_mul, ← Time.deriv_eq, h t, mul_zero]
 
-/--
-If a free-particle trajectory has constant velocity, then its linear momentum is constant.
--/
-lemma linearMomentum_conserved_of_velocity_const (s : FreeParticle) (q : Trajectory)
-    (h : ∃ v₀, ∀ t, s.velocity q t = v₀) :
-    ∃ p, ∀ t, s.linearMomentum q t = p := by
+/-- If a free-particle trajectory has constant velocity, then its linear momentum is constant. -/
+lemma linearMomentum_conserved_of_velocity_const
+    (s : FreeParticle) (q : Trajectory) (h : ∃ v₀, ∀ t, s.velocity q t = v₀)
+    : ∃ p, ∀ t, s.linearMomentum q t = p := by
   obtain ⟨v₀, hv⟩ := h
   exact ⟨s.mass * v₀, fun t => by simp [linearMomentum, hv]⟩
 
@@ -180,9 +175,9 @@ A free particle satisfying the equation of motion conserves linear momentum.
 Newton's second law implies that the acceleration vanishes, so the velocity is constant.
 Since the particle mass is fixed, the linear momentum is constant in time.
 -/
-theorem linearMomentum_conserved (s : FreeParticle) (q : Trajectory)
-    (h : ∀ t, s.NewtonsSecondLaw q t) (hcont : ContDiff ℝ 2 q) :
-    ∃ p, ∀ t, s.linearMomentum q t = p :=
+theorem linearMomentum_conserved
+    (s : FreeParticle) (q : Trajectory) (h : ∀ t, s.NewtonsSecondLaw q t) (hcont : ContDiff ℝ 2 q)
+    : ∃ p, ∀ t, s.linearMomentum q t = p :=
   linearMomentum_conserved_of_velocity_const s q
     (velocity_const_of_zero_acc q (accel_zero s q h) hcont)
 
@@ -195,11 +190,11 @@ turn implies that the velocity is constant. Since the kinetic energy
 depends only on the square of the velocity, it follows that the kinetic
 energy is constant in time.
 -/
-theorem kineticEnergy_conserved (s : FreeParticle) (q : Trajectory)
-    (h : ∀ t, s.NewtonsSecondLaw q t) (hcont : ContDiff ℝ 2 q) :
-    ∃ E, ∀ t, s.kineticEnergy q t = E := by
+theorem kineticEnergy_conserved
+    (s : FreeParticle) (q : Trajectory) (h : ∀ t, s.NewtonsSecondLaw q t) (hcont : ContDiff ℝ 2 q)
+    : ∃ E, ∀ t, s.kineticEnergy q t = E := by
   obtain ⟨v₀, hv⟩ := velocity_const_of_zero_acc q (accel_zero s q h) hcont
-  refine ⟨(1 / 2) * s.mass * v₀^2, fun t => ?_⟩
+  refine ⟨(1 / 2) * s.mass * v₀ ^ 2, fun t => ?_⟩
   simp only [kineticEnergy, velocity, hv]
 
 end FreeParticle

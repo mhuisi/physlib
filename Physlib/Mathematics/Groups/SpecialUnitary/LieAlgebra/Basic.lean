@@ -79,15 +79,18 @@ vector space.
 -/
 
 /-- The traceless hermitian `n × n` matrices with entries in `R`, as a real subspace. -/
-abbrev SULieAlgebra.submodule (n : ℕ) (R : Type*) [CommRing R] [StarRing R] [Algebra ℝ R]
-    [StarModule ℝ R] : Submodule ℝ (Matrix (Fin n) (Fin n) R) :=
-  selfAdjoint.submodule ℝ (Matrix (Fin n) (Fin n) R) ⊓
-    LinearMap.ker (Matrix.traceLinearMap (Fin n) ℝ R)
+abbrev SULieAlgebra.submodule
+    (n : ℕ) (R : Type*) [CommRing R] [StarRing R] [Algebra ℝ R] [StarModule ℝ R]
+    : Submodule ℝ (Matrix (Fin n) (Fin n) R) :=
+  selfAdjoint.submodule ℝ (Matrix (Fin n) (Fin n) R)
+    ⊓ LinearMap.ker (Matrix.traceLinearMap (Fin n) ℝ R)
 
-/-- Traceless hermitian `n × n` matrices with entries in `R`, as a real Lie algebra;
-  `SULieAlgebra n ℂ` is `su(n)`. -/
-abbrev SULieAlgebra (n : ℕ) (R : Type*) [CommRing R] [StarRing R] [Algebra ℝ R]
-    [StarModule ℝ R] : Type _ :=
+/--
+Traceless hermitian `n × n` matrices with entries in `R`, as a real Lie algebra;
+`SULieAlgebra n ℂ` is `su(n)`.
+-/
+abbrev SULieAlgebra (n : ℕ) (R : Type*) [CommRing R] [StarRing R] [Algebra ℝ R] [StarModule ℝ R]
+    : Type _ :=
   ↥(SULieAlgebra.submodule n R)
 
 namespace SULieAlgebra
@@ -95,13 +98,15 @@ namespace SULieAlgebra
 variable {n : ℕ} {R : Type*} [CommRing R] [StarRing R] [Algebra ℝ R] [StarModule ℝ R]
 
 /-- The element given by a traceless hermitian matrix. -/
-def ofMatrix (A : Matrix (Fin n) (Fin n) R) (hA : star A = A) (hT : A.trace = 0) :
-    SULieAlgebra n R := ⟨A, hA, hT⟩
+def ofMatrix (A : Matrix (Fin n) (Fin n) R) (hA : star A = A) (hT : A.trace = 0)
+    : SULieAlgebra n R :=
+  ⟨A, hA, hT⟩
 
 /-- The underlying matrix of `ofMatrix A hA hT` is `A`. -/
 @[simp]
-lemma val_ofMatrix (A : Matrix (Fin n) (Fin n) R) (hA : star A = A) (hT : A.trace = 0) :
-    (ofMatrix A hA hT).1 = A := rfl
+lemma val_ofMatrix (A : Matrix (Fin n) (Fin n) R) (hA : star A = A) (hT : A.trace = 0)
+    : (ofMatrix A hA hT).1 = A :=
+  rfl
 
 /-- The underlying matrix of an element is hermitian. -/
 lemma star_val_eq (x : SULieAlgebra n R) : star x.1 = x.1 := x.2.1
@@ -120,21 +125,24 @@ Conjugation `x ↦ U x U†` by a unitary matrix `U` preserves traceless hermiti
 
 /-- The conjugation representation of the unitary group on `SULieAlgebra n R`: `x ↦ U x U†`. -/
 noncomputable def conj : Representation ℝ (unitaryGroup (Fin n) R) (SULieAlgebra n R) where
-  toFun U :=
-    { toFun x := ofMatrix (U.1 * x.1 * star U.1)
+  toFun U := {
+    toFun x :=
+      ofMatrix (U.1 * x.1 * star U.1)
         (by rw [star_mul, star_mul, star_star, x.star_val_eq, mul_assoc])
         (by
           rw [Matrix.trace_mul_comm, ← mul_assoc, UnitaryGroup.star_mul_self U, one_mul,
             x.trace_val_eq_zero])
-      map_add' x y := Subtype.ext (by simp [mul_add, add_mul])
-      map_smul' r x := Subtype.ext (by simp) }
+    map_add' x y := Subtype.ext (by simp [mul_add, add_mul])
+    map_smul' r x := Subtype.ext (by simp)
+  }
   map_one' := LinearMap.ext fun x => Subtype.ext (by simp)
   map_mul' U V := LinearMap.ext fun x => Subtype.ext (by simp [star_mul, mul_assoc])
 
 /-- The underlying matrix of `conj U x` is `U x U†`. -/
 @[simp]
-lemma val_conj_apply (U : unitaryGroup (Fin n) R) (x : SULieAlgebra n R) :
-    (conj U x).1 = U.1 * x.1 * star U.1 := rfl
+lemma val_conj_apply (U : unitaryGroup (Fin n) R) (x : SULieAlgebra n R)
+    : (conj U x).1 = U.1 * x.1 * star U.1 :=
+  rfl
 
 /-!
 
@@ -157,39 +165,43 @@ variable [Algebra ℂ R] [StarModule ℂ R]
 
 /-- The bracket `⁅x, y⁆ = i (x y - y x)`. -/
 noncomputable instance : Bracket (SULieAlgebra n R) (SULieAlgebra n R) where
-  bracket x y := ofMatrix (Complex.I • (x.1 * y.1 - y.1 * x.1))
-    (by
-      rw [star_smul, star_sub, star_mul, star_mul, x.star_val_eq, y.star_val_eq,
-        Complex.star_def, Complex.conj_I, neg_smul, ← smul_neg, neg_sub])
-    (by rw [Matrix.trace_smul, Matrix.trace_sub, Matrix.trace_mul_comm, sub_self, smul_zero])
+  bracket x y :=
+    ofMatrix (Complex.I • (x.1 * y.1 - y.1 * x.1))
+      (by
+        rw [star_smul, star_sub, star_mul, star_mul, x.star_val_eq, y.star_val_eq, Complex.star_def,
+          Complex.conj_I, neg_smul, ← smul_neg, neg_sub])
+      (by rw [Matrix.trace_smul, Matrix.trace_sub, Matrix.trace_mul_comm, sub_self, smul_zero])
 
 /-- The underlying matrix of `⁅x, y⁆` is `i (x y - y x)`. -/
 @[simp]
-lemma val_bracket (x y : SULieAlgebra n R) :
-    ⁅x, y⁆.1 = Complex.I • (x.1 * y.1 - y.1 * x.1) := rfl
+lemma val_bracket (x y : SULieAlgebra n R) : ⁅x, y⁆.1 = Complex.I • (x.1 * y.1 - y.1 * x.1) := rfl
 
 /-- `⁅x, y⁆ = i (x y - y x)` makes `SULieAlgebra n R` a Lie ring. -/
 noncomputable instance : LieRing (SULieAlgebra n R) where
-  add_lie x y z := Subtype.ext (by
-    simp only [val_bracket, Submodule.coe_add, add_mul, mul_add, smul_add, smul_sub]
-    abel)
-  lie_add x y z := Subtype.ext (by
-    simp only [val_bracket, Submodule.coe_add, add_mul, mul_add, smul_add, smul_sub]
-    abel)
+  add_lie x y z :=
+    Subtype.ext (by
+      simp only [val_bracket, Submodule.coe_add, add_mul, mul_add, smul_add, smul_sub]
+      abel)
+  lie_add x y z :=
+    Subtype.ext (by
+      simp only [val_bracket, Submodule.coe_add, add_mul, mul_add, smul_add, smul_sub]
+      abel)
   lie_self x := Subtype.ext (by simp)
-  leibniz_lie x y z := Subtype.ext (by
-    simp only [val_bracket, Submodule.coe_add, mul_smul_comm, smul_mul_assoc, smul_smul,
-      Complex.I_mul_I, smul_sub, mul_sub, sub_mul, mul_assoc]
-    module)
+  leibniz_lie x y z :=
+    Subtype.ext (by
+      simp only [val_bracket, Submodule.coe_add, mul_smul_comm, smul_mul_assoc, smul_smul,
+        Complex.I_mul_I, smul_sub, mul_sub, sub_mul, mul_assoc]
+      module)
 
 /-- The bracket is `ℝ`-bilinear, so `SULieAlgebra n R` is a real Lie algebra. -/
 noncomputable instance : LieAlgebra ℝ (SULieAlgebra n R) where
-  lie_smul r x y := Subtype.ext (by
-    ext i j
-    simp only [val_bracket, Submodule.coe_smul, Matrix.smul_apply, Matrix.sub_apply,
-      Matrix.mul_apply]
-    simp only [Algebra.smul_def, mul_sub, Finset.mul_sum]
-    congr 1 <;> exact Finset.sum_congr rfl fun k _ => by ring)
+  lie_smul r x y :=
+    Subtype.ext (by
+      ext i j
+      simp only [val_bracket, Submodule.coe_smul, Matrix.smul_apply, Matrix.sub_apply,
+        Matrix.mul_apply]
+      simp only [Algebra.smul_def, mul_sub, Finset.mul_sum]
+      congr 1 <;> exact Finset.sum_congr rfl fun k _ => by ring)
 
 /-!
 
@@ -197,14 +209,15 @@ noncomputable instance : LieAlgebra ℝ (SULieAlgebra n R) where
 
 -/
 
-/-- Conjugation by a unitary matrix preserves the bracket, so `conj` acts by Lie algebra
-  automorphisms. -/
-lemma conj_lie (U : unitaryGroup (Fin n) R) (x y : SULieAlgebra n R) :
-    conj U ⁅x, y⁆ = ⁅conj U x, conj U y⁆ := by
+/--
+Conjugation by a unitary matrix preserves the bracket, so `conj` acts by Lie algebra
+automorphisms.
+-/
+lemma conj_lie (U : unitaryGroup (Fin n) R) (x y : SULieAlgebra n R)
+    : conj U ⁅x, y⁆ = ⁅conj U x, conj U y⁆ := by
   ext1
   simp only [val_conj_apply, val_bracket, Matrix.mul_smul, Matrix.smul_mul, mul_sub, sub_mul]
-  congr 2 <;> simp only [mul_assoc, ← mul_assoc (star U.1) U.1, UnitaryGroup.star_mul_self,
-    one_mul]
+  congr 2 <;> simp only [mul_assoc, ← mul_assoc (star U.1) U.1, UnitaryGroup.star_mul_self, one_mul]
 
 /-!
 
@@ -225,8 +238,7 @@ abbrev Complexification (n : ℕ) : Type := ℂ ⊗[ℝ] SULieAlgebra n ℂ
 noncomputable def toMatrixℂ : Complexification n →ₗ[ℂ] Matrix (Fin n) (Fin n) ℂ :=
   (SULieAlgebra.submodule n ℂ).subtype.liftBaseChange ℂ
 
-@[simp]
-lemma toMatrixℂ_tmul (z : ℂ) (x : SULieAlgebra n ℂ) : toMatrixℂ (z ⊗ₜ x) = z • x.1 := rfl
+@[simp] lemma toMatrixℂ_tmul (z : ℂ) (x : SULieAlgebra n ℂ) : toMatrixℂ (z ⊗ₜ x) = z • x.1 := rfl
 
 /-- The underlying matrix of an element of the complexification is traceless. -/
 lemma trace_toMatrixℂ (A : Complexification n) : (toMatrixℂ A).trace = 0 := by
@@ -234,10 +246,12 @@ lemma trace_toMatrixℂ (A : Complexification n) : (toMatrixℂ A).trace = 0 := 
   | tmul z x => rw [toMatrixℂ_tmul, Matrix.trace_smul, x.trace_val_eq_zero, smul_zero]
   | add A B hA hB => rw [map_add, Matrix.trace_add, hA, hB, add_zero]
 
-/-- The matrix of a bracket is `i` times the commutator of the matrices, `[A, B] ↦ i (A B - B A)`,
-  as in `su(n)` itself. -/
-lemma toMatrixℂ_lie (A B : Complexification n) :
-    toMatrixℂ ⁅A, B⁆ = Complex.I • (toMatrixℂ A * toMatrixℂ B - toMatrixℂ B * toMatrixℂ A) := by
+/--
+The matrix of a bracket is `i` times the commutator of the matrices, `[A, B] ↦ i (A B - B A)`,
+as in `su(n)` itself.
+-/
+lemma toMatrixℂ_lie (A B : Complexification n)
+    : toMatrixℂ ⁅A, B⁆ = Complex.I • (toMatrixℂ A * toMatrixℂ B - toMatrixℂ B * toMatrixℂ A) := by
   induction A using TensorProduct.inductionOn with
   | tmul z x =>
     induction B using TensorProduct.inductionOn with
@@ -262,50 +276,53 @@ lemma toMatrixℂ_lie (A B : Complexification n) :
 -/
 
 /-- The element `1 ⊗ ℜ M + i ⊗ ℑ M` of the complexification with the traceless matrix `M`. -/
-noncomputable def ofTracelessℂ (M : Matrix (Fin n) (Fin n) ℂ) (hM : M.trace = 0) :
-    Complexification n :=
+noncomputable def ofTracelessℂ (M : Matrix (Fin n) (Fin n) ℂ) (hM : M.trace = 0)
+    : Complexification n :=
   1 ⊗ₜ ofMatrix (ℜ M) (selfAdjoint.mem_iff.mp (ℜ M).2) (by
-      simp [realPart_apply_coe, trace_smul, trace_add, star_eq_conjTranspose,
-        trace_conjTranspose, hM]) +
-    Complex.I ⊗ₜ ofMatrix (ℑ M) (selfAdjoint.mem_iff.mp (ℑ M).2) (by
+      simp [realPart_apply_coe, trace_smul, trace_add, star_eq_conjTranspose, trace_conjTranspose,
+        hM])
+    + Complex.I ⊗ₜ ofMatrix (ℑ M) (selfAdjoint.mem_iff.mp (ℑ M).2) (by
       simp [imaginaryPart_apply_coe, trace_smul, trace_sub, star_eq_conjTranspose,
         trace_conjTranspose, hM])
 
 /-- The matrix of `ofTracelessℂ M` is `M = ℜ M + i ℑ M`. -/
 @[simp]
-lemma toMatrixℂ_ofTracelessℂ (M : Matrix (Fin n) (Fin n) ℂ) (hM : M.trace = 0) :
-    toMatrixℂ (ofTracelessℂ M hM) = M := by
-  rw [ofTracelessℂ, map_add, toMatrixℂ_tmul, toMatrixℂ_tmul, one_smul, val_ofMatrix,
-    val_ofMatrix, realPart_add_I_smul_imaginaryPart]
+lemma toMatrixℂ_ofTracelessℂ (M : Matrix (Fin n) (Fin n) ℂ) (hM : M.trace = 0)
+    : toMatrixℂ (ofTracelessℂ M hM) = M := by
+  rw [ofTracelessℂ, map_add, toMatrixℂ_tmul, toMatrixℂ_tmul, one_smul, val_ofMatrix, val_ofMatrix,
+    realPart_add_I_smul_imaginaryPart]
 
 /-- `ofTracelessℂ` is additive. -/
-lemma ofTracelessℂ_add (M N : Matrix (Fin n) (Fin n) ℂ) (hM : M.trace = 0) (hN : N.trace = 0)
-    (hMN : (M + N).trace = 0) :
-    ofTracelessℂ (M + N) hMN = ofTracelessℂ M hM + ofTracelessℂ N hN := by
+lemma ofTracelessℂ_add
+    (M N : Matrix (Fin n) (Fin n) ℂ) (hM : M.trace = 0) (hN : N.trace = 0) (hMN : (M + N).trace = 0)
+    : ofTracelessℂ (M + N) hMN = ofTracelessℂ M hM + ofTracelessℂ N hN := by
   rw [ofTracelessℂ, ofTracelessℂ, ofTracelessℂ, add_add_add_comm, ← tmul_add, ← tmul_add]
   congr 2 <;> exact Subtype.ext (by simp)
 
 /-- An element of the complexification is recovered from its matrix. -/
 @[simp]
-lemma ofTracelessℂ_toMatrixℂ (A : Complexification n) :
-    ofTracelessℂ (toMatrixℂ A) (trace_toMatrixℂ A) = A := by
+lemma ofTracelessℂ_toMatrixℂ (A : Complexification n)
+    : ofTracelessℂ (toMatrixℂ A) (trace_toMatrixℂ A) = A := by
   induction A using TensorProduct.inductionOn with
   | tmul z x =>
-    have hre : ∀ h₁ h₂, ofMatrix (ℜ (z • x.1)) h₁ h₂ = z.re • x := fun _ _ => Subtype.ext (by
-      simp [realPart_smul, IsSelfAdjoint.coe_realPart x.star_val_eq,
-        IsSelfAdjoint.imaginaryPart x.star_val_eq])
-    have him : ∀ h₁ h₂, ofMatrix (ℑ (z • x.1)) h₁ h₂ = z.im • x := fun _ _ => Subtype.ext (by
-      simp [imaginaryPart_smul, IsSelfAdjoint.coe_realPart x.star_val_eq,
-        IsSelfAdjoint.imaginaryPart x.star_val_eq])
+    have hre : ∀ h₁ h₂, ofMatrix (ℜ (z • x.1)) h₁ h₂ = z.re • x := fun _ _ =>
+      Subtype.ext (by
+        simp [realPart_smul, IsSelfAdjoint.coe_realPart x.star_val_eq,
+          IsSelfAdjoint.imaginaryPart x.star_val_eq])
+    have him : ∀ h₁ h₂, ofMatrix (ℑ (z • x.1)) h₁ h₂ = z.im • x := fun _ _ =>
+      Subtype.ext (by
+        simp [imaginaryPart_smul, IsSelfAdjoint.coe_realPart x.star_val_eq,
+          IsSelfAdjoint.imaginaryPart x.star_val_eq])
     rw [ofTracelessℂ]
     simp only [toMatrixℂ_tmul, hre, him]
     rw [← smul_tmul, ← smul_tmul, ← add_tmul, Complex.real_smul, Complex.real_smul, mul_one,
       Complex.re_add_im]
   | add A B hA hB =>
-    calc _ = ofTracelessℂ (toMatrixℂ A + toMatrixℂ B)
+    calc
+      _ = ofTracelessℂ (toMatrixℂ A + toMatrixℂ B)
           (by rw [← map_add]; exact trace_toMatrixℂ _) := by
-          congr 1
-          exact map_add _ _ _
+        congr 1
+        exact map_add _ _ _
       _ = A + B := by rw [ofTracelessℂ_add _ _ (trace_toMatrixℂ A) (trace_toMatrixℂ B), hA, hB]
 
 /-!
@@ -320,12 +337,14 @@ lemma toMatrixℂ_injective : Function.Injective (toMatrixℂ (n := n)) := fun A
   congr 1
 
 /-- The matrices of elements of the complexification are exactly the traceless matrices. -/
-lemma range_toMatrixℂ :
-    LinearMap.range (toMatrixℂ (n := n)) = LinearMap.ker (Matrix.traceLinearMap (Fin n) ℂ ℂ) := by
+lemma range_toMatrixℂ
+    : LinearMap.range (toMatrixℂ (n := n)) = LinearMap.ker (Matrix.traceLinearMap (Fin n) ℂ ℂ) := by
   ext M
   rw [LinearMap.mem_range, LinearMap.mem_ker, Matrix.traceLinearMap_apply]
-  exact ⟨fun ⟨A, hA⟩ => hA ▸ trace_toMatrixℂ A,
-    fun hM => ⟨ofTracelessℂ M hM, toMatrixℂ_ofTracelessℂ M hM⟩⟩
+  exact ⟨
+    fun ⟨A, hA⟩ => hA ▸ trace_toMatrixℂ A,
+    fun hM => ⟨ofTracelessℂ M hM, toMatrixℂ_ofTracelessℂ M hM⟩
+  ⟩
 
 /-!
 
@@ -333,10 +352,14 @@ lemma range_toMatrixℂ :
 
 -/
 
-/-- A matrix commuting with every element of `su(n)` commutes with every matrix: it commutes with
-  the traceless matrices, which `su(n)` spans over `ℂ`, and with the identity. -/
-lemma commute_of_forall_commute_val {M : Matrix (Fin n) (Fin n) ℂ}
-    (h : ∀ x : SULieAlgebra n ℂ, Commute M x.1) (N : Matrix (Fin n) (Fin n) ℂ) : Commute M N := by
+/--
+A matrix commuting with every element of `su(n)` commutes with every matrix: it commutes with
+the traceless matrices, which `su(n)` spans over `ℂ`, and with the identity.
+-/
+lemma commute_of_forall_commute_val
+    {M : Matrix (Fin n) (Fin n) ℂ} (h : ∀ x : SULieAlgebra n ℂ, Commute M x.1)
+    (N : Matrix (Fin n) (Fin n) ℂ)
+    : Commute M N := by
   have hA (A : Complexification n) : Commute M (toMatrixℂ A) := by
     induction A using TensorProduct.inductionOn with
     | tmul z x => exact toMatrixℂ_tmul z x ▸ (h x).smul_right z
@@ -355,10 +378,12 @@ lemma commute_of_forall_commute_val {M : Matrix (Fin n) (Fin n) ℂ}
 
 -/
 
-/-- The linear equivalence between the complexification of `su(n)` and the traceless complex
-  matrices, sending an element to its matrix. -/
-noncomputable def equivTraceKer :
-    Complexification n ≃ₗ[ℂ] LinearMap.ker (Matrix.traceLinearMap (Fin n) ℂ ℂ) where
+/--
+The linear equivalence between the complexification of `su(n)` and the traceless complex
+matrices, sending an element to its matrix.
+-/
+noncomputable def equivTraceKer
+    : Complexification n ≃ₗ[ℂ] LinearMap.ker (Matrix.traceLinearMap (Fin n) ℂ ℂ) where
   toFun A := ⟨toMatrixℂ A, trace_toMatrixℂ A⟩
   invFun M := ofTracelessℂ M.1 M.2
   map_add' A B := Subtype.ext (map_add _ A B)
@@ -367,13 +392,13 @@ noncomputable def equivTraceKer :
   right_inv _ := Subtype.ext (toMatrixℂ_ofTracelessℂ _ _)
 
 /-- The matrix of `equivTraceKer A` is the matrix of `A`. -/
-@[simp]
-lemma val_equivTraceKer (A : Complexification n) : (equivTraceKer A).1 = toMatrixℂ A := rfl
+@[simp] lemma val_equivTraceKer (A : Complexification n) : (equivTraceKer A).1 = toMatrixℂ A := rfl
 
 /-- The matrix of `equivTraceKer.symm M` is `M`. -/
 @[simp]
-lemma toMatrixℂ_equivTraceKer_symm (M : LinearMap.ker (traceLinearMap (Fin n) ℂ ℂ)) :
-    toMatrixℂ (equivTraceKer.symm M) = M.1 := toMatrixℂ_ofTracelessℂ _ M.2
+lemma toMatrixℂ_equivTraceKer_symm (M : LinearMap.ker (traceLinearMap (Fin n) ℂ ℂ))
+    : toMatrixℂ (equivTraceKer.symm M) = M.1 :=
+  toMatrixℂ_ofTracelessℂ _ M.2
 
 /-!
 
@@ -385,8 +410,10 @@ lemma toMatrixℂ_equivTraceKer_symm (M : LinearMap.ker (traceLinearMap (Fin n) 
 noncomputable def singleℂ (p q : Fin n) (h : p ≠ q) : Complexification n :=
   ofTracelessℂ (single p q 1) (by simp [h])
 
-/-- The element of the complexification corresponding to the difference of diagonal
-  entries `(p, p) - (q, q)`. -/
+/--
+The element of the complexification corresponding to the difference of diagonal
+entries `(p, p) - (q, q)`.
+-/
 noncomputable def diagDiffℂ (p q : Fin n) : Complexification n :=
   ofTracelessℂ (single p p 1 - single q q 1) (by simp)
 
@@ -399,13 +426,15 @@ span the complexification.
 
 -/
 
-/-- A submodule of the complexification containing every element supported at a single
-  off-diagonal entry, and every difference of two diagonal entries, is everything. -/
-lemma submodule_eq_top_of_singleℂ_mem_of_diagDiffℂ_mem {n : ℕ}
-    {W : Submodule ℂ (Complexification n)}
+/--
+A submodule of the complexification containing every element supported at a single
+off-diagonal entry, and every difference of two diagonal entries, is everything.
+-/
+lemma submodule_eq_top_of_singleℂ_mem_of_diagDiffℂ_mem
+    {n : ℕ} {W : Submodule ℂ (Complexification n)}
     (hoff : ∀ (p q : Fin n) (h : p ≠ q), singleℂ p q h ∈ W)
-    (hdiag : ∀ p q : Fin n, diagDiffℂ p q ∈ W) :
-    W = ⊤ := by
+    (hdiag : ∀ p q : Fin n, diagDiffℂ p q ∈ W)
+    : W = ⊤ := by
   refine Submodule.eq_top_iff'.2 fun A => ?_
   obtain hn | ⟨⟨i⟩⟩ := isEmpty_or_nonempty (Fin n)
   · simp [show A = 0 from toMatrixℂ_injective (Subsingleton.elim _ _)]
@@ -426,11 +455,15 @@ lemma submodule_eq_top_of_singleℂ_mem_of_diagDiffℂ_mem {n : ℕ}
       toMatrixℂ_injective (by simp [singleℂ])]
     exact Submodule.smul_mem _ _ (hoff p q h)
 
-/-- The elements supported at a single off-diagonal entry, together with the differences of two
-  diagonal entries, span the complexification. -/
-lemma singleℂ_diagDiffℂ_span_eq_top {n : ℕ} :
-    Submodule.span ℂ ({A : Complexification n | ∃ (p q : Fin n) (h : p ≠ q), A = singleℂ p q h} ∪
-      {A : Complexification n | ∃ p q : Fin n, A = diagDiffℂ p q}) = ⊤ :=
+/--
+The elements supported at a single off-diagonal entry, together with the differences of two
+diagonal entries, span the complexification.
+-/
+lemma singleℂ_diagDiffℂ_span_eq_top {n : ℕ}
+    : Submodule.span ℂ
+        ({A : Complexification n | ∃ (p q : Fin n) (h : p ≠ q), A = singleℂ p q h}
+          ∪ {A : Complexification n | ∃ p q : Fin n, A = diagDiffℂ p q})
+      = ⊤ :=
   submodule_eq_top_of_singleℂ_mem_of_diagDiffℂ_mem
     (fun p q h => Submodule.subset_span (Or.inl ⟨p, q, h, rfl⟩))
     fun p q => Submodule.subset_span (Or.inr ⟨p, q, rfl⟩)
@@ -441,8 +474,10 @@ lemma singleℂ_diagDiffℂ_span_eq_top {n : ℕ} :
 
 -/
 
-/-- The complexification `ℂ ⊗[ℝ] su(n)` has complex dimension `n² - 1`: it is the traceless
-  matrices, and the trace is onto for `0 < n`. -/
+/--
+The complexification `ℂ ⊗[ℝ] su(n)` has complex dimension `n² - 1`: it is the traceless
+matrices, and the trace is onto for `0 < n`.
+-/
 lemma finrank_complexification : Module.finrank ℂ (Complexification n) = n ^ 2 - 1 := by
   rw [← LinearMap.finrank_range_of_inj toMatrixℂ_injective, range_toMatrixℂ]
   rcases Nat.eq_zero_or_pos n with rfl | hn

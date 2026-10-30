@@ -73,8 +73,9 @@ open MvPolynomial
 
 namespace JetGenerators
 
-lemma indexClass_dA (s : Multiset (Fin 1 ⊕ Fin 3)) (μ : Fin 1 ⊕ Fin 3) :
-    (JetGenerators.dA s μ).indexClass = s + {μ} := rfl
+lemma indexClass_dA (s : Multiset (Fin 1 ⊕ Fin 3)) (μ : Fin 1 ⊕ Fin 3)
+    : (JetGenerators.dA s μ).indexClass = s + {μ} :=
+  rfl
 
 lemma indexClass_ne_zero (j : JetGenerators) : j.indexClass ≠ 0 := by
   obtain ⟨s, μ⟩ := j
@@ -83,10 +84,11 @@ lemma indexClass_ne_zero (j : JetGenerators) : j.indexClass ≠ 0 := by
   have := congrArg Multiset.card h
   simp at this
 
-/-- Erasing the class representative and putting it back as the Lorentz index
-  preserves the class. -/
-lemma indexClass_classProj (j : JetGenerators) :
-    j.classProj.indexClass = j.indexClass := by
+/--
+Erasing the class representative and putting it back as the Lorentz index
+preserves the class.
+-/
+lemma indexClass_classProj (j : JetGenerators) : j.classProj.indexClass = j.indexClass := by
   rw [classProj, indexClass_dA, Multiset.add_comm, Multiset.singleton_add,
     Multiset.cons_erase (classRep_mem (indexClass_ne_zero j))]
 
@@ -96,10 +98,12 @@ lemma classProj_idem (j : JetGenerators) : j.classProj.classProj = j.classProj :
   rw [indexClass_classProj]
   rfl
 
-/-- Two jet coordinates have the same class projection exactly when they lie
-  in the same symmetrized-index class. -/
-lemma classProj_eq_classProj_iff (j j' : JetGenerators) :
-    j.classProj = j'.classProj ↔ j.indexClass = j'.indexClass := by
+/--
+Two jet coordinates have the same class projection exactly when they lie
+in the same symmetrized-index class.
+-/
+lemma classProj_eq_classProj_iff (j j' : JetGenerators)
+    : j.classProj = j'.classProj ↔ j.indexClass = j'.indexClass := by
   constructor
   · intro h
     rw [← indexClass_classProj j, ← indexClass_classProj j', h]
@@ -116,16 +120,18 @@ namespace JetAlgebra
 
 -/
 
-/-- A jet coordinate minus the canonical coordinate of its class is a
-  derivative of the field strength. -/
-lemma coord_sub_classProj (s : Multiset (Fin 1 ⊕ Fin 3)) (μ : Fin 1 ⊕ Fin 3)
-    (h : (JetGenerators.dA s μ).classProj ≠ JetGenerators.dA s μ) :
-    (X (JetGenerators.dA s μ) : JetAlgebra) - X ((JetGenerators.dA s μ).classProj) =
-      fieldStrength (s.erase (classRep (s + {μ}))) (classRep (s + {μ})) μ := by
+/--
+A jet coordinate minus the canonical coordinate of its class is a
+derivative of the field strength.
+-/
+lemma coord_sub_classProj
+    (s : Multiset (Fin 1 ⊕ Fin 3)) (μ : Fin 1 ⊕ Fin 3)
+    (h : (JetGenerators.dA s μ).classProj ≠ JetGenerators.dA s μ)
+    : (X (JetGenerators.dA s μ) : JetAlgebra) - X ((JetGenerators.dA s μ).classProj)
+      = fieldStrength (s.erase (classRep (s + {μ}))) (classRep (s + {μ})) μ := by
   set r := classRep (s + {μ}) with hr
   have hrs : r ∈ s := by
-    have hmem : r ∈ s + {μ} :=
-      classRep_mem (JetGenerators.indexClass_ne_zero (.dA s μ))
+    have hmem : r ∈ s + {μ} := classRep_mem (JetGenerators.indexClass_ne_zero (.dA s μ))
     rcases Multiset.mem_add.mp hmem with hmem | hmem
     · exact hmem
     · exfalso
@@ -136,15 +142,14 @@ lemma coord_sub_classProj (s : Multiset (Fin 1 ⊕ Fin 3)) (μ : Fin 1 ⊕ Fin 3
           rw [Multiset.add_comm, Multiset.singleton_add, Multiset.erase_cons_head]]
   have h1 : s.erase r + {r} = s := by
     rw [Multiset.add_comm, Multiset.singleton_add, Multiset.cons_erase hrs]
-  have h2 : s.erase r + {μ} = (s + {μ}).erase r := by
-    rw [Multiset.erase_add_left_pos _ hrs]
+  have h2 : s.erase r + {μ} = (s + {μ}).erase r := by rw [Multiset.erase_add_left_pos _ hrs]
   rw [fieldStrength, h1, h2, JetGenerators.classProj, JetGenerators.indexClass_dA]
   rfl
 
 /-- Every field-strength jet lies in the range of the field-strength family. -/
-lemma fieldStrength_mem_range (t : Multiset (Fin 1 ⊕ Fin 3)) (μ ν : Fin 1 ⊕ Fin 3) :
-    fieldStrength t μ ν ∈ Set.range (fun p :
-        Multiset (Fin 1 ⊕ Fin 3) × (Fin 1 ⊕ Fin 3) × (Fin 1 ⊕ Fin 3) =>
+lemma fieldStrength_mem_range (t : Multiset (Fin 1 ⊕ Fin 3)) (μ ν : Fin 1 ⊕ Fin 3)
+    : fieldStrength t μ ν
+      ∈ Set.range (fun p : Multiset (Fin 1 ⊕ Fin 3) × (Fin 1 ⊕ Fin 3) × (Fin 1 ⊕ Fin 3) =>
         fieldStrength p.1 p.2.1 p.2.2) :=
   ⟨⟨t, μ, ν⟩, rfl⟩
 
@@ -155,47 +160,53 @@ lemma fieldStrength_mem_range (t : Multiset (Fin 1 ⊕ Fin 3)) (μ ν : Fin 1 �
 -/
 
 set_option maxHeartbeats 1600000 in
-/-- **Completeness of the field strength for gauge invariance**: an element of
-  the photon jet algebra is invariant under every gauge transformation if and
-  only if it is a polynomial in the derivatives `∂_s F_{μν}` of the field
-  strength.  The field strength does not just provide *some* gauge invariants
-  — it generates *all* of them. -/
-lemma gaugeInvariant_iff_mem_adjoin_fieldStrength (x : JetAlgebra) :
-    (∀ c : GaugeJet, gaugeAction c x = x) ↔
-      x ∈ Algebra.adjoin ℝ (Set.range fun p :
-        Multiset (Fin 1 ⊕ Fin 3) × (Fin 1 ⊕ Fin 3) × (Fin 1 ⊕ Fin 3) =>
-        fieldStrength p.1 p.2.1 p.2.2) := by
+/--
+**Completeness of the field strength for gauge invariance**: an element of
+the photon jet algebra is invariant under every gauge transformation if and
+only if it is a polynomial in the derivatives `∂_s F_{μν}` of the field
+strength.  The field strength does not just provide *some* gauge invariants
+— it generates *all* of them.
+-/
+lemma gaugeInvariant_iff_mem_adjoin_fieldStrength (x : JetAlgebra)
+    : (∀ c : GaugeJet, gaugeAction c x = x)
+      ↔ x ∈ Algebra.adjoin ℝ
+        (Set.range fun p : Multiset (Fin 1 ⊕ Fin 3) × (Fin 1 ⊕ Fin 3) × (Fin 1 ⊕ Fin 3) =>
+          fieldStrength p.1 p.2.1 p.2.2) := by
   constructor
   · intro hx
-    have key := MvPolynomial.mem_adjoin_range_X_sub_X_of_forall_aeval_add_eq
-      (R := ℝ) (I := JetGenerators) JetGenerators.classProj
-      JetGenerators.classProj_idem x ?_
+    have key :=
+      MvPolynomial.mem_adjoin_range_X_sub_X_of_forall_aeval_add_eq (R := ℝ) (I := JetGenerators)
+        JetGenerators.classProj JetGenerators.classProj_idem x ?_
     · refine Algebra.adjoin_le ?_ key
       rintro y ⟨j, rfl⟩
       obtain ⟨s, μ⟩ := j
       show (X (JetGenerators.dA s μ) : JetAlgebra) -
         X (JetGenerators.dA s μ).classProj ∈ _
-      rcases eq_or_ne (JetGenerators.dA s μ).classProj (JetGenerators.dA s μ) with
-        hproj | hproj
+      rcases eq_or_ne (JetGenerators.dA s μ).classProj (JetGenerators.dA s μ) with hproj | hproj
       · rw [hproj, sub_self]
         exact Subalgebra.zero_mem _
       · rw [coord_sub_classProj s μ hproj]
         exact Algebra.subset_adjoin (fieldStrength_mem_range _ _ _)
     · intro i₀ r
       obtain ⟨s₀, μ₀⟩ := i₀
-      have hfun : (fun i => (X i : JetAlgebra) +
-          C (if i.classProj = (JetGenerators.dA s₀ μ₀).classProj then r else 0)) =
-          fun j => match j with
-            | JetGenerators.dA s μ => coord s μ +
-                C ((fun t => if t = s₀ + {μ₀} then r else 0) (s + {μ})) := by
+      have hfun
+          : (fun i =>
+              (X i : JetAlgebra)
+                + C (if i.classProj = (JetGenerators.dA s₀ μ₀).classProj then r else 0))
+            = fun j =>
+              match j with
+              | JetGenerators.dA s μ =>
+                coord s μ + C ((fun t => if t = s₀ + {μ₀} then r else 0) (s + {μ})) := by
         funext j
         obtain ⟨s, μ⟩ := j
         show (X (JetGenerators.dA s μ) : JetAlgebra) + _ = coord s μ + _
         rw [coord]
         congr 1
-        exact congrArg C (if_congr (Iff.trans
-          (JetGenerators.classProj_eq_classProj_iff _ _)
-          (by rw [JetGenerators.indexClass_dA, JetGenerators.indexClass_dA])) rfl rfl)
+        exact congrArg C
+          (if_congr
+            (Iff.trans (JetGenerators.classProj_eq_classProj_iff _ _)
+              (by rw [JetGenerators.indexClass_dA, JetGenerators.indexClass_dA]))
+            rfl rfl)
       rw [congrArg MvPolynomial.aeval hfun]
       exact hx fun t => if t = s₀ + {μ₀} then r else 0
   · intro hx c

@@ -61,8 +61,10 @@ variable (Ω₀ : Type*) [Fintype Ω₀] [DecidableEq Ω₀]
 
 /-! ## A. The quasi-local algebra of a crystal -/
 
-/-- **The quasi-local algebra of an infinite crystal** whose sites all carry the finite
-configuration space `Ω₀`. -/
+/--
+**The quasi-local algebra of an infinite crystal** whose sites all carry the finite
+configuration space `Ω₀`.
+-/
 abbrev crystalAlgebra (G F : Type*) [DecidableEq (CellSite G F)] :=
   (uniformNet (S := CellSite G F) Ω₀).Quasilocal
 
@@ -75,8 +77,7 @@ def cellSymmetryAction : CellSymmetry G F →* (crystalAlgebra Ω₀ G F ≃⋆�
 /-- The translations as cell symmetries. -/
 def translationHom (G F : Type*) [AddCommGroup G] : Multiplicative G →* CellSymmetry G F where
   toFun a := CellSymmetry.translation (Multiplicative.toAdd a)
-  map_one' := by
-    ext <;> simp [CellSymmetry.translation]
+  map_one' := by ext <;> simp [CellSymmetry.translation]
   map_mul' a b := by
     rw [toAdd_mul]
     exact (CellSymmetry.translation_mul _ _).symm
@@ -86,10 +87,10 @@ def translationAction : Multiplicative G →* (crystalAlgebra Ω₀ G F ≃⋆�
   (cellSymmetryAction Ω₀).comp (translationHom G F)
 
 /-- **Covariance**: a cell symmetry carries the translation by `a` to the translation by `A a`. -/
-lemma cellSymmetryAction_translation_conj (s : CellSymmetry G F) (a : G) :
-    cellSymmetryAction Ω₀ s * cellSymmetryAction Ω₀ (CellSymmetry.translation a) *
-        (cellSymmetryAction Ω₀ s)⁻¹ =
-      cellSymmetryAction Ω₀ (CellSymmetry.translation (s.linear a)) := by
+lemma cellSymmetryAction_translation_conj (s : CellSymmetry G F) (a : G)
+    : cellSymmetryAction Ω₀ s * cellSymmetryAction Ω₀ (CellSymmetry.translation a)
+        * (cellSymmetryAction Ω₀ s)⁻¹
+      = cellSymmetryAction Ω₀ (CellSymmetry.translation (s.linear a)) := by
   rw [← map_mul, ← map_inv, ← map_mul, CellSymmetry.mul_translation_mul_inv]
 
 end CondensedMatter.Crystal

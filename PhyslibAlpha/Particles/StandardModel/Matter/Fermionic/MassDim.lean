@@ -46,8 +46,11 @@ namespace FermionicAlgebra
 
 open TensorProduct
 
-variable {G₀ : Type} [Group G₀] {𝔤 : Type} [LieRing 𝔤] [LieAlgebra ℝ 𝔤]
-  {GJ : Type} [Group GJ] {𝔤J : Type} [LieRing 𝔤J] [LieAlgebra ℝ 𝔤J]
+variable
+  {G₀ : Type} [Group G₀]
+  {𝔤 : Type} [LieRing 𝔤] [LieAlgebra ℝ 𝔤]
+  {GJ : Type} [Group GJ]
+  {𝔤J : Type} [LieRing 𝔤J] [LieAlgebra ℝ 𝔤J]
   {jets : LocalGaugeData G₀ 𝔤 GJ 𝔤J} {M : MatterField jets}
 
 /-!
@@ -56,16 +59,17 @@ variable {G₀ : Type} [Group G₀] {𝔤 : Type} [LieRing 𝔤] [LieAlgebra ℝ
 
 -/
 
-/-- **The mass-weight scaling on the fermionic algebra** of a field of mass weight `w`:
-  the algebra endomorphism scaling the generator `∂_s ψ_α` by `c ^ (w + 2 |s|)`, the
-  functorial lift of the scaling on the jet component space. -/
-noncomputable def massWeightScale (w : ℕ) (c : ℂ) :
-    FermionicAlgebra M →ₐ[ℂ] FermionicAlgebra M :=
+/--
+**The mass-weight scaling on the fermionic algebra** of a field of mass weight `w`:
+the algebra endomorphism scaling the generator `∂_s ψ_α` by `c ^ (w + 2 |s|)`, the
+functorial lift of the scaling on the jet component space.
+-/
+noncomputable def massWeightScale (w : ℕ) (c : ℂ) : FermionicAlgebra M →ₐ[ℂ] FermionicAlgebra M :=
   ExteriorAlgebra.map (JetComponentSpace.massWeightScale w c)
 
 @[simp]
-lemma massWeightScale_ι (w : ℕ) (c : ℂ) (x : JetComponentSpace M) :
-    massWeightScale w c (ExteriorAlgebra.ι ℂ x)
+lemma massWeightScale_ι (w : ℕ) (c : ℂ) (x : JetComponentSpace M)
+    : massWeightScale w c (ExteriorAlgebra.ι ℂ x)
       = ExteriorAlgebra.ι ℂ (JetComponentSpace.massWeightScale w c x) := by
   rw [massWeightScale, ExteriorAlgebra.map_apply_ι]
 
@@ -77,57 +81,57 @@ lemma massWeightScale_ι (w : ℕ) (c : ℂ) (x : JetComponentSpace M) :
 
 /-- The undifferentiated field carries its own mass weight. -/
 @[simp]
-lemma massWeightScale_ofField (w : ℕ) (c : ℂ) (φ : Module.Dual ℂ M.V) :
-    massWeightScale w c (ofField φ) = c ^ w • ofField φ := by
+lemma massWeightScale_ofField (w : ℕ) (c : ℂ) (φ : Module.Dual ℂ M.V)
+    : massWeightScale w c (ofField φ) = c ^ w • ofField φ := by
   rw [ofField_apply, massWeightScale_ι, ← map_smul]
   congr 1
   refine Prod.ext ?_ ?_
   · rw [JetComponentSpace.massWeightScale_fst]
-    simp only [TensorProduct.map_tmul, AlgHom.toLinearMap_apply, map_one,
-      LinearMap.id_apply, Prod.smul_fst, TensorProduct.smul_tmul']
+    simp only [TensorProduct.map_tmul, AlgHom.toLinearMap_apply, map_one, LinearMap.id_apply,
+      Prod.smul_fst, TensorProduct.smul_tmul']
   · rw [JetComponentSpace.massWeightScale_snd]
     simp
 
 /-- The undifferentiated conjugate field carries the same mass weight as the field. -/
 @[simp]
-lemma massWeightScale_ofConjField (w : ℕ) (c : ℂ) (φ : Module.Dual ℂ (ConjModule M.V)) :
-    massWeightScale w c (ofConjField φ) = c ^ w • ofConjField φ := by
+lemma massWeightScale_ofConjField (w : ℕ) (c : ℂ) (φ : Module.Dual ℂ (ConjModule M.V))
+    : massWeightScale w c (ofConjField φ) = c ^ w • ofConjField φ := by
   rw [ofConjField_apply, massWeightScale_ι, ← map_smul]
   congr 1
   refine Prod.ext ?_ ?_
   · rw [JetComponentSpace.massWeightScale_fst]
     simp
   · rw [JetComponentSpace.massWeightScale_snd]
-    simp only [TensorProduct.map_tmul, AlgHom.toLinearMap_apply, map_one,
-      LinearMap.id_apply, Prod.smul_snd, TensorProduct.smul_tmul']
+    simp only [TensorProduct.map_tmul, AlgHom.toLinearMap_apply, map_one, LinearMap.id_apply,
+      Prod.smul_snd, TensorProduct.smul_tmul']
 
-/-- **A total derivative adds mass weight two**: the scaling intertwines the total
-  derivative up to a factor `c ^ 2`. -/
-lemma massWeightScale_jetDeriv (w : ℕ) (c : ℂ) (μ : Fin 1 ⊕ Fin 3)
-    (x : FermionicAlgebra M) :
-    massWeightScale w c (jetDeriv μ x) = c ^ 2 • jetDeriv μ (massWeightScale w c x) := by
+/--
+**A total derivative adds mass weight two**: the scaling intertwines the total
+derivative up to a factor `c ^ 2`.
+-/
+lemma massWeightScale_jetDeriv (w : ℕ) (c : ℂ) (μ : Fin 1 ⊕ Fin 3) (x : FermionicAlgebra M)
+    : massWeightScale w c (jetDeriv μ x) = c ^ 2 • jetDeriv μ (massWeightScale w c x) := by
   induction x using ExteriorAlgebra.induction with
-  | algebraMap r => rw [jetDeriv_algebraMap, map_zero, AlgHom.commutes, jetDeriv_algebraMap,
-      smul_zero]
+  | algebraMap r =>
+    rw [jetDeriv_algebraMap, map_zero, AlgHom.commutes, jetDeriv_algebraMap, smul_zero]
   | ι v =>
     rw [jetDeriv_ι, massWeightScale_ι, massWeightScale_ι, jetDeriv_ι, ← map_smul]
     exact congrArg (ExteriorAlgebra.ι ℂ)
       (LinearMap.congr_fun (JetComponentSpace.massWeightScale_jetDeriv w c μ) v)
   | mul a b ha hb =>
-    simp only [jetDeriv_mul, map_add, map_mul, ha, hb, smul_add, smul_mul_assoc,
-      mul_smul_comm]
+    simp only [jetDeriv_mul, map_add, map_mul, ha, hb, smul_add, smul_mul_assoc, mul_smul_comm]
   | add a b ha hb => simp only [map_add, ha, hb, smul_add]
 
 /-- **The iterated derivative `∂_s` adds mass weight `2 |s|`.** -/
-lemma massWeightScale_iteratedJetDeriv (w : ℕ) (c : ℂ) (s : Multiset (Fin 1 ⊕ Fin 3))
-    (x : FermionicAlgebra M) :
-    massWeightScale w c (iteratedJetDeriv s x)
+lemma massWeightScale_iteratedJetDeriv
+    (w : ℕ) (c : ℂ) (s : Multiset (Fin 1 ⊕ Fin 3)) (x : FermionicAlgebra M)
+    : massWeightScale w c (iteratedJetDeriv s x)
       = c ^ (2 * Multiset.card s) • iteratedJetDeriv s (massWeightScale w c x) := by
   induction s using Multiset.induction_on generalizing x with
   | empty => simp
   | cons μ s ih =>
-    rw [iteratedJetDeriv_cons, LinearMap.comp_apply, massWeightScale_jetDeriv, ih,
-      map_smul, LinearMap.comp_apply, smul_smul, ← pow_add]
+    rw [iteratedJetDeriv_cons, LinearMap.comp_apply, massWeightScale_jetDeriv, ih, map_smul,
+      LinearMap.comp_apply, smul_smul, ← pow_add]
     congr 2
     rw [Multiset.card_cons]
     ring

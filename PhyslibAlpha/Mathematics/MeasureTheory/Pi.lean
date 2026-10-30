@@ -6,7 +6,7 @@ Authors: brent
 module
 
 public import Mathlib.MeasureTheory.Constructions.Pi
-import all Mathlib.MeasureTheory.Constructions.Pi  -- for unfolding `Measure.pi`
+import all Mathlib.MeasureTheory.Constructions.Pi -- for unfolding `Measure.pi`
 
 /-!
 
@@ -46,14 +46,20 @@ namespace MeasureTheory.Measure
 
 -/
 
-/-- The finite product measure `Measure.pi μ` is monotone in the family of measures `μ`:
-if `μ i ≤ ν i` for every `i`, then `Measure.pi μ ≤ Measure.pi ν`. -/
-lemma pi_mono {ι : Type*} [Fintype ι] {α : ι → Type*} [∀ i, MeasurableSpace (α i)]
-    {μ ν : (i : ι) → Measure (α i)} (h : ∀ i, μ i ≤ ν i) : Measure.pi μ ≤ Measure.pi ν := by
+/--
+The finite product measure `Measure.pi μ` is monotone in the family of measures `μ`:
+if `μ i ≤ ν i` for every `i`, then `Measure.pi μ ≤ Measure.pi ν`.
+-/
+lemma pi_mono
+    {ι : Type*} [Fintype ι]
+    {α : ι → Type*} [∀ i, MeasurableSpace (α i)]
+    {μ ν : (i : ι) → Measure (α i)} (h : ∀ i, μ i ≤ ν i)
+    : Measure.pi μ ≤ Measure.pi ν := by
   refine Measure.le_iff.2 fun s hs => ?_
   rw [Measure.pi, toMeasure_apply _ _ hs, Measure.pi, toMeasure_apply _ _ hs]
-  suffices OuterMeasure.pi (fun i => (μ i).toOuterMeasure) ≤
-      OuterMeasure.pi (fun i => (ν i).toOuterMeasure) from this s
+  suffices OuterMeasure.pi (fun i => (μ i).toOuterMeasure)
+      ≤ OuterMeasure.pi (fun i => (ν i).toOuterMeasure) from
+    this s
   refine OuterMeasure.le_pi.2 fun t _ => ?_
   exact (OuterMeasure.pi_pi_le _ t).trans <|
     Finset.prod_le_prod fun i _ => (Measure.le_iff'.1 (h i)) (t i)

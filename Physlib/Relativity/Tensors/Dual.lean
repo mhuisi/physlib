@@ -56,11 +56,13 @@ reindexing of the colors.
 
 namespace TensorSpecies
 
-variable {k : Type} [RCLike k] {C : Type} {G : Type} [Group G]
-    {V : C → Type} [∀ c, AddCommGroup (V c)] [∀ c, Module k (V c)]
-    {basisIdx : C → Type} [∀ c, Fintype (basisIdx c)] [∀ c, DecidableEq (basisIdx c)]
-    {rep : (c : C) → Representation k G (V c)} {b : (c : C) → Module.Basis (basisIdx c) k (V c)}
-    {S : TensorSpecies k C G V basisIdx rep b} [S.WithMetric]
+variable
+  {k : Type} [RCLike k]
+  {C : Type} {G : Type} [Group G]
+  {V : C → Type} [∀ c, AddCommGroup (V c)] [∀ c, Module k (V c)]
+  {basisIdx : C → Type} [∀ c, Fintype (basisIdx c)] [∀ c, DecidableEq (basisIdx c)]
+  {rep : (c : C) → Representation k G (V c)} {b : (c : C) → Module.Basis (basisIdx c) k (V c)}
+  {S : TensorSpecies k C G V basisIdx rep b} [S.WithMetric]
 
 namespace Tensor
 
@@ -70,10 +72,13 @@ namespace Tensor
 
 -/
 
-/-- The linear map between `S.Tensor c` and `S.Tensor (Function.update c i (S.τ (c i)))`
-  formed by contracting the index `i` with the metric tensor. -/
-noncomputable def toDualMapAtIndex : {n : ℕ} → {c : Fin n → C} → (i : Fin n) →
-    S.Tensor c →ₗ[k] S.Tensor (Function.update c i (S.τ (c i)))
+/--
+The linear map between `S.Tensor c` and `S.Tensor (Function.update c i (S.τ (c i)))`
+formed by contracting the index `i` with the metric tensor.
+-/
+noncomputable def toDualMapAtIndex
+    : {n : ℕ} → {c : Fin n → C} → (i : Fin n)
+      → S.Tensor c →ₗ[k] S.Tensor (Function.update c i (S.τ (c i)))
   | 0, _, i => i.elim0
   | _ + 1, c, i => crossToSlot i (0 : Fin 2) rfl (metricTensor (S := S) (S.τ (c i)))
 
@@ -84,22 +89,26 @@ noncomputable def toDualMapAtIndex : {n : ℕ} → {c : Fin n → C} → (i : Fi
 -/
 
 set_option backward.isDefEq.respectTransparency false in
-/-- The metric at `τ c` contracted with the metric at `c` is the unit tensor at `c`,
-  `η^{μν} η_{νρ} = δ^μ_ρ`. -/
-lemma contractInnerT_dual_metricTensor_metricTensor {c : C} :
-    contractInnerT (S.τ_τ_apply c) (metricTensor (S := S) (S.τ c)) (metricTensor (S := S) c) =
-      permT (id : Fin 2 → Fin 2) (IsReindexing.unitTensor_of_tau_eq rfl)
+/--
+The metric at `τ c` contracted with the metric at `c` is the unit tensor at `c`,
+`η^{μν} η_{νρ} = δ^μ_ρ`.
+-/
+lemma contractInnerT_dual_metricTensor_metricTensor {c : C}
+    : contractInnerT (S.τ_τ_apply c) (metricTensor (S := S) (S.τ c)) (metricTensor (S := S) c)
+      = permT (id : Fin 2 → Fin 2) (IsReindexing.unitTensor_of_tau_eq rfl)
         (unitTensor (S := S) c) := by
   rw [contractInnerT_apply, crossToEnd_two, contrT_dual_metricTensor_metricTensor, permT_permT,
     permT_permT]
   exact permT_congr rfl rfl
 
 set_option backward.isDefEq.respectTransparency false in
-/-- The metric at `c` contracted with the metric at `τ c` is the unit tensor at `τ c`,
-  `η_{μν} η^{νρ} = δ_μ^ρ`. -/
-lemma contractInnerT_metricTensor_metricTensor_eq_dual_unit {c : C} :
-    contractInnerT rfl (metricTensor (S := S) c) (metricTensor (S := S) (S.τ c)) =
-      permT (id : Fin 2 → Fin 2) (IsReindexing.unitTensor_of_tau_eq (S.τ_τ_apply c))
+/--
+The metric at `c` contracted with the metric at `τ c` is the unit tensor at `τ c`,
+`η_{μν} η^{νρ} = δ_μ^ρ`.
+-/
+lemma contractInnerT_metricTensor_metricTensor_eq_dual_unit {c : C}
+    : contractInnerT rfl (metricTensor (S := S) c) (metricTensor (S := S) (S.τ c))
+      = permT (id : Fin 2 → Fin 2) (IsReindexing.unitTensor_of_tau_eq (S.τ_τ_apply c))
         (unitTensor (S := S) (S.τ c)) := by
   rw [contractInnerT_apply, crossToEnd_two, contrT_metricTensor_metricTensor_eq_dual_unit,
     permT_permT, permT_permT]
@@ -111,25 +120,27 @@ lemma contractInnerT_metricTensor_metricTensor_eq_dual_unit {c : C} :
 
 -/
 
-/-- Dualising the index `i` twice returns the original tensor, up to the reindexing of the
-  colors. -/
-lemma toDualMapAtIndex_toDualMapAtIndex {n : ℕ} {c : Fin n → C}
-    (i : Fin n) (t : S.Tensor c) :
-    toDualMapAtIndex (S := S) i (toDualMapAtIndex (S := S) i t) =
-      permT (id : Fin n → Fin n)
-        (IsReindexing.update_update_of_eq i (by simp [τ_τ_apply])) t := by
+/--
+Dualising the index `i` twice returns the original tensor, up to the reindexing of the
+colors.
+-/
+lemma toDualMapAtIndex_toDualMapAtIndex {n : ℕ} {c : Fin n → C} (i : Fin n) (t : S.Tensor c)
+    : toDualMapAtIndex (S := S) i (toDualMapAtIndex (S := S) i t)
+      = permT (id : Fin n → Fin n) (IsReindexing.update_update_of_eq i (by simp [τ_τ_apply]))
+        t := by
   cases n with
   | zero => exact i.elim0
   | succ nA =>
     -- Both metrics enter at literal colors, matched by `S.τ_τ_apply`, so neither is transported.
-    have key := crossToSlot_raise_lower_round_trip (S := S) i (he := rfl) (ha := rfl)
-      (hb := S.τ_τ_apply (c i)) (M := metricTensor (S := S) (S.τ (c i)))
-      (M' := metricTensor (S := S) (c i))
-      (hM := contractInnerT_dual_metricTensor_metricTensor) (t := t)
+    have key :=
+      crossToSlot_raise_lower_round_trip (S := S) i (he := rfl) (ha := rfl)
+        (hb := S.τ_τ_apply (c i)) (M := metricTensor (S := S) (S.τ (c i)))
+        (M' := metricTensor (S := S) (c i)) (hM := contractInnerT_dual_metricTensor_metricTensor)
+        (t := t)
     -- The second dualisation reads its metric at the composite color the first one left behind.
     rw [toDualMapAtIndex, toDualMapAtIndex,
-      metricTensor_congr (by simp [Function.update_self, τ_τ_apply] :
-        S.τ (Function.update c i (S.τ (c i)) i) = c i)]
+      metricTensor_congr
+        (by simp [Function.update_self, τ_τ_apply] : S.τ (Function.update c i (S.τ (c i)) i) = c i)]
     -- Why `erw` is needed: The second metric's colour `S.τ (Function.update c i (S.τ (c i)) i)`
     -- only matches `crossToSlot_permT_right_id` after unfolding `Function.update`.
     -- It's messy to do anything other than use erw
@@ -142,17 +153,20 @@ lemma toDualMapAtIndex_toDualMapAtIndex {n : ℕ} {c : Fin n → C}
 
 -/
 
-/-- The linear map between `S.Tensor (Function.update c i (S.τ (c i)))` and `S.Tensor c`
-  formed by contracting the index `i` with the metric tensor. It is the inverse of
-  `toDualMapAtIndex`. -/
-noncomputable def fromDualMapAtIndex : {n : ℕ} → {c : Fin n → C} → (i : Fin n) →
-    S.Tensor (Function.update c i (S.τ (c i))) →ₗ[k] S.Tensor c
+/--
+The linear map between `S.Tensor (Function.update c i (S.τ (c i)))` and `S.Tensor c`
+formed by contracting the index `i` with the metric tensor. It is the inverse of
+`toDualMapAtIndex`.
+-/
+noncomputable def fromDualMapAtIndex
+    : {n : ℕ} → {c : Fin n → C} → (i : Fin n)
+      → S.Tensor (Function.update c i (S.τ (c i))) →ₗ[k] S.Tensor c
   | 0, _, i => i.elim0
   | _ + 1, c, i => crossToSlotInv i rfl (S.τ_τ_apply (c i)) (metricTensor (S := S) (c i))
 
 @[simp]
-lemma fromDualMapAtIndex_toDualMapAtIndex {n : ℕ} {c : Fin n → C} (i : Fin n) (t : S.Tensor c) :
-    fromDualMapAtIndex (S := S) i (toDualMapAtIndex (S := S) i t) = t := by
+lemma fromDualMapAtIndex_toDualMapAtIndex {n : ℕ} {c : Fin n → C} (i : Fin n) (t : S.Tensor c)
+    : fromDualMapAtIndex (S := S) i (toDualMapAtIndex (S := S) i t) = t := by
   cases n with
   | zero => exact i.elim0
   | succ nA =>
@@ -161,9 +175,9 @@ lemma fromDualMapAtIndex_toDualMapAtIndex {n : ℕ} {c : Fin n → C} (i : Fin n
       contractInnerT_dual_metricTensor_metricTensor t
 
 @[simp]
-lemma toDualMapAtIndex_fromDualMapAtIndex {n : ℕ} {c : Fin n → C} (i : Fin n)
-    (t : S.Tensor (Function.update c i (S.τ (c i)))) :
-    toDualMapAtIndex (S := S) i (fromDualMapAtIndex (S := S) i t) = t := by
+lemma toDualMapAtIndex_fromDualMapAtIndex
+    {n : ℕ} {c : Fin n → C} (i : Fin n) (t : S.Tensor (Function.update c i (S.τ (c i))))
+    : toDualMapAtIndex (S := S) i (fromDualMapAtIndex (S := S) i t) = t := by
   cases n with
   | zero => exact i.elim0
   | succ nA =>
@@ -180,8 +194,8 @@ lemma toDualMapAtIndex_fromDualMapAtIndex {n : ℕ} {c : Fin n → C} (i : Fin n
 
 /-- Dualising the index `i` commutes with the action of `G`. -/
 @[simp]
-lemma toDualMapAtIndex_equivariant {n : ℕ} {c : Fin n → C} (i : Fin n) (g : G) (t : S.Tensor c) :
-    toDualMapAtIndex (S := S) i (g • t) = g • toDualMapAtIndex (S := S) i t := by
+lemma toDualMapAtIndex_equivariant {n : ℕ} {c : Fin n → C} (i : Fin n) (g : G) (t : S.Tensor c)
+    : toDualMapAtIndex (S := S) i (g • t) = g • toDualMapAtIndex (S := S) i t := by
   cases n with
   | zero => exact i.elim0
   | succ nA =>
@@ -195,10 +209,13 @@ lemma toDualMapAtIndex_equivariant {n : ℕ} {c : Fin n → C} (i : Fin n) (g : 
 
 -/
 
-/-- The linear equivalence between `S.Tensor c` and `S.Tensor (Function.update c i (S.τ (c i)))`
-  formed by contracting the index `i` with the metric tensor. -/
-noncomputable def toDualAtIndex : {n : ℕ} → {c : Fin n → C} → (i : Fin n) →
-    S.Tensor c ≃ₗ[k] S.Tensor (Function.update c i (S.τ (c i)))
+/--
+The linear equivalence between `S.Tensor c` and `S.Tensor (Function.update c i (S.τ (c i)))`
+formed by contracting the index `i` with the metric tensor.
+-/
+noncomputable def toDualAtIndex
+    : {n : ℕ} → {c : Fin n → C} → (i : Fin n)
+      → S.Tensor c ≃ₗ[k] S.Tensor (Function.update c i (S.τ (c i)))
   | 0, _, i => i.elim0
   | _ + 1, c, i =>
     crossToSlotEquiv i rfl rfl (S.τ_τ_apply (c i)) (metricTensor (S := S) (S.τ (c i)))
@@ -206,16 +223,16 @@ noncomputable def toDualAtIndex : {n : ℕ} → {c : Fin n → C} → (i : Fin n
       contractInnerT_metricTensor_metricTensor_eq_dual_unit
 
 @[simp]
-lemma toDualAtIndex_apply {n : ℕ} {c : Fin n → C} (i : Fin n) (t : S.Tensor c) :
-    toDualAtIndex (S := S) i t = toDualMapAtIndex (S := S) i t := by
+lemma toDualAtIndex_apply {n : ℕ} {c : Fin n → C} (i : Fin n) (t : S.Tensor c)
+    : toDualAtIndex (S := S) i t = toDualMapAtIndex (S := S) i t := by
   cases n with
   | zero => exact i.elim0
   | succ nA => rfl
 
 @[simp]
-lemma toDualAtIndex_symm_apply {n : ℕ} {c : Fin n → C} (i : Fin n)
-    (t : S.Tensor (Function.update c i (S.τ (c i)))) :
-    (toDualAtIndex (S := S) i).symm t = fromDualMapAtIndex (S := S) i t := by
+lemma toDualAtIndex_symm_apply
+    {n : ℕ} {c : Fin n → C} (i : Fin n) (t : S.Tensor (Function.update c i (S.τ (c i))))
+    : (toDualAtIndex (S := S) i).symm t = fromDualMapAtIndex (S := S) i t := by
   cases n with
   | zero => exact i.elim0
   | succ nA => rfl

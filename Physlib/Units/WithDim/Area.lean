@@ -39,12 +39,12 @@ open Dimensionful CarriesDimension
 noncomputable def squareMeter : DimArea := toDimensionful SI ⟨1⟩
 
 /-- The dimensional area corresponding to 1 square foot. -/
-noncomputable def squareFoot : DimArea := toDimensionful ({SI with
-  length := LengthUnit.feet} : LTMCTUnitChoices) ⟨1⟩
+noncomputable def squareFoot : DimArea :=
+  toDimensionful ({ SI with length := LengthUnit.feet } : LTMCTUnitChoices) ⟨1⟩
 
 /-- The dimensional area corresponding to 1 square mile. -/
-noncomputable def squareMile : DimArea := toDimensionful ({SI with
-  length := LengthUnit.miles} : LTMCTUnitChoices) ⟨1⟩
+noncomputable def squareMile : DimArea :=
+  toDimensionful ({ SI with length := LengthUnit.miles } : LTMCTUnitChoices) ⟨1⟩
 
 /-- The dimensional area corresponding to 1 are (100 square meters). -/
 noncomputable def are : DimArea := toDimensionful SI ⟨100⟩
@@ -53,8 +53,8 @@ noncomputable def are : DimArea := toDimensionful SI ⟨100⟩
 noncomputable def hectare : DimArea := toDimensionful SI ⟨10000⟩
 
 /-- The dimensional area corresponding to 1 acre (1/640 square miles). -/
-noncomputable def acre : DimArea := toDimensionful ({SI with
-  length := LengthUnit.miles} : LTMCTUnitChoices) ⟨(1/640)⟩
+noncomputable def acre : DimArea :=
+  toDimensionful ({ SI with length := LengthUnit.miles } : LTMCTUnitChoices) ⟨(1 / 640)⟩
 
 /-!
 
@@ -62,9 +62,7 @@ noncomputable def acre : DimArea := toDimensionful ({SI with
 
 -/
 
-@[simp]
-lemma squareMeter_in_SI : squareMeter.1 SI = ⟨1⟩ := by
-  simp [squareMeter]
+@[simp] lemma squareMeter_in_SI : squareMeter.1 SI = ⟨1⟩ := by simp [squareMeter]
 
 set_option backward.isDefEq.respectTransparency false in
 @[simp]
@@ -82,13 +80,9 @@ lemma squareMile_in_SI : squareMile.1 SI = ⟨2589988.110336⟩ := by
   simp [NNReal.coe_ofScientific]
   norm_num [toReal]
 
-@[simp]
-lemma are_in_SI : are.1 SI = ⟨100⟩ := by
-  simp [are]
+@[simp] lemma are_in_SI : are.1 SI = ⟨100⟩ := by simp [are]
 
-@[simp]
-lemma hectare_in_SI : hectare.1 SI = ⟨10000⟩ := by
-  simp [hectare]
+@[simp] lemma hectare_in_SI : hectare.1 SI = ⟨10000⟩ := by simp [hectare]
 
 set_option backward.isDefEq.respectTransparency false in
 @[simp]

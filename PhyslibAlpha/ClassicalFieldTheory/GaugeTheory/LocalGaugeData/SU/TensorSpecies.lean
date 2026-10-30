@@ -78,7 +78,7 @@ inductive Color
   | antiFund : Color
   /-- The adjoint color. -/
   | adj : Color
-  deriving DecidableEq
+deriving DecidableEq
 
 variable (N : ℕ)
 
@@ -98,8 +98,10 @@ noncomputable instance modulesModule : ∀ c, Module ℂ (modules N c)
   | .antiFund => inferInstance
   | .adj => inferInstance
 
-/-- The labels of the basis vectors: `Fin N` for the fundamental and anti-fundamental colors,
-  and the labels of the generalized Gell-Mann matrices for the adjoint. -/
+/--
+The labels of the basis vectors: `Fin N` for the fundamental and anti-fundamental colors,
+and the labels of the generalized Gell-Mann matrices for the adjoint.
+-/
 abbrev basisIdx : Color → Type
   | .fund => Fin N
   | .antiFund => Fin N
@@ -115,8 +117,10 @@ instance basisIdxDecidableEq : ∀ c, DecidableEq (basisIdx N c)
   | .antiFund => inferInstance
   | .adj => inferInstance
 
-/-- The bases of the carriers: the standard basis for the fundamental and anti-fundamental colors,
-  and the generalized Gell-Mann matrices for the adjoint. -/
+/--
+The bases of the carriers: the standard basis for the fundamental and anti-fundamental colors,
+and the generalized Gell-Mann matrices for the adjoint.
+-/
 noncomputable abbrev basis : (c : Color) → Basis (basisIdx N c) ℂ (modules N c)
   | .fund => Pi.basisFun ℂ (Fin N)
   | .antiFund => Pi.basisFun ℂ (Fin N)
@@ -138,8 +142,10 @@ noncomputable def fundRep : Representation ℂ (SU N) (Fin N → ℂ) where
     simp only [Submonoid.coe_mul, Matrix.mulVecLin_mul]
     rfl
 
-/-- The anti-fundamental representation, `v ↦ (g⁻¹)ᵀ v`, the dual of the fundamental one. For
-  unitary `g`, `(g⁻¹)ᵀ` is the complex conjugate of `g`. -/
+/--
+The anti-fundamental representation, `v ↦ (g⁻¹)ᵀ v`, the dual of the fundamental one. For
+unitary `g`, `(g⁻¹)ᵀ` is the complex conjugate of `g`.
+-/
 noncomputable def antiFundRep : Representation ℂ (SU N) (Fin N → ℂ) where
   toFun g := (g⁻¹).1ᵀ.mulVecLin
   map_one' := by
@@ -161,24 +167,30 @@ noncomputable abbrev rep : (c : Color) → Representation ℂ (SU N) (modules N 
 
 -/
 
-/-- The contraction of a fundamental against an anti-fundamental index, the dot product
-  `v ⊗ w ↦ ∑ vᵢ wᵢ`. -/
-noncomputable def fundContr : ((fundRep N).tprod (antiFundRep N)).IntertwiningMap
-    (Representation.trivial ℂ (SU N) ℂ) where
+/--
+The contraction of a fundamental against an anti-fundamental index, the dot product
+`v ⊗ w ↦ ∑ vᵢ wᵢ`.
+-/
+noncomputable def fundContr
+    : ((fundRep N).tprod (antiFundRep N)).IntertwiningMap (Representation.trivial ℂ (SU N) ℂ) where
   toLinearMap := TensorProduct.lift (dotProductBilin ℂ ℂ)
-  isIntertwining' g := TensorProduct.ext' fun v w => by
-    change (g.1 *ᵥ v) ⬝ᵥ ((g⁻¹).1ᵀ *ᵥ w) = v ⬝ᵥ w
-    rw [dotProduct_mulVec, vecMul_transpose, mulVec_mulVec, val_inv_mul_val, one_mulVec]
+  isIntertwining' g :=
+    TensorProduct.ext' fun v w => by
+      change (g.1 *ᵥ v) ⬝ᵥ ((g⁻¹).1ᵀ *ᵥ w) = v ⬝ᵥ w
+      rw [dotProduct_mulVec, vecMul_transpose, mulVec_mulVec, val_inv_mul_val, one_mulVec]
 
-/-- The contraction of an anti-fundamental against a fundamental index, the dot product
-  `w ⊗ v ↦ ∑ wᵢ vᵢ`. -/
-noncomputable def antiFundContr : ((antiFundRep N).tprod (fundRep N)).IntertwiningMap
-    (Representation.trivial ℂ (SU N) ℂ) where
+/--
+The contraction of an anti-fundamental against a fundamental index, the dot product
+`w ⊗ v ↦ ∑ wᵢ vᵢ`.
+-/
+noncomputable def antiFundContr
+    : ((antiFundRep N).tprod (fundRep N)).IntertwiningMap (Representation.trivial ℂ (SU N) ℂ) where
   toLinearMap := TensorProduct.lift (dotProductBilin ℂ ℂ)
-  isIntertwining' g := TensorProduct.ext' fun w v => by
-    change ((g⁻¹).1ᵀ *ᵥ w) ⬝ᵥ (g.1 *ᵥ v) = w ⬝ᵥ v
-    rw [dotProduct_comm, dotProduct_mulVec, vecMul_transpose, mulVec_mulVec, val_inv_mul_val,
-      one_mulVec, dotProduct_comm]
+  isIntertwining' g :=
+    TensorProduct.ext' fun w v => by
+      change ((g⁻¹).1ᵀ *ᵥ w) ⬝ᵥ (g.1 *ᵥ v) = w ⬝ᵥ v
+      rw [dotProduct_comm, dotProduct_mulVec, vecMul_transpose, mulVec_mulVec, val_inv_mul_val,
+        one_mulVec, dotProduct_comm]
 
 /-!
 
@@ -194,98 +206,107 @@ injective, so a unit is unique, and it is invariant, its transform being sent to
 
 section Coevaluation
 
-variable {N} {V W : Type} [AddCommGroup V] [Module ℂ V]
-  [AddCommGroup W] [Module ℂ W] {ρ : Representation ℂ (SU N) V}
-  {σ : Representation ℂ (SU N) W}
+variable
+  {N} {V W : Type} [AddCommGroup V] [Module ℂ V] [AddCommGroup W] [Module ℂ W]
+  {ρ : Representation ℂ (SU N) V} {σ : Representation ℂ (SU N) W}
 
 /-- The endomorphism `x ↦ ∑ contr (x ⊗ wᵢ) vᵢ` of `V` attached to `∑ wᵢ ⊗ vᵢ ∈ W ⊗ V`. -/
-noncomputable def coevalMap (contr : (ρ.tprod σ).IntertwiningMap
-    (Representation.trivial ℂ (SU N) ℂ)) : W ⊗[ℂ] V →ₗ[ℂ] V →ₗ[ℂ] V :=
-  dualTensorHom ℂ V V ∘ₗ TensorProduct.map (TensorProduct.curry contr.toLinearMap).flip
-    LinearMap.id
+noncomputable def coevalMap
+    (contr : (ρ.tprod σ).IntertwiningMap (Representation.trivial ℂ (SU N) ℂ))
+    : W ⊗[ℂ] V →ₗ[ℂ] V →ₗ[ℂ] V :=
+  dualTensorHom ℂ V V ∘ₗ TensorProduct.map (TensorProduct.curry contr.toLinearMap).flip LinearMap.id
 
 variable (contr : (ρ.tprod σ).IntertwiningMap (Representation.trivial ℂ (SU N) ℂ))
 
 @[simp]
-lemma coevalMap_tmul (w : W) (v x : V) :
-    coevalMap contr (w ⊗ₜ v) x = contr (x ⊗ₜ w) • v := rfl
+lemma coevalMap_tmul (w : W) (v x : V) : coevalMap contr (w ⊗ₜ v) x = contr (x ⊗ₜ w) • v := rfl
 
 /-- The contraction of `x` against the first factor of `U` is `coevalMap contr U x`. -/
-lemma lid_rTensor_assoc_symm_eq_coevalMap (x : V) (U : W ⊗[ℂ] V) :
-    TensorProduct.lid ℂ V (contr.toLinearMap.rTensor V
-      ((TensorProduct.assoc ℂ V W V).symm (x ⊗ₜ[ℂ] U))) = coevalMap contr U x := by
+lemma lid_rTensor_assoc_symm_eq_coevalMap (x : V) (U : W ⊗[ℂ] V)
+    : TensorProduct.lid ℂ V
+        (contr.toLinearMap.rTensor V ((TensorProduct.assoc ℂ V W V).symm (x ⊗ₜ[ℂ] U)))
+      = coevalMap contr U x := by
   induction U with
   | tmul w v => simp
   | add U U' hU hU' => simp only [tmul_add, map_add, hU, hU', LinearMap.add_apply]
 
 /-- `coevalMap` is injective when the contraction separates `W`. -/
-lemma coevalMap_injective [FiniteDimensional ℂ V]
-    (h : Function.Injective (TensorProduct.curry contr.toLinearMap).flip) :
-    Function.Injective (coevalMap contr) := by
+lemma coevalMap_injective
+    [FiniteDimensional ℂ V] (h : Function.Injective (TensorProduct.curry contr.toLinearMap).flip)
+    : Function.Injective (coevalMap contr) := by
   rw [coevalMap, LinearMap.coe_comp]
   exact (dualTensorHomEquiv ℂ V V).injective.comp
     (Module.Flat.rTensor_preserves_injective_linearMap (M := V) _ h)
 
-/-- Transforming both factors of `U` conjugates `coevalMap contr U`, by the invariance of the
-  contraction. -/
-lemma coevalMap_map (g : SU N) (U : W ⊗[ℂ] V) :
-    coevalMap contr (TensorProduct.map (σ g) (ρ g) U)
-      = ρ g ∘ₗ coevalMap contr U ∘ₗ ρ g⁻¹ := by
+/--
+Transforming both factors of `U` conjugates `coevalMap contr U`, by the invariance of the
+contraction.
+-/
+lemma coevalMap_map (g : SU N) (U : W ⊗[ℂ] V)
+    : coevalMap contr (TensorProduct.map (σ g) (ρ g) U) = ρ g ∘ₗ coevalMap contr U ∘ₗ ρ g⁻¹ := by
   induction U with
   | tmul w v =>
     refine LinearMap.ext fun x => ?_
     have h := LinearMap.congr_fun (contr.isIntertwining' g) (ρ g⁻¹ x ⊗ₜ[ℂ] w)
     simp only [LinearMap.comp_apply, Representation.tprod_apply, TensorProduct.map_tmul,
-      Representation.self_inv_apply, Representation.trivial_apply] at h
+        Representation.self_inv_apply, Representation.trivial_apply]
+      at h
     simp only [TensorProduct.map_tmul, coevalMap_tmul, LinearMap.comp_apply, map_smul]
     exact congrArg (· • (ρ g) v) h
   | add U U' hU hU' => simp only [map_add, hU, hU', LinearMap.add_comp, LinearMap.comp_add]
 
-/-- An element whose `coevalMap` is the identity is invariant, when the contraction separates
-  `W`. -/
-lemma map_eq_self_of_coevalMap_eq_id [FiniteDimensional ℂ V]
-    (h : Function.Injective (TensorProduct.curry contr.toLinearMap).flip) {U : W ⊗[ℂ] V}
-    (hU : coevalMap contr U = LinearMap.id) (g : SU N) :
-    TensorProduct.map (σ g) (ρ g) U = U := by
+/--
+An element whose `coevalMap` is the identity is invariant, when the contraction separates
+`W`.
+-/
+lemma map_eq_self_of_coevalMap_eq_id
+    [FiniteDimensional ℂ V]
+    (h : Function.Injective (TensorProduct.curry contr.toLinearMap).flip)
+    {U : W ⊗[ℂ] V} (hU : coevalMap contr U = LinearMap.id)
+    (g : SU N)
+    : TensorProduct.map (σ g) (ρ g) U = U := by
   refine coevalMap_injective contr h ?_
   rw [coevalMap_map, hU]
   exact LinearMap.ext fun x => by simp
 
 variable {contr} in
 /-- The unit intertwining map `a ↦ a • U` of an invariant element `U ∈ W ⊗ V`. -/
-noncomputable def unitOf {U : W ⊗[ℂ] V} (hU : ∀ g : SU N, TensorProduct.map (σ g) (ρ g) U = U) :
-    (Representation.trivial ℂ (SU N) ℂ).IntertwiningMap (σ.tprod ρ) where
+noncomputable def unitOf {U : W ⊗[ℂ] V} (hU : ∀ g : SU N, TensorProduct.map (σ g) (ρ g) U = U)
+    : (Representation.trivial ℂ (SU N) ℂ).IntertwiningMap (σ.tprod ρ) where
   toFun a := a • U
   map_add' a b := add_smul a b U
   map_smul' a b := smul_assoc a b U
-  isIntertwining' g := LinearMap.ext fun a => by
-    simp [Representation.tprod_apply, hU g]
+  isIntertwining' g := LinearMap.ext fun a => by simp [Representation.tprod_apply, hU g]
 
 @[simp]
-lemma unitOf_apply {U : W ⊗[ℂ] V} (hU : ∀ g : SU N, TensorProduct.map (σ g) (ρ g) U = U)
-    (a : ℂ) : unitOf hU a = a • U := rfl
+lemma unitOf_apply {U : W ⊗[ℂ] V} (hU : ∀ g : SU N, TensorProduct.map (σ g) (ρ g) U = U) (a : ℂ)
+    : unitOf hU a = a • U :=
+  rfl
 
 end Coevaluation
 
-/-- The element `∑ eᵢ ⊗ eᵢ` of `ℂᴺ ⊗ ℂᴺ`, the unit of the fundamental and of the anti-fundamental
-  color. -/
-noncomputable def pairUnitVal : (Fin N → ℂ) ⊗[ℂ] (Fin N → ℂ) :=
-  ∑ i, Pi.single i 1 ⊗ₜ Pi.single i 1
+/--
+The element `∑ eᵢ ⊗ eᵢ` of `ℂᴺ ⊗ ℂᴺ`, the unit of the fundamental and of the anti-fundamental
+color.
+-/
+noncomputable def pairUnitVal : (Fin N → ℂ) ⊗[ℂ] (Fin N → ℂ) := ∑ i, Pi.single i 1 ⊗ₜ Pi.single i 1
 
 lemma comm_pairUnitVal : TensorProduct.comm ℂ _ _ (pairUnitVal N) = pairUnitVal N := by
   simp [pairUnitVal]
 
 /-- The dot product separates vectors. -/
-lemma dotProduct_flip_injective : Function.Injective
-    (TensorProduct.curry (TensorProduct.lift (dotProductBilin ℂ ℂ) :
-      (Fin N → ℂ) ⊗[ℂ] (Fin N → ℂ) →ₗ[ℂ] ℂ)).flip := fun w w' h => funext fun i => by
-  simpa [dotProductBilin] using LinearMap.congr_fun h (Pi.single i 1)
+lemma dotProduct_flip_injective
+    : Function.Injective (TensorProduct.curry
+      (TensorProduct.lift (dotProductBilin ℂ ℂ)
+        : (Fin N → ℂ) ⊗[ℂ] (Fin N → ℂ) →ₗ[ℂ] ℂ)).flip := fun w w' h =>
+  funext fun i => by simpa [dotProductBilin] using LinearMap.congr_fun h (Pi.single i 1)
 
 /-- Contracting against `∑ eᵢ ⊗ eᵢ` by the dot product is the identity. -/
-lemma coevalMap_pairUnitVal {ρ σ : Representation ℂ (SU N) (Fin N → ℂ)}
+lemma coevalMap_pairUnitVal
+    {ρ σ : Representation ℂ (SU N) (Fin N → ℂ)}
     (contr : (ρ.tprod σ).IntertwiningMap (Representation.trivial ℂ (SU N) ℂ))
-    (h : contr.toLinearMap = TensorProduct.lift (dotProductBilin ℂ ℂ)) :
-    coevalMap contr (pairUnitVal N) = LinearMap.id := by
+    (h : contr.toLinearMap = TensorProduct.lift (dotProductBilin ℂ ℂ))
+    : coevalMap contr (pairUnitVal N) = LinearMap.id := by
   have hc : ∀ v w : Fin N → ℂ, contr (v ⊗ₜ w) = v ⬝ᵥ w := fun v w => by
     rw [show contr (v ⊗ₜ w) = contr.toLinearMap (v ⊗ₜ w) from rfl, h]
     rfl
@@ -293,19 +314,21 @@ lemma coevalMap_pairUnitVal {ρ σ : Representation ℂ (SU N) (Fin N → ℂ)}
   simp [pairUnitVal, map_sum, hc, Finset.sum_apply, Pi.single_apply]
 
 /-- The unit of the fundamental color, `∑ eᵢ ⊗ eᵢ` in anti-fundamental ⊗ fundamental. -/
-noncomputable def fundUnit : (Representation.trivial ℂ (SU N) ℂ).IntertwiningMap
-    ((antiFundRep N).tprod (fundRep N)) :=
+noncomputable def fundUnit
+    : (Representation.trivial ℂ (SU N) ℂ).IntertwiningMap ((antiFundRep N).tprod (fundRep N)) :=
   unitOf (map_eq_self_of_coevalMap_eq_id (fundContr N) (dotProduct_flip_injective N)
     (coevalMap_pairUnitVal N (fundContr N) rfl))
 
 /-- The unit of the anti-fundamental color, `∑ eᵢ ⊗ eᵢ` in fundamental ⊗ anti-fundamental. -/
-noncomputable def antiFundUnit : (Representation.trivial ℂ (SU N) ℂ).IntertwiningMap
-    ((fundRep N).tprod (antiFundRep N)) :=
+noncomputable def antiFundUnit
+    : (Representation.trivial ℂ (SU N) ℂ).IntertwiningMap ((fundRep N).tprod (antiFundRep N)) :=
   unitOf (map_eq_self_of_coevalMap_eq_id (antiFundContr N) (dotProduct_flip_injective N)
     (coevalMap_pairUnitVal N (antiFundContr N) rfl))
 
-/-- The element `∑ b_a ⊗ bᵃ` of `su(N)_ℂ ⊗ su(N)_ℂ`, for the Gell-Mann basis `b` and its dual basis
-  `bᵃ` under the trace form: the unit of the adjoint color. -/
+/--
+The element `∑ b_a ⊗ bᵃ` of `su(N)_ℂ ⊗ su(N)_ℂ`, for the Gell-Mann basis `b` and its dual basis
+`bᵃ` under the trace form: the unit of the adjoint color.
+-/
 noncomputable def adjUnitVal : (SUAlgebraComplexified N) ⊗[ℂ] (SUAlgebraComplexified N) :=
   ∑ a, adjBasis N a ⊗ₜ (traceForm N).dualBasis (traceForm_nondegenerate N) (adjBasis N) a
 
@@ -319,11 +342,12 @@ lemma coevalMap_adjUnitVal : coevalMap (adjContr N) (adjUnitVal N) = LinearMap.i
   rw [coevalMap_tmul, LinearMap.BilinForm.dualBasis_repr_apply]
   rfl
 
-lemma coevalMap_comm_adjUnitVal :
-    coevalMap (adjContr N) (TensorProduct.comm ℂ _ _ (adjUnitVal N)) = LinearMap.id := by
+lemma coevalMap_comm_adjUnitVal
+    : coevalMap (adjContr N) (TensorProduct.comm ℂ _ _ (adjUnitVal N)) = LinearMap.id := by
   refine LinearMap.ext fun x => ?_
-  have hb := LinearMap.BilinForm.dualBasis_dualBasis (traceForm_nondegenerate N)
-    (traceForm_isSymm N) (adjBasis N)
+  have hb :=
+    LinearMap.BilinForm.dualBasis_dualBasis (traceForm_nondegenerate N) (traceForm_isSymm N)
+      (adjBasis N)
   rw [LinearMap.id_apply]
   conv_rhs => rw [← ((traceForm N).dualBasis (traceForm_nondegenerate N)
     ((traceForm N).dualBasis (traceForm_nondegenerate N)
@@ -340,8 +364,8 @@ lemma comm_adjUnitVal : TensorProduct.comm ℂ _ _ (adjUnitVal N) = adjUnitVal N
     ((coevalMap_comm_adjUnitVal N).trans (coevalMap_adjUnitVal N).symm)
 
 /-- The unit of the adjoint color, `∑ b_a ⊗ bᵃ`. -/
-noncomputable def adjUnit : (Representation.trivial ℂ (SU N) ℂ).IntertwiningMap
-    ((adjRep N).tprod (adjRep N)) :=
+noncomputable def adjUnit
+    : (Representation.trivial ℂ (SU N) ℂ).IntertwiningMap ((adjRep N).tprod (adjRep N)) :=
   unitOf (map_eq_self_of_coevalMap_eq_id (adjContr N) (adjContr_flip_injective N)
     (coevalMap_adjUnitVal N))
 
@@ -354,12 +378,14 @@ end suTensor
 -/
 
 open suTensor in
-/-- The complex tensor species of `SU(N)`, with fundamental, anti-fundamental and adjoint
-  indices. The fundamental and anti-fundamental colors are dual to each other, the adjoint
-  color dual to itself. -/
-noncomputable def suTensor (N : ℕ) : TensorSpecies ℂ suTensor.Color (SU N)
-    (suTensor.modules N) (suTensor.basisIdx N) (suTensor.rep N)
-    (suTensor.basis N) where
+/--
+The complex tensor species of `SU(N)`, with fundamental, anti-fundamental and adjoint
+indices. The fundamental and anti-fundamental colors are dual to each other, the adjoint
+color dual to itself.
+-/
+noncomputable def suTensor (N : ℕ)
+    : TensorSpecies ℂ suTensor.Color (SU N) (suTensor.modules N) (suTensor.basisIdx N)
+      (suTensor.rep N) (suTensor.basis N) where
   τ
     | .fund => .antiFund
     | .antiFund => .fund
@@ -379,16 +405,16 @@ noncomputable def suTensor (N : ℕ) : TensorSpecies ℂ suTensor.Color (SU N)
     | .adj, x, y => trace_mul_comm (adjMat N x) (adjMat N y)
   -- Each unit is fixed by swapping its factors, and the cast along `τ (τ c) = c` is the identity.
   unit_symm c := by
-    cases c <;>
-    · dsimp only
-      simp only [fundUnit, antiFundUnit, adjUnit, unitOf_apply, one_smul, comm_pairUnitVal,
-        comm_adjUnitVal]
-      exact (LinearMap.congr_fun (LinearMap.lTensor_id _ _) _).symm
+    cases c
+      <;> · dsimp only
+            simp only [fundUnit, antiFundUnit, adjUnit, unitOf_apply, one_smul, comm_pairUnitVal,
+              comm_adjUnitVal]
+            exact (LinearMap.congr_fun (LinearMap.lTensor_id _ _) _).symm
   contr_unit
     | .fund, x => by
       dsimp only
-      rw [lid_rTensor_assoc_symm_eq_coevalMap (fundContr N), fundUnit, unitOf_apply,
-        one_smul, coevalMap_pairUnitVal N (fundContr N) rfl, LinearMap.id_apply]
+      rw [lid_rTensor_assoc_symm_eq_coevalMap (fundContr N), fundUnit, unitOf_apply, one_smul,
+        coevalMap_pairUnitVal N (fundContr N) rfl, LinearMap.id_apply]
     | .antiFund, x => by
       dsimp only
       rw [lid_rTensor_assoc_symm_eq_coevalMap (antiFundContr N), antiFundUnit, unitOf_apply,
@@ -400,9 +426,11 @@ noncomputable def suTensor (N : ℕ) : TensorSpecies ℂ suTensor.Color (SU N)
 
 namespace suTensor
 
-/-- Notation for the complex tensors of `SU(N)`: `SuT[N, c₁, …, cₙ]` is the type
-  `(suTensor N).Tensor ![c₁, …, cₙ]` of tensors with index colors `c₁, …, cₙ`, for example
-  `SuT[3, .fund, .antiFund, .adj]`. -/
+/--
+Notation for the complex tensors of `SU(N)`: `SuT[N, c₁, …, cₙ]` is the type
+`(suTensor N).Tensor ![c₁, …, cₙ]` of tensors with index colors `c₁, …, cₙ`, for example
+`SuT[3, .fund, .antiFund, .adj]`.
+-/
 syntax (name := suTensorSyntax) "SuT[" term,* "]" : term
 
 macro_rules
@@ -431,29 +459,27 @@ namespace suTensor
 
 variable {N}
 
-lemma toMatrix_fundRep (g : SU N) :
-    LinearMap.toMatrix (Pi.basisFun ℂ (Fin N)) (Pi.basisFun ℂ (Fin N)) (fundRep N g) = g.1 := by
+lemma toMatrix_fundRep (g : SU N)
+    : LinearMap.toMatrix (Pi.basisFun ℂ (Fin N)) (Pi.basisFun ℂ (Fin N)) (fundRep N g) = g.1 := by
   rw [LinearMap.toMatrix_eq_toMatrix', ← LinearMap.toMatrix'_toLin' g.1, Matrix.toLin'_apply']
   rfl
 
-lemma toMatrix_antiFundRep (g : SU N) :
-    LinearMap.toMatrix (Pi.basisFun ℂ (Fin N)) (Pi.basisFun ℂ (Fin N)) (antiFundRep N g)
+lemma toMatrix_antiFundRep (g : SU N)
+    : LinearMap.toMatrix (Pi.basisFun ℂ (Fin N)) (Pi.basisFun ℂ (Fin N)) (antiFundRep N g)
       = (g⁻¹).1ᵀ := by
-  rw [LinearMap.toMatrix_eq_toMatrix', ← LinearMap.toMatrix'_toLin' (g⁻¹).1ᵀ,
-    Matrix.toLin'_apply']
+  rw [LinearMap.toMatrix_eq_toMatrix', ← LinearMap.toMatrix'_toLin' (g⁻¹).1ᵀ, Matrix.toLin'_apply']
   rfl
 
 variable (N) in
 /-- On every color, the matrix of `g⁻¹` is the conjugate transpose of the matrix of `g`. -/
-lemma toMatrix_rep_inv (k : Color) (g : SU N) :
-    LinearMap.toMatrix (basis N k) (basis N k) (rep N k g⁻¹)
+lemma toMatrix_rep_inv (k : Color) (g : SU N)
+    : LinearMap.toMatrix (basis N k) (basis N k) (rep N k g⁻¹)
       = (LinearMap.toMatrix (basis N k) (basis N k) (rep N k g))ᴴ := by
   cases k
   · change LinearMap.toMatrix _ _ (fundRep N g⁻¹) = (LinearMap.toMatrix _ _ (fundRep N g))ᴴ
     rw [toMatrix_fundRep, toMatrix_fundRep, val_inv]
     rfl
-  · change LinearMap.toMatrix _ _ (antiFundRep N g⁻¹)
-      = (LinearMap.toMatrix _ _ (antiFundRep N g))ᴴ
+  · change LinearMap.toMatrix _ _ (antiFundRep N g⁻¹) = (LinearMap.toMatrix _ _ (antiFundRep N g))ᴴ
     rw [toMatrix_antiFundRep, toMatrix_antiFundRep, inv_inv, val_inv]
     ext i j
     simp
@@ -463,7 +489,7 @@ lemma toMatrix_rep_inv (k : Color) (g : SU N) :
 
 variable (N) in
 /-- Every list of colors of the `SU(N)` tensors is closed under adjoints, with `g' = g⁻¹`. -/
-lemma isAdjointClosed {n : ℕ} (c : Fin n → Color) : (suTensor N).IsAdjointClosed c :=
-  fun g => ⟨g⁻¹, fun i => toMatrix_rep_inv N (c i) g⟩
+lemma isAdjointClosed {n : ℕ} (c : Fin n → Color) : (suTensor N).IsAdjointClosed c := fun g =>
+  ⟨g⁻¹, fun i => toMatrix_rep_inv N (c i) g⟩
 
 end suTensor

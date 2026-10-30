@@ -54,11 +54,10 @@ variable {V : Type} [AddCommGroup V] [Module ℂ V]
 noncomputable def chargePow (n : ℤ) (U : unitary SpaceTimeAlgebra) : SpaceTimeAlgebra :=
   ((Unitary.toUnits U ^ n : SpaceTimeAlgebraˣ) : SpaceTimeAlgebra)
 
-lemma chargePow_one (n : ℤ) : chargePow n 1 = 1 := by
-  simp [chargePow]
+lemma chargePow_one (n : ℤ) : chargePow n 1 = 1 := by simp [chargePow]
 
-lemma chargePow_mul (n : ℤ) (U W : unitary SpaceTimeAlgebra) :
-    chargePow n (U * W) = chargePow n U * chargePow n W := by
+lemma chargePow_mul (n : ℤ) (U W : unitary SpaceTimeAlgebra)
+    : chargePow n (U * W) = chargePow n U * chargePow n W := by
   simp [chargePow, mul_zpow]
 
 /-!
@@ -67,10 +66,12 @@ lemma chargePow_mul (n : ℤ) (U W : unitary SpaceTimeAlgebra) :
 
 -/
 
-/-- **The charge-`n` action of `U(1)` jets on the jets of a `V`-valued field**:
-  multiplication of the jet-ring factor by `U ^ n`. -/
-noncomputable def chargeRep (n : ℤ) (V : Type) [AddCommGroup V] [Module ℂ V] :
-    Representation ℂ (unitary SpaceTimeAlgebra) (SpaceTimeAlgebra ⊗[ℂ] V) where
+/--
+**The charge-`n` action of `U(1)` jets on the jets of a `V`-valued field**:
+multiplication of the jet-ring factor by `U ^ n`.
+-/
+noncomputable def chargeRep (n : ℤ) (V : Type) [AddCommGroup V] [Module ℂ V]
+    : Representation ℂ (unitary SpaceTimeAlgebra) (SpaceTimeAlgebra ⊗[ℂ] V) where
   toFun U := LinearMap.rTensor V (LinearMap.mulLeft ℂ (chargePow n U))
   map_one' := by
     rw [chargePow_one, LinearMap.mulLeft_one, LinearMap.rTensor_id]
@@ -78,19 +79,19 @@ noncomputable def chargeRep (n : ℤ) (V : Type) [AddCommGroup V] [Module ℂ V]
   map_mul' U W := by
     rw [chargePow_mul,
       show LinearMap.mulLeft ℂ (chargePow n U * chargePow n W)
-        = (LinearMap.mulLeft ℂ (chargePow n U)) ∘ₗ (LinearMap.mulLeft ℂ (chargePow n W)) from
+          = (LinearMap.mulLeft ℂ (chargePow n U)) ∘ₗ (LinearMap.mulLeft ℂ (chargePow n W)) from
         LinearMap.ext fun z => mul_assoc _ _ z,
       LinearMap.rTensor_comp]
     rfl
 
-lemma chargeRep_tmul (n : ℤ) (U : unitary SpaceTimeAlgebra) (f : SpaceTimeAlgebra) (v : V) :
-    chargeRep n V U (f ⊗ₜ[ℂ] v) = (chargePow n U * f) ⊗ₜ[ℂ] v :=
+lemma chargeRep_tmul (n : ℤ) (U : unitary SpaceTimeAlgebra) (f : SpaceTimeAlgebra) (v : V)
+    : chargeRep n V U (f ⊗ₜ[ℂ] v) = (chargePow n U * f) ⊗ₜ[ℂ] v :=
   LinearMap.rTensor_tmul _ _ _ _
 
 /-- **The charge action is fibrewise**: it commutes with multiplication by scalar jets. -/
-lemma chargeRep_smul (n : ℤ) (U : unitary SpaceTimeAlgebra) (χ : SpaceTimeAlgebra)
-    (z : SpaceTimeAlgebra ⊗[ℂ] V) :
-    chargeRep n V U (χ • z) = χ • chargeRep n V U z := by
+lemma chargeRep_smul
+    (n : ℤ) (U : unitary SpaceTimeAlgebra) (χ : SpaceTimeAlgebra) (z : SpaceTimeAlgebra ⊗[ℂ] V)
+    : chargeRep n V U (χ • z) = χ • chargeRep n V U z := by
   induction z using TensorProduct.inductionOn with
   | tmul f v =>
     rw [TensorProduct.smul_tmul', chargeRep_tmul, chargeRep_tmul, TensorProduct.smul_tmul',
@@ -103,22 +104,28 @@ lemma chargeRep_smul (n : ℤ) (U : unitary SpaceTimeAlgebra) (χ : SpaceTimeAlg
 
 -/
 
-/-- **The charged matter field**: a field with values in `V`, Lorentz representation
-  `repLorentz`, electric charge `n` and mass weight `w`, as a matter field for the jets of
-  `U(1)`, in any gauge context `jets` whose jet group is `unitary SpaceTimeAlgebra`.
+/--
+**The charged matter field**: a field with values in `V`, Lorentz representation
+`repLorentz`, electric charge `n` and mass weight `w`, as a matter field for the jets of
+`U(1)`, in any gauge context `jets` whose jet group is `unitary SpaceTimeAlgebra`.
 
-  The infinitesimal action `act` of the gauge algebra is supplied, not constructed. For a
-  charge-`n` field it is `c ↦ (i n φ(c)) • id` for the functional `φ` reading off the
-  `u(1)` component of `c`, and no such functional is available: `jets` relates the gauge
-  algebra `𝔤` to the jets only through `evalLie` and `maurerCartan`, neither of which
-  identifies a `u(1)` direction in an arbitrary `𝔤`. The rest of the data does not depend
-  on `jets` beyond its jet group, so it is supplied polymorphically. -/
-noncomputable def charged {𝔤 : Type} [LieRing 𝔤] [LieAlgebra ℝ 𝔤]
-    {G₀ : Type} [Group G₀] {𝔤J : Type} [LieRing 𝔤J] [LieAlgebra ℝ 𝔤J]
-    (jets : LocalGaugeData G₀ 𝔤 (unitary SpaceTimeAlgebra) 𝔤J) [Module.Free ℂ V] [Module.Finite ℂ V]
-    (repLorentz : Representation ℂ SL(2,ℂ) V) (n : ℤ) (act : 𝔤 →ₗ[ℝ] V →ₗ[ℂ] V)
-    (hact : jets.IsInfinitesimalActionOf act (chargeRep n V)) (w : ℕ) :
-    MatterField jets where
+The infinitesimal action `act` of the gauge algebra is supplied, not constructed. For a
+charge-`n` field it is `c ↦ (i n φ(c)) • id` for the functional `φ` reading off the
+`u(1)` component of `c`, and no such functional is available: `jets` relates the gauge
+algebra `𝔤` to the jets only through `evalLie` and `maurerCartan`, neither of which
+identifies a `u(1)` direction in an arbitrary `𝔤`. The rest of the data does not depend
+on `jets` beyond its jet group, so it is supplied polymorphically.
+-/
+noncomputable def charged
+    {𝔤 : Type} [LieRing 𝔤] [LieAlgebra ℝ 𝔤]
+    {G₀ : Type} [Group G₀]
+    {𝔤J : Type} [LieRing 𝔤J] [LieAlgebra ℝ 𝔤J]
+    (jets : LocalGaugeData G₀ 𝔤 (unitary SpaceTimeAlgebra) 𝔤J)
+    [Module.Free ℂ V] [Module.Finite ℂ V]
+    (repLorentz : Representation ℂ (SL(2,ℂ)) V)
+    (n : ℤ) (act : 𝔤 →ₗ[ℝ] V →ₗ[ℂ] V) (hact : jets.IsInfinitesimalActionOf act (chargeRep n V))
+    (w : ℕ)
+    : MatterField jets where
   V := V
   repLorentz := repLorentz
   repJet := chargeRep n V
@@ -128,11 +135,16 @@ noncomputable def charged {𝔤 : Type} [LieRing 𝔤] [LieAlgebra ℝ 𝔤]
   massWeight := w
 
 @[simp]
-lemma charged_V {𝔤 : Type} [LieRing 𝔤] [LieAlgebra ℝ 𝔤]
-    {G₀ : Type} [Group G₀] {𝔤J : Type} [LieRing 𝔤J] [LieAlgebra ℝ 𝔤J]
-    (jets : LocalGaugeData G₀ 𝔤 (unitary SpaceTimeAlgebra) 𝔤J) [Module.Free ℂ V] [Module.Finite ℂ V]
-    (repLorentz : Representation ℂ SL(2,ℂ) V) (n : ℤ) (act : 𝔤 →ₗ[ℝ] V →ₗ[ℂ] V)
-    (hact : jets.IsInfinitesimalActionOf act (chargeRep n V)) (w : ℕ) :
-    (charged jets repLorentz n act hact w).V = V := rfl
+lemma charged_V
+    {𝔤 : Type} [LieRing 𝔤] [LieAlgebra ℝ 𝔤]
+    {G₀ : Type} [Group G₀]
+    {𝔤J : Type} [LieRing 𝔤J] [LieAlgebra ℝ 𝔤J]
+    (jets : LocalGaugeData G₀ 𝔤 (unitary SpaceTimeAlgebra) 𝔤J)
+    [Module.Free ℂ V] [Module.Finite ℂ V]
+    (repLorentz : Representation ℂ (SL(2,ℂ)) V)
+    (n : ℤ) (act : 𝔤 →ₗ[ℝ] V →ₗ[ℂ] V) (hact : jets.IsInfinitesimalActionOf act (chargeRep n V))
+    (w : ℕ)
+    : (charged jets repLorentz n act hact w).V = V :=
+  rfl
 
 end MatterField

@@ -46,8 +46,7 @@ open scoped NNReal
 -/
 
 /-- The positive pointed cone of an ordered real module. -/
-abbrev PosCone (E : Type*) [OrderedVectorSpace E] : PointedCone ℝ E :=
-  PointedCone.positive ℝ E
+abbrev PosCone (E : Type*) [OrderedVectorSpace E] : PointedCone ℝ E := PointedCone.positive ℝ E
 
 namespace PosCone
 
@@ -93,8 +92,7 @@ variable {E : Type*} [OrderUnitSpace E]
 /-- The order unit, regarded as a point of the positive cone. -/
 instance instOne : One (PosCone E) := ⟨⟨1, one_nonneg⟩⟩
 
-@[simp]
-lemma coe_one : ((1 : PosCone E) : E) = (1 : E) := rfl
+@[simp] lemma coe_one : ((1 : PosCone E) : E) = (1 : E) := rfl
 
 end OrderUnitSpace
 

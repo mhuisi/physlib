@@ -55,12 +55,12 @@ noncomputable section
 -/
 
 /-- Every rotation is the image of a unitary element of `SL(2, ℂ)`. -/
-lemma exists_unitary_toLorentzGroup_eq (Λ : LorentzGroup.Rotations 3) :
-    ∃ M : SL(2, ℂ), M.1 ∈ unitaryGroup (Fin 2) ℂ ∧ toLorentzGroup M = Λ := by
+lemma exists_unitary_toLorentzGroup_eq (Λ : LorentzGroup.Rotations 3)
+    : ∃ M : SL(2, ℂ), M.1 ∈ unitaryGroup (Fin 2) ℂ ∧ toLorentzGroup M = Λ := by
   open LorentzGroup in
   set A := ofSpecialOrthogonal.symm Λ
-  have hA := (Matrix.mem_orthogonalGroup_iff' (A := A.1)).mp
-    (mem_specialOrthogonalGroup_iff.mp A.2).1
+  have hA :=
+    (Matrix.mem_orthogonalGroup_iff' (A := A.1)).mp (mem_specialOrthogonalGroup_iff.mp A.2).1
   have hn : A.1 0 2 ^ 2 + A.1 1 2 ^ 2 + A.1 2 2 ^ 2 = 1 := by
     have := congrFun (congrFun hA 2) 2
     simp only [Matrix.mul_apply, transpose_apply, Fin.sum_univ_three, one_apply_eq] at this
@@ -68,8 +68,8 @@ lemma exists_unitary_toLorentzGroup_eq (Λ : LorentzGroup.Rotations 3) :
   obtain ⟨a, b, h, hab⟩ := exists_cayleyKleinRotation_apply_two (fun i => A.1 i 2) hn
   set B := (ofSpecialOrthogonal (d := 3)).symm (cayleyKleinRotation a b h)
   have hab' : ∀ i, B.1 i 2 = A.1 i 2 := fun i => hab i
-  have hB' := (Matrix.mem_orthogonalGroup_iff' (A := B.1)).mp
-    (mem_specialOrthogonalGroup_iff.mp B.2).1
+  have hB' :=
+    (Matrix.mem_orthogonalGroup_iff' (A := B.1)).mp (mem_specialOrthogonalGroup_iff.mp B.2).1
   set C := B⁻¹ * A
   have hC : ∀ i, C.1 i 2 = if i = 2 then 1 else 0 := fun i => by
     have := congrFun (congrFun hB' i) 2
@@ -79,11 +79,15 @@ lemma exists_unitary_toLorentzGroup_eq (Λ : LorentzGroup.Rotations 3) :
     simp only [Matrix.mul_apply, star_apply, star_trivial, Fin.sum_univ_three, ← hab']
   have hC' : C.1 = !![C.1 0 0, C.1 0 1, 0; -C.1 0 1, C.1 0 0, 0; 0, 0, 1] :=
     GroupTheory.SO3.eq_of_apply_two
-      ⟨C.1, (mem_specialOrthogonalGroup_iff.mp C.2).2,
-        (Matrix.mem_orthogonalGroup_iff _ _).mp (mem_specialOrthogonalGroup_iff.mp C.2).1⟩ hC
+      ⟨
+        C.1,
+        (mem_specialOrthogonalGroup_iff.mp C.2).2,
+        (Matrix.mem_orthogonalGroup_iff _ _).mp (mem_specialOrthogonalGroup_iff.mp C.2).1
+      ⟩
+      hC
   have hcs : C.1 0 0 ^ 2 + C.1 0 1 ^ 2 = 1 := by
-    have h1 := (Matrix.mem_orthogonalGroup_iff' (A := C.1)).mp
-      (mem_specialOrthogonalGroup_iff.mp C.2).1
+    have h1 :=
+      (Matrix.mem_orthogonalGroup_iff' (A := C.1)).mp (mem_specialOrthogonalGroup_iff.mp C.2).1
     rw [hC'] at h1
     have := congrFun (congrFun h1 0) 0
     simp [Matrix.mul_apply, Fin.sum_univ_three] at this
@@ -93,20 +97,22 @@ lemma exists_unitary_toLorentzGroup_eq (Λ : LorentzGroup.Rotations 3) :
     have h1 := congrArg normSq hw
     rw [map_pow, normSq_mk (C.1 0 0)] at h1
     exact (pow_eq_one_iff_of_nonneg (normSq_nonneg w) two_ne_zero).mp (by nlinarith)
-  have hV : (ofSpecialOrthogonal (d := 3)).symm
-      (cayleyKleinRotation w 0 (by simpa using hw1)) = C := by
+  have hV
+      : (ofSpecialOrthogonal (d := 3)).symm (cayleyKleinRotation w 0 (by simpa using hw1)) = C := by
     apply Subtype.ext
     rw [hC']
     ext i j
     change (cayleyKleinRotation w 0 _).1.1 (Sum.inr i) (Sum.inr j) = _
     rw [cayleyKleinRotation_inr_inr]
     fin_cases i <;> fin_cases j <;> simp [hw, hw1]
-  refine ⟨cayleyKlein a b h * cayleyKlein w 0 (by simpa using hw1),
-    Submonoid.mul_mem _ (cayleyKlein_mem_unitaryGroup ..) (cayleyKlein_mem_unitaryGroup ..), ?_⟩
+  refine ⟨
+    cayleyKlein a b h * cayleyKlein w 0 (by simpa using hw1),
+    Submonoid.mul_mem _ (cayleyKlein_mem_unitaryGroup ..) (cayleyKlein_mem_unitaryGroup ..),
+    ?_
+  ⟩
   have hΛ : Λ = ofSpecialOrthogonal B * ofSpecialOrthogonal C := by
     rw [← map_mul, mul_inv_cancel_left, MulEquiv.apply_symm_apply]
-  rw [map_mul, hΛ, Subgroup.coe_mul, ← hV, MulEquiv.apply_symm_apply,
-    MulEquiv.apply_symm_apply]
+  rw [map_mul, hΛ, Subgroup.coe_mul, ← hV, MulEquiv.apply_symm_apply, MulEquiv.apply_symm_apply]
   rfl
 
 /-!
@@ -116,8 +122,8 @@ lemma exists_unitary_toLorentzGroup_eq (Λ : LorentzGroup.Rotations 3) :
 -/
 
 /-- Every velocity is the image of the time axis under some element of `SL(2, ℂ)`. -/
-lemma exists_toVector_toLorentzGroup_eq (u : Velocity 3) :
-    ∃ M : SL(2, ℂ), LorentzGroup.toVector (toLorentzGroup M) = u.1 := by
+lemma exists_toVector_toLorentzGroup_eq (u : Velocity 3)
+    : ∃ M : SL(2, ℂ), LorentzGroup.toVector (toLorentzGroup M) = u.1 := by
   obtain ⟨hu, h0⟩ := Velocity.mem_iff.mp u.2
   rw [Vector.minkowskiProduct_toCoord, Fin.sum_univ_three] at hu
   have hz : 0 < u.1 (Sum.inl 0) - u.1 (Sum.inr 2) := by
@@ -126,14 +132,16 @@ lemma exists_toVector_toLorentzGroup_eq (u : Velocity 3) :
   set x := √(u.1 (Sum.inl 0) - u.1 (Sum.inr 2))
   have hx : x ^ 2 = u.1 (Sum.inl 0) - u.1 (Sum.inr 2) := Real.sq_sqrt hz.le
   have hx0 : 0 < x := Real.sqrt_pos.mpr hz
-  let M : SL(2, ℂ) := ⟨!![(x : ℂ), 0; ⟨-u.1 (Sum.inr 0) / x, -u.1 (Sum.inr 1) / x⟩, (x : ℂ)⁻¹],
-    by rw [det_fin_two_of]; field_simp; simp [hx0.ne']⟩
+  let M : SL(2, ℂ) := ⟨
+    !![(x : ℂ), 0; ⟨-u.1 (Sum.inr 0) / x, -u.1 (Sum.inr 1) / x⟩, (x : ℂ)⁻¹],
+    by rw [det_fin_two_of]; field_simp; simp [hx0.ne']
+  ⟩
   refine ⟨M, ?_⟩
   rw [LorentzGroup.toVector_eq_fun]
   funext μ
   refine (congrFun (toLorentzGroup_fst_col M) μ).trans ?_
-  rcases μ with μ | μ <;> fin_cases μ <;>
-    simp [M, Complex.sq_norm, normSq_mk] <;> field_simp <;> nlinarith
+  rcases μ with μ | μ <;> fin_cases μ <;> simp [M, Complex.sq_norm, normSq_mk] <;> field_simp
+    <;> nlinarith
 
 /-- The homomorphism from `SL(2, ℂ)` to the restricted Lorentz group is surjective. -/
 lemma toRestrictedLorentzGroup_surjective : Function.Surjective toRestrictedLorentzGroup := by

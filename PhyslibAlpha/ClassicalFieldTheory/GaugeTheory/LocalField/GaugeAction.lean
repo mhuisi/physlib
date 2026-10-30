@@ -48,8 +48,11 @@ open TensorProduct
 
 namespace GaugeFieldData
 
-variable {G₀ : Type} [Group G₀] {𝔤 : Type} [LieRing 𝔤] [LieAlgebra ℝ 𝔤] [Module.Finite ℝ 𝔤]
-  {GJ : Type} [Group GJ] {𝔤J : Type} [LieRing 𝔤J] [LieAlgebra ℝ 𝔤J]
+variable
+  {G₀ : Type} [Group G₀]
+  {𝔤 : Type} [LieRing 𝔤] [LieAlgebra ℝ 𝔤] [Module.Finite ℝ 𝔤]
+  {GJ : Type} [Group GJ]
+  {𝔤J : Type} [LieRing 𝔤J] [LieAlgebra ℝ 𝔤J]
   {jets : LocalGaugeData G₀ 𝔤 GJ 𝔤J} (T : GaugeFieldData jets)
 
 /-!
@@ -58,20 +61,24 @@ variable {G₀ : Type} [Group G₀] {𝔤 : Type} [LieRing 𝔤] [LieAlgebra ℝ
 
 -/
 
-/-- The connection generators after the action of a jet: the gauge-only action on the
-  degree-one element, included into the local field algebra. -/
-noncomputable def gaugeConnection (U : GJ) :
-    GaugeBoson.JetComponentSpace 𝔤 →ₗ[ℝ] T.LocalFieldAlgebra :=
-  ((T.includeConnection).restrictScalars ℝ).toLinearMap ∘ₗ
-    (Algebra.TensorProduct.includeRight (R := ℝ) (A := ℂ)
-      (B := SymmetricAlgebra ℝ (GaugeBoson.JetComponentSpace 𝔤))).toLinearMap ∘ₗ
-    (LocalGaugeFieldAlgebra.repJetAlgHom jets U).toLinearMap ∘ₗ
-    SymmetricAlgebra.ι ℝ (GaugeBoson.JetComponentSpace 𝔤)
+/--
+The connection generators after the action of a jet: the gauge-only action on the
+degree-one element, included into the local field algebra.
+-/
+noncomputable def gaugeConnection (U : GJ)
+    : GaugeBoson.JetComponentSpace 𝔤 →ₗ[ℝ] T.LocalFieldAlgebra :=
+  ((T.includeConnection).restrictScalars ℝ).toLinearMap
+    ∘ₗ (Algebra.TensorProduct.includeRight (R := ℝ) (A := ℂ)
+      (B := SymmetricAlgebra ℝ (GaugeBoson.JetComponentSpace 𝔤))).toLinearMap
+    ∘ₗ (LocalGaugeFieldAlgebra.repJetAlgHom jets U).toLinearMap
+    ∘ₗ SymmetricAlgebra.ι ℝ (GaugeBoson.JetComponentSpace 𝔤)
 
-/-- The assignment of the generators defining the action of a jet: each matter species
-  acts on its own component functions, the connection generators through the gauge-only
-  action. The relations hold because the images are generators of the same kind, or lie in
-  the central connection factor. -/
+/--
+The assignment of the generators defining the action of a jet: each matter species
+acts on its own component functions, the connection generators through the gauge-only
+action. The relations hold because the images are generators of the same kind, or lie in
+the central connection factor.
+-/
 noncomputable def gaugeAssignment (U : GJ) : T.Assignment T.LocalFieldAlgebra where
   fermion i := T.ιFermion i ∘ₗ JetComponentSpace.repJet (T.fermion i) U
   boson j := T.ιBoson j ∘ₗ JetComponentSpace.repJet (T.boson j) U
@@ -90,30 +97,31 @@ noncomputable def gaugeAssignment (U : GJ) : T.Assignment T.LocalFieldAlgebra wh
 
 -/
 
-/-- The action of a jet on the local field algebra, as an algebra endomorphism: the lift
-  of its gauge assignment. -/
+/--
+The action of a jet on the local field algebra, as an algebra endomorphism: the lift
+of its gauge assignment.
+-/
 noncomputable def repJetAlgHom (U : GJ) : T.LocalFieldAlgebra →ₐ[ℂ] T.LocalFieldAlgebra :=
   (T.gaugeAssignment U).lift
 
 variable {T}
 
 @[simp]
-lemma repJetAlgHom_ιFermion (U : GJ) (i : T.FermionSpecies)
-    (x : JetComponentSpace (T.fermion i)) :
-    T.repJetAlgHom U (T.ιFermion i x)
+lemma repJetAlgHom_ιFermion (U : GJ) (i : T.FermionSpecies) (x : JetComponentSpace (T.fermion i))
+    : T.repJetAlgHom U (T.ιFermion i x)
       = T.ιFermion i (JetComponentSpace.repJet (T.fermion i) U x) :=
   (T.gaugeAssignment U).lift_ιFermion i x
 
 @[simp]
-lemma repJetAlgHom_ιBoson (U : GJ) (j : T.BosonSpecies) (y : JetComponentSpace (T.boson j)) :
-    T.repJetAlgHom U (T.ιBoson j y) = T.ιBoson j (JetComponentSpace.repJet (T.boson j) U y) :=
+lemma repJetAlgHom_ιBoson (U : GJ) (j : T.BosonSpecies) (y : JetComponentSpace (T.boson j))
+    : T.repJetAlgHom U (T.ιBoson j y) = T.ιBoson j (JetComponentSpace.repJet (T.boson j) U y) :=
   (T.gaugeAssignment U).lift_ιBoson j y
 
 @[simp]
-lemma repJetAlgHom_ιConnection (U : GJ) (v : GaugeBoson.JetComponentSpace 𝔤) :
-    T.repJetAlgHom U (T.ιConnection v)
+lemma repJetAlgHom_ιConnection (U : GJ) (v : GaugeBoson.JetComponentSpace 𝔤)
+    : T.repJetAlgHom U (T.ιConnection v)
       = T.includeConnection ((1 : ℂ) ⊗ₜ[ℝ]
-          LocalGaugeFieldAlgebra.repJet jets U (SymmetricAlgebra.ι ℝ _ v)) :=
+        LocalGaugeFieldAlgebra.repJet jets U (SymmetricAlgebra.ι ℝ _ v)) :=
   (T.gaugeAssignment U).lift_ιConnection v
 
 /-!
@@ -122,29 +130,33 @@ lemma repJetAlgHom_ιConnection (U : GJ) (v : GaugeBoson.JetComponentSpace 𝔤)
 
 -/
 
-/-- The action of a jet restricts to the complexified gauge-only action on the connection
-  factor, as an equation of algebra maps out of the complexified gauge-only algebra: it is
-  enough to compare them on the real generators, where it is the computation rule of the
-  lift. -/
-lemma repJetAlgHom_comp_includeConnection (U : GJ) :
-    (T.repJetAlgHom U).comp T.includeConnection
+/--
+The action of a jet restricts to the complexified gauge-only action on the connection
+factor, as an equation of algebra maps out of the complexified gauge-only algebra: it is
+enough to compare them on the real generators, where it is the computation rule of the
+lift.
+-/
+lemma repJetAlgHom_comp_includeConnection (U : GJ)
+    : (T.repJetAlgHom U).comp T.includeConnection
       = T.includeConnection.comp (LocalGaugeFieldAlgebra.complexRepJetAlgHom jets U) := by
   refine Algebra.TensorProduct.ext (Subsingleton.elim _ _) ?_
   refine AlgHom.ext_of_adjoin_eq_top SymmetricAlgebra.adjoin_range_ι ?_
   rintro _ ⟨v, rfl⟩
   exact repJetAlgHom_ιConnection U v
 
-/-- The action of a jet restricts to the complexified gauge-only action on the connection
-  factor. -/
-lemma repJetAlgHom_includeConnection (U : GJ) (y : ℂ ⊗[ℝ] LocalGaugeFieldAlgebra 𝔤) :
-    T.repJetAlgHom U (T.includeConnection y)
+/--
+The action of a jet restricts to the complexified gauge-only action on the connection
+factor.
+-/
+lemma repJetAlgHom_includeConnection (U : GJ) (y : ℂ ⊗[ℝ] LocalGaugeFieldAlgebra 𝔤)
+    : T.repJetAlgHom U (T.includeConnection y)
       = T.includeConnection (LocalGaugeFieldAlgebra.complexRepJet jets U y) := by
   rw [LocalGaugeFieldAlgebra.complexRepJet_apply]
   exact AlgHom.congr_fun (repJetAlgHom_comp_includeConnection U) y
 
 /-- On the real gauge-only algebra, included, a jet acts through the gauge-only action. -/
-lemma repJetAlgHom_includeConnection_one_tmul (U : GJ) (x : LocalGaugeFieldAlgebra 𝔤) :
-    T.repJetAlgHom U (T.includeConnection ((1 : ℂ) ⊗ₜ[ℝ] x))
+lemma repJetAlgHom_includeConnection_one_tmul (U : GJ) (x : LocalGaugeFieldAlgebra 𝔤)
+    : T.repJetAlgHom U (T.includeConnection ((1 : ℂ) ⊗ₜ[ℝ] x))
       = T.includeConnection ((1 : ℂ) ⊗ₜ[ℝ] LocalGaugeFieldAlgebra.repJet jets U x) :=
   repJetAlgHom_includeConnection U ((1 : ℂ) ⊗ₜ[ℝ] x)
 
@@ -163,13 +175,13 @@ lemma repJetAlgHom_one : T.repJetAlgHom 1 = AlgHom.id ℂ T.LocalFieldAlgebra :=
     rfl
 
 /-- The action of a product of jets is the composite of the actions. -/
-lemma repJetAlgHom_mul (U V : GJ) :
-    T.repJetAlgHom (U * V) = (T.repJetAlgHom U).comp (T.repJetAlgHom V) := by
+lemma repJetAlgHom_mul (U V : GJ)
+    : T.repJetAlgHom (U * V) = (T.repJetAlgHom U).comp (T.repJetAlgHom V) := by
   refine algHom_ext (fun i x => ?_) (fun j y => ?_) (fun v => ?_)
   · rw [repJetAlgHom_ιFermion, AlgHom.comp_apply, repJetAlgHom_ιFermion, repJetAlgHom_ιFermion,
       map_mul, Module.End.mul_apply]
-  · rw [repJetAlgHom_ιBoson, AlgHom.comp_apply, repJetAlgHom_ιBoson, repJetAlgHom_ιBoson,
-      map_mul, Module.End.mul_apply]
+  · rw [repJetAlgHom_ιBoson, AlgHom.comp_apply, repJetAlgHom_ιBoson, repJetAlgHom_ιBoson, map_mul,
+      Module.End.mul_apply]
   · refine (repJetAlgHom_ιConnection (U * V) v).trans ?_
     refine Eq.trans ?_ (congrArg (T.repJetAlgHom U) (repJetAlgHom_ιConnection V v)).symm
     refine Eq.trans ?_ (repJetAlgHom_includeConnection_one_tmul U _).symm
@@ -186,52 +198,55 @@ noncomputable def repJet : Representation ℂ GJ T.LocalFieldAlgebra where
 
 variable {T}
 
-lemma repJet_apply (U : GJ) (x : T.LocalFieldAlgebra) :
-    T.repJet U x = T.repJetAlgHom U x := rfl
+lemma repJet_apply (U : GJ) (x : T.LocalFieldAlgebra) : T.repJet U x = T.repJetAlgHom U x := rfl
 
-lemma repJet_apply_mul (U : GJ) (x y : T.LocalFieldAlgebra) :
-    T.repJet U (x * y) = T.repJet U x * T.repJet U y :=
+lemma repJet_apply_mul (U : GJ) (x y : T.LocalFieldAlgebra)
+    : T.repJet U (x * y) = T.repJet U x * T.repJet U y :=
   map_mul (T.repJetAlgHom U) x y
 
 lemma repJet_apply_one (U : GJ) : T.repJet U (1 : T.LocalFieldAlgebra) = 1 :=
   (T.repJetAlgHom U).map_one
 
 @[simp]
-lemma repJet_ιFermion (U : GJ) (i : T.FermionSpecies) (x : JetComponentSpace (T.fermion i)) :
-    T.repJet U (T.ιFermion i x) = T.ιFermion i (JetComponentSpace.repJet (T.fermion i) U x) :=
+lemma repJet_ιFermion (U : GJ) (i : T.FermionSpecies) (x : JetComponentSpace (T.fermion i))
+    : T.repJet U (T.ιFermion i x) = T.ιFermion i (JetComponentSpace.repJet (T.fermion i) U x) :=
   repJetAlgHom_ιFermion U i x
 
 @[simp]
-lemma repJet_ιBoson (U : GJ) (j : T.BosonSpecies) (y : JetComponentSpace (T.boson j)) :
-    T.repJet U (T.ιBoson j y) = T.ιBoson j (JetComponentSpace.repJet (T.boson j) U y) :=
+lemma repJet_ιBoson (U : GJ) (j : T.BosonSpecies) (y : JetComponentSpace (T.boson j))
+    : T.repJet U (T.ιBoson j y) = T.ιBoson j (JetComponentSpace.repJet (T.boson j) U y) :=
   repJetAlgHom_ιBoson U j y
 
 @[simp]
-lemma repJet_ιConnection (U : GJ) (v : GaugeBoson.JetComponentSpace 𝔤) :
-    T.repJet U (T.ιConnection v)
+lemma repJet_ιConnection (U : GJ) (v : GaugeBoson.JetComponentSpace 𝔤)
+    : T.repJet U (T.ιConnection v)
       = T.includeConnection ((1 : ℂ) ⊗ₜ[ℝ]
-          LocalGaugeFieldAlgebra.repJet jets U (SymmetricAlgebra.ι ℝ _ v)) :=
+        LocalGaugeFieldAlgebra.repJet jets U (SymmetricAlgebra.ι ℝ _ v)) :=
   repJetAlgHom_ιConnection U v
 
-/-- The jet gauge action restricts to the complexified gauge-only action on the connection
-  factor. -/
-lemma repJet_includeConnection (U : GJ) (y : ℂ ⊗[ℝ] LocalGaugeFieldAlgebra 𝔤) :
-    T.repJet U (T.includeConnection y)
+/--
+The jet gauge action restricts to the complexified gauge-only action on the connection
+factor.
+-/
+lemma repJet_includeConnection (U : GJ) (y : ℂ ⊗[ℝ] LocalGaugeFieldAlgebra 𝔤)
+    : T.repJet U (T.includeConnection y)
       = T.includeConnection (LocalGaugeFieldAlgebra.complexRepJet jets U y) :=
   repJetAlgHom_includeConnection U y
 
-/-- The affine gauge law of the connection generators: a jet carries a connection
-  generator to the transported generator of its inverse plus the Maurer–Cartan shift, the
-  gauge field being a connection and not a tensor. This is the generator-level form of
-  `GaugeFieldData.repJet_ιConnection`, with no reference to the connection factor. -/
-lemma repJet_ιConnection_affine (U : GJ) (v : GaugeBoson.JetComponentSpace 𝔤) :
-    T.repJet U (T.ιConnection v)
+/--
+The affine gauge law of the connection generators: a jet carries a connection
+generator to the transported generator of its inverse plus the Maurer–Cartan shift, the
+gauge field being a connection and not a tensor. This is the generator-level form of
+`GaugeFieldData.repJet_ιConnection`, with no reference to the connection factor.
+-/
+lemma repJet_ιConnection_affine (U : GJ) (v : GaugeBoson.JetComponentSpace 𝔤)
+    : T.repJet U (T.ιConnection v)
       = T.ιConnection (LocalGaugeFieldAlgebra.transport jets U⁻¹ v)
         + (LocalGaugeFieldAlgebra.mcShift jets U⁻¹ v : ℂ) • (1 : T.LocalFieldAlgebra) := by
   rw [repJet_ιConnection, LocalGaugeFieldAlgebra.repJet_ι, TensorProduct.tmul_add, map_add,
     show ((1 : ℂ) ⊗ₜ[ℝ] algebraMap ℝ (LocalGaugeFieldAlgebra 𝔤)
-        (LocalGaugeFieldAlgebra.mcShift jets U⁻¹ v))
-      = algebraMap ℝ (ℂ ⊗[ℝ] LocalGaugeFieldAlgebra 𝔤)
+          (LocalGaugeFieldAlgebra.mcShift jets U⁻¹ v))
+        = algebraMap ℝ (ℂ ⊗[ℝ] LocalGaugeFieldAlgebra 𝔤)
           (LocalGaugeFieldAlgebra.mcShift jets U⁻¹ v) from
       (Algebra.TensorProduct.includeRight_apply _).symm.trans
         (AlgHom.commutes Algebra.TensorProduct.includeRight _),

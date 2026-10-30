@@ -91,35 +91,42 @@ namespace JetAlgebra
 
 -/
 
-/-- The derivative of a covariant component.  Differentiability is needed to move
-  the constant `η_{νν}` through the derivative. -/
-lemma deriv_coPotential (A : ElectromagneticPotential 3) (hA : Differentiable ℝ A)
-    (μ ν : Fin 1 ⊕ Fin 3) (x : SpaceTime 3) :
-    ∂_ μ (coPotential A ν) x = η ν ν * ∂_ μ A x ν := by
+/--
+The derivative of a covariant component.  Differentiability is needed to move
+the constant `η_{νν}` through the derivative.
+-/
+lemma deriv_coPotential
+    (A : ElectromagneticPotential 3) (hA : Differentiable ℝ A)
+    (μ ν : Fin 1 ⊕ Fin 3) (x : SpaceTime 3)
+    : ∂_ μ (coPotential A ν) x = η ν ν * ∂_ μ A x ν := by
   have hd : Differentiable ℝ (fun y => A y ν) := (SpaceTime.differentiable_vector _).mpr hA ν
   rw [SpaceTime.deriv_apply_eq μ ν _ hA x]
   show fderiv ℝ (fun y => η ν ν * A y ν) x (Lorentz.Vector.basis μ) = _
   rw [fderiv_const_mul (hd x)]
   simp
 
-lemma evalPotential_fieldStrength_zero_apply (A : ElectromagneticPotential 3)
-    (hA : Differentiable ℝ A) (μ ν : Fin 1 ⊕ Fin 3) (x : SpaceTime 3) :
-    evalPotential A (fieldStrength 0 μ ν) x = η ν ν * ∂_ μ A x ν - η μ μ * ∂_ ν A x μ := by
+lemma evalPotential_fieldStrength_zero_apply
+    (A : ElectromagneticPotential 3) (hA : Differentiable ℝ A)
+    (μ ν : Fin 1 ⊕ Fin 3) (x : SpaceTime 3)
+    : evalPotential A (fieldStrength 0 μ ν) x = η ν ν * ∂_ μ A x ν - η μ μ * ∂_ ν A x μ := by
   rw [fieldStrength, map_sub]
   simp only [zero_add, evalPotential_coord, derivMultiset_singleton, Pi.sub_apply]
   rw [deriv_coPotential A hA μ ν x, deriv_coPotential A hA ν μ x]
 
-/-- The formal field strength evaluates to the field strength of the potential
-  with both indices lowered, `F_{μν} = η_{μμ} η_{νν} F^{μν}`. -/
-lemma evalPotential_fieldStrength_zero (A : ElectromagneticPotential 3)
-    (hA : Differentiable ℝ A) (μ ν : Fin 1 ⊕ Fin 3) (x : SpaceTime 3) :
-    evalPotential A (fieldStrength 0 μ ν) x =
-      η μ μ * η ν ν * toScalar {A.toFieldStrength x | [μ] [ν]}ᵀ := by
+/--
+The formal field strength evaluates to the field strength of the potential
+with both indices lowered, `F_{μν} = η_{μμ} η_{νν} F^{μν}`.
+-/
+lemma evalPotential_fieldStrength_zero
+    (A : ElectromagneticPotential 3) (hA : Differentiable ℝ A)
+    (μ ν : Fin 1 ⊕ Fin 3) (x : SpaceTime 3)
+    : evalPotential A (fieldStrength 0 μ ν) x
+      = η μ μ * η ν ν * toScalar {A.toFieldStrength x | [μ] [ν]}ᵀ := by
   rw [evalPotential_fieldStrength_zero_apply A hA μ ν x,
     ElectromagneticPotential.toFieldStrength_eval_apply_eq_single A x μ ν]
-  rcases mul_self_eq_one_iff.mp (minkowskiMatrix.η_apply_mul_η_apply_diag μ) with h1 | h1 <;>
-    rcases mul_self_eq_one_iff.mp (minkowskiMatrix.η_apply_mul_η_apply_diag ν) with h2 | h2 <;>
-    rw [h1, h2] <;> ring
+  rcases mul_self_eq_one_iff.mp (minkowskiMatrix.η_apply_mul_η_apply_diag μ) with h1 | h1
+    <;> rcases mul_self_eq_one_iff.mp (minkowskiMatrix.η_apply_mul_η_apply_diag ν) with h2 | h2
+    <;> rw [h1, h2] <;> ring
 
 /-!
 
@@ -127,32 +134,34 @@ lemma evalPotential_fieldStrength_zero (A : ElectromagneticPotential 3)
 
 -/
 
-/-- **The formal Maxwell term is the Maxwell Lagrangian.**  Evaluated on any
-  differentiable electromagnetic potential, the gauge-invariant jet polynomial
-  `F_{μν} F^{μν}` is `-4 μ₀` times the kinetic term
-  `- 1/(4 μ₀) F_{μν} F^{μν}` of `Physlib.Electromagnetism`. -/
-lemma evalPotential_maxwellTerm (𝓕 : FreeSpace) (A : ElectromagneticPotential 3)
-    (hA : Differentiable ℝ A) (x : SpaceTime 3) :
-    evalPotential A maxwellTerm x = -(4 * 𝓕.μ₀) * A.kineticTerm 𝓕 x := by
+/--
+**The formal Maxwell term is the Maxwell Lagrangian.**  Evaluated on any
+differentiable electromagnetic potential, the gauge-invariant jet polynomial
+`F_{μν} F^{μν}` is `-4 μ₀` times the kinetic term
+`- 1/(4 μ₀) F_{μν} F^{μν}` of `Physlib.Electromagnetism`.
+-/
+lemma evalPotential_maxwellTerm
+    (𝓕 : FreeSpace) (A : ElectromagneticPotential 3) (hA : Differentiable ℝ A) (x : SpaceTime 3)
+    : evalPotential A maxwellTerm x = -(4 * 𝓕.μ₀) * A.kineticTerm 𝓕 x := by
   rw [ElectromagneticPotential.kineticTerm_eq_sum_potential, maxwellTerm, map_sum]
-  simp only [Finset.sum_apply, map_sum, map_smul, Pi.smul_apply, smul_eq_mul, map_mul,
-    Pi.mul_apply]
+  simp only [Finset.sum_apply, map_sum, map_smul, Pi.smul_apply, smul_eq_mul, map_mul, Pi.mul_apply]
   simp only [evalPotential_fieldStrength_zero_apply A hA]
   /- Both sides are now explicit double sums in `∂_ μ A x ν`. -/
-  have key : ∀ μ ν : Fin 1 ⊕ Fin 3,
-      η μ μ * η ν ν * ((η ν ν * ∂_ μ A x ν - η μ μ * ∂_ ν A x μ) *
-        (η ν ν * ∂_ μ A x ν - η μ μ * ∂_ ν A x μ)) =
-      (η μ μ * η ν ν * (∂_ μ A x ν) ^ 2 - ∂_ μ A x ν * ∂_ ν A x μ) +
-      (η ν ν * η μ μ * (∂_ ν A x μ) ^ 2 - ∂_ ν A x μ * ∂_ μ A x ν) := by
+  have key
+      : ∀ μ ν : Fin 1 ⊕ Fin 3,
+        η μ μ * η ν ν
+            * ((η ν ν * ∂_ μ A x ν - η μ μ * ∂_ ν A x μ)
+              * (η ν ν * ∂_ μ A x ν - η μ μ * ∂_ ν A x μ))
+          = (η μ μ * η ν ν * (∂_ μ A x ν) ^ 2 - ∂_ μ A x ν * ∂_ ν A x μ)
+            + (η ν ν * η μ μ * (∂_ ν A x μ) ^ 2 - ∂_ ν A x μ * ∂_ μ A x ν) := by
     intro μ ν
-    rcases mul_self_eq_one_iff.mp (minkowskiMatrix.η_apply_mul_η_apply_diag μ) with h1 | h1 <;>
-      rcases mul_self_eq_one_iff.mp (minkowskiMatrix.η_apply_mul_η_apply_diag ν) with h2 | h2 <;>
-      rw [h1, h2] <;> ring
+    rcases mul_self_eq_one_iff.mp (minkowskiMatrix.η_apply_mul_η_apply_diag μ) with h1 | h1
+      <;> rcases mul_self_eq_one_iff.mp (minkowskiMatrix.η_apply_mul_η_apply_diag ν) with h2 | h2
+      <;> rw [h1, h2] <;> ring
   rw [Finset.sum_congr rfl fun μ _ => Finset.sum_congr rfl fun ν _ => key μ ν]
   simp only [Finset.sum_add_distrib]
   rw [Finset.sum_comm (s := Finset.univ) (t := Finset.univ)
-    (f := fun μ ν : Fin 1 ⊕ Fin 3 =>
-      η ν ν * η μ μ * (∂_ ν A x μ) ^ 2 - ∂_ ν A x μ * ∂_ μ A x ν)]
+    (f := fun μ ν : Fin 1 ⊕ Fin 3 => η ν ν * η μ μ * (∂_ ν A x μ) ^ 2 - ∂_ ν A x μ * ∂_ μ A x ν)]
   have hμ₀ : 𝓕.μ₀ ≠ 0 := ne_of_gt 𝓕.μ₀_pos
   field_simp
   ring
@@ -168,27 +177,33 @@ field and the space–space components the magnetic field of
 
 -/
 
-/-- The electric field is (the speed of light times) the evaluated time–space
-  components of the formal field strength: `E_i = c ∂_0 A_i - c ∂_i A_0`
-  with lowered indices. -/
-lemma electricField_eq_evalPotential_fieldStrength (c : SpeedOfLight)
-    (A : ElectromagneticPotential 3) (hA : Differentiable ℝ A) (t : Time)
-    (x : Space) (i : Fin 3) :
-    A.electricField c t x i =
-      c * evalPotential A (fieldStrength 0 (Sum.inl 0) (Sum.inr i))
+/--
+The electric field is (the speed of light times) the evaluated time–space
+components of the formal field strength: `E_i = c ∂_0 A_i - c ∂_i A_0`
+with lowered indices.
+-/
+lemma electricField_eq_evalPotential_fieldStrength
+    (c : SpeedOfLight)
+    (A : ElectromagneticPotential 3) (hA : Differentiable ℝ A)
+    (t : Time) (x : Space) (i : Fin 3)
+    : A.electricField c t x i
+      = c * evalPotential A (fieldStrength 0 (Sum.inl 0) (Sum.inr i))
         ((toTimeAndSpace c).symm (t, x)) := by
   rw [evalPotential_fieldStrength_zero A hA,
     ElectromagneticPotential.electricField_eq_toFieldStrength_eval A t x i hA]
   simp only [inl_0_inl_0, inr_i_inr_i, one_mul, neg_mul]
   ring
 
-/-- The magnetic field is the evaluated space–space components of the formal
-  field strength, `B_i = - F_{(i+1)(i+2)}` with lowered indices. -/
-lemma magneticField_eq_evalPotential_fieldStrength (c : SpeedOfLight)
-    (A : ElectromagneticPotential 3) (hA : Differentiable ℝ A) (t : Time)
-    (x : Space) (i : Fin 3) :
-    A.magneticField c t x i =
-      - evalPotential A (fieldStrength 0 (Sum.inr (i + 1)) (Sum.inr (i + 2)))
+/--
+The magnetic field is the evaluated space–space components of the formal
+field strength, `B_i = - F_{(i+1)(i+2)}` with lowered indices.
+-/
+lemma magneticField_eq_evalPotential_fieldStrength
+    (c : SpeedOfLight)
+    (A : ElectromagneticPotential 3) (hA : Differentiable ℝ A)
+    (t : Time) (x : Space) (i : Fin 3)
+    : A.magneticField c t x i
+      = - evalPotential A (fieldStrength 0 (Sum.inr (i + 1)) (Sum.inr (i + 2)))
         ((toTimeAndSpace c).symm (t, x)) := by
   rw [evalPotential_fieldStrength_zero A hA,
     ElectromagneticPotential.magneticField_coord_eq_toFieldStrength_eval A t x hA]
@@ -200,13 +215,15 @@ lemma magneticField_eq_evalPotential_fieldStrength (c : SpeedOfLight)
 
 -/
 
-/-- The Maxwell part `- 1/4 F_{μν} F^{μν}` of the QED Lagrangian evaluates to
-  `μ₀` times the electromagnetic kinetic term of
-  `Physlib.Electromagnetism.Dynamics`: the two Lagrangians agree up to the
-  choice of units absorbed into the field normalisation. -/
-lemma evalPotential_neg_quarter_maxwellTerm (𝓕 : FreeSpace)
-    (A : ElectromagneticPotential 3) (hA : Differentiable ℝ A) (x : SpaceTime 3) :
-    evalPotential A ((-(1 : ℝ)/4) • maxwellTerm) x = 𝓕.μ₀ * A.kineticTerm 𝓕 x := by
+/--
+The Maxwell part `- 1/4 F_{μν} F^{μν}` of the QED Lagrangian evaluates to
+`μ₀` times the electromagnetic kinetic term of
+`Physlib.Electromagnetism.Dynamics`: the two Lagrangians agree up to the
+choice of units absorbed into the field normalisation.
+-/
+lemma evalPotential_neg_quarter_maxwellTerm
+    (𝓕 : FreeSpace) (A : ElectromagneticPotential 3) (hA : Differentiable ℝ A) (x : SpaceTime 3)
+    : evalPotential A ((-(1 : ℝ) / 4) • maxwellTerm) x = 𝓕.μ₀ * A.kineticTerm 𝓕 x := by
   rw [map_smul]
   have h := evalPotential_maxwellTerm 𝓕 A hA x
   rw [Pi.smul_apply, smul_eq_mul, h]
@@ -224,61 +241,70 @@ Maxwell equations** in covariant form.
 
 -/
 
-lemma contDiff_coPotential {A : ElectromagneticPotential 3} (hA : ContDiff ℝ 2 A)
-    (ν : Fin 1 ⊕ Fin 3) : ContDiff ℝ 2 (coPotential A ν) := by
+lemma contDiff_coPotential
+    {A : ElectromagneticPotential 3} (hA : ContDiff ℝ 2 A) (ν : Fin 1 ⊕ Fin 3)
+    : ContDiff ℝ 2 (coPotential A ν) := by
   have h : ContDiff ℝ 2 fun x => A x ν := (SpaceTime.contDiff_vector _).mpr hA ν
   exact contDiff_const.mul h
 
-/-- The iterated derivative along a pair of directions, in either order: for a
-  `C²` function the canonical sorted order is immaterial by Clairaut's
-  theorem. -/
-lemma derivMultiset_pair (a b : Fin 1 ⊕ Fin 3) (f : SpaceTime 3 → ℝ)
-    (hf : ContDiff ℝ 2 f) :
-    derivMultiset {a, b} f = ∂_ a (∂_ b f) := by
-  have key : ∀ u v : Fin 1 ⊕ Fin 3,
-      finSumFinEquiv (m := 1) (n := 3) u ≤ finSumFinEquiv (m := 1) (n := 3) v →
-      derivMultiset {u, v} f = ∂_ u (∂_ v f) := by
+/--
+The iterated derivative along a pair of directions, in either order: for a
+`C²` function the canonical sorted order is immaterial by Clairaut's
+theorem.
+-/
+lemma derivMultiset_pair (a b : Fin 1 ⊕ Fin 3) (f : SpaceTime 3 → ℝ) (hf : ContDiff ℝ 2 f)
+    : derivMultiset {a, b} f = ∂_ a (∂_ b f) := by
+  have key
+      : ∀ u v : Fin 1 ⊕ Fin 3,
+        finSumFinEquiv (m := 1) (n := 3) u ≤ finSumFinEquiv (m := 1) (n := 3) v
+          → derivMultiset {u, v} f = ∂_ u (∂_ v f) := by
     intro u v huv
-    have hsort : ((finSumFinEquiv (m := 1) (n := 3) u ::ₘ
-        {finSumFinEquiv (m := 1) (n := 3) v}).sort fun a b => a ≤ b) =
-        [finSumFinEquiv (m := 1) (n := 3) u, finSumFinEquiv (m := 1) (n := 3) v] := by
+    have hsort
+        : ((finSumFinEquiv (m := 1) (n := 3) u ::ₘ {finSumFinEquiv (m := 1) (n := 3) v}).sort
+            fun a b => a ≤ b)
+          = [finSumFinEquiv (m := 1) (n := 3) u, finSumFinEquiv (m := 1) (n := 3) v] := by
       rw [Multiset.sort_cons]
       · rw [Multiset.sort_singleton]
       · intro c hc
         rw [Multiset.mem_singleton] at hc
         rw [hc]
         exact huv
-    rw [derivMultiset, show ({u, v} : Multiset (Fin 1 ⊕ Fin 3)).map
-        (finSumFinEquiv (m := 1) (n := 3)) =
-        finSumFinEquiv (m := 1) (n := 3) u ::ₘ {finSumFinEquiv (m := 1) (n := 3) v} from by
-      simp, hsort]
+    rw [derivMultiset,
+      show ({u, v} : Multiset (Fin 1 ⊕ Fin 3)).map (finSumFinEquiv (m := 1) (n := 3))
+          = finSumFinEquiv (m := 1) (n := 3) u ::ₘ {finSumFinEquiv (m := 1) (n := 3) v} from by
+        simp,
+      hsort]
     simp
-  rcases le_total (finSumFinEquiv (m := 1) (n := 3) a) (finSumFinEquiv (m := 1) (n := 3) b)
-    with h | h
+  rcases le_total (finSumFinEquiv (m := 1) (n := 3) a) (finSumFinEquiv (m := 1) (n := 3) b) with
+    h | h
   · exact key a b h
-  · rw [show ({a, b} : Multiset (Fin 1 ⊕ Fin 3)) = {b, a} from Multiset.pair_comm a b,
-      key b a h, SpaceTime.deriv_commute b a f hf]
+  · rw [show ({a, b} : Multiset (Fin 1 ⊕ Fin 3)) = {b, a} from Multiset.pair_comm a b, key b a h,
+      SpaceTime.deriv_commute b a f hf]
 
-lemma deriv_sub_eq {f g : SpaceTime 3 → ℝ} (lam : Fin 1 ⊕ Fin 3)
-    (hf : Differentiable ℝ f) (hg : Differentiable ℝ g) :
-    ∂_ lam (f - g) = ∂_ lam f - ∂_ lam g := by
+lemma deriv_sub_eq
+    {f g : SpaceTime 3 → ℝ}
+    (lam : Fin 1 ⊕ Fin 3) (hf : Differentiable ℝ f) (hg : Differentiable ℝ g)
+    : ∂_ lam (f - g) = ∂_ lam f - ∂_ lam g := by
   ext x
   rw [Pi.sub_apply, SpaceTime.deriv_eq, SpaceTime.deriv_eq, SpaceTime.deriv_eq,
     fderiv_sub (hf x) (hg x)]
   simp
 
-/-- Evaluation intertwines the first-order jet with the spacetime derivative:
-  the evaluated `∂_lam F_{μν}` is the derivative of the evaluated `F_{μν}`. -/
-lemma evalPotential_fieldStrength_singleton (A : ElectromagneticPotential 3)
-    (hA : ContDiff ℝ 2 A) (lam μ ν : Fin 1 ⊕ Fin 3) :
-    evalPotential A (fieldStrength {lam} μ ν) =
-      ∂_ lam (evalPotential A (fieldStrength 0 μ ν)) := by
-  have hsub : evalPotential A (fieldStrength 0 μ ν) =
-      ∂_ μ (coPotential A ν) - ∂_ ν (coPotential A μ) := by
+/--
+Evaluation intertwines the first-order jet with the spacetime derivative:
+the evaluated `∂_lam F_{μν}` is the derivative of the evaluated `F_{μν}`.
+-/
+lemma evalPotential_fieldStrength_singleton
+    (A : ElectromagneticPotential 3) (hA : ContDiff ℝ 2 A) (lam μ ν : Fin 1 ⊕ Fin 3)
+    : evalPotential A (fieldStrength {lam} μ ν)
+      = ∂_ lam (evalPotential A (fieldStrength 0 μ ν)) := by
+  have hsub
+      : evalPotential A (fieldStrength 0 μ ν)
+        = ∂_ μ (coPotential A ν) - ∂_ ν (coPotential A μ) := by
     rw [fieldStrength, map_sub]
     simp only [zero_add, evalPotential_coord, derivMultiset_singleton]
-  rw [hsub, deriv_sub_eq lam
-      (SpaceTime.differentiable_deriv μ _ (contDiff_coPotential hA ν))
+  rw [hsub,
+    deriv_sub_eq lam (SpaceTime.differentiable_deriv μ _ (contDiff_coPotential hA ν))
       (SpaceTime.differentiable_deriv ν _ (contDiff_coPotential hA μ)),
     fieldStrength, map_sub]
   simp only [evalPotential_coord, Multiset.singleton_add]
@@ -286,21 +312,23 @@ lemma evalPotential_fieldStrength_singleton (A : ElectromagneticPotential 3)
   rw [derivMultiset_pair lam μ _ (contDiff_coPotential hA ν),
     derivMultiset_pair lam ν _ (contDiff_coPotential hA μ)]
 
-/-- **The homogeneous Maxwell equations** in covariant form,
-  `∂_lam F_{μν} + ∂_μ F_{ν lam} + ∂_ν F_{lam μ} = 0`, as the evaluation of the
-  formal Bianchi identity of `PhyslibAlpha.Particles.QED.FieldStrength`: Faraday's law and
-  the absence of magnetic monopoles are its time–space–space and
-  space–space–space components. -/
-lemma evalPotential_maxwell_homogeneous (A : ElectromagneticPotential 3)
-    (hA : ContDiff ℝ 2 A) (lam μ ν : Fin 1 ⊕ Fin 3) :
-    ∂_ lam (evalPotential A (fieldStrength 0 μ ν)) +
-      ∂_ μ (evalPotential A (fieldStrength 0 ν lam)) +
-      ∂_ ν (evalPotential A (fieldStrength 0 lam μ)) = 0 := by
+/--
+**The homogeneous Maxwell equations** in covariant form,
+`∂_lam F_{μν} + ∂_μ F_{ν lam} + ∂_ν F_{lam μ} = 0`, as the evaluation of the
+formal Bianchi identity of `PhyslibAlpha.Particles.QED.FieldStrength`: Faraday's law and
+the absence of magnetic monopoles are its time–space–space and
+space–space–space components.
+-/
+lemma evalPotential_maxwell_homogeneous
+    (A : ElectromagneticPotential 3) (hA : ContDiff ℝ 2 A) (lam μ ν : Fin 1 ⊕ Fin 3)
+    : ∂_ lam (evalPotential A (fieldStrength 0 μ ν))
+        + ∂_ μ (evalPotential A (fieldStrength 0 ν lam))
+        + ∂_ ν (evalPotential A (fieldStrength 0 lam μ))
+      = 0 := by
   rw [← evalPotential_fieldStrength_singleton A hA lam μ ν,
     ← evalPotential_fieldStrength_singleton A hA μ ν lam,
     ← evalPotential_fieldStrength_singleton A hA ν lam μ, ← map_add, ← map_add,
-    show fieldStrength {lam} μ ν + fieldStrength {μ} ν lam +
-        fieldStrength {ν} lam μ = 0 from by
+    show fieldStrength {lam} μ ν + fieldStrength {μ} ν lam + fieldStrength {ν} lam μ = 0 from by
       simpa using fieldStrength_bianchi 0 lam μ ν,
     map_zero]
 
@@ -316,27 +344,30 @@ principle can be read entirely through the jet algebra.
 
 -/
 
-lemma deriv_const_mul_apply (c : ℝ) {f : SpaceTime 3 → ℝ} (ρ : Fin 1 ⊕ Fin 3)
-    (hf : Differentiable ℝ f) (x : SpaceTime 3) :
-    ∂_ ρ (fun y => c * f y) x = c * ∂_ ρ f x := by
+lemma deriv_const_mul_apply
+    (c : ℝ) {f : SpaceTime 3 → ℝ} (ρ : Fin 1 ⊕ Fin 3) (hf : Differentiable ℝ f) (x : SpaceTime 3)
+    : ∂_ ρ (fun y => c * f y) x = c * ∂_ ρ f x := by
   rw [SpaceTime.deriv_eq, SpaceTime.deriv_eq, fderiv_const_mul (hf x)]
   simp
 
-/-- **The action principle through the jet algebra**: an electromagnetic
-  potential extremises the Maxwell action with source `J` exactly when the
-  evaluated formal Maxwell operator equals `μ₀ J` — the inhomogeneous Maxwell
-  equations `∂_μ F^{μν} = μ₀ J^ν`. -/
-lemma isExtrema_iff_evalPotential_maxwellOperator (𝓕 : FreeSpace)
+/--
+**The action principle through the jet algebra**: an electromagnetic
+potential extremises the Maxwell action with source `J` exactly when the
+evaluated formal Maxwell operator equals `μ₀ J` — the inhomogeneous Maxwell
+equations `∂_μ F^{μν} = μ₀ J^ν`.
+-/
+lemma isExtrema_iff_evalPotential_maxwellOperator
+    (𝓕 : FreeSpace)
     (A : ElectromagneticPotential 3) (hA : ContDiff ℝ ∞ A)
-    (J : LorentzCurrentDensity 3) (hJ : ContDiff ℝ ∞ J) :
-    ElectromagneticPotential.IsExtrema 𝓕 A J ↔
-      ∀ x ν, evalPotential A (maxwellOperator ν) x = 𝓕.μ₀ * J x ν := by
+    (J : LorentzCurrentDensity 3) (hJ : ContDiff ℝ ∞ J)
+    : ElectromagneticPotential.IsExtrema 𝓕 A J
+      ↔ ∀ x ν, evalPotential A (maxwellOperator ν) x = 𝓕.μ₀ * J x ν := by
   have h2 : ContDiff ℝ 2 A := hA.of_le ENat.LEInfty.out
-  have hdiffF : ∀ μ' ν' : Fin 1 ⊕ Fin 3,
-      Differentiable ℝ (evalPotential A (fieldStrength 0 μ' ν')) := by
+  have hdiffF
+      : ∀ μ' ν' : Fin 1 ⊕ Fin 3, Differentiable ℝ (evalPotential A (fieldStrength 0 μ' ν')) := by
     intro μ' ν'
-    rw [show evalPotential A (fieldStrength 0 μ' ν') =
-        ∂_ μ' (coPotential A ν') - ∂_ ν' (coPotential A μ') from by
+    rw [show evalPotential A (fieldStrength 0 μ' ν')
+        = ∂_ μ' (coPotential A ν') - ∂_ ν' (coPotential A μ') from by
       rw [fieldStrength, map_sub]
       simp only [zero_add, evalPotential_coord, derivMultiset_singleton]]
     exact (SpaceTime.differentiable_deriv _ _ (contDiff_coPotential h2 ν')).sub
@@ -344,27 +375,28 @@ lemma isExtrema_iff_evalPotential_maxwellOperator (𝓕 : FreeSpace)
   rw [ElectromagneticPotential.isExtrema_iff_toFieldStrength_eval A hA J hJ]
   refine forall_congr' fun x => forall_congr' fun ν => Iff.of_eq ?_
   refine congrArg (· = 𝓕.μ₀ * J x ν) ?_
-  have hFmat : ∀ μ' : Fin 1 ⊕ Fin 3, (fun y => toScalar {A.toFieldStrength y | [μ'] [ν]}ᵀ) =
-      fun y => (η μ' μ' * η ν ν) * evalPotential A (fieldStrength 0 μ' ν) y := by
+  have hFmat
+      : ∀ μ' : Fin 1 ⊕ Fin 3,
+        (fun y => toScalar {A.toFieldStrength y | [μ'] [ν]}ᵀ)
+          = fun y => (η μ' μ' * η ν ν) * evalPotential A (fieldStrength 0 μ' ν) y := by
     intro μ'
     funext y
     rw [evalPotential_fieldStrength_zero A (h2.differentiable two_ne_zero) μ' ν y]
-    rcases mul_self_eq_one_iff.mp (minkowskiMatrix.η_apply_mul_η_apply_diag μ') with
-      h1 | h1 <;>
-      rcases mul_self_eq_one_iff.mp (minkowskiMatrix.η_apply_mul_η_apply_diag ν) with
-        h2' | h2' <;>
-      rw [h1, h2'] <;> ring
-  calc ∑ μ, ∂_ μ (fun y => toScalar {A.toFieldStrength y | [μ] [ν]}ᵀ) x
-      = ∑ μ, (η μ μ * η ν ν) * ∂_ μ (evalPotential A (fieldStrength 0 μ ν)) x := by
-        refine Finset.sum_congr rfl fun μ _ => ?_
-        rw [show (fun y => toScalar {A.toFieldStrength y | [μ] [ν]}ᵀ) =
-            fun y => (η μ μ * η ν ν) * evalPotential A (fieldStrength 0 μ ν) y from
-          hFmat μ, deriv_const_mul_apply _ _ (hdiffF μ ν)]
+    rcases mul_self_eq_one_iff.mp (minkowskiMatrix.η_apply_mul_η_apply_diag μ') with h1 | h1
+      <;> rcases mul_self_eq_one_iff.mp (minkowskiMatrix.η_apply_mul_η_apply_diag ν) with h2' | h2'
+      <;> rw [h1, h2'] <;> ring
+  calc
+    ∑ μ, ∂_ μ (fun y => toScalar {A.toFieldStrength y | [μ] [ν]}ᵀ) x
+        = ∑ μ, (η μ μ * η ν ν) * ∂_ μ (evalPotential A (fieldStrength 0 μ ν)) x := by
+      refine Finset.sum_congr rfl fun μ _ => ?_
+      rw [show (fun y => toScalar {A.toFieldStrength y | [μ] [ν]}ᵀ)
+            = fun y => (η μ μ * η ν ν) * evalPotential A (fieldStrength 0 μ ν) y from
+          hFmat μ,
+        deriv_const_mul_apply _ _ (hdiffF μ ν)]
     _ = evalPotential A (maxwellOperator ν) x := by
-        rw [maxwellOperator, map_sum, Finset.sum_apply]
-        refine Finset.sum_congr rfl fun μ _ => ?_
-        rw [map_smul, Pi.smul_apply, smul_eq_mul,
-          evalPotential_fieldStrength_singleton A h2 μ μ ν]
+      rw [maxwellOperator, map_sum, Finset.sum_apply]
+      refine Finset.sum_congr rfl fun μ _ => ?_
+      rw [map_smul, Pi.smul_apply, smul_eq_mul, evalPotential_fieldStrength_singleton A h2 μ μ ν]
 
 /-!
 
@@ -377,22 +409,24 @@ Lorentz-transformed jet on the original potential at the transformed point.
 
 -/
 
-/-- **Compatibility of the formal and concrete Lorentz actions**: the
-  evaluation of the field strength on `Λ • A` at `x` is the evaluation of its
-  formal Lorentz transform on `A` at `Λ⁻¹ • x`, matching the equivariance
-  `Physlib.Electromagnetism.Kinematics.FieldStrength.toFieldStrength_equivariant`
-  on the concrete side. -/
-lemma evalPotential_fieldStrength_lorentzAction (Λ : LorentzGroup 3)
+/--
+**Compatibility of the formal and concrete Lorentz actions**: the
+evaluation of the field strength on `Λ • A` at `x` is the evaluation of its
+formal Lorentz transform on `A` at `Λ⁻¹ • x`, matching the equivariance
+`Physlib.Electromagnetism.Kinematics.FieldStrength.toFieldStrength_equivariant`
+on the concrete side.
+-/
+lemma evalPotential_fieldStrength_lorentzAction
+    (Λ : LorentzGroup 3)
     (A : ElectromagneticPotential 3) (hA : Differentiable ℝ A)
-    (μ ν : Fin 1 ⊕ Fin 3) (x : SpaceTime 3) :
-    evalPotential (Λ • A) (fieldStrength 0 μ ν) x =
-      evalPotential A (lorentzAction Λ (fieldStrength 0 μ ν)) (Λ⁻¹ • x) := by
+    (μ ν : Fin 1 ⊕ Fin 3) (x : SpaceTime 3)
+    : evalPotential (Λ • A) (fieldStrength 0 μ ν) x
+      = evalPotential A (lorentzAction Λ (fieldStrength 0 μ ν)) (Λ⁻¹ • x) := by
   have hinv : ∀ a μ' : Fin 1 ⊕ Fin 3, (Λ⁻¹).1 a μ' = η a a * Λ.1 μ' a * η μ' μ' := by
     intro a μ'
     rw [LorentzGroup.inv_eq_dual]
     exact minkowskiMatrix.dual_apply _ a μ'
-  have hΛA : Differentiable ℝ (Λ • A) :=
-    ElectromagneticPotential.differentiable_action Λ A hA
+  have hΛA : Differentiable ℝ (Λ • A) := ElectromagneticPotential.differentiable_action Λ A hA
   rw [evalPotential_fieldStrength_zero _ hΛA μ ν x,
     ElectromagneticPotential.toFieldStrength_eval_equivariant A Λ hA,
     lorentzAction_fieldStrength_zero]
@@ -400,9 +434,9 @@ lemma evalPotential_fieldStrength_lorentzAction (Λ : LorentzGroup 3)
   simp only [evalPotential_fieldStrength_zero A hA]
   simp only [Finset.mul_sum]
   refine Finset.sum_congr rfl fun a _ => Finset.sum_congr rfl fun b _ => ?_
-  rcases mul_self_eq_one_iff.mp (minkowskiMatrix.η_apply_mul_η_apply_diag a) with h1 | h1 <;>
-    rcases mul_self_eq_one_iff.mp (minkowskiMatrix.η_apply_mul_η_apply_diag b) with h2 | h2 <;>
-    rw [hinv a μ, hinv b ν, h1, h2] <;> ring
+  rcases mul_self_eq_one_iff.mp (minkowskiMatrix.η_apply_mul_η_apply_diag a) with h1 | h1
+    <;> rcases mul_self_eq_one_iff.mp (minkowskiMatrix.η_apply_mul_η_apply_diag b) with h2 | h2
+    <;> rw [hinv a μ, hinv b ν, h1, h2] <;> ring
 
 /-!
 
@@ -414,32 +448,34 @@ Maxwell term, is unchanged when the potential is replaced by `A + ∂χ`.
 
 -/
 
-lemma differentiable_gaugeTransform {A : ElectromagneticPotential 3} {χ : SpaceTime 3 → ℝ}
-    (hA : Differentiable ℝ A) (hχ : ContDiff ℝ 2 χ) :
-    Differentiable ℝ (ElectromagneticPotential.gaugeTransform χ A) :=
+lemma differentiable_gaugeTransform
+    {A : ElectromagneticPotential 3} {χ : SpaceTime 3 → ℝ}
+    (hA : Differentiable ℝ A) (hχ : ContDiff ℝ 2 χ)
+    : Differentiable ℝ (ElectromagneticPotential.gaugeTransform χ A) :=
   hA.add (ElectromagneticPotential.differentiable_ofGradient hχ)
 
-/-- The evaluated field strength is invariant under the concrete gauge
-  transformation `A ↦ A + ∂χ`, matching the formal gauge invariance
-  `Physlib.Particles.QED.GaugeInvariance.Photon.JetAlgebra.gaugeAction_fieldStrength`. -/
-lemma evalPotential_fieldStrength_gaugeTransform (A : ElectromagneticPotential 3)
-    (χ : SpaceTime 3 → ℝ) (hA : Differentiable ℝ A) (hχ : ContDiff ℝ 2 χ)
-    (μ ν : Fin 1 ⊕ Fin 3) (x : SpaceTime 3) :
-    evalPotential (ElectromagneticPotential.gaugeTransform χ A) (fieldStrength 0 μ ν) x =
-      evalPotential A (fieldStrength 0 μ ν) x := by
+/--
+The evaluated field strength is invariant under the concrete gauge
+transformation `A ↦ A + ∂χ`, matching the formal gauge invariance
+`Physlib.Particles.QED.GaugeInvariance.Photon.JetAlgebra.gaugeAction_fieldStrength`.
+-/
+lemma evalPotential_fieldStrength_gaugeTransform
+    (A : ElectromagneticPotential 3) (χ : SpaceTime 3 → ℝ)
+    (hA : Differentiable ℝ A) (hχ : ContDiff ℝ 2 χ) (μ ν : Fin 1 ⊕ Fin 3) (x : SpaceTime 3)
+    : evalPotential (ElectromagneticPotential.gaugeTransform χ A) (fieldStrength 0 μ ν) x
+      = evalPotential A (fieldStrength 0 μ ν) x := by
   rw [evalPotential_fieldStrength_zero _ (differentiable_gaugeTransform hA hχ),
     evalPotential_fieldStrength_zero A hA,
     ElectromagneticPotential.toFieldStrength_eval_gaugeTransform A χ hA hχ]
 
 /-- The Maxwell Lagrangian is gauge invariant, as read off from the jet algebra. -/
-lemma evalPotential_maxwellTerm_gaugeTransform (A : ElectromagneticPotential 3)
-    (χ : SpaceTime 3 → ℝ) (hA : Differentiable ℝ A) (hχ : ContDiff ℝ 2 χ)
-    (x : SpaceTime 3) :
-    evalPotential (ElectromagneticPotential.gaugeTransform χ A) maxwellTerm x =
-      evalPotential A maxwellTerm x := by
+lemma evalPotential_maxwellTerm_gaugeTransform
+    (A : ElectromagneticPotential 3) (χ : SpaceTime 3 → ℝ)
+    (hA : Differentiable ℝ A) (hχ : ContDiff ℝ 2 χ) (x : SpaceTime 3)
+    : evalPotential (ElectromagneticPotential.gaugeTransform χ A) maxwellTerm x
+      = evalPotential A maxwellTerm x := by
   rw [maxwellTerm, map_sum, map_sum]
-  simp only [Finset.sum_apply, map_sum, map_smul, Pi.smul_apply, smul_eq_mul, map_mul,
-    Pi.mul_apply]
+  simp only [Finset.sum_apply, map_sum, map_smul, Pi.smul_apply, smul_eq_mul, map_mul, Pi.mul_apply]
   refine Finset.sum_congr rfl fun μ _ => Finset.sum_congr rfl fun ν _ => ?_
   rw [evalPotential_fieldStrength_gaugeTransform A χ hA hχ]
 

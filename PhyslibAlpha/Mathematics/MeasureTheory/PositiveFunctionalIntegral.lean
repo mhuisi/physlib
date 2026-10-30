@@ -55,8 +55,7 @@ open MeasureTheory
 
 -/
 
-instance ContinuousMap.instPosSMulMono {X : Type*} [TopologicalSpace X] :
-    PosSMulMono ℝ C(X, ℝ) :=
+instance ContinuousMap.instPosSMulMono {X : Type*} [TopologicalSpace X] : PosSMulMono ℝ C(X, ℝ) :=
   ⟨fun _ hc _ _ h x => mul_le_mul_of_nonneg_left (h x) hc⟩
 
 /-!
@@ -65,9 +64,10 @@ instance ContinuousMap.instPosSMulMono {X : Type*} [TopologicalSpace X] :
 
 -/
 
-variable {X V : Type*} [TopologicalSpace X] [CompactSpace X] [T2Space X] [MeasurableSpace X]
-  [BorelSpace X] [AddCommGroup V] [Module ℝ V] (T : V →ₗ[ℝ] C(X, ℝ)) (φ : V →ₗ[ℝ] ℝ)
-  (hpos : ∀ v, 0 ≤ T v → 0 ≤ φ v)
+variable
+  {X V : Type*} [TopologicalSpace X] [CompactSpace X] [T2Space X] [MeasurableSpace X] [BorelSpace X]
+  [AddCommGroup V] [Module ℝ V]
+  (T : V →ₗ[ℝ] C(X, ℝ)) (φ : V →ₗ[ℝ] ℝ) (hpos : ∀ v, 0 ≤ T v → 0 ≤ φ v)
 
 omit [CompactSpace X] [T2Space X] [MeasurableSpace X] [BorelSpace X] in
 include hpos in
@@ -79,16 +79,18 @@ lemma ker_le_ker_of_nonneg : LinearMap.ker T ≤ LinearMap.ker φ := fun v hv =>
 
 omit [CompactSpace X] [T2Space X] [MeasurableSpace X] [BorelSpace X] in
 /-- The functional `φ` on the range of `T`. -/
-noncomputable def rangeFunctional : C(X, ℝ) →ₗ.[ℝ] ℝ :=
-  ⟨LinearMap.range T, (LinearMap.ker T).liftQ φ (ker_le_ker_of_nonneg T φ hpos) ∘ₗ
-    T.quotKerEquivRange.symm.toLinearMap⟩
+noncomputable def rangeFunctional : C(X, ℝ) →ₗ.[ℝ] ℝ := ⟨
+  LinearMap.range T,
+  (LinearMap.ker T).liftQ φ (ker_le_ker_of_nonneg T φ hpos) ∘ₗ T.quotKerEquivRange.symm.toLinearMap
+⟩
 
 omit [CompactSpace X] [T2Space X] [MeasurableSpace X] [BorelSpace X] in
 lemma rangeFunctional_apply (v : V) : rangeFunctional T φ hpos ⟨T v, v, rfl⟩ = φ v := by
   change (LinearMap.ker T).liftQ φ (ker_le_ker_of_nonneg T φ hpos)
-    (T.quotKerEquivRange.symm ⟨T v, v, rfl⟩) = φ v
-  rw [T.quotKerEquivRange.symm_apply_eq.2
-    (Subtype.ext (LinearMap.quotKerEquivRange_apply_mk T v).symm)]
+      (T.quotKerEquivRange.symm ⟨T v, v, rfl⟩)
+    = φ v
+  rw [T.quotKerEquivRange.symm_apply_eq.2 (Subtype.ext (LinearMap.quotKerEquivRange_apply_mk T
+    v).symm)]
   rfl
 
 variable {one : V} (hone : T one = 1)
@@ -96,19 +98,25 @@ include hpos hone
 
 omit [T2Space X] [MeasurableSpace X] [BorelSpace X] in
 /-- **M. Riesz extension**: `φ` extends to a positive functional on all continuous functions. -/
-lemma exists_positive_extension : ∃ Λ : C(X, ℝ) →ₗ[ℝ] ℝ,
-    (∀ v, Λ (T v) = φ v) ∧ ∀ g, 0 ≤ g → 0 ≤ Λ g := by
-  obtain ⟨Λ, hΛ, hΛpos⟩ := riesz_extension (PointedCone.positive ℝ _) (rangeFunctional T φ hpos)
-    (fun ⟨_, v, rfl⟩ hv => by rw [rangeFunctional_apply]; exact hpos v hv)
-    fun g => ⟨⟨T (‖g‖ • one), _, rfl⟩, fun x => by
-      simpa [hone, Real.norm_eq_abs, neg_le_iff_add_nonneg'] using
-        (neg_abs_le (g x)).trans' (neg_le_neg (g.norm_coe_le_norm x))⟩
+lemma exists_positive_extension
+    : ∃ Λ : C(X, ℝ) →ₗ[ℝ] ℝ, (∀ v, Λ (T v) = φ v) ∧ ∀ g, 0 ≤ g → 0 ≤ Λ g := by
+  obtain ⟨Λ, hΛ, hΛpos⟩ :=
+    riesz_extension (PointedCone.positive ℝ _) (rangeFunctional T φ hpos)
+      (fun ⟨_, v, rfl⟩ hv => by rw [rangeFunctional_apply]; exact hpos v hv)
+      fun g => ⟨
+        ⟨T (‖g‖ • one), _, rfl⟩,
+        fun x => by
+          simpa [hone, Real.norm_eq_abs, neg_le_iff_add_nonneg'] using
+            (neg_abs_le (g x)).trans' (neg_le_neg (g.norm_coe_le_norm x))
+      ⟩
   exact ⟨Λ, fun v => (hΛ ⟨T v, v, rfl⟩).trans (rangeFunctional_apply T φ hpos v), hΛpos⟩
 
-/-- **Positive functionals are integrals**: a positive linear functional through `T`, equal to `1`
-on a preimage of `1`, is integration against a regular probability measure. -/
-lemma exists_regular_probabilityMeasure_integral_eq (hφ : φ one = 1) :
-    ∃ μ : Measure X, μ.Regular ∧ IsProbabilityMeasure μ ∧ ∀ v, ∫ x, T v x ∂μ = φ v := by
+/--
+**Positive functionals are integrals**: a positive linear functional through `T`, equal to `1`
+on a preimage of `1`, is integration against a regular probability measure.
+-/
+lemma exists_regular_probabilityMeasure_integral_eq (hφ : φ one = 1)
+    : ∃ μ : Measure X, μ.Regular ∧ IsProbabilityMeasure μ ∧ ∀ v, ∫ x, T v x ∂μ = φ v := by
   obtain ⟨Λ, hΛ, hΛpos⟩ := exists_positive_extension T φ hpos hone
   let Λc : CompactlySupportedContinuousMap X ℝ →ₚ[ℝ] ℝ :=
     .mk₀ ⟨⟨fun g => Λ g.toContinuousMap, fun _ _ => map_add Λ _ _⟩, fun c _ => map_smul Λ c _⟩

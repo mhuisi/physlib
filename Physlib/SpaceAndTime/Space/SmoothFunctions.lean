@@ -23,14 +23,18 @@ open Manifold
 
 namespace Space
 
-/-- Bundle a smooth real-valued function on `Space d` as an element of the space of bundled
+/--
+Bundle a smooth real-valued function on `Space d` as an element of the space of bundled
 smooth maps. Keeping this as a named constructor ensures the resulting type head stays
-`ContMDiffMap`, so the module/ring operations and `comp` resolve correctly. -/
-def cmap {d : ℕ} (f : Space d → ℝ) (hf : ContDiff ℝ ⊤ f) :
-    C^⊤⟮𝓘(ℝ, Space d), Space d; 𝓘(ℝ, ℝ), ℝ⟯ := ⟨f, hf.contMDiff⟩
+`ContMDiffMap`, so the module/ring operations and `comp` resolve correctly.
+-/
+def cmap {d : ℕ} (f : Space d → ℝ) (hf : ContDiff ℝ ⊤ f)
+    : C^⊤⟮𝓘(ℝ, Space d), Space d; 𝓘(ℝ, ℝ), ℝ⟯ :=
+  ⟨f, hf.contMDiff⟩
 
 @[simp]
-lemma cmap_apply {d : ℕ} (f : Space d → ℝ) (hf : ContDiff ℝ ⊤ f) (y : Space d) :
-    cmap f hf y = f y := rfl
+lemma cmap_apply {d : ℕ} (f : Space d → ℝ) (hf : ContDiff ℝ ⊤ f) (y : Space d)
+    : cmap f hf y = f y :=
+  rfl
 
 end Space

@@ -56,8 +56,9 @@ def addOfOrthogonal (e f : Effect E) (h : Orthogonal e f) : Effect E :=
 
 /-- The underlying observable of an orthogonal effect sum is the ordinary sum. -/
 @[simp]
-lemma coe_addOfOrthogonal (e f : Effect E) (h : Orthogonal e f) :
-    (addOfOrthogonal e f h : E) = (e : E) + (f : E) := rfl
+lemma coe_addOfOrthogonal (e f : Effect E) (h : Orthogonal e f)
+    : (addOfOrthogonal e f h : E) = (e : E) + (f : E) :=
+  rfl
 
 end Effect
 

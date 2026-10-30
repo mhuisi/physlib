@@ -89,17 +89,19 @@ The derivative acts on brackets via the Leibniz rule:
 namespace StandardModel
 open MvPowerSeries Matrix
 
-/-- The jet gauge algebra: the Lie-algebra analogue of `JetGaugeGroupI`, with one factor per gauge
-  group factor — traceless self-adjoint `3 × 3` and `2 × 2` matrices and a self-adjoint scalar, all
-  with coefficients in the ring `SpaceTimeAlgebra` of formal power series in the spacetime
-  coordinates. The Maurer–Cartan forms of the jet gauge group are valued here, hermiticity being
-  `star_maurerCartanSU3` and its companions. -/
+/--
+The jet gauge algebra: the Lie-algebra analogue of `JetGaugeGroupI`, with one factor per gauge
+group factor — traceless self-adjoint `3 × 3` and `2 × 2` matrices and a self-adjoint scalar, all
+with coefficients in the ring `SpaceTimeAlgebra` of formal power series in the spacetime
+coordinates. The Maurer–Cartan forms of the jet gauge group are valued here, hermiticity being
+`star_maurerCartanSU3` and its companions.
+-/
 abbrev JetGaugeAlgebra :=
-  ↥(selfAdjoint.submodule ℝ (Matrix (Fin 3) (Fin 3) SpaceTimeAlgebra) ⊓
-    LinearMap.ker (Matrix.traceLinearMap (Fin 3) ℝ SpaceTimeAlgebra)) ×
-  ↥(selfAdjoint.submodule ℝ (Matrix (Fin 2) (Fin 2) SpaceTimeAlgebra) ⊓
-    LinearMap.ker (Matrix.traceLinearMap (Fin 2) ℝ SpaceTimeAlgebra)) ×
-  selfAdjoint SpaceTimeAlgebra
+  ↥(selfAdjoint.submodule ℝ (Matrix (Fin 3) (Fin 3) SpaceTimeAlgebra)
+      ⊓ LinearMap.ker (Matrix.traceLinearMap (Fin 3) ℝ SpaceTimeAlgebra))
+    × ↥(selfAdjoint.submodule ℝ (Matrix (Fin 2) (Fin 2) SpaceTimeAlgebra)
+      ⊓ LinearMap.ker (Matrix.traceLinearMap (Fin 2) ℝ SpaceTimeAlgebra))
+    × selfAdjoint SpaceTimeAlgebra
 
 namespace JetGaugeAlgebra
 
@@ -113,31 +115,33 @@ namespace JetGaugeAlgebra
 def toSU3Matrix (a : JetGaugeAlgebra) : Matrix (Fin 3) (Fin 3) SpaceTimeAlgebra := a.1
 
 /-- The `su(2)`-factor component of an element of the jet gauge algebra. -/
-def toSU2Matrix (a : JetGaugeAlgebra) : Matrix (Fin 2) (Fin 2) SpaceTimeAlgebra  := a.2.1
+def toSU2Matrix (a : JetGaugeAlgebra) : Matrix (Fin 2) (Fin 2) SpaceTimeAlgebra := a.2.1
 
 /-- The `u(1)`-factor component of an element of the jet gauge algebra. -/
-def toU1Value (a : JetGaugeAlgebra) :  SpaceTimeAlgebra := a.2.2
+def toU1Value (a : JetGaugeAlgebra) : SpaceTimeAlgebra := a.2.2
 
-/-- The underlying matrix value of an element of the jet gauge algebra, as a
-  product of matrices. -/
-def toVal (a : JetGaugeAlgebra) :
-    Matrix (Fin 3) (Fin 3) SpaceTimeAlgebra × Matrix (Fin 2)
-        (Fin 2) SpaceTimeAlgebra × SpaceTimeAlgebra :=
+/--
+The underlying matrix value of an element of the jet gauge algebra, as a
+product of matrices.
+-/
+def toVal (a : JetGaugeAlgebra)
+    : Matrix (Fin 3) (Fin 3) SpaceTimeAlgebra × Matrix (Fin 2) (Fin 2) SpaceTimeAlgebra
+      × SpaceTimeAlgebra :=
   (a.toSU3Matrix, a.toSU2Matrix, a.toU1Value)
 
-@[simp]
-lemma toVal_fst (a : JetGaugeAlgebra) : a.toVal.1 = a.toSU3Matrix := rfl
+@[simp] lemma toVal_fst (a : JetGaugeAlgebra) : a.toVal.1 = a.toSU3Matrix := rfl
 
-@[simp]
-lemma toVal_snd_fst (a : JetGaugeAlgebra) : a.toVal.2.1 = a.toSU2Matrix := rfl
+@[simp] lemma toVal_snd_fst (a : JetGaugeAlgebra) : a.toVal.2.1 = a.toSU2Matrix := rfl
 
-@[simp]
-lemma toVal_snd_snd (a : JetGaugeAlgebra) : a.toVal.2.2 = a.toU1Value := rfl
+@[simp] lemma toVal_snd_snd (a : JetGaugeAlgebra) : a.toVal.2.2 = a.toU1Value := rfl
 
 @[ext]
-lemma ext_of_matrix {a b : JetGaugeAlgebra} (h1 : a.toSU3Matrix = b.toSU3Matrix)
-    (h2 : a.toSU2Matrix = b.toSU2Matrix) (h3 : a.toU1Value = b.toU1Value) : a = b := by
-  cases a; cases b
+lemma ext_of_matrix
+    {a b : JetGaugeAlgebra} (h1 : a.toSU3Matrix = b.toSU3Matrix)
+    (h2 : a.toSU2Matrix = b.toSU2Matrix) (h3 : a.toU1Value = b.toU1Value)
+    : a = b := by
+  cases a
+  cases b
   simp only [toSU3Matrix, toSU2Matrix, toU1Value] at h1 h2 h3
   grind
 
@@ -147,34 +151,44 @@ lemma ext_of_matrix {a b : JetGaugeAlgebra} (h1 : a.toSU3Matrix = b.toSU3Matrix)
 
 -/
 
-/-- A jet of the gauge algebra from a triple of matrices of jets: the `SU(3)` and `SU(2)`
-  components self-adjoint and traceless, the `U(1)` component self-adjoint. -/
-def ofMatrixProd (A : Matrix (Fin 3) (Fin 3) SpaceTimeAlgebra ×
-    Matrix (Fin 2) (Fin 2) SpaceTimeAlgebra × SpaceTimeAlgebra)
-        (hA : star A.1 = A.1 ∧ A.1.trace = 0)
-    (hB : star A.2.1 = A.2.1 ∧ A.2.1.trace = 0) (hC : star A.2.2 = A.2.2) : JetGaugeAlgebra :=
+/--
+A jet of the gauge algebra from a triple of matrices of jets: the `SU(3)` and `SU(2)`
+components self-adjoint and traceless, the `U(1)` component self-adjoint.
+-/
+def ofMatrixProd
+    (A : Matrix (Fin 3) (Fin 3) SpaceTimeAlgebra × Matrix (Fin 2) (Fin 2) SpaceTimeAlgebra
+      × SpaceTimeAlgebra)
+    (hA : star A.1 = A.1 ∧ A.1.trace = 0) (hB : star A.2.1 = A.2.1 ∧ A.2.1.trace = 0)
+    (hC : star A.2.2 = A.2.2)
+    : JetGaugeAlgebra :=
   ⟨⟨A.1, hA⟩, ⟨A.2.1, hB⟩, ⟨A.2.2, hC⟩⟩
 
 @[simp]
-lemma ofMatrixProd_toSU3Matrix (A : Matrix (Fin 3) (Fin 3) SpaceTimeAlgebra ×
-    Matrix (Fin 2) (Fin 2) SpaceTimeAlgebra × SpaceTimeAlgebra)
-        (hA : star A.1 = A.1 ∧ A.1.trace = 0)
-    (hB : star A.2.1 = A.2.1 ∧ A.2.1.trace = 0) (hC : star A.2.2 = A.2.2) :
-    (ofMatrixProd A hA hB hC).toSU3Matrix = A.1 := by rfl
+lemma ofMatrixProd_toSU3Matrix
+    (A : Matrix (Fin 3) (Fin 3) SpaceTimeAlgebra × Matrix (Fin 2) (Fin 2) SpaceTimeAlgebra
+      × SpaceTimeAlgebra)
+    (hA : star A.1 = A.1 ∧ A.1.trace = 0) (hB : star A.2.1 = A.2.1 ∧ A.2.1.trace = 0)
+    (hC : star A.2.2 = A.2.2)
+    : (ofMatrixProd A hA hB hC).toSU3Matrix = A.1 := by
+  rfl
 
 @[simp]
-lemma ofMatrixProd_toSU2Matrix (A : Matrix (Fin 3) (Fin 3) SpaceTimeAlgebra ×
-    Matrix (Fin 2) (Fin 2) SpaceTimeAlgebra × SpaceTimeAlgebra)
-        (hA : star A.1 = A.1 ∧ A.1.trace = 0)
-    (hB : star A.2.1 = A.2.1 ∧ A.2.1.trace = 0) (hC : star A.2.2 = A.2.2) :
-    (ofMatrixProd A hA hB hC).toSU2Matrix = A.2.1 := by rfl
+lemma ofMatrixProd_toSU2Matrix
+    (A : Matrix (Fin 3) (Fin 3) SpaceTimeAlgebra × Matrix (Fin 2) (Fin 2) SpaceTimeAlgebra
+      × SpaceTimeAlgebra)
+    (hA : star A.1 = A.1 ∧ A.1.trace = 0) (hB : star A.2.1 = A.2.1 ∧ A.2.1.trace = 0)
+    (hC : star A.2.2 = A.2.2)
+    : (ofMatrixProd A hA hB hC).toSU2Matrix = A.2.1 := by
+  rfl
 
 @[simp]
-lemma ofMatrixProd_toU1Value (A : Matrix (Fin 3) (Fin 3) SpaceTimeAlgebra ×
-    Matrix (Fin 2) (Fin 2) SpaceTimeAlgebra × SpaceTimeAlgebra)
-        (hA : star A.1 = A.1 ∧ A.1.trace = 0)
-    (hB : star A.2.1 = A.2.1 ∧ A.2.1.trace = 0) (hC : star A.2.2 = A.2.2) :
-    (ofMatrixProd A hA hB hC).toU1Value = A.2.2 := by rfl
+lemma ofMatrixProd_toU1Value
+    (A : Matrix (Fin 3) (Fin 3) SpaceTimeAlgebra × Matrix (Fin 2) (Fin 2) SpaceTimeAlgebra
+      × SpaceTimeAlgebra)
+    (hA : star A.1 = A.1 ∧ A.1.trace = 0) (hB : star A.2.1 = A.2.1 ∧ A.2.1.trace = 0)
+    (hC : star A.2.2 = A.2.2)
+    : (ofMatrixProd A hA hB hC).toU1Value = A.2.2 := by
+  rfl
 
 /-!
 
@@ -183,112 +197,118 @@ lemma ofMatrixProd_toU1Value (A : Matrix (Fin 3) (Fin 3) SpaceTimeAlgebra ×
 -/
 
 @[simp]
-lemma add_toSU3Matrix (a b : JetGaugeAlgebra) :
-    (a + b).toSU3Matrix = a.toSU3Matrix + b.toSU3Matrix := by rfl
+lemma add_toSU3Matrix (a b : JetGaugeAlgebra)
+    : (a + b).toSU3Matrix = a.toSU3Matrix + b.toSU3Matrix := by
+  rfl
 
 @[simp]
-lemma add_toSU2Matrix (a b : JetGaugeAlgebra) :
-    (a + b).toSU2Matrix = a.toSU2Matrix + b.toSU2Matrix := by rfl
+lemma add_toSU2Matrix (a b : JetGaugeAlgebra)
+    : (a + b).toSU2Matrix = a.toSU2Matrix + b.toSU2Matrix := by
+  rfl
 
 @[simp]
-lemma add_toU1Value (a b : JetGaugeAlgebra) :
-    (a + b).toU1Value = a.toU1Value + b.toU1Value := by rfl
+lemma add_toU1Value (a b : JetGaugeAlgebra) : (a + b).toU1Value = a.toU1Value + b.toU1Value := by
+  rfl
 
-lemma toSU3Matrix_sum {ι : Type*} (t : Finset ι) (f : ι → JetGaugeAlgebra) :
-    (∑ i ∈ t, f i).toSU3Matrix = ∑ i ∈ t, (f i).toSU3Matrix :=
+lemma toSU3Matrix_sum {ι : Type*} (t : Finset ι) (f : ι → JetGaugeAlgebra)
+    : (∑ i ∈ t, f i).toSU3Matrix = ∑ i ∈ t, (f i).toSU3Matrix :=
   map_sum (AddMonoidHom.mk' toSU3Matrix add_toSU3Matrix) f t
 
-lemma toSU2Matrix_sum {ι : Type*} (t : Finset ι) (f : ι → JetGaugeAlgebra) :
-    (∑ i ∈ t, f i).toSU2Matrix = ∑ i ∈ t, (f i).toSU2Matrix :=
+lemma toSU2Matrix_sum {ι : Type*} (t : Finset ι) (f : ι → JetGaugeAlgebra)
+    : (∑ i ∈ t, f i).toSU2Matrix = ∑ i ∈ t, (f i).toSU2Matrix :=
   map_sum (AddMonoidHom.mk' toSU2Matrix add_toSU2Matrix) f t
 
-lemma toU1Value_sum {ι : Type*} (t : Finset ι) (f : ι → JetGaugeAlgebra) :
-    (∑ i ∈ t, f i).toU1Value = ∑ i ∈ t, (f i).toU1Value :=
+lemma toU1Value_sum {ι : Type*} (t : Finset ι) (f : ι → JetGaugeAlgebra)
+    : (∑ i ∈ t, f i).toU1Value = ∑ i ∈ t, (f i).toU1Value :=
   map_sum (AddMonoidHom.mk' toU1Value add_toU1Value) f t
 
-@[simp]
-lemma zero_toSU3Matrix : (0 : JetGaugeAlgebra).toSU3Matrix = 0 := by rfl
+@[simp] lemma zero_toSU3Matrix : (0 : JetGaugeAlgebra).toSU3Matrix = 0 := by rfl
+
+@[simp] lemma zero_toSU2Matrix : (0 : JetGaugeAlgebra).toSU2Matrix = 0 := by rfl
+
+@[simp] lemma zero_toU1Value : (0 : JetGaugeAlgebra).toU1Value = 0 := by rfl
 
 @[simp]
-lemma zero_toSU2Matrix : (0 : JetGaugeAlgebra).toSU2Matrix = 0 := by rfl
+lemma smul_toSU3Matrix (r : ℝ) (a : JetGaugeAlgebra) : (r • a).toSU3Matrix = r • a.toSU3Matrix := by
+  rfl
 
 @[simp]
-lemma zero_toU1Value : (0 : JetGaugeAlgebra).toU1Value = 0 := by rfl
+lemma smul_toSU2Matrix (r : ℝ) (a : JetGaugeAlgebra) : (r • a).toSU2Matrix = r • a.toSU2Matrix := by
+  rfl
 
 @[simp]
-lemma smul_toSU3Matrix (r : ℝ) (a : JetGaugeAlgebra) :
-    (r • a).toSU3Matrix = r • a.toSU3Matrix := by rfl
+lemma smul_toU1Value (r : ℝ) (a : JetGaugeAlgebra) : (r • a).toU1Value = r • a.toU1Value := by rfl
 
 @[simp]
-lemma smul_toSU2Matrix (r : ℝ) (a : JetGaugeAlgebra) :
-    (r • a).toSU2Matrix = r • a.toSU2Matrix := by rfl
+lemma sub_toSU3Matrix (a b : JetGaugeAlgebra)
+    : (a - b).toSU3Matrix = a.toSU3Matrix - b.toSU3Matrix := by
+  rfl
 
 @[simp]
-lemma smul_toU1Value (r : ℝ) (a : JetGaugeAlgebra) :
-    (r • a).toU1Value = r • a.toU1Value := by rfl
+lemma sub_toSU2Matrix (a b : JetGaugeAlgebra)
+    : (a - b).toSU2Matrix = a.toSU2Matrix - b.toSU2Matrix := by
+  rfl
 
 @[simp]
-lemma sub_toSU3Matrix (a b : JetGaugeAlgebra) :
-    (a - b).toSU3Matrix = a.toSU3Matrix - b.toSU3Matrix := by rfl
+lemma sub_toU1Value (a b : JetGaugeAlgebra) : (a - b).toU1Value = a.toU1Value - b.toU1Value := by
+  rfl
 
-@[simp]
-lemma sub_toSU2Matrix (a b : JetGaugeAlgebra) :
-    (a - b).toSU2Matrix = a.toSU2Matrix - b.toSU2Matrix := by rfl
-
-@[simp]
-lemma sub_toU1Value (a b : JetGaugeAlgebra) :
-    (a - b).toU1Value = a.toU1Value - b.toU1Value := by rfl
-
-/-- The bracket on the jet gauge algebra: `I` times the matrix commutator on the
-  `su(3)` and `su(2)` factors, and zero on the (commutative) `u(1)` factor. The
-  factor of `I` is what makes the bracket of two hermitian matrices hermitian
-  again; it is also why the bracket is only `ℝ`-bilinear, not `ℂ`-bilinear. -/
+/--
+The bracket on the jet gauge algebra: `I` times the matrix commutator on the
+`su(3)` and `su(2)` factors, and zero on the (commutative) `u(1)` factor. The
+factor of `I` is what makes the bracket of two hermitian matrices hermitian
+again; it is also why the bracket is only `ℝ`-bilinear, not `ℂ`-bilinear.
+-/
 noncomputable instance : Bracket JetGaugeAlgebra JetGaugeAlgebra where
-  bracket a b := ofMatrixProd
-      (Complex.I • (a.toSU3Matrix * b.toSU3Matrix - b.toSU3Matrix * a.toSU3Matrix),
+  bracket a b :=
+    ofMatrixProd
+      (
+        Complex.I • (a.toSU3Matrix * b.toSU3Matrix - b.toSU3Matrix * a.toSU3Matrix),
         Complex.I • (a.toSU2Matrix * b.toSU2Matrix - b.toSU2Matrix * a.toSU2Matrix),
-        0)
-      ⟨by
-        rw [star_smul, star_sub, star_mul, star_mul,
-          show star a.toSU3Matrix = a.toSU3Matrix from a.1.2.1,
-          show star b.toSU3Matrix = b.toSU3Matrix from b.1.2.1,
-          Complex.star_def, Complex.conj_I, neg_smul, ← smul_neg, neg_sub],
-        by rw [Matrix.trace_smul, Matrix.trace_sub, Matrix.trace_mul_comm, sub_self, smul_zero]⟩
-      ⟨by
-        rw [star_smul, star_sub, star_mul, star_mul,
-          show star a.toSU2Matrix = a.toSU2Matrix from a.2.1.2.1,
-          show star b.toSU2Matrix = b.toSU2Matrix from b.2.1.2.1,
-          Complex.star_def, Complex.conj_I, neg_smul, ← smul_neg, neg_sub],
-        by rw [Matrix.trace_smul, Matrix.trace_sub, Matrix.trace_mul_comm, sub_self, smul_zero]⟩
+        0
+      )
+      ⟨
+        by
+          rw [star_smul, star_sub, star_mul, star_mul,
+            show star a.toSU3Matrix = a.toSU3Matrix from a.1.2.1,
+            show star b.toSU3Matrix = b.toSU3Matrix from b.1.2.1, Complex.star_def, Complex.conj_I,
+            neg_smul, ← smul_neg, neg_sub],
+        by rw [Matrix.trace_smul, Matrix.trace_sub, Matrix.trace_mul_comm, sub_self, smul_zero]
+      ⟩
+      ⟨
+        by
+          rw [star_smul, star_sub, star_mul, star_mul,
+            show star a.toSU2Matrix = a.toSU2Matrix from a.2.1.2.1,
+            show star b.toSU2Matrix = b.toSU2Matrix from b.2.1.2.1, Complex.star_def,
+            Complex.conj_I, neg_smul, ← smul_neg, neg_sub],
+        by rw [Matrix.trace_smul, Matrix.trace_sub, Matrix.trace_mul_comm, sub_self, smul_zero]
+      ⟩
       (star_zero _)
 
 @[simp]
-lemma bracket_toSU3Matrix (a b : JetGaugeAlgebra) :
-    ⁅a, b⁆.toSU3Matrix =
-      Complex.I • (a.toSU3Matrix * b.toSU3Matrix - b.toSU3Matrix * a.toSU3Matrix) := rfl
+lemma bracket_toSU3Matrix (a b : JetGaugeAlgebra)
+    : ⁅a, b⁆.toSU3Matrix
+      = Complex.I • (a.toSU3Matrix * b.toSU3Matrix - b.toSU3Matrix * a.toSU3Matrix) :=
+  rfl
 
 @[simp]
-lemma bracket_toSU2Matrix (a b : JetGaugeAlgebra) :
-    ⁅a, b⁆.toSU2Matrix =
-      Complex.I • (a.toSU2Matrix * b.toSU2Matrix - b.toSU2Matrix * a.toSU2Matrix) := rfl
+lemma bracket_toSU2Matrix (a b : JetGaugeAlgebra)
+    : ⁅a, b⁆.toSU2Matrix
+      = Complex.I • (a.toSU2Matrix * b.toSU2Matrix - b.toSU2Matrix * a.toSU2Matrix) :=
+  rfl
 
-@[simp]
-lemma bracket_toU1Value (a b : JetGaugeAlgebra) :
-    ⁅a, b⁆.toU1Value = 0 := rfl
+@[simp] lemma bracket_toU1Value (a b : JetGaugeAlgebra) : ⁅a, b⁆.toU1Value = 0 := rfl
 
 noncomputable instance : LieRing JetGaugeAlgebra where
-  add_lie a b c := by
-    ext <;> simp [add_mul, mul_add, smul_add, smul_sub] <;> abel
-  lie_add a b c := by
-    ext <;> simp [add_mul, mul_add, smul_add, smul_sub] <;> abel
-  lie_self a := by
-    ext <;> simp
+  add_lie a b c := by ext <;> simp [add_mul, mul_add, smul_add, smul_sub] <;> abel
+  lie_add a b c := by ext <;> simp [add_mul, mul_add, smul_add, smul_sub] <;> abel
+  lie_self a := by ext <;> simp
   leibniz_lie a b c := by
-    refine ext_of_matrix ?_ ?_ ?_ <;>
-      simp only [bracket_toSU3Matrix, bracket_toSU2Matrix, bracket_toU1Value,
-        add_toSU3Matrix, add_toSU2Matrix, add_toU1Value, mul_smul_comm, smul_mul_assoc,
-        smul_smul, Complex.I_mul_I, smul_sub, mul_sub, sub_mul, mul_assoc, add_zero] <;>
-      module
+    refine ext_of_matrix ?_ ?_ ?_
+      <;> simp only [bracket_toSU3Matrix, bracket_toSU2Matrix, bracket_toU1Value, add_toSU3Matrix,
+        add_toSU2Matrix, add_toU1Value, mul_smul_comm, smul_mul_assoc, smul_smul, Complex.I_mul_I,
+        smul_sub, mul_sub, sub_mul, mul_assoc, add_zero]
+      <;> module
 
 noncomputable instance : LieAlgebra ℝ JetGaugeAlgebra where
   lie_smul r a b := by refine ext_of_matrix ?_ ?_ ?_ <;> simp <;> module
@@ -299,33 +319,38 @@ noncomputable instance : LieAlgebra ℝ JetGaugeAlgebra where
 
 -/
 
-/-- The formal derivative in the direction `μ` on the jet gauge algebra, acting
-  entrywise on each factor. It preserves hermiticity since `star` commutes with
-  `pderiv`, and tracelessness since the trace of the entrywise derivative is the
-  derivative of the trace. -/
+/--
+The formal derivative in the direction `μ` on the jet gauge algebra, acting
+entrywise on each factor. It preserves hermiticity since `star` commutes with
+`pderiv`, and tracelessness since the trace of the entrywise derivative is the
+derivative of the trace.
+-/
 noncomputable def deriv (μ : Fin 1 ⊕ Fin 3) : JetGaugeAlgebra →ₗ[ℝ] JetGaugeAlgebra where
-  toFun a := ofMatrixProd
-      (a.toSU3Matrix.map (pderiv μ), a.toSU2Matrix.map (pderiv μ),
-        pderiv μ a.toU1Value)
-      ⟨by
-        ext i j : 1
-        simpa [Matrix.star_apply, Matrix.map_apply, ← SpaceTimeAlgebra.pderiv_star] using
-          congrArg (fun M => pderiv μ (M i j))
-            (show star a.toSU3Matrix = a.toSU3Matrix from a.1.2.1),
-        by rw [← AddMonoidHom.map_trace, show a.toSU3Matrix.trace = 0 from a.1.2.2, map_zero]⟩
-      ⟨by
-        ext i j : 1
-        simpa [Matrix.star_apply, Matrix.map_apply, ← SpaceTimeAlgebra.pderiv_star] using
-          congrArg (fun M => pderiv μ (M i j))
-            (show star a.toSU2Matrix = a.toSU2Matrix from a.2.1.2.1),
-        by rw [← AddMonoidHom.map_trace, show a.toSU2Matrix.trace = 0 from a.2.1.2.2, map_zero]⟩
+  toFun a :=
+    ofMatrixProd (a.toSU3Matrix.map (pderiv μ), a.toSU2Matrix.map (pderiv μ), pderiv μ a.toU1Value)
+      ⟨
+        by
+          ext i j : 1
+          simpa [Matrix.star_apply, Matrix.map_apply, ← SpaceTimeAlgebra.pderiv_star] using
+            congrArg
+              (fun M => pderiv μ (M i j))
+              (show star a.toSU3Matrix = a.toSU3Matrix from a.1.2.1),
+        by rw [← AddMonoidHom.map_trace, show a.toSU3Matrix.trace = 0 from a.1.2.2, map_zero]
+      ⟩
+      ⟨
+        by
+          ext i j : 1
+          simpa [Matrix.star_apply, Matrix.map_apply, ← SpaceTimeAlgebra.pderiv_star] using
+            congrArg
+              (fun M => pderiv μ (M i j))
+              (show star a.toSU2Matrix = a.toSU2Matrix from a.2.1.2.1),
+        by rw [← AddMonoidHom.map_trace, show a.toSU2Matrix.trace = 0 from a.2.1.2.2, map_zero]
+      ⟩
       (by rw [← SpaceTimeAlgebra.pderiv_star, show star a.toU1Value = a.toU1Value from a.2.2.2])
-  map_add' a b := by
-    ext <;> simp [Matrix.map_apply]
+  map_add' a b := by ext <;> simp [Matrix.map_apply]
   map_smul' r a := by
-    refine ext_of_matrix ?_ ?_ ?_ <;>
-      simp only [ofMatrixProd_toSU3Matrix, ofMatrixProd_toSU2Matrix, ofMatrixProd_toU1Value,
-        smul_toSU3Matrix, smul_toSU2Matrix, smul_toU1Value, RingHom.id_apply]
+    refine ext_of_matrix ?_ ?_ ?_ <;> simp only [ofMatrixProd_toSU3Matrix, ofMatrixProd_toSU2Matrix,
+      ofMatrixProd_toU1Value, smul_toSU3Matrix, smul_toSU2Matrix, smul_toU1Value, RingHom.id_apply]
     · ext i j : 1
       simp only [Matrix.map_apply, Matrix.smul_apply]
       rw [← algebraMap_smul ℂ r, Derivation.map_smul, algebraMap_smul]
@@ -335,16 +360,19 @@ noncomputable def deriv (μ : Fin 1 ⊕ Fin 3) : JetGaugeAlgebra →ₗ[ℝ] Jet
     · rw [← algebraMap_smul ℂ r, Derivation.map_smul, algebraMap_smul]
 
 @[simp]
-lemma deriv_toSU3Matrix (μ : Fin 1 ⊕ Fin 3) (a : JetGaugeAlgebra) :
-    (deriv μ a).toSU3Matrix = a.toSU3Matrix.map (pderiv μ) := rfl
+lemma deriv_toSU3Matrix (μ : Fin 1 ⊕ Fin 3) (a : JetGaugeAlgebra)
+    : (deriv μ a).toSU3Matrix = a.toSU3Matrix.map (pderiv μ) :=
+  rfl
 
 @[simp]
-lemma deriv_toSU2Matrix (μ : Fin 1 ⊕ Fin 3) (a : JetGaugeAlgebra) :
-    (deriv μ a).toSU2Matrix = a.toSU2Matrix.map (pderiv μ) := rfl
+lemma deriv_toSU2Matrix (μ : Fin 1 ⊕ Fin 3) (a : JetGaugeAlgebra)
+    : (deriv μ a).toSU2Matrix = a.toSU2Matrix.map (pderiv μ) :=
+  rfl
 
 @[simp]
-lemma deriv_toU1Value (μ : Fin 1 ⊕ Fin 3) (a : JetGaugeAlgebra) :
-    (deriv μ a).toU1Value = pderiv μ a.toU1Value := rfl
+lemma deriv_toU1Value (μ : Fin 1 ⊕ Fin 3) (a : JetGaugeAlgebra)
+    : (deriv μ a).toU1Value = pderiv μ a.toU1Value :=
+  rfl
 
 /-!
 
@@ -352,43 +380,56 @@ lemma deriv_toU1Value (μ : Fin 1 ⊕ Fin 3) (a : JetGaugeAlgebra) :
 
 -/
 
-/-- Multiplication by the spacetime coordinate `x_μ`, entrywise on each factor. It
-  preserves hermiticity since the coordinates are self-adjoint, and tracelessness since
-  it is a scalar. -/
+/--
+Multiplication by the spacetime coordinate `x_μ`, entrywise on each factor. It
+preserves hermiticity since the coordinates are self-adjoint, and tracelessness since
+it is a scalar.
+-/
 noncomputable def coord (μ : Fin 1 ⊕ Fin 3) : JetGaugeAlgebra →ₗ[ℝ] JetGaugeAlgebra where
-  toFun a := ofMatrixProd
-      ((X μ : SpaceTimeAlgebra) • a.toSU3Matrix, (X μ : SpaceTimeAlgebra) • a.toSU2Matrix,
-        (X μ : SpaceTimeAlgebra) * a.toU1Value)
-      ⟨by rw [star_smul, SpaceTimeAlgebra.star_X, show star a.toSU3Matrix =
-          a.toSU3Matrix from a.1.2.1],
-        by rw [Matrix.trace_smul, show a.toSU3Matrix.trace = 0 from a.1.2.2, smul_zero]⟩
-      ⟨by rw [star_smul, SpaceTimeAlgebra.star_X, show star a.toSU2Matrix =
-          a.toSU2Matrix from a.2.1.2.1],
-        by rw [Matrix.trace_smul, show a.toSU2Matrix.trace = 0 from a.2.1.2.2, smul_zero]⟩
+  toFun a :=
+    ofMatrixProd
+      (
+        (X μ : SpaceTimeAlgebra) • a.toSU3Matrix,
+        (X μ : SpaceTimeAlgebra) • a.toSU2Matrix,
+        (X μ : SpaceTimeAlgebra) * a.toU1Value
+      )
+      ⟨
+        by
+          rw [star_smul, SpaceTimeAlgebra.star_X,
+            show star a.toSU3Matrix = a.toSU3Matrix from a.1.2.1],
+        by rw [Matrix.trace_smul, show a.toSU3Matrix.trace = 0 from a.1.2.2, smul_zero]
+      ⟩
+      ⟨
+        by
+          rw [star_smul, SpaceTimeAlgebra.star_X,
+            show star a.toSU2Matrix = a.toSU2Matrix from a.2.1.2.1],
+        by rw [Matrix.trace_smul, show a.toSU2Matrix.trace = 0 from a.2.1.2.2, smul_zero]
+      ⟩
       (by rw [star_mul', SpaceTimeAlgebra.star_X, show star a.toU1Value = a.toU1Value from a.2.2.2])
-  map_add' a b := by
-    ext <;> simp [smul_add, mul_add]
+  map_add' a b := by ext <;> simp [smul_add, mul_add]
   map_smul' r a := by
-    refine ext_of_matrix ?_ ?_ ?_ <;>
-      simp only [ofMatrixProd_toSU3Matrix, ofMatrixProd_toSU2Matrix, ofMatrixProd_toU1Value,
-        smul_toSU3Matrix, smul_toSU2Matrix, smul_toU1Value, RingHom.id_apply, smul_comm r,
-        mul_smul_comm]
+    refine ext_of_matrix ?_ ?_ ?_ <;> simp only [ofMatrixProd_toSU3Matrix, ofMatrixProd_toSU2Matrix,
+      ofMatrixProd_toU1Value, smul_toSU3Matrix, smul_toSU2Matrix, smul_toU1Value, RingHom.id_apply,
+      smul_comm r, mul_smul_comm]
 
 @[simp]
-lemma coord_toSU3Matrix (μ : Fin 1 ⊕ Fin 3) (a : JetGaugeAlgebra) :
-    (coord μ a).toSU3Matrix = (X μ : SpaceTimeAlgebra) • a.toSU3Matrix := rfl
+lemma coord_toSU3Matrix (μ : Fin 1 ⊕ Fin 3) (a : JetGaugeAlgebra)
+    : (coord μ a).toSU3Matrix = (X μ : SpaceTimeAlgebra) • a.toSU3Matrix :=
+  rfl
 
 @[simp]
-lemma coord_toSU2Matrix (μ : Fin 1 ⊕ Fin 3) (a : JetGaugeAlgebra) :
-    (coord μ a).toSU2Matrix = (X μ : SpaceTimeAlgebra) • a.toSU2Matrix := rfl
+lemma coord_toSU2Matrix (μ : Fin 1 ⊕ Fin 3) (a : JetGaugeAlgebra)
+    : (coord μ a).toSU2Matrix = (X μ : SpaceTimeAlgebra) • a.toSU2Matrix :=
+  rfl
 
 @[simp]
-lemma coord_toU1Value (μ : Fin 1 ⊕ Fin 3) (a : JetGaugeAlgebra) :
-    (coord μ a).toU1Value = (X μ : SpaceTimeAlgebra) * a.toU1Value := rfl
+lemma coord_toU1Value (μ : Fin 1 ⊕ Fin 3) (a : JetGaugeAlgebra)
+    : (coord μ a).toU1Value = (X μ : SpaceTimeAlgebra) * a.toU1Value :=
+  rfl
 
 /-- The Leibniz rule for a coordinate: `∂_μ (x_ν a) = x_ν ∂_μ a + δ_{μν} a`. -/
-lemma deriv_coord (μ ν : Fin 1 ⊕ Fin 3) (a : JetGaugeAlgebra) :
-    deriv μ (coord ν a) = coord ν (deriv μ a) + if μ = ν then a else 0 := by
+lemma deriv_coord (μ ν : Fin 1 ⊕ Fin 3) (a : JetGaugeAlgebra)
+    : deriv μ (coord ν a) = coord ν (deriv μ a) + if μ = ν then a else 0 := by
   by_cases h : μ = ν
   · subst h
     rw [ite_eq_left rfl]
@@ -401,8 +442,8 @@ lemma deriv_coord (μ ν : Fin 1 ⊕ Fin 3) (a : JetGaugeAlgebra) :
       simp only [deriv_toSU2Matrix, coord_toSU2Matrix, add_toSU2Matrix, Matrix.map_apply,
         Matrix.smul_apply, Matrix.add_apply, smul_eq_mul, Derivation.leibniz, pderiv_X_self]
       ring_nf
-    · simp only [deriv_toU1Value, coord_toU1Value, add_toU1Value, smul_eq_mul,
-        Derivation.leibniz, pderiv_X_self]
+    · simp only [deriv_toU1Value, coord_toU1Value, add_toU1Value, smul_eq_mul, Derivation.leibniz,
+        pderiv_X_self]
       ring
   · rw [ite_eq_right h, add_zero]
     refine ext_of_matrix ?_ ?_ ?_
@@ -416,16 +457,14 @@ lemma deriv_coord (μ ν : Fin 1 ⊕ Fin 3) (a : JetGaugeAlgebra) :
         pderiv_X_of_ne (Ne.symm h), mul_zero, add_zero]
 
 /-- The coordinates are central for the bracket. -/
-lemma coord_lie (μ : Fin 1 ⊕ Fin 3) (a b : JetGaugeAlgebra) :
-    ⁅coord μ a, b⁆ = coord μ ⁅a, b⁆ := by
-  refine ext_of_matrix ?_ ?_ ?_ <;>
-    simp only [bracket_toSU3Matrix, bracket_toSU2Matrix, bracket_toU1Value, coord_toSU3Matrix,
-      coord_toSU2Matrix, coord_toU1Value, Matrix.smul_mul, Matrix.mul_smul, smul_sub,
-      smul_comm (X μ : SpaceTimeAlgebra) Complex.I, mul_zero]
+lemma coord_lie (μ : Fin 1 ⊕ Fin 3) (a b : JetGaugeAlgebra) : ⁅coord μ a, b⁆ = coord μ ⁅a, b⁆ := by
+  refine ext_of_matrix ?_ ?_ ?_ <;> simp only [bracket_toSU3Matrix, bracket_toSU2Matrix,
+    bracket_toU1Value, coord_toSU3Matrix, coord_toSU2Matrix, coord_toU1Value, Matrix.smul_mul,
+    Matrix.mul_smul, smul_sub, smul_comm (X μ : SpaceTimeAlgebra) Complex.I, mul_zero]
 
 /-- Formal derivatives on the jet gauge algebra commute. -/
-lemma deriv_comm (μ ν : Fin 1 ⊕ Fin 3) (a : JetGaugeAlgebra) :
-    deriv μ (deriv ν a) = deriv ν (deriv μ a) := by
+lemma deriv_comm (μ ν : Fin 1 ⊕ Fin 3) (a : JetGaugeAlgebra)
+    : deriv μ (deriv ν a) = deriv ν (deriv μ a) := by
   refine ext_of_matrix ?_ ?_ ?_
   · ext i j : 1
     simp [Matrix.map_apply, SpaceTimeAlgebra.pderiv_comm μ ν]
@@ -433,29 +472,33 @@ lemma deriv_comm (μ ν : Fin 1 ⊕ Fin 3) (a : JetGaugeAlgebra) :
     simp [Matrix.map_apply, SpaceTimeAlgebra.pderiv_comm μ ν]
   · exact SpaceTimeAlgebra.pderiv_comm μ ν _
 
-/-- The derivative is a derivation of the bracket: the Leibniz rule
-  `deriv μ ⁅x, y⁆ = ⁅deriv μ x, y⁆ + ⁅x, deriv μ y⁆`. -/
-lemma deriv_bracket (μ : Fin 1 ⊕ Fin 3) (x y : JetGaugeAlgebra) :
-    deriv μ ⁅x, y⁆ = ⁅deriv μ x, y⁆ + ⁅x, deriv μ y⁆ := by
-  have hleib : ∀ (κ : Type) [Fintype κ] [DecidableEq κ] (M N : Matrix κ κ SpaceTimeAlgebra),
-      (M * N).map (pderiv μ) = M.map (pderiv μ) * N + M * N.map (pderiv μ) := by
+/--
+The derivative is a derivation of the bracket: the Leibniz rule
+`deriv μ ⁅x, y⁆ = ⁅deriv μ x, y⁆ + ⁅x, deriv μ y⁆`.
+-/
+lemma deriv_bracket (μ : Fin 1 ⊕ Fin 3) (x y : JetGaugeAlgebra)
+    : deriv μ ⁅x, y⁆ = ⁅deriv μ x, y⁆ + ⁅x, deriv μ y⁆ := by
+  have hleib
+      : ∀ (κ : Type) [Fintype κ] [DecidableEq κ] (M N : Matrix κ κ SpaceTimeAlgebra),
+        (M * N).map (pderiv μ) = M.map (pderiv μ) * N + M * N.map (pderiv μ) := by
     intro κ _ _ M N
     ext i j : 1
-    simp only [Matrix.map_apply, Matrix.mul_apply, Matrix.add_apply, map_sum,
-      Derivation.leibniz, smul_eq_mul]
+    simp only [Matrix.map_apply, Matrix.mul_apply, Matrix.add_apply, map_sum, Derivation.leibniz,
+      smul_eq_mul]
     exact (Finset.sum_congr rfl fun k _ => by ring).trans Finset.sum_add_distrib
-  have hsmul : ∀ (κ : Type) [Fintype κ] [DecidableEq κ] (c : ℂ) (M : Matrix κ κ SpaceTimeAlgebra),
-      (c • M).map (pderiv μ) = c • M.map (pderiv μ) :=
-    fun _ _ _ _ _ => Matrix.ext fun _ _ => Derivation.map_smul _ _ _
-  have hsub : ∀ (κ : Type) [Fintype κ] [DecidableEq κ] (M N : Matrix κ κ SpaceTimeAlgebra),
-      (M - N).map (pderiv μ) = M.map (pderiv μ) - N.map (pderiv μ) := by
+  have hsmul
+      : ∀ (κ : Type) [Fintype κ] [DecidableEq κ] (c : ℂ) (M : Matrix κ κ SpaceTimeAlgebra),
+        (c • M).map (pderiv μ) = c • M.map (pderiv μ) := fun _ _ _ _ _ =>
+    Matrix.ext fun _ _ => Derivation.map_smul _ _ _
+  have hsub
+      : ∀ (κ : Type) [Fintype κ] [DecidableEq κ] (M N : Matrix κ κ SpaceTimeAlgebra),
+        (M - N).map (pderiv μ) = M.map (pderiv μ) - N.map (pderiv μ) := by
     intro κ _ _ M N
     ext i j : 1
     simp only [Matrix.map_apply, Matrix.sub_apply, map_sub]
-  refine ext_of_matrix ?_ ?_ ?_ <;>
-    simp only [deriv_toSU3Matrix, deriv_toSU2Matrix, deriv_toU1Value, bracket_toSU3Matrix,
-      bracket_toSU2Matrix, bracket_toU1Value, add_toSU3Matrix, add_toSU2Matrix,
-      add_toU1Value, hsmul, hsub, hleib, map_zero, add_zero]
+  refine ext_of_matrix ?_ ?_ ?_ <;> simp only [deriv_toSU3Matrix, deriv_toSU2Matrix,
+    deriv_toU1Value, bracket_toSU3Matrix, bracket_toSU2Matrix, bracket_toU1Value, add_toSU3Matrix,
+    add_toSU2Matrix, add_toU1Value, hsmul, hsub, hleib, map_zero, add_zero]
   · rw [← smul_add]
     congr 1
     abel
@@ -468,85 +511,89 @@ lemma deriv_bracket (μ : Fin 1 ⊕ Fin 3) (x y : JetGaugeAlgebra) :
 ## F. The iterated derivative
 
 -/
-/-- Post-composition with `deriv` is right-commutative, since formal derivatives
-  commute (`deriv_comm`). This is what allows iterated derivatives to be indexed by a
-  `Multiset` of directions. -/
-instance : RightCommutative
-    (fun (D : JetGaugeAlgebra →ₗ[ℝ] JetGaugeAlgebra) (μ : Fin 1 ⊕ Fin 3) => D.comp (deriv μ)) where
+/--
+Post-composition with `deriv` is right-commutative, since formal derivatives
+commute (`deriv_comm`). This is what allows iterated derivatives to be indexed by a
+`Multiset` of directions.
+-/
+instance
+    : RightCommutative (fun (D : JetGaugeAlgebra →ₗ[ℝ] JetGaugeAlgebra) (μ : Fin 1 ⊕ Fin 3) =>
+      D.comp (deriv μ)) where
   right_comm D μ ν := by
     refine LinearMap.ext fun a => ?_
     exact congrArg D (deriv_comm μ ν a)
 
-/-- The iterated formal derivative on the jet gauge algebra, in the (unordered, since
-  derivatives commute) directions given by the multiset `μs`. -/
-noncomputable def iteratedDeriv (μs : Multiset (Fin 1 ⊕ Fin 3)) :
-    JetGaugeAlgebra →ₗ[ℝ] JetGaugeAlgebra :=
+/--
+The iterated formal derivative on the jet gauge algebra, in the (unordered, since
+derivatives commute) directions given by the multiset `μs`.
+-/
+noncomputable def iteratedDeriv (μs : Multiset (Fin 1 ⊕ Fin 3))
+    : JetGaugeAlgebra →ₗ[ℝ] JetGaugeAlgebra :=
   μs.foldl (fun D μ => D.comp (deriv μ)) LinearMap.id
 
-@[simp]
-lemma iteratedDeriv_zero : iteratedDeriv 0 = LinearMap.id := by
-  simp [iteratedDeriv]
+@[simp] lemma iteratedDeriv_zero : iteratedDeriv 0 = LinearMap.id := by simp [iteratedDeriv]
 
-lemma iteratedDeriv_cons (μ : Fin 1 ⊕ Fin 3) (μs : Multiset (Fin 1 ⊕ Fin 3)) :
-    iteratedDeriv (μ ::ₘ μs) = (deriv μ).comp (iteratedDeriv μs) := by
-  have h : ∀ (s : Multiset (Fin 1 ⊕ Fin 3)) (D : JetGaugeAlgebra →ₗ[ℝ] JetGaugeAlgebra),
-      s.foldl (fun D μ => D.comp (deriv μ)) D = D.comp (iteratedDeriv s) := by
+lemma iteratedDeriv_cons (μ : Fin 1 ⊕ Fin 3) (μs : Multiset (Fin 1 ⊕ Fin 3))
+    : iteratedDeriv (μ ::ₘ μs) = (deriv μ).comp (iteratedDeriv μs) := by
+  have h
+      : ∀ (s : Multiset (Fin 1 ⊕ Fin 3)) (D : JetGaugeAlgebra →ₗ[ℝ] JetGaugeAlgebra),
+        s.foldl (fun D μ => D.comp (deriv μ)) D = D.comp (iteratedDeriv s) := by
     intro s
     induction s using Multiset.induction_on with
     | empty => intro D; simp [iteratedDeriv]
     | cons κ t ih =>
-        intro D
-        rw [iteratedDeriv, Multiset.foldl_cons, Multiset.foldl_cons, ih, ih]
-        simp [LinearMap.comp_assoc]
+      intro D
+      rw [iteratedDeriv, Multiset.foldl_cons, Multiset.foldl_cons, ih, ih]
+      simp [LinearMap.comp_assoc]
   rw [iteratedDeriv, Multiset.foldl_cons, h]
   simp
 
-/-- The iterated derivative is additive in the multiset of directions: deriving
-  along `s + t` is deriving along `t` and then along `s`. -/
-lemma iteratedDeriv_add (s t : Multiset (Fin 1 ⊕ Fin 3)) :
-    iteratedDeriv (s + t) = (iteratedDeriv s).comp (iteratedDeriv t) := by
+/--
+The iterated derivative is additive in the multiset of directions: deriving
+along `s + t` is deriving along `t` and then along `s`.
+-/
+lemma iteratedDeriv_add (s t : Multiset (Fin 1 ⊕ Fin 3))
+    : iteratedDeriv (s + t) = (iteratedDeriv s).comp (iteratedDeriv t) := by
   induction s using Multiset.induction_on with
   | empty => simp [iteratedDeriv_zero]
   | cons μ s ih =>
-      rw [Multiset.cons_add, iteratedDeriv_cons, iteratedDeriv_cons, ih,
-        LinearMap.comp_assoc]
+    rw [Multiset.cons_add, iteratedDeriv_cons, iteratedDeriv_cons, ih, LinearMap.comp_assoc]
 
 @[simp]
-lemma iteratedDeriv_singleton (μ : Fin 1 ⊕ Fin 3) :
-    iteratedDeriv ({μ} : Multiset (Fin 1 ⊕ Fin 3)) = deriv μ := by
+lemma iteratedDeriv_singleton (μ : Fin 1 ⊕ Fin 3)
+    : iteratedDeriv ({μ} : Multiset (Fin 1 ⊕ Fin 3)) = deriv μ := by
   rw [show ({μ} : Multiset (Fin 1 ⊕ Fin 3)) = μ ::ₘ 0 from rfl, iteratedDeriv_cons,
     iteratedDeriv_zero, LinearMap.comp_id]
 
-lemma iteratedDeriv_toSU3Matrix (s : Multiset (Fin 1 ⊕ Fin 3)) (a : JetGaugeAlgebra) :
-    (iteratedDeriv s a).toSU3Matrix =
-      a.toSU3Matrix.map fun f => SpaceTimeAlgebra.iteratedPDeriv s f := by
+lemma iteratedDeriv_toSU3Matrix (s : Multiset (Fin 1 ⊕ Fin 3)) (a : JetGaugeAlgebra)
+    : (iteratedDeriv s a).toSU3Matrix
+      = a.toSU3Matrix.map fun f => SpaceTimeAlgebra.iteratedPDeriv s f := by
   induction s using Multiset.induction_on with
   | empty => simp [iteratedDeriv_zero]
   | cons μ t ih =>
-      rw [iteratedDeriv_cons, LinearMap.comp_apply, deriv_toSU3Matrix, ih]
-      ext i j : 1
-      simp only [Matrix.map_apply, SpaceTimeAlgebra.iteratedPDeriv_cons]
-      exact (SpaceTimeAlgebra.iteratedPDeriv_pderiv t μ _).symm
+    rw [iteratedDeriv_cons, LinearMap.comp_apply, deriv_toSU3Matrix, ih]
+    ext i j : 1
+    simp only [Matrix.map_apply, SpaceTimeAlgebra.iteratedPDeriv_cons]
+    exact (SpaceTimeAlgebra.iteratedPDeriv_pderiv t μ _).symm
 
-lemma iteratedDeriv_toSU2Matrix (s : Multiset (Fin 1 ⊕ Fin 3)) (a : JetGaugeAlgebra) :
-    (iteratedDeriv s a).toSU2Matrix =
-      a.toSU2Matrix.map fun f => SpaceTimeAlgebra.iteratedPDeriv s f := by
+lemma iteratedDeriv_toSU2Matrix (s : Multiset (Fin 1 ⊕ Fin 3)) (a : JetGaugeAlgebra)
+    : (iteratedDeriv s a).toSU2Matrix
+      = a.toSU2Matrix.map fun f => SpaceTimeAlgebra.iteratedPDeriv s f := by
   induction s using Multiset.induction_on with
   | empty => simp [iteratedDeriv_zero]
   | cons μ t ih =>
-      rw [iteratedDeriv_cons, LinearMap.comp_apply, deriv_toSU2Matrix, ih]
-      ext i j : 1
-      simp only [Matrix.map_apply, SpaceTimeAlgebra.iteratedPDeriv_cons]
-      exact (SpaceTimeAlgebra.iteratedPDeriv_pderiv t μ _).symm
+    rw [iteratedDeriv_cons, LinearMap.comp_apply, deriv_toSU2Matrix, ih]
+    ext i j : 1
+    simp only [Matrix.map_apply, SpaceTimeAlgebra.iteratedPDeriv_cons]
+    exact (SpaceTimeAlgebra.iteratedPDeriv_pderiv t μ _).symm
 
-lemma iteratedDeriv_toU1Value (s : Multiset (Fin 1 ⊕ Fin 3)) (a : JetGaugeAlgebra) :
-    (iteratedDeriv s a).toU1Value = SpaceTimeAlgebra.iteratedPDeriv s a.toU1Value := by
+lemma iteratedDeriv_toU1Value (s : Multiset (Fin 1 ⊕ Fin 3)) (a : JetGaugeAlgebra)
+    : (iteratedDeriv s a).toU1Value = SpaceTimeAlgebra.iteratedPDeriv s a.toU1Value := by
   induction s using Multiset.induction_on with
   | empty => simp [iteratedDeriv_zero]
   | cons μ t ih =>
-      rw [iteratedDeriv_cons, LinearMap.comp_apply, deriv_toU1Value, ih,
-        SpaceTimeAlgebra.iteratedPDeriv_cons, SpaceTimeAlgebra.iteratedPDeriv_pderiv]
-
+    rw [iteratedDeriv_cons, LinearMap.comp_apply, deriv_toU1Value, ih,
+      SpaceTimeAlgebra.iteratedPDeriv_cons, SpaceTimeAlgebra.iteratedPDeriv_pderiv]
 
 /-!
 
@@ -554,39 +601,49 @@ lemma iteratedDeriv_toU1Value (s : Multiset (Fin 1 ⊕ Fin 3)) (a : JetGaugeAlge
 
 -/
 
-/-- The Taylor coefficient of an element of the jet gauge algebra at the monomial
-  given by the multiset `r` of spacetime directions, taken entrywise, as an
-  `ℝ`-linear map to the constant gauge algebra `GaugeAlgebra`.
+/--
+The Taylor coefficient of an element of the jet gauge algebra at the monomial
+given by the multiset `r` of spacetime directions, taken entrywise, as an
+`ℝ`-linear map to the constant gauge algebra `GaugeAlgebra`.
 
-  For `r ≠ 0` this is only linear: the coefficient of a product is a convolution of
-  coefficients, so it does not respect the bracket. The zeroth coefficient does; see
-  `eval` for that morphism of Lie algebras. -/
-noncomputable def taylorCoeff (r : Multiset (Fin 1 ⊕ Fin 3)) :
-    JetGaugeAlgebra →ₗ[ℝ] GaugeAlgebra where
-  toFun a := GaugeAlgebra.ofMatrixProd
-      (a.toSU3Matrix.map (coeff r.toFinsupp), a.toSU2Matrix.map (coeff r.toFinsupp),
-        coeff r.toFinsupp a.toU1Value)
-      ⟨by
-        ext i j : 1
-        simpa [Matrix.star_apply, Matrix.map_apply] using
-          congrArg (fun M => coeff r.toFinsupp (M i j))
-            (show star a.toSU3Matrix = a.toSU3Matrix from a.1.2.1),
-        by rw [← AddMonoidHom.map_trace, show a.toSU3Matrix.trace = 0 from a.1.2.2, map_zero]⟩
-      ⟨by
-        ext i j : 1
-        simpa [Matrix.star_apply, Matrix.map_apply] using
-          congrArg (fun M => coeff r.toFinsupp (M i j))
-            (show star a.toSU2Matrix = a.toSU2Matrix from a.2.1.2.1),
-        by rw [← AddMonoidHom.map_trace, show a.toSU2Matrix.trace = 0 from a.2.1.2.2, map_zero]⟩
+For `r ≠ 0` this is only linear: the coefficient of a product is a convolution of
+coefficients, so it does not respect the bracket. The zeroth coefficient does; see
+`eval` for that morphism of Lie algebras.
+-/
+noncomputable def taylorCoeff (r : Multiset (Fin 1 ⊕ Fin 3))
+    : JetGaugeAlgebra →ₗ[ℝ] GaugeAlgebra where
+  toFun a :=
+    GaugeAlgebra.ofMatrixProd
+      (
+        a.toSU3Matrix.map (coeff r.toFinsupp),
+        a.toSU2Matrix.map (coeff r.toFinsupp),
+        coeff r.toFinsupp a.toU1Value
+      )
+      ⟨
+        by
+          ext i j : 1
+          simpa [Matrix.star_apply, Matrix.map_apply] using
+            congrArg
+              (fun M => coeff r.toFinsupp (M i j))
+              (show star a.toSU3Matrix = a.toSU3Matrix from a.1.2.1),
+        by rw [← AddMonoidHom.map_trace, show a.toSU3Matrix.trace = 0 from a.1.2.2, map_zero]
+      ⟩
+      ⟨
+        by
+          ext i j : 1
+          simpa [Matrix.star_apply, Matrix.map_apply] using
+            congrArg
+              (fun M => coeff r.toFinsupp (M i j))
+              (show star a.toSU2Matrix = a.toSU2Matrix from a.2.1.2.1),
+        by rw [← AddMonoidHom.map_trace, show a.toSU2Matrix.trace = 0 from a.2.1.2.2, map_zero]
+      ⟩
       (by rw [← SpaceTimeAlgebra.coeff_star, show star a.toU1Value = a.toU1Value from a.2.2.2])
-  map_add' a b := by
-    ext <;> simp [Matrix.map_apply]
+  map_add' a b := by ext <;> simp [Matrix.map_apply]
   map_smul' t a := by
-    refine GaugeAlgebra.ext_of_matrix ?_ ?_ ?_ <;>
-      simp only [GaugeAlgebra.ofMatrixProd_toSU3Matrix, GaugeAlgebra.ofMatrixProd_toSU2Matrix,
-        GaugeAlgebra.ofMatrixProd_toU1Value, smul_toSU3Matrix, smul_toSU2Matrix, smul_toU1Value,
-        GaugeAlgebra.smul_toSU3Matrix, GaugeAlgebra.smul_toSU2Matrix, GaugeAlgebra.smul_toU1Value,
-        RingHom.id_apply]
+    refine GaugeAlgebra.ext_of_matrix ?_ ?_ ?_ <;> simp only [GaugeAlgebra.ofMatrixProd_toSU3Matrix,
+      GaugeAlgebra.ofMatrixProd_toSU2Matrix, GaugeAlgebra.ofMatrixProd_toU1Value, smul_toSU3Matrix,
+      smul_toSU2Matrix, smul_toU1Value, GaugeAlgebra.smul_toSU3Matrix,
+      GaugeAlgebra.smul_toSU2Matrix, GaugeAlgebra.smul_toU1Value, RingHom.id_apply]
     · ext i j : 1
       simp only [Matrix.map_apply, Matrix.smul_apply]
       rw [← algebraMap_smul ℂ t, map_smul, algebraMap_smul]
@@ -596,65 +653,83 @@ noncomputable def taylorCoeff (r : Multiset (Fin 1 ⊕ Fin 3)) :
     · rw [← algebraMap_smul ℂ t, map_smul, algebraMap_smul]
 
 @[simp]
-lemma taylorCoeff_toSU3Matrix (r : Multiset (Fin 1 ⊕ Fin 3)) (a : JetGaugeAlgebra) :
-    (taylorCoeff r a).toSU3Matrix = a.toSU3Matrix.map (coeff r.toFinsupp) := rfl
+lemma taylorCoeff_toSU3Matrix (r : Multiset (Fin 1 ⊕ Fin 3)) (a : JetGaugeAlgebra)
+    : (taylorCoeff r a).toSU3Matrix = a.toSU3Matrix.map (coeff r.toFinsupp) :=
+  rfl
 
 @[simp]
-lemma taylorCoeff_toSU2Matrix (r : Multiset (Fin 1 ⊕ Fin 3)) (a : JetGaugeAlgebra) :
-    (taylorCoeff r a).toSU2Matrix = a.toSU2Matrix.map (coeff r.toFinsupp) := rfl
+lemma taylorCoeff_toSU2Matrix (r : Multiset (Fin 1 ⊕ Fin 3)) (a : JetGaugeAlgebra)
+    : (taylorCoeff r a).toSU2Matrix = a.toSU2Matrix.map (coeff r.toFinsupp) :=
+  rfl
 
 @[simp]
-lemma taylorCoeff_toU1Value (r : Multiset (Fin 1 ⊕ Fin 3)) (a : JetGaugeAlgebra) :
-    (taylorCoeff r a).toU1Value = coeff r.toFinsupp a.toU1Value := rfl
+lemma taylorCoeff_toU1Value (r : Multiset (Fin 1 ⊕ Fin 3)) (a : JetGaugeAlgebra)
+    : (taylorCoeff r a).toU1Value = coeff r.toFinsupp a.toU1Value :=
+  rfl
 
-/-- The zeroth Taylor coefficient respects the bracket, since the constant coefficient
-  of a product of jets is the product of the constant coefficients. -/
-lemma taylorCoeff_zero_bracket (a b : JetGaugeAlgebra) :
-    taylorCoeff 0 ⁅a, b⁆ = ⁅taylorCoeff 0 a, taylorCoeff 0 b⁆ := by
+/--
+The zeroth Taylor coefficient respects the bracket, since the constant coefficient
+of a product of jets is the product of the constant coefficients.
+-/
+lemma taylorCoeff_zero_bracket (a b : JetGaugeAlgebra)
+    : taylorCoeff 0 ⁅a, b⁆ = ⁅taylorCoeff 0 a, taylorCoeff 0 b⁆ := by
   refine GaugeAlgebra.ext_of_matrix ?_ ?_ ?_
   · ext i j : 1
-    simp [Matrix.map_apply, Matrix.mul_apply, smul_eq_mul,
-      coeff_zero_eq_constantCoeff, map_sum, Finset.mul_sum, mul_sub]
+    simp [Matrix.map_apply, Matrix.mul_apply, smul_eq_mul, coeff_zero_eq_constantCoeff, map_sum,
+      Finset.mul_sum, mul_sub]
   · ext i j : 1
-    simp [Matrix.map_apply, Matrix.mul_apply, smul_eq_mul,
-      coeff_zero_eq_constantCoeff, mul_sub]
+    simp [Matrix.map_apply, Matrix.mul_apply, smul_eq_mul, coeff_zero_eq_constantCoeff, mul_sub]
   · simp
 
-/-- Evaluation of the jet gauge algebra at the base point: the zeroth Taylor
-  coefficient, as a morphism of Lie algebras. -/
-noncomputable def eval : JetGaugeAlgebra →ₗ⁅ℝ⁆ GaugeAlgebra :=
-  { taylorCoeff 0 with map_lie' := taylorCoeff_zero_bracket _ _ }
+/--
+Evaluation of the jet gauge algebra at the base point: the zeroth Taylor
+coefficient, as a morphism of Lie algebras.
+-/
+noncomputable def eval : JetGaugeAlgebra →ₗ⁅ℝ⁆ GaugeAlgebra := {
+  taylorCoeff 0 with
+  map_lie' := taylorCoeff_zero_bracket _ _
+}
 
-/-- The inclusion of the constant gauge algebra into the jet gauge algebra: the jets
-  with no spacetime dependence, given entrywise by the constant power series. This is
-  a section of `eval`. -/
+/--
+The inclusion of the constant gauge algebra into the jet gauge algebra: the jets
+with no spacetime dependence, given entrywise by the constant power series. This is
+a section of `eval`.
+-/
 noncomputable def ofConstant : GaugeAlgebra →ₗ[ℝ] JetGaugeAlgebra where
-  toFun a := ofMatrixProd
-      (a.toSU3Matrix.map (C : ℂ → SpaceTimeAlgebra), a.toSU2Matrix.map (C : ℂ → SpaceTimeAlgebra),
-        C a.toU1Value)
-      ⟨by
-        ext i j : 1
-        simpa [Matrix.star_apply, Matrix.map_apply] using
-          congrArg (fun M => (C (M i j) : SpaceTimeAlgebra))
-            (show star a.toSU3Matrix = a.toSU3Matrix from a.1.2.1),
-        by rw [← AddMonoidHom.map_trace, show a.toSU3Matrix.trace = 0 from a.1.2.2, map_zero]⟩
-      ⟨by
-        ext i j : 1
-        simpa [Matrix.star_apply, Matrix.map_apply] using
-          congrArg (fun M => (C (M i j) : SpaceTimeAlgebra))
-            (show star a.toSU2Matrix = a.toSU2Matrix from a.2.1.2.1),
-        by rw [← AddMonoidHom.map_trace, show a.toSU2Matrix.trace = 0 from a.2.1.2.2, map_zero]⟩
+  toFun a :=
+    ofMatrixProd
+      (
+        a.toSU3Matrix.map (C : ℂ → SpaceTimeAlgebra),
+        a.toSU2Matrix.map (C : ℂ → SpaceTimeAlgebra),
+        C a.toU1Value
+      )
+      ⟨
+        by
+          ext i j : 1
+          simpa [Matrix.star_apply, Matrix.map_apply] using
+            congrArg
+              (fun M => (C (M i j) : SpaceTimeAlgebra))
+              (show star a.toSU3Matrix = a.toSU3Matrix from a.1.2.1),
+        by rw [← AddMonoidHom.map_trace, show a.toSU3Matrix.trace = 0 from a.1.2.2, map_zero]
+      ⟩
+      ⟨
+        by
+          ext i j : 1
+          simpa [Matrix.star_apply, Matrix.map_apply] using
+            congrArg
+              (fun M => (C (M i j) : SpaceTimeAlgebra))
+              (show star a.toSU2Matrix = a.toSU2Matrix from a.2.1.2.1),
+        by rw [← AddMonoidHom.map_trace, show a.toSU2Matrix.trace = 0 from a.2.1.2.2, map_zero]
+      ⟩
       (by rw [SpaceTimeAlgebra.star_C, show star a.toU1Value = a.toU1Value from a.2.2.2])
-  map_add' a b := by
-    ext <;> simp [Matrix.map_apply]
+  map_add' a b := by ext <;> simp [Matrix.map_apply]
   map_smul' t a := by
     have hC : ∀ x : ℂ, (C (t • x) : SpaceTimeAlgebra) = t • C x := fun x => by
       rw [Algebra.smul_def, Algebra.smul_def, map_mul, MvPowerSeries.algebraMap_apply]
-    refine ext_of_matrix ?_ ?_ ?_ <;>
-      simp only [ofMatrixProd_toSU3Matrix, ofMatrixProd_toSU2Matrix, ofMatrixProd_toU1Value,
-        GaugeAlgebra.smul_toSU3Matrix, GaugeAlgebra.smul_toSU2Matrix,
-        GaugeAlgebra.smul_toU1Value, smul_toSU3Matrix, smul_toSU2Matrix, smul_toU1Value,
-        RingHom.id_apply]
+    refine ext_of_matrix ?_ ?_ ?_
+      <;> simp only [ofMatrixProd_toSU3Matrix, ofMatrixProd_toSU2Matrix, ofMatrixProd_toU1Value,
+        GaugeAlgebra.smul_toSU3Matrix, GaugeAlgebra.smul_toSU2Matrix, GaugeAlgebra.smul_toU1Value,
+        smul_toSU3Matrix, smul_toSU2Matrix, smul_toU1Value, RingHom.id_apply]
     · ext i j : 1
       simp only [Matrix.map_apply, Matrix.smul_apply]
       exact hC _
@@ -664,16 +739,17 @@ noncomputable def ofConstant : GaugeAlgebra →ₗ[ℝ] JetGaugeAlgebra where
     · exact hC _
 
 @[simp]
-lemma ofConstant_toSU3Matrix (a : GaugeAlgebra) :
-    (ofConstant a).toSU3Matrix = a.toSU3Matrix.map (C : ℂ → SpaceTimeAlgebra) := rfl
+lemma ofConstant_toSU3Matrix (a : GaugeAlgebra)
+    : (ofConstant a).toSU3Matrix = a.toSU3Matrix.map (C : ℂ → SpaceTimeAlgebra) :=
+  rfl
 
 @[simp]
-lemma ofConstant_toSU2Matrix (a : GaugeAlgebra) :
-    (ofConstant a).toSU2Matrix = a.toSU2Matrix.map (C : ℂ → SpaceTimeAlgebra) := rfl
+lemma ofConstant_toSU2Matrix (a : GaugeAlgebra)
+    : (ofConstant a).toSU2Matrix = a.toSU2Matrix.map (C : ℂ → SpaceTimeAlgebra) :=
+  rfl
 
 @[simp]
-lemma ofConstant_toU1Value (a : GaugeAlgebra) :
-    (ofConstant a).toU1Value = C a.toU1Value := rfl
+lemma ofConstant_toU1Value (a : GaugeAlgebra) : (ofConstant a).toU1Value = C a.toU1Value := rfl
 
 lemma eval_apply (a : JetGaugeAlgebra) : eval a = taylorCoeff 0 a := rfl
 
@@ -683,24 +759,22 @@ lemma eval_ofConstant (a : GaugeAlgebra) : eval (ofConstant a) = a := by
   · ext i j : 1
     simp [Matrix.map_apply, eval_apply, coeff_zero_eq_constantCoeff, constantCoeff_C]
   · ext i j : 1
-    simp [Matrix.map_apply,  eval_apply, coeff_zero_eq_constantCoeff, constantCoeff_C]
+    simp [Matrix.map_apply, eval_apply, coeff_zero_eq_constantCoeff, constantCoeff_C]
   · simp [coeff_zero_eq_constantCoeff, eval_apply, constantCoeff_C]
 
-
-lemma eval_toSU3Matrix_apply (a : JetGaugeAlgebra) (i j : Fin 3) :
-    (eval a).toSU3Matrix i j = constantCoeff (a.toSU3Matrix i j) := by
+lemma eval_toSU3Matrix_apply (a : JetGaugeAlgebra) (i j : Fin 3)
+    : (eval a).toSU3Matrix i j = constantCoeff (a.toSU3Matrix i j) := by
   rw [show eval a = taylorCoeff 0 a from rfl, taylorCoeff_toSU3Matrix, Matrix.map_apply,
     show Multiset.toFinsupp (0 : Multiset (Fin 1 ⊕ Fin 3)) = 0 from map_zero _,
     coeff_zero_eq_constantCoeff]
 
-lemma eval_toSU2Matrix_apply (a : JetGaugeAlgebra) (i j : Fin 2) :
-    (eval a).toSU2Matrix i j = constantCoeff (a.toSU2Matrix i j) := by
+lemma eval_toSU2Matrix_apply (a : JetGaugeAlgebra) (i j : Fin 2)
+    : (eval a).toSU2Matrix i j = constantCoeff (a.toSU2Matrix i j) := by
   rw [show eval a = taylorCoeff 0 a from rfl, taylorCoeff_toSU2Matrix, Matrix.map_apply,
     show Multiset.toFinsupp (0 : Multiset (Fin 1 ⊕ Fin 3)) = 0 from map_zero _,
     coeff_zero_eq_constantCoeff]
 
-lemma eval_toU1Value_eq (a : JetGaugeAlgebra) :
-    (eval a).toU1Value = constantCoeff a.toU1Value := by
+lemma eval_toU1Value_eq (a : JetGaugeAlgebra) : (eval a).toU1Value = constantCoeff a.toU1Value := by
   rw [show eval a = taylorCoeff 0 a from rfl, taylorCoeff_toU1Value,
     show Multiset.toFinsupp (0 : Multiset (Fin 1 ⊕ Fin 3)) = 0 from map_zero _,
     coeff_zero_eq_constantCoeff]
@@ -715,87 +789,87 @@ lemma eval_coord (μ : Fin 1 ⊕ Fin 3) (a : JetGaugeAlgebra) : eval (coord μ a
   · simp [eval_toU1Value_eq]
 
 /-- The `su(3)` component of the base-point Taylor coefficients. -/
-lemma eval_iteratedDeriv_toSU3Matrix (x : Multiset (Fin 1 ⊕ Fin 3)) (a : JetGaugeAlgebra) :
-    (eval (iteratedDeriv x a)).toSU3Matrix
+lemma eval_iteratedDeriv_toSU3Matrix (x : Multiset (Fin 1 ⊕ Fin 3)) (a : JetGaugeAlgebra)
+    : (eval (iteratedDeriv x a)).toSU3Matrix
       = a.toSU3Matrix.map fun f => constantCoeff (SpaceTimeAlgebra.iteratedPDeriv x f) := by
   ext i j
   rw [eval_toSU3Matrix_apply, iteratedDeriv_toSU3Matrix, Matrix.map_apply, Matrix.map_apply]
 
 /-- The `su(2)` component of the base-point Taylor coefficients. -/
-lemma eval_iteratedDeriv_toSU2Matrix (x : Multiset (Fin 1 ⊕ Fin 3)) (a : JetGaugeAlgebra) :
-    (eval (iteratedDeriv x a)).toSU2Matrix
+lemma eval_iteratedDeriv_toSU2Matrix (x : Multiset (Fin 1 ⊕ Fin 3)) (a : JetGaugeAlgebra)
+    : (eval (iteratedDeriv x a)).toSU2Matrix
       = a.toSU2Matrix.map fun f => constantCoeff (SpaceTimeAlgebra.iteratedPDeriv x f) := by
   ext i j
   rw [eval_toSU2Matrix_apply, iteratedDeriv_toSU2Matrix, Matrix.map_apply, Matrix.map_apply]
 
 /-- The `u(1)` component of the base-point Taylor coefficients. -/
-lemma eval_iteratedDeriv_toU1Value (x : Multiset (Fin 1 ⊕ Fin 3)) (a : JetGaugeAlgebra) :
-    (eval (iteratedDeriv x a)).toU1Value
+lemma eval_iteratedDeriv_toU1Value (x : Multiset (Fin 1 ⊕ Fin 3)) (a : JetGaugeAlgebra)
+    : (eval (iteratedDeriv x a)).toU1Value
       = constantCoeff (SpaceTimeAlgebra.iteratedPDeriv x a.toU1Value) := by
   rw [eval_toU1Value_eq, iteratedDeriv_toU1Value]
 
-
-/-- Taylor determinacy: a jet gauge algebra element is determined by the base-point
-  values of its iterated derivatives. -/
-lemma ext_of_eval_iteratedDeriv {x y : JetGaugeAlgebra}
-    (h : ∀ s, eval (iteratedDeriv s x) = eval (iteratedDeriv s y)) : x = y := by
-  have key : ∀ (n : ℕ) (x y : JetGaugeAlgebra),
-      (∀ s, eval (iteratedDeriv s x) = eval (iteratedDeriv s y)) →
-      ∀ m : (Fin 1 ⊕ Fin 3) →₀ ℕ, Finsupp.degree m = n →
-        (∀ i j, coeff m (x.toSU3Matrix i j) = coeff m (y.toSU3Matrix i j)) ∧
-        (∀ i j, coeff m (x.toSU2Matrix i j) = coeff m (y.toSU2Matrix i j)) ∧
-        coeff m x.toU1Value = coeff m y.toU1Value := by
+/--
+Taylor determinacy: a jet gauge algebra element is determined by the base-point
+values of its iterated derivatives.
+-/
+lemma ext_of_eval_iteratedDeriv
+    {x y : JetGaugeAlgebra} (h : ∀ s, eval (iteratedDeriv s x) = eval (iteratedDeriv s y))
+    : x = y := by
+  have key
+      : ∀ (n : ℕ) (x y : JetGaugeAlgebra),
+        (∀ s, eval (iteratedDeriv s x) = eval (iteratedDeriv s y))
+          → ∀ m : (Fin 1 ⊕ Fin 3) →₀ ℕ,
+            Finsupp.degree m = n
+              → (∀ i j, coeff m (x.toSU3Matrix i j) = coeff m (y.toSU3Matrix i j))
+                ∧ (∀ i j, coeff m (x.toSU2Matrix i j) = coeff m (y.toSU2Matrix i j))
+                ∧ coeff m x.toU1Value = coeff m y.toU1Value := by
     intro n
     induction n with
     | zero =>
-        intro x y hxy m hm
-        have hm0 : m = 0 := (Finsupp.degree_eq_zero_iff m).mp hm
-        subst hm0
-        have h0 := hxy 0
-        rw [iteratedDeriv_zero] at h0
-        simp only [LinearMap.id_coe, id_eq] at h0
-        have h0' : taylorCoeff 0 x = taylorCoeff 0 y := h0
-        refine ⟨fun i j => ?_, fun i j => ?_, ?_⟩
-        · simpa [Matrix.map_apply] using
-            congrArg (fun g => GaugeAlgebra.toSU3Matrix g i j) h0'
-        · simpa [Matrix.map_apply] using
-            congrArg (fun g => GaugeAlgebra.toSU2Matrix g i j) h0'
-        · simpa using congrArg GaugeAlgebra.toU1Value h0'
+      intro x y hxy m hm
+      have hm0 : m = 0 := (Finsupp.degree_eq_zero_iff m).mp hm
+      subst hm0
+      have h0 := hxy 0
+      rw [iteratedDeriv_zero] at h0
+      simp only [LinearMap.id_coe, id_eq] at h0
+      have h0' : taylorCoeff 0 x = taylorCoeff 0 y := h0
+      refine ⟨fun i j => ?_, fun i j => ?_, ?_⟩
+      · simpa [Matrix.map_apply] using congrArg (fun g => GaugeAlgebra.toSU3Matrix g i j) h0'
+      · simpa [Matrix.map_apply] using congrArg (fun g => GaugeAlgebra.toSU2Matrix g i j) h0'
+      · simpa using congrArg GaugeAlgebra.toU1Value h0'
     | succ n ih =>
-        intro x y hxy m hm
-        -- pick a direction occurring in `m` and peel one derivative off
-        have hm0 : m ≠ 0 := fun h0 => by simp [h0] at hm
-        obtain ⟨μ, hμ⟩ := Finsupp.ne_iff.mp hm0
-        simp only [Finsupp.coe_zero, Pi.zero_apply] at hμ
-        have hle : Finsupp.single μ 1 ≤ m := by
-          rw [Finsupp.single_le_iff]
-          omega
-        have hm'' : m - Finsupp.single μ 1 + Finsupp.single μ 1 = m :=
-          tsub_add_cancel_of_le hle
-        have hdeg' : Finsupp.degree (m - Finsupp.single μ 1) = n := by
-          have h1 := congrArg Finsupp.degree hm''
-          rw [map_add, Finsupp.degree_single, hm] at h1
-          omega
-        -- the derivative pair inherits the hypothesis, by additivity of `iteratedDeriv`
-        have hd : ∀ s, eval (iteratedDeriv s (deriv μ x)) =
-            eval (iteratedDeriv s (deriv μ y)) := by
-          intro s
-          have h1 := hxy (s + {μ})
-          rwa [iteratedDeriv_add, LinearMap.comp_apply, iteratedDeriv_singleton] at h1
-        obtain ⟨k3, k2, k1⟩ := ih (deriv μ x) (deriv μ y) hd (m - Finsupp.single μ 1) hdeg'
-        refine ⟨fun i j => ?_, fun i j => ?_, ?_⟩
-        · have hk := k3 i j
-          simp only [deriv_toSU3Matrix, Matrix.map_apply] at hk
-          rw [coeff_pderiv, coeff_pderiv, hm''] at hk
-          exact mul_right_cancel₀ (Nat.cast_add_one_ne_zero _) hk
-        · have hk := k2 i j
-          simp only [deriv_toSU2Matrix, Matrix.map_apply] at hk
-          rw [coeff_pderiv, coeff_pderiv, hm''] at hk
-          exact mul_right_cancel₀ (Nat.cast_add_one_ne_zero _) hk
-        · have hk := k1
-          simp only [deriv_toU1Value] at hk
-          rw [coeff_pderiv, coeff_pderiv, hm''] at hk
-          exact mul_right_cancel₀ (Nat.cast_add_one_ne_zero _) hk
+      intro x y hxy m hm
+      -- pick a direction occurring in `m` and peel one derivative off
+      have hm0 : m ≠ 0 := fun h0 => by simp [h0] at hm
+      obtain ⟨μ, hμ⟩ := Finsupp.ne_iff.mp hm0
+      simp only [Finsupp.coe_zero, Pi.zero_apply] at hμ
+      have hle : Finsupp.single μ 1 ≤ m := by
+        rw [Finsupp.single_le_iff]
+        omega
+      have hm'' : m - Finsupp.single μ 1 + Finsupp.single μ 1 = m := tsub_add_cancel_of_le hle
+      have hdeg' : Finsupp.degree (m - Finsupp.single μ 1) = n := by
+        have h1 := congrArg Finsupp.degree hm''
+        rw [map_add, Finsupp.degree_single, hm] at h1
+        omega
+      -- the derivative pair inherits the hypothesis, by additivity of `iteratedDeriv`
+      have hd : ∀ s, eval (iteratedDeriv s (deriv μ x)) = eval (iteratedDeriv s (deriv μ y)) := by
+        intro s
+        have h1 := hxy (s + {μ})
+        rwa [iteratedDeriv_add, LinearMap.comp_apply, iteratedDeriv_singleton] at h1
+      obtain ⟨k3, k2, k1⟩ := ih (deriv μ x) (deriv μ y) hd (m - Finsupp.single μ 1) hdeg'
+      refine ⟨fun i j => ?_, fun i j => ?_, ?_⟩
+      · have hk := k3 i j
+        simp only [deriv_toSU3Matrix, Matrix.map_apply] at hk
+        rw [coeff_pderiv, coeff_pderiv, hm''] at hk
+        exact mul_right_cancel₀ (Nat.cast_add_one_ne_zero _) hk
+      · have hk := k2 i j
+        simp only [deriv_toSU2Matrix, Matrix.map_apply] at hk
+        rw [coeff_pderiv, coeff_pderiv, hm''] at hk
+        exact mul_right_cancel₀ (Nat.cast_add_one_ne_zero _) hk
+      · have hk := k1
+        simp only [deriv_toU1Value] at hk
+        rw [coeff_pderiv, coeff_pderiv, hm''] at hk
+        exact mul_right_cancel₀ (Nat.cast_add_one_ne_zero _) hk
   refine ext_of_matrix ?_ ?_ ?_
   · ext i j : 1
     ext m
@@ -812,60 +886,66 @@ lemma ext_of_eval_iteratedDeriv {x y : JetGaugeAlgebra}
 
 -/
 
-
 /-!
 
 ## I. The adjoint representation of Jet Gauge group
 
 -/
 
-/-- The adjoint action of an element `U` of the jet gauge group on the jet gauge algebra,
-  acting on the `su(3)` and `su(2)` factors by `a ↦ U a U⁻¹`, with `U⁻¹ = star U` by
-  unitarity, and trivially on the `u(1)` factor since `SpaceTimeAlgebra` is commutative.
-  Hermiticity is preserved since `star (U a (star U)) = U (star a) (star U)`, and
-  tracelessness since the trace is invariant under conjugation. -/
+/--
+The adjoint action of an element `U` of the jet gauge group on the jet gauge algebra,
+acting on the `su(3)` and `su(2)` factors by `a ↦ U a U⁻¹`, with `U⁻¹ = star U` by
+unitarity, and trivially on the `u(1)` factor since `SpaceTimeAlgebra` is commutative.
+Hermiticity is preserved since `star (U a (star U)) = U (star a) (star U)`, and
+tracelessness since the trace is invariant under conjugation.
+-/
 noncomputable def adjointMap (U : JetGaugeGroupI) : JetGaugeAlgebra →ₗ[ℝ] JetGaugeAlgebra where
-  toFun a := ofMatrixProd
-      (U.1.1 * a.toSU3Matrix * star U.1.1,
-        U.2.1.1 * a.toSU2Matrix * star U.2.1.1,
-        a.toU1Value)
-      ⟨by
-        rw [star_mul, star_mul, star_star,
-          show star a.toSU3Matrix = a.toSU3Matrix from a.1.2.1, mul_assoc],
+  toFun a :=
+    ofMatrixProd
+      (U.1.1 * a.toSU3Matrix * star U.1.1, U.2.1.1 * a.toSU2Matrix * star U.2.1.1, a.toU1Value)
+      ⟨
         by
-        rw [Matrix.trace_mul_comm, ← mul_assoc,
-          show star U.1.1 * U.1.1 = 1 from mem_unitaryGroup_iff'.mp
-            (mem_specialUnitaryGroup_iff.mp U.1.2).1,
-          one_mul, show a.toSU3Matrix.trace = 0 from a.1.2.2]⟩
-      ⟨by
-        rw [star_mul, star_mul, star_star,
-          show star a.toSU2Matrix = a.toSU2Matrix from a.2.1.2.1]
-        exact (mul_assoc _ _ _).symm,
+          rw [star_mul, star_mul, star_star, show star a.toSU3Matrix = a.toSU3Matrix from a.1.2.1,
+            mul_assoc],
         by
-        rw [Matrix.trace_mul_comm, ← mul_assoc,
-          show star U.2.1.1 * U.2.1.1 = 1 from mem_unitaryGroup_iff'.mp
-            (mem_specialUnitaryGroup_iff.mp U.2.1.2).1,
-          one_mul, show a.toSU2Matrix.trace = 0 from a.2.1.2.2]⟩
+          rw [Matrix.trace_mul_comm, ← mul_assoc,
+            show star U.1.1 * U.1.1 = 1 from
+              mem_unitaryGroup_iff'.mp (mem_specialUnitaryGroup_iff.mp U.1.2).1,
+            one_mul, show a.toSU3Matrix.trace = 0 from a.1.2.2]
+      ⟩
+      ⟨
+        by
+          rw [star_mul, star_mul, star_star, show star a.toSU2Matrix = a.toSU2Matrix from a.2.1.2.1]
+          exact (mul_assoc _ _ _).symm,
+        by
+          rw [Matrix.trace_mul_comm, ← mul_assoc,
+            show star U.2.1.1 * U.2.1.1 = 1 from
+              mem_unitaryGroup_iff'.mp (mem_specialUnitaryGroup_iff.mp U.2.1.2).1,
+            one_mul, show a.toSU2Matrix.trace = 0 from a.2.1.2.2]
+      ⟩
       (show star a.toU1Value = a.toU1Value from a.2.2.2)
-  map_add' a b := by
-    ext <;> simp [mul_add, add_mul]
-  map_smul' r a := by
-    ext <;> simp
+  map_add' a b := by ext <;> simp [mul_add, add_mul]
+  map_smul' r a := by ext <;> simp
 
 @[simp]
-lemma adjointMap_toSU3Matrix (U : JetGaugeGroupI) (a : JetGaugeAlgebra) :
-    (adjointMap U a).toSU3Matrix = U.1.1 * a.toSU3Matrix * star U.1.1 := rfl
+lemma adjointMap_toSU3Matrix (U : JetGaugeGroupI) (a : JetGaugeAlgebra)
+    : (adjointMap U a).toSU3Matrix = U.1.1 * a.toSU3Matrix * star U.1.1 :=
+  rfl
 
 @[simp]
-lemma adjointMap_toSU2Matrix (U : JetGaugeGroupI) (a : JetGaugeAlgebra) :
-    (adjointMap U a).toSU2Matrix = U.2.1.1 * a.toSU2Matrix * star U.2.1.1 := rfl
+lemma adjointMap_toSU2Matrix (U : JetGaugeGroupI) (a : JetGaugeAlgebra)
+    : (adjointMap U a).toSU2Matrix = U.2.1.1 * a.toSU2Matrix * star U.2.1.1 :=
+  rfl
 
 @[simp]
-lemma adjointMap_toU1Value (U : JetGaugeGroupI) (a : JetGaugeAlgebra) :
-    (adjointMap U a).toU1Value = a.toU1Value := rfl
+lemma adjointMap_toU1Value (U : JetGaugeGroupI) (a : JetGaugeAlgebra)
+    : (adjointMap U a).toU1Value = a.toU1Value :=
+  rfl
 
-/-- The adjoint representation of the jet gauge group on the jet gauge algebra,
-  `U ↦ (a ↦ U a U⁻¹)` factorwise. -/
+/--
+The adjoint representation of the jet gauge group on the jet gauge algebra,
+`U ↦ (a ↦ U a U⁻¹)` factorwise.
+-/
 noncomputable def adjoint : Representation ℝ JetGaugeGroupI JetGaugeAlgebra where
   toFun := adjointMap
   map_one' := by
@@ -875,13 +955,16 @@ noncomputable def adjoint : Representation ℝ JetGaugeGroupI JetGaugeAlgebra wh
     refine LinearMap.ext fun a => ?_
     ext <;> simp [star_mul, mul_assoc]
 
-/-- At the base point the adjoint action of a gauge jet is the adjoint action of its
-  value: the constant coefficient of `U x U†` is `U₀ x₀ U₀†`. -/
-lemma eval_adjointMap (U : JetGaugeGroupI) (x : JetGaugeAlgebra) :
-    eval (adjointMap U x) = GaugeAlgebra.adjoint U.eval (eval x) := by
-  have hmap : ∀ {n : Type} [Fintype n] [DecidableEq n] (M : Matrix n n SpaceTimeAlgebra),
-      M.map (coeff (Multiset.toFinsupp (0 : Multiset (Fin 1 ⊕ Fin 3)))) =
-        (constantCoeff : SpaceTimeAlgebra →+* ℂ).mapMatrix M := by
+/--
+At the base point the adjoint action of a gauge jet is the adjoint action of its
+value: the constant coefficient of `U x U†` is `U₀ x₀ U₀†`.
+-/
+lemma eval_adjointMap (U : JetGaugeGroupI) (x : JetGaugeAlgebra)
+    : eval (adjointMap U x) = GaugeAlgebra.adjoint U.eval (eval x) := by
+  have hmap
+      : ∀ {n : Type} [Fintype n] [DecidableEq n] (M : Matrix n n SpaceTimeAlgebra),
+        M.map (coeff (Multiset.toFinsupp (0 : Multiset (Fin 1 ⊕ Fin 3))))
+          = (constantCoeff : SpaceTimeAlgebra →+* ℂ).mapMatrix M := by
     intro n _ _ M
     ext i j
     simp [Matrix.map_apply, RingHom.mapMatrix_apply, coeff_zero_eq_constantCoeff]
@@ -894,13 +977,13 @@ lemma eval_adjointMap (U : JetGaugeGroupI) (x : JetGaugeAlgebra) :
       GaugeAlgebra.adjoint_toSU2Matrix]
     rw [hmap, hmap, map_mul, map_mul, SpaceTimeAlgebra.mapMatrix_constantCoeff_star]
     rfl
-  · simp [eval_apply, taylorCoeff_toU1Value, adjointMap_toU1Value,
-      GaugeAlgebra.adjoint_toU1Value]
+  · simp [eval_apply, taylorCoeff_toU1Value, adjointMap_toU1Value, GaugeAlgebra.adjoint_toU1Value]
 
-/-- The constant inclusion is a morphism of Lie algebras: constants bracket to
-  constants. -/
-lemma ofConstant_lie (a b : GaugeAlgebra) :
-    ofConstant ⁅a, b⁆ = ⁅ofConstant a, ofConstant b⁆ := by
+/--
+The constant inclusion is a morphism of Lie algebras: constants bracket to
+constants.
+-/
+lemma ofConstant_lie (a b : GaugeAlgebra) : ofConstant ⁅a, b⁆ = ⁅ofConstant a, ofConstant b⁆ := by
   refine ext_of_matrix ?_ ?_ ?_
   · ext i j : 1
     simp [Matrix.map_apply, Matrix.mul_apply, Matrix.smul_apply, smul_eq_mul,
@@ -910,17 +993,19 @@ lemma ofConstant_lie (a b : GaugeAlgebra) :
       MvPowerSeries.smul_eq_C_mul, mul_sub]
   · simp
 
-/-- The adjoint action preserves the bracket: conjugation is an automorphism of the
-  Lie algebra, using unitarity to cancel the inner `U† U` factors. -/
-lemma adjointMap_lie (U : JetGaugeGroupI) (x y : JetGaugeAlgebra) :
-    adjointMap U ⁅x, y⁆ = ⁅adjointMap U x, adjointMap U y⁆ := by
+/--
+The adjoint action preserves the bracket: conjugation is an automorphism of the
+Lie algebra, using unitarity to cancel the inner `U† U` factors.
+-/
+lemma adjointMap_lie (U : JetGaugeGroupI) (x y : JetGaugeAlgebra)
+    : adjointMap U ⁅x, y⁆ = ⁅adjointMap U x, adjointMap U y⁆ := by
   refine ext_of_matrix ?_ ?_ ?_
   · have hU : star U.1.1 * U.1.1 = 1 := by
       have h := (Matrix.mem_specialUnitaryGroup_iff.mp U.1.2).1
       rwa [Matrix.mem_unitaryGroup_iff'] at h
-    have key : ∀ X Y : Matrix (Fin 3) (Fin 3) SpaceTimeAlgebra,
-        (U.1.1 * X * star U.1.1) * (U.1.1 * Y * star U.1.1) =
-          U.1.1 * (X * Y) * star U.1.1 := by
+    have key
+        : ∀ X Y : Matrix (Fin 3) (Fin 3) SpaceTimeAlgebra,
+          (U.1.1 * X * star U.1.1) * (U.1.1 * Y * star U.1.1) = U.1.1 * (X * Y) * star U.1.1 := by
       intro X Y
       simp only [mul_assoc]
       rw [show star U.1.1 * (U.1.1 * (Y * star U.1.1)) = Y * star U.1.1 from by
@@ -930,9 +1015,10 @@ lemma adjointMap_lie (U : JetGaugeGroupI) (x y : JetGaugeAlgebra) :
   · have hU : star U.2.1.1 * U.2.1.1 = 1 := by
       have h := (Matrix.mem_specialUnitaryGroup_iff.mp U.2.1.2).1
       rwa [Matrix.mem_unitaryGroup_iff'] at h
-    have key : ∀ X Y : Matrix (Fin 2) (Fin 2) SpaceTimeAlgebra,
-        (U.2.1.1 * X * star U.2.1.1) * (U.2.1.1 * Y * star U.2.1.1) =
-          U.2.1.1 * (X * Y) * star U.2.1.1 := by
+    have key
+        : ∀ X Y : Matrix (Fin 2) (Fin 2) SpaceTimeAlgebra,
+          (U.2.1.1 * X * star U.2.1.1) * (U.2.1.1 * Y * star U.2.1.1)
+            = U.2.1.1 * (X * Y) * star U.2.1.1 := by
       intro X Y
       simp only [mul_assoc]
       rw [show star U.2.1.1 * (U.2.1.1 * (Y * star U.2.1.1)) = Y * star U.2.1.1 from by

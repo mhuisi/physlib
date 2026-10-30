@@ -50,14 +50,11 @@ namespace FreeParticle
 ## A. Basic properties
 -/
 
-@[simp]
-lemma m_pos : 0 < Q.m := Q.hm
+@[simp] lemma m_pos : 0 < Q.m := Q.hm
 
-@[simp]
-lemma m_nonneg : 0 ≤ Q.m := Q.hm.le
+@[simp] lemma m_nonneg : 0 ≤ Q.m := Q.hm.le
 
-@[simp]
-lemma m_ne_zero : Q.m ≠ 0 := Q.hm.ne'
+@[simp] lemma m_ne_zero : Q.m ≠ 0 := Q.hm.ne'
 
 /-!
 ## B. Hilbert space

@@ -107,8 +107,7 @@ variable
   {H' : Type*} [NormedAddCommGroup H'] [InnerProductSpace ℂ H']
   {H'' : Type*} [NormedAddCommGroup H''] [InnerProductSpace ℂ H'']
   {α : Type*} [Fintype α]
-  {T T₁ T₂ : H →ₗ.[ℂ] H} {S : α → H →ₗ.[ℂ] H}
-  {U U₁ U₂ : H →ₗ.[ℂ] H'} {W : α → H →ₗ.[ℂ] H'}
+  {T T₁ T₂ : H →ₗ.[ℂ] H} {S : α → H →ₗ.[ℂ] H} {U U₁ U₂ : H →ₗ.[ℂ] H'} {W : α → H →ₗ.[ℂ] H'}
   {V V₁ V₂ : H' →ₗ.[ℂ] H''}
 
 /-!
@@ -136,8 +135,9 @@ lemma isSymmetric_def : T.IsSymmetric ↔ T.IsFormalAdjoint T := Iff.rfl
 /-- A LinearPMap is essentially self-adjoint iff its closure is self-adjoint. -/
 def IsEssentiallySelfAdjoint [CompleteSpace H] (T : H →ₗ.[ℂ] H) : Prop := IsSelfAdjoint T.closure
 
-lemma isEssentiallySelfAdjoint_def [CompleteSpace H] :
-    T.IsEssentiallySelfAdjoint ↔ IsSelfAdjoint T.closure := Iff.rfl
+lemma isEssentiallySelfAdjoint_def [CompleteSpace H]
+    : T.IsEssentiallySelfAdjoint ↔ IsSelfAdjoint T.closure :=
+  Iff.rfl
 
 lemma isStarNormal_def [CompleteSpace H] : IsStarNormal T ↔ T† * T = T * T† := isStarNormal_iff _
 
@@ -149,8 +149,8 @@ lemma isStarNormal_def [CompleteSpace H] : IsStarNormal T ↔ T† * T = T * T�
 ### B.1. Dense domain
 -/
 
-lemma HasDenseDomain.isUnbounded_iff_isClosable (h : U.HasDenseDomain) :
-    U.IsUnbounded ↔ U.IsClosable :=
+lemma HasDenseDomain.isUnbounded_iff_isClosable (h : U.HasDenseDomain)
+    : U.IsUnbounded ↔ U.IsClosable :=
   and_iff_right h
 
 lemma HasDenseDomain.closure (h : U.HasDenseDomain) : U.closure.HasDenseDomain :=
@@ -163,8 +163,9 @@ lemma closure_domain_le_domain_closure (U : H →ₗ.[ℂ] H') : U.closure.domai
     obtain ⟨b, hb, hb'⟩ := mem_closure_iff_seq_limit.mp hψφ
     refine mem_closure_iff_seq_limit.mpr
       ⟨fun n ↦ (b n).1, fun n ↦ ?_, (nhds_prod_eq (x := ψ) (y := φ) ▸ hb').fst⟩
-    simp only [coe_toAddSubmonoid, SetLike.mem_coe, mem_graph_iff, Subtype.exists,
-      exists_and_left, exists_eq_left] at hb
+    simp only [coe_toAddSubmonoid, SetLike.mem_coe, mem_graph_iff, Subtype.exists, exists_and_left,
+        exists_eq_left]
+      at hb
     exact (hb n).choose
   · simp [closure_def' h_cl, closure_le.mp]
 
@@ -175,36 +176,37 @@ lemma HasDenseDomain.neg (h : U.HasDenseDomain) : (-U).HasDenseDomain := h
 
 lemma HasDenseDomain.smul (h : U.HasDenseDomain) (c : ℂ) : (c • U).HasDenseDomain := h
 
-lemma HasDenseDomain.add_of_le (h₁ : U₁.HasDenseDomain) (h_le : U₁.domain ≤ U₂.domain) :
-    (U₁ + U₂).HasDenseDomain :=
+lemma HasDenseDomain.add_of_le (h₁ : U₁.HasDenseDomain) (h_le : U₁.domain ≤ U₂.domain)
+    : (U₁ + U₂).HasDenseDomain :=
   h₁.mono (by simp [h_le, add_domain])
 
-lemma HasDenseDomain.sub_of_le (h₁ : U₁.HasDenseDomain) (h_le : U₁.domain ≤ U₂.domain) :
-    (U₁ - U₂).HasDenseDomain :=
+lemma HasDenseDomain.sub_of_le (h₁ : U₁.HasDenseDomain) (h_le : U₁.domain ≤ U₂.domain)
+    : (U₁ - U₂).HasDenseDomain :=
   h₁.mono (by simp [h_le, sub_domain])
 
 lemma HasDenseDomain.sum_of_le
-    {E : Submodule ℂ H} (hE : Dense (E : Set H)) (h : ∀ a, E ≤ (W a).domain) :
-    (sum W).HasDenseDomain :=
+    {E : Submodule ℂ H} (hE : Dense (E : Set H)) (h : ∀ a, E ≤ (W a).domain)
+    : (sum W).HasDenseDomain :=
   hE.mono (by simp [sum_domain, h])
 
-lemma HasDenseDomain.pow
-    (h : T.HasDenseDomain) (h_range : ∀ x : T.domain, T x ∈ T.domain) (n : ℕ) :
-    (T ^ n).HasDenseDomain := by
+lemma HasDenseDomain.pow (h : T.HasDenseDomain) (h_range : ∀ x : T.domain, T x ∈ T.domain) (n : ℕ)
+    : (T ^ n).HasDenseDomain := by
   apply h.mono
   induction n with
   | zero => simp
   | succ n ih => exact fun x hx ↦ mem_compRestricted_domain_iff.mpr ⟨hx, ih (h_range ⟨x, hx⟩)⟩
 
-lemma pow_hasDenseDomain_of_le
-    {n : ℕ} (h : (T ^ n).HasDenseDomain) {k : ℕ} (hle : k ≤ n) : (T ^ k).HasDenseDomain :=
+lemma pow_hasDenseDomain_of_le {n : ℕ} (h : (T ^ n).HasDenseDomain) {k : ℕ} (hle : k ≤ n)
+    : (T ^ k).HasDenseDomain :=
   h.mono <| pow_sub_mul_pow T hle ▸ compRestricted_domain_le _ _
 
-/-- `U.rangeᗮ = U†.ker`
+/--
+`U.rangeᗮ = U†.ker`
 
-  c.f. `LinearMap.orthogonal_range` and `ContinuousLinearMap.orthogonal_range` -/
-lemma HasDenseDomain.orthogonal_range [CompleteSpace H] (h : U.HasDenseDomain) :
-    U.toFun.rangeᗮ = U†.toFun.ker.map U†.domain.subtype := by
+c.f. `LinearMap.orthogonal_range` and `ContinuousLinearMap.orthogonal_range`
+-/
+lemma HasDenseDomain.orthogonal_range [CompleteSpace H] (h : U.HasDenseDomain)
+    : U.toFun.rangeᗮ = U†.toFun.ker.map U†.domain.subtype := by
   ext u
   simp only [mem_orthogonal', Subtype.exists, mem_map, LinearMap.mem_ker, subtype_apply,
     exists_and_right, exists_eq_right, toFun_eq_coe]
@@ -215,9 +217,9 @@ lemma HasDenseDomain.orthogonal_range [CompleteSpace H] (h : U.HasDenseDomain) :
     simp [← hxv, ← adjoint_isFormalAdjoint h ⟨u, hu⟩, hu']
 
 /-- `U†.kerᗮ = U.range.closure` -/
-lemma HasDenseDomain.orthogonal_adjoint_ker [CompleteSpace H] [CompleteSpace H']
-    (h : U.HasDenseDomain) :
-    (U†.toFun.ker.map U†.domain.subtype)ᗮ = U.toFun.range.closure :=
+lemma HasDenseDomain.orthogonal_adjoint_ker
+    [CompleteSpace H] [CompleteSpace H'] (h : U.HasDenseDomain)
+    : (U†.toFun.ker.map U†.domain.subtype)ᗮ = U.toFun.range.closure :=
   h.orthogonal_range ▸ orthogonal_orthogonal_eq_closure _
 
 /-!
@@ -231,9 +233,10 @@ lemma IsClosable.isClosed_iff (h : U.IsClosable) : U.IsClosed ↔ U.closure = U 
   ⟨IsClosed.closure_eq, fun h' ↦ h' ▸ h.closure_isClosed⟩
 
 /-- A LinearPMap with densely-defined formal adjoint is closable. -/
-lemma isClosable_of_exists_dense_formalAdjoint [CompleteSpace H] [CompleteSpace H']
-    (h : U.HasDenseDomain) (h_fadj : ∃ U' : H' →ₗ.[ℂ] H, U'.HasDenseDomain ∧ U'.IsFormalAdjoint U) :
-    U.IsClosable := by
+lemma isClosable_of_exists_dense_formalAdjoint
+    [CompleteSpace H] [CompleteSpace H']
+    (h : U.HasDenseDomain) (h_fadj : ∃ U' : H' →ₗ.[ℂ] H, U'.HasDenseDomain ∧ U'.IsFormalAdjoint U)
+    : U.IsClosable := by
   have h_adj : U†.HasDenseDomain := by
     obtain ⟨U', hU', hU''⟩ := h_fadj
     exact hU'.mono (hU''.symm.le_adjoint h).1
@@ -320,12 +323,11 @@ lemma adjoint_of_zero [CompleteSpace H] (h_zero : ⇑U = 0) : U† = 0 := by
     · exact adjoint_apply_eq h x (by simp [h_zero])
     · exact adjoint_apply_of_not_dense h x
 
-@[simp]
-lemma adjoint_zero [CompleteSpace H] : (0 : H →ₗ.[ℂ] H')† = 0 := adjoint_of_zero rfl
+@[simp] lemma adjoint_zero [CompleteSpace H] : (0 : H →ₗ.[ℂ] H')† = 0 := adjoint_of_zero rfl
 
 @[simp]
-lemma adjoint_smul [CompleteSpace H] (U : H →ₗ.[ℂ] H') {c : ℂ} (hc : c ≠ 0) :
-    (c • U)† = conj c • U† := by
+lemma adjoint_smul [CompleteSpace H] (U : H →ₗ.[ℂ] H') {c : ℂ} (hc : c ≠ 0)
+    : (c • U)† = conj c • U† := by
   refine dExt ?_ fun x y hxy ↦ ?_
   · ext x
     change Continuous (fun w ↦ ⟪x, c • U w⟫_ℂ) ↔ Continuous (fun w ↦ ⟪x, U w⟫_ℂ)
@@ -336,11 +338,12 @@ lemma adjoint_smul [CompleteSpace H] (U : H →ₗ.[ℂ] H') {c : ℂ} (hc : c �
     · simp [adjoint_apply_of_not_dense h y, adjoint_apply_of_not_dense (smul_domain c U ▸ h) x]
 
 @[simp]
-lemma adjoint_neg [CompleteSpace H] (U : H →ₗ.[ℂ] H') : (-U)† = -U† := by
+lemma adjoint_neg [CompleteSpace H] (U : H →ₗ.[ℂ] H') : (-U)† = - U† := by
   simp [neg_eq_neg_one_smul, adjoint_smul]
 
-lemma adjoint_antitone [CompleteSpace H]
-    (h₁₂ : U₁.HasDenseDomain ∨ ¬U₂.HasDenseDomain) (h_le : U₁ ≤ U₂) : U₂† ≤ U₁† := by
+lemma adjoint_antitone
+    [CompleteSpace H] (h₁₂ : U₁.HasDenseDomain ∨ ¬U₂.HasDenseDomain) (h_le : U₁ ≤ U₂)
+    : U₂† ≤ U₁† := by
   have h_agree : ∀ w : U₁.domain, U₁ w = U₂ ⟨w, h_le.1 w.2⟩ := fun w ↦ @h_le.2 w ⟨w, h_le.1 w.2⟩ rfl
   constructor
   · intro v
@@ -357,8 +360,9 @@ lemma adjoint_antitone [CompleteSpace H]
     · have h₁ : ¬U₁.HasDenseDomain := fun h ↦ h₂ (h.mono h_le.1)
       rw [adjoint_apply_of_not_dense h₁ v, adjoint_apply_of_not_dense h₂ u]
 
-lemma adjoint_add_le_add_adjoint [CompleteSpace H]
-    (U₁ U₂ : H →ₗ.[ℂ] H') (h₁₂ : (U₁ + U₂).HasDenseDomain) : U₁† + U₂† ≤ (U₁ + U₂)† := by
+lemma adjoint_add_le_add_adjoint
+    [CompleteSpace H] (U₁ U₂ : H →ₗ.[ℂ] H') (h₁₂ : (U₁ + U₂).HasDenseDomain)
+    : U₁† + U₂† ≤ (U₁ + U₂)† := by
   have h₁ : U₁.HasDenseDomain := h₁₂.mono Set.inter_subset_left
   have h₂ : U₂.HasDenseDomain := h₁₂.mono Set.inter_subset_right
   constructor
@@ -373,13 +377,15 @@ lemma adjoint_add_le_add_adjoint [CompleteSpace H]
       adjoint_isFormalAdjoint h₁ ⟨u, u.2.1⟩ ⟨w, w.2.1⟩,
       adjoint_isFormalAdjoint h₂ ⟨u, u.2.2⟩ ⟨w, w.2.2⟩]
 
-lemma adjoint_sub_le_sub_adjoint [CompleteSpace H]
-    (U₁ U₂ : H →ₗ.[ℂ] H') (h₁₂ : (U₁ - U₂).HasDenseDomain) : U₁† - U₂† ≤ (U₁ - U₂)† := by
+lemma adjoint_sub_le_sub_adjoint
+    [CompleteSpace H] (U₁ U₂ : H →ₗ.[ℂ] H') (h₁₂ : (U₁ - U₂).HasDenseDomain)
+    : U₁† - U₂† ≤ (U₁ - U₂)† := by
   simp only [sub_eq_add_neg, ← adjoint_neg]
   exact adjoint_add_le_add_adjoint U₁ (-U₂) h₁₂
 
-lemma adjoint_compRestricted_le_compRestricted_adjoint [CompleteSpace H] [CompleteSpace H']
-    (hV : V.HasDenseDomain) (hVU : (V ∘ᵣ U).HasDenseDomain) : U† ∘ᵣ V† ≤ (V ∘ᵣ U)† := by
+lemma adjoint_compRestricted_le_compRestricted_adjoint
+    [CompleteSpace H] [CompleteSpace H'] (hV : V.HasDenseDomain) (hVU : (V ∘ᵣ U).HasDenseDomain)
+    : U† ∘ᵣ V† ≤ (V ∘ᵣ U)† := by
   have hU : U.HasDenseDomain := hVU.mono (compRestricted_domain_le V U)
   have h : (U† ∘ᵣ V†).IsFormalAdjoint (V ∘ᵣ U) := by
     intro x y
@@ -388,11 +394,13 @@ lemma adjoint_compRestricted_le_compRestricted_adjoint [CompleteSpace H] [Comple
     trans ⟪V† ⟨x, x.2.2⟩, U ⟨y, y.2.2⟩⟫_ℂ
     · exact adjoint_isFormalAdjoint hU ⟨V† ⟨x, x.2.2⟩, hx⟩ ⟨y, y.2.2⟩
     exact adjoint_isFormalAdjoint hV ⟨x, x.2.2⟩ ⟨U ⟨y, y.2.2⟩, hy⟩
-  exact ⟨fun x hx ↦ mem_adjoint_domain_of_exists _ ⟨(U† ∘ᵣ V†) ⟨x, hx⟩, h ⟨x, hx⟩⟩,
-    fun x y hxy ↦ (adjoint_apply_eq hVU y <| hxy ▸ h x).symm⟩
+  exact ⟨
+    fun x hx ↦ mem_adjoint_domain_of_exists _ ⟨(U† ∘ᵣ V†) ⟨x, hx⟩, h ⟨x, hx⟩⟩,
+    fun x y hxy ↦ (adjoint_apply_eq hVU y <| hxy ▸ h x).symm
+  ⟩
 
-lemma adjoint_pow_le_pow_adjoint [CompleteSpace H] {n : ℕ} (h : (T ^ n).HasDenseDomain) :
-    T† ^ n ≤ (T ^ n)† := by
+lemma adjoint_pow_le_pow_adjoint [CompleteSpace H] {n : ℕ} (h : (T ^ n).HasDenseDomain)
+    : T† ^ n ≤ (T ^ n)† := by
   induction n with
   | zero => simp
   | succ n ih =>
@@ -404,13 +412,17 @@ lemma adjoint_pow_le_pow_adjoint [CompleteSpace H] {n : ℕ} (h : (T ^ n).HasDen
 ### B.4. Continuity / boundedness
 -/
 
-/-- `f : E →ₗ[𝕜] F` is continuous iff there exists `M > 0` s.t. `‖f x‖ ≤ M * ‖x‖` for all `x : E`.
+/--
+`f : E →ₗ[𝕜] F` is continuous iff there exists `M > 0` s.t. `‖f x‖ ≤ M * ‖x‖` for all `x : E`.
 
-  This is a (convenient) immediate consequence of
-  `IsBoundedLinearMap.isLinearMap_and_continuous_iff_isBoundedLinearMap`. -/
-lemma _root_.LinearMap.continuous_iff_bounded {𝕜 E F : Type*} [NontriviallyNormedField 𝕜]
-    [SeminormedAddCommGroup E] [NormedSpace 𝕜 E] [SeminormedAddCommGroup F] [NormedSpace 𝕜 F]
-    {f : E →ₗ[𝕜] F} : Continuous f ↔ ∃ M, 0 < M ∧ ∀ x : E, ‖f x‖ ≤ M * ‖x‖ := by
+This is a (convenient) immediate consequence of
+`IsBoundedLinearMap.isLinearMap_and_continuous_iff_isBoundedLinearMap`.
+-/
+lemma _root_.LinearMap.continuous_iff_bounded
+    {𝕜 E F : Type*} [NontriviallyNormedField 𝕜] [SeminormedAddCommGroup E] [NormedSpace 𝕜 E]
+    [SeminormedAddCommGroup F] [NormedSpace 𝕜 F]
+    {f : E →ₗ[𝕜] F}
+    : Continuous f ↔ ∃ M, 0 < M ∧ ∀ x : E, ‖f x‖ ≤ M * ‖x‖ := by
   refine (and_congr_right_iff (a := IsLinearMap 𝕜 f)).mp ?_ f.isLinear
   rw [← isBoundedLinearMap_iff]
   exact IsBoundedLinearMap.isLinearMap_and_continuous_iff_isBoundedLinearMap f
@@ -430,8 +442,8 @@ lemma isClosable_of_continuous (h : Continuous U) : U.IsClosable := by
   · exact mul_zero M ▸ (norm_eq_zero.mpr hx₁) ▸ hbx.fst.norm.const_mul M
 
 /-- A strengthening of `closure_domain_le_domain_closure` for continuous operators. -/
-lemma closure_domain_eq_domain_closure_of_continuous [CompleteSpace H'] (h : Continuous U) :
-    U.closure.domain = U.domain.closure := by
+lemma closure_domain_eq_domain_closure_of_continuous [CompleteSpace H'] (h : Continuous U)
+    : U.closure.domain = U.domain.closure := by
   refine eq_of_le_of_ge U.closure_domain_le_domain_closure fun x hx ↦ ?_
   obtain ⟨M, hM, h_bound⟩ := LinearMap.continuous_iff_bounded.mp h
   obtain ⟨b, hb, hb'⟩ := mem_closure_iff_seq_limit.mp hx
@@ -457,8 +469,8 @@ lemma closure_domain_eq_domain_closure_of_continuous [CompleteSpace H'] (h : Con
     exact Filter.Tendsto.prodMk hb' hy
 
 /-- A continuous operator is closed iff its domain is closed. -/
-lemma isClosed_iff_isClosed_domain_of_continuous [CompleteSpace H'] (h : Continuous U) :
-    U.IsClosed ↔ _root_.IsClosed (U.domain : Set H) := by
+lemma isClosed_iff_isClosed_domain_of_continuous [CompleteSpace H'] (h : Continuous U)
+    : U.IsClosed ↔ _root_.IsClosed (U.domain : Set H) := by
   rw [(isClosable_of_continuous h).isClosed_iff]
   have h_domain := closure_domain_eq_domain_closure_of_continuous h
   constructor <;> intro hcl
@@ -466,8 +478,8 @@ lemma isClosed_iff_isClosed_domain_of_continuous [CompleteSpace H'] (h : Continu
   · refine (eq_of_le_of_domain_eq U.le_closure ?_).symm
     exact h_domain ▸ hcl.submodule_topologicalClosure_eq.symm
 
-lemma IsClosed.isClosed_toFun_graph (hU : U.IsClosed) :
-    _root_.IsClosed (U.toFun.graph : Set (U.domain × H')) := by
+lemma IsClosed.isClosed_toFun_graph (hU : U.IsClosed)
+    : _root_.IsClosed (U.toFun.graph : Set (U.domain × H')) := by
   refine isClosed_of_closure_subset fun ⟨x₁, x₂⟩ hx ↦ ?_
   simp only [SetLike.mem_coe, LinearMap.mem_graph_iff, toFun_eq_coe]
   suffices (↑x₁, x₂) ∈ U.graph.topologicalClosure by
@@ -475,24 +487,29 @@ lemma IsClosed.isClosed_toFun_graph (hU : U.IsClosed) :
   obtain ⟨b, hb, hbx⟩ := mem_closure_iff_seq_limit.mp hx
   apply mem_closure_iff_seq_limit.mpr
   rw [nhds_prod_eq] at *
-  refine ⟨fun n ↦ (↑(b n).1, (b n).2), by simp_all,
-    Filter.Tendsto.prodMk (tendsto_subtype_rng.mp hbx.fst) hbx.snd⟩
+  refine ⟨
+    fun n ↦ (↑(b n).1, (b n).2),
+    by simp_all,
+    Filter.Tendsto.prodMk (tendsto_subtype_rng.mp hbx.fst) hbx.snd
+  ⟩
 
-/-- The **closed graph theorem** for partial linear maps:
-  a closed operator with closed domain is continuous.
+/--
+The **closed graph theorem** for partial linear maps:
+a closed operator with closed domain is continuous.
 
-  This follows immediately from `LinearMap.continuous_of_isClosed_graph`
-  and the completeness of `H` and `H'`. -/
-lemma IsClosed.continuous_of_isClosed_domain [CompleteSpace H] [CompleteSpace H']
-    (hU : U.IsClosed) (h : _root_.IsClosed (U.domain : Set H)) :
-    Continuous U := by
+This follows immediately from `LinearMap.continuous_of_isClosed_graph`
+and the completeness of `H` and `H'`.
+-/
+lemma IsClosed.continuous_of_isClosed_domain
+    [CompleteSpace H] [CompleteSpace H'] (hU : U.IsClosed) (h : _root_.IsClosed (U.domain : Set H))
+    : Continuous U := by
   have : CompleteSpace U.domain := instCompleteSpaceSubtypeMemSubmoduleOfIsClosedCoe U.domain
   exact LinearMap.continuous_of_isClosed_graph U.toFun hU.isClosed_toFun_graph
 
 /-- Closability is preserved upon adding a continuous operator. -/
 lemma IsClosable.add_continuous
-    (h₁ : U₁.IsClosable) (h₂ : Continuous U₂) (h : U₁.domain ≤ U₂.domain) :
-    (U₁ + U₂).IsClosable := by
+    (h₁ : U₁.IsClosable) (h₂ : Continuous U₂) (h : U₁.domain ≤ U₂.domain)
+    : (U₁ + U₂).IsClosable := by
   use (U₁ + U₂).graph.topologicalClosure.toLinearPMap
   refine (toLinearPMap_graph_eq _ fun ⟨x₁, x₂⟩ hx hx₁ ↦ ?_).symm
   subst hx₁
@@ -501,7 +518,8 @@ lemma IsClosable.add_continuous
   apply mem_closure_iff_seq_limit.mpr
   obtain ⟨b, hb, hbx⟩ := mem_closure_iff_seq_limit.mp hx
   simp only [coe_toAddSubmonoid, SetLike.mem_coe, mem_graph_iff, add_domain, add_apply,
-    Subtype.exists, exists_and_left, exists_eq_left, nhds_prod_eq] at *
+      Subtype.exists, exists_and_left, exists_eq_left, nhds_prod_eq]
+    at *
   refine ⟨fun n ↦ ((b n).1, (b n).2 - U₂ ⟨(b n).1, h (hb n).choose.1⟩), fun n ↦ ?_, ?_⟩
   · exact ⟨(hb n).choose.1, eq_sub_of_add_eq (hb n).choose_spec⟩
   · refine Filter.Tendsto.prodMk hbx.fst ?_
@@ -510,19 +528,22 @@ lemma IsClosable.add_continuous
 
 /-- Closability is preserved upon subtracting a continuous operator. -/
 lemma IsClosable.sub_continuous
-    (h₁ : U₁.IsClosable) (h₂ : Continuous U₂) (h : U₁.domain ≤ U₂.domain) : (U₁ - U₂).IsClosable :=
+    (h₁ : U₁.IsClosable) (h₂ : Continuous U₂) (h : U₁.domain ≤ U₂.domain)
+    : (U₁ - U₂).IsClosable :=
   sub_eq_add_neg U₁ U₂ ▸ h₁.add_continuous h₂.neg h
 
 /-- Closedness is preserved upon adding a continuous operator. -/
-lemma IsClosed.add_continuous [CompleteSpace H']
-    (h₁ : U₁.IsClosed) (h₂ : Continuous U₂) (h : U₁.domain ≤ U₂.domain) : (U₁ + U₂).IsClosed := by
+lemma IsClosed.add_continuous
+    [CompleteSpace H'] (h₁ : U₁.IsClosed) (h₂ : Continuous U₂) (h : U₁.domain ≤ U₂.domain)
+    : (U₁ + U₂).IsClosed := by
   have hcl : (U₁ + U₂).IsClosable := h₁.isClosable.add_continuous h₂ h
   refine hcl.isClosed_iff.mpr (eq_of_le_of_ge (le_of_le_graph ?_) (U₁ + U₂).le_closure)
   rw [← hcl.graph_closure_eq_closure_graph]
   intro ⟨x₁, x₂⟩ hx
   obtain ⟨b, hb, hbx⟩ := mem_closure_iff_seq_limit.mp hx
   simp only [coe_toAddSubmonoid, SetLike.mem_coe, mem_graph_iff, Subtype.exists, exists_and_left,
-    exists_eq_left, add_domain, inf_of_le_left h] at hb
+      exists_eq_left, add_domain, inf_of_le_left h]
+    at hb
   rw [nhds_prod_eq] at hbx
   have hb₁U₂ : ∀ n, (b n).1 ∈ U₂.domain := fun n ↦ h (hb n).choose
   have hCS : CauchySeq fun n ↦ U₂ ⟨(b n).1, hb₁U₂ n⟩ := by
@@ -549,8 +570,9 @@ lemma IsClosed.add_continuous [CompleteSpace H']
   simp_all [add_domain, add_apply]
 
 /-- Closedness is preserved upon subtracting a continuous operator. -/
-lemma IsClosed.sub_continuous [CompleteSpace H']
-    (h₁ : U₁.IsClosed) (h₂ : Continuous U₂) (h : U₁.domain ≤ U₂.domain) : (U₁ - U₂).IsClosed :=
+lemma IsClosed.sub_continuous
+    [CompleteSpace H'] (h₁ : U₁.IsClosed) (h₂ : Continuous U₂) (h : U₁.domain ≤ U₂.domain)
+    : (U₁ - U₂).IsClosed :=
   sub_eq_add_neg U₁ U₂ ▸ h₁.add_continuous h₂.neg h
 
 lemma adjoint_domain_of_continuous [CompleteSpace H] (h : Continuous U) : U†.domain = ⊤ := by
@@ -558,9 +580,9 @@ lemma adjoint_domain_of_continuous [CompleteSpace H] (h : Continuous U) : U†.d
   simp only [mem_top, iff_true, mem_adjoint_domain_iff, LinearMap.coe_comp, coe_innerₛₗ_apply]
   exact Continuous.comp (by fun_prop) h
 
-lemma HasDenseDomain.adjoint_add_continuous [CompleteSpace H]
-    (h₁ : T₁.HasDenseDomain) (h₂ : Continuous T₂) (h : T₁.domain ≤ T₂.domain) :
-    (T₁ + T₂)† = T₁† + T₂† := by
+lemma HasDenseDomain.adjoint_add_continuous
+    [CompleteSpace H] (h₁ : T₁.HasDenseDomain) (h₂ : Continuous T₂) (h : T₁.domain ≤ T₂.domain)
+    : (T₁ + T₂)† = T₁† + T₂† := by
   have h₂' : T₂†.domain = ⊤ := adjoint_domain_of_continuous h₂
   have h₁₂ : (T₁ + T₂).HasDenseDomain := h₁.mono <| by simp [add_domain, h]
   refine (eq_of_le_of_domain_eq ?_ ?_).symm
@@ -581,9 +603,9 @@ lemma HasDenseDomain.adjoint_add_continuous [CompleteSpace H]
         adjoint_isFormalAdjoint h₁₂ ⟨x, h'⟩ ⟨y, ⟨y.2, h y.2⟩⟩,
         adjoint_isFormalAdjoint (h₁.mono h) ⟨x, h₂' ▸ mem_top⟩ ⟨y, h y.2⟩]
 
-lemma HasDenseDomain.adjoint_sub_continuous [CompleteSpace H]
-    (h₁ : T₁.HasDenseDomain) (h₂ : Continuous T₂) (h : T₁.domain ≤ T₂.domain) :
-    (T₁ - T₂)† = T₁† - T₂† := by
+lemma HasDenseDomain.adjoint_sub_continuous
+    [CompleteSpace H] (h₁ : T₁.HasDenseDomain) (h₂ : Continuous T₂) (h : T₁.domain ≤ T₂.domain)
+    : (T₁ - T₂)† = T₁† - T₂† := by
   simp only [sub_eq_add_neg, ← adjoint_neg]
   exact h₁.adjoint_add_continuous (continuous_neg_iff.mpr h₂) h
 
@@ -593,62 +615,72 @@ lemma HasDenseDomain.adjoint_sub_continuous [CompleteSpace H]
 
 variable (u : H ≃ₗᵢ[ℂ] H') (A : H →ₗ.[ℂ] H)
 
-/-- The conjugation `u A u⁻¹` of a partially-defined operator `A : H →ₗ.[ℂ] H` by a unitary
+/--
+The conjugation `u A u⁻¹` of a partially-defined operator `A : H →ₗ.[ℂ] H` by a unitary
 `u : H ≃ₗᵢ[ℂ] H'`, with domain `u (A.domain) = u⁻¹ ⁻¹' (A.domain)` and action
-`y ↦ u (A (u⁻¹ y))`. Since `u` and `u⁻¹` are `ℂ`-linear, the result is again `ℂ`-linear. -/
+`y ↦ u (A (u⁻¹ y))`. Since `u` and `u⁻¹` are `ℂ`-linear, the result is again `ℂ`-linear.
+-/
 def unitaryConj : H' →ₗ.[ℂ] H' where
   domain := A.domain.comap (u.symm.toLinearEquiv : H' →ₗ[ℂ] H)
-  toFun := u.toLinearEquiv.toLinearMap.comp <| A.toFun.comp
-    (((u.symm.toLinearEquiv : H' →ₗ[ℂ] H).comp
-      (A.domain.comap (u.symm.toLinearEquiv : H' →ₗ[ℂ] H)).subtype).codRestrict A.domain
-        fun x => x.2)
+  toFun :=
+    u.toLinearEquiv.toLinearMap.comp <| A.toFun.comp
+      (((u.symm.toLinearEquiv : H' →ₗ[ℂ] H).comp
+          (A.domain.comap (u.symm.toLinearEquiv : H' →ₗ[ℂ] H)).subtype).codRestrict
+        A.domain fun x => x.2)
 
 /-- Membership in the conjugated domain: `x ∈ D(u A u⁻¹) ↔ u⁻¹ x ∈ D(A)`. -/
-lemma mem_unitaryConj_domain_iff {x : H'} :
-    x ∈ (unitaryConj u A).domain ↔ u.symm x ∈ A.domain := Iff.rfl
+lemma mem_unitaryConj_domain_iff {x : H'} : x ∈ (unitaryConj u A).domain ↔ u.symm x ∈ A.domain :=
+  Iff.rfl
 
 /-- The defining formula `(u A u⁻¹) x = u (A (u⁻¹ x))`. -/
-lemma unitaryConj_apply (x : (unitaryConj u A).domain) :
-    unitaryConj u A x = u (A ⟨u.symm (x : H'), (mem_unitaryConj_domain_iff u A).mp x.2⟩) := rfl
+lemma unitaryConj_apply (x : (unitaryConj u A).domain)
+    : unitaryConj u A x = u (A ⟨u.symm (x : H'), (mem_unitaryConj_domain_iff u A).mp x.2⟩) :=
+  rfl
 
 /-- `u` maps `D(A)` into `D(u A u⁻¹)`. -/
 lemma map_mem_unitaryConj_domain (y : A.domain) : u (y : H) ∈ (unitaryConj u A).domain := by
   simpa only [mem_unitaryConj_domain_iff, u.symm_apply_apply] using y.2
 
 /-- The action on the image domain: `(u A u⁻¹)(u y) = u (A y)` for `y ∈ D(A)`. -/
-lemma unitaryConj_apply_map (y : A.domain) :
-    unitaryConj u A ⟨u (y : H), map_mem_unitaryConj_domain u A y⟩ = u (A y) := by
+lemma unitaryConj_apply_map (y : A.domain)
+    : unitaryConj u A ⟨u (y : H), map_mem_unitaryConj_domain u A y⟩ = u (A y) := by
   simp only [unitaryConj_apply, u.symm_apply_apply]
 
 variable {u A}
 
 open scoped InnerProductSpace in
-/-- Unitary conjugation preserves formal adjointness. If `A` is a formal adjoint of `B`, then
-`u A u⁻¹` is a formal adjoint of `u B u⁻¹`. Unitary conjugation preserves symmetry when `A = B`. -/
-lemma IsFormalAdjoint.unitaryConj {B : H →ₗ.[ℂ] H} (h : A.IsFormalAdjoint B) :
-    (unitaryConj u A).IsFormalAdjoint (unitaryConj u B) := by
+/--
+Unitary conjugation preserves formal adjointness. If `A` is a formal adjoint of `B`, then
+`u A u⁻¹` is a formal adjoint of `u B u⁻¹`. Unitary conjugation preserves symmetry when `A = B`.
+-/
+lemma IsFormalAdjoint.unitaryConj {B : H →ₗ.[ℂ] H} (h : A.IsFormalAdjoint B)
+    : (unitaryConj u A).IsFormalAdjoint (unitaryConj u B) := by
   intro x y
   let x' : A.domain := ⟨u.symm (x : H'), (mem_unitaryConj_domain_iff u A).mp x.2⟩
   let y' : B.domain := ⟨u.symm (y : H'), (mem_unitaryConj_domain_iff u B).mp y.2⟩
-  calc ⟪LinearPMap.unitaryConj u A x, (y : H')⟫_ℂ
+  calc
+    ⟪LinearPMap.unitaryConj u A x, (y : H')⟫_ℂ
       = ⟪A x', (y' : H)⟫_ℂ := u.inner_map_eq_flip _ _
     _ = ⟪(x' : H), B y'⟫_ℂ := h x' y'
     _ = ⟪(x : H'), LinearPMap.unitaryConj u B y⟫_ℂ := u.symm.inner_map_eq_flip _ _
 
-/-- If `A` has dense domain, then so does `u A u⁻¹`: the domain `u⁻¹ ⁻¹' (A.domain)` is the
-preimage of a dense set under a homeomorphism. -/
-lemma HasDenseDomain.unitaryConj_dense_domain (hdense : A.HasDenseDomain) :
-    (unitaryConj u A).HasDenseDomain := hdense.preimage u.symm.toHomeomorph.isOpenMap
+/--
+If `A` has dense domain, then so does `u A u⁻¹`: the domain `u⁻¹ ⁻¹' (A.domain)` is the
+preimage of a dense set under a homeomorphism.
+-/
+lemma HasDenseDomain.unitaryConj_dense_domain (hdense : A.HasDenseDomain)
+    : (unitaryConj u A).HasDenseDomain :=
+  hdense.preimage u.symm.toHomeomorph.isOpenMap
 
 /-- If `A - z` is surjective for a scalar `z : ℂ`, then so is `u A u⁻¹ - z`. -/
-lemma unitaryConj_sub_smul_surjective {z : ℂ} (h : Function.Surjective (A - z • 1).toFun) :
-    Function.Surjective (unitaryConj u A - z • 1).toFun := by
+lemma unitaryConj_sub_smul_surjective {z : ℂ} (h : Function.Surjective (A - z • 1).toFun)
+    : Function.Surjective (unitaryConj u A - z • 1).toFun := by
   intro φ
   obtain ⟨ξ, hξ⟩ := h (u.symm φ)
   obtain ⟨w, hw⟩ : ∃ w : A.domain, A w - z • (w : H) = u.symm φ :=
     ⟨⟨(ξ : H), (Submodule.mem_inf.mp ξ.2).1⟩, hξ⟩
-  refine ⟨⟨u (w : H), Submodule.mem_inf.mpr
-    ⟨map_mem_unitaryConj_domain u A w, Submodule.mem_top⟩⟩, ?_⟩
+  refine
+    ⟨⟨u (w : H), Submodule.mem_inf.mpr ⟨map_mem_unitaryConj_domain u A w, Submodule.mem_top⟩⟩, ?_⟩
   show unitaryConj u A ⟨u (w : H), map_mem_unitaryConj_domain u A w⟩ - z • (u (w : H)) = φ
   rw [unitaryConj_apply_map, ← _root_.map_smul u, ← _root_.map_sub, hw, u.apply_symm_apply]
 
@@ -664,8 +696,8 @@ lemma IsUnbounded.hasDenseDomain (h : U.IsUnbounded) : U.HasDenseDomain := h.1
 
 lemma IsUnbounded.isClosable (h : U.IsUnbounded) : U.IsClosable := h.2
 
-lemma IsUnbounded.adjoint [CompleteSpace H] [CompleteSpace H'] (h : U.IsUnbounded) :
-    U†.IsUnbounded := by
+lemma IsUnbounded.adjoint [CompleteSpace H] [CompleteSpace H'] (h : U.IsUnbounded)
+    : U†.IsUnbounded := by
   refine ⟨?_, (adjoint_isClosed h.1).isClosable⟩
   by_contra h_adj
   obtain ⟨y, hy⟩ := not_forall.mp h_adj
@@ -687,8 +719,8 @@ lemma IsUnbounded.closure (h : U.IsUnbounded) : U.closure.IsUnbounded :=
   ⟨h.1.closure, h.2.closureIsClosable⟩
 
 @[simp]
-lemma IsUnbounded.adjoint_closure_eq_adjoint [CompleteSpace H] (h : U.IsUnbounded) :
-    U.closure† = U† := by
+lemma IsUnbounded.adjoint_closure_eq_adjoint [CompleteSpace H] (h : U.IsUnbounded)
+    : U.closure† = U† := by
   refine eq_of_eq_graph ?_
   ext
   rw [adjoint_graph_eq_graph_adjoint h.1, adjoint_graph_eq_graph_adjoint h.1.closure,
@@ -697,9 +729,9 @@ lemma IsUnbounded.adjoint_closure_eq_adjoint [CompleteSpace H] (h : U.IsUnbounde
     mem_submodule_adjoint_iff_mem_submoduleToLp_orthogonal]
 
 @[simp]
-lemma IsUnbounded.adjoint_adjoint_eq_closure [CompleteSpace H] [CompleteSpace H']
-    (h : U.IsUnbounded) :
-    U†† = U.closure := by
+lemma IsUnbounded.adjoint_adjoint_eq_closure
+    [CompleteSpace H] [CompleteSpace H'] (h : U.IsUnbounded)
+    : U†† = U.closure := by
   refine eq_of_eq_graph ?_
   ext
   rw [adjoint_graph_eq_graph_adjoint h.adjoint.1, adjoint_graph_eq_graph_adjoint h.1,
@@ -707,22 +739,22 @@ lemma IsUnbounded.adjoint_adjoint_eq_closure [CompleteSpace H] [CompleteSpace H'
     mem_submodule_adjoint_adjoint_iff_mem_submoduleToLp_orthogonal_orthogonal,
     orthogonal_orthogonal_eq_closure, mem_submodule_closure_iff_mem_submoduleToLp_closure]
 
-lemma IsUnbounded.le_adjoint_adjoint [CompleteSpace H] [CompleteSpace H'] (h : U.IsUnbounded) :
-    U ≤ U†† :=
+lemma IsUnbounded.le_adjoint_adjoint [CompleteSpace H] [CompleteSpace H'] (h : U.IsUnbounded)
+    : U ≤ U†† :=
   h.adjoint_adjoint_eq_closure ▸ U.le_closure
 
-lemma IsUnbounded.isClosed_iff [CompleteSpace H] [CompleteSpace H'] (h : U.IsUnbounded) :
-    U.IsClosed ↔ U†† = U :=
+lemma IsUnbounded.isClosed_iff [CompleteSpace H] [CompleteSpace H'] (h : U.IsUnbounded)
+    : U.IsClosed ↔ U†† = U :=
   h.adjoint_adjoint_eq_closure ▸ h.2.isClosed_iff
 
 /-- `U†.rangeᗮ = U.closure.ker` -/
-lemma IsUnbounded.orthogonal_adjoint_range [CompleteSpace H] [CompleteSpace H']
-    (h : U.IsUnbounded) : U†.toFun.rangeᗮ = U.closure.toFun.ker.map U.closure.domain.subtype :=
+lemma IsUnbounded.orthogonal_adjoint_range [CompleteSpace H] [CompleteSpace H'] (h : U.IsUnbounded)
+    : U†.toFun.rangeᗮ = U.closure.toFun.ker.map U.closure.domain.subtype :=
   h.adjoint_adjoint_eq_closure ▸ h.adjoint.hasDenseDomain.orthogonal_range
 
 /-- `U.closure.kerᗮ = U†.range` -/
-lemma IsUnbounded.orthogonal_closure_ker [CompleteSpace H] [CompleteSpace H'] (h : U.IsUnbounded) :
-    (U.closure.toFun.ker.map U.closure.domain.subtype)ᗮ = U†.toFun.range.closure :=
+lemma IsUnbounded.orthogonal_closure_ker [CompleteSpace H] [CompleteSpace H'] (h : U.IsUnbounded)
+    : (U.closure.toFun.ker.map U.closure.domain.subtype)ᗮ = U†.toFun.range.closure :=
   h.adjoint_adjoint_eq_closure ▸ h.adjoint.hasDenseDomain.orthogonal_adjoint_ker
 
 /-!
@@ -730,9 +762,11 @@ lemma IsUnbounded.orthogonal_closure_ker [CompleteSpace H] [CompleteSpace H'] (h
 -/
 
 /-- The analogue of `inner_map_polarization` for LinearPMap. -/
-lemma inner_map_polarization (x y : T.domain) :
-    ⟪T y, x⟫_ℂ = (⟪T (x + y), ↑(x + y)⟫_ℂ - ⟪T (x - y), ↑(x - y)⟫_ℂ
-      + I * ⟪T (x + I • y), ↑(x + I • y)⟫_ℂ - I * ⟪T (x - I • y), ↑(x - I • y)⟫_ℂ) / 4 := by
+lemma inner_map_polarization (x y : T.domain)
+    : ⟪T y, x⟫_ℂ
+      = (⟪T (x + y), ↑(x + y)⟫_ℂ - ⟪T (x - y), ↑(x - y)⟫_ℂ + I * ⟪T (x + I • y), ↑(x + I • y)⟫_ℂ
+          - I * ⟪T (x - I • y), ↑(x - I • y)⟫_ℂ)
+        / 4 := by
   simp only [map_add, coe_add, inner_add_right, inner_add_left, map_sub, AddSubgroupClass.coe_sub,
     inner_sub_right, inner_sub_left, sub_sub, map_smul, SetLike.val_smul, inner_smul_left, conj_I,
     neg_mul, inner_smul_right, mul_add, mul_neg, ← mul_assoc, ← pow_two, I_sq, one_mul, neg_neg,
@@ -740,9 +774,11 @@ lemma inner_map_polarization (x y : T.domain) :
   ring
 
 /-- The analogue of `inner_map_polarization'` for LinearPMap. -/
-theorem inner_map_polarization' (x y : T.domain) :
-    ⟪T x, y⟫_ℂ = (⟪T (x + y), ↑(x + y)⟫_ℂ - ⟪T (x - y), ↑(x - y)⟫_ℂ
-      - I * ⟪T (x + I • y), ↑(x + I • y)⟫_ℂ + I * ⟪T (x - I • y), ↑(x - I • y)⟫_ℂ) / 4 := by
+theorem inner_map_polarization' (x y : T.domain)
+    : ⟪T x, y⟫_ℂ
+      = (⟪T (x + y), ↑(x + y)⟫_ℂ - ⟪T (x - y), ↑(x - y)⟫_ℂ - I * ⟪T (x + I • y), ↑(x + I • y)⟫_ℂ
+          + I * ⟪T (x - I • y), ↑(x - I • y)⟫_ℂ)
+        / 4 := by
   simp only [map_add, coe_add, inner_add_right, inner_add_left, map_sub, AddSubgroupClass.coe_sub,
     inner_sub_right, inner_sub_left, sub_sub, map_smul, SetLike.val_smul, inner_smul_left, conj_I,
     neg_mul, inner_smul_right, mul_add, mul_neg, ← mul_assoc, ← pow_two, I_sq, one_mul, neg_neg,
@@ -750,50 +786,50 @@ theorem inner_map_polarization' (x y : T.domain) :
   ring
 
 -- The analogue of `LinearMap.isSymmetric_iff_inner_map_self_real` for LinearPMap.
-lemma isSymmetric_iff_inner_map_self_real :
-    T.IsSymmetric ↔ ∀ x : T.domain, conj ⟪T x, x⟫_ℂ = ⟪T x, x⟫_ℂ := by
+lemma isSymmetric_iff_inner_map_self_real
+    : T.IsSymmetric ↔ ∀ x : T.domain, conj ⟪T x, x⟫_ℂ = ⟪T x, x⟫_ℂ := by
   refine ⟨fun h_symm x ↦ by simp [h_symm x x], fun h_re x y ↦ ?_⟩
   nth_rw 2 [← inner_conj_symm, inner_map_polarization]
   simp only [map_div₀, _root_.map_sub, _root_.map_add, map_mul, neg_mul, conj_ofNat, conj_I, h_re]
   rw [inner_map_polarization']
   simp [sub_eq_add_neg]
 
-lemma IsSymmetric.isClosable [CompleteSpace H] (h : T.IsSymmetric) (h' : T.HasDenseDomain) :
-    T.IsClosable :=
+lemma IsSymmetric.isClosable [CompleteSpace H] (h : T.IsSymmetric) (h' : T.HasDenseDomain)
+    : T.IsClosable :=
   isClosable_iff_exists_closed_extension.mpr ⟨T†, adjoint_isClosed h', h.le_adjoint h'⟩
 
-lemma IsSymmetric.isUnbounded_iff_hasDenseDomain [CompleteSpace H] (h : T.IsSymmetric) :
-    T.IsUnbounded ↔ T.HasDenseDomain :=
+lemma IsSymmetric.isUnbounded_iff_hasDenseDomain [CompleteSpace H] (h : T.IsSymmetric)
+    : T.IsUnbounded ↔ T.HasDenseDomain :=
   and_iff_left_of_imp h.isClosable
 
-lemma isSymmetric_iff_le_adjoint [CompleteSpace H] (h : T.HasDenseDomain) :
-    T.IsSymmetric ↔ T ≤ T† := by
+lemma isSymmetric_iff_le_adjoint [CompleteSpace H] (h : T.HasDenseDomain)
+    : T.IsSymmetric ↔ T ≤ T† := by
   refine ⟨fun h_symm ↦ h_symm.le_adjoint h, fun h_le x y ↦ ?_⟩
   have h_eq : T x = T† ⟨x, h_le.1 x.2⟩ := @h_le.2 x ⟨x, h_le.1 x.2⟩ rfl
   exact h_eq ▸ adjoint_isFormalAdjoint h _ _
 
-lemma IsSymmetric.closure_le_adjoint [CompleteSpace H] (h : T.IsSymmetric) (h' : T.HasDenseDomain) :
-    T.closure ≤ T† := by
+lemma IsSymmetric.closure_le_adjoint [CompleteSpace H] (h : T.IsSymmetric) (h' : T.HasDenseDomain)
+    : T.closure ≤ T† := by
   have h_adj : T†.IsClosed := adjoint_isClosed h'
   exact h_adj.closure_eq ▸ h_adj.isClosable.closure_mono (h.le_adjoint h')
 
-lemma IsSymmetric.isEssentiallySelfAdjoint_iff [CompleteSpace H]
-    (h : T.IsSymmetric) (h' : T.HasDenseDomain) :
-    T.IsEssentiallySelfAdjoint ↔ T†.domain = T.closure.domain := by
+lemma IsSymmetric.isEssentiallySelfAdjoint_iff
+    [CompleteSpace H] (h : T.IsSymmetric) (h' : T.HasDenseDomain)
+    : T.IsEssentiallySelfAdjoint ↔ T†.domain = T.closure.domain := by
   rw [isEssentiallySelfAdjoint_def, isSelfAdjoint_def,
     (h.isUnbounded_iff_hasDenseDomain.mpr h').adjoint_closure_eq_adjoint]
   constructor <;> intro h''
   · congr
   · exact (eq_of_le_of_domain_eq (h.closure_le_adjoint h') h''.symm).symm
 
-lemma IsSymmetric.isSelfAdjoint_iff [CompleteSpace H] (h : T.IsSymmetric) (h' : T.HasDenseDomain) :
-    IsSelfAdjoint T ↔ T†.domain = T.domain := by
+lemma IsSymmetric.isSelfAdjoint_iff [CompleteSpace H] (h : T.IsSymmetric) (h' : T.HasDenseDomain)
+    : IsSelfAdjoint T ↔ T†.domain = T.domain := by
   constructor <;> intro h''
   · congr
   · exact (eq_of_le_of_domain_eq ((isSymmetric_iff_le_adjoint h').mp h) h''.symm).symm
 
-lemma add_adjoint_isSymmetric [CompleteSpace H] (h : T.HasDenseDomain) :
-    (T + T.adjoint).IsSymmetric := by
+lemma add_adjoint_isSymmetric [CompleteSpace H] (h : T.HasDenseDomain)
+    : (T + T.adjoint).IsSymmetric := by
   intro x y
   have h₁ := adjoint_isFormalAdjoint h ⟨x, x.2.2⟩ ⟨y, y.2.1⟩
   have h₂ := congrArg conj (adjoint_isFormalAdjoint h ⟨y, y.2.2⟩ ⟨x, x.2.1⟩)
@@ -831,8 +867,9 @@ lemma IsSymmetric.sub (h₁ : T₁.IsSymmetric) (h₂ : T₂.IsSymmetric) : (T�
   sub_eq_add_neg T₁ T₂ ▸ h₁.add h₂.neg
 
 @[aesop safe apply]
-lemma IsSymmetric.smul (h : T.IsSymmetric) {c : ℂ} (hc : conj c = c) : (c • T).IsSymmetric :=
-  fun x y ↦ by simp only [smul_apply, inner_smul_left, inner_smul_right, hc, h x y]
+lemma IsSymmetric.smul (h : T.IsSymmetric) {c : ℂ} (hc : conj c = c)
+    : (c • T).IsSymmetric := fun x y ↦ by
+  simp only [smul_apply, inner_smul_left, inner_smul_right, hc, h x y]
 
 @[aesop safe apply]
 lemma IsSymmetric.real_smul (h : T.IsSymmetric) (r : ℝ) : (r • T).IsSymmetric :=
@@ -849,10 +886,12 @@ lemma IsSymmetric.of_le (h₁ : T₁.IsSymmetric) (h_le : T₂ ≤ T₁) : T₂.
   have hy : T₂ y = T₁ ⟨y, h_le.1 y.2⟩ := @h_le.2 y ⟨y, h_le.1 y.2⟩ rfl
   exact hx ▸ hy ▸ h₁ ⟨x, h_le.1 x.2⟩ ⟨y, h_le.1 y.2⟩
 
-/-- The closure of a symmetric densely-defined operator is symmetric: `T††` is a symmetric
-closed extension of `T`, so it extends `T.closure`, whose symmetry then descends. -/
-lemma IsSymmetric.closure [CompleteSpace H] (hsym : T.IsSymmetric) (hdense : T.HasDenseDomain) :
-    T.closure.IsSymmetric := by
+/--
+The closure of a symmetric densely-defined operator is symmetric: `T††` is a symmetric
+closed extension of `T`, so it extends `T.closure`, whose symmetry then descends.
+-/
+lemma IsSymmetric.closure [CompleteSpace H] (hsym : T.IsSymmetric) (hdense : T.HasDenseDomain)
+    : T.closure.IsSymmetric := by
   have hle : T ≤ T† := (isSymmetric_def.mp hsym).le_adjoint hdense
   have hadj_dense : T†.HasDenseDomain := hdense.mono hle.1
   have hT_le : T ≤ T†† := (adjoint_isFormalAdjoint hdense).le_adjoint hadj_dense
@@ -862,17 +901,23 @@ lemma IsSymmetric.closure [CompleteSpace H] (hsym : T.IsSymmetric) (hdense : T.H
       (adjoint_antitone (Or.inl (hdense.mono hT_le.1)) (adjoint_antitone (Or.inl hdense) hle))
   exact h1.of_le (hc.closure_eq ▸ hc.isClosable.closure_mono hT_le)
 
-/-- A LinearPMap constructed from a symmetric LinearMap with dense domain
-  is an unbounded operator. -/
-lemma isUnbounded_of_dense_of_isSymmetric [CompleteSpace H] {E : Submodule ℂ H}
-    (hE : Dense (E : Set H)) {f : E →ₗ[ℂ] H} (h : ∀ x y : E, ⟪f x, ↑y⟫_ℂ = ⟪↑x, f y⟫_ℂ) :
-    (mk E f).IsUnbounded :=
+/--
+A LinearPMap constructed from a symmetric LinearMap with dense domain
+is an unbounded operator.
+-/
+lemma isUnbounded_of_dense_of_isSymmetric
+    [CompleteSpace H]
+    {E : Submodule ℂ H} (hE : Dense (E : Set H))
+    {f : E →ₗ[ℂ] H} (h : ∀ x y : E, ⟪f x, ↑y⟫_ℂ = ⟪↑x, f y⟫_ℂ)
+    : (mk E f).IsUnbounded :=
   ⟨hE, IsSymmetric.isClosable h hE⟩
 
 /-- Variant of `of_dense_of_isSymmetric` for an endomorphism satisfying `LinearMap.IsSymmetric`. -/
-lemma isUnbounded_of_dense_of_isSymmetric' [CompleteSpace H]
-    {E : Submodule ℂ H} (hE : Dense (E : Set H)) {f : E →ₗ[ℂ] E} (h : f.IsSymmetric) :
-    (mk E (E.subtype ∘ₗ f)).IsUnbounded :=
+lemma isUnbounded_of_dense_of_isSymmetric'
+    [CompleteSpace H]
+    {E : Submodule ℂ H} (hE : Dense (E : Set H))
+    {f : E →ₗ[ℂ] E} (h : f.IsSymmetric)
+    : (mk E (E.subtype ∘ₗ f)).IsUnbounded :=
   ⟨hE, IsSymmetric.isClosable h hE⟩
 
 /-!
@@ -893,8 +938,8 @@ lemma IsSelfAdjoint.isClosable [CompleteSpace H] (h : IsSelfAdjoint T) : T.IsClo
 lemma IsSelfAdjoint.isUnbounded [CompleteSpace H] (h : IsSelfAdjoint T) : T.IsUnbounded :=
   ⟨h.dense_domain, isClosable h⟩
 
-lemma IsSelfAdjoint.isEssentiallySelfAdjoint [CompleteSpace H] (h : IsSelfAdjoint T) :
-    T.IsEssentiallySelfAdjoint :=
+lemma IsSelfAdjoint.isEssentiallySelfAdjoint [CompleteSpace H] (h : IsSelfAdjoint T)
+    : T.IsEssentiallySelfAdjoint :=
   isEssentiallySelfAdjoint_def.mpr (h.isClosed.closure_eq.symm ▸ h)
 
 @[aesop safe apply]
@@ -903,26 +948,29 @@ lemma IsSelfAdjoint.adjoint [CompleteSpace H] (h : IsSelfAdjoint T) : IsSelfAdjo
   exact h.symm ▸ h
 
 @[aesop safe apply]
-lemma IsSelfAdjoint.smul [CompleteSpace H]
-    (h : IsSelfAdjoint T) {c : ℂ} (hc : c ≠ 0) (hc' : conj c = c) :
-    IsSelfAdjoint (c • T) := by
+lemma IsSelfAdjoint.smul
+    [CompleteSpace H] (h : IsSelfAdjoint T) {c : ℂ} (hc : c ≠ 0) (hc' : conj c = c)
+    : IsSelfAdjoint (c • T) := by
   rw [isSelfAdjoint_def, T.adjoint_smul hc, hc', isSelfAdjoint_def.mp h]
 
 @[aesop safe apply]
-lemma IsSelfAdjoint.real_smul [CompleteSpace H] (h : IsSelfAdjoint T) {r : ℝ} (hr : r ≠ 0) :
-    IsSelfAdjoint (r • T) :=
+lemma IsSelfAdjoint.real_smul [CompleteSpace H] (h : IsSelfAdjoint T) {r : ℝ} (hr : r ≠ 0)
+    : IsSelfAdjoint (r • T) :=
   smul h (ofReal_ne_zero.mpr hr) (conj_ofReal r)
 
 @[aesop safe apply]
 lemma IsSelfAdjoint.neg [CompleteSpace H] (h : IsSelfAdjoint T) : IsSelfAdjoint (-T) :=
   neg_eq_neg_one_smul T ▸ smul h (by norm_num) (by norm_num)
 
-/-- Self-adjointness from surjectivity of `T ± i`: a symmetric, densely-defined operator `T` for
-which `T + I • 1` and `T - I • 1` both have full range is self-adjoint. -/
-lemma IsSymmetric.isSelfAdjoint_of_range_eq_top [CompleteSpace H] (hsym : T.IsSymmetric)
-    (hdense : T.HasDenseDomain)
-    (hadd : (T + I • 1).toFun.range = ⊤) (hsub : (T - I • 1).toFun.range = ⊤) :
-    IsSelfAdjoint T := by
+/--
+Self-adjointness from surjectivity of `T ± i`: a symmetric, densely-defined operator `T` for
+which `T + I • 1` and `T - I • 1` both have full range is self-adjoint.
+-/
+lemma IsSymmetric.isSelfAdjoint_of_range_eq_top
+    [CompleteSpace H]
+    (hsym : T.IsSymmetric) (hdense : T.HasDenseDomain) (hadd : (T + I • 1).toFun.range = ⊤)
+    (hsub : (T - I • 1).toFun.range = ⊤)
+    : IsSelfAdjoint T := by
   have hplus : ∀ φ : H, ∃ ψ : T.domain, T ψ + I • (ψ : H) = φ := fun φ => by
     obtain ⟨ψ, hψ⟩ := LinearMap.range_eq_top.mp hadd φ
     exact ⟨⟨(ψ : H), (Submodule.mem_inf.mp ψ.2).1⟩, hψ⟩
@@ -943,8 +991,7 @@ lemma IsSymmetric.isSelfAdjoint_of_range_eq_top [CompleteSpace H] (hsym : T.IsSy
   have hker : ∀ w : T.adjoint.domain, T.adjoint w = I • (w : H) → (w : H) = 0 := by
     intro w hw
     obtain ⟨v, hv⟩ := hplus (w : H)
-    suffices ⟪↑w, T v + I • v⟫_ℂ = 0 by
-      exact inner_self_eq_zero.mp (hv ▸ this)
+    suffices ⟪↑w, T v + I • v⟫_ℂ = 0 by exact inner_self_eq_zero.mp (hv ▸ this)
     rw [inner_add_right, inner_smul_right, ← adjoint_isFormalAdjoint hdense w v, hw,
       inner_smul_left, conj_I]
     ring
@@ -955,45 +1002,47 @@ lemma IsSymmetric.isSelfAdjoint_of_range_eq_top [CompleteSpace H] (hsym : T.IsSy
 ### C.4. Essentially self-adjoint operators
 -/
 
-lemma IsEssentiallySelfAdjoint.hasDenseDomain [CompleteSpace H] (h : T.IsEssentiallySelfAdjoint) :
-    T.HasDenseDomain :=
+lemma IsEssentiallySelfAdjoint.hasDenseDomain [CompleteSpace H] (h : T.IsEssentiallySelfAdjoint)
+    : T.HasDenseDomain :=
   hasDenseDomain_iff_closure_hasDenseDomain.mpr h.dense_domain
 
-lemma IsEssentiallySelfAdjoint.isSymmetric [CompleteSpace H] (h : T.IsEssentiallySelfAdjoint) :
-    T.IsSymmetric :=
+lemma IsEssentiallySelfAdjoint.isSymmetric [CompleteSpace H] (h : T.IsEssentiallySelfAdjoint)
+    : T.IsSymmetric :=
   (IsSelfAdjoint.isSymmetric h).of_le T.le_closure
 
-lemma IsEssentiallySelfAdjoint.isClosable [CompleteSpace H] (h : T.IsEssentiallySelfAdjoint) :
-    T.IsClosable :=
+lemma IsEssentiallySelfAdjoint.isClosable [CompleteSpace H] (h : T.IsEssentiallySelfAdjoint)
+    : T.IsClosable :=
   h.isSymmetric.isClosable h.hasDenseDomain
 
-lemma IsEssentiallySelfAdjoint.isUnbounded [CompleteSpace H] (h : T.IsEssentiallySelfAdjoint) :
-    T.IsUnbounded :=
+lemma IsEssentiallySelfAdjoint.isUnbounded [CompleteSpace H] (h : T.IsEssentiallySelfAdjoint)
+    : T.IsUnbounded :=
   h.isSymmetric.isUnbounded_iff_hasDenseDomain.mpr h.hasDenseDomain
 
 /-- The closure is the unique self-adjoint extension of an essentially self-adjoint operator. -/
-lemma IsEssentiallySelfAdjoint.unique_self_adjoint_extension [CompleteSpace H]
-    (h : T.IsEssentiallySelfAdjoint) {T₂ : H →ₗ.[ℂ] H} (h_le : T ≤ T₂) (h₂ : IsSelfAdjoint T₂) :
-    T₂ = T.closure := by
+lemma IsEssentiallySelfAdjoint.unique_self_adjoint_extension
+    [CompleteSpace H]
+    (h : T.IsEssentiallySelfAdjoint)
+    {T₂ : H →ₗ.[ℂ] H} (h_le : T ≤ T₂) (h₂ : IsSelfAdjoint T₂)
+    : T₂ = T.closure := by
   have h_cl : T₂.IsClosed := IsSelfAdjoint.isClosed h₂
   have h_le' : T.closure ≤ T₂ := h_cl.closure_eq ▸ h_cl.isClosable.closure_mono h_le
   exact eq_of_le_of_ge (h ▸ h₂ ▸ adjoint_antitone (Or.inl h.hasDenseDomain.closure) h_le') h_le'
 
 @[aesop safe apply]
-lemma IsEssentiallySelfAdjoint.smul [CompleteSpace H]
-    (h : T.IsEssentiallySelfAdjoint) {c : ℂ} (hc : c ≠ 0) (hc' : conj c = c) :
-    (c • T).IsEssentiallySelfAdjoint := by
+lemma IsEssentiallySelfAdjoint.smul
+    [CompleteSpace H] (h : T.IsEssentiallySelfAdjoint) {c : ℂ} (hc : c ≠ 0) (hc' : conj c = c)
+    : (c • T).IsEssentiallySelfAdjoint := by
   simp_all [isEssentiallySelfAdjoint_def, isSelfAdjoint_def, closure_smul _ hc, adjoint_smul _ hc]
 
 @[aesop safe apply]
-lemma IsEssentiallySelfAdjoint.real_smul [CompleteSpace H]
-    (h : T.IsEssentiallySelfAdjoint) {r : ℝ} (hr : r ≠ 0) :
-    (r • T).IsEssentiallySelfAdjoint :=
+lemma IsEssentiallySelfAdjoint.real_smul
+    [CompleteSpace H] (h : T.IsEssentiallySelfAdjoint) {r : ℝ} (hr : r ≠ 0)
+    : (r • T).IsEssentiallySelfAdjoint :=
   h.smul (ofReal_ne_zero.mpr hr) (conj_ofReal r)
 
 @[aesop safe apply]
-lemma IsEssentiallySelfAdjoint.neg [CompleteSpace H] (h : T.IsEssentiallySelfAdjoint) :
-    (-T).IsEssentiallySelfAdjoint :=
+lemma IsEssentiallySelfAdjoint.neg [CompleteSpace H] (h : T.IsEssentiallySelfAdjoint)
+    : (-T).IsEssentiallySelfAdjoint :=
   neg_eq_neg_one_smul T ▸ h.smul (by norm_num) (by norm_num)
 
 end LinearPMap

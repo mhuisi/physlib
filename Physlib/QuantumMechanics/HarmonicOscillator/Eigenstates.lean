@@ -99,14 +99,15 @@ def eigenCoeff (i : Fin d) : ℝ := 1 / √(2 ^ n i * (n i)! * √π * Q.ξ i)
 lemma eigenCoeff_eq (i : Fin d) : Q.eigenCoeff n i = 1 / √(2 ^ n i * (n i)! * √π * Q.ξ i) := rfl
 
 /-- `√(nᵢ + 1) c(n + eᵢ)ᵢ = c(n)ᵢ / √2`. -/
-lemma eigenCoeff_update_succ (i : Fin d) (n : Fin d → ℕ) :
-    √((n i : ℝ) + 1) * Q.eigenCoeff (Function.update n i (n i + 1)) i
+lemma eigenCoeff_update_succ (i : Fin d) (n : Fin d → ℕ)
+    : √((n i : ℝ) + 1) * Q.eigenCoeff (Function.update n i (n i + 1)) i
       = (√2)⁻¹ * Q.eigenCoeff n i := by
   simp only [eigenCoeff_eq, Function.update_self]
   have hpos : 0 < (2 : ℝ) ^ n i * (n i)! * √π * Q.ξ i :=
     mul_pos (mul_pos (mul_pos (by positivity) (by positivity)) (by positivity)) (Q.ξ_pos i)
-  have h1 : (2 : ℝ) ^ (n i + 1) * ((n i + 1)! : ℝ) * √π * Q.ξ i
-      = (2 * ((n i : ℝ) + 1)) * (2 ^ n i * (n i)! * √π * Q.ξ i) := by
+  have h1
+      : (2 : ℝ) ^ (n i + 1) * ((n i + 1)! : ℝ) * √π * Q.ξ i
+        = (2 * ((n i : ℝ) + 1)) * (2 ^ n i * (n i)! * √π * Q.ξ i) := by
     push_cast [Nat.factorial_succ]
     ring
   rw [h1, Real.sqrt_mul (by positivity : (0 : ℝ) ≤ 2 * ((n i : ℝ) + 1)),
@@ -117,8 +118,8 @@ lemma eigenCoeff_update_succ (i : Fin d) (n : Fin d → ℕ) :
   field_simp
 
 /-- `√nᵢ c(n - eᵢ)ᵢ = 2 nᵢ c(n)ᵢ / √2` (both sides vanish when `nᵢ = 0`). -/
-lemma eigenCoeff_update_pred (i : Fin d) (n : Fin d → ℕ) :
-    √(n i : ℝ) * Q.eigenCoeff (Function.update n i (n i - 1)) i
+lemma eigenCoeff_update_pred (i : Fin d) (n : Fin d → ℕ)
+    : √(n i : ℝ) * Q.eigenCoeff (Function.update n i (n i - 1)) i
       = (√2)⁻¹ * (2 * n i) * Q.eigenCoeff n i := by
   rcases Nat.eq_zero_or_pos (n i) with h0 | hpos
   · simp [h0]
@@ -126,8 +127,9 @@ lemma eigenCoeff_update_pred (i : Fin d) (n : Fin d → ℕ) :
     simp only [eigenCoeff_eq, Function.update_self, hm, Nat.add_sub_cancel]
     have hp : 0 < (2 : ℝ) ^ m * (m)! * √π * Q.ξ i :=
       mul_pos (mul_pos (mul_pos (by positivity) (by positivity)) (by positivity)) (Q.ξ_pos i)
-    have h1 : (2 : ℝ) ^ (m + 1) * ((m + 1)! : ℝ) * √π * Q.ξ i
-        = (2 * ((m : ℝ) + 1)) * (2 ^ m * (m)! * √π * Q.ξ i) := by
+    have h1
+        : (2 : ℝ) ^ (m + 1) * ((m + 1)! : ℝ) * √π * Q.ξ i
+          = (2 * ((m : ℝ) + 1)) * (2 ^ m * (m)! * √π * Q.ξ i) := by
       push_cast [Nat.factorial_succ]
       ring
     rw [h1, Real.sqrt_mul (by positivity : (0 : ℝ) ≤ 2 * ((m : ℝ) + 1)),
@@ -139,28 +141,37 @@ lemma eigenCoeff_update_pred (i : Fin d) (n : Fin d → ℕ) :
     field_simp
     rw [Real.sq_sqrt (by positivity), Real.sq_sqrt (by norm_num)]
 
-/-- The eigenfunction labelled by the integer quantum numbers `n : Fin d → ℕ`, defined as a product
-  of (physicist's) Hermite polynomials multiplying a Gaussian with covariance controlled
-  by the characteristic lengths, `Q.ξ`. -/
+/--
+The eigenfunction labelled by the integer quantum numbers `n : Fin d → ℕ`, defined as a product
+of (physicist's) Hermite polynomials multiplying a Gaussian with covariance controlled
+by the characteristic lengths, `Q.ξ`.
+-/
 def eigenfunction : 𝓢(Space d, ℂ) :=
   compCLMOfContinuousLinearEquiv ℂ Q.ξEquiv.symm <| smulLeftCLM ℂ
-    (fun x ↦ ∏ i, Q.eigenCoeff n i * physHermite (n i) (x i)) (stdGaussian (Space d) ℂ)
+    (fun x ↦ ∏ i, Q.eigenCoeff n i * physHermite (n i) (x i))
+    (stdGaussian (Space d) ℂ)
 
-lemma eigenfunction_eq :
-    Q.eigenfunction n = compCLMOfContinuousLinearEquiv ℂ Q.ξEquiv.symm (smulLeftCLM ℂ
-      (fun x ↦ ∏ i, Q.eigenCoeff n i * physHermite (n i) (x i)) (stdGaussian (Space d) ℂ)) := rfl
+lemma eigenfunction_eq
+    : Q.eigenfunction n
+      = compCLMOfContinuousLinearEquiv ℂ Q.ξEquiv.symm
+        (smulLeftCLM ℂ
+          (fun x ↦ ∏ i, Q.eigenCoeff n i * physHermite (n i) (x i))
+          (stdGaussian (Space d) ℂ)) :=
+  rfl
 
-lemma eigenfunction_apply :
-    Q.eigenfunction n x =
-      ∏ i, Q.eigenCoeff n i *
-        physHermite (n i) (x i / Q.ξ i) * cexp (-2⁻¹ * (x i / Q.ξ i) ^ 2) := by
+lemma eigenfunction_apply
+    : Q.eigenfunction n x
+      = ∏ i, Q.eigenCoeff n i *
+          physHermite (n i) (x i / Q.ξ i) * cexp (-2⁻¹ * (x i / Q.ξ i) ^ 2) := by
   rw [eigenfunction_eq, compCLMOfContinuousLinearEquiv_apply, Function.comp_apply,
     smulLeftCLM_apply_apply (by fun_prop)]
   simp [div_eq_mul_inv, prod_mul_distrib, exp_neg, norm_sq_eq, mul_sum, mul_comm, exp_sum]
 
-/-- The one-dimensional harmonic oscillator of mass `m` and angular frequency `ωⱼ`, along the
-  `j`th axis. `Q.eigenfunction n` is the product over `j` of the `nⱼ`th eigenfunctions of these
-  oscillators (`eigenfunction_eq_prod_oneDim`). -/
+/--
+The one-dimensional harmonic oscillator of mass `m` and angular frequency `ωⱼ`, along the
+`j`th axis. `Q.eigenfunction n` is the product over `j` of the `nⱼ`th eigenfunctions of these
+oscillators (`eigenfunction_eq_prod_oneDim`).
+-/
 def oneDim (j : Fin d) : OneDimension.HarmonicOscillator where
   m := Q.m
   ω := Q.ω j
@@ -174,10 +185,10 @@ lemma oneDim_ξ (j : Fin d) : (Q.oneDim j).ξ = Q.ξ j := by
   rw [Real.sqrt_div' _ (mul_nonneg Q.hm.le (Q.hω j).le), Real.sqrt_mul Q.hm.le]
 
 /-- The `nⱼ`th eigenfunction of `Q.oneDim j` is `y ↦ c(n)ⱼ Hₙⱼ(y / ξⱼ) exp(-½ (y / ξⱼ)²)`. -/
-lemma oneDim_eigenfunction_apply (j : Fin d) (y : ℝ) :
-    (Q.oneDim j).eigenfunction (n j) y =
-      (Q.eigenCoeff n j : ℂ) * (physHermite (n j) (y / Q.ξ j) : ℂ) *
-        cexp (-2⁻¹ * ((y : ℂ) / (Q.ξ j : ℂ)) ^ 2) := by
+lemma oneDim_eigenfunction_apply (j : Fin d) (y : ℝ)
+    : (Q.oneDim j).eigenfunction (n j) y
+      = (Q.eigenCoeff n j : ℂ) * (physHermite (n j) (y / Q.ξ j) : ℂ)
+        * cexp (-2⁻¹ * ((y : ℂ) / (Q.ξ j : ℂ)) ^ 2) := by
   have hs : √(2 ^ n j * (n j)! * √π * Q.ξ j) = √(2 ^ n j * (n j)!) * √(√π * Q.ξ j) := by
     rw [mul_assoc (2 ^ n j * (n j)! : ℝ), Real.sqrt_mul (by positivity)]
   rw [OneDimension.HarmonicOscillator.eigenfunction_eq, Q.oneDim_ξ, eigenCoeff_eq, hs]
@@ -185,66 +196,75 @@ lemma oneDim_eigenfunction_apply (j : Fin d) (y : ℝ) :
   ring_nf
 
 /-- The eigenfunction is the product of the eigenfunctions of the one-dimensional oscillators. -/
-lemma eigenfunction_eq_prod_oneDim :
-    Q.eigenfunction n x = ∏ j, (Q.oneDim j).eigenfunction (n j) (x j) := by
+lemma eigenfunction_eq_prod_oneDim
+    : Q.eigenfunction n x = ∏ j, (Q.oneDim j).eigenfunction (n j) (x j) := by
   rw [eigenfunction_apply]
   exact Finset.prod_congr rfl fun j _ => (Q.oneDim_eigenfunction_apply n j (x j)).symm
 
-/-- The derivative of the `nⱼ`th eigenfunction of `Q.oneDim j`,
-  `c(n)ⱼ ((2 nⱼ/ξⱼ) Hₙⱼ₋₁(y/ξⱼ) - (y/ξⱼ²) Hₙⱼ(y/ξⱼ)) exp(-½ (y/ξⱼ)²)`. -/
-lemma deriv_oneDim_eigenfunction (j : Fin d) (y : ℝ) :
-    _root_.deriv ((Q.oneDim j).eigenfunction (n j)) y
-      = (Q.eigenCoeff n j : ℂ) *
-        (((2 * n j / Q.ξ j : ℝ) : ℂ) * (physHermite (n j - 1) (y / Q.ξ j) : ℂ)
-          - ((y / Q.ξ j ^ 2 : ℝ) : ℂ) * (physHermite (n j) (y / Q.ξ j) : ℂ)) *
-        cexp (-2⁻¹ * ((y : ℂ) / (Q.ξ j : ℂ)) ^ 2) := by
+/--
+The derivative of the `nⱼ`th eigenfunction of `Q.oneDim j`,
+`c(n)ⱼ ((2 nⱼ/ξⱼ) Hₙⱼ₋₁(y/ξⱼ) - (y/ξⱼ²) Hₙⱼ(y/ξⱼ)) exp(-½ (y/ξⱼ)²)`.
+-/
+lemma deriv_oneDim_eigenfunction (j : Fin d) (y : ℝ)
+    : _root_.deriv ((Q.oneDim j).eigenfunction (n j)) y
+      = (Q.eigenCoeff n j : ℂ)
+        * (((2 * n j / Q.ξ j : ℝ) : ℂ) * (physHermite (n j - 1) (y / Q.ξ j) : ℂ)
+          - ((y / Q.ξ j ^ 2 : ℝ) : ℂ) * (physHermite (n j) (y / Q.ξ j) : ℂ))
+        * cexp (-2⁻¹ * ((y : ℂ) / (Q.ξ j : ℂ)) ^ 2) := by
   have h1 : HasDerivAt (fun y : ℝ => y / Q.ξ j) (1 / Q.ξ j) y :=
     ((hasDerivAt_id y).div_const (Q.ξ j)).congr_deriv (by simp)
-  have hH : HasDerivAt (fun y : ℝ => (physHermite (n j) (y / Q.ξ j) : ℂ))
+  have hH : HasDerivAt
+      (fun y : ℝ => (physHermite (n j) (y / Q.ξ j) : ℂ))
       ((2 * n j * physHermite (n j - 1) (y / Q.ξ j) / Q.ξ j : ℝ) : ℂ) y := by
-    have h2 := ((physHermite_differentiable (n j)).differentiableAt.hasDerivAt
-      (x := y / Q.ξ j)).comp y h1
+    have h2 :=
+      ((physHermite_differentiable (n j)).differentiableAt.hasDerivAt (x := y / Q.ξ j)).comp y h1
     rw [deriv_physHermite] at h2
     refine h2.ofReal_comp.congr_deriv ?_
     simp only [Pi.mul_apply, Pi.ofNat_apply, Pi.natCast_apply]
     push_cast
     ring
-  have hE : HasDerivAt (fun y : ℝ => cexp (-2⁻¹ * ((y : ℂ) / (Q.ξ j : ℂ)) ^ 2))
+  have hE : HasDerivAt
+      (fun y : ℝ => cexp (-2⁻¹ * ((y : ℂ) / (Q.ξ j : ℂ)) ^ 2))
       (cexp (-2⁻¹ * ((y : ℂ) / (Q.ξ j : ℂ)) ^ 2) * (-(y / Q.ξ j ^ 2 : ℝ) : ℂ)) y := by
-    have h2 := ((((hasDerivAt_id y).ofReal_comp.div_const (Q.ξ j : ℂ)).pow 2).const_mul
-      (-2⁻¹ : ℂ)).cexp
+    have h2 :=
+      ((((hasDerivAt_id y).ofReal_comp.div_const (Q.ξ j : ℂ)).pow 2).const_mul (-2⁻¹ : ℂ)).cexp
     refine h2.congr_deriv ?_
     simp only [Pi.pow_apply, id]
     push_cast
     ring
   have := (hH.const_mul (Q.eigenCoeff n j : ℂ)).mul hE
-  rw [show (Q.oneDim j).eigenfunction (n j) = fun y : ℝ => (Q.eigenCoeff n j : ℂ) *
-      (physHermite (n j) (y / Q.ξ j) : ℂ) * cexp (-2⁻¹ * ((y : ℂ) / (Q.ξ j : ℂ)) ^ 2) from
+  rw [show (Q.oneDim j).eigenfunction (n j)
+      = fun y : ℝ =>
+        (Q.eigenCoeff n j : ℂ) * (physHermite (n j) (y / Q.ξ j) : ℂ)
+          * cexp (-2⁻¹ * ((y : ℂ) / (Q.ξ j : ℂ)) ^ 2) from
     funext (Q.oneDim_eigenfunction_apply n j)]
-  rw [show (fun y : ℝ => (Q.eigenCoeff n j : ℂ) * (physHermite (n j) (y / Q.ξ j) : ℂ)
-        * cexp (-2⁻¹ * ((y : ℂ) / (Q.ξ j : ℂ)) ^ 2))
-      = (fun y : ℝ => (Q.eigenCoeff n j : ℂ) * (physHermite (n j) (y / Q.ξ j) : ℂ)) *
-        fun y : ℝ => cexp (-2⁻¹ * ((y : ℂ) / (Q.ξ j : ℂ)) ^ 2) from rfl, this.deriv]
+  rw [show (fun y : ℝ =>
+          (Q.eigenCoeff n j : ℂ) * (physHermite (n j) (y / Q.ξ j) : ℂ)
+            * cexp (-2⁻¹ * ((y : ℂ) / (Q.ξ j : ℂ)) ^ 2))
+        = (fun y : ℝ => (Q.eigenCoeff n j : ℂ) * (physHermite (n j) (y / Q.ξ j) : ℂ))
+          * fun y : ℝ => cexp (-2⁻¹ * ((y : ℂ) / (Q.ξ j : ℂ)) ^ 2) from
+      rfl,
+    this.deriv]
   push_cast
   ring
 
 /-- The eigenfunction with the `i`th quantum number changed to `k`, factor `i` set apart. -/
-lemma eigenfunction_update_apply (i : Fin d) (k : ℕ) :
-    Q.eigenfunction (Function.update n i k) x =
-      (Q.oneDim i).eigenfunction (Function.update n i k i) (x i) *
-        ∏ j ∈ univ.erase i, (Q.oneDim j).eigenfunction (n j) (x j) := by
+lemma eigenfunction_update_apply (i : Fin d) (k : ℕ)
+    : Q.eigenfunction (Function.update n i k) x
+      = (Q.oneDim i).eigenfunction (Function.update n i k i) (x i)
+        * ∏ j ∈ univ.erase i, (Q.oneDim j).eigenfunction (n j) (x j) := by
   rw [eigenfunction_eq_prod_oneDim, ← Finset.mul_prod_erase univ _ (Finset.mem_univ i)]
   congr 1
-  exact Finset.prod_congr rfl fun j hj => by
-    rw [Function.update_of_ne (Finset.ne_of_mem_erase hj)]
+  exact Finset.prod_congr rfl fun j hj => by rw [Function.update_of_ne (Finset.ne_of_mem_erase hj)]
 
 /-- The `i`th spatial derivative of the eigenfunction, factor `i` differentiated. -/
-lemma deriv_eigenfunction_apply (i : Fin d) :
-    ∂[i] (Q.eigenfunction n) x =
-      _root_.deriv ((Q.oneDim i).eigenfunction (n i)) (x i) *
-        ∏ j ∈ univ.erase i, (Q.oneDim j).eigenfunction (n j) (x j) := by
-  have h : (⇑(Q.eigenfunction n) : Space d → ℂ) =
-      fun x => ∏ j, (Q.oneDim j).eigenfunction (n j) (x j) := by
+lemma deriv_eigenfunction_apply (i : Fin d)
+    : ∂[i] (Q.eigenfunction n) x
+      = _root_.deriv ((Q.oneDim i).eigenfunction (n i)) (x i)
+        * ∏ j ∈ univ.erase i, (Q.oneDim j).eigenfunction (n j) (x j) := by
+  have h
+      : (⇑(Q.eigenfunction n) : Space d → ℂ)
+        = fun x => ∏ j, (Q.oneDim j).eigenfunction (n j) (x j) := by
     funext x
     exact Q.eigenfunction_eq_prod_oneDim n x
   rw [h, Space.deriv_prod_coord _ fun j y => (Q.oneDim j).eigenfunction_differentiableAt y (n j)]
@@ -263,16 +283,20 @@ lemma eigenstate_eq : Q.eigenstate n = schwartzEquiv _ (Q.eigenfunction n) := rf
 lemma eigenstates_orthonormal : ⟪(Q.eigenstate n : Q.HS), Q.eigenstate n'⟫_ℂ = δ[n,n'] := by
   have hmp : MeasureTheory.MeasurePreserving (equivPi d).symm :=
     Space.basis.measurePreserving_repr_symm.comp (PiLp.volume_preserving_toLp (Fin d))
-  have h1 (i : Fin d) : ∫ t : ℝ, starRingEnd ℂ ((Q.oneDim i).eigenfunction (n i) t) *
-      (Q.oneDim i).eigenfunction (n' i) t = if n i = n' i then 1 else 0 := by
+  have h1 (i : Fin d)
+      : ∫ t : ℝ, starRingEnd ℂ ((Q.oneDim i).eigenfunction (n i) t) *
+          (Q.oneDim i).eigenfunction (n' i) t
+        = if n i = n' i then 1 else 0 := by
     rw [← OneDimension.HilbertSpace.inner_mk_mk]
     exact orthonormal_iff_ite.mp (Q.oneDim i).eigenfunction_orthonormal (n i) (n' i)
   rw [← Submodule.coe_inner, eigenstate, eigenstate, SchwartzSubmodule.schwartzEquiv_inner]
   simp_rw [eigenfunction_eq_prod_oneDim, map_prod, ← Finset.prod_mul_distrib]
   rw [← hmp.integral_comp (equivPi d).symm.toHomeomorph.measurableEmbedding]
-  refine (MeasureTheory.integral_fintype_prod_volume_eq_prod (f := fun i t =>
-    starRingEnd ℂ ((Q.oneDim i).eigenfunction (n i) t) *
-      (Q.oneDim i).eigenfunction (n' i) t)).trans ?_
+  refine (MeasureTheory.integral_fintype_prod_volume_eq_prod
+      (f := fun i t =>
+        starRingEnd ℂ ((Q.oneDim i).eigenfunction (n i) t)
+          * (Q.oneDim i).eigenfunction (n' i) t)).trans
+    ?_
   simp only [h1, Finset.prod_boole, KroneckerDelta.kroneckerDelta, funext_iff]
   split_ifs <;> simp_all
 
@@ -283,15 +307,14 @@ lemma eigenstates_orthonormal : ⟪(Q.eigenstate n : Q.HS), Q.eigenstate n'⟫_�
 -/
 
 /-- `aᵢ† ψₙ = √(nᵢ + 1) ψₙ₊ₑᵢ`: the raising operator raises the `i`th quantum number by one. -/
-lemma raising_eigenfunction (i : Fin d) (n : Fin d → ℕ) :
-    Q.raisingCLM i (Q.eigenfunction n) =
-      ((Real.sqrt (n i + 1) : ℝ) : ℂ) • Q.eigenfunction (Function.update n i (n i + 1)) := by
+lemma raising_eigenfunction (i : Fin d) (n : Fin d → ℕ)
+    : Q.raisingCLM i (Q.eigenfunction n)
+      = ((Real.sqrt (n i + 1) : ℝ) : ℂ) • Q.eigenfunction (Function.update n i (n i + 1)) := by
   ext x
   simp only [raisingCLM_eq, _root_.smul_apply, _root_.sub_apply, positionCLM_apply,
     momentumCLM_apply, smul_eq_mul]
-  rw [Q.deriv_eigenfunction_apply, Q.eigenfunction_update_apply,
-    Q.eigenfunction_eq_prod_oneDim n x, ← Finset.mul_prod_erase univ _ (Finset.mem_univ i),
-    Q.deriv_oneDim_eigenfunction]
+  rw [Q.deriv_eigenfunction_apply, Q.eigenfunction_update_apply, Q.eigenfunction_eq_prod_oneDim n x,
+    ← Finset.mul_prod_erase univ _ (Finset.mem_univ i), Q.deriv_oneDim_eigenfunction]
   set P : ℂ := ∏ j ∈ univ.erase i, (Q.oneDim j).eigenfunction (n j) (x j) with hP
   rw [Q.oneDim_eigenfunction_apply (Function.update n i (n i + 1)) i,
     Q.oneDim_eigenfunction_apply n i]
@@ -302,10 +325,12 @@ lemma raising_eigenfunction (i : Fin d) (n : Fin d → ℕ) :
   rw [hHc]
   have hξ := Q.ξ_ofReal_ne_zero i
   have hℏ := ℏ_ofReal_ne_zero
-  have hs : ((Real.sqrt 2 : ℝ) : ℂ) ≠ 0 := by
-    exact_mod_cast (Real.sqrt_pos.mpr (by norm_num)).ne'
-  have hcc' : ((Real.sqrt 2 : ℝ) : ℂ) * (((Real.sqrt ((n i : ℝ) + 1) : ℝ) : ℂ)
-      * (Q.eigenCoeff (Function.update n i (n i + 1)) i : ℂ)) = (Q.eigenCoeff n i : ℂ) := by
+  have hs : ((Real.sqrt 2 : ℝ) : ℂ) ≠ 0 := by exact_mod_cast (Real.sqrt_pos.mpr (by norm_num)).ne'
+  have hcc'
+      : ((Real.sqrt 2 : ℝ) : ℂ)
+          * (((Real.sqrt ((n i : ℝ) + 1) : ℝ) : ℂ)
+            * (Q.eigenCoeff (Function.update n i (n i + 1)) i : ℂ))
+        = (Q.eigenCoeff n i : ℂ) := by
     rw [hcc, mul_inv_cancel_left₀ hs]
   field_simp
   linear_combination ((Q.eigenCoeff n i : ℂ) * P * (2 * ((Q.ξ i : ℝ) : ℂ) * ((n i : ℕ) : ℂ)
@@ -315,17 +340,18 @@ lemma raising_eigenfunction (i : Fin d) (n : Fin d → ℕ) :
       - ((Q.ξ i : ℝ) : ℂ) * ((n i : ℕ) : ℂ)
         * ((physHermite (n i - 1) (x i / Q.ξ i) : ℝ) : ℂ))) * hcc'
 
-/-- `aᵢ ψₙ = √nᵢ ψₙ₋ₑᵢ`: the lowering operator lowers the `i`th quantum number by one (and
-  annihilates the eigenfunction when `nᵢ = 0`, since `√0 = 0`). -/
-lemma lowering_eigenfunction (i : Fin d) (n : Fin d → ℕ) :
-    Q.loweringCLM i (Q.eigenfunction n) =
-      ((Real.sqrt (n i) : ℝ) : ℂ) • Q.eigenfunction (Function.update n i (n i - 1)) := by
+/--
+`aᵢ ψₙ = √nᵢ ψₙ₋ₑᵢ`: the lowering operator lowers the `i`th quantum number by one (and
+annihilates the eigenfunction when `nᵢ = 0`, since `√0 = 0`).
+-/
+lemma lowering_eigenfunction (i : Fin d) (n : Fin d → ℕ)
+    : Q.loweringCLM i (Q.eigenfunction n)
+      = ((Real.sqrt (n i) : ℝ) : ℂ) • Q.eigenfunction (Function.update n i (n i - 1)) := by
   ext x
   simp only [loweringCLM_eq, _root_.smul_apply, _root_.add_apply, positionCLM_apply,
     momentumCLM_apply, smul_eq_mul]
-  rw [Q.deriv_eigenfunction_apply, Q.eigenfunction_update_apply,
-    Q.eigenfunction_eq_prod_oneDim n x, ← Finset.mul_prod_erase univ _ (Finset.mem_univ i),
-    Q.deriv_oneDim_eigenfunction]
+  rw [Q.deriv_eigenfunction_apply, Q.eigenfunction_update_apply, Q.eigenfunction_eq_prod_oneDim n x,
+    ← Finset.mul_prod_erase univ _ (Finset.mem_univ i), Q.deriv_oneDim_eigenfunction]
   set P : ℂ := ∏ j ∈ univ.erase i, (Q.oneDim j).eigenfunction (n j) (x j) with hP
   rw [Q.oneDim_eigenfunction_apply (Function.update n i (n i - 1)) i,
     Q.oneDim_eigenfunction_apply n i]
@@ -334,11 +360,11 @@ lemma lowering_eigenfunction (i : Fin d) (n : Fin d → ℕ) :
   push_cast at hcc ⊢
   have hξ := Q.ξ_ofReal_ne_zero i
   have hℏ := ℏ_ofReal_ne_zero
-  have hs : ((Real.sqrt 2 : ℝ) : ℂ) ≠ 0 := by
-    exact_mod_cast (Real.sqrt_pos.mpr (by norm_num)).ne'
-  have hcc' : ((Real.sqrt 2 : ℝ) : ℂ) * (((Real.sqrt (n i : ℝ) : ℝ) : ℂ)
-      * (Q.eigenCoeff (Function.update n i (n i - 1)) i : ℂ))
-      = 2 * ((n i : ℕ) : ℂ) * (Q.eigenCoeff n i : ℂ) := by
+  have hs : ((Real.sqrt 2 : ℝ) : ℂ) ≠ 0 := by exact_mod_cast (Real.sqrt_pos.mpr (by norm_num)).ne'
+  have hcc'
+      : ((Real.sqrt 2 : ℝ) : ℂ)
+          * (((Real.sqrt (n i : ℝ) : ℝ) : ℂ) * (Q.eigenCoeff (Function.update n i (n i - 1)) i : ℂ))
+        = 2 * ((n i : ℕ) : ℂ) * (Q.eigenCoeff n i : ℂ) := by
     rw [hcc]
     field_simp
   field_simp
@@ -353,8 +379,8 @@ lemma lowering_eigenfunction_zero (i : Fin d) : Q.loweringCLM i (Q.eigenfunction
   simp
 
 /-- `Nᵢ ψₙ = nᵢ ψₙ`: the eigenfunctions are eigenfunctions of the number operators. -/
-lemma number_eigenfunction (i : Fin d) (n : Fin d → ℕ) :
-    Q.numberCLM i (Q.eigenfunction n) = ((n i : ℕ) : ℂ) • Q.eigenfunction n := by
+lemma number_eigenfunction (i : Fin d) (n : Fin d → ℕ)
+    : Q.numberCLM i (Q.eigenfunction n) = ((n i : ℕ) : ℂ) • Q.eigenfunction n := by
   rw [numberCLM_eq, ContinuousLinearMap.comp_apply, lowering_eigenfunction, map_smul,
     raising_eigenfunction, smul_smul, Function.update_self, Function.update_idem]
   rcases Nat.eq_zero_or_pos (n i) with h0 | hpos
@@ -371,14 +397,17 @@ lemma number_eigenfunction (i : Fin d) (n : Fin d → ℕ) :
 
 -/
 
-/-- `∑ᵢ ℏ ωᵢ (Nᵢ + ½) ψₙ = Eₙ ψₙ`: the eigenvalue equation for the Hamiltonian written with the
-  number operators. -/
-lemma sum_number_eigenfunction :
-    (∑ j, ((ℏ * Q.ω j : ℝ) : ℂ) •
-      (Q.numberCLM j + (2⁻¹ : ℂ) • ContinuousLinearMap.id ℂ 𝓢(Space d, ℂ))) (Q.eigenfunction n) =
-      (Q.eigenEnergy n : ℂ) • Q.eigenfunction n := by
-  simp only [FunLike.coe_sum, Finset.sum_apply, _root_.smul_apply,
-    _root_.add_apply, ContinuousLinearMap.id_apply, number_eigenfunction, eigenEnergy_eq]
+/--
+`∑ᵢ ℏ ωᵢ (Nᵢ + ½) ψₙ = Eₙ ψₙ`: the eigenvalue equation for the Hamiltonian written with the
+number operators.
+-/
+lemma sum_number_eigenfunction
+    : (∑ j, ((ℏ * Q.ω j : ℝ) : ℂ) •
+        (Q.numberCLM j + (2⁻¹ : ℂ) • ContinuousLinearMap.id ℂ 𝓢(Space d, ℂ)))
+        (Q.eigenfunction n)
+      = (Q.eigenEnergy n : ℂ) • Q.eigenfunction n := by
+  simp only [FunLike.coe_sum, Finset.sum_apply, _root_.smul_apply, _root_.add_apply,
+    ContinuousLinearMap.id_apply, number_eigenfunction, eigenEnergy_eq]
   simp only [← add_smul, smul_smul, ← Finset.sum_smul, ofReal_sum]
   congr 1
   refine Finset.sum_congr rfl fun j _ => ?_
@@ -389,10 +418,12 @@ lemma sum_number_eigenfunction :
 lemma eigenstate_mem_hamiltonian_domain : (Q.eigenstate n : Q.HS) ∈ Q.hamiltonian.domain :=
   Q.schwartzSubmodule_le_hamiltonian_domain (Q.eigenstate n).2
 
-/-- `H ψₙ = Eₙ ψₙ`: the time-independent Schrodinger equation for the eigenstates, with the
-  Hamiltonian `kineticOperator + potentialOperator` of `Basic.lean`. -/
-lemma hamiltonian_eigenstate (h : (Q.eigenstate n : Q.HS) ∈ Q.hamiltonian.domain) :
-    Q.hamiltonian ⟨Q.eigenstate n, h⟩ = (Q.eigenEnergy n : ℂ) • (Q.eigenstate n : Q.HS) := by
+/--
+`H ψₙ = Eₙ ψₙ`: the time-independent Schrodinger equation for the eigenstates, with the
+Hamiltonian `kineticOperator + potentialOperator` of `Basic.lean`.
+-/
+lemma hamiltonian_eigenstate (h : (Q.eigenstate n : Q.HS) ∈ Q.hamiltonian.domain)
+    : Q.hamiltonian ⟨Q.eigenstate n, h⟩ = (Q.eigenEnergy n : ℂ) • (Q.eigenstate n : Q.HS) := by
   have h1 := Q.hamiltonian_apply_schwartz (Q.eigenfunction n) h
   rw [sum_number_eigenfunction, map_smul, Submodule.coe_smul] at h1
   exact h1

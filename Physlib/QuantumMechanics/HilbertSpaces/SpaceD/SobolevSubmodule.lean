@@ -45,8 +45,10 @@ variable {d : ℕ} {μ : Measure (Space d)} [μ.HasTemperateGrowth]
 ## A. The Sobolev submodule `H^s`
 -/
 
-/-- The Sobolev space `H^s` as a submodule of `SpaceDHilbertSpace d`: the L² classes whose
-associated tempered distribution satisfies `MemSobolev s 2`. -/
+/--
+The Sobolev space `H^s` as a submodule of `SpaceDHilbertSpace d`: the L² classes whose
+associated tempered distribution satisfies `MemSobolev s 2`.
+-/
 def SobolevSubmodule (d : ℕ) (s : ℝ) : Submodule ℂ (SpaceDHilbertSpace d) where
   carrier := {ψ | MemSobolev s 2 (toTemperedDistributionCLM d volume ψ)}
   add_mem' {ψ φ} hψ hφ := by simpa only [Set.mem_ofPred_eq, map_add] using hψ.add hφ
@@ -54,30 +56,32 @@ def SobolevSubmodule (d : ℕ) (s : ℝ) : Submodule ℂ (SpaceDHilbertSpace d) 
   smul_mem' c ψ hψ := by simpa only [Set.mem_ofPred_eq, map_smul] using hψ.smul c
 
 /-- Membership in `H^s` is the Sobolev condition on the associated tempered distribution. -/
-lemma mem_sobolevSubmodule_iff {s : ℝ} {ψ : SpaceDHilbertSpace d} :
-    ψ ∈ SobolevSubmodule d s ↔ MemSobolev s 2 (toTemperedDistribution ψ) := Iff.rfl
+lemma mem_sobolevSubmodule_iff {s : ℝ} {ψ : SpaceDHilbertSpace d}
+    : ψ ∈ SobolevSubmodule d s ↔ MemSobolev s 2 (toTemperedDistribution ψ) :=
+  Iff.rfl
 
 /-- Schwartz maps lie in every Sobolev space `H^s`. -/
-lemma SobolevSubmodule.schwartzIncl_mem (s : ℝ) (g : 𝓢(Space d, ℂ)) :
-    schwartzIncl volume g ∈ SobolevSubmodule d s := by
+lemma SobolevSubmodule.schwartzIncl_mem (s : ℝ) (g : 𝓢(Space d, ℂ))
+    : schwartzIncl volume g ∈ SobolevSubmodule d s := by
   rw [mem_sobolevSubmodule_iff, SchwartzSubmodule.toTemperedDistribution_schwartzIncl_eq]
   exact g.memSobolev
 
 /-- The Schwartz submodule is contained in every Sobolev space `H^s`. -/
-lemma schwartzSubmodule_le_sobolevSubmodule (s : ℝ) :
-    SchwartzSubmodule d ≤ SobolevSubmodule d s := by
+lemma schwartzSubmodule_le_sobolevSubmodule (s : ℝ)
+    : SchwartzSubmodule d ≤ SobolevSubmodule d s := by
   rintro ψ ⟨g, rfl⟩
   exact SobolevSubmodule.schwartzIncl_mem s g
 
-/-- Every Sobolev space `H^s` is dense in `SpaceDHilbertSpace d`, containing the dense Schwartz
-submodule. -/
-lemma SobolevSubmodule.dense (s : ℝ) :
-    Dense (SobolevSubmodule d s : Set (SpaceDHilbertSpace d)) :=
+/--
+Every Sobolev space `H^s` is dense in `SpaceDHilbertSpace d`, containing the dense Schwartz
+submodule.
+-/
+lemma SobolevSubmodule.dense (s : ℝ) : Dense (SobolevSubmodule d s : Set (SpaceDHilbertSpace d)) :=
   (SchwartzSubmodule.dense d volume).mono (schwartzSubmodule_le_sobolevSubmodule s)
 
 /-- The Sobolev spaces shrink as the regularity index grows: `H^s ≤ H^s'` for `s' ≤ s`. -/
-lemma SobolevSubmodule.antitone (d : ℕ) : Antitone (SobolevSubmodule d) :=
-  fun _ _ h _ hψ => hψ.mono h
+lemma SobolevSubmodule.antitone (d : ℕ) : Antitone (SobolevSubmodule d) := fun _ _ h _ hψ =>
+  hψ.mono h
 
 end SpaceDHilbertSpace
 end QuantumMechanics

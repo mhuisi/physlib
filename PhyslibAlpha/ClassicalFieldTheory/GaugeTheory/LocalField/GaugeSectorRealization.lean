@@ -44,10 +44,13 @@ open TensorProduct Matrix MatrixGroups
 
 namespace GaugeFieldData
 
-variable {G₀ : Type} [Group G₀] {𝔤 : Type} [LieRing 𝔤] [LieAlgebra ℝ 𝔤] [Module.Finite ℝ 𝔤]
-  {GJ : Type} [Group GJ] {𝔤J : Type} [LieRing 𝔤J] [LieAlgebra ℝ 𝔤J]
-  {jets : LocalGaugeData G₀ 𝔤 GJ 𝔤J} {T : GaugeFieldData jets} {B : Type} [Ring B]
-  [Algebra ℂ B] {repJet : Representation ℂ GJ B} {repLorentz : Representation ℂ SL(2,ℂ) B}
+variable
+  {G₀ : Type} [Group G₀]
+  {𝔤 : Type} [LieRing 𝔤] [LieAlgebra ℝ 𝔤] [Module.Finite ℝ 𝔤]
+  {GJ : Type} [Group GJ]
+  {𝔤J : Type} [LieRing 𝔤J] [LieAlgebra ℝ 𝔤J]
+  {jets : LocalGaugeData G₀ 𝔤 GJ 𝔤J} {T : GaugeFieldData jets} {B : Type} [Ring B] [Algebra ℂ B]
+  {repJet : Representation ℂ GJ B} {repLorentz : Representation ℂ (SL(2,ℂ)) B}
 
 /-!
 
@@ -56,16 +59,17 @@ variable {G₀ : Type} [Group G₀] {𝔤 : Type} [LieRing 𝔤] [LieAlgebra ℝ
 -/
 
 variable (T) in
-/-- Realizations of the ordinary gauge sector are the real realizations of the gauge-only
-  algebra, the target keeping its complex actions restricted to `ℝ`. -/
-noncomputable def gaugeSectorRealizationEquiv :
-    SectorAlgebra.Realization T {FieldCategory.gauge} B repJet repLorentz
+/--
+Realizations of the ordinary gauge sector are the real realizations of the gauge-only
+algebra, the target keeping its complex actions restricted to `ℝ`.
+-/
+noncomputable def gaugeSectorRealizationEquiv
+    : SectorAlgebra.Realization T {FieldCategory.gauge} B repJet repLorentz
       ≃ LocalGaugeFieldAlgebra.Realization jets B (repJet.restrictScalars ℝ)
-          (repLorentz.restrictScalars ℝ) :=
-  (Representation.EquivariantAlgHom.compEquiv T.gaugeSectorEquiv
-      gaugeSectorEquiv_complexRepJet gaugeSectorEquiv_complexRepLorentzGroup).trans
-    (Representation.EquivariantAlgHom.liftEquivBaseChange
-      LocalGaugeFieldAlgebra.complexRepJet_tmul
+        (repLorentz.restrictScalars ℝ) :=
+  (Representation.EquivariantAlgHom.compEquiv T.gaugeSectorEquiv gaugeSectorEquiv_complexRepJet
+      gaugeSectorEquiv_complexRepLorentzGroup).trans
+    (Representation.EquivariantAlgHom.liftEquivBaseChange LocalGaugeFieldAlgebra.complexRepJet_tmul
       LocalGaugeFieldAlgebra.complexRepLorentzGroup_tmul).symm
 
 /-!
@@ -75,56 +79,63 @@ noncomputable def gaugeSectorRealizationEquiv :
 -/
 
 lemma gaugeSectorRealizationEquiv_toAlgHom
-    (f : SectorAlgebra.Realization T {FieldCategory.gauge} B repJet repLorentz) :
-    (T.gaugeSectorRealizationEquiv f).toAlgHom
+    (f : SectorAlgebra.Realization T {FieldCategory.gauge} B repJet repLorentz)
+    : (T.gaugeSectorRealizationEquiv f).toAlgHom
       = ((f.toAlgHom.comp T.gaugeSectorEquiv.toAlgHom).restrictScalars ℝ).comp
-          Algebra.TensorProduct.includeRight := rfl
+        Algebra.TensorProduct.includeRight :=
+  rfl
 
 @[simp]
 lemma gaugeSectorRealizationEquiv_toAlgHom_apply
     (f : SectorAlgebra.Realization T {FieldCategory.gauge} B repJet repLorentz)
-    (x : LocalGaugeFieldAlgebra 𝔤) :
-    (T.gaugeSectorRealizationEquiv f).toAlgHom x
-      = f.toAlgHom (T.gaugeSectorEquiv ((1 : ℂ) ⊗ₜ[ℝ] x)) := rfl
+    (x : LocalGaugeFieldAlgebra 𝔤)
+    : (T.gaugeSectorRealizationEquiv f).toAlgHom x
+      = f.toAlgHom (T.gaugeSectorEquiv ((1 : ℂ) ⊗ₜ[ℝ] x)) :=
+  rfl
 
 /-- The gauge symbols of the corresponding real realization are the sector symbols. -/
 lemma gaugeSectorRealizationEquiv_A
     (f : SectorAlgebra.Realization T {FieldCategory.gauge} B repJet repLorentz)
-    (s : Multiset (Fin 1 ⊕ Fin 3)) (μ : Fin 1 ⊕ Fin 3) (φ : Module.Dual ℝ 𝔤) :
-    (T.gaugeSectorRealizationEquiv f).A s μ φ
+    (s : Multiset (Fin 1 ⊕ Fin 3)) (μ : Fin 1 ⊕ Fin 3) (φ : Module.Dual ℝ 𝔤)
+    : (T.gaugeSectorRealizationEquiv f).A s μ φ
       = f.toAlgHom (T.gaugeSectorEquiv (LocalGaugeFieldAlgebra.gaugeField 𝔤 s μ φ)) :=
-  (congrArg (fun y => f.toAlgHom (T.gaugeSectorEquiv y))
+  (congrArg
+    (fun y => f.toAlgHom (T.gaugeSectorEquiv y))
     (LocalGaugeFieldAlgebra.gaugeField_eq_one_tmul_derivA s μ φ)).symm
 
 lemma gaugeSectorRealizationEquiv_symm_toAlgHom
     (h : LocalGaugeFieldAlgebra.Realization jets B (repJet.restrictScalars ℝ)
-      (repLorentz.restrictScalars ℝ)) :
-    (T.gaugeSectorRealizationEquiv.symm h).toAlgHom
+      (repLorentz.restrictScalars ℝ))
+    : (T.gaugeSectorRealizationEquiv.symm h).toAlgHom
       = (AlgHom.liftEquiv ℝ ℂ (LocalGaugeFieldAlgebra 𝔤) B h.toAlgHom).comp
-          T.gaugeSectorEquiv.symm.toAlgHom := rfl
+        T.gaugeSectorEquiv.symm.toAlgHom :=
+  rfl
 
 @[simp]
 lemma gaugeSectorRealizationEquiv_symm_toAlgHom_apply
     (h : LocalGaugeFieldAlgebra.Realization jets B (repJet.restrictScalars ℝ)
-      (repLorentz.restrictScalars ℝ)) (x : T.SectorAlgebra {FieldCategory.gauge}) :
-    (T.gaugeSectorRealizationEquiv.symm h).toAlgHom x
-      = AlgHom.liftEquiv ℝ ℂ (LocalGaugeFieldAlgebra 𝔤) B h.toAlgHom
-          (T.gaugeSectorEquiv.symm x) := rfl
+      (repLorentz.restrictScalars ℝ))
+    (x : T.SectorAlgebra {FieldCategory.gauge})
+    : (T.gaugeSectorRealizationEquiv.symm h).toAlgHom x
+      = AlgHom.liftEquiv ℝ ℂ (LocalGaugeFieldAlgebra 𝔤) B h.toAlgHom (T.gaugeSectorEquiv.symm x) :=
+  rfl
 
 /-- The sector symbols of the corresponding sector realization are the gauge symbols. -/
 lemma gaugeSectorRealizationEquiv_symm_toAlgHom_gaugeField
     (h : LocalGaugeFieldAlgebra.Realization jets B (repJet.restrictScalars ℝ)
-      (repLorentz.restrictScalars ℝ)) (s : Multiset (Fin 1 ⊕ Fin 3)) (μ : Fin 1 ⊕ Fin 3)
-    (φ : Module.Dual ℝ 𝔤) :
-    (T.gaugeSectorRealizationEquiv.symm h).toAlgHom
-        (T.gaugeSectorEquiv (LocalGaugeFieldAlgebra.gaugeField 𝔤 s μ φ)) = h.A s μ φ :=
-  calc (T.gaugeSectorRealizationEquiv.symm h).toAlgHom
+      (repLorentz.restrictScalars ℝ))
+    (s : Multiset (Fin 1 ⊕ Fin 3)) (μ : Fin 1 ⊕ Fin 3) (φ : Module.Dual ℝ 𝔤)
+    : (T.gaugeSectorRealizationEquiv.symm h).toAlgHom
         (T.gaugeSectorEquiv (LocalGaugeFieldAlgebra.gaugeField 𝔤 s μ φ))
-      = AlgHom.liftEquiv ℝ ℂ (LocalGaugeFieldAlgebra 𝔤) B h.toAlgHom
+      = h.A s μ φ :=
+  calc
+    (T.gaugeSectorRealizationEquiv.symm h).toAlgHom
+          (T.gaugeSectorEquiv (LocalGaugeFieldAlgebra.gaugeField 𝔤 s μ φ))
+        = AlgHom.liftEquiv ℝ ℂ (LocalGaugeFieldAlgebra 𝔤) B h.toAlgHom
           (LocalGaugeFieldAlgebra.gaugeField 𝔤 s μ φ) :=
-        congrArg _ (T.gaugeSectorEquiv.symm_apply_apply _)
+      congrArg _ (T.gaugeSectorEquiv.symm_apply_apply _)
     _ = h.A s μ φ := by
-        rw [LocalGaugeFieldAlgebra.gaugeField_eq_one_tmul_derivA, AlgHom.liftEquiv_tmul,
-          one_smul, LocalGaugeFieldAlgebra.Realization.A_apply]
+      rw [LocalGaugeFieldAlgebra.gaugeField_eq_one_tmul_derivA, AlgHom.liftEquiv_tmul, one_smul,
+        LocalGaugeFieldAlgebra.Realization.A_apply]
 
 end GaugeFieldData

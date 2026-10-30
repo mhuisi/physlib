@@ -46,7 +46,8 @@ theories.
 
 namespace ProbabilisticTheory
 
-variable {G E F : Type*} [Group G] [OrderUnitSpace E] [OrderUnitSpace F]
+variable
+  {G E F : Type*} [Group G] [OrderUnitSpace E] [OrderUnitSpace F]
   (ρ : G →* Reversible E E) (σ : G →* Reversible F F)
 
 /-! ## A. Covariant channels -/
@@ -66,18 +67,20 @@ lemma isIntertwining_id : IsIntertwining ρ ρ (.id ℝ E) := by
 namespace IsIntertwining
 
 /-- The composition of intertwining channels also intertwines the group actions. -/
-lemma comp {H : Type*} [OrderUnitSpace H] {τ : G →* Reversible H H}
-    {Φ : E →ₚ₁[ℝ] F} {Ψ : F →ₚ₁[ℝ] H} (hΦ : IsIntertwining ρ σ Φ)
-    (hΨ : IsIntertwining σ τ Ψ) : IsIntertwining ρ τ (Ψ.comp Φ) := by
+lemma comp
+    {H : Type*} [OrderUnitSpace H]
+    {τ : G →* Reversible H H} {Φ : E →ₚ₁[ℝ] F} {Ψ : F →ₚ₁[ℝ] H}
+    (hΦ : IsIntertwining ρ σ Φ) (hΨ : IsIntertwining σ τ Ψ)
+    : IsIntertwining ρ τ (Ψ.comp Φ) := by
   intro g x
   simp [hΦ g x, hΨ g (Φ x)]
 
 /-! ### A.2. Invariant states -/
 
 /-- Pulling back an invariant state along an intertwining channel preserves invariance. -/
-lemma comap_isInvariant {Φ : E →ₚ₁[ℝ] F} (h : IsIntertwining ρ σ Φ)
-    {ω : 𝓢[ℝ, F]} (hω : IsInvariant σ ω) :
-    IsInvariant ρ (UnitalPositiveLinearMap.comap Φ ω) := by
+lemma comap_isInvariant
+    {Φ : E →ₚ₁[ℝ] F} (h : IsIntertwining ρ σ Φ) {ω : 𝓢[ℝ, F]} (hω : IsInvariant σ ω)
+    : IsInvariant ρ (UnitalPositiveLinearMap.comap Φ ω) := by
   intro g
   ext x
   have h1 := h g⁻¹ x
@@ -96,15 +99,15 @@ namespace Reversible
 variable (ρ σ) (e : Reversible E F)
 
 /-- A reversible transformation intertwines an action with its transport. -/
-lemma isIntertwining_transport :
-    IsIntertwining ρ (e.transport ρ) e.toChannel := by
+lemma isIntertwining_transport : IsIntertwining ρ (e.transport ρ) e.toChannel := by
   intro g x
   simp [transport, conj]
 
-/-- A reversible transformation intertwines two actions exactly when the target action
-is the transport of the source action. -/
-lemma isIntertwining_iff_eq_transport :
-    IsIntertwining ρ σ e.toChannel ↔ σ = e.transport ρ := by
+/--
+A reversible transformation intertwines two actions exactly when the target action
+is the transport of the source action.
+-/
+lemma isIntertwining_iff_eq_transport : IsIntertwining ρ σ e.toChannel ↔ σ = e.transport ρ := by
   constructor
   · intro h
     ext g y

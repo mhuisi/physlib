@@ -64,8 +64,10 @@ open Matrix MatrixGroups MvPowerSeries
 /-- The gauge group `SU(n)`. -/
 abbrev SU (n : ℕ) : Type := specialUnitaryGroup (Fin n) ℂ
 
-/-- Jets of `SU(n)` gauge transformations: special unitary matrices of formal power
-  series. -/
+/--
+Jets of `SU(n)` gauge transformations: special unitary matrices of formal power
+series.
+-/
 abbrev JetSU (n : ℕ) : Type := specialUnitaryGroup (Fin n) SpaceTimeAlgebra
 
 /-- The Lie algebra `su(n)`: traceless hermitian matrices. -/
@@ -94,53 +96,69 @@ lemma det_val (U : JetSU n) : U.1.det = 1 := (mem_specialUnitaryGroup_iff.mp U.2
 
 /-- For a special unitary matrix, the conjugate transpose is the adjugate. -/
 lemma star_val_eq_adjugate (U : JetSU n) : star U.1 = U.1.adjugate := by
-  calc star U.1 = star U.1 * (U.1 * U.1.adjugate) := by
-        rw [Matrix.mul_adjugate, det_val, one_smul, mul_one]
+  calc
+    star U.1
+      = star U.1 * (U.1 * U.1.adjugate) := by rw [Matrix.mul_adjugate, det_val, one_smul, mul_one]
     _ = star U.1 * U.1 * U.1.adjugate := by rw [mul_assoc]
     _ = U.1.adjugate := by rw [star_mul_val, one_mul]
 
-/-- Evaluation of a jet of an `SU(n)` gauge transformation at the base point: the entrywise
-  constant coefficient. -/
+/--
+Evaluation of a jet of an `SU(n)` gauge transformation at the base point: the entrywise
+constant coefficient.
+-/
 noncomputable def eval : JetSU n →* SU n where
-  toFun U := ⟨(constantCoeff : SpaceTimeAlgebra →+* ℂ).mapMatrix U.1, by
-    obtain ⟨h1, h2⟩ := mem_specialUnitaryGroup_iff.mp U.2
-    rw [mem_specialUnitaryGroup_iff]
-    constructor
-    · rw [mem_unitaryGroup_iff] at h1 ⊢
-      rw [show star ((constantCoeff : SpaceTimeAlgebra →+* ℂ).mapMatrix U.1) =
-          (constantCoeff : SpaceTimeAlgebra →+* ℂ).mapMatrix (star U.1) from
-          (SpaceTimeAlgebra.mapMatrix_constantCoeff_star U.1).symm, ← map_mul, h1, map_one]
-    · rw [← RingHom.map_det, h2, map_one]⟩
+  toFun U := ⟨
+    (constantCoeff : SpaceTimeAlgebra →+* ℂ).mapMatrix U.1,
+    by
+      obtain ⟨h1, h2⟩ := mem_specialUnitaryGroup_iff.mp U.2
+      rw [mem_specialUnitaryGroup_iff]
+      constructor
+      · rw [mem_unitaryGroup_iff] at h1 ⊢
+        rw [show star ((constantCoeff : SpaceTimeAlgebra →+* ℂ).mapMatrix U.1)
+              = (constantCoeff : SpaceTimeAlgebra →+* ℂ).mapMatrix (star U.1) from
+            (SpaceTimeAlgebra.mapMatrix_constantCoeff_star U.1).symm,
+          ← map_mul, h1, map_one]
+      · rw [← RingHom.map_det, h2, map_one]
+  ⟩
   map_one' := Subtype.ext (map_one ((constantCoeff : SpaceTimeAlgebra →+* ℂ).mapMatrix))
   map_mul' U V := Subtype.ext (map_mul ((constantCoeff : SpaceTimeAlgebra →+* ℂ).mapMatrix) U.1 V.1)
 
 @[simp]
-lemma eval_val (U : JetSU n) : (eval U).1 =
-    (constantCoeff : SpaceTimeAlgebra →+* ℂ).mapMatrix U.1 := rfl
+lemma eval_val (U : JetSU n)
+    : (eval U).1 = (constantCoeff : SpaceTimeAlgebra →+* ℂ).mapMatrix U.1 :=
+  rfl
 
-/-- The jet of a constant `SU(n)` gauge transformation: the entrywise inclusion of
-  constants. -/
+/--
+The jet of a constant `SU(n)` gauge transformation: the entrywise inclusion of
+constants.
+-/
 noncomputable def ofConstant : SU n →* JetSU n where
-  toFun u := ⟨(C : ℂ →+* SpaceTimeAlgebra).mapMatrix u.1, by
-    obtain ⟨h1, h2⟩ := mem_specialUnitaryGroup_iff.mp u.2
-    rw [mem_specialUnitaryGroup_iff]
-    constructor
-    · rw [mem_unitaryGroup_iff] at h1 ⊢
-      rw [show star ((C : ℂ →+* SpaceTimeAlgebra).mapMatrix u.1) =
-          (C : ℂ →+* SpaceTimeAlgebra).mapMatrix (star u.1) from
-          (SpaceTimeAlgebra.mapMatrix_C_star u.1).symm, ← map_mul, h1, map_one]
-    · rw [← RingHom.map_det, h2, map_one]⟩
+  toFun u := ⟨
+    (C : ℂ →+* SpaceTimeAlgebra).mapMatrix u.1,
+    by
+      obtain ⟨h1, h2⟩ := mem_specialUnitaryGroup_iff.mp u.2
+      rw [mem_specialUnitaryGroup_iff]
+      constructor
+      · rw [mem_unitaryGroup_iff] at h1 ⊢
+        rw [show star ((C : ℂ →+* SpaceTimeAlgebra).mapMatrix u.1)
+              = (C : ℂ →+* SpaceTimeAlgebra).mapMatrix (star u.1) from
+            (SpaceTimeAlgebra.mapMatrix_C_star u.1).symm,
+          ← map_mul, h1, map_one]
+      · rw [← RingHom.map_det, h2, map_one]
+  ⟩
   map_one' := Subtype.ext (map_one ((C : ℂ →+* SpaceTimeAlgebra).mapMatrix))
   map_mul' u v := Subtype.ext (map_mul ((C : ℂ →+* SpaceTimeAlgebra).mapMatrix) u.1 v.1)
 
 @[simp]
-lemma ofConstant_val (u : SU n) : (ofConstant u).1 =
-    (C : ℂ →+* SpaceTimeAlgebra).mapMatrix u.1 := rfl
+lemma ofConstant_val (u : SU n) : (ofConstant u).1 = (C : ℂ →+* SpaceTimeAlgebra).mapMatrix u.1 :=
+  rfl
 
-/-- The Maurer–Cartan matrix `i (∂_μ U) U†` is traceless, by Jacobi's formula and
-  `det U = 1`. -/
-lemma trace_mcMatrix (μ : Fin 1 ⊕ Fin 3) (U : JetSU n) :
-    (Complex.I • (U.1.map (pderiv μ) * star U.1)).trace = 0 := by
+/--
+The Maurer–Cartan matrix `i (∂_μ U) U†` is traceless, by Jacobi's formula and
+`det U = 1`.
+-/
+lemma trace_mcMatrix (μ : Fin 1 ⊕ Fin 3) (U : JetSU n)
+    : (Complex.I • (U.1.map (pderiv μ) * star U.1)).trace = 0 := by
   rw [Matrix.trace_smul, star_val_eq_adjugate, ← SpaceTimeAlgebra.jacobi, det_val, pderiv_one,
     smul_zero]
 
@@ -158,85 +176,97 @@ variable {n : ℕ}
 
 /-- The formal derivative in the direction `μ`, entrywise. -/
 noncomputable def deriv (μ : Fin 1 ⊕ Fin 3) : JetSUAlgebra n →ₗ[ℝ] JetSUAlgebra n where
-  toFun a := SUAlgebraOver.ofMatrix (a.1.map (pderiv μ))
-    (by rw [SpaceTimeAlgebra.star_map_pderiv, a.star_val])
-    (by rw [← AddMonoidHom.map_trace, a.trace_val, map_zero])
-  map_add' a b := Subtype.ext (by
-    ext i j : 1
-    simp [Matrix.map_apply])
-  map_smul' r a := Subtype.ext (by
-    ext i j : 1
-    simp only [SUAlgebraOver.ofMatrix_val, Submodule.coe_smul, Matrix.map_apply,
-      Matrix.smul_apply, RingHom.id_apply]
-    exact SpaceTimeAlgebra.pderiv_real_smul μ r _)
+  toFun a :=
+    SUAlgebraOver.ofMatrix (a.1.map (pderiv μ))
+      (by rw [SpaceTimeAlgebra.star_map_pderiv, a.star_val])
+      (by rw [← AddMonoidHom.map_trace, a.trace_val, map_zero])
+  map_add' a b :=
+    Subtype.ext (by
+      ext i j : 1
+      simp [Matrix.map_apply])
+  map_smul' r a :=
+    Subtype.ext (by
+      ext i j : 1
+      simp only [SUAlgebraOver.ofMatrix_val, Submodule.coe_smul, Matrix.map_apply,
+        Matrix.smul_apply, RingHom.id_apply]
+      exact SpaceTimeAlgebra.pderiv_real_smul μ r _)
 
 @[simp]
-lemma deriv_val (μ : Fin 1 ⊕ Fin 3) (a : JetSUAlgebra n) :
-    (deriv μ a).1 = a.1.map (pderiv μ) := rfl
+lemma deriv_val (μ : Fin 1 ⊕ Fin 3) (a : JetSUAlgebra n) : (deriv μ a).1 = a.1.map (pderiv μ) := rfl
 
 /-- Multiplication by the coordinate `x_μ`, entrywise. -/
 noncomputable def coord (μ : Fin 1 ⊕ Fin 3) : JetSUAlgebra n →ₗ[ℝ] JetSUAlgebra n where
-  toFun a := SUAlgebraOver.ofMatrix ((X μ : SpaceTimeAlgebra) • a.1)
-    (by rw [star_smul, SpaceTimeAlgebra.star_X, a.star_val])
-    (by rw [Matrix.trace_smul, a.trace_val, smul_zero])
+  toFun a :=
+    SUAlgebraOver.ofMatrix ((X μ : SpaceTimeAlgebra) • a.1)
+      (by rw [star_smul, SpaceTimeAlgebra.star_X, a.star_val])
+      (by rw [Matrix.trace_smul, a.trace_val, smul_zero])
   map_add' a b := Subtype.ext (by simp [smul_add])
   map_smul' r a := Subtype.ext (by simp [smul_comm r])
 
 @[simp]
-lemma coord_val (μ : Fin 1 ⊕ Fin 3) (a : JetSUAlgebra n) :
-    (coord μ a).1 = (X μ : SpaceTimeAlgebra) • a.1 := rfl
+lemma coord_val (μ : Fin 1 ⊕ Fin 3) (a : JetSUAlgebra n)
+    : (coord μ a).1 = (X μ : SpaceTimeAlgebra) • a.1 :=
+  rfl
 
-lemma star_mapMatrix_constantCoeff (a : JetSUAlgebra n) :
-    star ((constantCoeff : SpaceTimeAlgebra →+* ℂ).mapMatrix a.1)
+lemma star_mapMatrix_constantCoeff (a : JetSUAlgebra n)
+    : star ((constantCoeff : SpaceTimeAlgebra →+* ℂ).mapMatrix a.1)
       = (constantCoeff : SpaceTimeAlgebra →+* ℂ).mapMatrix a.1 := by
   rw [← SpaceTimeAlgebra.mapMatrix_constantCoeff_star, a.star_val]
 
-lemma trace_mapMatrix_constantCoeff (a : JetSUAlgebra n) :
-    ((constantCoeff : SpaceTimeAlgebra →+* ℂ).mapMatrix a.1).trace = 0 := by
+lemma trace_mapMatrix_constantCoeff (a : JetSUAlgebra n)
+    : ((constantCoeff : SpaceTimeAlgebra →+* ℂ).mapMatrix a.1).trace = 0 := by
   rw [RingHom.mapMatrix_apply, ← AddMonoidHom.map_trace, a.trace_val, map_zero]
 
 /-- Evaluation at the base point: the entrywise constant coefficient. -/
 noncomputable def evalLie : JetSUAlgebra n →ₗ[ℝ] SUAlgebra n where
-  toFun a := SUAlgebraOver.ofMatrix ((constantCoeff : SpaceTimeAlgebra →+* ℂ).mapMatrix a.1)
-    (star_mapMatrix_constantCoeff a) (trace_mapMatrix_constantCoeff a)
-  map_add' a b := Subtype.ext (by
-    simp only [SUAlgebraOver.ofMatrix_val, Submodule.coe_add]
-    exact map_add _ _ _)
-  map_smul' r a := Subtype.ext (by
-    simp only [SUAlgebraOver.ofMatrix_val, Submodule.coe_smul, RingHom.id_apply]
-    ext i j
-    simp only [RingHom.mapMatrix_apply, Matrix.map_apply, Matrix.smul_apply]
-    exact SpaceTimeAlgebra.constantCoeff_real_smul r _)
+  toFun a :=
+    SUAlgebraOver.ofMatrix ((constantCoeff : SpaceTimeAlgebra →+* ℂ).mapMatrix a.1)
+      (star_mapMatrix_constantCoeff a) (trace_mapMatrix_constantCoeff a)
+  map_add' a b :=
+    Subtype.ext (by
+      simp only [SUAlgebraOver.ofMatrix_val, Submodule.coe_add]
+      exact map_add _ _ _)
+  map_smul' r a :=
+    Subtype.ext (by
+      simp only [SUAlgebraOver.ofMatrix_val, Submodule.coe_smul, RingHom.id_apply]
+      ext i j
+      simp only [RingHom.mapMatrix_apply, Matrix.map_apply, Matrix.smul_apply]
+      exact SpaceTimeAlgebra.constantCoeff_real_smul r _)
 
 @[simp]
-lemma evalLie_val (a : JetSUAlgebra n) :
-    (evalLie a).1 = (constantCoeff : SpaceTimeAlgebra →+* ℂ).mapMatrix a.1 := rfl
+lemma evalLie_val (a : JetSUAlgebra n)
+    : (evalLie a).1 = (constantCoeff : SpaceTimeAlgebra →+* ℂ).mapMatrix a.1 :=
+  rfl
 
-lemma star_mapMatrix_C (a : SUAlgebra n) :
-    star ((C : ℂ →+* SpaceTimeAlgebra).mapMatrix a.1) =
-        (C : ℂ →+* SpaceTimeAlgebra).mapMatrix a.1 := by
+lemma star_mapMatrix_C (a : SUAlgebra n)
+    : star ((C : ℂ →+* SpaceTimeAlgebra).mapMatrix a.1)
+      = (C : ℂ →+* SpaceTimeAlgebra).mapMatrix a.1 := by
   rw [← SpaceTimeAlgebra.mapMatrix_C_star, a.star_val]
 
-lemma trace_mapMatrix_C (a : SUAlgebra n) :
-    ((C : ℂ →+* SpaceTimeAlgebra).mapMatrix a.1).trace = 0 := by
+lemma trace_mapMatrix_C (a : SUAlgebra n)
+    : ((C : ℂ →+* SpaceTimeAlgebra).mapMatrix a.1).trace = 0 := by
   rw [RingHom.mapMatrix_apply, ← AddMonoidHom.map_trace, a.trace_val, map_zero]
 
 /-- A constant as a jet: the entrywise constant power series. -/
 noncomputable def ofConstantLie : SUAlgebra n →ₗ[ℝ] JetSUAlgebra n where
-  toFun a := SUAlgebraOver.ofMatrix ((C : ℂ →+* SpaceTimeAlgebra).mapMatrix a.1)
-    (star_mapMatrix_C a) (trace_mapMatrix_C a)
-  map_add' a b := Subtype.ext (by
-    simp only [SUAlgebraOver.ofMatrix_val, Submodule.coe_add]
-    exact map_add _ _ _)
-  map_smul' r a := Subtype.ext (by
-    simp only [SUAlgebraOver.ofMatrix_val, Submodule.coe_smul, RingHom.id_apply]
-    ext i j : 1
-    simp only [RingHom.mapMatrix_apply, Matrix.map_apply, Matrix.smul_apply]
-    exact SpaceTimeAlgebra.C_real_smul r _)
+  toFun a :=
+    SUAlgebraOver.ofMatrix ((C : ℂ →+* SpaceTimeAlgebra).mapMatrix a.1) (star_mapMatrix_C a)
+      (trace_mapMatrix_C a)
+  map_add' a b :=
+    Subtype.ext (by
+      simp only [SUAlgebraOver.ofMatrix_val, Submodule.coe_add]
+      exact map_add _ _ _)
+  map_smul' r a :=
+    Subtype.ext (by
+      simp only [SUAlgebraOver.ofMatrix_val, Submodule.coe_smul, RingHom.id_apply]
+      ext i j : 1
+      simp only [RingHom.mapMatrix_apply, Matrix.map_apply, Matrix.smul_apply]
+      exact SpaceTimeAlgebra.C_real_smul r _)
 
 @[simp]
-lemma ofConstantLie_val (a : SUAlgebra n) :
-    (ofConstantLie a).1 = (C : ℂ →+* SpaceTimeAlgebra).mapMatrix a.1 := rfl
+lemma ofConstantLie_val (a : SUAlgebra n)
+    : (ofConstantLie a).1 = (C : ℂ →+* SpaceTimeAlgebra).mapMatrix a.1 :=
+  rfl
 
 /-- The adjoint action `a ↦ U a U†` of the jets of `SU(n)` on the jets of `su(n)`. -/
 noncomputable def adjoint : Representation ℝ (JetSU n) (JetSUAlgebra n) :=
@@ -244,17 +274,15 @@ noncomputable def adjoint : Representation ℝ (JetSU n) (JetSUAlgebra n) :=
     (Submonoid.inclusion specialUnitaryGroup_le_unitaryGroup)
 
 @[simp]
-lemma adjoint_val (U : JetSU n) (a : JetSUAlgebra n) :
-    (adjoint U a).1 = U.1 * a.1 * star U.1 := rfl
+lemma adjoint_val (U : JetSU n) (a : JetSUAlgebra n) : (adjoint U a).1 = U.1 * a.1 * star U.1 := rfl
 
 /-- The adjoint action `a ↦ U a U†` of `SU(n)` on `su(n)`. -/
 noncomputable def adjointValue : Representation ℝ (SU n) (SUAlgebra n) :=
-  (SUAlgebraOver.conj (R := ℂ)).comp
-    (Submonoid.inclusion specialUnitaryGroup_le_unitaryGroup)
+  (SUAlgebraOver.conj (R := ℂ)).comp (Submonoid.inclusion specialUnitaryGroup_le_unitaryGroup)
 
 @[simp]
-lemma adjointValue_val (U : SU n) (a : SUAlgebra n) :
-    (adjointValue U a).1 = U.1 * a.1 * star U.1 := rfl
+lemma adjointValue_val (U : SU n) (a : SUAlgebra n) : (adjointValue U a).1 = U.1 * a.1 * star U.1 :=
+  rfl
 
 /-!
 
@@ -269,8 +297,9 @@ noncomputable def mc (U : JetSU n) (μ : Fin 1 ⊕ Fin 3) : JetSUAlgebra n :=
     (JetSU.trace_mcMatrix μ U)
 
 @[simp]
-lemma mc_val (U : JetSU n) (μ : Fin 1 ⊕ Fin 3) :
-    (mc U μ).1 = Complex.I • (U.1.map (pderiv μ) * star U.1) := rfl
+lemma mc_val (U : JetSU n) (μ : Fin 1 ⊕ Fin 3)
+    : (mc U μ).1 = Complex.I • (U.1.map (pderiv μ) * star U.1) :=
+  rfl
 
 end JetSUAlgebra
 
@@ -282,10 +311,12 @@ end JetSUAlgebra
 
 namespace LocalGaugeData
 
-/-- **The presentation of `SU(n)` by matrices of jets**: the carriers are subtypes of
-  matrices and every structure map is the matrix one. -/
-noncomputable def suMatrixJets (n : ℕ) :
-    MatrixJets (Fin n) (SU n) (SUAlgebra n) (JetSU n) (JetSUAlgebra n) where
+/--
+**The presentation of `SU(n)` by matrices of jets**: the carriers are subtypes of
+matrices and every structure map is the matrix one.
+-/
+noncomputable def suMatrixJets (n : ℕ)
+    : MatrixJets (Fin n) (SU n) (SUAlgebra n) (JetSU n) (JetSUAlgebra n) where
   toMat₀ := (specialUnitaryGroup (Fin n) ℂ).subtype
   toMat₀_injective _ _ h := Subtype.ext h
   toMatJ := (specialUnitaryGroup (Fin n) SpaceTimeAlgebra).subtype
@@ -317,9 +348,11 @@ noncomputable def suMatrixJets (n : ℕ) :
   maurerCartan := JetSUAlgebra.mc
   lieJ_maurerCartan _ _ := rfl
 
-/-- **The local gauge data of `SU(n)`**: special unitary jets, traceless hermitian jets
-  with the bracket `i (a b − b a)` and the conjugation action, and the Maurer–Cartan form
-  `i (∂_μ U) U⁻¹`. -/
+/--
+**The local gauge data of `SU(n)`**: special unitary jets, traceless hermitian jets
+with the bracket `i (a b − b a)` and the conjugation action, and the Maurer–Cartan form
+`i (∂_μ U) U⁻¹`.
+-/
 noncomputable def su (n : ℕ) : LocalGaugeData (SU n) (SUAlgebra n) (JetSU n) (JetSUAlgebra n) :=
   (suMatrixJets n).toLocalGaugeData
 
@@ -327,10 +360,12 @@ variable {n : ℕ}
 
 @[simp] lemma su_eval : (su n).eval = JetSU.eval := rfl
 @[simp] lemma su_ofConstant : (su n).ofConstant = JetSU.ofConstant := rfl
-@[simp] lemma su_evalLie_apply (a : JetSUAlgebra n) : (su n).evalLie a = JetSUAlgebra.evalLie a :=
+@[simp]
+lemma su_evalLie_apply (a : JetSUAlgebra n) : (su n).evalLie a = JetSUAlgebra.evalLie a := rfl
+@[simp]
+lemma su_ofConstantLie
+    : ((su n).ofConstantLie : SUAlgebra n →ₗ[ℝ] JetSUAlgebra n) = JetSUAlgebra.ofConstantLie :=
   rfl
-@[simp] lemma su_ofConstantLie :
-    ((su n).ofConstantLie : SUAlgebra n →ₗ[ℝ] JetSUAlgebra n) = JetSUAlgebra.ofConstantLie := rfl
 @[simp] lemma su_deriv (μ : Fin 1 ⊕ Fin 3) : (su n).deriv μ = JetSUAlgebra.deriv μ := rfl
 @[simp] lemma su_adjointJ : (su n).adjointJ = JetSUAlgebra.adjoint := rfl
 @[simp] lemma su_maurerCartan : (su n).maurerCartan = JetSUAlgebra.mc := rfl
@@ -341,17 +376,32 @@ noncomputable def suFactor (n : ℕ) : SUFactor (su n) (Fin n) := (suMatrixJets 
 /-- The local gauge data of `SU(n)` is faithful. -/
 instance instFaithfulSU : (su n).Faithful := (suMatrixJets n).faithful
 
-/-- The local gauge data of `SU(n)` is free. Traceless hermitian Taylor data give a
-  traceless hermitian matrix of jets, and the unitary Euler transport of a traceless
-  hermitian jet has unit determinant by Jacobi's formula. -/
+/--
+The local gauge data of `SU(n)` is free. Traceless hermitian Taylor data give a
+traceless hermitian matrix of jets, and the unitary Euler transport of a traceless
+hermitian jet has unit determinant by Jacobi's formula.
+-/
 instance instFreeSU : (su n).Free :=
   (suMatrixJets n).free
-    (fun c => ⟨SUAlgebraOver.ofMatrix _ (SpaceTimeAlgebra.star_taylorMatrix fun s => (c s).2.1)
-      (SpaceTimeAlgebra.trace_taylorMatrix fun s => (c s).2.2), rfl⟩)
+    (fun c => ⟨
+      SUAlgebraOver.ofMatrix _ (SpaceTimeAlgebra.star_taylorMatrix fun s => (c s).2.1)
+        (SpaceTimeAlgebra.trace_taylorMatrix fun s => (c s).2.2),
+      rfl
+    ⟩)
     (fun a => a.2.1)
-    (fun ρ V hV0 hVu hEV => ⟨⟨V, mem_specialUnitaryGroup_iff.mpr ⟨mem_unitaryGroup_iff.mpr hVu,
-      SpaceTimeAlgebra.eulerTransport_det SpaceTimeAlgebra.jacobi
-        (by rw [Matrix.trace_smul, show ((suMatrixJets n).lieJ ρ).trace = 0 from ρ.2.2,
-          smul_zero]) hV0 hEV⟩⟩, rfl⟩)
+    (fun ρ V hV0 hVu hEV => ⟨
+      ⟨
+        V,
+        mem_specialUnitaryGroup_iff.mpr ⟨
+          mem_unitaryGroup_iff.mpr hVu,
+          SpaceTimeAlgebra.eulerTransport_det SpaceTimeAlgebra.jacobi
+            (by
+              rw [Matrix.trace_smul, show ((suMatrixJets n).lieJ ρ).trace = 0 from ρ.2.2,
+                smul_zero])
+            hV0 hEV
+        ⟩
+      ⟩,
+      rfl
+    ⟩)
 
 end LocalGaugeData

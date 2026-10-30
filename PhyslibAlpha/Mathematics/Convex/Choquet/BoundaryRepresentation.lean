@@ -52,28 +52,33 @@ variable {A B X : Type*} [MeasurableSpace B] [TopologicalSpace B]
 
 /-! ## A. Boundary representations -/
 
-/-- A regular probability measure on `B` represents `x` when the average of every test over the
-boundary agrees with its value at `x`. -/
-def IsBoundaryRepresentation (test : A → X → ℝ) (boundary : B → X) (x : X)
-    (μ : Measure B) : Prop :=
-  μ.Regular ∧ IsProbabilityMeasure μ ∧
-    ∀ a, ∫ b, test a (boundary b) ∂μ = test a x
+/--
+A regular probability measure on `B` represents `x` when the average of every test over the
+boundary agrees with its value at `x`.
+-/
+def IsBoundaryRepresentation (test : A → X → ℝ) (boundary : B → X) (x : X) (μ : Measure B) : Prop :=
+  μ.Regular ∧ IsProbabilityMeasure μ ∧ ∀ a, ∫ b, test a (boundary b) ∂μ = test a x
 
-/-- A point has a boundary decomposition when some regular probability measure on the boundary
-represents it. -/
+/--
+A point has a boundary decomposition when some regular probability measure on the boundary
+represents it.
+-/
 def HasBoundaryDecomposition (test : A → X → ℝ) (boundary : B → X) (x : X) : Prop :=
   ∃ μ : Measure B, IsBoundaryRepresentation test boundary x μ
 
-/-- A point has a unique boundary decomposition when exactly one regular probability measure on
-the boundary represents it. -/
-def HasUniqueBoundaryDecomposition (test : A → X → ℝ) (boundary : B → X)
-    (x : X) : Prop :=
+/--
+A point has a unique boundary decomposition when exactly one regular probability measure on
+the boundary represents it.
+-/
+def HasUniqueBoundaryDecomposition (test : A → X → ℝ) (boundary : B → X) (x : X) : Prop :=
   ∃! μ : Measure B, IsBoundaryRepresentation test boundary x μ
 
 /-! ## B. Simplices -/
 
-/-- A tested space is a simplex with boundary `B` when every point has a unique boundary
-decomposition. -/
+/--
+A tested space is a simplex with boundary `B` when every point has a unique boundary
+decomposition.
+-/
 def IsSimplexRepresentation (test : A → X → ℝ) (boundary : B → X) : Prop :=
   ∀ x, HasUniqueBoundaryDecomposition test boundary x
 

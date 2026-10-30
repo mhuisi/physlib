@@ -50,20 +50,25 @@ variable {K : Type*} [Field K] {n : ℕ}
 variable {L : Type*} [LieRing L] [LieAlgebra K L] {h e f : L}
 
 /-- The action map satisfies the Leibniz rule, since `Φ` preserves brackets. -/
-lemma Φ_leibniz [CharZero K] (t : IsSl2Triple h e f) (x y : ↥(t.toLieSubalgebra (R := K)))
-    (v : StandardSl2Module K n) :
-    Φ (n := n) t x (Φ t y v) = Φ t ⁅x, y⁆ v + Φ t y (Φ t x v) := by
+lemma Φ_leibniz
+    [CharZero K]
+    (t : IsSl2Triple h e f) (x y : ↥(t.toLieSubalgebra (R := K)))
+    (v : StandardSl2Module K n)
+    : Φ (n := n) t x (Φ t y v) = Φ t (⁅x, y⁆) v + Φ t y (Φ t x v) := by
   rw [Φ_lie (K := K) (n := n) t x y, LieRing.of_associative_ring_bracket]
   simp only [LinearMap.sub_apply, Module.End.mul_apply]
   abel
 
-/-- Standard module `V(n)`, module structure.
+/--
+Standard module `V(n)`, module structure.
 Given an `sl₂`-triple `(h,e,f)` in `L`, `StandardSl2Module K n` carries a
 `LieRingModule` structure for the generated subalgebra, with
 `h ⬝ v k = (n - 2k) • v k`, `f ⬝ v k = v (k+1)` (and `f ⬝ v n = 0), and
-`e ⬝ v k = (k * (n - k + 1)) • v (k-1)` (and `e ⬝ v 0 = 0`). -/
-@[reducible] def standardSl2ModuleLieRingModule [CharZero K] (t : IsSl2Triple h e f) :
-    LieRingModule (↥(t.toLieSubalgebra (R := K))) (StandardSl2Module K n) where
+`e ⬝ v k = (k * (n - k + 1)) • v (k-1)` (and `e ⬝ v 0 = 0`).
+-/
+@[reducible]
+def standardSl2ModuleLieRingModule [CharZero K] (t : IsSl2Triple h e f)
+    : LieRingModule (↥(t.toLieSubalgebra (R := K))) (StandardSl2Module K n) where
   bracket x v := Φ (K := K) (n := n) t x v
   add_lie x y v := by
     change Φ (K := K) (n := n) t (x + y) v = Φ t x v + Φ t y v
@@ -72,11 +77,10 @@ Given an `sl₂`-triple `(h,e,f)` in `L`, `StandardSl2Module K n` carries a
   lie_add x v w := map_add (Φ (K := K) (n := n) t x) v w
   leibniz_lie x y v := Φ_leibniz t x y v
 
-
 /-- Standard module `V(n)`, module structure, continued. -/
-lemma standardSl2ModuleLieModule [CharZero K] (t : IsSl2Triple h e f) :
-    letI := standardSl2ModuleLieRingModule (K := K) (n := n) t
-    LieModule K ↥(t.toLieSubalgebra (R := K)) (StandardSl2Module K n) := by
+lemma standardSl2ModuleLieModule [CharZero K] (t : IsSl2Triple h e f)
+    : letI := standardSl2ModuleLieRingModule (K := K) (n := n) t
+      LieModule K (↥(t.toLieSubalgebra (R := K))) (StandardSl2Module K n) := by
   let := standardSl2ModuleLieRingModule (K := K) (n := n) t
   constructor
   · intro c x v
@@ -120,63 +124,61 @@ def eSub (t : IsSl2Triple h e f) : ↥(t.toLieSubalgebra (R := K)) := ⟨e, e_me
 /-- The subalgebra element corresponding to `f`, as used by the theorems below. -/
 def fSub (t : IsSl2Triple h e f) : ↥(t.toLieSubalgebra (R := K)) := ⟨f, f_mem_subalgebra t⟩
 
-lemma hSub_eq (t : IsSl2Triple h e f) :
-    hSub (K := K) t = subalgebraBasis (K := K) t 2 := by
+lemma hSub_eq (t : IsSl2Triple h e f) : hSub (K := K) t = subalgebraBasis (K := K) t 2 := by
   apply Subtype.ext; simp [hSub, subalgebraBasis, Basis.mk_apply, efhSub]
 
-lemma eSub_eq (t : IsSl2Triple h e f) :
-    eSub (K := K) t = subalgebraBasis (K := K) t 0 := by
+lemma eSub_eq (t : IsSl2Triple h e f) : eSub (K := K) t = subalgebraBasis (K := K) t 0 := by
   apply Subtype.ext; simp [eSub, subalgebraBasis, Basis.mk_apply, efhSub]
 
-lemma fSub_eq (t : IsSl2Triple h e f) :
-    fSub (K := K) t = subalgebraBasis (K := K) t 1 := by
+lemma fSub_eq (t : IsSl2Triple h e f) : fSub (K := K) t = subalgebraBasis (K := K) t 1 := by
   apply Subtype.ext; simp [fSub, subalgebraBasis, Basis.mk_apply, efhSub]
 
-lemma standardSl2ModuleLieRingModule_h_apply (t : IsSl2Triple h e f) (k : Fin (n + 1)) :
-    letI := standardSl2ModuleLieRingModule (K := K) (n := n) t
-    ⁅hSub (K := K) t, StandardSl2Module.v (K := K) k⁆
-      = ((n : K) - 2 * (k : ℕ)) • StandardSl2Module.v k := by
+lemma standardSl2ModuleLieRingModule_h_apply (t : IsSl2Triple h e f) (k : Fin (n + 1))
+    : letI := standardSl2ModuleLieRingModule (K := K) (n := n) t
+      ⁅hSub (K := K) t, StandardSl2Module.v (K := K) k⁆
+        = ((n : K) - 2 * (k : ℕ)) • StandardSl2Module.v k := by
   let := standardSl2ModuleLieRingModule (K := K) (n := n) t
   show (Φ (K := K) (n := n) t (hSub (K := K) t) :
     Module.End K (StandardSl2Module K n)) (StandardSl2Module.v k) = _
   rw [hSub_eq, Φ_apply]
   exact ρH_v k
 
-lemma standardSl2ModuleLieRingModule_e_apply_zero (t : IsSl2Triple h e f) :
-    letI := standardSl2ModuleLieRingModule (K := K) (n := n) t
-    ⁅eSub (K := K) t, StandardSl2Module.v (K := K) (⟨0, Nat.succ_pos n⟩ : Fin (n + 1))⁆
-      = (0 : StandardSl2Module K n) := by
+lemma standardSl2ModuleLieRingModule_e_apply_zero (t : IsSl2Triple h e f)
+    : letI := standardSl2ModuleLieRingModule (K := K) (n := n) t
+      ⁅eSub (K := K) t, StandardSl2Module.v (K := K) (⟨0, Nat.succ_pos n⟩ : Fin (n + 1))⁆
+        = (0 : StandardSl2Module K n) := by
   let := standardSl2ModuleLieRingModule (K := K) (n := n) t
   show (Φ (K := K) (n := n) t (eSub (K := K) t) :
     Module.End K (StandardSl2Module K n)) (StandardSl2Module.v ⟨0, Nat.succ_pos n⟩) = _
   rw [eSub_eq, Φ_apply]
   exact ρE_v_zero
 
-lemma standardSl2ModuleLieRingModule_e_apply_pos (t : IsSl2Triple h e f)
-    (k : Fin (n + 1)) (hk : 0 < (k : ℕ)) :
-    letI := standardSl2ModuleLieRingModule (K := K) (n := n) t
-    ⁅eSub (K := K) t, StandardSl2Module.v (K := K) k⁆
-      = ((k : ℕ) * (n - (k : ℕ) + 1) : K) • StandardSl2Module.v ⟨(k : ℕ) - 1, by omega⟩ := by
+lemma standardSl2ModuleLieRingModule_e_apply_pos
+    (t : IsSl2Triple h e f) (k : Fin (n + 1)) (hk : 0 < (k : ℕ))
+    : letI := standardSl2ModuleLieRingModule (K := K) (n := n) t
+      ⁅eSub (K := K) t, StandardSl2Module.v (K := K) k⁆
+        = ((k : ℕ) * (n - (k : ℕ) + 1) : K) • StandardSl2Module.v ⟨(k : ℕ) - 1, by omega⟩ := by
   let := standardSl2ModuleLieRingModule (K := K) (n := n) t
   show (Φ (K := K) (n := n) t (eSub (K := K) t) :
     Module.End K (StandardSl2Module K n)) (StandardSl2Module.v k) = _
   rw [eSub_eq, Φ_apply]
   exact ρE_v_pos k hk
 
-lemma standardSl2ModuleLieRingModule_f_apply_lt (t : IsSl2Triple h e f)
-    (k : Fin (n + 1)) (hk : (k : ℕ) < n) :
-    letI := standardSl2ModuleLieRingModule (K := K) (n := n) t
-    ⁅fSub (K := K) t, StandardSl2Module.v (K := K) k⁆ =
-      StandardSl2Module.v ⟨(k : ℕ) + 1, by omega⟩ := by
+lemma standardSl2ModuleLieRingModule_f_apply_lt
+    (t : IsSl2Triple h e f) (k : Fin (n + 1)) (hk : (k : ℕ) < n)
+    : letI := standardSl2ModuleLieRingModule (K := K) (n := n) t
+      ⁅fSub (K := K) t, StandardSl2Module.v (K := K) k⁆
+        = StandardSl2Module.v ⟨(k : ℕ) + 1, by omega⟩ := by
   let := standardSl2ModuleLieRingModule (K := K) (n := n) t
   show (Φ (K := K) (n := n) t (fSub (K := K) t) :
     Module.End K (StandardSl2Module K n)) (StandardSl2Module.v k) = _
   rw [fSub_eq, Φ_apply]
   exact ρF_v_lt k hk
 
-lemma standardSl2ModuleLieRingModule_f_apply_last (t : IsSl2Triple h e f) :
-    letI := standardSl2ModuleLieRingModule (K := K) (n := n) t
-    ⁅fSub (K := K) t, StandardSl2Module.v (K := K) (Fin.last n)⁆ = (0 : StandardSl2Module K n) := by
+lemma standardSl2ModuleLieRingModule_f_apply_last (t : IsSl2Triple h e f)
+    : letI := standardSl2ModuleLieRingModule (K := K) (n := n) t
+      ⁅fSub (K := K) t, StandardSl2Module.v (K := K) (Fin.last n)⁆
+        = (0 : StandardSl2Module K n) := by
   let := standardSl2ModuleLieRingModule (K := K) (n := n) t
   show (Φ (K := K) (n := n) t (fSub (K := K) t) :
     Module.End K (StandardSl2Module K n)) (StandardSl2Module.v (Fin.last n)) = _
@@ -184,13 +186,15 @@ lemma standardSl2ModuleLieRingModule_f_apply_last (t : IsSl2Triple h e f) :
   exact ρF_v_last
 
 omit [CharZero K] in
-/-- `hSub t`, `eSub t`, `fSub t` themselves form an `IsSl2Triple` within the subalgebra
+/--
+`hSub t`, `eSub t`, `fSub t` themselves form an `IsSl2Triple` within the subalgebra
 `↥(t.toLieSubalgebra K)` (as opposed to `t` itself, whose `h, e, f` live in the ambient `L`).
 Useful for restricting sl2-representation-theory results (e.g.
 `IsSl2Triple.exists_hasPrimitiveVectorWith`) to a submodule that is invariant under the
-subalgebra generated by `t` but not necessarily under all of `L`. -/
-lemma isSl2Triple_sub (t : IsSl2Triple h e f) :
-    IsSl2Triple (hSub (K := K) t) (eSub (K := K) t) (fSub (K := K) t) where
+subalgebra generated by `t` but not necessarily under all of `L`.
+-/
+lemma isSl2Triple_sub (t : IsSl2Triple h e f)
+    : IsSl2Triple (hSub (K := K) t) (eSub (K := K) t) (fSub (K := K) t) where
   h_ne_zero hc := t.h_ne_zero (by simpa [hSub, Subtype.ext_iff] using hc)
   lie_e_f := by
     apply Subtype.ext

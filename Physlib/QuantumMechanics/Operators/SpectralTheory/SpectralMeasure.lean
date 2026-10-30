@@ -45,8 +45,8 @@ open ContinuousLinearMap
 open MeasureTheory
 open Set
 
-instance (H : Type*) [SeminormedAddCommGroup H] [InnerProductSpace ℂ H] :
-    HasUniqueDiv (H →L[ℂ] H) where
+instance (H : Type*) [SeminormedAddCommGroup H] [InnerProductSpace ℂ H]
+    : HasUniqueDiv (H →L[ℂ] H) where
   nsmul_right_injective n hn := by
     refine Function.HasLeftInverse.injective ⟨fun f ↦ (n : ℂ)⁻¹ • f, fun x ↦ ?_⟩
     simp [← Nat.cast_smul_eq_nsmul ℂ, smul_smul, Nat.cast_ne_zero (R := ℂ), hn]
@@ -55,9 +55,11 @@ instance (H : Type*) [SeminormedAddCommGroup H] [InnerProductSpace ℂ H] :
 ## A. Definition
 -/
 
-/-- A _spectral measure_ on a measurable space `α` is a σ-additive function `Set α → H →L[ℂ] H`
-  such that each set is mapped to a star projection on `H`, the empty set and non-measurable sets
-  are mapped to zero, and `univ` is mapped to the identity. -/
+/--
+A _spectral measure_ on a measurable space `α` is a σ-additive function `Set α → H →L[ℂ] H`
+such that each set is mapped to a star projection on `H`, the empty set and non-measurable sets
+are mapped to zero, and `univ` is mapped to the identity.
+-/
 structure SpectralMeasure
     (α : Type*) [MeasurableSpace α]
     (H : Type*) [NormedAddCommGroup H] [InnerProductSpace ℂ H] [CompleteSpace H]
@@ -81,8 +83,7 @@ instance instCoeFun : CoeFun (SpectralMeasure α H) fun _ ↦ Set α → H →L[
 
 lemma isStarProjection (A : Set α) : IsStarProjection (μS A) := μS.isStarProjection' A
 
-@[simp]
-lemma univ : μS univ = 1 := μS.univ'
+@[simp] lemma univ : μS univ = 1 := μS.univ'
 
 /-!
 ## B. Composition
@@ -92,15 +93,16 @@ lemma univ : μS univ = 1 := μS.univ'
 lemma comp_self (A : Set α) : μS A ∘L μS A = μS A := (μS.isStarProjection A).isIdempotentElem
 
 lemma comp_of_disjoint
-    {A B : Set α} (h : Disjoint A B) (hA : MeasurableSet A) (hB : MeasurableSet B) :
-    μS A ∘L μS B = 0 := by
+    {A B : Set α} (h : Disjoint A B) (hA : MeasurableSet A) (hB : MeasurableSet B)
+    : μS A ∘L μS B = 0 := by
   suffices μS A ∘L μS (A ∪ B) = μS A by simp_all [μS.of_union]
   refine (IsStarProjection.sub_iff_mul_eq_left (μS.isStarProjection A)
-    (μS.isStarProjection (A ∪ B))).mp ?_
+      (μS.isStarProjection (A ∪ B))).mp
+    ?_
   simpa [μS.of_union h hA hB] using μS.isStarProjection B
 
-lemma comp_eq_of_inter {A B : Set α} (hA : MeasurableSet A) (hB : MeasurableSet B) :
-    μS A ∘L μS B = μS (A ∩ B) := by
+lemma comp_eq_of_inter {A B : Set α} (hA : MeasurableSet A) (hB : MeasurableSet B)
+    : μS A ∘L μS B = μS (A ∩ B) := by
   nth_rw 1 [← inter_union_sdiff B A, ← inter_union_sdiff A B]
   simp only [μS.of_union, hA.inter hB, hB.inter hA, hA.diff hB, hB.diff hA,
     disjoint_sdiff_inter.symm, add_comp, comp_add]

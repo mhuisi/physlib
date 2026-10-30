@@ -44,7 +44,9 @@ open scoped NNReal
 
 -/
 
-/-- The type `Frequency` represents the measure of of how often sinusodial components
- of a wave repeat per unit time, i.e. a nonnegative real number carrying the dimension
- of inverse time, in a given (but arbitrary) set of units. -/
+/--
+The type `Frequency` represents the measure of of how often sinusodial components
+of a wave repeat per unit time, i.e. a nonnegative real number carrying the dimension
+of inverse time, in a given (but arbitrary) set of units.
+-/
 abbrev Frequency : Type := WithDim T𝓭⁻¹ ℝ≥0

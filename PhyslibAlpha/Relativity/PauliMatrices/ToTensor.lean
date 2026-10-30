@@ -57,20 +57,23 @@ open Tensorial
 
 -/
 
-/-- The basis of `ℂT[.up, .upL, .upR]` indexed by `(Fin 1 ⊕ Fin 3) × Fin 2 × Fin 2` through
-  `indexEquiv`: `indexBasis (μ, α, β) = e_μ ⊗ e_α ⊗ e_β`. -/
-noncomputable def indexBasis :
-    Basis ((Fin 1 ⊕ Fin 3) × Fin 2 × Fin 2) ℂ ℂT[.up, .upL, .upR] :=
+/--
+The basis of `ℂT[.up, .upL, .upR]` indexed by `(Fin 1 ⊕ Fin 3) × Fin 2 × Fin 2` through
+`indexEquiv`: `indexBasis (μ, α, β) = e_μ ⊗ e_α ⊗ e_β`.
+-/
+noncomputable def indexBasis : Basis ((Fin 1 ⊕ Fin 3) × Fin 2 × Fin 2) ℂ ℂT[.up, .upL, .upR] :=
   (Tensor.basis ![Color.up, Color.upL, Color.upR]).reindex indexEquiv
 
-lemma indexBasis_apply (d : (Fin 1 ⊕ Fin 3) × Fin 2 × Fin 2) :
-    indexBasis d = Tensor.basis ![Color.up, Color.upL, Color.upR] (indexEquiv.symm d) :=
+lemma indexBasis_apply (d : (Fin 1 ⊕ Fin 3) × Fin 2 × Fin 2)
+    : indexBasis d = Tensor.basis (![Color.up, Color.upL, Color.upR]) (indexEquiv.symm d) :=
   Basis.reindex_apply _ _ _
 
 set_option backward.isDefEq.respectTransparency false in
 /-- The Pauli tensor as a sum over its components, `σ^^^ = ∑ σ^μ_{α β} e_μ ⊗ e_α ⊗ e_β`. -/
-lemma toTensor_eq_sum_indexBasis : σ^^^ = ∑ d : (Fin 1 ⊕ Fin 3) × Fin 2 × Fin 2,
-    pauliMatrix d.1 d.2.1 d.2.2 • indexBasis d := by
+lemma toTensor_eq_sum_indexBasis
+    : σ^^^
+      = ∑ d : (Fin 1 ⊕ Fin 3) × Fin 2 × Fin 2,
+        pauliMatrix d.1 d.2.1 d.2.2 • indexBasis d := by
   have h : (toTensor (self := tensorial)).symm σ^^^ = pauliMatrix :=
     (toTensor (self := tensorial)).symm_apply_apply pauliMatrix
   conv_lhs => rw [← (Tensor.basis _).sum_repr σ^^^]

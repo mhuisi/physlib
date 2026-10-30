@@ -48,28 +48,37 @@ open PeriodicGraph
 
 /-! ## A. The admissible triples -/
 
-/-- The images of the basis vectors under the twelve point operations of the rhombohedral
-lattice: the permutations of the primitive vectors, with or without the inversion. -/
-def rhombohedralPointTriples : Finset (Fin 3 → Fin 3 → ℤ) :=
-  {![![1, 0, 0], ![0, 1, 0], ![0, 0, 1]], ![![1, 0, 0], ![0, 0, 1], ![0, 1, 0]],
-    ![![0, 1, 0], ![1, 0, 0], ![0, 0, 1]], ![![0, 1, 0], ![0, 0, 1], ![1, 0, 0]],
-    ![![0, 0, 1], ![1, 0, 0], ![0, 1, 0]], ![![0, 0, 1], ![0, 1, 0], ![1, 0, 0]],
-    ![![-1, 0, 0], ![0, -1, 0], ![0, 0, -1]], ![![-1, 0, 0], ![0, 0, -1], ![0, -1, 0]],
-    ![![0, -1, 0], ![-1, 0, 0], ![0, 0, -1]], ![![0, -1, 0], ![0, 0, -1], ![-1, 0, 0]],
-    ![![0, 0, -1], ![-1, 0, 0], ![0, -1, 0]], ![![0, 0, -1], ![0, -1, 0], ![-1, 0, 0]]}
+/--
+The images of the basis vectors under the twelve point operations of the rhombohedral
+lattice: the permutations of the primitive vectors, with or without the inversion.
+-/
+def rhombohedralPointTriples : Finset (Fin 3 → Fin 3 → ℤ) := {
+  ![![1, 0, 0], ![0, 1, 0], ![0, 0, 1]], ![![1, 0, 0], ![0, 0, 1], ![0, 1, 0]],
+  ![![0, 1, 0], ![1, 0, 0], ![0, 0, 1]], ![![0, 1, 0], ![0, 0, 1], ![1, 0, 0]],
+  ![![0, 0, 1], ![1, 0, 0], ![0, 1, 0]], ![![0, 0, 1], ![0, 1, 0], ![1, 0, 0]],
+  ![![-1, 0, 0], ![0, -1, 0], ![0, 0, -1]], ![![-1, 0, 0], ![0, 0, -1], ![0, -1, 0]],
+  ![![0, -1, 0], ![-1, 0, 0], ![0, 0, -1]], ![![0, -1, 0], ![0, 0, -1], ![-1, 0, 0]],
+  ![![0, 0, -1], ![-1, 0, 0], ![0, -1, 0]], ![![0, 0, -1], ![0, -1, 0], ![-1, 0, 0]]
+}
 
-/-- The point operations of the rhombohedral lattice are the twelve of
-`rhombohedralPointTriples`. -/
-lemma rhombohedral_admissible_iff (v : Fin 3 → Fin 3 → ℤ) :
-    Admissible (bondNeighbors rhombohedralBonds) v ↔ v ∈ rhombohedralPointTriples :=
-  admissible_iff_of_tests (fun j => by fin_cases j <;> decide) [] [(-1, -1)]
-    [![-1, 0, -1], ![0, -1, -1], ![-2, -2, -1]] (by decide +kernel) (by decide +kernel) v
+/--
+The point operations of the rhombohedral lattice are the twelve of
+`rhombohedralPointTriples`.
+-/
+lemma rhombohedral_admissible_iff (v : Fin 3 → Fin 3 → ℤ)
+    : Admissible (bondNeighbors rhombohedralBonds) v ↔ v ∈ rhombohedralPointTriples :=
+  admissible_iff_of_tests
+    (fun j => by fin_cases j <;> decide)
+    [] [(-1, -1)] [![-1, 0, -1], ![0, -1, -1], ![-2, -2, -1]] (by decide +kernel)
+    (by decide +kernel) v
 
 /-! ## B. The order -/
 
 /-- **The point group of the rhombohedral lattice has order `12`.** -/
 lemma rhombohedral_card_pointGroup : Nat.card rhombohedralGraph.pointGroup = 12 :=
-  (card_pointGroup_ofBonds rhombohedralBonds (fun j => by fin_cases j <;> decide)
-    rhombohedral_admissible_iff).trans (by decide)
+  (card_pointGroup_ofBonds rhombohedralBonds
+      (fun j => by fin_cases j <;> decide)
+      rhombohedral_admissible_iff).trans
+    (by decide)
 
 end CondensedMatter.Crystal

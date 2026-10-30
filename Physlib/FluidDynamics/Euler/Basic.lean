@@ -46,14 +46,16 @@ namespace FluidDynamics
 
 /-- The conservative Euler equations: continuity, Cauchy momentum, and inviscid stress. -/
 def Euler (d : ℕ) (flow : CauchyFlow d) (pressure : ScalarField d) : Prop :=
-  FluidFlow.ClassicalContinuityEquation d flow.toFluidFlow ∧
-    CauchyFlow.CauchyMomentumEquation d flow ∧ CauchyFlow.IsInviscid d flow pressure
+  FluidFlow.ClassicalContinuityEquation d flow.toFluidFlow
+    ∧ CauchyFlow.CauchyMomentumEquation d flow ∧ CauchyFlow.IsInviscid d flow pressure
 
-/-- The convective Euler equations: continuity, convective Cauchy momentum, and inviscid
-stress. -/
+/--
+The convective Euler equations: continuity, convective Cauchy momentum, and inviscid
+stress.
+-/
 def ConvectiveEuler (d : ℕ) (flow : CauchyFlow d) (pressure : ScalarField d) : Prop :=
-  FluidFlow.ClassicalContinuityEquation d flow.toFluidFlow ∧
-    CauchyFlow.ConvectiveCauchyMomentumEquation d flow ∧ CauchyFlow.IsInviscid d flow pressure
+  FluidFlow.ClassicalContinuityEquation d flow.toFluidFlow
+    ∧ CauchyFlow.ConvectiveCauchyMomentumEquation d flow ∧ CauchyFlow.IsInviscid d flow pressure
 
 /-!
 
@@ -61,28 +63,27 @@ def ConvectiveEuler (d : ℕ) (flow : CauchyFlow d) (pressure : ScalarField d) :
 
 -/
 
-/-- The conservative and convective Euler forms are equivalent when the fields are
-differentiable enough for the product rules. -/
+/--
+The conservative and convective Euler forms are equivalent when the fields are
+differentiable enough for the product rules.
+-/
 theorem euler_iff_convectiveEuler
-    (d : ℕ) (flow : CauchyFlow d) (pressure : ScalarField d)
-    (hRhoTime : ∀ t x, DifferentiableAt ℝ (flow.rho · x) t)
+    (d : ℕ) (flow : CauchyFlow d)
+    (pressure : ScalarField d) (hRhoTime : ∀ t x, DifferentiableAt ℝ (flow.rho · x) t)
     (hVelocityTime : ∀ t x, DifferentiableAt ℝ (flow.velocity · x) t)
-    (hMomentumDensity : ∀ t,
-      Differentiable ℝ (FluidFlow.momentumDensity d flow.toFluidFlow t))
-    (hVelocitySpace : ∀ t, Differentiable ℝ (flow.velocity t)) :
-    Euler d flow pressure ↔ ConvectiveEuler d flow pressure := by
+    (hMomentumDensity : ∀ t, Differentiable ℝ (FluidFlow.momentumDensity d flow.toFluidFlow t))
+    (hVelocitySpace : ∀ t, Differentiable ℝ (flow.velocity t))
+    : Euler d flow pressure ↔ ConvectiveEuler d flow pressure := by
   constructor
   · intro hConservative
     refine ⟨hConservative.1, ?_, hConservative.2.2⟩
-    exact
-      (CauchyFlow.cauchyMomentumEquation_iff_convectiveCauchyMomentumEquation d flow
+    exact (CauchyFlow.cauchyMomentumEquation_iff_convectiveCauchyMomentumEquation d flow
         hConservative.1 hRhoTime hVelocityTime hMomentumDensity hVelocitySpace).mp
-          hConservative.2.1
+      hConservative.2.1
   · intro hConvective
     refine ⟨hConvective.1, ?_, hConvective.2.2⟩
-    exact
-      (CauchyFlow.cauchyMomentumEquation_iff_convectiveCauchyMomentumEquation d flow
+    exact (CauchyFlow.cauchyMomentumEquation_iff_convectiveCauchyMomentumEquation d flow
         hConvective.1 hRhoTime hVelocityTime hMomentumDensity hVelocitySpace).mpr
-          hConvective.2.1
+      hConvective.2.1
 
 end FluidDynamics

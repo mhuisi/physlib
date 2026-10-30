@@ -97,16 +97,18 @@ namespace JetAlgebra
 
 -/
 
-/-- Photon gauge jets compose by addition: the gauge transformations form a
-  group acting on the photon jet algebra. -/
-lemma gaugeAction_comp (c₁ c₂ : GaugeJet) :
-    (gaugeAction c₁).comp (gaugeAction c₂) = gaugeAction (c₁ + c₂) := by
+/--
+Photon gauge jets compose by addition: the gauge transformations form a
+group acting on the photon jet algebra.
+-/
+lemma gaugeAction_comp (c₁ c₂ : GaugeJet)
+    : (gaugeAction c₁).comp (gaugeAction c₂) = gaugeAction (c₁ + c₂) := by
   refine MvPolynomial.algHom_ext fun j => ?_
   obtain ⟨s, μ⟩ := j
   rw [AlgHom.comp_apply]
   show gaugeAction c₁ (gaugeAction c₂ (coord s μ)) = gaugeAction (c₁ + c₂) (coord s μ)
-  rw [gaugeAction_coord, gaugeAction_coord, map_add, gaugeAction_coord, gaugeAction_C,
-    add_assoc, ← MvPolynomial.C_add]
+  rw [gaugeAction_coord, gaugeAction_coord, map_add, gaugeAction_coord, gaugeAction_C, add_assoc,
+    ← MvPolynomial.C_add]
   rfl
 
 @[simp]
@@ -128,9 +130,8 @@ lemma is built into the indexing.
 -/
 
 @[simp]
-lemma gaugeAction_fieldStrength (c : GaugeJet) (s : Multiset (Fin 1 ⊕ Fin 3))
-    (μ ν : Fin 1 ⊕ Fin 3) :
-    gaugeAction c (fieldStrength s μ ν) = fieldStrength s μ ν := by
+lemma gaugeAction_fieldStrength (c : GaugeJet) (s : Multiset (Fin 1 ⊕ Fin 3)) (μ ν : Fin 1 ⊕ Fin 3)
+    : gaugeAction c (fieldStrength s μ ν) = fieldStrength s μ ν := by
   have hcomm : s + {μ} + {ν} = s + {ν} + {μ} := by
     rw [add_assoc, add_assoc, add_comm ({μ} : Multiset _)]
   rw [fieldStrength, map_sub, gaugeAction_coord, gaugeAction_coord, hcomm]
@@ -162,13 +163,14 @@ namespace Electron
 
 namespace JetAlgebra
 
-/-- The trivial gauge jet acts trivially on the electron jet algebra: the
-  gauge action is unital. -/
-lemma gaugeAction_trivial (e : ℝ) :
-    gaugeAction (GaugeJet.trivial e) = AlgHom.id ℂ JetAlgebra := by
+/--
+The trivial gauge jet acts trivially on the electron jet algebra: the
+gauge action is unital.
+-/
+lemma gaugeAction_trivial (e : ℝ) : gaugeAction (GaugeJet.trivial e) = AlgHom.id ℂ JetAlgebra := by
   refine ExteriorAlgebra.hom_ext (Finsupp.lhom_ext fun j b => ?_)
-  simp only [LinearMap.coe_comp, Function.comp_apply, AlgHom.toLinearMap_apply,
-    AlgHom.coe_id, id_eq]
+  simp only [LinearMap.coe_comp, Function.comp_apply, AlgHom.toLinearMap_apply, AlgHom.coe_id,
+    id_eq]
   rw [← Finsupp.smul_single_one, map_smul, map_smul]
   congr 1
   show gaugeAction (GaugeJet.trivial e) (ofGenerator j) = ofGenerator j
@@ -176,20 +178,15 @@ lemma gaugeAction_trivial (e : ℝ) :
   | dψ t α =>
     rw [gaugeAction_ofGenerator_dψ,
       show (t.antidiagonal.map fun p =>
-          star ((GaugeJet.trivial e).phase p.1) • ofGenerator (.dψ p.2 α)) =
-        t.antidiagonal.map fun p =>
-          if p.1 = 0 then ofGenerator (.dψ p.2 α) else 0 from
-        Multiset.map_congr rfl fun p _ => by
-          by_cases h : p.1 = 0 <;> simp [GaugeJet.trivial, h],
+            star ((GaugeJet.trivial e).phase p.1) • ofGenerator (.dψ p.2 α))
+          = t.antidiagonal.map fun p => if p.1 = 0 then ofGenerator (.dψ p.2 α) else 0 from
+        Multiset.map_congr rfl fun p _ => by by_cases h : p.1 = 0 <;> simp [GaugeJet.trivial, h],
       sum_map_antidiagonal_ite t fun u => ofGenerator (.dψ u α)]
   | dbarψ t α =>
     rw [gaugeAction_ofGenerator_dbarψ,
-      show (t.antidiagonal.map fun p =>
-          (GaugeJet.trivial e).phase p.1 • ofGenerator (.dbarψ p.2 α)) =
-        t.antidiagonal.map fun p =>
-          if p.1 = 0 then ofGenerator (.dbarψ p.2 α) else 0 from
-        Multiset.map_congr rfl fun p _ => by
-          by_cases h : p.1 = 0 <;> simp [GaugeJet.trivial, h],
+      show (t.antidiagonal.map fun p => (GaugeJet.trivial e).phase p.1 • ofGenerator (.dbarψ p.2 α))
+          = t.antidiagonal.map fun p => if p.1 = 0 then ofGenerator (.dbarψ p.2 α) else 0 from
+        Multiset.map_congr rfl fun p _ => by by_cases h : p.1 = 0 <;> simp [GaugeJet.trivial, h],
       sum_map_antidiagonal_ite t fun u => ofGenerator (.dbarψ u α)]
 
 end JetAlgebra
@@ -198,24 +195,24 @@ end Electron
 
 namespace JetAlgebra
 
-/-- The trivial gauge jet acts trivially on the QED jet algebra: the gauge
-  action is unital. -/
-lemma gaugeAction_trivial (e : ℝ) :
-    gaugeAction (GaugeJet.trivial e) = AlgHom.id ℂ JetAlgebra := by
-  have hP : gaugeActionPhoton (GaugeJet.trivial e).χjet =
-      AlgHom.id ℂ (ℂ ⊗[ℝ] Photon.JetAlgebra) := by
+/--
+The trivial gauge jet acts trivially on the QED jet algebra: the gauge
+action is unital.
+-/
+lemma gaugeAction_trivial (e : ℝ) : gaugeAction (GaugeJet.trivial e) = AlgHom.id ℂ JetAlgebra := by
+  have hP
+      : gaugeActionPhoton (GaugeJet.trivial e).χjet = AlgHom.id ℂ (ℂ ⊗[ℝ] Photon.JetAlgebra) := by
     rw [show (GaugeJet.trivial e).χjet = 0 from rfl, gaugeActionPhoton,
       Photon.JetAlgebra.gaugeAction_zero, Algebra.TensorProduct.map_id]
   simp only [gaugeAction, hP, Electron.JetAlgebra.gaugeAction_trivial]
   exact Algebra.TensorProduct.map_id
 
 /-- The electron gauge actions compose through the monoid of gauge jets. -/
-lemma _root_.QED.Electron.JetAlgebra.gaugeAction_mul {e : ℝ} (g₁ g₂ : GaugeJet e) :
-    (Electron.JetAlgebra.gaugeAction g₁).comp (Electron.JetAlgebra.gaugeAction g₂) =
-      Electron.JetAlgebra.gaugeAction (g₁ * g₂) := by
+lemma _root_.QED.Electron.JetAlgebra.gaugeAction_mul {e : ℝ} (g₁ g₂ : GaugeJet e)
+    : (Electron.JetAlgebra.gaugeAction g₁).comp (Electron.JetAlgebra.gaugeAction g₂)
+      = Electron.JetAlgebra.gaugeAction (g₁ * g₂) := by
   refine ExteriorAlgebra.hom_ext (Finsupp.lhom_ext fun j b => ?_)
-  simp only [LinearMap.coe_comp, Function.comp_apply, AlgHom.toLinearMap_apply,
-    AlgHom.comp_apply]
+  simp only [LinearMap.coe_comp, Function.comp_apply, AlgHom.toLinearMap_apply, AlgHom.comp_apply]
   rw [← Finsupp.smul_single_one, map_smul, map_smul, map_smul, map_smul]
   congr 1
   show Electron.JetAlgebra.gaugeAction g₁ (Electron.JetAlgebra.gaugeAction g₂
@@ -224,74 +221,99 @@ lemma _root_.QED.Electron.JetAlgebra.gaugeAction_mul {e : ℝ} (g₁ g₂ : Gaug
   cases j with
   | dψ t α =>
     rw [Electron.JetAlgebra.gaugeAction_ofGenerator_dψ,
-      show (t.antidiagonal.map fun p => star (g₂.phase p.1) •
-          Electron.JetAlgebra.ofGenerator (.dψ p.2 α)).sum =
-        phaseAct (fun x => star (g₂.phase x))
-          (fun t' => Electron.JetAlgebra.ofGenerator (.dψ t' α)) t from rfl,
-      show Electron.JetAlgebra.gaugeAction g₁ (phaseAct (fun x => star (g₂.phase x))
-          (fun t' => Electron.JetAlgebra.ofGenerator (.dψ t' α)) t) =
-        phaseAct (fun x => star (g₂.phase x))
-          (fun t' => Electron.JetAlgebra.gaugeAction g₁
-            (Electron.JetAlgebra.ofGenerator (.dψ t' α))) t from
+      show (t.antidiagonal.map fun p =>
+            star (g₂.phase p.1) • Electron.JetAlgebra.ofGenerator (.dψ p.2 α)).sum
+          = phaseAct
+            (fun x => star (g₂.phase x))
+            (fun t' => Electron.JetAlgebra.ofGenerator (.dψ t' α))
+            t from
+        rfl,
+      show Electron.JetAlgebra.gaugeAction g₁
+            (phaseAct
+              (fun x => star (g₂.phase x))
+              (fun t' => Electron.JetAlgebra.ofGenerator (.dψ t' α))
+              t)
+          = phaseAct
+            (fun x => star (g₂.phase x))
+            (fun t' =>
+              Electron.JetAlgebra.gaugeAction g₁ (Electron.JetAlgebra.ofGenerator (.dψ t' α)))
+            t from
         map_phaseAct _ _ (Electron.JetAlgebra.gaugeAction g₁).toLinearMap t,
-      show (fun t' => Electron.JetAlgebra.gaugeAction g₁
-          (Electron.JetAlgebra.ofGenerator (.dψ t' α))) =
-        fun t' => phaseAct (fun x => star (g₁.phase x))
-          (fun t'' => Electron.JetAlgebra.ofGenerator (.dψ t'' α)) t' from
+      show (fun t' =>
+            Electron.JetAlgebra.gaugeAction g₁ (Electron.JetAlgebra.ofGenerator (.dψ t' α)))
+          = fun t' =>
+            phaseAct
+              (fun x => star (g₁.phase x))
+              (fun t'' => Electron.JetAlgebra.ofGenerator (.dψ t'' α))
+              t' from
         funext fun t' => Electron.JetAlgebra.gaugeAction_ofGenerator_dψ g₁ t' α,
       phaseAct_assoc, Electron.JetAlgebra.gaugeAction_ofGenerator_dψ,
-      show (t.antidiagonal.map fun p => star ((g₁ * g₂).phase p.1) •
-          Electron.JetAlgebra.ofGenerator (.dψ p.2 α)).sum =
-        phaseAct (fun x => star ((g₁ * g₂).phase x))
-          (fun t' => Electron.JetAlgebra.ofGenerator (.dψ t' α)) t from rfl]
-    refine congrFun (congrArg (fun w => phaseAct w
-      (fun t' => Electron.JetAlgebra.ofGenerator (.dψ t' α))) (funext fun x => ?_)) t
+      show (t.antidiagonal.map fun p =>
+            star ((g₁ * g₂).phase p.1) • Electron.JetAlgebra.ofGenerator (.dψ p.2 α)).sum
+          = phaseAct
+            (fun x => star ((g₁ * g₂).phase x))
+            (fun t' => Electron.JetAlgebra.ofGenerator (.dψ t' α))
+            t from
+        rfl]
+    refine congrFun
+      (congrArg
+        (fun w => phaseAct w (fun t' => Electron.JetAlgebra.ofGenerator (.dψ t' α)))
+        (funext fun x => ?_))
+      t
     rw [GaugeJet.mul_phase, star_phaseAct, phaseAct_comm]
   | dbarψ t α =>
     rw [Electron.JetAlgebra.gaugeAction_ofGenerator_dbarψ,
-      show (t.antidiagonal.map fun p => g₂.phase p.1 •
-          Electron.JetAlgebra.ofGenerator (.dbarψ p.2 α)).sum =
-        phaseAct g₂.phase
-          (fun t' => Electron.JetAlgebra.ofGenerator (.dbarψ t' α)) t from rfl,
-      show Electron.JetAlgebra.gaugeAction g₁ (phaseAct g₂.phase
-          (fun t' => Electron.JetAlgebra.ofGenerator (.dbarψ t' α)) t) =
-        phaseAct g₂.phase
-          (fun t' => Electron.JetAlgebra.gaugeAction g₁
-            (Electron.JetAlgebra.ofGenerator (.dbarψ t' α))) t from
+      show (t.antidiagonal.map fun p =>
+            g₂.phase p.1 • Electron.JetAlgebra.ofGenerator (.dbarψ p.2 α)).sum
+          = phaseAct g₂.phase (fun t' => Electron.JetAlgebra.ofGenerator (.dbarψ t' α)) t from
+        rfl,
+      show Electron.JetAlgebra.gaugeAction g₁
+            (phaseAct g₂.phase (fun t' => Electron.JetAlgebra.ofGenerator (.dbarψ t' α)) t)
+          = phaseAct g₂.phase
+            (fun t' =>
+              Electron.JetAlgebra.gaugeAction g₁ (Electron.JetAlgebra.ofGenerator (.dbarψ t' α)))
+            t from
         map_phaseAct _ _ (Electron.JetAlgebra.gaugeAction g₁).toLinearMap t,
-      show (fun t' => Electron.JetAlgebra.gaugeAction g₁
-          (Electron.JetAlgebra.ofGenerator (.dbarψ t' α))) =
-        fun t' => phaseAct g₁.phase
-          (fun t'' => Electron.JetAlgebra.ofGenerator (.dbarψ t'' α)) t' from
+      show (fun t' =>
+            Electron.JetAlgebra.gaugeAction g₁ (Electron.JetAlgebra.ofGenerator (.dbarψ t' α)))
+          = fun t' =>
+            phaseAct g₁.phase (fun t'' => Electron.JetAlgebra.ofGenerator (.dbarψ t'' α)) t' from
         funext fun t' => Electron.JetAlgebra.gaugeAction_ofGenerator_dbarψ g₁ t' α,
       phaseAct_assoc, Electron.JetAlgebra.gaugeAction_ofGenerator_dbarψ,
-      show (t.antidiagonal.map fun p => (g₁ * g₂).phase p.1 •
-          Electron.JetAlgebra.ofGenerator (.dbarψ p.2 α)).sum =
-        phaseAct ((g₁ * g₂).phase)
-          (fun t' => Electron.JetAlgebra.ofGenerator (.dbarψ t' α)) t from rfl]
-    refine congrFun (congrArg (fun w => phaseAct w
-      (fun t' => Electron.JetAlgebra.ofGenerator (.dbarψ t' α))) (funext fun x => ?_)) t
+      show (t.antidiagonal.map fun p =>
+            (g₁ * g₂).phase p.1 • Electron.JetAlgebra.ofGenerator (.dbarψ p.2 α)).sum
+          = phaseAct ((g₁ * g₂).phase)
+            (fun t' => Electron.JetAlgebra.ofGenerator (.dbarψ t' α))
+            t from
+        rfl]
+    refine congrFun
+      (congrArg
+        (fun w => phaseAct w (fun t' => Electron.JetAlgebra.ofGenerator (.dbarψ t' α)))
+        (funext fun x => ?_))
+      t
     rw [GaugeJet.mul_phase, phaseAct_comm]
 
-/-- The complexified photon gauge actions compose by addition of the gauge
-  jets. -/
-lemma gaugeActionPhoton_comp (c₁ c₂ : Photon.JetAlgebra.GaugeJet) :
-    (gaugeActionPhoton c₁).comp (gaugeActionPhoton c₂) =
-      gaugeActionPhoton (c₁ + c₂) := by
-  rw [gaugeActionPhoton, gaugeActionPhoton, gaugeActionPhoton,
-    ← Algebra.TensorProduct.map_comp, AlgHom.comp_id,
-    Photon.JetAlgebra.gaugeAction_comp]
+/--
+The complexified photon gauge actions compose by addition of the gauge
+jets.
+-/
+lemma gaugeActionPhoton_comp (c₁ c₂ : Photon.JetAlgebra.GaugeJet)
+    : (gaugeActionPhoton c₁).comp (gaugeActionPhoton c₂) = gaugeActionPhoton (c₁ + c₂) := by
+  rw [gaugeActionPhoton, gaugeActionPhoton, gaugeActionPhoton, ← Algebra.TensorProduct.map_comp,
+    AlgHom.comp_id, Photon.JetAlgebra.gaugeAction_comp]
 
-/-- **The gauge actions compose through the monoid of gauge jets**: the QED
-  gauge action is a monoid action on the jet algebra. -/
-lemma gaugeAction_mul {e : ℝ} (g₁ g₂ : GaugeJet e) :
-    (gaugeAction g₁).comp (gaugeAction g₂) = gaugeAction (g₁ * g₂) := by
+/--
+**The gauge actions compose through the monoid of gauge jets**: the QED
+gauge action is a monoid action on the jet algebra.
+-/
+lemma gaugeAction_mul {e : ℝ} (g₁ g₂ : GaugeJet e)
+    : (gaugeAction g₁).comp (gaugeAction g₂) = gaugeAction (g₁ * g₂) := by
   simp only [gaugeAction, GaugeJet.mul_χjet]
   rw [← gaugeActionPhoton_comp, ← Electron.JetAlgebra.gaugeAction_mul]
   exact (Algebra.TensorProduct.map_comp _ _ _ _).symm
 
-lemma gaugeAction_mul_apply {e : ℝ} (g₁ g₂ : GaugeJet e) (x : JetAlgebra) :
-    gaugeAction (g₁ * g₂) x = gaugeAction g₁ (gaugeAction g₂ x) :=
+lemma gaugeAction_mul_apply {e : ℝ} (g₁ g₂ : GaugeJet e) (x : JetAlgebra)
+    : gaugeAction (g₁ * g₂) x = gaugeAction g₁ (gaugeAction g₂ x) :=
   (DFunLike.congr_fun (gaugeAction_mul g₁ g₂) x).symm
 
 /-!
@@ -306,15 +328,15 @@ scalar multiple `(∂_s ∂_μ χ) • 1`.
 
 -/
 
-/-- The gauge action on the photon jet coordinate: the affine shift
-  `∂_s A_μ ↦ ∂_s A_μ + ∂_s ∂_μ χ`. -/
-lemma gaugeAction_A {e : ℝ} (g : GaugeJet e) (s : Multiset (Fin 1 ⊕ Fin 3))
-    (μ : Fin 1 ⊕ Fin 3) :
-    gaugeAction g (A s μ) = A s μ + (g.χjet (s + {μ}) : ℂ) • 1 := by
+/--
+The gauge action on the photon jet coordinate: the affine shift
+`∂_s A_μ ↦ ∂_s A_μ + ∂_s ∂_μ χ`.
+-/
+lemma gaugeAction_A {e : ℝ} (g : GaugeJet e) (s : Multiset (Fin 1 ⊕ Fin 3)) (μ : Fin 1 ⊕ Fin 3)
+    : gaugeAction g (A s μ) = A s μ + (g.χjet (s + {μ}) : ℂ) • 1 := by
   simp only [A]
-  rw [gaugeAction_tmul, map_one, gaugeActionPhoton_tmul,
-    Photon.JetAlgebra.gaugeAction_coord, TensorProduct.tmul_add, add_tmul,
-    tmul_C_eq_smul_one]
+  rw [gaugeAction_tmul, map_one, gaugeActionPhoton_tmul, Photon.JetAlgebra.gaugeAction_coord,
+    TensorProduct.tmul_add, add_tmul, tmul_C_eq_smul_one]
 
 /-!
 
@@ -327,36 +349,28 @@ first derivative of the phase into the zeroth-order coordinate.
 -/
 
 @[simp]
-lemma gaugeAction_ψ_zero {e : ℝ} (g : GaugeJet e) (α : Fin 2 ⊕ Fin 2) :
-    gaugeAction g (ψ 0 α) = star (g.phase 0) • ψ 0 α := by
+lemma gaugeAction_ψ_zero {e : ℝ} (g : GaugeJet e) (α : Fin 2 ⊕ Fin 2)
+    : gaugeAction g (ψ 0 α) = star (g.phase 0) • ψ 0 α := by
   simp only [ψ]
-  rw [gaugeAction_tmul, map_one,
-    Electron.JetAlgebra.gaugeAction_ofGenerator_dψ_zero, tmul_smul]
+  rw [gaugeAction_tmul, map_one, Electron.JetAlgebra.gaugeAction_ofGenerator_dψ_zero, tmul_smul]
 
 @[simp]
-lemma gaugeAction_barψ_zero {e : ℝ} (g : GaugeJet e) (α : Fin 2 ⊕ Fin 2) :
-    gaugeAction g (barψ 0 α) = g.phase 0 • barψ 0 α := by
+lemma gaugeAction_barψ_zero {e : ℝ} (g : GaugeJet e) (α : Fin 2 ⊕ Fin 2)
+    : gaugeAction g (barψ 0 α) = g.phase 0 • barψ 0 α := by
   simp only [barψ]
-  rw [gaugeAction_tmul, map_one,
-    Electron.JetAlgebra.gaugeAction_ofGenerator_dbarψ_zero, tmul_smul]
+  rw [gaugeAction_tmul, map_one, Electron.JetAlgebra.gaugeAction_ofGenerator_dbarψ_zero, tmul_smul]
 
-lemma gaugeAction_ψ_singleton {e : ℝ} (g : GaugeJet e) (μ : Fin 1 ⊕ Fin 3)
-    (α : Fin 2 ⊕ Fin 2) :
-    gaugeAction g (ψ {μ} α) =
-      star (g.phase 0) • ψ {μ} α + star (g.phase {μ}) • ψ 0 α := by
+lemma gaugeAction_ψ_singleton {e : ℝ} (g : GaugeJet e) (μ : Fin 1 ⊕ Fin 3) (α : Fin 2 ⊕ Fin 2)
+    : gaugeAction g (ψ {μ} α) = star (g.phase 0) • ψ {μ} α + star (g.phase {μ}) • ψ 0 α := by
   simp only [ψ]
-  rw [gaugeAction_tmul, map_one,
-    Electron.JetAlgebra.gaugeAction_ofGenerator_dψ_singleton, tmul_add,
+  rw [gaugeAction_tmul, map_one, Electron.JetAlgebra.gaugeAction_ofGenerator_dψ_singleton, tmul_add,
     tmul_smul, tmul_smul]
 
-lemma gaugeAction_barψ_singleton {e : ℝ} (g : GaugeJet e) (μ : Fin 1 ⊕ Fin 3)
-    (α : Fin 2 ⊕ Fin 2) :
-    gaugeAction g (barψ {μ} α) =
-      g.phase 0 • barψ {μ} α + g.phase {μ} • barψ 0 α := by
+lemma gaugeAction_barψ_singleton {e : ℝ} (g : GaugeJet e) (μ : Fin 1 ⊕ Fin 3) (α : Fin 2 ⊕ Fin 2)
+    : gaugeAction g (barψ {μ} α) = g.phase 0 • barψ {μ} α + g.phase {μ} • barψ 0 α := by
   simp only [barψ]
-  rw [gaugeAction_tmul, map_one,
-    Electron.JetAlgebra.gaugeAction_ofGenerator_dbarψ_singleton, tmul_add,
-    tmul_smul, tmul_smul]
+  rw [gaugeAction_tmul, map_one, Electron.JetAlgebra.gaugeAction_ofGenerator_dbarψ_singleton,
+    tmul_add, tmul_smul, tmul_smul]
 
 /-!
 
@@ -368,19 +382,18 @@ is the commutativity of multiset addition.
 -/
 
 @[simp]
-lemma gaugeAction_fieldStrength {e : ℝ} (g : GaugeJet e)
-    (s : Multiset (Fin 1 ⊕ Fin 3)) (μ ν : Fin 1 ⊕ Fin 3) :
-    gaugeAction g (fieldStrength s μ ν) = fieldStrength s μ ν := by
+lemma gaugeAction_fieldStrength
+    {e : ℝ} (g : GaugeJet e) (s : Multiset (Fin 1 ⊕ Fin 3)) (μ ν : Fin 1 ⊕ Fin 3)
+    : gaugeAction g (fieldStrength s μ ν) = fieldStrength s μ ν := by
   simp only [fieldStrength]
   rw [gaugeAction_tmul, map_one, gaugeActionPhoton_tmul,
     Photon.JetAlgebra.gaugeAction_fieldStrength]
 
 @[simp]
-lemma gaugeAction_maxwellTerm {e : ℝ} (g : GaugeJet e) :
-    gaugeAction g maxwellTerm = maxwellTerm := by
+lemma gaugeAction_maxwellTerm {e : ℝ} (g : GaugeJet e)
+    : gaugeAction g maxwellTerm = maxwellTerm := by
   simp only [maxwellTerm]
-  rw [gaugeAction_tmul, map_one, gaugeActionPhoton_tmul,
-    Photon.JetAlgebra.gaugeAction_maxwellTerm]
+  rw [gaugeAction_tmul, map_one, gaugeActionPhoton_tmul, Photon.JetAlgebra.gaugeAction_maxwellTerm]
 
 /-!
 
@@ -394,29 +407,28 @@ itself.
 
 -/
 
-/-- **Gauge covariance of the covariant derivative**: `D_μ ψ` rotates by the
-  conjugate phase, exactly like `ψ` itself.  The shift of the photon
-  coordinate cancels the derivative of the phase. -/
-lemma gaugeAction_covDψ {e : ℝ} (g : GaugeJet e) (μ : Fin 1 ⊕ Fin 3)
-    (α : Fin 2 ⊕ Fin 2) :
-    gaugeAction g (covDψ e μ α) = star (g.phase 0) • covDψ e μ α := by
-  rw [covDψ, map_add, map_smul, map_mul, gaugeAction_ψ_singleton,
-    gaugeAction_ψ_zero, gaugeAction_A, g.star_phase_singleton μ,
-    show (0 : Multiset (Fin 1 ⊕ Fin 3)) + {μ} = {μ} from zero_add _]
-  simp only [add_mul, smul_mul_assoc, one_mul, mul_smul_comm, smul_add,
-    smul_smul, neg_smul]
+/--
+**Gauge covariance of the covariant derivative**: `D_μ ψ` rotates by the
+conjugate phase, exactly like `ψ` itself.  The shift of the photon
+coordinate cancels the derivative of the phase.
+-/
+lemma gaugeAction_covDψ {e : ℝ} (g : GaugeJet e) (μ : Fin 1 ⊕ Fin 3) (α : Fin 2 ⊕ Fin 2)
+    : gaugeAction g (covDψ e μ α) = star (g.phase 0) • covDψ e μ α := by
+  rw [covDψ, map_add, map_smul, map_mul, gaugeAction_ψ_singleton, gaugeAction_ψ_zero, gaugeAction_A,
+    g.star_phase_singleton μ, show (0 : Multiset (Fin 1 ⊕ Fin 3)) + {μ} = {μ} from zero_add _]
+  simp only [add_mul, smul_mul_assoc, one_mul, mul_smul_comm, smul_add, smul_smul, neg_smul]
   module
 
-/-- Gauge covariance of the conjugate covariant derivative: `D_μ ψ̄` rotates
-  by the phase, exactly like `ψ̄` itself. -/
-lemma gaugeAction_covDbarψ {e : ℝ} (g : GaugeJet e) (μ : Fin 1 ⊕ Fin 3)
-    (α : Fin 2 ⊕ Fin 2) :
-    gaugeAction g (covDbarψ e μ α) = g.phase 0 • covDbarψ e μ α := by
-  rw [covDbarψ, map_sub, map_smul, map_mul, gaugeAction_barψ_singleton,
-    gaugeAction_barψ_zero, gaugeAction_A, g.phase_singleton μ,
+/--
+Gauge covariance of the conjugate covariant derivative: `D_μ ψ̄` rotates
+by the phase, exactly like `ψ̄` itself.
+-/
+lemma gaugeAction_covDbarψ {e : ℝ} (g : GaugeJet e) (μ : Fin 1 ⊕ Fin 3) (α : Fin 2 ⊕ Fin 2)
+    : gaugeAction g (covDbarψ e μ α) = g.phase 0 • covDbarψ e μ α := by
+  rw [covDbarψ, map_sub, map_smul, map_mul, gaugeAction_barψ_singleton, gaugeAction_barψ_zero,
+    gaugeAction_A, g.phase_singleton μ,
     show (0 : Multiset (Fin 1 ⊕ Fin 3)) + {μ} = {μ} from zero_add _]
-  simp only [add_mul, smul_mul_assoc, one_mul, mul_smul_comm, smul_add,
-    smul_sub, smul_smul]
+  simp only [add_mul, smul_mul_assoc, one_mul, mul_smul_comm, smul_add, smul_sub, smul_smul]
   module
 
 /-!
@@ -427,14 +439,17 @@ lemma gaugeAction_covDbarψ {e : ℝ} (g : GaugeJet e) (μ : Fin 1 ⊕ Fin 3)
 
 -/
 
-/-- A product of a factor rotating by the phase and a factor rotating by the
-  conjugate phase is gauge invariant: the phases cancel by unitarity.  This is
-  the reason every charge-neutral fermion bilinear of QED is gauge
-  invariant. -/
-lemma gaugeAction_mul_phase_cancel {e : ℝ} (g : GaugeJet e) {x y : JetAlgebra}
-    (hx : gaugeAction g x = g.phase 0 • x)
-    (hy : gaugeAction g y = star (g.phase 0) • y) :
-    gaugeAction g (x * y) = x * y := by
+/--
+A product of a factor rotating by the phase and a factor rotating by the
+conjugate phase is gauge invariant: the phases cancel by unitarity.  This is
+the reason every charge-neutral fermion bilinear of QED is gauge
+invariant.
+-/
+lemma gaugeAction_mul_phase_cancel
+    {e : ℝ} (g : GaugeJet e)
+    {x y : JetAlgebra}
+    (hx : gaugeAction g x = g.phase 0 • x) (hy : gaugeAction g y = star (g.phase 0) • y)
+    : gaugeAction g (x * y) = x * y := by
   rw [map_mul, hx, hy, smul_mul_smul_comm, g.phase_zero_unitary, one_smul]
 
 /-!
@@ -444,8 +459,8 @@ lemma gaugeAction_mul_phase_cancel {e : ℝ} (g : GaugeJet e) {x y : JetAlgebra}
 -/
 
 @[simp]
-lemma gaugeAction_diracKineticTerm {e : ℝ} (g : GaugeJet e) :
-    gaugeAction g (diracKineticTerm e) = diracKineticTerm e := by
+lemma gaugeAction_diracKineticTerm {e : ℝ} (g : GaugeJet e)
+    : gaugeAction g (diracKineticTerm e) = diracKineticTerm e := by
   rw [diracKineticTerm, map_smul, map_sum]
   congr 1
   refine Finset.sum_congr rfl fun μ _ => ?_
@@ -454,12 +469,11 @@ lemma gaugeAction_diracKineticTerm {e : ℝ} (g : GaugeJet e) :
   rw [map_sum]
   refine Finset.sum_congr rfl fun β _ => ?_
   rw [map_smul,
-    gaugeAction_mul_phase_cancel g (gaugeAction_barψ_zero g α)
-      (gaugeAction_covDψ g μ β)]
+    gaugeAction_mul_phase_cancel g (gaugeAction_barψ_zero g α) (gaugeAction_covDψ g μ β)]
 
 @[simp]
-lemma gaugeAction_diracKineticTermBar {e : ℝ} (g : GaugeJet e) :
-    gaugeAction g (diracKineticTermBar e) = diracKineticTermBar e := by
+lemma gaugeAction_diracKineticTermBar {e : ℝ} (g : GaugeJet e)
+    : gaugeAction g (diracKineticTermBar e) = diracKineticTermBar e := by
   rw [diracKineticTermBar, map_smul, map_sum]
   congr 1
   refine Finset.sum_congr rfl fun μ _ => ?_
@@ -468,19 +482,16 @@ lemma gaugeAction_diracKineticTermBar {e : ℝ} (g : GaugeJet e) :
   rw [map_sum]
   refine Finset.sum_congr rfl fun β _ => ?_
   rw [map_smul,
-    gaugeAction_mul_phase_cancel g (gaugeAction_covDbarψ g μ α)
-      (gaugeAction_ψ_zero g β)]
+    gaugeAction_mul_phase_cancel g (gaugeAction_covDbarψ g μ α) (gaugeAction_ψ_zero g β)]
 
 @[simp]
-lemma gaugeAction_electronMassTerm {e : ℝ} (g : GaugeJet e) :
-    gaugeAction g electronMassTerm = electronMassTerm := by
+lemma gaugeAction_electronMassTerm {e : ℝ} (g : GaugeJet e)
+    : gaugeAction g electronMassTerm = electronMassTerm := by
   rw [electronMassTerm, map_sum]
   refine Finset.sum_congr rfl fun α _ => ?_
   rw [map_sum]
   refine Finset.sum_congr rfl fun β _ => ?_
-  rw [map_smul,
-    gaugeAction_mul_phase_cancel g (gaugeAction_barψ_zero g α)
-      (gaugeAction_ψ_zero g β)]
+  rw [map_smul, gaugeAction_mul_phase_cancel g (gaugeAction_barψ_zero g α) (gaugeAction_ψ_zero g β)]
 
 /-!
 
@@ -488,12 +499,14 @@ lemma gaugeAction_electronMassTerm {e : ℝ} (g : GaugeJet e) :
 
 -/
 
-/-- **Gauge invariance of the QED Lagrangian.**  The Maxwell term is invariant
-  by the symmetry of the photon shift in its derivative indices, the kinetic
-  term by the covariance of the covariant derivative, and the mass term by the
-  unitarity of the phase. -/
-lemma gaugeAction_lagrangian {e : ℝ} (g : GaugeJet e) (m : ℝ) :
-    gaugeAction g (lagrangian e m) = lagrangian e m := by
+/--
+**Gauge invariance of the QED Lagrangian.**  The Maxwell term is invariant
+by the symmetry of the photon shift in its derivative indices, the kinetic
+term by the covariance of the covariant derivative, and the mass term by the
+unitarity of the phase.
+-/
+lemma gaugeAction_lagrangian {e : ℝ} (g : GaugeJet e) (m : ℝ)
+    : gaugeAction g (lagrangian e m) = lagrangian e m := by
   rw [lagrangian, map_sub, map_add, map_smul, map_smul, gaugeAction_maxwellTerm,
     gaugeAction_diracKineticTerm, gaugeAction_electronMassTerm]
 

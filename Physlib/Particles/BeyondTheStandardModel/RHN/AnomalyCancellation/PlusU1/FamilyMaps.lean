@@ -27,22 +27,19 @@ variable {n : ℕ}
 
 set_option backward.isDefEq.respectTransparency false in
 /-- The family universal maps on `LinSols`. -/
-def familyUniversalLinear (n : ℕ) :
-    (PlusU1 1).LinSols →ₗ[ℚ] (PlusU1 n).LinSols where
-  toFun S := chargeToLinear (familyUniversal n S.val)
-    (by rw [familyUniversal_accGrav, gravSol S, mul_zero])
-    (by rw [familyUniversal_accSU2, SU2Sol S, mul_zero])
-    (by rw [familyUniversal_accSU3, SU3Sol S, mul_zero])
-    (by rw [familyUniversal_accYY, YYsol S, mul_zero])
+def familyUniversalLinear (n : ℕ) : (PlusU1 1).LinSols →ₗ[ℚ] (PlusU1 n).LinSols where
+  toFun S :=
+    chargeToLinear (familyUniversal n S.val) (by rw [familyUniversal_accGrav, gravSol S, mul_zero])
+      (by rw [familyUniversal_accSU2, SU2Sol S, mul_zero])
+      (by rw [familyUniversal_accSU3, SU3Sol S, mul_zero])
+      (by rw [familyUniversal_accYY, YYsol S, mul_zero])
   map_add' S T := rfl
   map_smul' a S := rfl
 
 set_option backward.isDefEq.respectTransparency false in
 /-- The family universal maps on `QuadSols`. -/
-def familyUniversalQuad (n : ℕ) :
-    (PlusU1 1).QuadSols → (PlusU1 n).QuadSols := fun S =>
-  chargeToQuad (familyUniversal n S.val)
-    (by rw [familyUniversal_accGrav, gravSol S.1, mul_zero])
+def familyUniversalQuad (n : ℕ) : (PlusU1 1).QuadSols → (PlusU1 n).QuadSols := fun S =>
+  chargeToQuad (familyUniversal n S.val) (by rw [familyUniversal_accGrav, gravSol S.1, mul_zero])
     (by rw [familyUniversal_accSU2, SU2Sol S.1, mul_zero])
     (by rw [familyUniversal_accSU3, SU3Sol S.1, mul_zero])
     (by rw [familyUniversal_accYY, YYsol S.1, mul_zero])
@@ -50,10 +47,8 @@ def familyUniversalQuad (n : ℕ) :
 
 set_option backward.isDefEq.respectTransparency false in
 /-- The family universal maps on `Sols`. -/
-def familyUniversalAF (n : ℕ) :
-    (PlusU1 1).Sols → (PlusU1 n).Sols := fun S =>
-  chargeToAF (familyUniversal n S.val)
-    (by rw [familyUniversal_accGrav, gravSol S.1.1, mul_zero])
+def familyUniversalAF (n : ℕ) : (PlusU1 1).Sols → (PlusU1 n).Sols := fun S =>
+  chargeToAF (familyUniversal n S.val) (by rw [familyUniversal_accGrav, gravSol S.1.1, mul_zero])
     (by rw [familyUniversal_accSU2, SU2Sol S.1.1, mul_zero])
     (by rw [familyUniversal_accSU3, SU3Sol S.1.1, mul_zero])
     (by rw [familyUniversal_accYY, YYsol S.1.1, mul_zero])

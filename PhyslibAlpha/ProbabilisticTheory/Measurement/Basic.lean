@@ -57,8 +57,10 @@ open MeasureTheory UnitalPositiveLinearMap
 
 /-! ## A. Measurements -/
 
-/-- A measurement with outcomes in `Ω`: a normal channel from the classical system of outcomes
-into the system. -/
+/--
+A measurement with outcomes in `Ω`: a normal channel from the classical system of outcomes
+into the system.
+-/
 structure Measurement (Ω : Type*) [MeasurableSpace Ω] (E : Type*) [OrderUnitSpace E] where
   /-- The channel sending observables of the outcome to observables of the system. -/
   toChannel : Channel (BoundedMeasurable Ω) E
@@ -74,68 +76,75 @@ lemma ext {M N : Measurement Ω E} (h : M.toChannel = N.toChannel) : M = N := by
   cases M; cases N; congr
 
 /-- The effect testing whether the outcome lies in an event. -/
-noncomputable instance :
-    CoeFun (Measurement Ω E) fun _ => ∀ s : Set Ω, MeasurableSet s → Effect E where
+noncomputable instance
+    : CoeFun (Measurement Ω E) fun _ => ∀ s : Set Ω, MeasurableSet s → Effect E where
   coe M s hs := M.toChannel.mapEffect (BoundedMeasurable.indicatorEffect s hs)
 
-lemma coe_apply (M : Measurement Ω E) (s : Set Ω) (hs : MeasurableSet s) :
-    (M s hs : E) = M.toChannel (BoundedMeasurable.indicator s hs) := rfl
+lemma coe_apply (M : Measurement Ω E) (s : Set Ω) (hs : MeasurableSet s)
+    : (M s hs : E) = M.toChannel (BoundedMeasurable.indicator s hs) :=
+  rfl
 
 /-- The effects of the events of a measurement form an effect-valued measure. -/
 noncomputable def toEffectValuedMeasure (M : Measurement Ω E) : EffectValuedMeasure Ω E :=
   BoundedMeasurable.outcomeMeasurement.map M.toChannel M.isNormal
 
 @[simp]
-lemma toEffectValuedMeasure_apply (M : Measurement Ω E) (s : Set Ω) (hs : MeasurableSet s) :
-    M.toEffectValuedMeasure s hs = M s hs := rfl
+lemma toEffectValuedMeasure_apply (M : Measurement Ω E) (s : Set Ω) (hs : MeasurableSet s)
+    : M.toEffectValuedMeasure s hs = M s hs :=
+  rfl
 
-@[simp]
-lemma map_empty (M : Measurement Ω E) : M ∅ .empty = 0 := M.toEffectValuedMeasure.map_empty
+@[simp] lemma map_empty (M : Measurement Ω E) : M ∅ .empty = 0 := M.toEffectValuedMeasure.map_empty
 
-@[simp]
-lemma map_univ (M : Measurement Ω E) : M .univ .univ = 1 := M.toEffectValuedMeasure.map_univ
+@[simp] lemma map_univ (M : Measurement Ω E) : M .univ .univ = 1 := M.toEffectValuedMeasure.map_univ
 
 /-! ## B. The Born law -/
 
-lemma isNormal_comp (M : Measurement Ω E) {ω : 𝓢[ℝ, E]} (hω : ω.IsNormal) :
-    (ω.comp M.toChannel).IsNormal :=
+lemma isNormal_comp (M : Measurement Ω E) {ω : 𝓢[ℝ, E]} (hω : ω.IsNormal)
+    : (ω.comp M.toChannel).IsNormal :=
   UnitalPositiveLinearMap.IsNormal.comp M.isNormal hω
 
 /-- The Born law: the distribution of the outcome of `M` in the normal state `ω`. -/
-noncomputable def probabilityLaw (M : Measurement Ω E) (ω : 𝓢[ℝ, E]) (hω : ω.IsNormal) :
-    ProbabilityMeasure Ω :=
+noncomputable def probabilityLaw (M : Measurement Ω E) (ω : 𝓢[ℝ, E]) (hω : ω.IsNormal)
+    : ProbabilityMeasure Ω :=
   BoundedMeasurable.toMeasure (ω.comp M.toChannel) (M.isNormal_comp hω)
 
 @[simp]
-lemma probabilityLaw_apply (M : Measurement Ω E) (ω : 𝓢[ℝ, E]) (hω : ω.IsNormal)
-    (s : Set Ω) (hs : MeasurableSet s) :
-    (M.probabilityLaw ω hω : Measure Ω) s = ENNReal.ofReal (ω (M s hs)) :=
+lemma probabilityLaw_apply
+    (M : Measurement Ω E) (ω : 𝓢[ℝ, E]) (hω : ω.IsNormal) (s : Set Ω) (hs : MeasurableSet s)
+    : (M.probabilityLaw ω hω : Measure Ω) s = ENNReal.ofReal (ω (M s hs)) :=
   BoundedMeasurable.toMeasure_apply _ _ hs
 
-/-- The average of an observable `f` of the outcome under the Born law is the expectation of
-`M f`. -/
-lemma integral_probabilityLaw (M : Measurement Ω E) (ω : 𝓢[ℝ, E]) (hω : ω.IsNormal)
-    (f : BoundedMeasurable Ω) : ∫ x, f x ∂(M.probabilityLaw ω hω : Measure Ω) = ω (M.toChannel f) :=
+/--
+The average of an observable `f` of the outcome under the Born law is the expectation of
+`M f`.
+-/
+lemma integral_probabilityLaw
+    (M : Measurement Ω E) (ω : 𝓢[ℝ, E]) (hω : ω.IsNormal) (f : BoundedMeasurable Ω)
+    : ∫ x, f x ∂(M.probabilityLaw ω hω : Measure Ω) = ω (M.toChannel f) :=
   congrFun (congrArg DFunLike.coe (BoundedMeasurable.ofMeasure_toMeasure _ (M.isNormal_comp hω))) f
 
 /-- The Born law of a measurement is the Born law of its effect-valued measure. -/
-lemma probabilityLaw_eq (M : Measurement Ω E) (ω : 𝓢[ℝ, E]) (hω : ω.IsNormal) :
-    M.probabilityLaw ω hω = M.toEffectValuedMeasure.probabilityLaw ω hω :=
+lemma probabilityLaw_eq (M : Measurement Ω E) (ω : 𝓢[ℝ, E]) (hω : ω.IsNormal)
+    : M.probabilityLaw ω hω = M.toEffectValuedMeasure.probabilityLaw ω hω :=
   ProbabilityMeasure.toMeasure_injective <| Measure.ext fun s hs => by
     rw [probabilityLaw_apply _ _ _ s hs, EffectValuedMeasure.probabilityLaw_apply _ _ _ s hs,
       toEffectValuedMeasure_apply]
 
 /-! ## C. Measuring after a channel -/
 
-/-- Measuring `M` after the normal channel `φ`: the outcome observables go through `M`, then
-through `φ`. -/
+/--
+Measuring `M` after the normal channel `φ`: the outcome observables go through `M`, then
+through `φ`.
+-/
 def map (M : Measurement Ω E) (φ : Channel E F) (hφ : φ.IsNormal) : Measurement Ω F where
   toChannel := φ.comp M.toChannel
   isNormal := UnitalPositiveLinearMap.IsNormal.comp M.isNormal hφ
 
 @[simp, nolint simpNF]
-lemma coe_map_apply (M : Measurement Ω E) (φ : Channel E F) (hφ : φ.IsNormal) (s : Set Ω)
-    (hs : MeasurableSet s) : (M.map φ hφ s hs : F) = φ (M s hs) := rfl
+lemma coe_map_apply
+    (M : Measurement Ω E) (φ : Channel E F) (hφ : φ.IsNormal) (s : Set Ω) (hs : MeasurableSet s)
+    : (M.map φ hφ s hs : F) = φ (M s hs) :=
+  rfl
 
 end Measurement
 
@@ -154,13 +163,13 @@ def outcome : Measurement Ω (BoundedMeasurable Ω) where
   isNormal := isNormal_id
 
 @[simp, nolint simpNF]
-lemma coe_outcome_apply (s : Set Ω) (hs : MeasurableSet s) :
-    (outcome s hs : BoundedMeasurable Ω) = BoundedMeasurable.indicator s hs := rfl
+lemma coe_outcome_apply (s : Set Ω) (hs : MeasurableSet s)
+    : (outcome s hs : BoundedMeasurable Ω) = BoundedMeasurable.indicator s hs :=
+  rfl
 
 /-- The outcome of a classical system in a normal state is distributed by the state. -/
-lemma probabilityLaw_outcome (ω : 𝓢[ℝ, BoundedMeasurable Ω]) (hω : ω.IsNormal) :
-    outcome.probabilityLaw ω hω = toMeasure ω hω := by
+lemma probabilityLaw_outcome (ω : 𝓢[ℝ, BoundedMeasurable Ω]) (hω : ω.IsNormal)
+    : outcome.probabilityLaw ω hω = toMeasure ω hω := by
   simp only [Measurement.probabilityLaw, outcome, comp_id]
 
 end BoundedMeasurable
-

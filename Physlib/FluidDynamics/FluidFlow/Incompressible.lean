@@ -49,26 +49,26 @@ namespace FluidFlow
 -/
 
 /-- The incompressibility residual, given by the divergence of the velocity field. -/
-noncomputable def incompressibilityResidual (d : ℕ) (fluid : FluidFlow d) :
-    Time → Space d → ℝ :=
+noncomputable def incompressibilityResidual (d : ℕ) (fluid : FluidFlow d) : Time → Space d → ℝ :=
   fun t x => (∇ ⬝ fluid.velocity t) x
 
-/-- A classical incompressible flow has divergence-free velocity at points where the velocity
-field is differentiable. -/
+/--
+A classical incompressible flow has divergence-free velocity at points where the velocity
+field is differentiable.
+-/
 def ClassicalIncompressible (d : ℕ) (fluid : FluidFlow d) : Prop :=
-  ∀ t x, DifferentiableAt ℝ (fluid.velocity t) x →
-    incompressibilityResidual d fluid t x = 0
+  ∀ t x, DifferentiableAt ℝ (fluid.velocity t) x → incompressibilityResidual d fluid t x = 0
 
-/-- A smooth incompressible flow has globally differentiable velocity and vanishing
-incompressibility residual everywhere. -/
+/--
+A smooth incompressible flow has globally differentiable velocity and vanishing
+incompressibility residual everywhere.
+-/
 def SmoothIncompressible (d : ℕ) (fluid : FluidFlow d) : Prop :=
-  (∀ t, Differentiable ℝ (fluid.velocity t)) ∧
-    ∀ t x, incompressibilityResidual d fluid t x = 0
+  (∀ t, Differentiable ℝ (fluid.velocity t)) ∧ ∀ t x, incompressibilityResidual d fluid t x = 0
 
 /-- A smooth incompressible flow is classically incompressible. -/
-lemma classicalIncompressible_of_smoothIncompressible
-    (d : ℕ) (fluid : FluidFlow d) :
-    SmoothIncompressible d fluid → ClassicalIncompressible d fluid := by
+lemma classicalIncompressible_of_smoothIncompressible (d : ℕ) (fluid : FluidFlow d)
+    : SmoothIncompressible d fluid → ClassicalIncompressible d fluid := by
   intro hSmooth t x _
   simpa [incompressibilityResidual] using hSmooth.2 t x
 

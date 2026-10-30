@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Joseph Tooby-Smith
 -/
 module
+
 public import PhyslibAlpha.SpaceAndTime.Space.Surfaces.SphericalShell
 public import Physlib.SpaceAndTime.Space.Translations
 public import Mathlib.MeasureTheory.Integral.BoundedContinuousFunction
@@ -44,8 +45,10 @@ criteria for continuous functions and the invariance of `ringMeasure.prod volume
 open SchwartzMap NNReal
 noncomputable section
 open Physlib Distribution
-variable (𝕜 : Type) {E F F' : Type} [RCLike 𝕜] [NormedAddCommGroup E] [NormedAddCommGroup F]
-  [NormedAddCommGroup F'] [NormedSpace ℝ E] [NormedSpace ℝ F]
+variable
+  (𝕜 : Type)
+  {E F F' : Type} [RCLike 𝕜] [NormedAddCommGroup E] [NormedAddCommGroup F] [NormedAddCommGroup F']
+  [NormedSpace ℝ E] [NormedSpace ℝ F]
 
 namespace Space
 
@@ -77,7 +80,6 @@ lemma ring_continuous : Continuous ring := by
 lemma ring_measurableEmbedding : MeasurableEmbedding ring :=
   Continuous.measurableEmbedding ring_continuous ring_injective
 
-
 /-!
 
 ## B. The measure associated with the ring
@@ -88,27 +90,26 @@ lemma ring_measurableEmbedding : MeasurableEmbedding ring :=
 def ringMeasure : Measure (Space 3) :=
   MeasureTheory.Measure.map ring (MeasureTheory.Measure.toSphere volume)
 
-instance ringMeasure_hasTemperateGrowth :
-    ringMeasure.HasTemperateGrowth := by
+instance ringMeasure_hasTemperateGrowth : ringMeasure.HasTemperateGrowth := by
   rw [ringMeasure]
   refine { exists_integrable := ?_ }
   use 0
   simp
 
-instance ringMeasure_prod_volume_hasTemperateGrowth :
-    (ringMeasure.prod (volume (α := Space))).HasTemperateGrowth := by
+instance ringMeasure_prod_volume_hasTemperateGrowth
+    : (ringMeasure.prod (volume (α := Space))).HasTemperateGrowth := by
   infer_instance
 
-instance ringMeasure_sFinite: SFinite ringMeasure := by
+instance ringMeasure_sFinite : SFinite ringMeasure := by
   rw [ringMeasure]
   exact Measure.instSFiniteMap volume.toSphere ring
 
-instance ringMeasure_finite: IsFiniteMeasure ringMeasure := by
+instance ringMeasure_finite : IsFiniteMeasure ringMeasure := by
   rw [ringMeasure]
   exact Measure.isFiniteMeasure_map volume.toSphere ring
 
-lemma integrable_ringMeasure_of_continuous (f : Space → ℝ) (hf : Continuous (f ∘ ring)) :
-    Integrable f ringMeasure := by
+lemma integrable_ringMeasure_of_continuous (f : Space → ℝ) (hf : Continuous (f ∘ ring))
+    : Integrable f ringMeasure := by
   rw [ringMeasure]
   rw [MeasurableEmbedding.integrable_map_iff]
   · let f' : BoundedContinuousFunction (Metric.sphere (0 : Space 2) 1) ℝ :=
@@ -116,19 +117,20 @@ lemma integrable_ringMeasure_of_continuous (f : Space → ℝ) (hf : Continuous 
     exact BoundedContinuousFunction.integrable _ f'
   · exact ring_measurableEmbedding
 
-lemma integrable_ringMeasure_of_continuous_euclid (f : Space → EuclideanSpace ℝ (Fin n))
-    (hf : Continuous (f ∘ ring)) :
-    Integrable f ringMeasure := by
+lemma integrable_ringMeasure_of_continuous_euclid
+    (f : Space → EuclideanSpace ℝ (Fin n)) (hf : Continuous (f ∘ ring))
+    : Integrable f ringMeasure := by
   rw [ringMeasure]
   rw [MeasurableEmbedding.integrable_map_iff]
   · exact BoundedContinuousFunction.integrable _
       (BoundedContinuousFunction.mkOfCompact ⟨f ∘ ring, hf⟩)
   · exact ring_measurableEmbedding
 
-lemma ringMeasure_prod_volume_map :
-    (ringMeasure.prod (volume (α := Space))).map (fun x : Space × Space => (x.1, x.2 + x.1))
-     = (ringMeasure.prod (volume (α := Space))) := by
-  refine (MeasureTheory.MeasurePreserving.skew_product (f := id) (g := fun x => fun y => y + x)
+lemma ringMeasure_prod_volume_map
+    : (ringMeasure.prod (volume (α := Space))).map (fun x : Space × Space => (x.1, x.2 + x.1))
+      = (ringMeasure.prod (volume (α := Space))) := by
+  refine (MeasureTheory.MeasurePreserving.skew_product (f := id)
+    (g := fun x => fun y => y + x)
     ?_ ?_ ?_).map_eq
   · exact MeasurePreserving.id ringMeasure
   · fun_prop
@@ -143,7 +145,6 @@ lemma ringMeasure_univ : ringMeasure Set.univ = ENNReal.ofReal ((2 : ℝ) * π) 
   · fun_prop
   · exact MeasurableSet.univ
 
-
 /-!
 
 ## C. The distribution associated with the ring
@@ -151,15 +152,14 @@ lemma ringMeasure_univ : ringMeasure Set.univ = ENNReal.ofReal ((2 : ℝ) * π) 
 -/
 
 /-- The distribution on `Space 3` corresponding to integration around a ring. -/
-def ringDist : (Space 3) →d[ℝ] ℝ  :=
-  SchwartzMap.integralCLM ℝ ringMeasure
+def ringDist : (Space 3) →d[ℝ] ℝ := SchwartzMap.integralCLM ℝ ringMeasure
 
-lemma ringDist_apply_eq_integral_ringMeasure (f : 𝓢(Space 3, ℝ)) :
-    ringDist f = ∫ x, f x ∂ringMeasure := by
+lemma ringDist_apply_eq_integral_ringMeasure (f : 𝓢(Space 3, ℝ))
+    : ringDist f = ∫ x, f x ∂ringMeasure := by
   rw [ringDist, SchwartzMap.integralCLM_apply]
 
-lemma ringDist_eq_integral_delta (f : 𝓢(Space 3, ℝ)) :
-    ringDist f = ∫ z, diracDelta ℝ z f ∂ringMeasure := by
+lemma ringDist_eq_integral_delta (f : 𝓢(Space 3, ℝ))
+    : ringDist f = ∫ z, diracDelta ℝ z f ∂ringMeasure := by
   rw [ringDist_apply_eq_integral_ringMeasure]
   simp
 

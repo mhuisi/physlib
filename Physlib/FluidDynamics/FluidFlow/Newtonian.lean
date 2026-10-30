@@ -46,23 +46,23 @@ namespace FluidFlow
 -/
 
 /-- The spatial velocity-gradient matrix, with entries `partial_j u_i`. -/
-noncomputable def velocityGradient (d : ℕ) (flow : FluidFlow d) :
-    Time → Space d → Matrix (Fin d) (Fin d) ℝ :=
-  fun t x i j => ∂[j] (fun x' => flow.velocity t x' i) x
+noncomputable def velocityGradient (d : ℕ) (flow : FluidFlow d)
+    : Time → Space d → Matrix (Fin d) (Fin d) ℝ := fun t x i j =>
+  ∂[j] (fun x' => flow.velocity t x' i) x
 
-/-- The Newtonian stress tensor
+/--
+The Newtonian stress tensor
 `-p I + mu (grad u + grad u^T) + lambda (div u) I`.
 
 The scalar fields are pressure, shear viscosity, and second viscosity.
 -/
-noncomputable def newtonianStressTensor (d : ℕ) (flow : FluidFlow d)
-    (pressure shearViscosity secondViscosity : ScalarField d) : StressTensor d :=
-  fun t x =>
-    (-(pressure t x)) • (1 : Matrix (Fin d) (Fin d) ℝ) +
-      shearViscosity t x •
-        (velocityGradient d flow t x + Matrix.transpose (velocityGradient d flow t x)) +
-        (secondViscosity t x * (∇ ⬝ flow.velocity t) x) •
-          (1 : Matrix (Fin d) (Fin d) ℝ)
+noncomputable def newtonianStressTensor
+    (d : ℕ) (flow : FluidFlow d) (pressure shearViscosity secondViscosity : ScalarField d)
+    : StressTensor d := fun t x =>
+  (-(pressure t x)) • (1 : Matrix (Fin d) (Fin d) ℝ)
+    + shearViscosity t x
+      • (velocityGradient d flow t x + Matrix.transpose (velocityGradient d flow t x))
+    + (secondViscosity t x * (∇ ⬝ flow.velocity t) x) • (1 : Matrix (Fin d) (Fin d) ℝ)
 
 end FluidFlow
 

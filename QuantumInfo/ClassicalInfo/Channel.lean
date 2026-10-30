@@ -11,7 +11,8 @@ public import QuantumInfo.ClassicalInfo.Distribution
 
 open BigOperators
 
-/- Channels, as in information theory.
+/-
+Channels, as in information theory.
 
 A `Channel` is as a function from `List`s over an input alphabet A to a distribution
 of lists over an output alphabet B. The most important case of interest here
@@ -21,7 +22,8 @@ identically and independently.
 
 variable (I O : Type*) [Fintype O]
 
-/- Actually defining Channels this way gets messy fast because of the measure theory.
+/-
+Actually defining Channels this way gets messy fast because of the measure theory.
 
 /-- Although we could simply `def Channel := List A → List B`, defining it as
 a structure lets us extend this structure by adding additional properties while
@@ -48,9 +50,11 @@ def product : Channel (A × C) (B × D) :=
   ⟨Cab.map × Ccd.map⟩
 -/
 
-/-- Discrete Memoryless Channel. Each input symbol `I` has a corresponding
- output distribution `Distribution O`, and this process is applied
- independently on each symbol in the list. -/
+/--
+Discrete Memoryless Channel. Each input symbol `I` has a corresponding
+output distribution `Distribution O`, and this process is applied
+independently on each symbol in the list.
+-/
 structure DMChannel where
   symb_dist : I → ProbDistribution O
 
@@ -58,11 +62,13 @@ namespace DMChannel
 
 /-- Apply a discrete memoryless channel to an n-character string. -/
 def on_fin (C : DMChannel I O) {n : ℕ} (is : Fin n → I) : ProbDistribution (Fin n → O) :=
-  ProbDistribution.mk' (fun os ↦ ∏ k, (C.symb_dist (is k) (os k) : ℝ))
+  ProbDistribution.mk'
+    (fun os ↦ ∏ k, (C.symb_dist (is k) (os k) : ℝ))
     (fun _ ↦ Finset.prod_nonneg fun k _ ↦ Prob.zero_le_coe)
     (by
-      have h := Finset.sum_prod_piFinset (Finset.univ : Finset O)
-        (fun (k : Fin n) (j : O) ↦ ((C.symb_dist (is k)) j : ℝ))
+      have h :=
+        Finset.sum_prod_piFinset (Finset.univ : Finset O)
+          (fun (k : Fin n) (j : O) ↦ ((C.symb_dist (is k)) j : ℝ))
       simp only [Fintype.piFinset_univ] at h
       simp only [h]
       exact Finset.prod_eq_one fun k _ ↦ ProbDistribution.normalized (C.symb_dist (is k)))

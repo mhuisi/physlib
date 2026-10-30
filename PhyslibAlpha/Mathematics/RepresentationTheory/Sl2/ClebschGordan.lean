@@ -50,8 +50,8 @@ open scoped TensorProduct DirectSum
 variable {K : Type*} [Field K]
 
 /-- The arithmetic progression underlying the Clebsch–Gordan dimension count. -/
-lemma sum_arithmetic_progression (m d : ℕ) :
-    ∑ k ∈ Finset.range (m + 1), (d + 2 * k + 1) = (m + 1) * (d + m + 1) := by
+lemma sum_arithmetic_progression (m d : ℕ)
+    : ∑ k ∈ Finset.range (m + 1), (d + 2 * k + 1) = (m + 1) * (d + m + 1) := by
   have hgauss : ∑ k ∈ Finset.range (m + 1), 2 * k = (m + 1) * m := by
     have h := Finset.sum_range_id_mul_two (m + 1)
     rw [Finset.sum_mul] at h
@@ -61,8 +61,8 @@ lemma sum_arithmetic_progression (m d : ℕ) :
   ring
 
 /-- Reindex the dimension sum when `m ≤ n`. -/
-lemma clebsch_gordan_finrank_aux (m n : ℕ) (h : m ≤ n) :
-    (m + 1) * (n + 1) = ∑ k ∈ Finset.range (m + 1), (m + n - 2 * k + 1) := by
+lemma clebsch_gordan_finrank_aux (m n : ℕ) (h : m ≤ n)
+    : (m + 1) * (n + 1) = ∑ k ∈ Finset.range (m + 1), (m + n - 2 * k + 1) := by
   set d := n - m with hd_def
   have hn : n = m + d := by omega
   have hterm : ∀ k ∈ Finset.range (m + 1), (m + n - 2 * k + 1 : ℕ) = d + 2 * (m - k) + 1 := by
@@ -76,24 +76,28 @@ lemma clebsch_gordan_finrank_aux (m n : ℕ) (h : m ≤ n) :
   rw [sum_arithmetic_progression, hn]
   ring
 
-/-- Clebsch–Gordan decomposition, dimension form:
+/--
+Clebsch–Gordan decomposition, dimension form:
 the numerical shadow `(m+1)(n+1) = ∑_{k=0}^{min(m,n)} (m+n-2k+1)` of the module
-isomorphism `V(m) ⊗ V(n) ≅ ⊕_k V(m+n-2k)`. -/
-lemma clebsch_gordan_finrank (m n : ℕ) :
-    (m + 1) * (n + 1) = ∑ k ∈ Finset.range (min m n + 1), (m + n - 2 * k + 1) := by
+isomorphism `V(m) ⊗ V(n) ≅ ⊕_k V(m+n-2k)`.
+-/
+lemma clebsch_gordan_finrank (m n : ℕ)
+    : (m + 1) * (n + 1) = ∑ k ∈ Finset.range (min m n + 1), (m + n - 2 * k + 1) := by
   rcases le_total m n with h | h
   · rw [min_eq_left h]
     exact clebsch_gordan_finrank_aux m n h
   · rw [min_eq_right h, Nat.add_comm m n, mul_comm]
     exact clebsch_gordan_finrank_aux n m h
 
-/-- Clebsch–Gordan decomposition, vector-space form:
+/--
+Clebsch–Gordan decomposition, vector-space form:
 `V(m) ⊗ V(n)` is linearly isomorphic to `⊕_{k=0}^{min(m,n)} V(m+n-2k)`.
 
 The equivalence follows only from equal dimensions. It does not identify the diagonal
-`sl₂` action with the action on the direct sum or provide Clebsch–Gordan coefficients. -/
-lemma clebsch_gordan (m n : ℕ) :
-    Nonempty (StandardSl2Module K m ⊗[K] StandardSl2Module K n ≃ₗ[K]
+`sl₂` action with the action on the direct sum or provide Clebsch–Gordan coefficients.
+-/
+lemma clebsch_gordan (m n : ℕ)
+    : Nonempty (StandardSl2Module K m ⊗[K] StandardSl2Module K n ≃ₗ[K]
       ⨁ _k : Fin (min m n + 1), StandardSl2Module K (m + n - 2 * (_k : ℕ))) := by
   have hdim : ∀ k : ℕ, Module.finrank K (StandardSl2Module K k) = k + 1 := fun k => by
     show Module.finrank K (Fin (k + 1) → K) = k + 1

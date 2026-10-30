@@ -57,12 +57,11 @@ open scoped JordanAlgebra
 noncomputable def closedGeneratedByOne (a : E) : Submodule ℝ E :=
   (JordanAlgebra.generatedByOne a).topologicalClosure
 
-lemma generatedByOne_le_closedGeneratedByOne (a : E) :
-    JordanAlgebra.generatedByOne a ≤ closedGeneratedByOne a :=
+lemma generatedByOne_le_closedGeneratedByOne (a : E)
+    : JordanAlgebra.generatedByOne a ≤ closedGeneratedByOne a :=
   Submodule.le_topologicalClosure _
 
-lemma one_mem_closedGeneratedByOne (a : E) :
-    (1 : E) ∈ closedGeneratedByOne a :=
+lemma one_mem_closedGeneratedByOne (a : E) : (1 : E) ∈ closedGeneratedByOne a :=
   generatedByOne_le_closedGeneratedByOne a (JordanAlgebra.one_mem_generatedByOne a)
 
 lemma self_mem_closedGeneratedByOne (a : E) : a ∈ closedGeneratedByOne a :=
@@ -70,12 +69,14 @@ lemma self_mem_closedGeneratedByOne (a : E) : a ∈ closedGeneratedByOne a :=
 
 /-! ## B. Closure under the Jordan product -/
 
-/-- **The topological half of the reduction.** `C_J(a)` is closed under the Jordan product: a
+/--
+**The topological half of the reduction.** `C_J(a)` is closed under the Jordan product: a
 continuous binary operation (`isBoundedBilinearMap_mul.continuous`) that is closed on `J[a]`
-(`IsJordanOrderUnit.mul_mem_generatedByOne`) remains closed on `J[a]`'s closure. -/
-lemma mul_mem_closedGeneratedByOne {a x y : E}
-    (hx : x ∈ closedGeneratedByOne a) (hy : y ∈ closedGeneratedByOne a) :
-    x * y ∈ closedGeneratedByOne a := by
+(`IsJordanOrderUnit.mul_mem_generatedByOne`) remains closed on `J[a]`'s closure.
+-/
+lemma mul_mem_closedGeneratedByOne
+    {a x y : E} (hx : x ∈ closedGeneratedByOne a) (hy : y ∈ closedGeneratedByOne a)
+    : x * y ∈ closedGeneratedByOne a := by
   let S : Set E := JordanAlgebra.generatedByOne a
   have hclosed : IsClosed (closure S) := isClosed_closure
   have hleft : ∀ u ∈ S, u * y ∈ closure S := by
@@ -84,17 +85,23 @@ lemma mul_mem_closedGeneratedByOne {a x y : E}
     intro v hv
     exact subset_closure (JordanAlgebra.mul_mem_generatedByOne a hu hv)
   have hfinal : x * y ∈ closure S := by
-    apply (closure_minimal (s := S) (fun u hu => hleft u hu)
-      (hclosed.preimage (NormedJordanAlgebra.continuous_mul_right y))) hx
+    apply (closure_minimal (s := S)
+        (fun u hu => hleft u hu)
+        (hclosed.preimage (NormedJordanAlgebra.continuous_mul_right y)))
+      hx
   show x * y ∈ (closedGeneratedByOne a : Set E)
   rw [closedGeneratedByOne, Submodule.topologicalClosure_coe]
   exact hfinal
 
-/-- Associativity extends from `J[a]` to its closure. The proof extends the polynomial identity
-successively in the third, second, and first variables, using continuity of multiplication. -/
-lemma assoc_of_mem_closedGeneratedByOne (a : E) {x y z : E}
-    (hx : x ∈ closedGeneratedByOne a) (hy : y ∈ closedGeneratedByOne a)
-    (hz : z ∈ closedGeneratedByOne a) : (x * y) * z = x * (y * z) := by
+/--
+Associativity extends from `J[a]` to its closure. The proof extends the polynomial identity
+successively in the third, second, and first variables, using continuity of multiplication.
+-/
+lemma assoc_of_mem_closedGeneratedByOne
+    (a : E)
+    {x y z : E} (hx : x ∈ closedGeneratedByOne a) (hy : y ∈ closedGeneratedByOne a)
+    (hz : z ∈ closedGeneratedByOne a)
+    : (x * y) * z = x * (y * z) := by
   let S : Set E := JordanAlgebra.generatedByOne a
   have hx' : x ∈ closure S := by
     change x ∈ closure (JordanAlgebra.generatedByOne a : Set E) at hx
@@ -105,43 +112,43 @@ lemma assoc_of_mem_closedGeneratedByOne (a : E) {x y z : E}
   have hz' : z ∈ closure S := by
     change z ∈ closure (JordanAlgebra.generatedByOne a : Set E) at hz
     simpa only [S] using hz
-  have hbase {u v w : E} (hu : u ∈ S) (hv : v ∈ S) (hw : w ∈ S) :
-      (u * v) * w = u * (v * w) := by
+  have hbase {u v w : E} (hu : u ∈ S) (hv : v ∈ S) (hw : w ∈ S) : (u * v) * w = u * (v * w) := by
     let u' : JordanAlgebra.GeneratedByOne a := ⟨u, hu⟩
     let v' : JordanAlgebra.GeneratedByOne a := ⟨v, hv⟩
     let w' : JordanAlgebra.GeneratedByOne a := ⟨w, hw⟩
     exact congrArg Subtype.val (JordanAlgebra.GeneratedByOne.mul_assoc a u' v' w')
-  have hclose_z {u v : E} (hu : u ∈ S) (hv : v ∈ S) :
-      ∀ z ∈ closure S, (u * v) * z = u * (v * z) := by
-    exact Set.EqOn.closure (fun _ hw => hbase hu hv hw)
-      (continuous_mul_left (u * v))
-      ((continuous_mul_left u).comp (continuous_mul_left v))
-  have hclose_y {u z : E} (hu : u ∈ S) (hz : z ∈ closure S) :
-      ∀ y ∈ closure S, (u * y) * z = u * (y * z) := by
-    exact Set.EqOn.closure (fun _ hv => hclose_z hu hv z hz)
+  have hclose_z {u v : E} (hu : u ∈ S) (hv : v ∈ S)
+      : ∀ z ∈ closure S, (u * v) * z = u * (v * z) := by
+    exact Set.EqOn.closure
+      (fun _ hw => hbase hu hv hw)
+      (continuous_mul_left (u * v)) ((continuous_mul_left u).comp (continuous_mul_left v))
+  have hclose_y {u z : E} (hu : u ∈ S) (hz : z ∈ closure S)
+      : ∀ y ∈ closure S, (u * y) * z = u * (y * z) := by
+    exact Set.EqOn.closure
+      (fun _ hv => hclose_z hu hv z hz)
       ((continuous_mul_right z).comp (continuous_mul_left u))
       ((continuous_mul_left u).comp (continuous_mul_right z))
-  exact Set.EqOn.closure (fun _ hu => hclose_y hu hz' y hy')
-    ((continuous_mul_right z).comp (continuous_mul_right y))
-    (continuous_mul_right (y * z)) hx'
+  exact Set.EqOn.closure
+    (fun _ hu => hclose_y hu hz' y hy')
+    ((continuous_mul_right z).comp (continuous_mul_right y)) (continuous_mul_right (y * z)) hx'
 
 /-! ## C. Completeness -/
 
 /-- `C_J(a)` is closed, being a topological closure. -/
-lemma isClosed_closedGeneratedByOne (a : E) :
-    IsClosed (closedGeneratedByOne a : Set E) :=
+lemma isClosed_closedGeneratedByOne (a : E) : IsClosed (closedGeneratedByOne a : Set E) :=
   Submodule.isClosed_topologicalClosure _
 
 variable [CompleteSpace E] in
 /-- `C_J(a)` is complete whenever its ambient normed Jordan algebra is complete. -/
-lemma isComplete_closedGeneratedByOne (a : E) :
-    IsComplete (closedGeneratedByOne a : Set E) :=
+lemma isComplete_closedGeneratedByOne (a : E) : IsComplete (closedGeneratedByOne a : Set E) :=
   (isClosed_closedGeneratedByOne a).isComplete
 
 /-! ## D. The bundled commutative normed algebra -/
 
-/-- The norm-closed Jordan subalgebra generated by `1` and `a`, regarded as its own type. Although
-the ambient multiplication need not be associative, its restriction to this subtype is. -/
+/--
+The norm-closed Jordan subalgebra generated by `1` and `a`, regarded as its own type. Although
+the ambient multiplication need not be associative, its restriction to this subtype is.
+-/
 abbrev ClosedGeneratedByOne (a : E) : Type _ := closedGeneratedByOne a
 
 namespace ClosedGeneratedByOne
@@ -152,13 +159,13 @@ noncomputable instance : Mul (ClosedGeneratedByOne a) where
   mul x y := ⟨(x : E) * (y : E), mul_mem_closedGeneratedByOne x.2 y.2⟩
 
 @[simp]
-lemma val_mul (x y : ClosedGeneratedByOne a) :
-    ((x * y : ClosedGeneratedByOne a) : E) = (x : E) * (y : E) := rfl
+lemma val_mul (x y : ClosedGeneratedByOne a)
+    : ((x * y : ClosedGeneratedByOne a) : E) = (x : E) * (y : E) :=
+  rfl
 
 noncomputable instance : One (ClosedGeneratedByOne a) := ⟨⟨1, one_mem_closedGeneratedByOne a⟩⟩
 
-@[simp]
-lemma val_one : ((1 : ClosedGeneratedByOne a) : E) = 1 := rfl
+@[simp] lemma val_one : ((1 : ClosedGeneratedByOne a) : E) = 1 := rfl
 
 /-- The closed one-generator algebra is a commutative associative ring. -/
 noncomputable instance instCommRing : CommRing (ClosedGeneratedByOne a) where
@@ -176,20 +183,23 @@ noncomputable instance instCommRing : CommRing (ClosedGeneratedByOne a) where
 
 /-- The closed one-generator algebra is an algebra over the real scalars inherited from `E`. -/
 noncomputable instance instAlgebra : Algebra ℝ (ClosedGeneratedByOne a) where
-  algebraMap :=
-    { toFun := fun c => ⟨c • (1 : E), (closedGeneratedByOne a).smul_mem c
-          (one_mem_closedGeneratedByOne a)⟩
-      map_one' := Subtype.ext (one_smul ℝ 1)
-      map_mul' := fun c d => Subtype.ext (by
+  algebraMap := {
+    toFun := fun c =>
+      ⟨c • (1 : E), (closedGeneratedByOne a).smul_mem c (one_mem_closedGeneratedByOne a)⟩
+    map_one' := Subtype.ext (one_smul ℝ 1)
+    map_mul' := fun c d =>
+      Subtype.ext (by
         show (c * d) • (1 : E) = (c • (1 : E)) * (d • (1 : E))
         rw [mul_smul_comm, smul_mul_assoc, _root_.one_mul, smul_smul, _root_.mul_comm c d])
-      map_zero' := Subtype.ext (by simp)
-      map_add' := fun c d => Subtype.ext (by simp [add_smul]) }
+    map_zero' := Subtype.ext (by simp)
+    map_add' := fun c d => Subtype.ext (by simp [add_smul])
+  }
   commutes' c x := Subtype.ext (_root_.mul_comm (c • (1 : E)) (x : E))
   smul c x := ⟨c • (x : E), (closedGeneratedByOne a).smul_mem c x.2⟩
-  smul_def' c x := Subtype.ext (by
-    show c • (x : E) = (c • (1 : E)) * (x : E)
-    rw [smul_mul_assoc, _root_.one_mul])
+  smul_def' c x :=
+    Subtype.ext (by
+      show c • (x : E) = (c • (1 : E)) * (x : E)
+      rw [smul_mul_assoc, _root_.one_mul])
 
 /-- The inherited norm is submultiplicative on the closed generated algebra. -/
 noncomputable instance instNormedRing : NormedRing (ClosedGeneratedByOne a) where
@@ -203,17 +213,16 @@ noncomputable instance instNormedAlgebra : NormedAlgebra ℝ (ClosedGeneratedByO
   norm_smul_le r x := by simpa using norm_smul_le r (x : E)
 
 /-- If `E` is complete, its closed generated subalgebra is complete. -/
-noncomputable instance instCompleteSpace [CompleteSpace E] :
-    CompleteSpace (ClosedGeneratedByOne a) :=
+noncomputable instance instCompleteSpace [CompleteSpace E]
+    : CompleteSpace (ClosedGeneratedByOne a) :=
   (isClosed_closedGeneratedByOne a).completeSpace_coe
 
 /-- Powers in `C(a)` are Jordan powers in the ambient algebra, for every element of `C(a)`. -/
-lemma pow_val (x : ClosedGeneratedByOne a) (n : ℕ) :
-    ((x ^ n : ClosedGeneratedByOne a) : E) = (x : E) ^[n] := by
+lemma pow_val (x : ClosedGeneratedByOne a) (n : ℕ)
+    : ((x ^ n : ClosedGeneratedByOne a) : E) = (x : E) ^[n] := by
   induction n with
   | zero => simp [JordanAlgebra.jpow_zero]
-  | succ n ih =>
-      rw [pow_succ, val_mul, ih, JordanAlgebra.jpow_succ, _root_.mul_comm]
+  | succ n ih => rw [pow_succ, val_mul, ih, JordanAlgebra.jpow_succ, _root_.mul_comm]
 
 end ClosedGeneratedByOne
 

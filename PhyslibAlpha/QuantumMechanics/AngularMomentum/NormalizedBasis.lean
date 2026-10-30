@@ -91,16 +91,16 @@ def invForm : StandardSl2Module K n →ₗ[K] StandardSl2Module K n →ₗ[K] K 
   Matrix.toLinearMap₂ (Pi.basisFun K (Fin (n + 1))) (Pi.basisFun K (Fin (n + 1)))
     (Matrix.diagonal fun a => (normSq n a : K))
 
-lemma invForm_v (i j : Fin (n + 1)) :
-    invForm K n (v i) (v j) = if i = j then (normSq n i : K) else 0 := by
+lemma invForm_v (i j : Fin (n + 1))
+    : invForm K n (v i) (v j) = if i = j then (normSq n i : K) else 0 := by
   have hi : (v i : StandardSl2Module K n) = Pi.basisFun K (Fin (n + 1)) i := by
     rw [Pi.basisFun_apply]; rfl
   have hj : (v j : StandardSl2Module K n) = Pi.basisFun K (Fin (n + 1)) j := by
     rw [Pi.basisFun_apply]; rfl
   rw [hi, hj, invForm, Matrix.toLinearMap₂_apply_basis, Matrix.diagonal_apply]
 
-lemma invForm_vNat (a b : ℕ) :
-    invForm K n (vNat n a) (vNat n b) = if a = b ∧ a ≤ n then (normSq n a : K) else 0 := by
+lemma invForm_vNat (a b : ℕ)
+    : invForm K n (vNat n a) (vNat n b) = if a = b ∧ a ≤ n then (normSq n a : K) else 0 := by
   rcases le_or_gt a n with ha | ha
   · rcases le_or_gt b n with hb | hb
     · rw [vNat_eq_v ha, vNat_eq_v hb, invForm_v]
@@ -113,8 +113,10 @@ lemma invForm_vNat (a b : ℕ) :
     simp [this]
 
 /-- Two bilinear forms on `V(n)` agree if they agree on all pairs `v_a, v_b`. -/
-lemma bilin_ext_vNat {B B' : StandardSl2Module K n →ₗ[K] StandardSl2Module K n →ₗ[K] K}
-    (h : ∀ a b, B (vNat n a) (vNat n b) = B' (vNat n a) (vNat n b)) : B = B' :=
+lemma bilin_ext_vNat
+    {B B' : StandardSl2Module K n →ₗ[K] StandardSl2Module K n →ₗ[K] K}
+    (h : ∀ a b, B (vNat n a) (vNat n b) = B' (vNat n a) (vNat n b))
+    : B = B' :=
   linearMap_ext_vNat fun a => linearMap_ext_vNat fun b => h a b
 
 /-!
@@ -152,8 +154,8 @@ omit [CharZero K] in
 /-- The weight operator is symmetric: `⟨h x, y⟩ = ⟨x, h y⟩`. -/
 lemma invForm_comp_ρH : (invForm K n).comp ρH = (invForm K n).compl₂ ρH := by
   refine bilin_ext_vNat fun a b => ?_
-  simp only [LinearMap.comp_apply, LinearMap.compl₂_apply, ρH_vNat, map_smul,
-    LinearMap.smul_apply, invForm_vNat, smul_eq_mul]
+  simp only [LinearMap.comp_apply, LinearMap.compl₂_apply, ρH_vNat, map_smul, LinearMap.smul_apply,
+    invForm_vNat, smul_eq_mul]
   by_cases hab : a = b
   · subst hab; ring
   · simp [hab]
@@ -161,11 +163,12 @@ lemma invForm_comp_ρH : (invForm K n).comp ρH = (invForm K n).compl₂ ρH := 
 omit [CharZero K] in
 /-- The form is symmetric. -/
 lemma invForm_comm (x y : StandardSl2Module K n) : invForm K n x y = invForm K n y x := by
-  have : invForm K n = (invForm K n).flip := bilin_ext_vNat fun a b => by
-    rw [LinearMap.flip_apply, invForm_vNat, invForm_vNat]
-    by_cases hab : a = b
-    · subst hab; rfl
-    · simp [hab, Ne.symm hab]
+  have : invForm K n = (invForm K n).flip :=
+    bilin_ext_vNat fun a b => by
+      rw [LinearMap.flip_apply, invForm_vNat, invForm_vNat]
+      by_cases hab : a = b
+      · subst hab; rfl
+      · simp [hab, Ne.symm hab]
   rw [this, LinearMap.flip_apply, ← this]
 
 /-!
@@ -174,14 +177,15 @@ lemma invForm_comm (x y : StandardSl2Module K n) : invForm K n x y = invForm K n
 
 -/
 
-/-- The normalised basis vector `u_a = v_a / √(normSq n a)` of `V(n)` over `ℝ`; for `a ≤ n` it
-is the state `|j, m⟩` with `j = n/2`, `m = j - a`. -/
-def normVec (n a : ℕ) : StandardSl2Module ℝ n :=
-  (Real.sqrt (normSq n a))⁻¹ • vNat n a
+/--
+The normalised basis vector `u_a = v_a / √(normSq n a)` of `V(n)` over `ℝ`; for `a ≤ n` it
+is the state `|j, m⟩` with `j = n/2`, `m = j - a`.
+-/
+def normVec (n a : ℕ) : StandardSl2Module ℝ n := (Real.sqrt (normSq n a))⁻¹ • vNat n a
 
-lemma sqrt_normSq_succ (n a : ℕ) :
-    Real.sqrt (normSq n (a + 1)) =
-      Real.sqrt (normSq n a) * Real.sqrt (((a : ℝ) + 1) * ((n : ℝ) - a)) := by
+lemma sqrt_normSq_succ (n a : ℕ)
+    : Real.sqrt (normSq n (a + 1))
+      = Real.sqrt (normSq n a) * Real.sqrt (((a : ℝ) + 1) * ((n : ℝ) - a)) := by
   rcases le_or_gt a n with ha | ha
   · rw [normSq_succ, Nat.cast_mul, Real.sqrt_mul (Nat.cast_nonneg _)]
     congr 2
@@ -194,8 +198,8 @@ lemma sqrt_normSq_succ (n a : ℕ) :
     simp [h0, h1, Real.sqrt_zero]
 
 /-- Orthonormality: `⟨u_a, u_b⟩ = δ_ab` for `a, b ≤ n`. -/
-lemma invForm_normVec {a b : ℕ} (ha : a ≤ n) (hb : b ≤ n) :
-    invForm ℝ n (normVec n a) (normVec n b) = if a = b then 1 else 0 := by
+lemma invForm_normVec {a b : ℕ} (ha : a ≤ n) (hb : b ≤ n)
+    : invForm ℝ n (normVec n a) (normVec n b) = if a = b then 1 else 0 := by
   simp only [normVec, map_smul, LinearMap.smul_apply, invForm_vNat, smul_eq_mul]
   by_cases hab : a = b
   · subst hab
@@ -207,18 +211,22 @@ lemma invForm_normVec {a b : ℕ} (ha : a ≤ n) (hb : b ≤ n) :
     linarith
   · simp [hab]
 
-/-- The weight operator on the normalised basis: `h u_a = (n - 2a) u_a`, i.e.
-`Jz |j, m⟩ = m |j, m⟩`. -/
-lemma ρH_normVec (a : ℕ) :
-    (ρH : Module.End ℝ (StandardSl2Module ℝ n)) (normVec n a) =
-      ((n : ℝ) - 2 * a) • normVec n a := by
+/--
+The weight operator on the normalised basis: `h u_a = (n - 2a) u_a`, i.e.
+`Jz |j, m⟩ = m |j, m⟩`.
+-/
+lemma ρH_normVec (a : ℕ)
+    : (ρH : Module.End ℝ (StandardSl2Module ℝ n)) (normVec n a)
+      = ((n : ℝ) - 2 * a) • normVec n a := by
   rw [normVec, map_smul, ρH_vNat, smul_comm]
 
-/-- The lowering operator on the normalised basis: `f u_a = √((a+1)(n-a)) u_{a+1}` for `a < n`,
-i.e. `J₋ |j, m⟩ = √((j + m)(j - m + 1)) |j, m - 1⟩`. -/
-lemma ρF_normVec {a : ℕ} (ha : a < n) :
-    (ρF : Module.End ℝ (StandardSl2Module ℝ n)) (normVec n a) =
-      Real.sqrt (((a : ℝ) + 1) * ((n : ℝ) - a)) • normVec n (a + 1) := by
+/--
+The lowering operator on the normalised basis: `f u_a = √((a+1)(n-a)) u_{a+1}` for `a < n`,
+i.e. `J₋ |j, m⟩ = √((j + m)(j - m + 1)) |j, m - 1⟩`.
+-/
+lemma ρF_normVec {a : ℕ} (ha : a < n)
+    : (ρF : Module.End ℝ (StandardSl2Module ℝ n)) (normVec n a)
+      = Real.sqrt (((a : ℝ) + 1) * ((n : ℝ) - a)) • normVec n (a + 1) := by
   have hpos : (0 : ℝ) < normSq n a := by exact_mod_cast normSq_pos ha.le
   have hc : (0 : ℝ) < ((a : ℝ) + 1) * ((n : ℝ) - a) := by
     have : (a : ℝ) < n := by exact_mod_cast ha
@@ -229,11 +237,13 @@ lemma ρF_normVec {a : ℕ} (ha : a < n) :
   congr 1
   field_simp
 
-/-- The raising operator on the normalised basis: `e u_{a+1} = √((a+1)(n-a)) u_a` for `a < n`,
-i.e. `J₊ |j, m⟩ = √((j - m)(j + m + 1)) |j, m + 1⟩`. -/
-lemma ρE_normVec_succ {a : ℕ} (ha : a < n) :
-    (ρE : Module.End ℝ (StandardSl2Module ℝ n)) (normVec n (a + 1)) =
-      Real.sqrt (((a : ℝ) + 1) * ((n : ℝ) - a)) • normVec n a := by
+/--
+The raising operator on the normalised basis: `e u_{a+1} = √((a+1)(n-a)) u_a` for `a < n`,
+i.e. `J₊ |j, m⟩ = √((j - m)(j + m + 1)) |j, m + 1⟩`.
+-/
+lemma ρE_normVec_succ {a : ℕ} (ha : a < n)
+    : (ρE : Module.End ℝ (StandardSl2Module ℝ n)) (normVec n (a + 1))
+      = Real.sqrt (((a : ℝ) + 1) * ((n : ℝ) - a)) • normVec n a := by
   have hpos : (0 : ℝ) < normSq n a := by exact_mod_cast normSq_pos ha.le
   have hc : (0 : ℝ) < ((a : ℝ) + 1) * ((n : ℝ) - a) := by
     have : (a : ℝ) < n := by exact_mod_cast ha

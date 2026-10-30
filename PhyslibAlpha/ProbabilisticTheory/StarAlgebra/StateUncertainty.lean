@@ -84,8 +84,7 @@ lemma star_fluctuation (a : selfAdjoint A) : star (ω.fluctuation a) = ω.fluctu
     Complex.star_def, Complex.conj_ofReal]
 
 /-- The covariance `Re ω((a - ω(a)) (b - ω(b)))` of two observables. -/
-noncomputable def covariance (a b : selfAdjoint A) : ℝ :=
-  (ω (ω.fluctuation a * ω.fluctuation b)).re
+noncomputable def covariance (a b : selfAdjoint A) : ℝ := (ω (ω.fluctuation a * ω.fluctuation b)).re
 
 /-- The variance of an observable. -/
 noncomputable def variance (a : selfAdjoint A) : ℝ := ω.covariance a a
@@ -94,8 +93,8 @@ noncomputable def variance (a : selfAdjoint A) : ℝ := ω.covariance a a
 noncomputable def bracket (a b : selfAdjoint A) : ℝ := (ω ((⁅a, b⁆ : selfAdjoint A) : A)).re
 
 /-- `ω((a - ω(a)) (b - ω(b))) = ω(a b) - ω(a) ω(b)`. -/
-lemma apply_fluctuation_mul (a b : selfAdjoint A) :
-    ω (ω.fluctuation a * ω.fluctuation b) = ω ((a : A) * b) - ω (a : A) * ω (b : A) := by
+lemma apply_fluctuation_mul (a b : selfAdjoint A)
+    : ω (ω.fluctuation a * ω.fluctuation b) = ω ((a : A) * b) - ω (a : A) * ω (b : A) := by
   simp only [fluctuation, sub_mul, mul_sub, smul_mul_assoc, mul_smul_comm, one_mul, mul_one,
     smul_sub, smul_smul]
   change ω.toLinearMap _ = ω.toLinearMap _ - ω.toLinearMap _ * ω.toLinearMap _
@@ -105,21 +104,21 @@ lemma apply_fluctuation_mul (a b : selfAdjoint A) :
   ring
 
 /-- The bracket is the imaginary part of `ω((a - ω(a)) (b - ω(b)))`. -/
-lemma bracket_eq_im (a b : selfAdjoint A) :
-    ω.bracket a b = (ω (ω.fluctuation a * ω.fluctuation b)).im := by
+lemma bracket_eq_im (a b : selfAdjoint A)
+    : ω.bracket a b = (ω (ω.fluctuation a * ω.fluctuation b)).im := by
   have hba : ω ((b : A) * a) = star (ω ((a : A) * b)) := by
     rw [← ω.map_star, star_mul, a.property.star_eq, b.property.star_eq]
-  have hsub : ω ((⁅a, b⁆ : selfAdjoint A) : A) =
-      -(Complex.I / 2) * (ω ((a : A) * b) - ω ((b : A) * a)) := by
+  have hsub
+      : ω ((⁅a, b⁆ : selfAdjoint A) : A)
+        = -(Complex.I / 2) * (ω ((a : A) * b) - ω ((b : A) * a)) := by
     rw [selfAdjoint.coe_bracket]
     change ω.toLinearMap _ = _
     rw [_root_.map_smul, _root_.map_sub, smul_eq_mul]
     rfl
   rw [bracket, hsub, hba, apply_fluctuation_mul, ω.apply_selfAdjoint a, ω.apply_selfAdjoint b]
-  simp only [Complex.star_def, Complex.mul_re, Complex.neg_re, Complex.div_ofNat_re,
-    Complex.I_re, Complex.neg_im, Complex.div_ofNat_im, Complex.I_im, Complex.sub_re,
-    Complex.sub_im, Complex.conj_re, Complex.conj_im, Complex.mul_im, Complex.ofReal_re,
-    Complex.ofReal_im]
+  simp only [Complex.star_def, Complex.mul_re, Complex.neg_re, Complex.div_ofNat_re, Complex.I_re,
+    Complex.neg_im, Complex.div_ofNat_im, Complex.I_im, Complex.sub_re, Complex.sub_im,
+    Complex.conj_re, Complex.conj_im, Complex.mul_im, Complex.ofReal_re, Complex.ofReal_im]
   ring
 
 /-! ## B. The matrices `Σ` and `Ω` -/
@@ -137,64 +136,65 @@ noncomputable def bracketMatrix (a : ι → selfAdjoint A) : Matrix ι ι ℝ :=
 /-- The fluctuation of an observable as a vector of the pre-Hilbert space of the state. -/
 def fluctuationVector (a : selfAdjoint A) : ω.PreGNS := ω.toPre (ω.fluctuation a)
 
-lemma inner_fluctuationVector (a b : selfAdjoint A) :
-    ⟪ω.fluctuationVector a, ω.fluctuationVector b⟫_ℂ =
-      ω (ω.fluctuation a * ω.fluctuation b) := by
+lemma inner_fluctuationVector (a b : selfAdjoint A)
+    : ⟪ω.fluctuationVector a, ω.fluctuationVector b⟫_ℂ = ω (ω.fluctuation a * ω.fluctuation b) := by
   rw [inner_pre]
   change ω (star (ω.fluctuation a) * ω.fluctuation b) = _
   rw [star_fluctuation]
 
 /-- **`Σ + iΩ` is the Gram matrix of the fluctuations.** -/
-lemma gram_fluctuation (a : ι → selfAdjoint A) :
-    gram ℂ (fun j => ω.fluctuationVector (a j)) =
-      (ω.covarianceMatrix a).map ((↑) : ℝ → ℂ) +
-        Complex.I • (ω.bracketMatrix a).map ((↑) : ℝ → ℂ) := by
+lemma gram_fluctuation (a : ι → selfAdjoint A)
+    : gram ℂ (fun j => ω.fluctuationVector (a j))
+      = (ω.covarianceMatrix a).map ((↑) : ℝ → ℂ)
+        + Complex.I • (ω.bracketMatrix a).map ((↑) : ℝ → ℂ) := by
   ext j k
   rw [gram, of_apply, inner_fluctuationVector]
-  apply Complex.ext <;>
-    simp [covarianceMatrix, bracketMatrix, covariance, bracket_eq_im]
+  apply Complex.ext <;> simp [covarianceMatrix, bracketMatrix, covariance, bracket_eq_im]
 
 /-- `Σ - iΩ` is the transpose of the Gram matrix. -/
-lemma transpose_gram_fluctuation (a : ι → selfAdjoint A) :
-    (gram ℂ (fun j => ω.fluctuationVector (a j)))ᵀ =
-      (ω.covarianceMatrix a).map ((↑) : ℝ → ℂ) -
-        Complex.I • (ω.bracketMatrix a).map ((↑) : ℝ → ℂ) := by
+lemma transpose_gram_fluctuation (a : ι → selfAdjoint A)
+    : (gram ℂ (fun j => ω.fluctuationVector (a j)))ᵀ
+      = (ω.covarianceMatrix a).map ((↑) : ℝ → ℂ)
+        - Complex.I • (ω.bracketMatrix a).map ((↑) : ℝ → ℂ) := by
   ext j k
   rw [transpose_apply, gram, of_apply, ← inner_conj_symm, inner_fluctuationVector]
-  apply Complex.ext <;>
-    simp [covarianceMatrix, bracketMatrix, covariance, bracket_eq_im]
+  apply Complex.ext <;> simp [covarianceMatrix, bracketMatrix, covariance, bracket_eq_im]
 
 /-! ## C. Uncertainty relations -/
 
-/-- **The Robertson–Schrödinger relation** for a state on a `*`-algebra:
-`Cov(a, b)² + ω⟨⁅a, b⁆⟩² ≤ Var a · Var b`. -/
-lemma robertson_schrodinger (a b : selfAdjoint A) :
-    ω.covariance a b ^ 2 + ω.bracket a b ^ 2 ≤ ω.variance a * ω.variance b := by
+/--
+**The Robertson–Schrödinger relation** for a state on a `*`-algebra:
+`Cov(a, b)² + ω⟨⁅a, b⁆⟩² ≤ Var a · Var b`.
+-/
+lemma robertson_schrodinger (a b : selfAdjoint A)
+    : ω.covariance a b ^ 2 + ω.bracket a b ^ 2 ≤ ω.variance a * ω.variance b := by
   have h := norm_inner_le_norm (𝕜 := ℂ) (ω.fluctuationVector a) (ω.fluctuationVector b)
   have hn (c : selfAdjoint A) : ‖ω.fluctuationVector c‖ ^ 2 = ω.variance c := by
     rw [@norm_sq_eq_re_inner ℂ, inner_fluctuationVector]
     rfl
   have h2 := pow_le_pow_left₀ (norm_nonneg _) h 2
-  rw [mul_pow, hn, hn, inner_fluctuationVector, ← Complex.normSq_eq_norm_sq,
-    Complex.normSq_apply] at h2
+  rw [mul_pow, hn, hn, inner_fluctuationVector, ← Complex.normSq_eq_norm_sq, Complex.normSq_apply]
+    at h2
   rw [covariance, bracket_eq_im]
   nlinarith [h2]
 
-/-- **Robertson's uncertainty relation for several observables** for a state on a `*`-algebra:
-for every finite family of observables, `|det Ω| ≤ det Σ`. -/
-lemma robertson_det [Fintype ι] [DecidableEq ι] (a : ι → selfAdjoint A) :
-    |(ω.bracketMatrix a).det| ≤ (ω.covarianceMatrix a).det := by
+/--
+**Robertson's uncertainty relation for several observables** for a state on a `*`-algebra:
+for every finite family of observables, `|det Ω| ≤ det Σ`.
+-/
+lemma robertson_det [Fintype ι] [DecidableEq ι] (a : ι → selfAdjoint A)
+    : |(ω.bracketMatrix a).det| ≤ (ω.covarianceMatrix a).det := by
   have hG := posSemidef_gram ℂ fun j => ω.fluctuationVector (a j)
-  exact abs_det_le_det_of_posSemidef
-    (by rw [← transpose_gram_fluctuation]; exact hG.transpose)
+  exact abs_det_le_det_of_posSemidef (by rw [← transpose_gram_fluctuation]; exact hG.transpose)
     (by rw [← gram_fluctuation]; exact hG)
 
 /-! ## D. Symmetric states -/
 
 section Symm
 
-variable (σ : A ≃⋆ₐ[ℂ] A) (hω : ∀ x, ω (σ x) = ω x) {a b : selfAdjoint A}
-  (ha : σ (a : A) = a) (hb : σ (b : A) = -b)
+variable
+  (σ : A ≃⋆ₐ[ℂ] A) (hω : ∀ x, ω (σ x) = ω x)
+  {a b : selfAdjoint A} (ha : σ (a : A) = a) (hb : σ (b : A) = -b)
 include hω hb
 
 lemma apply_eq_zero_of_symm : ω (b : A) = 0 := by
@@ -220,8 +220,10 @@ lemma covariance_eq_zero_of_symm : ω.covariance a b = 0 := by
   simp
 
 include ha in
-/-- **In a symmetric state, an even and an odd observable have a bracket of expectation
-zero.** -/
+/--
+**In a symmetric state, an even and an odd observable have a bracket of expectation
+zero.**
+-/
 lemma bracket_eq_zero_of_symm : ω.bracket a b = 0 := by
   rw [bracket_eq_im, apply_fluctuation_mul, apply_mul_eq_zero_of_symm ω σ hω ha hb,
     apply_eq_zero_of_symm ω σ hω hb]

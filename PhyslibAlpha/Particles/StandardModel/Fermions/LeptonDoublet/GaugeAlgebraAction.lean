@@ -64,13 +64,15 @@ open Matrix MatrixGroups
 
 -/
 
-/-- The endomorphism of the lepton doublet defined by a `2 × 2` complex matrix acting on
-  the weak index, with the Weyl factor untouched. -/
-noncomputable def weakEnd (A : Matrix (Fin 2) (Fin 2) ℂ) :
-    LeptonDoubletV →ₗ[ℂ] LeptonDoubletV :=
+/--
+The endomorphism of the lepton doublet defined by a `2 × 2` complex matrix acting on
+the weak index, with the Weyl factor untouched.
+-/
+noncomputable def weakEnd (A : Matrix (Fin 2) (Fin 2) ℂ) : LeptonDoubletV →ₗ[ℂ] LeptonDoubletV :=
   LocalGaugeData.MatrixRep.valEnd (LinearEquiv.refl ℂ LeptonDoubletV) A
 
-/- The hand-built definition, now derived from the datum:
+/-
+The hand-built definition, now derived from the datum:
 
 /-- The endomorphism of the lepton doublet defined by a `2 × 2` complex matrix acting on
   the weak index, with the Weyl factor untouched. -/
@@ -81,41 +83,40 @@ noncomputable def weakEnd (A : Matrix (Fin 2) (Fin 2) ℂ) :
       (Matrix.toLpLinAlgEquiv 2 A) ∘ₗ valLinEquiv.toLinearMap
 -/
 
-/-- The weak endomorphism on a pure spinor–weak tensor: the matrix acts on the weak
-  coordinates. -/
-lemma weakEnd_tmul (A : Matrix (Fin 2) (Fin 2) ℂ) (s : Fermion.LeftHandedWeyl)
-    (v : Fin 2 → ℂ) :
-    weakEnd A (s ⊗ₜ v) = s ⊗ₜ A.mulVec v :=
+/--
+The weak endomorphism on a pure spinor–weak tensor: the matrix acts on the weak
+coordinates.
+-/
+lemma weakEnd_tmul (A : Matrix (Fin 2) (Fin 2) ℂ) (s : Fermion.LeftHandedWeyl) (v : Fin 2 → ℂ)
+    : weakEnd A (s ⊗ₜ v) = s ⊗ₜ A.mulVec v :=
   LocalGaugeData.MatrixRep.valEnd_apply_symm_tmul (LinearEquiv.refl ℂ LeptonDoubletV) A s v
 
-lemma weakEnd_add (A B : Matrix (Fin 2) (Fin 2) ℂ) :
-    weakEnd (A + B) = weakEnd A + weakEnd B :=
+lemma weakEnd_add (A B : Matrix (Fin 2) (Fin 2) ℂ) : weakEnd (A + B) = weakEnd A + weakEnd B :=
   LocalGaugeData.MatrixRep.valEnd_add (LinearEquiv.refl ℂ LeptonDoubletV) A B
 
-lemma weakEnd_smul (z : ℂ) (A : Matrix (Fin 2) (Fin 2) ℂ) :
-    weakEnd (z • A) = z • weakEnd A :=
+lemma weakEnd_smul (z : ℂ) (A : Matrix (Fin 2) (Fin 2) ℂ) : weakEnd (z • A) = z • weakEnd A :=
   LocalGaugeData.MatrixRep.valEnd_smul (LinearEquiv.refl ℂ LeptonDoubletV) z A
 
 lemma weakEnd_zero : weakEnd 0 = 0 :=
   LocalGaugeData.MatrixRep.valEnd_zero (LinearEquiv.refl ℂ LeptonDoubletV)
 
-lemma weakEnd_neg (A : Matrix (Fin 2) (Fin 2) ℂ) : weakEnd (-A) = -weakEnd A :=
+lemma weakEnd_neg (A : Matrix (Fin 2) (Fin 2) ℂ) : weakEnd (-A) = - weakEnd A :=
   LocalGaugeData.MatrixRep.valEnd_neg (LinearEquiv.refl ℂ LeptonDoubletV) A
 
-lemma weakEnd_multiset_sum (m : Multiset (Matrix (Fin 2) (Fin 2) ℂ)) :
-    weakEnd m.sum = (m.map weakEnd).sum :=
+lemma weakEnd_multiset_sum (m : Multiset (Matrix (Fin 2) (Fin 2) ℂ))
+    : weakEnd m.sum = (m.map weakEnd).sum :=
   LocalGaugeData.MatrixRep.valEnd_multiset_sum (LinearEquiv.refl ℂ LeptonDoubletV) m
 
 /-- The weak endomorphisms compose through matrix multiplication. -/
-lemma weakEnd_mul (A B : Matrix (Fin 2) (Fin 2) ℂ) :
-    weakEnd (A * B) = weakEnd A ∘ₗ weakEnd B :=
+lemma weakEnd_mul (A B : Matrix (Fin 2) (Fin 2) ℂ) : weakEnd (A * B) = weakEnd A ∘ₗ weakEnd B :=
   LocalGaugeData.MatrixRep.valEnd_mul (LinearEquiv.refl ℂ LeptonDoubletV) A B
 
 /-- The weak endomorphism of the identity matrix is the identity. -/
 lemma weakEnd_one : weakEnd 1 = LinearMap.id :=
   LocalGaugeData.MatrixRep.valEnd_one (LinearEquiv.refl ℂ LeptonDoubletV)
 
-/- The hand-built proofs, now derived from the datum:
+/-
+The hand-built proofs, now derived from the datum:
 lemma weakEnd_apply_mk (A : Matrix (Fin 2) (Fin 2) ℂ) (v : LeptonDoubletV) :
     weakEnd A v
       = valLinEquiv.symm
@@ -155,15 +156,19 @@ lemma weakEnd_mul (A B : Matrix (Fin 2) (Fin 2) ℂ) :
   rfl
 -/
 
-/-- The matrix of the infinitesimal `(1, 2)_{-3}` action of a gauge algebra element on
-  the weak index: the action matrix of the datum. -/
+/--
+The matrix of the infinitesimal `(1, 2)_{-3}` action of a gauge algebra element on
+the weak index: the action matrix of the datum.
+-/
 noncomputable def actionMatrix (c : GaugeAlgebra) : Matrix (Fin 2) (Fin 2) ℂ :=
   Model.leptonDoublet.rep.act c
 
-/-- The action matrix is `i` times the weak part, shifted by `i` times `-3` the
-  hypercharge. -/
-lemma actionMatrix_eq (c : GaugeAlgebra) :
-    actionMatrix c = Complex.I • (c.toSU2Matrix - ((3 : ℂ) • c.toU1Value) • 1) := by
+/--
+The action matrix is `i` times the weak part, shifted by `i` times `-3` the
+hypercharge.
+-/
+lemma actionMatrix_eq (c : GaugeAlgebra)
+    : actionMatrix c = Complex.I • (c.toSU2Matrix - ((3 : ℂ) • c.toU1Value) • 1) := by
   show Complex.I • (c.2.1 : Matrix (Fin 2) (Fin 2) ℂ)
       + (Complex.I * ((-3 : ℤ) : ℂ) * (c.2.2 : ℂ)) • (1 : Matrix (Fin 2) (Fin 2) ℂ) = _
   rw [GaugeAlgebra.toSU2Matrix, GaugeAlgebra.toU1Value]
@@ -171,21 +176,24 @@ lemma actionMatrix_eq (c : GaugeAlgebra) :
   simp only [Matrix.add_apply, Matrix.smul_apply, Matrix.sub_apply, smul_eq_mul]
   ring
 
-/-- **The infinitesimal action of the gauge algebra on the lepton doublet**: the
-  derivative of the `(1, 2)_{-3}` action of the gauge group, real-linear in the
-  algebra slot and complex-linear in the value slot — the form consumed by the
-  covariant derivative `GaugeAlgebraRealization.covDerivIter` and by
-  `LocalGaugeData.IsInfinitesimalActionOf`. It is the action the general theory derives
-  from the datum. -/
-noncomputable def gaugeAlgebraAction :
-    GaugeAlgebra →ₗ[ℝ] LeptonDoubletV →ₗ[ℂ] LeptonDoubletV :=
+/--
+**The infinitesimal action of the gauge algebra on the lepton doublet**: the
+derivative of the `(1, 2)_{-3}` action of the gauge group, real-linear in the
+algebra slot and complex-linear in the value slot — the form consumed by the
+covariant derivative `GaugeAlgebraRealization.covDerivIter` and by
+`LocalGaugeData.IsInfinitesimalActionOf`. It is the action the general theory derives
+from the datum.
+-/
+noncomputable def gaugeAlgebraAction : GaugeAlgebra →ₗ[ℝ] LeptonDoubletV →ₗ[ℂ] LeptonDoubletV :=
   Model.leptonDoublet.toMatterField.repAlgebra
 
 /-- The gauge algebra acts by the weak endomorphism of its action matrix. -/
-lemma gaugeAlgebraAction_apply (c : GaugeAlgebra) :
-    gaugeAlgebraAction c = weakEnd (actionMatrix c) := rfl
+lemma gaugeAlgebraAction_apply (c : GaugeAlgebra)
+    : gaugeAlgebraAction c = weakEnd (actionMatrix c) :=
+  rfl
 
-/- The hand-built definitions, now derived from the datum:
+/-
+The hand-built definitions, now derived from the datum:
 /-- The matrix of the infinitesimal `(1, 2)_{-3}` action of a gauge algebra element on
   the weak index: `i` times the weak part, shifted by `i` times `-3` the
   hypercharge. -/
@@ -239,15 +247,19 @@ section InfinitesimalAction
 
 open MvPowerSeries
 
-/-- The jet-valued matrix of the infinitesimal `(1, 2)_{-3}` action of a jet of gauge
-  algebra elements: the jet action matrix of the datum. -/
+/--
+The jet-valued matrix of the infinitesimal `(1, 2)_{-3}` action of a jet of gauge
+algebra elements: the jet action matrix of the datum.
+-/
 noncomputable def jetActionMatrix (a : JetGaugeAlgebra) : Matrix (Fin 2) (Fin 2) SpaceTimeAlgebra :=
   Model.leptonDoublet.rep.jetAct a
 
-/-- The jet action matrix is `i` times the weak part, shifted by `i` times `-3` the
-  hypercharge. -/
-lemma jetActionMatrix_eq (a : JetGaugeAlgebra) :
-    jetActionMatrix a = Complex.I • (a.toSU2Matrix - ((3 : ℂ) • a.toU1Value) • 1) := by
+/--
+The jet action matrix is `i` times the weak part, shifted by `i` times `-3` the
+hypercharge.
+-/
+lemma jetActionMatrix_eq (a : JetGaugeAlgebra)
+    : jetActionMatrix a = Complex.I • (a.toSU2Matrix - ((3 : ℂ) • a.toU1Value) • 1) := by
   show Complex.I • (a.2.1 : Matrix (Fin 2) (Fin 2) SpaceTimeAlgebra)
       + ((Complex.I * ((-3 : ℤ) : ℂ)) • (a.2.2 : SpaceTimeAlgebra)) •
           (1 : Matrix (Fin 2) (Fin 2) SpaceTimeAlgebra)
@@ -258,15 +270,17 @@ lemma jetActionMatrix_eq (a : JetGaugeAlgebra) :
   split_ifs <;> simp [Algebra.smul_def]
   ring
 
-/-- The base-point Taylor coefficients of the jet action matrix are the action matrices
-  of the base-point Taylor coefficients. -/
-lemma jetActionMatrix_map_cc_foldl (p : Multiset (Fin 1 ⊕ Fin 3)) (a : JetGaugeAlgebra) :
-    ((jetActionMatrix a).map fun f =>
-        constantCoeff (SpaceTimeAlgebra.iteratedPDeriv p f))
+/--
+The base-point Taylor coefficients of the jet action matrix are the action matrices
+of the base-point Taylor coefficients.
+-/
+lemma jetActionMatrix_map_cc_foldl (p : Multiset (Fin 1 ⊕ Fin 3)) (a : JetGaugeAlgebra)
+    : ((jetActionMatrix a).map fun f => constantCoeff (SpaceTimeAlgebra.iteratedPDeriv p f))
       = actionMatrix (JetGaugeAlgebra.eval (JetGaugeAlgebra.iteratedDeriv p a)) :=
   Model.leptonDoublet.rep.jetAct_map_cc_foldl p a
 
-/- The hand-built definition and proofs, now derived from the datum:
+/-
+The hand-built definition and proofs, now derived from the datum:
 /-- A single formal derivative commutes with the iterated one. -/
 private lemma pderiv_foldl (μ : Fin 1 ⊕ Fin 3) (x : Multiset (Fin 1 ⊕ Fin 3))
     (f : SpaceTimeAlgebra) :
@@ -310,7 +324,8 @@ lemma jetActionMatrix_map_cc_foldl (p : Multiset (Fin 1 ⊕ Fin 3)) (a : JetGaug
       SpaceTimeAlgebra.foldl_pderiv_zero, map_zero]
 -/
 
-/- `doubletMatrix` and `repJetGaugeGroupI_eq_doubletMatrix` now live in `LeptonDoubletV.Basic`:
+/-
+`doubletMatrix` and `repJetGaugeGroupI_eq_doubletMatrix` now live in `LeptonDoubletV.Basic`:
 /-- The `SpaceTimeAlgebra`-valued weak matrix of the jet gauge action on the lepton doublet: the
   weak matrix of the gauge jet carrying the `-3` hypercharge phase. -/
 noncomputable def doubletMatrix (U : JetGaugeGroupI) : Matrix (Fin 2) (Fin 2) SpaceTimeAlgebra :=
@@ -328,7 +343,8 @@ lemma repJetGaugeGroupI_eq_doubletMatrix (U : JetGaugeGroupI)
             (jetValLinEquiv z)) := rfl
 -/
 
-/- The hand-written derivative and equivariance identities for the weak matrix, now the
+/-
+The hand-written derivative and equivariance identities for the weak matrix, now the
   axioms `mat_map_pderiv` and `mat_mul_jetAct` of the datum's matrix representation:
 /-- The entrywise formal derivative on the weak coordinates, as a `ℂ`-linear map. -/
 private noncomputable def pderivWeak (μ : Fin 1 ⊕ Fin 3) :
@@ -542,16 +558,19 @@ private lemma foldl_pderiv_neg (x : Multiset (Fin 1 ⊕ Fin 3)) (f : SpaceTimeAl
   exact SpaceTimeAlgebra.iteratedPDeriv_neg x f
 -/
 
-/-- **The base-point Taylor coefficients of the jet gauge action** on the lepton
-  doublet are the weak endomorphisms of the base-point Taylor coefficients of the
-  weak matrix. -/
-lemma repCoeff_eq (U : JetGaugeGroupI) (x : Multiset (Fin 1 ⊕ Fin 3)) :
-    GaugeAlgebraRealization.repCoeff repJetGaugeGroupI U x
+/--
+**The base-point Taylor coefficients of the jet gauge action** on the lepton
+doublet are the weak endomorphisms of the base-point Taylor coefficients of the
+weak matrix.
+-/
+lemma repCoeff_eq (U : JetGaugeGroupI) (x : Multiset (Fin 1 ⊕ Fin 3))
+    : GaugeAlgebraRealization.repCoeff repJetGaugeGroupI U x
       = weakEnd ((doubletMatrix U).map fun f =>
-          constantCoeff (SpaceTimeAlgebra.iteratedPDeriv x f)) :=
+        constantCoeff (SpaceTimeAlgebra.iteratedPDeriv x f)) :=
   Model.leptonDoublet.rep.repCoeff_eq (LinearEquiv.refl ℂ LeptonDoubletV) U x
 
-/- The hand-written proof, now derived from the datum:
+/-
+The hand-written proof, now derived from the datum:
 set_option maxHeartbeats 1000000 in
 /-- **The base-point Taylor coefficients of the jet gauge action** on the lepton
   doublet are the weak endomorphisms of the base-point Taylor coefficients of the
@@ -623,36 +642,44 @@ lemma weakEnd_one : weakEnd 1 = LinearMap.id := by
     LinearEquiv.symm_apply_apply, LinearMap.id_apply]
 -/
 
-/-- At the base point, a gauge jet with trivial value acts trivially: the zeroth
-  Taylor coefficient of the jet gauge action is the identity. -/
-lemma repCoeff_zero_of_eval_eq_one {U : JetGaugeGroupI} (hU : U.eval = 1) :
-    GaugeAlgebraRealization.repCoeff repJetGaugeGroupI U 0 = LinearMap.id := by
-  have h2 : (constantCoeff : SpaceTimeAlgebra →+* ℂ).mapMatrix
-      ((U.2.1 : specialUnitaryGroup (Fin 2) SpaceTimeAlgebra) : Matrix (Fin 2)
-          (Fin 2) SpaceTimeAlgebra)
-        = 1 := Subtype.ext_iff.mp (congrArg (fun p : GaugeGroupI => p.2.1) hU)
+/--
+At the base point, a gauge jet with trivial value acts trivially: the zeroth
+Taylor coefficient of the jet gauge action is the identity.
+-/
+lemma repCoeff_zero_of_eval_eq_one {U : JetGaugeGroupI} (hU : U.eval = 1)
+    : GaugeAlgebraRealization.repCoeff repJetGaugeGroupI U 0 = LinearMap.id := by
+  have h2
+      : (constantCoeff : SpaceTimeAlgebra →+* ℂ).mapMatrix
+          ((U.2.1 : specialUnitaryGroup (Fin 2) SpaceTimeAlgebra)
+            : Matrix (Fin 2) (Fin 2) SpaceTimeAlgebra)
+        = 1 :=
+    Subtype.ext_iff.mp (congrArg (fun p : GaugeGroupI => p.2.1) hU)
   have hu : constantCoeff ((U.2.2 : unitary SpaceTimeAlgebra) : SpaceTimeAlgebra) = 1 :=
     Subtype.ext_iff.mp (congrArg (fun p : GaugeGroupI => p.2.2) hU)
-  have hM : ((doubletMatrix U).map fun f =>
-      constantCoeff (SpaceTimeAlgebra.iteratedPDeriv (0 : Multiset (Fin 1 ⊕ Fin 3)) f))
+  have hM
+      : ((doubletMatrix U).map fun f =>
+          constantCoeff (SpaceTimeAlgebra.iteratedPDeriv (0 : Multiset (Fin 1 ⊕ Fin 3)) f))
         = 1 := by
     ext i j
     rw [Matrix.map_apply, SpaceTimeAlgebra.iteratedPDeriv_zero, doubletMatrix_eq, Matrix.smul_apply,
-      smul_eq_mul, map_mul, map_pow, SpaceTimeAlgebra.constantCoeff_star, hu, star_one,
-      one_pow, one_mul]
+      smul_eq_mul, map_mul, map_pow, SpaceTimeAlgebra.constantCoeff_star, hu, star_one, one_pow,
+      one_mul]
     exact Matrix.ext_iff.mpr h2 i j
   rw [repCoeff_eq, hM, weakEnd_one]
 
-/-- **The `(1, 2)_{-3}` action of the gauge algebra is the infinitesimal action
-  underlying the jet gauge action on the lepton doublet**: its base-point Taylor
-  coefficients obey the Maurer–Cartan Leibniz law and intertwine the action with the
-  adjoint transports. This is the generic statement for the datum's matrix
-  representation. -/
-lemma isInfinitesimalActionOf :
-    localGaugeData.IsInfinitesimalActionOf gaugeAlgebraAction repJetGaugeGroupI :=
+/--
+**The `(1, 2)_{-3}` action of the gauge algebra is the infinitesimal action
+underlying the jet gauge action on the lepton doublet**: its base-point Taylor
+coefficients obey the Maurer–Cartan Leibniz law and intertwine the action with the
+adjoint transports. This is the generic statement for the datum's matrix
+representation.
+-/
+lemma isInfinitesimalActionOf
+    : localGaugeData.IsInfinitesimalActionOf gaugeAlgebraAction repJetGaugeGroupI :=
   Model.leptonDoublet.toMatterField.repAlgebra_isInfinitesimalAction
 
-/- The hand-written proof, now derived from the datum:
+/-
+The hand-written proof, now derived from the datum:
 set_option maxHeartbeats 1000000 in
 /-- **The `(1, 2)_{-3}` action of the gauge algebra is the infinitesimal action
   underlying the jet gauge action on the lepton doublet**: its base-point Taylor
@@ -772,12 +799,13 @@ end InfinitesimalAction
 
 -/
 
-/-- The infinitesimal gauge action on the lepton doublet acts on the weak factor, the
-  Lorentz action on the Weyl factor, so the two commute. -/
-lemma gaugeAlgebraAction_comm_repLorentzGroup (c : GaugeAlgebra) (Λ : SL(2,ℂ))
-    (v : LeptonDoubletV) :
-    LeptonDoubletV.gaugeAlgebraAction c (LeptonDoubletV.repLorentzGroup Λ v) =
-      LeptonDoubletV.repLorentzGroup Λ (LeptonDoubletV.gaugeAlgebraAction c v) :=
+/--
+The infinitesimal gauge action on the lepton doublet acts on the weak factor, the
+Lorentz action on the Weyl factor, so the two commute.
+-/
+lemma gaugeAlgebraAction_comm_repLorentzGroup (c : GaugeAlgebra) (Λ : SL(2,ℂ)) (v : LeptonDoubletV)
+    : LeptonDoubletV.gaugeAlgebraAction c (LeptonDoubletV.repLorentzGroup Λ v)
+      = LeptonDoubletV.repLorentzGroup Λ (LeptonDoubletV.gaugeAlgebraAction c v) :=
   LocalGaugeData.MatrixRep.repAlgebra_comm_repLorentz _ _ _ c Λ v
 
 end LeptonDoubletV

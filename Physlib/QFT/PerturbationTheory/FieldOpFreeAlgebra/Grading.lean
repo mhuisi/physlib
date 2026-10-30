@@ -27,42 +27,45 @@ noncomputable section
 def statisticSubmodule (f : FieldStatistic) : Submodule ℂ 𝓕.FieldOpFreeAlgebra :=
   Submodule.span ℂ {a | ∃ φs, a = ofCrAnListF φs ∧ (𝓕 |>ₛ φs) = f}
 
-lemma ofCrAnListF_mem_statisticSubmodule_of (φs : List 𝓕.CrAnFieldOp) (f : FieldStatistic)
-    (h : (𝓕 |>ₛ φs) = f) :
-    ofCrAnListF φs ∈ statisticSubmodule f := by
+lemma ofCrAnListF_mem_statisticSubmodule_of
+    (φs : List 𝓕.CrAnFieldOp) (f : FieldStatistic) (h : (𝓕 |>ₛ φs) = f)
+    : ofCrAnListF φs ∈ statisticSubmodule f := by
   refine Submodule.mem_span.mpr fun _ a => a ⟨φs, ⟨rfl, h⟩⟩
 
-lemma ofCrAnListF_bosonic_or_fermionic (φs : List 𝓕.CrAnFieldOp) :
-    ofCrAnListF φs ∈ statisticSubmodule bosonic ∨
-    ofCrAnListF φs ∈ statisticSubmodule fermionic := by
+lemma ofCrAnListF_bosonic_or_fermionic (φs : List 𝓕.CrAnFieldOp)
+    : ofCrAnListF φs ∈ statisticSubmodule bosonic
+      ∨ ofCrAnListF φs ∈ statisticSubmodule fermionic := by
   by_cases h : (𝓕 |>ₛ φs) = bosonic
   · left
     exact ofCrAnListF_mem_statisticSubmodule_of φs bosonic h
   · right
     exact ofCrAnListF_mem_statisticSubmodule_of φs fermionic (by simpa using h)
 
-lemma ofCrAnOpF_bosonic_or_fermionic (φ : 𝓕.CrAnFieldOp) :
-    ofCrAnOpF φ ∈ statisticSubmodule bosonic ∨ ofCrAnOpF φ ∈ statisticSubmodule fermionic := by
+lemma ofCrAnOpF_bosonic_or_fermionic (φ : 𝓕.CrAnFieldOp)
+    : ofCrAnOpF φ ∈ statisticSubmodule bosonic ∨ ofCrAnOpF φ ∈ statisticSubmodule fermionic := by
   rw [← ofCrAnListF_singleton]
   exact ofCrAnListF_bosonic_or_fermionic [φ]
 
 /-- The projection of an element of `FieldOpFreeAlgebra` onto it's bosonic part. -/
 def bosonicProjF : 𝓕.FieldOpFreeAlgebra →ₗ[ℂ] statisticSubmodule (𝓕 := 𝓕) bosonic :=
   Basis.constr ofCrAnListFBasis ℂ fun φs =>
-  if h : (𝓕 |>ₛ φs) = bosonic then
-    ⟨ofCrAnListF φs, Submodule.mem_span.mpr fun _ a => a ⟨φs, ⟨rfl, h⟩⟩⟩
-  else
-    0
+    if h : (𝓕 |>ₛ φs) = bosonic then
+      ⟨ofCrAnListF φs, Submodule.mem_span.mpr fun _ a => a ⟨φs, ⟨rfl, h⟩⟩⟩
+    else
+      0
 
-lemma bosonicProjF_ofCrAnListF (φs : List 𝓕.CrAnFieldOp) :
-    bosonicProjF (ofCrAnListF φs) = if h : (𝓕 |>ₛ φs) = bosonic then
-      ⟨ofCrAnListF φs, Submodule.mem_span.mpr fun _ a => a ⟨φs, ⟨rfl, h⟩⟩⟩ else 0 := by
+lemma bosonicProjF_ofCrAnListF (φs : List 𝓕.CrAnFieldOp)
+    : bosonicProjF (ofCrAnListF φs)
+      = if h : (𝓕 |>ₛ φs) = bosonic then
+          ⟨ofCrAnListF φs, Submodule.mem_span.mpr fun _ a => a ⟨φs, ⟨rfl, h⟩⟩⟩
+        else
+          0 := by
   conv_lhs =>
     rw [← ofListBasis_eq_ofList, bosonicProjF, Basis.constr_basis]
 
 set_option backward.isDefEq.respectTransparency false in
-lemma bosonicProjF_of_mem_bosonic (a : 𝓕.FieldOpFreeAlgebra) (h : a ∈ statisticSubmodule bosonic) :
-    bosonicProjF a = ⟨a, h⟩ := by
+lemma bosonicProjF_of_mem_bosonic (a : 𝓕.FieldOpFreeAlgebra) (h : a ∈ statisticSubmodule bosonic)
+    : bosonicProjF a = ⟨a, h⟩ := by
   let p (a : 𝓕.FieldOpFreeAlgebra) (hx : a ∈ statisticSubmodule bosonic) : Prop :=
     bosonicProjF a = ⟨a, hx⟩
   change p a h
@@ -78,9 +81,9 @@ lemma bosonicProjF_of_mem_bosonic (a : 𝓕.FieldOpFreeAlgebra) (h : a ∈ stati
   · intro a x hx hy
     simp_all [p]
 
-lemma bosonicProjF_of_mem_fermionic (a : 𝓕.FieldOpFreeAlgebra)
-    (h : a ∈ statisticSubmodule fermionic) :
-    bosonicProjF a = 0 := by
+lemma bosonicProjF_of_mem_fermionic
+    (a : 𝓕.FieldOpFreeAlgebra) (h : a ∈ statisticSubmodule fermionic)
+    : bosonicProjF a = 0 := by
   let p (a : 𝓕.FieldOpFreeAlgebra) (hx : a ∈ statisticSubmodule fermionic) : Prop :=
     bosonicProjF a = 0
   change p a h
@@ -97,46 +100,51 @@ lemma bosonicProjF_of_mem_fermionic (a : 𝓕.FieldOpFreeAlgebra)
 
 @[simp]
 lemma bosonicProjF_of_bonosic_part
-    (a : DirectSum FieldStatistic (fun i => (statisticSubmodule (𝓕 := 𝓕) i))) :
-    bosonicProjF (a bosonic) = a bosonic := by
+    (a : DirectSum FieldStatistic (fun i => (statisticSubmodule (𝓕 := 𝓕) i)))
+    : bosonicProjF (a bosonic) = a bosonic := by
   apply bosonicProjF_of_mem_bosonic
 
 @[simp]
 lemma bosonicProjF_of_fermionic_part
-    (a : DirectSum FieldStatistic (fun i => (statisticSubmodule (𝓕 := 𝓕) i))) :
-    bosonicProjF (a fermionic).1 = 0 := by
+    (a : DirectSum FieldStatistic (fun i => (statisticSubmodule (𝓕 := 𝓕) i)))
+    : bosonicProjF (a fermionic).1 = 0 := by
   apply bosonicProjF_of_mem_fermionic
   exact Submodule.coe_mem (a.toFun fermionic)
 
 /-- The projection of an element of `FieldOpFreeAlgebra` onto it's fermionic part. -/
 def fermionicProjF : 𝓕.FieldOpFreeAlgebra →ₗ[ℂ] statisticSubmodule (𝓕 := 𝓕) fermionic :=
   Basis.constr ofCrAnListFBasis ℂ fun φs =>
-  if h : (𝓕 |>ₛ φs) = fermionic then
-    ⟨ofCrAnListF φs, Submodule.mem_span.mpr fun _ a => a ⟨φs, ⟨rfl, h⟩⟩⟩
-  else
-    0
+    if h : (𝓕 |>ₛ φs) = fermionic then
+      ⟨ofCrAnListF φs, Submodule.mem_span.mpr fun _ a => a ⟨φs, ⟨rfl, h⟩⟩⟩
+    else
+      0
 
-lemma fermionicProjF_ofCrAnListF (φs : List 𝓕.CrAnFieldOp) :
-    fermionicProjF (ofCrAnListF φs) = if h : (𝓕 |>ₛ φs) = fermionic then
-      ⟨ofCrAnListF φs, Submodule.mem_span.mpr fun _ a => a ⟨φs, ⟨rfl, h⟩⟩⟩ else 0 := by
+lemma fermionicProjF_ofCrAnListF (φs : List 𝓕.CrAnFieldOp)
+    : fermionicProjF (ofCrAnListF φs)
+      = if h : (𝓕 |>ₛ φs) = fermionic then
+          ⟨ofCrAnListF φs, Submodule.mem_span.mpr fun _ a => a ⟨φs, ⟨rfl, h⟩⟩⟩
+        else
+          0 := by
   conv_lhs =>
     rw [← ofListBasis_eq_ofList, fermionicProjF, Basis.constr_basis]
 
-lemma fermionicProjF_ofCrAnListF_if_bosonic (φs : List 𝓕.CrAnFieldOp) :
-    fermionicProjF (ofCrAnListF φs) = if h : (𝓕 |>ₛ φs) = bosonic then
-      0 else ⟨ofCrAnListF φs, Submodule.mem_span.mpr fun _ a => a ⟨φs, ⟨rfl,
-        by simpa using h⟩⟩⟩ := by
+lemma fermionicProjF_ofCrAnListF_if_bosonic (φs : List 𝓕.CrAnFieldOp)
+    : fermionicProjF (ofCrAnListF φs)
+      = if h : (𝓕 |>ₛ φs) = bosonic then
+          0
+        else
+          ⟨ofCrAnListF φs, Submodule.mem_span.mpr fun _ a => a ⟨φs, ⟨rfl, by simpa using h⟩⟩⟩ := by
   rw [fermionicProjF_ofCrAnListF]
   by_cases h1 : (𝓕 |>ₛ φs) = fermionic
   · simp [h1]
-  · simp only [h1, ↓reduceDIte]
+  · simp only [h1, ↓ reduceDIte]
     simp only [neq_fermionic_iff_eq_bosonic] at h1
     simp [h1]
 
 set_option backward.isDefEq.respectTransparency false in
-lemma fermionicProjF_of_mem_fermionic (a : 𝓕.FieldOpFreeAlgebra)
-    (h : a ∈ statisticSubmodule fermionic) :
-    fermionicProjF a = ⟨a, h⟩ := by
+lemma fermionicProjF_of_mem_fermionic
+    (a : 𝓕.FieldOpFreeAlgebra) (h : a ∈ statisticSubmodule fermionic)
+    : fermionicProjF a = ⟨a, h⟩ := by
   let p (a : 𝓕.FieldOpFreeAlgebra) (hx : a ∈ statisticSubmodule fermionic) : Prop :=
     fermionicProjF a = ⟨a, hx⟩
   change p a h
@@ -152,8 +160,8 @@ lemma fermionicProjF_of_mem_fermionic (a : 𝓕.FieldOpFreeAlgebra)
   · intro a x hx hy
     simp_all [p]
 
-lemma fermionicProjF_of_mem_bosonic (a : 𝓕.FieldOpFreeAlgebra)
-    (h : a ∈ statisticSubmodule bosonic) : fermionicProjF a = 0 := by
+lemma fermionicProjF_of_mem_bosonic (a : 𝓕.FieldOpFreeAlgebra) (h : a ∈ statisticSubmodule bosonic)
+    : fermionicProjF a = 0 := by
   let p (a : 𝓕.FieldOpFreeAlgebra) (hx : a ∈ statisticSubmodule bosonic) : Prop :=
     fermionicProjF a = 0
   change p a h
@@ -170,22 +178,22 @@ lemma fermionicProjF_of_mem_bosonic (a : 𝓕.FieldOpFreeAlgebra)
 
 @[simp]
 lemma fermionicProjF_of_bosonic_part
-    (a : DirectSum FieldStatistic (fun i => (statisticSubmodule (𝓕 := 𝓕) i))) :
-    fermionicProjF (a bosonic).1 = 0 := by
+    (a : DirectSum FieldStatistic (fun i => (statisticSubmodule (𝓕 := 𝓕) i)))
+    : fermionicProjF (a bosonic).1 = 0 := by
   apply fermionicProjF_of_mem_bosonic
   exact Submodule.coe_mem (a.toFun bosonic)
 
 @[simp]
 lemma fermionicProjF_of_fermionic_part
-    (a : DirectSum FieldStatistic (fun i => (statisticSubmodule (𝓕 := 𝓕) i))) :
-    fermionicProjF (a fermionic) = a fermionic := by
+    (a : DirectSum FieldStatistic (fun i => (statisticSubmodule (𝓕 := 𝓕) i)))
+    : fermionicProjF (a fermionic) = a fermionic := by
   apply fermionicProjF_of_mem_fermionic
 
-lemma bosonicProjF_add_fermionicProjF (a : 𝓕.FieldOpFreeAlgebra) :
-    a.bosonicProjF + (a.fermionicProjF).1 = a := by
-  let f1 :𝓕.FieldOpFreeAlgebra →ₗ[ℂ] 𝓕.FieldOpFreeAlgebra :=
+lemma bosonicProjF_add_fermionicProjF (a : 𝓕.FieldOpFreeAlgebra)
+    : a.bosonicProjF + (a.fermionicProjF).1 = a := by
+  let f1 : 𝓕.FieldOpFreeAlgebra →ₗ[ℂ] 𝓕.FieldOpFreeAlgebra :=
     (statisticSubmodule bosonic).subtype ∘ₗ bosonicProjF
-  let f2 :𝓕.FieldOpFreeAlgebra →ₗ[ℂ] 𝓕.FieldOpFreeAlgebra :=
+  let f2 : 𝓕.FieldOpFreeAlgebra →ₗ[ℂ] 𝓕.FieldOpFreeAlgebra :=
     (statisticSubmodule fermionic).subtype ∘ₗ fermionicProjF
   change (f1 + f2) a = LinearMap.id (R := ℂ) a
   refine LinearMap.congr_fun (ofCrAnListFBasis.ext fun φs ↦ ?_) a
@@ -197,10 +205,10 @@ lemma bosonicProjF_add_fermionicProjF (a : 𝓕.FieldOpFreeAlgebra) :
   · simp [h]
 
 lemma coeAddMonoidHom_apply_eq_bosonic_plus_fermionic
-    (a : DirectSum FieldStatistic (fun i => (statisticSubmodule (𝓕 := 𝓕) i))) :
-    DirectSum.coeAddMonoidHom statisticSubmodule a = a.1 bosonic + a.1 fermionic := by
-  let C : DirectSum FieldStatistic (fun i => (statisticSubmodule (𝓕 := 𝓕) i)) → Prop :=
-    fun a => DirectSum.coeAddMonoidHom statisticSubmodule a = a.1 bosonic + a.1 fermionic
+    (a : DirectSum FieldStatistic (fun i => (statisticSubmodule (𝓕 := 𝓕) i)))
+    : DirectSum.coeAddMonoidHom statisticSubmodule a = a.1 bosonic + a.1 fermionic := by
+  let C : DirectSum FieldStatistic (fun i => (statisticSubmodule (𝓕 := 𝓕) i)) → Prop := fun a =>
+    DirectSum.coeAddMonoidHom statisticSubmodule a = a.1 bosonic + a.1 fermionic
   change C a
   apply DirectSum.induction_on
   · simp [C]
@@ -215,12 +223,13 @@ lemma coeAddMonoidHom_apply_eq_bosonic_plus_fermionic
     abel
 
 lemma directSum_eq_bosonic_plus_fermionic
-    (a : DirectSum FieldStatistic (fun i => (statisticSubmodule (𝓕 := 𝓕) i))) :
-    a = (DirectSum.of (fun i => ↥(statisticSubmodule i)) bosonic) (a bosonic) +
-    (DirectSum.of (fun i => ↥(statisticSubmodule i)) fermionic) (a fermionic) := by
-  let C : DirectSum FieldStatistic (fun i => (statisticSubmodule (𝓕 := 𝓕) i)) → Prop :=
-    fun a => a = (DirectSum.of (fun i => ↥(statisticSubmodule i)) bosonic) (a bosonic) +
-    (DirectSum.of (fun i => ↥(statisticSubmodule i)) fermionic) (a fermionic)
+    (a : DirectSum FieldStatistic (fun i => (statisticSubmodule (𝓕 := 𝓕) i)))
+    : a
+      = (DirectSum.of (fun i => ↥(statisticSubmodule i)) bosonic) (a bosonic)
+        + (DirectSum.of (fun i => ↥(statisticSubmodule i)) fermionic) (a fermionic) := by
+  let C : DirectSum FieldStatistic (fun i => (statisticSubmodule (𝓕 := 𝓕) i)) → Prop := fun a =>
+    a = (DirectSum.of (fun i => ↥(statisticSubmodule i)) bosonic) (a bosonic)
+      + (DirectSum.of (fun i => ↥(statisticSubmodule i)) fermionic) (a fermionic)
   change C a
   apply DirectSum.induction_on
   · simp [C]
@@ -243,14 +252,16 @@ lemma directSum_eq_bosonic_plus_fermionic
     conv_lhs => rw [hx, hy]
     abel
 
-/-- For a field specification `𝓕`, the algebra `𝓕.FieldOpFreeAlgebra` is graded by `FieldStatistic`.
-  Those `ofCrAnListF φs` for which `φs` has an overall `bosonic` statistic
-  (i.e. `𝓕 |>ₛ φs = bosonic`) span `bosonic`
-  submodule, whilst those `ofCrAnListF φs` for which `φs` has an overall `fermionic` statistic
-  (i.e. `𝓕 |>ₛ φs = fermionic`) span
-  the `fermionic` submodule. -/
-instance fieldOpFreeAlgebraGrade :
-    GradedAlgebra (A := 𝓕.FieldOpFreeAlgebra) statisticSubmodule where
+/--
+For a field specification `𝓕`, the algebra `𝓕.FieldOpFreeAlgebra` is graded by `FieldStatistic`.
+Those `ofCrAnListF φs` for which `φs` has an overall `bosonic` statistic
+(i.e. `𝓕 |>ₛ φs = bosonic`) span `bosonic`
+submodule, whilst those `ofCrAnListF φs` for which `φs` has an overall `fermionic` statistic
+(i.e. `𝓕 |>ₛ φs = fermionic`) span
+the `fermionic` submodule.
+-/
+instance fieldOpFreeAlgebraGrade
+    : GradedAlgebra (A := 𝓕.FieldOpFreeAlgebra) statisticSubmodule where
   one_mem := by
     simp only [statisticSubmodule]
     refine Submodule.mem_span.mpr fun p a => a ?_
@@ -296,8 +307,9 @@ instance fieldOpFreeAlgebraGrade :
       simp only [Algebra.mul_smul_comm, p]
       exact Submodule.smul_mem _ _ h1
     · exact h2
-  decompose' a := DirectSum.of (fun i => (statisticSubmodule (𝓕 := 𝓕) i)) bosonic (bosonicProjF a)
-    + DirectSum.of (fun i => (statisticSubmodule (𝓕 := 𝓕) i)) fermionic (fermionicProjF a)
+  decompose' a :=
+    DirectSum.of (fun i => (statisticSubmodule (𝓕 := 𝓕) i)) bosonic (bosonicProjF a)
+      + DirectSum.of (fun i => (statisticSubmodule (𝓕 := 𝓕) i)) fermionic (fermionicProjF a)
   left_inv a := by
     trans a.bosonicProjF + fermionicProjF a
     · simp
@@ -309,17 +321,19 @@ instance fieldOpFreeAlgebraGrade :
       fermionicProjF_of_fermionic_part, zero_add]
     conv_rhs => rw [directSum_eq_bosonic_plus_fermionic a]
 
-lemma eq_zero_of_bosonic_and_fermionic {a : 𝓕.FieldOpFreeAlgebra}
-    (hb : a ∈ statisticSubmodule bosonic) (hf : a ∈ statisticSubmodule fermionic) : a = 0 := by
+lemma eq_zero_of_bosonic_and_fermionic
+    {a : 𝓕.FieldOpFreeAlgebra}
+    (hb : a ∈ statisticSubmodule bosonic) (hf : a ∈ statisticSubmodule fermionic)
+    : a = 0 := by
   have ha := bosonicProjF_of_mem_bosonic a hb
   have hb := fermionicProjF_of_mem_fermionic a hf
   have hc := (bosonicProjF_add_fermionicProjF a)
   rw [ha, hb] at hc
   simpa using hc
 
-lemma bosonicProjF_mul (a b : 𝓕.FieldOpFreeAlgebra) :
-    (a * b).bosonicProjF.1 = a.bosonicProjF.1 * b.bosonicProjF.1
-    + a.fermionicProjF.1 * b.fermionicProjF.1 := by
+lemma bosonicProjF_mul (a b : 𝓕.FieldOpFreeAlgebra)
+    : (a * b).bosonicProjF.1
+      = a.bosonicProjF.1 * b.bosonicProjF.1 + a.fermionicProjF.1 * b.fermionicProjF.1 := by
   conv_lhs =>
     rw [← bosonicProjF_add_fermionicProjF a]
     rw [← bosonicProjF_add_fermionicProjF b]
@@ -366,9 +380,9 @@ lemma bosonicProjF_mul (a b : 𝓕.FieldOpFreeAlgebra) :
     simp only [SetLike.coe_mem]
     simp
 
-lemma fermionicProjF_mul (a b : 𝓕.FieldOpFreeAlgebra) :
-    (a * b).fermionicProjF.1 = a.bosonicProjF.1 * b.fermionicProjF.1
-    + a.fermionicProjF.1 * b.bosonicProjF.1 := by
+lemma fermionicProjF_mul (a b : 𝓕.FieldOpFreeAlgebra)
+    : (a * b).fermionicProjF.1
+      = a.bosonicProjF.1 * b.fermionicProjF.1 + a.fermionicProjF.1 * b.bosonicProjF.1 := by
   conv_lhs =>
     rw [← bosonicProjF_add_fermionicProjF a]
     rw [← bosonicProjF_add_fermionicProjF b]

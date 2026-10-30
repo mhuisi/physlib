@@ -72,10 +72,12 @@ variable (B : D ≃L[ℝ] E) (x₀ x : E)
 ## A. Standard, real-valued
 -/
 
-/-- Crude bounds on the norms of iterated Fréchet derivatives of `innerSL ℝ`
-  in the form required by `norm_iteratedFDeriv_comp_le`. -/
-private lemma norm_iteratedFDeriv_innerSL_le_pow {n : ℕ} (hn : 1 ≤ n) :
-    ‖iteratedFDeriv ℝ n (fun x : E ↦ innerSL ℝ x x) x‖ ≤ (2 + ‖x‖ ^ 2) ^ n := by
+/--
+Crude bounds on the norms of iterated Fréchet derivatives of `innerSL ℝ`
+in the form required by `norm_iteratedFDeriv_comp_le`.
+-/
+private lemma norm_iteratedFDeriv_innerSL_le_pow {n : ℕ} (hn : 1 ≤ n)
+    : ‖iteratedFDeriv ℝ n (fun x : E ↦ innerSL ℝ x x) x‖ ≤ (2 + ‖x‖ ^ 2) ^ n := by
   have h_id₁ : ‖iteratedFDeriv ℝ 1 id x‖ ≤ 1 := by simp [norm_id_le]
   have h_id : ∀ k ≥ 2, ‖iteratedFDeriv ℝ k id x‖ = 0 := by
     intro k hk
@@ -85,10 +87,10 @@ private lemma norm_iteratedFDeriv_innerSL_le_pow {n : ℕ} (hn : 1 ≤ n) :
   calc
     _ ≤ ∑ k ∈ Finset.range (n + 1),
         n.choose k * ‖iteratedFDeriv ℝ k id x‖ * ‖iteratedFDeriv ℝ (n - k) id x‖ :=
-      (innerSL ℝ).norm_iteratedFDeriv_le_of_bilinear_of_le_one
-        contDiff_id contDiff_id x (Nat.cast_le.mpr n.le_succ) (norm_innerSL_le ℝ)
-    _ = n.choose 0 * ‖iteratedFDeriv ℝ 0 id x‖ * ‖iteratedFDeriv ℝ (n - 0) id x‖ +
-        n.choose 1 * ‖iteratedFDeriv ℝ 1 id x‖ * ‖iteratedFDeriv ℝ (n - 1) id x‖ := by
+      (innerSL ℝ).norm_iteratedFDeriv_le_of_bilinear_of_le_one contDiff_id contDiff_id x
+        (Nat.cast_le.mpr n.le_succ) (norm_innerSL_le ℝ)
+    _ = n.choose 0 * ‖iteratedFDeriv ℝ 0 id x‖ * ‖iteratedFDeriv ℝ (n - 0) id x‖
+        + n.choose 1 * ‖iteratedFDeriv ℝ 1 id x‖ * ‖iteratedFDeriv ℝ (n - 1) id x‖ := by
       refine Finset.sum_eq_add_of_mem 0 1 ?_ ?_ zero_ne_one fun k hk hk₀₁ ↦ ?_
       · simp
       · simp [Nat.zero_lt_of_lt hn]
@@ -102,8 +104,8 @@ private lemma norm_iteratedFDeriv_innerSL_le_pow {n : ℕ} (hn : 1 ≤ n) :
   · rw [h_id n (by omega), h_id (n - 1) (by omega), mul_zero, mul_zero, add_zero]
     positivity
 
-private lemma pow_mul_exp_bddAbove {s : ℝ} (hs : 0 ≤ s) (n : ℕ) :
-    ∃ C > 0, ∀ x ≥ 0, x ^ s * (2 + x) ^ n * rexp (-2⁻¹ * x) ≤ C := by
+private lemma pow_mul_exp_bddAbove {s : ℝ} (hs : 0 ≤ s) (n : ℕ)
+    : ∃ C > 0, ∀ x ≥ 0, x ^ s * (2 + x) ^ n * rexp (-2⁻¹ * x) ≤ C := by
   let b : ℝ → ℝ := fun x ↦ x ^ s * (2 + x) ^ n * rexp (-2⁻¹ * x)
   have hb : Continuous b := by fun_prop
   have htop : Tendsto b atTop (nhds 0) := by
@@ -134,10 +136,12 @@ private lemma pow_mul_exp_bddAbove {s : ℝ} (hs : 0 ≤ s) (n : ℕ) :
   · exact le_max_of_le_right (hgM x <| (le_abs_self _).trans (Std.le_of_not_ge hxM)).le
 
 variable (E) in
-/-- The (unnormalized) real-valued standard Gaussian `exp (-2⁻¹ * ‖x‖ ^ 2)` as a Schwartz map.
+/--
+The (unnormalized) real-valued standard Gaussian `exp (-2⁻¹ * ‖x‖ ^ 2)` as a Schwartz map.
 
-  This definition is used to construct the general RCLike-valued Gaussian and the preferred version
-  to use is `gaussian ℝ B x₀` (or `stdGaussian E ℝ` for mean zero, variance one). -/
+This definition is used to construct the general RCLike-valued Gaussian and the preferred version
+to use is `gaussian ℝ B x₀` (or `stdGaussian E ℝ` for mean zero, variance one).
+-/
 def realStdGaussian : 𝓢(E, ℝ) where
   toFun x := rexp (-2⁻¹ * ‖x‖ ^ 2)
   smooth' := contDiff_exp.fun_comp <| contDiff_const.mul <| contDiff_norm_sq ℝ
@@ -194,30 +198,31 @@ even when the Gaussian is complex-valued.
 variable [CompleteSpace D] [CompleteSpace E]
 
 /-- Multiplication by a real linear exponential shifts and rescales a general Gaussian. -/
-lemma exp_mul_gaussian (v : E) :
-    (ofReal (rexp (inner ℝ v x)) : 𝕜) * gaussian 𝕜 B x₀ x =
-      (ofReal (rexp (inner ℝ v x₀ + 2⁻¹ * ‖B.toContinuousLinearMap.adjoint v‖ ^ 2)) : 𝕜) *
-        gaussian 𝕜 B (x₀ + B (B.toContinuousLinearMap.adjoint v)) x := by
+lemma exp_mul_gaussian (v : E)
+    : (ofReal (rexp (inner ℝ v x)) : 𝕜) * gaussian 𝕜 B x₀ x
+      = (ofReal (rexp (inner ℝ v x₀ + 2⁻¹ * ‖B.toContinuousLinearMap.adjoint v‖ ^ 2)) : 𝕜)
+        * gaussian 𝕜 B (x₀ + B (B.toContinuousLinearMap.adjoint v)) x := by
   rw [gaussian_apply, gaussian_apply, ← ofReal_mul, ← ofReal_mul, ← exp_add, ← exp_add]
   congr 2
-  rw [← sub_sub, map_sub B.symm (x - x₀), B.symm_apply_apply, norm_sub_sq_real,
-    adjoint_inner_right, ContinuousLinearEquiv.coe_coe, B.apply_symm_apply,
-    ← real_inner_comm (x - x₀) v, inner_sub_right]
+  rw [← sub_sub, map_sub B.symm (x - x₀), B.symm_apply_apply, norm_sub_sq_real, adjoint_inner_right,
+    ContinuousLinearEquiv.coe_coe, B.apply_symm_apply, ← real_inner_comm (x - x₀) v,
+    inner_sub_right]
   ring
 
-/-- The product of `gaussian 𝕜 B x₀` with the real exponential `exp ⟪v, x⟫`, as a Schwartz map.
+/--
+The product of `gaussian 𝕜 B x₀` with the real exponential `exp ⟪v, x⟫`, as a Schwartz map.
 It has center `x₀ + B (Bᵀ v)` and the same covariance, with scale factor
-`exp (⟪v, x₀⟫ + 2⁻¹ * ‖Bᵀ v‖ ^ 2)`. -/
+`exp (⟪v, x₀⟫ + 2⁻¹ * ‖Bᵀ v‖ ^ 2)`.
+-/
 def gaussianExpMul (v : E) : 𝓢(E, 𝕜) :=
-  (ofReal (rexp (inner ℝ v x₀ + 2⁻¹ * ‖B.toContinuousLinearMap.adjoint v‖ ^ 2)) : 𝕜) •
-    gaussian 𝕜 B (x₀ + B (B.toContinuousLinearMap.adjoint v))
+  (ofReal (rexp (inner ℝ v x₀ + 2⁻¹ * ‖B.toContinuousLinearMap.adjoint v‖ ^ 2)) : 𝕜)
+    • gaussian 𝕜 B (x₀ + B (B.toContinuousLinearMap.adjoint v))
 
 /-- Evaluation of the bundled product agrees with pointwise multiplication by the exponential. -/
 @[simp]
-lemma gaussianExpMul_apply (v : E) :
-    gaussianExpMul 𝕜 B x₀ v x = (ofReal (rexp (inner ℝ v x)) : 𝕜) * gaussian 𝕜 B x₀ x := by
-  simpa only [gaussianExpMul, smul_apply, smul_eq_mul] using
-    (exp_mul_gaussian 𝕜 B x₀ x v).symm
+lemma gaussianExpMul_apply (v : E)
+    : gaussianExpMul 𝕜 B x₀ v x = (ofReal (rexp (inner ℝ v x)) : 𝕜) * gaussian 𝕜 B x₀ x := by
+  simpa only [gaussianExpMul, smul_apply, smul_eq_mul] using (exp_mul_gaussian 𝕜 B x₀ x v).symm
 
 end
 

@@ -60,16 +60,15 @@ variable {H : Type*} [NormedAddCommGroup H] [InnerProductSpace ℂ H] [CompleteS
 structure BoundedNormalSpectralData (U : H →L[ℂ] H) where
   /-- The spectral measure. -/
   spectralMeasure : WOTSpectralMeasure ℂ H
-  reconstruction : ∀ x y : H,
-    spectralMeasure.complexWeakIntegral id x y = ⟪y, U x⟫_ℂ
+  reconstruction : ∀ x y : H, spectralMeasure.complexWeakIntegral id x y = ⟪y, U x⟫_ℂ
 
 namespace BoundedNormalSpectralData
 
 variable {U : H →L[ℂ] H}
 
 @[ext]
-lemma ext {D E : BoundedNormalSpectralData U}
-    (h : D.spectralMeasure = E.spectralMeasure) : D = E := by
+lemma ext {D E : BoundedNormalSpectralData U} (h : D.spectralMeasure = E.spectralMeasure)
+    : D = E := by
   cases D with
   | mk μ hμ =>
     cases E with
@@ -77,16 +76,16 @@ lemma ext {D E : BoundedNormalSpectralData U}
       cases h
       rfl
 
-/- A bounded-integral equality is a convenient representation-independent uniqueness criterion.
+/-
+A bounded-integral equality is a convenient representation-independent uniqueness criterion.
 The stronger hypothesis is intentional: reconstruction of only the identity multiplier does not
 by itself expose the spectral projections, whereas equality for all bounded Borel multipliers does.
-    -/
-lemma ext_of_boundedIntegral_eq {D E : BoundedNormalSpectralData U}
-    (h : ∀ (f : ℂ → ℂ) (hf : Measurable f)
-      (hfb : ∃ C : ℝ, ∀ z, ‖f z‖ ≤ C),
-      D.spectralMeasure.boundedIntegral f hf hfb =
-        E.spectralMeasure.boundedIntegral f hf hfb) :
-    D = E := by
+-/
+lemma ext_of_boundedIntegral_eq
+    {D E : BoundedNormalSpectralData U}
+    (h : ∀ (f : ℂ → ℂ) (hf : Measurable f) (hfb : ∃ C : ℝ, ∀ z, ‖f z‖ ≤ C),
+      D.spectralMeasure.boundedIntegral f hf hfb = E.spectralMeasure.boundedIntegral f hf hfb)
+    : D = E := by
   apply ext
   exact WOTSpectralMeasure.ext_of_boundedIntegral_eq h
 
@@ -94,23 +93,23 @@ end BoundedNormalSpectralData
 
 /-! ## B. Bounded unitary spectral data -/
 
-/-- A spectral measure of the unitary `u`, supported on the unit circle and giving no mass to `1`.
+/--
+A spectral measure of the unitary `u`, supported on the unit circle and giving no mass to `1`.
 -/
 structure BoundedUnitarySpectralData (u : H ≃ₗᵢ[ℂ] H) where
   /-- The spectral measure. -/
   spectralMeasure : WOTSpectralMeasure ℂ H
-  support_away_one : ∀ S : Set ℂ, MeasurableSet S →
-    spectralMeasure S = spectralMeasure (S ∩ {z | ‖z‖ = 1 ∧ z ≠ 1})
-  reconstruction : ∀ x y : H,
-    spectralMeasure.complexWeakIntegral id x y = ⟪y, u x⟫_ℂ
+  support_away_one
+    : ∀ S : Set ℂ, MeasurableSet S → spectralMeasure S = spectralMeasure (S ∩ {z | ‖z‖ = 1 ∧ z ≠ 1})
+  reconstruction : ∀ x y : H, spectralMeasure.complexWeakIntegral id x y = ⟪y, u x⟫_ℂ
 
 namespace BoundedUnitarySpectralData
 
 variable {u : H ≃ₗᵢ[ℂ] H}
 
 @[ext]
-lemma ext {D E : BoundedUnitarySpectralData u}
-    (h : D.spectralMeasure = E.spectralMeasure) : D = E := by
+lemma ext {D E : BoundedUnitarySpectralData u} (h : D.spectralMeasure = E.spectralMeasure)
+    : D = E := by
   cases D with
   | mk μ hμ hμ' =>
     cases E with
@@ -118,12 +117,11 @@ lemma ext {D E : BoundedUnitarySpectralData u}
       cases h
       rfl
 
-lemma ext_of_boundedIntegral_eq {D E : BoundedUnitarySpectralData u}
-    (h : ∀ (f : ℂ → ℂ) (hf : Measurable f)
-      (hfb : ∃ C : ℝ, ∀ z, ‖f z‖ ≤ C),
-      D.spectralMeasure.boundedIntegral f hf hfb =
-        E.spectralMeasure.boundedIntegral f hf hfb) :
-    D = E := by
+lemma ext_of_boundedIntegral_eq
+    {D E : BoundedUnitarySpectralData u}
+    (h : ∀ (f : ℂ → ℂ) (hf : Measurable f) (hfb : ∃ C : ℝ, ∀ z, ‖f z‖ ≤ C),
+      D.spectralMeasure.boundedIntegral f hf hfb = E.spectralMeasure.boundedIntegral f hf hfb)
+    : D = E := by
   apply ext
   exact WOTSpectralMeasure.ext_of_boundedIntegral_eq h
 
@@ -133,15 +131,15 @@ variable {u : H ≃ₗᵢ[ℂ] H} (D : BoundedUnitarySpectralData u)
 def realSpectralMeasure : WOTSpectralMeasure ℝ H :=
   WOTSpectralMeasure.cayleyInverseMap D.spectralMeasure
 
-lemma cayleyMap_realSpectralMeasure :
-    WOTSpectralMeasure.cayleyMap D.realSpectralMeasure = D.spectralMeasure := by
+lemma cayleyMap_realSpectralMeasure
+    : WOTSpectralMeasure.cayleyMap D.realSpectralMeasure = D.spectralMeasure := by
   rw [WOTSpectralMeasure.mk.injEq]
   apply MeasureTheory.VectorMeasure.ext
   intro S hS
   change ((D.realSpectralMeasure.map cayley measurable_cayley) S) = D.spectralMeasure S
   rw [D.realSpectralMeasure.map_apply cayley measurable_cayley hS]
-  change ((D.spectralMeasure.map cayleyInverse measurable_cayleyInverse)
-      (cayley ⁻¹' S)) = D.spectralMeasure S
+  change ((D.spectralMeasure.map cayleyInverse measurable_cayleyInverse) (cayley ⁻¹' S))
+    = D.spectralMeasure S
   rw [D.spectralMeasure.map_apply cayleyInverse measurable_cayleyInverse
     (hS.preimage measurable_cayley)]
   have hL : MeasurableSet (cayleyInverse ⁻¹' cayley ⁻¹' S) :=
@@ -158,16 +156,17 @@ lemma cayleyMap_realSpectralMeasure :
     refine ⟨?_, hunit⟩
     simpa [Set.mem_preimage, hz'] using hz
 
-/-- The real measure recovered from bounded Cayley data is unique among real measures with the
-same Cayley pushforward. -/
+/--
+The real measure recovered from bounded Cayley data is unique among real measures with the
+same Cayley pushforward.
+-/
 lemma realSpectralMeasure_eq_of_cayleyMap_eq
-    {μS : WOTSpectralMeasure ℝ H}
-    (hμ : WOTSpectralMeasure.cayleyMap μS = D.spectralMeasure) :
-    D.realSpectralMeasure = μS := by
+    {μS : WOTSpectralMeasure ℝ H} (hμ : WOTSpectralMeasure.cayleyMap μS = D.spectralMeasure)
+    : D.realSpectralMeasure = μS := by
   apply WOTSpectralMeasure.cayleyMap_injective
   calc
-    WOTSpectralMeasure.cayleyMap D.realSpectralMeasure = D.spectralMeasure :=
-      D.cayleyMap_realSpectralMeasure
+    WOTSpectralMeasure.cayleyMap D.realSpectralMeasure
+      = D.spectralMeasure := D.cayleyMap_realSpectralMeasure
     _ = WOTSpectralMeasure.cayleyMap μS := hμ.symm
 
 end BoundedUnitarySpectralData

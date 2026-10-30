@@ -75,8 +75,10 @@ dual basis vector in direction `μ` and time coordinate `x⁰ = ct`.
 
 -/
 
-/-- The algebra of derivative symbols on spacetime, the polynomials in four commuting symbols
-  `∂_μ`. -/
+/--
+The algebra of derivative symbols on spacetime, the polynomials in four commuting symbols
+`∂_μ`.
+-/
 abbrev SpaceTimeDerivAlgebraℂ : Type := SymmetricAlgebra ℂ (Module.Dual ℂ Lorentz.ComplexCoVector)
 
 namespace SpaceTimeDerivAlgebraℂ
@@ -102,31 +104,32 @@ scoped notation "∂^[" s "]" => basis s
 /-- The derivative symbol `∂_μ` in direction `μ`, the monomial `basis {μ}`. -/
 scoped notation "∂[" μ "]" => basis {μ}
 
-/-- The monomial `∂^s` is the polynomial monomial whose exponents are the multiplicities in
-  `s`. -/
-lemma basis_apply (s : Multiset (Fin 1 ⊕ Fin 3)) :
-    ∂^[s] = (SymmetricAlgebra.equivMvPolynomial Lorentz.ComplexCoVector.basis.dualBasis).symm
-      (MvPolynomial.monomial (Multiset.toFinsupp s) 1) := by
+/--
+The monomial `∂^s` is the polynomial monomial whose exponents are the multiplicities in
+`s`.
+-/
+lemma basis_apply (s : Multiset (Fin 1 ⊕ Fin 3))
+    : ∂^[s]
+      = (SymmetricAlgebra.equivMvPolynomial Lorentz.ComplexCoVector.basis.dualBasis).symm
+        (MvPolynomial.monomial (Multiset.toFinsupp s) 1) := by
   rw [basis, Module.Basis.reindex_apply, Equiv.symm_symm]
   rfl
 
 /-- The empty monomial is the unit. -/
 @[simp]
 lemma basis_zero : ∂^[0] = 1 := by
-  rw [basis_apply, Multiset.toFinsupp_zero, MvPolynomial.monomial_zero', MvPolynomial.C_1,
-    map_one]
+  rw [basis_apply, Multiset.toFinsupp_zero, MvPolynomial.monomial_zero', MvPolynomial.C_1, map_one]
 
 /-- The monomial of a single direction `μ` is the derivative symbol `∂_μ`. -/
-lemma basis_singleton (μ : Fin 1 ⊕ Fin 3) :
-    ∂[μ] = SymmetricAlgebra.ι ℂ _ (Lorentz.ComplexCoVector.basis.dualBasis μ) := by
+lemma basis_singleton (μ : Fin 1 ⊕ Fin 3)
+    : ∂[μ] = SymmetricAlgebra.ι ℂ _ (Lorentz.ComplexCoVector.basis.dualBasis μ) := by
   rw [basis_apply, Multiset.toFinsupp_singleton]
   exact SymmetricAlgebra.equivMvPolynomial_symm_X _ μ
 
 /-- Monomials multiply by adding multisets, `∂^s ∂^t = ∂^(s + t)`. -/
-lemma basis_mul (s t : Multiset (Fin 1 ⊕ Fin 3)) :
-    ∂^[s] * ∂^[t] = ∂^[s + t] := by
-  rw [basis_apply, basis_apply, basis_apply, ← map_mul, MvPolynomial.monomial_mul_monomial,
-    mul_one, Multiset.toFinsupp_add]
+lemma basis_mul (s t : Multiset (Fin 1 ⊕ Fin 3)) : ∂^[s] * ∂^[t] = ∂^[s + t] := by
+  rw [basis_apply, basis_apply, basis_apply, ← map_mul, MvPolynomial.monomial_mul_monomial, mul_one,
+    Multiset.toFinsupp_add]
 
 /-!
 
@@ -139,8 +142,10 @@ polynomials). On the Taylor series of a field it gives `(∂^s φ)(x₀)`, by
 
 -/
 
-/-- The pairing of a symbol `P` with a series `f`, given by the value of `P f` at the base
-  point. -/
+/--
+The pairing of a symbol `P` with a series `f`, given by the value of `P f` at the base
+point.
+-/
 noncomputable def pairing : SpaceTimeDerivAlgebraℂ →ₗ[ℂ] SpaceTimeAlgebra →ₗ[ℂ] ℂ :=
   basis.constr ℂ fun s => LinearMap.proj s ∘ₗ derivValuesEquiv.toLinearMap
 
@@ -155,8 +160,8 @@ the symbol `∂_μ²` paired with the series `(x^μ)²` gives `2`, while the coe
 -/
 
 /-- The monomial `∂^s` pairs with `f` to the base-point value `(∂^s f)(x₀)`. -/
-lemma pairing_basis (s : Multiset (Fin 1 ⊕ Fin 3)) (f : SpaceTimeAlgebra) :
-    pairing ∂^[s] f = constantCoeff (iteratedPDeriv s f) := by
+lemma pairing_basis (s : Multiset (Fin 1 ⊕ Fin 3)) (f : SpaceTimeAlgebra)
+    : pairing (∂^[s]) f = constantCoeff (iteratedPDeriv s f) := by
   rw [pairing, Module.Basis.constr_basis]
   rfl
 
@@ -164,14 +169,15 @@ lemma pairing_basis (s : Multiset (Fin 1 ⊕ Fin 3)) (f : SpaceTimeAlgebra) :
 lemma pairing_one (f : SpaceTimeAlgebra) : pairing 1 f = constantCoeff f := by
   rw [← basis_zero, pairing_basis, iteratedPDeriv_zero]
 
-/-- Pairing a symbol with the series `x^s` gives `s!` times the coefficient of `∂^s` in the
-  symbol. -/
-lemma pairing_monomial (p : SpaceTimeDerivAlgebraℂ) (s : Multiset (Fin 1 ⊕ Fin 3)) :
-    pairing p (monomial (Multiset.toFinsupp s) 1) =
-      ((∏ ν, (s.count ν).factorial : ℕ) : ℂ) * basis.repr p s := by
+/--
+Pairing a symbol with the series `x^s` gives `s!` times the coefficient of `∂^s` in the
+symbol.
+-/
+lemma pairing_monomial (p : SpaceTimeDerivAlgebraℂ) (s : Multiset (Fin 1 ⊕ Fin 3))
+    : pairing p (monomial (Multiset.toFinsupp s) 1)
+      = ((∏ ν, (s.count ν).factorial : ℕ) : ℂ) * basis.repr p s := by
   classical
-  rw [pairing, Module.Basis.constr_apply, Finsupp.sum, LinearMap.sum_apply,
-    Finset.sum_eq_single s]
+  rw [pairing, Module.Basis.constr_apply, Finsupp.sum, LinearMap.sum_apply, Finset.sum_eq_single s]
   · simp [constantCoeff_iteratedPDeriv, mul_comm]
   · intro t _ hts
     simp [constantCoeff_iteratedPDeriv, coeff_monomial, Multiset.toFinsupp.injective.ne hts]
@@ -196,8 +202,8 @@ lemma pairing_injective : Function.Injective pairing := by
   rw [← mul_right_inj' hs, ← pairing_monomial, ← pairing_monomial, h]
 
 /-- Symbols that pair equally with every series are equal. -/
-lemma ext_of_pairing_eq {p q : SpaceTimeDerivAlgebraℂ} (h : ∀ f, pairing p f = pairing q f) :
-    p = q :=
+lemma ext_of_pairing_eq {p q : SpaceTimeDerivAlgebraℂ} (h : ∀ f, pairing p f = pairing q f)
+    : p = q :=
   pairing_injective (LinearMap.ext h)
 
 /-!
@@ -210,14 +216,14 @@ Appending `∂_μ` to a symbol amounts to differentiating the series along `μ`,
 -/
 
 /-- Multiplying a symbol by `∂_μ` corresponds to applying `pderiv μ` to the series. -/
-lemma pairing_mul_basis_singleton (p : SpaceTimeDerivAlgebraℂ) (μ : Fin 1 ⊕ Fin 3)
-    (f : SpaceTimeAlgebra) :
-    pairing (p * ∂[μ]) f = pairing p (pderiv μ f) := by
-  have h : pairing.flip f ∘ₗ LinearMap.mulRight ℂ ∂[μ] =
-      pairing.flip (pderiv μ f) := basis.ext fun s => by
-    rw [LinearMap.comp_apply, LinearMap.mulRight_apply, LinearMap.flip_apply,
-      LinearMap.flip_apply, basis_mul, pairing_basis, pairing_basis, add_comm,
-      Multiset.singleton_add, iteratedPDeriv_cons]
+lemma pairing_mul_basis_singleton
+    (p : SpaceTimeDerivAlgebraℂ) (μ : Fin 1 ⊕ Fin 3) (f : SpaceTimeAlgebra)
+    : pairing (p * ∂[μ]) f = pairing p (pderiv μ f) := by
+  have h : pairing.flip f ∘ₗ LinearMap.mulRight ℂ ∂[μ] = pairing.flip (pderiv μ f) :=
+    basis.ext fun s => by
+      rw [LinearMap.comp_apply, LinearMap.mulRight_apply, LinearMap.flip_apply,
+        LinearMap.flip_apply, basis_mul, pairing_basis, pairing_basis, add_comm,
+        Multiset.singleton_add, iteratedPDeriv_cons]
   exact LinearMap.congr_fun h p
 
 /-!
@@ -232,18 +238,25 @@ symbols, gives a symbol that pairs with `f` as the original pairs with `χ f`.
 -/
 
 /-- Pairing `∂^s` with a product `χ f` expands by the Leibniz rule. -/
-lemma pairing_basis_mul (s : Multiset (Fin 1 ⊕ Fin 3)) (χ f : SpaceTimeAlgebra) :
-    pairing ∂^[s] (χ * f) =
-      (s.antidiagonal.map fun t =>
-        constantCoeff (iteratedPDeriv t.1 χ) * pairing ∂^[t.2] f).sum := by
+lemma pairing_basis_mul (s : Multiset (Fin 1 ⊕ Fin 3)) (χ f : SpaceTimeAlgebra)
+    : pairing (∂^[s]) (χ * f)
+      = (s.antidiagonal.map fun t =>
+        constantCoeff (iteratedPDeriv t.1 χ) * pairing (∂^[t.2]) f).sum := by
   simp only [pairing_basis, constantCoeff_iteratedPDeriv_mul]
 
-/-- Replacing each monomial `∂^s` of `p` by its Leibniz expansion with `χ` gives a symbol that
-  pairs with `f` as `p` pairs with `χ f`. -/
-lemma pairing_constr_leibniz (χ : SpaceTimeAlgebra) (p : SpaceTimeDerivAlgebraℂ)
-    (f : SpaceTimeAlgebra) :
-    pairing (basis.constr ℂ (fun s => (s.antidiagonal.map fun t =>
-      constantCoeff (iteratedPDeriv t.1 χ) • ∂^[t.2]).sum) p) f = pairing p (χ * f) := by
+/--
+Replacing each monomial `∂^s` of `p` by its Leibniz expansion with `χ` gives a symbol that
+pairs with `f` as `p` pairs with `χ f`.
+-/
+lemma pairing_constr_leibniz
+    (χ : SpaceTimeAlgebra) (p : SpaceTimeDerivAlgebraℂ) (f : SpaceTimeAlgebra)
+    : pairing
+        (basis.constr ℂ
+          (fun s =>
+            (s.antidiagonal.map fun t => constantCoeff (iteratedPDeriv t.1 χ) • ∂^[t.2]).sum)
+          p)
+        f
+      = pairing p (χ * f) := by
   show (pairing.flip f ∘ₗ _) p = pairing.flip (χ * f) p
   refine LinearMap.congr_fun (basis.ext fun s => ?_) p
   simp [pairing_basis_mul, map_multiset_sum, Multiset.map_map, Function.comp_def]

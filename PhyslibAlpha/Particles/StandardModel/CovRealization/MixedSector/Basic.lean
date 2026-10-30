@@ -54,12 +54,11 @@ namespace StandardModel
 
 open TensorProduct Matrix MatrixGroups Lorentz
 
-
 namespace CovAlgebraRealization
 
-variable {B : Type} [Ring B] [Algebra ℂ B]
-  {repGauge : Representation ℂ GaugeGroupI B}
-  {repLorentz : Representation ℂ SL(2,ℂ) B}
+variable
+  {B : Type} [Ring B] [Algebra ℂ B]
+  {repGauge : Representation ℂ GaugeGroupI B} {repLorentz : Representation ℂ (SL(2,ℂ)) B}
   {massWeightPoly : B →ₐ[ℂ] Polynomial B}
   (h : CovAlgebraRealization B repGauge repLorentz massWeightPoly)
 
@@ -69,13 +68,15 @@ variable {B : Type} [Ring B] [Algebra ℂ B]
 
 -/
 
-/-- The mixed sector vanishes below weight nine: a word realising all three
-  classes carries gauge weight at least four, Higgs weight at least two and fermion
-  weight at least three, for a total of at least nine — so no such word exists at a
-  lower weight, and the sector's span there is trivial. -/
-lemma sectorMassWeight_mixed_eq_bot_of_lt_nine {w : ℕ} (hw : w < 9) :
-    h.sectorMassWeight
-      {GeneratorClass.gauge, GeneratorClass.higgs, GeneratorClass.fermion} w = ⊥ := by
+/--
+The mixed sector vanishes below weight nine: a word realising all three
+classes carries gauge weight at least four, Higgs weight at least two and fermion
+weight at least three, for a total of at least nine — so no such word exists at a
+lower weight, and the sector's span there is trivial.
+-/
+lemma sectorMassWeight_mixed_eq_bot_of_lt_nine {w : ℕ} (hw : w < 9)
+    : h.sectorMassWeight {GeneratorClass.gauge, GeneratorClass.higgs, GeneratorClass.fermion} w
+      = ⊥ := by
   rw [sectorMassWeight, Submodule.span_eq_bot]
   rintro x ⟨gl, hS, hsum, rfl⟩
   exfalso
@@ -88,11 +89,13 @@ lemma sectorMassWeight_mixed_eq_bot_of_lt_nine {w : ℕ} (hw : w < 9) :
   have h4 := classWeight_add_three gl
   omega
 
-/-- The weight-eight mixed sector vanishes: the mass weight of a dimension-four
-  Standard-Model term is at most eight, and the mixed sector is trivial there — no
-  dimension-four term mixes gauge, Higgs and fermion fields together. -/
-lemma sectorMassWeight_mixed_eight :
-    h.sectorMassWeight {GeneratorClass.gauge, GeneratorClass.higgs, GeneratorClass.fermion} 8
+/--
+The weight-eight mixed sector vanishes: the mass weight of a dimension-four
+Standard-Model term is at most eight, and the mixed sector is trivial there — no
+dimension-four term mixes gauge, Higgs and fermion fields together.
+-/
+lemma sectorMassWeight_mixed_eight
+    : h.sectorMassWeight {GeneratorClass.gauge, GeneratorClass.higgs, GeneratorClass.fermion} 8
       = ⊥ :=
   h.sectorMassWeight_mixed_eq_bot_of_lt_nine (by omega)
 
@@ -110,46 +113,70 @@ conjuncts ride along in the equivalences only to keep the shapes matched.
 
 -/
 
-/-- Below mass weight nine the mixed sector adds nothing to a submodule `S`: an element of
-  `sectorMassWeight {gauge, higgs, fermion} w ⊔ S` for `w < 9` already lies in `S`. The
-  sector is trivial there, so no invariance is asked of `x` and no stability of `S`. -/
-lemma mem_of_invariant_sectorMassWeight_mixed_lt_nine_sup (w : ℕ) (hw : w < 9)
-    (S : Submodule ℂ B) {x : B}
-    (hx : x ∈ h.sectorMassWeight {GeneratorClass.gauge, GeneratorClass.higgs,
-      GeneratorClass.fermion} w ⊔ S) : x ∈ S := by
+/--
+Below mass weight nine the mixed sector adds nothing to a submodule `S`: an element of
+`sectorMassWeight {gauge, higgs, fermion} w ⊔ S` for `w < 9` already lies in `S`. The
+sector is trivial there, so no invariance is asked of `x` and no stability of `S`.
+-/
+lemma mem_of_invariant_sectorMassWeight_mixed_lt_nine_sup
+    (w : ℕ) (hw : w < 9)
+    (S : Submodule ℂ B)
+    {x : B}
+    (hx : x
+      ∈ h.sectorMassWeight
+          {
+            GeneratorClass.gauge, GeneratorClass.higgs,
+            GeneratorClass.fermion
+          }
+          w
+        ⊔ S)
+    : x ∈ S := by
   rwa [h.sectorMassWeight_mixed_eq_bot_of_lt_nine hw, bot_sup_eq] at hx
 
-/-- The classification below mass weight nine as an equivalence, in the shape of the
-  gauge- and Yukawa-sector statements: an element of
-  `sectorMassWeight {gauge, higgs, fermion} w ⊔ S` for `w < 9` is fixed by both groups
-  exactly when it is itself an element of `S` fixed by both groups. Neither stability
-  hypothesis on `S` is needed, the forward direction being the vanishing of the sector. -/
-lemma mem_sectorMassWeight_mixed_lt_nine_sup_and_gauge_lorentz_invariant_iff (w : ℕ)
-    (hw : w < 9) (S : Submodule ℂ B) (x : B) :
-    (x ∈ h.sectorMassWeight {GeneratorClass.gauge, GeneratorClass.higgs,
-          GeneratorClass.fermion} w ⊔ S
+/--
+The classification below mass weight nine as an equivalence, in the shape of the
+gauge- and Yukawa-sector statements: an element of
+`sectorMassWeight {gauge, higgs, fermion} w ⊔ S` for `w < 9` is fixed by both groups
+exactly when it is itself an element of `S` fixed by both groups. Neither stability
+hypothesis on `S` is needed, the forward direction being the vanishing of the sector.
+-/
+lemma mem_sectorMassWeight_mixed_lt_nine_sup_and_gauge_lorentz_invariant_iff
+    (w : ℕ) (hw : w < 9) (S : Submodule ℂ B) (x : B)
+    : (x ∈ h.sectorMassWeight
+            {
+              GeneratorClass.gauge, GeneratorClass.higgs,
+              GeneratorClass.fermion
+            }
+            w
+          ⊔ S
         ∧ (∀ g : GaugeGroupI, repGauge g x = x) ∧ ∀ g : SL(2,ℂ), repLorentz g x = x)
-      ↔ ∃ y ∈ S, (∀ g : GaugeGroupI, repGauge g y = y)
-          ∧ (∀ g : SL(2,ℂ), repLorentz g y = y)
-          ∧ x = y := by
+      ↔ ∃ y ∈ S,
+        (∀ g : GaugeGroupI, repGauge g y = y) ∧ (∀ g : SL(2,ℂ), repLorentz g y = y) ∧ x = y := by
   constructor
   · rintro ⟨hx, hG, hL⟩
     exact ⟨x, h.mem_of_invariant_sectorMassWeight_mixed_lt_nine_sup w hw S hx, hG, hL, rfl⟩
   · rintro ⟨y, hyS, hyG, hyL, rfl⟩
     exact ⟨Submodule.mem_sup_right hyS, hyG, hyL⟩
 
-/-- The same classification without the existential: below mass weight nine an element of
-  `sectorMassWeight {gauge, higgs, fermion} w ⊔ S` fixed by both groups is an element of
-  `S` fixed by both groups, and conversely. -/
-lemma mem_sectorMassWeight_mixed_lt_nine_sup_and_gauge_lorentz_invariant_iff_mem (w : ℕ)
-    (hw : w < 9) (S : Submodule ℂ B) (x : B) :
-    (x ∈ h.sectorMassWeight {GeneratorClass.gauge, GeneratorClass.higgs,
-          GeneratorClass.fermion} w ⊔ S
+/--
+The same classification without the existential: below mass weight nine an element of
+`sectorMassWeight {gauge, higgs, fermion} w ⊔ S` fixed by both groups is an element of
+`S` fixed by both groups, and conversely.
+-/
+lemma mem_sectorMassWeight_mixed_lt_nine_sup_and_gauge_lorentz_invariant_iff_mem
+    (w : ℕ) (hw : w < 9) (S : Submodule ℂ B) (x : B)
+    : (x ∈ h.sectorMassWeight
+            {
+              GeneratorClass.gauge, GeneratorClass.higgs,
+              GeneratorClass.fermion
+            }
+            w
+          ⊔ S
         ∧ (∀ g : GaugeGroupI, repGauge g x = x) ∧ ∀ g : SL(2,ℂ), repLorentz g x = x)
-      ↔ (x ∈ S ∧ (∀ g : GaugeGroupI, repGauge g x = x)
-          ∧ ∀ g : SL(2,ℂ), repLorentz g x = x) :=
-  ⟨fun hx => ⟨h.mem_of_invariant_sectorMassWeight_mixed_lt_nine_sup w hw S hx.1, hx.2⟩,
-    fun hx => ⟨Submodule.mem_sup_right hx.1, hx.2⟩⟩
+      ↔ (x ∈ S ∧ (∀ g : GaugeGroupI, repGauge g x = x) ∧ ∀ g : SL(2,ℂ), repLorentz g x = x) := ⟨
+  fun hx => ⟨h.mem_of_invariant_sectorMassWeight_mixed_lt_nine_sup w hw S hx.1, hx.2⟩,
+  fun hx => ⟨Submodule.mem_sup_right hx.1, hx.2⟩
+⟩
 
 end CovAlgebraRealization
 

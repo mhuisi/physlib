@@ -23,17 +23,21 @@ variable {n : ℕ} (c : WickContraction n)
 open Physlib.List
 open FieldStatistic
 
-/-- Given a Wick contraction `c : WickContraction n` and `i1 i2 : Fin n` the finite set
-  of elements of `Fin n` between `i1` and `i2` which are either uncontracted
-  or are contracted but are contracted with an element occurring after `i1`.
-  In other words, the elements of `Fin n` between `i1` and `i2` which are not
-  contracted with before `i1`.
-  One should assume `i1 < i2` otherwise this finite set is empty. -/
+/--
+Given a Wick contraction `c : WickContraction n` and `i1 i2 : Fin n` the finite set
+of elements of `Fin n` between `i1` and `i2` which are either uncontracted
+or are contracted but are contracted with an element occurring after `i1`.
+In other words, the elements of `Fin n` between `i1` and `i2` which are not
+contracted with before `i1`.
+One should assume `i1 < i2` otherwise this finite set is empty.
+-/
 def signFinset (c : WickContraction n) (i1 i2 : Fin n) : Finset (Fin n) :=
-  Finset.univ.filter (fun i => i1 < i ∧ i < i2 ∧
-  (c.getDual? i = none ∨ ∀ (h : (c.getDual? i).isSome), i1 < (c.getDual? i).get h))
+  Finset.univ.filter (fun i =>
+    i1 < i ∧ i < i2
+      ∧ (c.getDual? i = none ∨ ∀ (h : (c.getDual? i).isSome), i1 < (c.getDual? i).get h))
 
-/-- For a list `φs` of `𝓕.FieldOp`, and a Wick contraction `φsΛ` of `φs`,
+/--
+For a list `φs` of `𝓕.FieldOp`, and a Wick contraction `φsΛ` of `φs`,
   the complex number `φsΛ.sign` is defined to be the sign (`1` or `-1`) corresponding
   to the number of `fermionic`-`fermionic` exchanges that must be done to put
   contracted pairs within `φsΛ` next to one another, starting recursively
@@ -51,13 +55,12 @@ def sign (φs : List 𝓕.FieldOp) (φsΛ : WickContraction φs.length) : ℂ :=
     𝓕 |>ₛ ⟨φs.get, φsΛ.signFinset (φsΛ.fstFieldOfContract a) (φsΛ.sndFieldOfContract a)⟩)
 
 set_option backward.isDefEq.respectTransparency false in
-lemma sign_empty (φs : List 𝓕.FieldOp) :
-    sign φs empty = 1 := by
+lemma sign_empty (φs : List 𝓕.FieldOp) : sign φs empty = 1 := by
   rw [sign]
   simp [empty]
 
-lemma sign_congr {φs φs' : List 𝓕.FieldOp} (h : φs = φs') (φsΛ : WickContraction φs.length) :
-    sign φs' (congr (by simp [h]) φsΛ) = sign φs φsΛ := by
+lemma sign_congr {φs φs' : List 𝓕.FieldOp} (h : φs = φs') (φsΛ : WickContraction φs.length)
+    : sign φs' (congr (by simp [h]) φsΛ) = sign φs φsΛ := by
   subst h
   rfl
 

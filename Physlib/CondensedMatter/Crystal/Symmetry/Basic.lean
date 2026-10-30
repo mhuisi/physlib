@@ -70,9 +70,11 @@ variable {G : Type*} [AddCommGroup G] [AddGroup.FG G]
 
 /-! ## A. Symmetries -/
 
-/-- A symmetry of a crystal: an automorphism of the action of the translation group on the sites.
+/--
+A symmetry of a crystal: an automorphism of the action of the translation group on the sites.
 It is an automorphism `lattice` of the translation group together with a bijection of the sites
-that carries the action along. -/
+that carries the action along.
+-/
 structure Symmetry (C : Crystal G) where
   /-- The automorphism of the translation group. -/
   lattice : G ≃+ G
@@ -112,16 +114,16 @@ lemma map_vadd (φ : Symmetry C) (a : G) (x : C.Site) : φ (a +ᵥ x) = φ.latti
   map_vaddₛₗ φ.toHom a x
 
 /-- A symmetry moves the site `⟨n, i⟩` by the lattice automorphism from the image of `⟨0, i⟩`. -/
-lemma apply_eq (φ : Symmetry C) (n : G) (i : C.UnitCell) :
-    φ ⟨n, i⟩ = ⟨φ.lattice n + (φ ⟨0, i⟩).cell, (φ ⟨0, i⟩).label⟩ := by
+lemma apply_eq (φ : Symmetry C) (n : G) (i : C.UnitCell)
+    : φ ⟨n, i⟩ = ⟨φ.lattice n + (φ ⟨0, i⟩).cell, (φ ⟨0, i⟩).label⟩ := by
   simpa [Site.vadd_def] using φ.map_vadd n ⟨0, i⟩
 
 /-- A symmetry as a permutation of the sites. -/
 noncomputable def toEquiv (φ : Symmetry C) : C.Site ≃ C.Site := Equiv.ofBijective φ φ.bijective
 
 /-- Composing equivariant maps gives an equivariant map. -/
-lemma comp_map_vadd (φ ψ : Symmetry C) (a : G) (x : C.Site) :
-    (φ ∘ ψ) (a +ᵥ x) = (ψ.lattice.trans φ.lattice) a +ᵥ (φ ∘ ψ) x := by
+lemma comp_map_vadd (φ ψ : Symmetry C) (a : G) (x : C.Site)
+    : (φ ∘ ψ) (a +ᵥ x) = (ψ.lattice.trans φ.lattice) a +ᵥ (φ ∘ ψ) x := by
   rw [Function.comp_apply, ψ.map_vadd, φ.map_vadd]
   rfl
 
@@ -129,10 +131,12 @@ lemma comp_map_vadd (φ ψ : Symmetry C) (a : G) (x : C.Site) :
 lemma id_map_vadd (a : G) (x : C.Site) : id (a +ᵥ x) = AddEquiv.refl G a +ᵥ id x := rfl
 
 /-- The inverse of an equivariant bijection is equivariant for the inverse automorphism. -/
-lemma symm_map_vadd (φ : Symmetry C) (a : G) (x : C.Site) :
-    φ.toEquiv.symm (a +ᵥ x) = φ.lattice.symm a +ᵥ φ.toEquiv.symm x :=
-  map_vaddₛₗ (φ.toHom.inverse' φ.toEquiv.symm φ.lattice.apply_symm_apply
-    φ.toEquiv.symm_apply_apply φ.toEquiv.apply_symm_apply) a x
+lemma symm_map_vadd (φ : Symmetry C) (a : G) (x : C.Site)
+    : φ.toEquiv.symm (a +ᵥ x) = φ.lattice.symm a +ᵥ φ.toEquiv.symm x :=
+  map_vaddₛₗ
+    (φ.toHom.inverse' φ.toEquiv.symm φ.lattice.apply_symm_apply φ.toEquiv.symm_apply_apply
+      φ.toEquiv.apply_symm_apply)
+    a x
 
 /-! ### A.2. Group structure -/
 
@@ -150,12 +154,12 @@ noncomputable instance (C : Crystal G) : Group (Symmetry C) where
 @[simp] lemma mul_apply (φ ψ : Symmetry C) (x : C.Site) : (φ * ψ) x = φ (ψ x) := rfl
 
 /-- The inverse of a symmetry undoes it. -/
-@[simp] lemma inv_apply_apply (φ : Symmetry C) (x : C.Site) : φ⁻¹ (φ x) = x :=
-  φ.toEquiv.symm_apply_apply x
+@[simp]
+lemma inv_apply_apply (φ : Symmetry C) (x : C.Site) : φ⁻¹ (φ x) = x := φ.toEquiv.symm_apply_apply x
 
 /-- A symmetry undoes its inverse. -/
-@[simp] lemma apply_inv_apply (φ : Symmetry C) (x : C.Site) : φ (φ⁻¹ x) = x :=
-  φ.toEquiv.apply_symm_apply x
+@[simp]
+lemma apply_inv_apply (φ : Symmetry C) (x : C.Site) : φ (φ⁻¹ x) = x := φ.toEquiv.apply_symm_apply x
 
 /-- The permutation of the sites underlying a symmetry. -/
 noncomputable def toPerm (C : Crystal G) : Symmetry C →* Equiv.Perm C.Site where
@@ -172,8 +176,8 @@ noncomputable def toPerm (C : Crystal G) : Symmetry C →* Equiv.Perm C.Site whe
 /-! ### A.3. Permutation of the labels -/
 
 /-- The label of the image of `⟨n, i⟩` does not depend on the cell `n`. -/
-lemma label_apply (φ : Symmetry C) (n : G) (i : C.UnitCell) :
-    (φ ⟨n, i⟩).label = (φ ⟨0, i⟩).label := by
+lemma label_apply (φ : Symmetry C) (n : G) (i : C.UnitCell)
+    : (φ ⟨n, i⟩).label = (φ ⟨0, i⟩).label := by
   rw [apply_eq φ n i]
 
 /-- A symmetry permutes the labels: it sends `i` to the label of the image of `⟨0, i⟩`. -/
@@ -187,24 +191,26 @@ noncomputable def labelHom (C : Crystal G) : Symmetry C →* Equiv.Perm C.UnitCe
   MulAction.toPermHom (Symmetry C) C.UnitCell
 
 /-- The label permutation of a symmetry sends `i` to the label of the image of `⟨0, i⟩`. -/
-lemma labelHom_apply (φ : Symmetry C) (i : C.UnitCell) :
-    labelHom C φ i = (φ ⟨0, i⟩).label := rfl
+lemma labelHom_apply (φ : Symmetry C) (i : C.UnitCell) : labelHom C φ i = (φ ⟨0, i⟩).label := rfl
 
 /-! ### A.4. Offsets -/
 
-/-- The offset of a symmetry at the label `i`: the cell in which the image of the reference site
-`⟨0, i⟩` lies, as a lattice vector in `G`. -/
+/--
+The offset of a symmetry at the label `i`: the cell in which the image of the reference site
+`⟨0, i⟩` lies, as a lattice vector in `G`.
+-/
 def offset (φ : Symmetry C) (i : C.UnitCell) : G := (φ ⟨0, i⟩).cell
 
-/-- A symmetry sends the site `⟨n, i⟩` to the cell `A n + bᵢ` with label `σ i`, where `A` is its
-lattice automorphism, `σ` its label permutation and `bᵢ` its offset at `i`. -/
-lemma apply_eq_components (φ : Symmetry C) (x : C.Site) :
-    φ x = ⟨φ.lattice x.cell + φ.offset x.label, labelHom C φ x.label⟩ :=
+/--
+A symmetry sends the site `⟨n, i⟩` to the cell `A n + bᵢ` with label `σ i`, where `A` is its
+lattice automorphism, `σ` its label permutation and `bᵢ` its offset at `i`.
+-/
+lemma apply_eq_components (φ : Symmetry C) (x : C.Site)
+    : φ x = ⟨φ.lattice x.cell + φ.offset x.label, labelHom C φ x.label⟩ :=
   apply_eq φ x.cell x.label
 
 /-- The cell of the image of `⟨n, i⟩` is `A n + bᵢ`. -/
-lemma cell_apply (φ : Symmetry C) (x : C.Site) :
-    (φ x).cell = φ.lattice x.cell + φ.offset x.label :=
+lemma cell_apply (φ : Symmetry C) (x : C.Site) : (φ x).cell = φ.lattice x.cell + φ.offset x.label :=
   congrArg Site.cell (apply_eq_components φ x)
 
 /-! ## B. The translations -/
@@ -213,11 +219,16 @@ lemma cell_apply (φ : Symmetry C) (x : C.Site) :
 lemma vadd_map_vadd (c b : G) (x : C.Site) : c +ᵥ (b +ᵥ x) = AddEquiv.refl G b +ᵥ (c +ᵥ x) :=
   vadd_comm c b x
 
-/-- Translation as a homomorphism, with the lattice written multiplicatively. It is only used to
-form the subgroup of translations; use `translation`. -/
+/--
+Translation as a homomorphism, with the lattice written multiplicatively. It is only used to
+form the subgroup of translations; use `translation`.
+-/
 noncomputable def translationHom (C : Crystal G) : Multiplicative G →* Symmetry C where
-  toFun a := ⟨AddEquiv.refl G, ⟨AddAction.toPerm (Multiplicative.toAdd a), vadd_map_vadd _⟩,
-    (AddAction.toPerm (Multiplicative.toAdd a)).bijective⟩
+  toFun a := ⟨
+    AddEquiv.refl G,
+    ⟨AddAction.toPerm (Multiplicative.toAdd a), vadd_map_vadd _⟩,
+    (AddAction.toPerm (Multiplicative.toAdd a)).bijective
+  ⟩
   map_one' := ext (zero_vadd G)
   map_mul' a b := ext (add_vadd (Multiplicative.toAdd a) (Multiplicative.toAdd b))
 
@@ -236,15 +247,14 @@ lemma translation_add (a b : G) : translation C (a + b) = translation C a * tran
 lemma translation_zero : translation C 0 = 1 := map_one (translationHom C)
 
 /-- The translations as a subgroup of the symmetries. -/
-noncomputable def translations (C : Crystal G) : Subgroup (Symmetry C) :=
-  (translationHom C).range
+noncomputable def translations (C : Crystal G) : Subgroup (Symmetry C) := (translationHom C).range
 
 /-- Translations have trivial lattice automorphism. -/
 @[simp] lemma lattice_translation (a : G) : (translation C a).lattice = 0 := rfl
 
 /-- Conjugating a translation by a symmetry translates by the image of the vector. -/
-lemma conj_translation (φ : Symmetry C) (a : G) :
-    φ * translation C a * φ⁻¹ = translation C (φ.lattice a) := by
+lemma conj_translation (φ : Symmetry C) (a : G)
+    : φ * translation C a * φ⁻¹ = translation C (φ.lattice a) := by
   ext x : 1
   show φ (a +ᵥ φ⁻¹ x) = φ.lattice a +ᵥ x
   rw [φ.map_vadd, apply_inv_apply]
@@ -268,19 +278,17 @@ noncomputable def mapBond (b : Bond C) : Bond C where
   displacement := φ.lattice b.displacement + φ.offset b.target - φ.offset b.source
 
 /-- A symmetry maps sites connected by a bond to sites connected by its image. -/
-lemma mapBond_links {b : Bond C} {x y : C.Site} (h : b.Links x y) :
-    (φ.mapBond b).Links (φ x) (φ y) := by
+lemma mapBond_links {b : Bond C} {x y : C.Site} (h : b.Links x y)
+    : (φ.mapBond b).Links (φ x) (φ y) := by
   obtain ⟨s, t, d⟩ := b
   obtain ⟨n, i⟩ := x
   obtain ⟨m, j⟩ := y
   simp only [Bond.Links] at h
   obtain ⟨rfl, rfl, rfl⟩ := h
-  exact ⟨label_apply φ n i, label_apply φ _ j, by
-    simp [mapBond, cell_apply, map_add, add_assoc]⟩
+  exact ⟨label_apply φ n i, label_apply φ _ j, by simp [mapBond, cell_apply, map_add, add_assoc]⟩
 
 /-- The image of a bond under a product is the iterated image. -/
-lemma mapBond_mul (ψ : Symmetry C) (b : Bond C) :
-    (φ * ψ).mapBond b = φ.mapBond (ψ.mapBond b) := by
+lemma mapBond_mul (ψ : Symmetry C) (b : Bond C) : (φ * ψ).mapBond b = φ.mapBond (ψ.mapBond b) := by
   have hl := b.links_reference
   exact Bond.eq_of_links ((φ * ψ).mapBond_links hl) (φ.mapBond_links (ψ.mapBond_links hl))
 

@@ -58,8 +58,8 @@ variable (μS : WOTSpectralMeasure α H)
 
 /-! ## A. Finite variation of the matrix-coefficient measures -/
 
-lemma scalarMeasure_inner_projection' (x y : H) (S : Set α) :
-    ⟪y, μS S x⟫_ℂ = ⟪μS S y, μS S x⟫_ℂ := by
+lemma scalarMeasure_inner_projection' (x y : H) (S : Set α)
+    : ⟪y, μS S x⟫_ℂ = ⟪μS S y, μS S x⟫_ℂ := by
   let p : H →L[ℂ] H := ContinuousLinearMapWOT.toCLM (μS S)
   have hmul : p * p = p :=
     congrArg ContinuousLinearMapWOT.toCLM (μS.isStarProjection S).isIdempotentElem
@@ -78,8 +78,8 @@ lemma scalarMeasure_inner_projection' (x y : H) (S : Set α) :
       rw [hpy] at h
       exact h.symm
 
-lemma scalarMeasure_variation_le_diagonal_add' (x y : H) :
-    (μS.scalarMeasure x y).variation ≤ μS.diagonalMeasure x + μS.diagonalMeasure y := by
+lemma scalarMeasure_variation_le_diagonal_add' (x y : H)
+    : (μS.scalarMeasure x y).variation ≤ μS.diagonalMeasure x + μS.diagonalMeasure y := by
   apply MeasureTheory.VectorMeasure.variation_le_of_forall_enorm_le
   intro S hS
   rw [μS.scalarMeasure_apply x y S]
@@ -94,43 +94,51 @@ lemma scalarMeasure_variation_le_diagonal_add' (x y : H) :
   nlinarith [sq_nonneg ‖μS S y‖, sq_nonneg ‖μS S x‖]
 
 /-- The matrix-coefficient measures of a weak spectral measure have finite variation. -/
-lemma scalarMeasure_isFiniteVariation' (x y : H) :
-    IsFiniteMeasure (μS.scalarMeasure x y).variation :=
+lemma scalarMeasure_isFiniteVariation' (x y : H)
+    : IsFiniteMeasure (μS.scalarMeasure x y).variation :=
   MeasureTheory.isFiniteMeasure_of_le (μS.diagonalMeasure x + μS.diagonalMeasure y)
     (scalarMeasure_variation_le_diagonal_add' μS x y)
 
 /-! ## B. Commutation with the bounded integrals -/
 
-/-- An operator commuting with every spectral projection commutes with every bounded integral
-against the spectral measure. -/
-lemma boundedIntegral_commute [Nonempty α] {T : H →L[ℂ] H}
+/--
+An operator commuting with every spectral projection commutes with every bounded integral
+against the spectral measure.
+-/
+lemma boundedIntegral_commute
+    [Nonempty α]
+    {T : H →L[ℂ] H}
     (hT : ∀ S, μS S * ContinuousLinearMapWOT.ofCLM T = ContinuousLinearMapWOT.ofCLM T * μS S)
-    {f : α → ℂ} (hf : Measurable f) (hbf : ∃ C, ∀ z, ‖f z‖ ≤ C) :
-    ContinuousLinearMapWOT.toCLM (boundedIntegral μS f hf hbf) * T =
-      T * ContinuousLinearMapWOT.toCLM (boundedIntegral μS f hf hbf) := by
+    {f : α → ℂ} (hf : Measurable f) (hbf : ∃ C, ∀ z, ‖f z‖ ≤ C)
+    : ContinuousLinearMapWOT.toCLM (boundedIntegral μS f hf hbf) * T
+      = T * ContinuousLinearMapWOT.toCLM (boundedIntegral μS f hf hbf) := by
   ext x
   apply ext_inner_left ℂ
   intro y
-  have hmeas :
-      (μS.scalarMeasure (T x) y) = (μS.scalarMeasure x (ContinuousLinearMap.adjoint T y)) := by
+  have hmeas
+      : (μS.scalarMeasure (T x) y) = (μS.scalarMeasure x (ContinuousLinearMap.adjoint T y)) := by
     apply VectorMeasure.ext
     intro S _
     rw [scalarMeasure_apply, scalarMeasure_apply]
     have h := congrArg (fun A : H →WOT[ℂ] H => ContinuousLinearMapWOT.toCLM A x) (hT S)
-    have h' : ContinuousLinearMapWOT.toCLM (μS S) (T x) =
-        T (ContinuousLinearMapWOT.toCLM (μS S) x) := by
+    have h'
+        : ContinuousLinearMapWOT.toCLM (μS S) (T x)
+          = T (ContinuousLinearMapWOT.toCLM (μS S) x) := by
       simpa using h
     change ⟪y, ContinuousLinearMapWOT.toCLM (μS S) (T x)⟫_ℂ = _
     rw [h']
     exact (ContinuousLinearMap.adjoint_inner_left T _ y).symm
   have h1 := boundedIntegral_inner μS hf hbf (T x) y (scalarMeasure_isFiniteVariation' μS _ _)
-  have h2 := boundedIntegral_inner μS hf hbf x (ContinuousLinearMap.adjoint T y)
-    (scalarMeasure_isFiniteVariation' μS _ _)
-  change ⟪y, ContinuousLinearMapWOT.toCLM (boundedIntegral μS f hf hbf) (T x)⟫_ℂ =
-    ⟪y, T (ContinuousLinearMapWOT.toCLM (boundedIntegral μS f hf hbf) x)⟫_ℂ
+  have h2 :=
+    boundedIntegral_inner μS hf hbf x (ContinuousLinearMap.adjoint T y)
+      (scalarMeasure_isFiniteVariation' μS _ _)
+  change ⟪y, ContinuousLinearMapWOT.toCLM (boundedIntegral μS f hf hbf) (T x)⟫_ℂ
+    = ⟪y, T (ContinuousLinearMapWOT.toCLM (boundedIntegral μS f hf hbf) x)⟫_ℂ
   rw [← ContinuousLinearMap.adjoint_inner_left T _ y]
-  rw [show ContinuousLinearMapWOT.toCLM (boundedIntegral μS f hf hbf) (T x) =
-    boundedIntegral μS f hf hbf (T x) from rfl, h1, hmeas, ← h2]
+  rw [show ContinuousLinearMapWOT.toCLM (boundedIntegral μS f hf hbf) (T x)
+        = boundedIntegral μS f hf hbf (T x) from
+      rfl,
+    h1, hmeas, ← h2]
   rfl
 
 end WOTSpectralMeasure

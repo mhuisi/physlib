@@ -52,16 +52,19 @@ namespace CanonicalEnsemble
 open Real Temperature MeasureTheory Constants
 open scoped Temperature CanonicalEnsemble
 
-variable {ι : Type} [Fintype ι] [MeasurableSpace ι]
-  [MeasurableSingletonClass ι] (𝓒 : CanonicalEnsemble ι)
+variable
+  {ι : Type} [Fintype ι] [MeasurableSpace ι] [MeasurableSingletonClass ι] (𝓒 : CanonicalEnsemble ι)
 
-variable {ι1 : Type} [Fintype ι1] [MeasurableSpace ι1]
-  [MeasurableSingletonClass ι1] (𝓒1 : CanonicalEnsemble ι1)
+variable
+  {ι1 : Type} [Fintype ι1] [MeasurableSpace ι1] [MeasurableSingletonClass ι1]
+  (𝓒1 : CanonicalEnsemble ι1)
 
-/-- A finite `CanonicalEnsemble` is one whose microstates form a finite type
+/--
+A finite `CanonicalEnsemble` is one whose microstates form a finite type
 and whose measure is the counting measure. For such systems, the state space is
 inherently discrete and dimensionless, so we require `dof = 0` and
-`phaseSpaceUnit = 1`. -/
+`phaseSpaceUnit = 1`.
+-/
 class IsFinite (𝓒 : CanonicalEnsemble ι) [Fintype ι] : Prop where
   μ_eq_count : 𝓒.μ = Measure.count
   dof_eq_zero : 𝓒.dof = 0
@@ -70,7 +73,7 @@ class IsFinite (𝓒 : CanonicalEnsemble ι) [Fintype ι] : Prop where
 instance [IsFinite 𝓒] [IsFinite 𝓒1] : IsFinite (𝓒 + 𝓒1) where
   μ_eq_count := by
     rw [μ_add]
-    rw [IsFinite.μ_eq_count (𝓒:=𝓒), IsFinite.μ_eq_count (𝓒:=𝓒1)]
+    rw [IsFinite.μ_eq_count (𝓒 := 𝓒), IsFinite.μ_eq_count (𝓒 := 𝓒1)]
     refine Measure.prod_eq ?_
     intro s t hs ht
     rw [Measure.count_apply, Measure.count_apply, Measure.count_apply]
@@ -80,15 +83,13 @@ instance [IsFinite 𝓒] [IsFinite 𝓒1] : IsFinite (𝓒 + 𝓒1) where
     · exact ht
     · exact hs
     · exact MeasurableSet.prod hs ht
-  dof_eq_zero := by
-    simp [IsFinite.dof_eq_zero (𝓒:=𝓒), IsFinite.dof_eq_zero (𝓒:=𝓒1)]
-  phase_space_unit_eq_one := by
-    simp [IsFinite.phase_space_unit_eq_one (𝓒:=𝓒)]
+  dof_eq_zero := by simp [IsFinite.dof_eq_zero (𝓒 := 𝓒), IsFinite.dof_eq_zero (𝓒 := 𝓒1)]
+  phase_space_unit_eq_one := by simp [IsFinite.phase_space_unit_eq_one (𝓒 := 𝓒)]
 
 instance [IsFinite 𝓒] (e : ι1 ≃ᵐ ι) : IsFinite (congr 𝓒 e) where
   μ_eq_count := by
     simp [congr]
-    rw [IsFinite.μ_eq_count (𝓒:=𝓒)]
+    rw [IsFinite.μ_eq_count (𝓒 := 𝓒)]
     refine Measure.ext_iff.mpr ?_
     intro s hs
     rw [@MeasurableEquiv.map_apply]
@@ -103,10 +104,8 @@ instance [IsFinite 𝓒] (e : ι1 ≃ᵐ ι) : IsFinite (congr 𝓒 e) where
     · exact Set.toFinite (⇑e '' s)
     · exact hs
     · exact (MeasurableEquiv.measurableSet_preimage e.symm).mpr hs
-  dof_eq_zero := by
-    simp [IsFinite.dof_eq_zero (𝓒:=𝓒)]
-  phase_space_unit_eq_one := by
-    simp [IsFinite.phase_space_unit_eq_one (𝓒:=𝓒)]
+  dof_eq_zero := by simp [IsFinite.dof_eq_zero (𝓒 := 𝓒)]
+  phase_space_unit_eq_one := by simp [IsFinite.phase_space_unit_eq_one (𝓒 := 𝓒)]
 
 instance [IsFinite 𝓒] (n : ℕ) : IsFinite (nsmul n 𝓒) where
   μ_eq_count := by
@@ -121,27 +120,24 @@ instance [IsFinite 𝓒] (n : ℕ) : IsFinite (nsmul n 𝓒) where
       · subst hs
         simp [CanonicalEnsemble.nsmul]
       · subst hs
-        simp [CanonicalEnsemble.nsmul, IsFinite.μ_eq_count (𝓒:=𝓒)]
+        simp [CanonicalEnsemble.nsmul, IsFinite.μ_eq_count (𝓒 := 𝓒)]
     | succ n ih =>
       have : IsFinite (nsmul n 𝓒) := {
         μ_eq_count := ih
-        dof_eq_zero := by
-          simp [CanonicalEnsemble.dof_nsmul, IsFinite.dof_eq_zero (𝓒:=𝓒)]
+        dof_eq_zero := by simp [CanonicalEnsemble.dof_nsmul, IsFinite.dof_eq_zero (𝓒 := 𝓒)]
         phase_space_unit_eq_one := by
-          simp [CanonicalEnsemble.phase_space_unit_nsmul,
-            IsFinite.phase_space_unit_eq_one (𝓒:=𝓒)]
+          simp [CanonicalEnsemble.phase_space_unit_nsmul, IsFinite.phase_space_unit_eq_one (𝓒 := 𝓒)]
       }
-      let : Fintype (Fin (n+1) → ι) := inferInstance
-      have h :
-        ((𝓒 + nsmul n 𝓒).congr
-            (MeasurableEquiv.piFinSuccAbove (fun _ => ι) 0)).μ
-          = Measure.count := by rw [IsFinite.μ_eq_count]; aesop
-      rw [← h]; rw [← @nsmul_succ]
-  dof_eq_zero := by
-    simp [CanonicalEnsemble.dof_nsmul, IsFinite.dof_eq_zero (𝓒:=𝓒)]
+      let : Fintype (Fin (n + 1) → ι) := inferInstance
+      have h
+          : ((𝓒 + nsmul n 𝓒).congr (MeasurableEquiv.piFinSuccAbove (fun _ => ι) 0)).μ
+            = Measure.count := by
+        rw [IsFinite.μ_eq_count]; aesop
+      rw [← h]
+      rw [← @nsmul_succ]
+  dof_eq_zero := by simp [CanonicalEnsemble.dof_nsmul, IsFinite.dof_eq_zero (𝓒 := 𝓒)]
   phase_space_unit_eq_one := by
-    simp [CanonicalEnsemble.phase_space_unit_nsmul,
-      IsFinite.phase_space_unit_eq_one (𝓒:=𝓒)]
+    simp [CanonicalEnsemble.phase_space_unit_nsmul, IsFinite.phase_space_unit_eq_one (𝓒 := 𝓒)]
 
 instance [IsFinite 𝓒] : IsFiniteMeasure (𝓒.μ) := by
   rw [IsFinite.μ_eq_count]
@@ -152,32 +148,33 @@ instance [IsFinite 𝓒] [Nonempty ι] : NeZero 𝓒.μ := by
   refine ⟨?_⟩
   intro hμ
   obtain ⟨i₀⟩ := (inferInstance : Nonempty ι)
-  have hone : 𝓒.μ {i₀} = 1 := by
-    simp [IsFinite.μ_eq_count (𝓒:=𝓒)]
+  have hone : 𝓒.μ {i₀} = 1 := by simp [IsFinite.μ_eq_count (𝓒 := 𝓒)]
   simp_all only [Measure.coe_zero, Pi.zero_apply, zero_ne_one]
 
-/-- The Shannon entropy of a finite canonical ensemble.
+/--
+The Shannon entropy of a finite canonical ensemble.
 This is defined by the formula `S = -k_B ∑ pᵢ log pᵢ`. It is proven to be
 equivalent to the `differentialEntropy` and the `thermodynamicEntropy` for systems
-satisfying the `IsFinite` property. -/
+satisfying the `IsFinite` property.
+-/
 noncomputable def shannonEntropy (T : Temperature) : ℝ :=
   -kB * ∑ i, 𝓒.probability T i * log (𝓒.probability T i)
 
-lemma mathematicalPartitionFunction_of_fintype [IsFinite 𝓒] (T : Temperature) :
-    𝓒.mathematicalPartitionFunction T = ∑ i, exp (- β T * 𝓒.energy i) := by
+lemma mathematicalPartitionFunction_of_fintype [IsFinite 𝓒] (T : Temperature)
+    : 𝓒.mathematicalPartitionFunction T = ∑ i, exp (- β T * 𝓒.energy i) := by
   rw [mathematicalPartitionFunction_eq_integral, MeasureTheory.integral_fintype]
   simp [IsFinite.μ_eq_count]
   · rw [IsFinite.μ_eq_count]
     exact Integrable.of_finite
 
-lemma partitionFunction_of_fintype [IsFinite 𝓒] (T : Temperature) :
-    𝓒.partitionFunction T = ∑ i, exp (- T.β * 𝓒.energy i) := by
-  simp [partitionFunction, mathematicalPartitionFunction_of_fintype,
-        IsFinite.dof_eq_zero, IsFinite.phase_space_unit_eq_one]
+lemma partitionFunction_of_fintype [IsFinite 𝓒] (T : Temperature)
+    : 𝓒.partitionFunction T = ∑ i, exp (- T.β * 𝓒.energy i) := by
+  simp [partitionFunction, mathematicalPartitionFunction_of_fintype, IsFinite.dof_eq_zero,
+    IsFinite.phase_space_unit_eq_one]
 
 @[simp]
-lemma μBolt_of_fintype (T : Temperature) [IsFinite 𝓒] (i : ι) :
-    (𝓒.μBolt T).real {i} = Real.exp (- β T * 𝓒.energy i) := by
+lemma μBolt_of_fintype (T : Temperature) [IsFinite 𝓒] (i : ι)
+    : (𝓒.μBolt T).real {i} = Real.exp (- β T * 𝓒.energy i) := by
   rw [μBolt]
   simp only [neg_mul]
   rw [@measureReal_def]
@@ -190,15 +187,15 @@ instance {T} [IsFinite 𝓒] : IsFiniteMeasure (𝓒.μBolt T) := by
   exact HasFiniteIntegral.of_finite
 
 @[simp]
-lemma μProd_of_fintype (T : Temperature) [IsFinite 𝓒] (i : ι) :
-    (𝓒.μProd T).real {i} = 𝓒.probability T i := by
+lemma μProd_of_fintype (T : Temperature) [IsFinite 𝓒] (i : ι)
+    : (𝓒.μProd T).real {i} = 𝓒.probability T i := by
   rw [μProd]
   simp [probability]
   rw [inv_mul_eq_div]
   rfl
 
-lemma meanEnergy_of_fintype [IsFinite 𝓒] (T : Temperature) :
-    𝓒.meanEnergy T = ∑ i, 𝓒.energy i * 𝓒.probability T i := by
+lemma meanEnergy_of_fintype [IsFinite 𝓒] (T : Temperature)
+    : 𝓒.meanEnergy T = ∑ i, 𝓒.energy i * 𝓒.probability T i := by
   simp [meanEnergy]
   rw [MeasureTheory.integral_fintype]
   simp [mul_comm]
@@ -209,98 +206,98 @@ namespace CanonicalEnsemble
 open Real Temperature MeasureTheory Constants
 open scoped Temperature CanonicalEnsemble
 
-variable {ι : Type} [Fintype ι] [MeasurableSpace ι]
-  (𝓒 : CanonicalEnsemble ι)
+variable {ι : Type} [Fintype ι] [MeasurableSpace ι] (𝓒 : CanonicalEnsemble ι)
 
-variable {ι1 : Type} [Fintype ι1] [MeasurableSpace ι1]
-  (𝓒1 : CanonicalEnsemble ι1)
+variable {ι1 : Type} [Fintype ι1] [MeasurableSpace ι1] (𝓒1 : CanonicalEnsemble ι1)
 open Constants
 
-lemma entropy_of_fintype (T : Temperature) :
-    𝓒.shannonEntropy T = - kB * ∑ i, 𝓒.probability T i * log (𝓒.probability T i) := by
+lemma entropy_of_fintype (T : Temperature)
+    : 𝓒.shannonEntropy T = -kB * ∑ i, 𝓒.probability T i * log (𝓒.probability T i) := by
   simp [shannonEntropy]
 
 lemma probability_le_one
-    [MeasurableSingletonClass ι] [IsFinite 𝓒] [Nonempty ι] (T : Temperature) (i : ι) :
-    𝓒.probability T i ≤ 1 := by
+    [MeasurableSingletonClass ι] [IsFinite 𝓒] [Nonempty ι] (T : Temperature) (i : ι)
+    : 𝓒.probability T i ≤ 1 := by
   have hZpos : 0 < 𝓒.mathematicalPartitionFunction T := by
     rw [mathematicalPartitionFunction_of_fintype]
     exact Finset.sum_pos (fun j _ => Real.exp_pos _) Finset.univ_nonempty
   rw [probability, div_le_one hZpos, mathematicalPartitionFunction_of_fintype]
-  simpa [neg_mul] using Finset.single_le_sum
-    (f := fun j : ι => Real.exp (- β T * 𝓒.energy j)) (fun j _ => Real.exp_nonneg _)
-    (Finset.mem_univ i)
+  simpa [neg_mul] using
+    Finset.single_le_sum
+      (f := fun j : ι => Real.exp (- β T * 𝓒.energy j))
+      (fun j _ => Real.exp_nonneg _)
+      (Finset.mem_univ i)
 
 /-- Finite specialization: strict positivity of the mathematical partition function. -/
 lemma mathematicalPartitionFunction_pos_finite
-    [MeasurableSingletonClass ι] [IsFinite 𝓒] [Nonempty ι] (T : Temperature) :
-    0 < 𝓒.mathematicalPartitionFunction T := by
-  simpa using (CanonicalEnsemble.mathematicalPartitionFunction_pos (𝓒:=𝓒) T)
+    [MeasurableSingletonClass ι] [IsFinite 𝓒] [Nonempty ι] (T : Temperature)
+    : 0 < 𝓒.mathematicalPartitionFunction T := by
+  simpa using (CanonicalEnsemble.mathematicalPartitionFunction_pos (𝓒 := 𝓒) T)
 
 /-- Finite specialization: strict positivity of the (physical) partition function. -/
 lemma partitionFunction_pos_finite
-    [MeasurableSingletonClass ι] [IsFinite 𝓒] [Nonempty ι] (T : Temperature) :
-    0 < 𝓒.partitionFunction T := by
-  simpa [partitionFunction, IsFinite.dof_eq_zero (𝓒:=𝓒),
-        IsFinite.phase_space_unit_eq_one (𝓒:=𝓒), pow_zero]
-    using mathematicalPartitionFunction_pos_finite (𝓒:=𝓒) (T:=T)
+    [MeasurableSingletonClass ι] [IsFinite 𝓒] [Nonempty ι] (T : Temperature)
+    : 0 < 𝓒.partitionFunction T := by
+  simpa [partitionFunction, IsFinite.dof_eq_zero (𝓒 := 𝓒),
+      IsFinite.phase_space_unit_eq_one (𝓒 := 𝓒), pow_zero]
+    using mathematicalPartitionFunction_pos_finite (𝓒 := 𝓒) (T := T)
 
 /-- Finite specialization: non-negativity (indeed positivity) of probabilities. -/
 lemma probability_nonneg_finite
-    [MeasurableSingletonClass ι] [IsFinite 𝓒] [Nonempty ι] (T : Temperature) (i : ι) :
-    0 ≤ 𝓒.probability T i := by
+    [MeasurableSingletonClass ι] [IsFinite 𝓒] [Nonempty ι] (T : Temperature) (i : ι)
+    : 0 ≤ 𝓒.probability T i := by
   unfold probability
-  have hZpos := mathematicalPartitionFunction_pos_finite (𝓒:=𝓒) (T:=T)
+  have hZpos := mathematicalPartitionFunction_pos_finite (𝓒 := 𝓒) (T := T)
   exact div_nonneg (Real.exp_nonneg _) hZpos.le
 
 /-- The sum of probabilities over all microstates is 1. -/
 lemma sum_probability_eq_one
-    [MeasurableSingletonClass ι] [IsFinite 𝓒] [Nonempty ι] (T : Temperature) :
-    ∑ i, 𝓒.probability T i = 1 := by
+    [MeasurableSingletonClass ι] [IsFinite 𝓒] [Nonempty ι] (T : Temperature)
+    : ∑ i, 𝓒.probability T i = 1 := by
   have hZne : 𝓒.mathematicalPartitionFunction T ≠ 0 :=
     (mathematicalPartitionFunction_pos_finite 𝓒 T).ne'
   simp_rw [probability, ← Finset.sum_div, ← mathematicalPartitionFunction_of_fintype]
   exact div_self hZne
 
 /-- The entropy of a finite canonical ensemble (Shannon entropy) is non-negative. -/
-lemma entropy_nonneg [MeasurableSingletonClass ι] [IsFinite 𝓒] [Nonempty ι] (T : Temperature) :
-    0 ≤ 𝓒.shannonEntropy T := by
+lemma entropy_nonneg [MeasurableSingletonClass ι] [IsFinite 𝓒] [Nonempty ι] (T : Temperature)
+    : 0 ≤ 𝓒.shannonEntropy T := by
   have hsum : ∑ i, 𝓒.probability T i * log (𝓒.probability T i) ≤ 0 :=
     Fintype.sum_nonpos fun i =>
-      mul_nonpos_iff.2 <| Or.inl ⟨probability_nonneg_finite 𝓒 T i,
-        Real.log_nonpos (probability_nonneg_finite 𝓒 T i) (probability_le_one 𝓒 T i)⟩
+      mul_nonpos_iff.2 <| Or.inl ⟨
+        probability_nonneg_finite 𝓒 T i,
+        Real.log_nonpos (probability_nonneg_finite 𝓒 T i) (probability_le_one 𝓒 T i)
+      ⟩
   rw [shannonEntropy, neg_mul, neg_nonneg]
   exact mul_nonpos_iff.2 <| Or.inl ⟨kB_pos.le, hsum⟩
 
 lemma shannonEntropy_eq_differentialEntropy
-    [MeasurableSingletonClass ι] [IsFinite 𝓒] (T : Temperature) :
-    𝓒.shannonEntropy T = 𝓒.differentialEntropy T := by
+    [MeasurableSingletonClass ι] [IsFinite 𝓒] (T : Temperature)
+    : 𝓒.shannonEntropy T = 𝓒.differentialEntropy T := by
   simp [shannonEntropy, differentialEntropy, integral_fintype, μProd_of_fintype]
 
-/-- In the finite, nonempty case the thermodynamic and Shannon entropies coincide.
+/--
+In the finite, nonempty case the thermodynamic and Shannon entropies coincide.
 All semi-classical correction factors vanish (`dof = 0`, `phaseSpaceUnit = 1`),
-so the absolute thermodynamic entropy reduces to the discrete Shannon form. -/
-theorem thermodynamicEntropy_eq_shannonEntropy [MeasurableSingletonClass ι] [IsFinite 𝓒]
-    (T : Temperature) :-- (hT : 0 < T.val) :
-    𝓒.thermodynamicEntropy T = 𝓒.shannonEntropy T := by
-  have h_thermo_eq_diff :
-      𝓒.thermodynamicEntropy T = 𝓒.differentialEntropy T := by
-    unfold CanonicalEnsemble.thermodynamicEntropy
-      CanonicalEnsemble.differentialEntropy
-    have h_log :
-        (fun i => Real.log (𝓒.physicalProbability T i))
+so the absolute thermodynamic entropy reduces to the discrete Shannon form.
+-/
+theorem thermodynamicEntropy_eq_shannonEntropy
+    [MeasurableSingletonClass ι] [IsFinite 𝓒] (T : Temperature)
+    : 𝓒.thermodynamicEntropy T = 𝓒.shannonEntropy T := by -- (hT : 0 < T.val) :
+  have h_thermo_eq_diff : 𝓒.thermodynamicEntropy T = 𝓒.differentialEntropy T := by
+    unfold CanonicalEnsemble.thermodynamicEntropy CanonicalEnsemble.differentialEntropy
+    have h_log
+        : (fun i => Real.log (𝓒.physicalProbability T i))
           = (fun i => Real.log (𝓒.probability T i)) := by
       funext i
-      simp [CanonicalEnsemble.physicalProbability,
-            IsFinite.dof_eq_zero (𝓒:=𝓒),
-            IsFinite.phase_space_unit_eq_one (𝓒:=𝓒)]
+      simp [CanonicalEnsemble.physicalProbability, IsFinite.dof_eq_zero (𝓒 := 𝓒),
+        IsFinite.phase_space_unit_eq_one (𝓒 := 𝓒)]
     simp_all only [physicalProbability_def]
-  have h_shannon :
-      𝓒.shannonEntropy T = 𝓒.differentialEntropy T :=
-    (shannonEntropy_eq_differentialEntropy (𝓒:=𝓒) T)
+  have h_shannon : 𝓒.shannonEntropy T = 𝓒.differentialEntropy T :=
+    (shannonEntropy_eq_differentialEntropy (𝓒 := 𝓒) T)
   calc
     𝓒.thermodynamicEntropy T
-        = 𝓒.differentialEntropy T := h_thermo_eq_diff
+      = 𝓒.differentialEntropy T := h_thermo_eq_diff
     _ = 𝓒.shannonEntropy T := h_shannon.symm
 
 open Real Temperature MeasureTheory Constants
@@ -310,57 +307,60 @@ open scoped Temperature CanonicalEnsemble BigOperators Constants ENNReal NNReal
 
 section FluctuationsFinite
 
-lemma meanSquareEnergy_of_fintype [MeasurableSingletonClass ι] [IsFinite 𝓒] (T : Temperature) :
-    𝓒.meanSquareEnergy T = ∑ i, (𝓒.energy i)^2 * 𝓒.probability T i := by
+lemma meanSquareEnergy_of_fintype [MeasurableSingletonClass ι] [IsFinite 𝓒] (T : Temperature)
+    : 𝓒.meanSquareEnergy T = ∑ i, (𝓒.energy i)^2 * 𝓒.probability T i := by
   simp [CanonicalEnsemble.meanSquareEnergy]
   rw [MeasureTheory.integral_fintype]
   simp [μProd_of_fintype, mul_comm]
   exact Integrable.of_finite
 
 lemma energyVariance_of_fintype
-    [MeasurableSingletonClass ι] [IsFinite 𝓒] [Nonempty ι] (T : Temperature) :
-    𝓒.energyVariance T = (∑ i, (𝓒.energy i)^2 * 𝓒.probability T i) - (𝓒.meanEnergy T)^2 := by
+    [MeasurableSingletonClass ι] [IsFinite 𝓒] [Nonempty ι] (T : Temperature)
+    : 𝓒.energyVariance T = (∑ i, (𝓒.energy i)^2 * 𝓒.probability T i) - (𝓒.meanEnergy T) ^ 2 := by
   have hE_int := Integrable.of_finite (f := 𝓒.energy) (μ := 𝓒.μProd T)
-  have hE2_int := Integrable.of_finite (f := fun i => (𝓒.energy i)^2) (μ := 𝓒.μProd T)
+  have hE2_int := Integrable.of_finite (f := fun i => (𝓒.energy i) ^ 2) (μ := 𝓒.μProd T)
   rw [CanonicalEnsemble.energyVariance_eq_meanSquareEnergy_sub_meanEnergy_sq 𝓒 T hE_int hE2_int]
   rw [meanSquareEnergy_of_fintype]
 
 /-! ## β-parameterization for finite systems -/
 
-/-- The finite-sum partition function as a real function of the inverse temperature `b = β`,
-defined by `Z(b) = ∑ i exp (-b * 𝓒.energy i)`. -/
+/--
+The finite-sum partition function as a real function of the inverse temperature `b = β`,
+defined by `Z(b) = ∑ i exp (-b * 𝓒.energy i)`.
+-/
 noncomputable def mathematicalPartitionFunctionBetaReal (b : ℝ) : ℝ :=
   ∑ i, Real.exp (-b * 𝓒.energy i)
 
-lemma mathematicalPartitionFunctionBetaReal_pos [Nonempty ι] (b : ℝ) :
-    0 < 𝓒.mathematicalPartitionFunctionBetaReal b := by
+lemma mathematicalPartitionFunctionBetaReal_pos [Nonempty ι] (b : ℝ)
+    : 0 < 𝓒.mathematicalPartitionFunctionBetaReal b := by
   apply Finset.sum_pos
   · intro i _; exact Real.exp_pos _
   · exact Finset.univ_nonempty
 
-/-- For inverse temperature `b = β`, the (real-valued) Boltzmann probability of microstate `i`,
-given by `exp (-b * E i) / Z(b)` where `Z(b) = ∑ i exp (-b * E i)`. -/
+/--
+For inverse temperature `b = β`, the (real-valued) Boltzmann probability of microstate `i`,
+given by `exp (-b * E i) / Z(b)` where `Z(b) = ∑ i exp (-b * E i)`.
+-/
 noncomputable def probabilityBetaReal (b : ℝ) (i : ι) : ℝ :=
   Real.exp (-b * 𝓒.energy i) / 𝓒.mathematicalPartitionFunctionBetaReal b
 
-/-- The mean energy as a function of inverse temperature `b = β` in the finite case,
+/--
+The mean energy as a function of inverse temperature `b = β` in the finite case,
 defined by `U(b) = ∑ i, E i * p_b i` with `p_b i = exp (-b * E i) / Z(b)` and `Z(b) = ∑ i,
-exp (-b * E i)`. -/
-noncomputable def meanEnergyBetaReal (b : ℝ) : ℝ :=
-  ∑ i, 𝓒.energy i * 𝓒.probabilityBetaReal b i
+exp (-b * E i)`.
+-/
+noncomputable def meanEnergyBetaReal (b : ℝ) : ℝ := ∑ i, 𝓒.energy i * 𝓒.probabilityBetaReal b i
 
-lemma meanEnergy_Beta_eq_finite [MeasurableSingletonClass ι] [IsFinite 𝓒] (b : ℝ) (hb : 0 < b) :
-    𝓒.meanEnergyBeta b = 𝓒.meanEnergyBetaReal b := by
+lemma meanEnergy_Beta_eq_finite [MeasurableSingletonClass ι] [IsFinite 𝓒] (b : ℝ) (hb : 0 < b)
+    : 𝓒.meanEnergyBeta b = 𝓒.meanEnergyBetaReal b := by
   let T := Temperature.ofβ (Real.toNNReal b)
-  have hT_beta : (T.β : ℝ) = b := by
-    simp [T, Real.toNNReal_of_nonneg hb.le]
+  have hT_beta : (T.β : ℝ) = b := by simp [T, Real.toNNReal_of_nonneg hb.le]
   rw [meanEnergyBeta, meanEnergy_of_fintype 𝓒 T, meanEnergyBetaReal]
   refine Finset.sum_congr rfl fun i _ => ?_
   simp [CanonicalEnsemble.probability, probabilityBetaReal,
-        mathematicalPartitionFunction_of_fintype, mathematicalPartitionFunctionBetaReal, hT_beta]
+    mathematicalPartitionFunction_of_fintype, mathematicalPartitionFunctionBetaReal, hT_beta]
 
-lemma differentiable_meanEnergyBetaReal
-    [Nonempty ι] : Differentiable ℝ 𝓒.meanEnergyBetaReal := by
+lemma differentiable_meanEnergyBetaReal [Nonempty ι] : Differentiable ℝ 𝓒.meanEnergyBetaReal := by
   unfold meanEnergyBetaReal probabilityBetaReal mathematicalPartitionFunctionBetaReal
   refine Differentiable.fun_sum (by
     intro i _
@@ -371,81 +371,85 @@ lemma differentiable_meanEnergyBetaReal
 
 /-! Derivatives of Z and numerator -/
 
-lemma differentiable_mathematicalPartitionFunctionBetaReal :
-    Differentiable ℝ 𝓒.mathematicalPartitionFunctionBetaReal := by
+lemma differentiable_mathematicalPartitionFunctionBetaReal
+    : Differentiable ℝ 𝓒.mathematicalPartitionFunctionBetaReal := by
   unfold mathematicalPartitionFunctionBetaReal
-  refine Differentiable.fun_sum ?_; intro i _; simp
+  refine Differentiable.fun_sum ?_
+  intro i _
+  simp
 
-/-- The numerator in the finite-sum expression of the mean energy as a function of the
+/--
+The numerator in the finite-sum expression of the mean energy as a function of the
 inverse temperature `b = β`,
-namely `∑ i, E i * exp (-b * E i)` (so that `U(b) = meanEnergyNumerator b / Z(b)`). -/
-noncomputable def meanEnergyNumerator (b : ℝ) : ℝ :=
-  ∑ i, 𝓒.energy i * Real.exp (-b * 𝓒.energy i)
+namely `∑ i, E i * exp (-b * E i)` (so that `U(b) = meanEnergyNumerator b / Z(b)`).
+-/
+noncomputable def meanEnergyNumerator (b : ℝ) : ℝ := ∑ i, 𝓒.energy i * Real.exp (-b * 𝓒.energy i)
 
-lemma differentiable_meanEnergyNumerator :
-    Differentiable ℝ 𝓒.meanEnergyNumerator := by
+lemma differentiable_meanEnergyNumerator : Differentiable ℝ 𝓒.meanEnergyNumerator := by
   unfold meanEnergyNumerator
-  refine Differentiable.fun_sum ?_; intro i _; apply Differentiable.const_mul; simp
+  refine Differentiable.fun_sum ?_
+  intro i _
+  apply Differentiable.const_mul
+  simp
 
-lemma deriv_mathematicalPartitionFunctionBetaReal (b : ℝ) :
-    deriv 𝓒.mathematicalPartitionFunctionBetaReal b = -𝓒.meanEnergyNumerator b := by
+lemma deriv_mathematicalPartitionFunctionBetaReal (b : ℝ)
+    : deriv 𝓒.mathematicalPartitionFunctionBetaReal b = - 𝓒.meanEnergyNumerator b := by
   unfold mathematicalPartitionFunctionBetaReal meanEnergyNumerator
   have hd : ∀ c : ℝ, HasDerivAt (fun x => Real.exp (-x * c)) (-c * Real.exp (-b * c)) b := by
     intro c
-    have h : HasDerivAt (fun x => -x * c) (-c) b := by
-      simpa using (hasDerivAt_id b).neg.mul_const c
+    have h : HasDerivAt (fun x => -x * c) (-c) b := by simpa using (hasDerivAt_id b).neg.mul_const c
     simpa [mul_comm] using h.exp
-  have h_sum : HasDerivAt (fun x => ∑ i, Real.exp (-x * 𝓒.energy i))
+  have h_sum : HasDerivAt
+      (fun x => ∑ i, Real.exp (-x * 𝓒.energy i))
       (∑ i, -𝓒.energy i * Real.exp (-b * 𝓒.energy i)) b :=
     HasDerivAt.fun_sum fun i _ => hd (𝓒.energy i)
   simpa [Finset.sum_neg_distrib] using h_sum.deriv
 
-lemma deriv_meanEnergyNumerator (b : ℝ) :
-    deriv 𝓒.meanEnergyNumerator b =
-      -∑ i, (𝓒.energy i)^2 * Real.exp (-b * 𝓒.energy i) := by
+lemma deriv_meanEnergyNumerator (b : ℝ)
+    : deriv 𝓒.meanEnergyNumerator b = - ∑ i, (𝓒.energy i)^2 * Real.exp (-b * 𝓒.energy i) := by
   unfold meanEnergyNumerator
   have hd : ∀ c : ℝ, HasDerivAt (fun x => Real.exp (-x * c)) (-c * Real.exp (-b * c)) b := by
     intro c
-    have h : HasDerivAt (fun x => -x * c) (-c) b := by
-      simpa using (hasDerivAt_id b).neg.mul_const c
+    have h : HasDerivAt (fun x => -x * c) (-c) b := by simpa using (hasDerivAt_id b).neg.mul_const c
     simpa [mul_comm] using h.exp
-  have h_sum : HasDerivAt (fun x => ∑ i, 𝓒.energy i * Real.exp (-x * 𝓒.energy i))
+  have h_sum : HasDerivAt
+      (fun x => ∑ i, 𝓒.energy i * Real.exp (-x * 𝓒.energy i))
       (∑ i, -(𝓒.energy i)^2 * Real.exp (-b * 𝓒.energy i)) b := by
     refine HasDerivAt.fun_sum fun i _ => ?_
-    simpa [sq, mul_comm, mul_left_comm, mul_assoc] using
-      (hd (𝓒.energy i)).const_mul (𝓒.energy i)
+    simpa [sq, mul_comm, mul_left_comm, mul_assoc] using (hd (𝓒.energy i)).const_mul (𝓒.energy i)
   simpa [Finset.sum_neg_distrib, sq, mul_comm, mul_left_comm, mul_assoc] using h_sum.deriv
 
 /-! Quotient rule: dU/db = U^2 - ⟨E^2⟩_β -/
 
 variable [Nonempty ι]
 
-lemma deriv_meanEnergyBetaReal (b : ℝ) :
-    deriv 𝓒.meanEnergyBetaReal b =
-    (𝓒.meanEnergyBetaReal b)^2 - ∑ i, (𝓒.energy i)^2 * 𝓒.probabilityBetaReal b i := by
+lemma deriv_meanEnergyBetaReal (b : ℝ)
+    : deriv 𝓒.meanEnergyBetaReal b
+      = (𝓒.meanEnergyBetaReal b) ^ 2 - ∑ i, (𝓒.energy i)^2 * 𝓒.probabilityBetaReal b i := by
   have hN_diff := (differentiable_meanEnergyNumerator 𝓒) b
   have hZ_diff := (differentiable_mathematicalPartitionFunctionBetaReal 𝓒) b
   have hZ_ne : 𝓒.mathematicalPartitionFunctionBetaReal b ≠ 0 :=
     (mathematicalPartitionFunctionBetaReal_pos 𝓒 b).ne'
-  have hU : 𝓒.meanEnergyBetaReal
-      = 𝓒.meanEnergyNumerator / 𝓒.mathematicalPartitionFunctionBetaReal := by
+  have hU
+      : 𝓒.meanEnergyBetaReal = 𝓒.meanEnergyNumerator / 𝓒.mathematicalPartitionFunctionBetaReal := by
     funext x
     simp [meanEnergyBetaReal, probabilityBetaReal, meanEnergyNumerator,
-          mathematicalPartitionFunctionBetaReal, Pi.div_apply, Finset.sum_div, mul_div_assoc]
-  have hprob : ∑ i, (𝓒.energy i)^2 * 𝓒.probabilityBetaReal b i
-      = (∑ i, (𝓒.energy i)^2 * Real.exp (-b * 𝓒.energy i))
+      mathematicalPartitionFunctionBetaReal, Pi.div_apply, Finset.sum_div, mul_div_assoc]
+  have hprob
+      : ∑ i, (𝓒.energy i)^2 * 𝓒.probabilityBetaReal b i
+        = (∑ i, (𝓒.energy i)^2 * Real.exp (-b * 𝓒.energy i))
           / 𝓒.mathematicalPartitionFunctionBetaReal b := by
     simp [probabilityBetaReal, Finset.sum_div, mul_div_assoc]
   rw [hprob, hU, deriv_div hN_diff hZ_diff hZ_ne, deriv_meanEnergyNumerator,
-      deriv_mathematicalPartitionFunctionBetaReal, Pi.div_apply]
+    deriv_mathematicalPartitionFunctionBetaReal, Pi.div_apply]
   set S2 := ∑ i, (𝓒.energy i) ^ 2 * Real.exp (-b * 𝓒.energy i)
   field_simp
   ring
 
 /-- (∂U/∂β) = -Var(E) for finite systems. -/
 lemma derivWithin_meanEnergy_Beta_eq_neg_variance
-    [MeasurableSingletonClass ι][𝓒.IsFinite] (T : Temperature) (hT_pos : 0 < T.val) :
-    derivWithin 𝓒.meanEnergyBeta (Set.Ioi 0) (T.β : ℝ) = - 𝓒.energyVariance T := by
+    [MeasurableSingletonClass ι] [𝓒.IsFinite] (T : Temperature) (hT_pos : 0 < T.val)
+    : derivWithin 𝓒.meanEnergyBeta (Set.Ioi 0) (T.β : ℝ) = - 𝓒.energyVariance T := by
   let β₀ := (T.β : ℝ)
   have hβ₀_pos : 0 < β₀ := beta_pos T hT_pos
   have h_eq_on : Set.EqOn 𝓒.meanEnergyBeta 𝓒.meanEnergyBetaReal (Set.Ioi 0) := by
@@ -471,8 +475,8 @@ lemma derivWithin_meanEnergy_Beta_eq_neg_variance
 
 /-- FDT for finite canonical ensembles: C_V = Var(E) / (k_B T²). -/
 theorem fluctuation_dissipation_theorem_finite
-    [MeasurableSingletonClass ι] [𝓒.IsFinite] (T : Temperature) (hT_pos : 0 < T.val) :
-    𝓒.heatCapacity T = 𝓒.energyVariance T / (kB * (T.val : ℝ)^2) := by
+    [MeasurableSingletonClass ι] [𝓒.IsFinite] (T : Temperature) (hT_pos : 0 < T.val)
+    : 𝓒.heatCapacity T = 𝓒.energyVariance T / (kB * (T.val : ℝ) ^ 2) := by
   have hβ₀_pos : 0 < (T.β : ℝ) := beta_pos T hT_pos
   let β₀ := (T.β : ℝ)
   have h_diff_U_beta : DifferentiableWithinAt ℝ 𝓒.meanEnergyBeta (Set.Ioi 0) β₀ := by

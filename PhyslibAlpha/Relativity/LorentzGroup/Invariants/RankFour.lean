@@ -98,8 +98,7 @@ paragraph is stated for any number of slots in `Invariants.Basic` and
 
 namespace RankFour
 
-variable {B : Type*} [AddCommGroup B] [Module ℂ B]
-  {repLorentz : Representation ℂ SL(2,ℂ) B}
+variable {B : Type*} [AddCommGroup B] [Module ℂ B] {repLorentz : Representation ℂ (SL(2,ℂ)) B}
 
 /-!
 
@@ -122,15 +121,19 @@ def contractionCoeff : Fin 4 → (Fin 4 → Fin 1 ⊕ Fin 3) → ℤ :=
     fun d => minkowskiMatrixZ (d 0) (d 3) * minkowskiMatrixZ (d 1) (d 2),
     fun d => leviCivitaSymbol fun μ => d (finSumFinEquiv μ)]
 
-/-- The four invariant tensors with four contravariant indices: `η_{μν} η_{ρσ}`,
-  `η_{μρ} η_{νσ}`, `η_{μσ} η_{νρ}` and `ε_{μνρσ}`. -/
+/--
+The four invariant tensors with four contravariant indices: `η_{μν} η_{ρσ}`,
+`η_{μρ} η_{νσ}`, `η_{μσ} η_{νρ}` and `ε_{μνρσ}`.
+-/
 noncomputable def contractionTensor (i : Fin 4) : ℂT(fun _ : Fin 4 => Color.up) :=
   (coeffEquiv 4).symm fun d => ((contractionCoeff i d : ℤ) : ℂ)
 
-/-- `ofComponents T` sends each invariant tensor to the contraction of `T` with its
-  coefficients. -/
-lemma ofComponents_contractionTensor (T : (Fin 4 → Fin 1 ⊕ Fin 3) → B) (i : Fin 4) :
-    ofComponents T (contractionTensor i) = ∑ d, ((contractionCoeff i d : ℤ) : ℂ) • T d :=
+/--
+`ofComponents T` sends each invariant tensor to the contraction of `T` with its
+coefficients.
+-/
+lemma ofComponents_contractionTensor (T : (Fin 4 → Fin 1 ⊕ Fin 3) → B) (i : Fin 4)
+    : ofComponents T (contractionTensor i) = ∑ d, ((contractionCoeff i d : ℤ) : ℂ) • T d :=
   ofComponents_coeffEquiv_symm T _
 
 /-!
@@ -147,39 +150,47 @@ and not three, a reflection having `det = -1`. `sum_pi_four` is bookkeeping.
 -/
 
 /-- Bookkeeping: a sum over index vectors is a fourfold sum over directions. -/
-lemma sum_pi_four {M : Type*} [AddCommMonoid M] (F : (Fin 4 → Fin 1 ⊕ Fin 3) → M) :
-    ∑ d : Fin 4 → Fin 1 ⊕ Fin 3, F d
+lemma sum_pi_four {M : Type*} [AddCommMonoid M] (F : (Fin 4 → Fin 1 ⊕ Fin 3) → M)
+    : ∑ d : Fin 4 → Fin 1 ⊕ Fin 3, F d
       = ∑ x : Fin 1 ⊕ Fin 3, ∑ y : Fin 1 ⊕ Fin 3, ∑ z : Fin 1 ⊕ Fin 3,
         ∑ w : Fin 1 ⊕ Fin 3, F ![x, y, z, w] := by
   rw [show (∑ d : Fin 4 → Fin 1 ⊕ Fin 3, F d)
       = ∑ p : (Fin 1 ⊕ Fin 3) × (Fin 1 ⊕ Fin 3) × (Fin 1 ⊕ Fin 3) × (Fin 1 ⊕ Fin 3),
         F ![p.1, p.2.1, p.2.2.1, p.2.2.2] from
-      Fintype.sum_equiv
-        { toFun := fun d => (d 0, d 1, d 2, d 3)
-          invFun := fun p => ![p.1, p.2.1, p.2.2.1, p.2.2.2]
-          left_inv := fun d => by funext i; fin_cases i <;> simp
-          right_inv := fun p => by simp } _ _ fun d => by
+    Fintype.sum_equiv
+      {
+        toFun := fun d => (d 0, d 1, d 2, d 3)
+        invFun := fun p => ![p.1, p.2.1, p.2.2.1, p.2.2.2]
+        left_inv := fun d => by funext i; fin_cases i <;> simp
+        right_inv := fun p => by simp
+      }
+      _ _
+      fun d => by
         congr 1
         funext i
         fin_cases i <;> simp]
   simp only [Fintype.sum_prod_type]
 
-/-- The pairing of slots `(0,1)` and `(2,3)` is fixed: two copies of
-  `LorentzGroup.sum_minkowskiMatrixZ_mul`. -/
-lemma act_outerPair (Λ : LorentzGroup 3) (a : Fin 4 → Fin 1 ⊕ Fin 3) :
-    act Λ.1 (fun d => ((minkowskiMatrixZ (d 0) (d 1) * minkowskiMatrixZ (d 2) (d 3) : ℤ) : ℂ)) a
+/--
+The pairing of slots `(0,1)` and `(2,3)` is fixed: two copies of
+`LorentzGroup.sum_minkowskiMatrixZ_mul`.
+-/
+lemma act_outerPair (Λ : LorentzGroup 3) (a : Fin 4 → Fin 1 ⊕ Fin 3)
+    : act Λ.1 (fun d => ((minkowskiMatrixZ (d 0) (d 1) * minkowskiMatrixZ (d 2) (d 3) : ℤ) : ℂ)) a
       = ((minkowskiMatrixZ (a 0) (a 1) * minkowskiMatrixZ (a 2) (a 3) : ℤ) : ℂ) := by
-  have h : ∀ x y z w : Fin 1 ⊕ Fin 3,
-      ((minkowskiMatrixZ (![x, y, z, w] 0) (![x, y, z, w] 1)
-          * minkowskiMatrixZ (![x, y, z, w] 2) (![x, y, z, w] 3) : ℤ) : ℂ)
-        * ∏ s, ((Λ.1 (a s) (![x, y, z, w] s) : ℝ) : ℂ)
-      = (((minkowskiMatrixZ x y : ℤ) : ℂ)
-          * (((Λ.1 (a 0) x : ℝ) : ℂ) * ((Λ.1 (a 1) y : ℝ) : ℂ)))
-        * (((minkowskiMatrixZ z w : ℤ) : ℂ)
-          * (((Λ.1 (a 2) z : ℝ) : ℂ) * ((Λ.1 (a 3) w : ℝ) : ℂ))) := by
+  have h
+      : ∀ x y z w : Fin 1 ⊕ Fin 3,
+        ((minkowskiMatrixZ (![x, y, z, w] 0) (![x, y, z, w] 1)
+                  * minkowskiMatrixZ (![x, y, z, w] 2) (![x, y, z, w] 3)
+                : ℤ)
+              : ℂ)
+            * ∏ s, ((Λ.1 (a s) (![x, y, z, w] s) : ℝ) : ℂ)
+          = (((minkowskiMatrixZ x y : ℤ) : ℂ) * (((Λ.1 (a 0) x : ℝ) : ℂ) * ((Λ.1 (a 1) y : ℝ) : ℂ)))
+            * (((minkowskiMatrixZ z w : ℤ) : ℂ)
+              * (((Λ.1 (a 2) z : ℝ) : ℂ) * ((Λ.1 (a 3) w : ℝ) : ℂ))) := by
     intro x y z w
-    simp only [Fin.prod_univ_four, Matrix.cons_val_zero, Matrix.cons_val_one,
-      Matrix.head_cons, Matrix.cons_val_two, Matrix.cons_val_three, Matrix.tail_cons]
+    simp only [Fin.prod_univ_four, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons,
+      Matrix.cons_val_two, Matrix.cons_val_three, Matrix.tail_cons]
     push_cast
     ring
   rw [act, sum_pi_four]
@@ -188,40 +199,42 @@ lemma act_outerPair (Λ : LorentzGroup 3) (a : Fin 4 → Fin 1 ⊕ Fin 3) :
   ring
 
 /-- The same for the slots permuted by `σ`, by renaming the summation variable. -/
-lemma act_outerPair_comp (σ : Equiv.Perm (Fin 4)) (Λ : LorentzGroup 3)
-    (a : Fin 4 → Fin 1 ⊕ Fin 3) :
-    act Λ.1 (fun d => ((minkowskiMatrixZ (d (σ 0)) (d (σ 1))
-        * minkowskiMatrixZ (d (σ 2)) (d (σ 3)) : ℤ) : ℂ)) a
-      = ((minkowskiMatrixZ (a (σ 0)) (a (σ 1))
-        * minkowskiMatrixZ (a (σ 2)) (a (σ 3)) : ℤ) : ℂ) := by
+lemma act_outerPair_comp (σ : Equiv.Perm (Fin 4)) (Λ : LorentzGroup 3) (a : Fin 4 → Fin 1 ⊕ Fin 3)
+    : act Λ.1
+        (fun d =>
+          ((minkowskiMatrixZ (d (σ 0)) (d (σ 1)) * minkowskiMatrixZ (d (σ 2)) (d (σ 3)) : ℤ) : ℂ))
+        a
+      = ((minkowskiMatrixZ (a (σ 0)) (a (σ 1)) * minkowskiMatrixZ (a (σ 2)) (a (σ 3)) : ℤ)
+        : ℂ) := by
   have h := act_outerPair Λ (a ∘ σ)
   rw [act, ← Equiv.sum_comp (Equiv.arrowCongr σ.symm (Equiv.refl (Fin 1 ⊕ Fin 3)))] at h
-  simp only [Equiv.arrowCongr_apply, Equiv.symm_symm, Equiv.coe_refl, Function.comp_def,
-    id] at h
+  simp only [Equiv.arrowCongr_apply, Equiv.symm_symm, Equiv.coe_refl, Function.comp_def, id] at h
   rw [← h, act]
   refine Finset.sum_congr rfl fun d _ => ?_
   rw [← Equiv.prod_comp σ fun i => ((Λ.1 (a i) (d i) : ℝ) : ℂ)]
 
-/-- The symbol is fixed by a Lorentz matrix of determinant `1`; in general it picks up `det Λ`,
-  by `sum_leviCivitaSymbol_mul_prod`. -/
-lemma act_leviCivitaSymbol (Λ : LorentzGroup 3) (hΛ : Λ.1.det = 1) (a : Fin 4 → Fin 1 ⊕ Fin 3) :
-    act Λ.1 (fun d => ((leviCivitaSymbol fun μ => d (finSumFinEquiv μ) : ℤ) : ℂ)) a
+/--
+The symbol is fixed by a Lorentz matrix of determinant `1`; in general it picks up `det Λ`,
+by `sum_leviCivitaSymbol_mul_prod`.
+-/
+lemma act_leviCivitaSymbol (Λ : LorentzGroup 3) (hΛ : Λ.1.det = 1) (a : Fin 4 → Fin 1 ⊕ Fin 3)
+    : act Λ.1 (fun d => ((leviCivitaSymbol fun μ => d (finSumFinEquiv μ) : ℤ) : ℂ)) a
       = ((leviCivitaSymbol fun μ => a (finSumFinEquiv μ) : ℤ) : ℂ) := by
   have hdet : (Complex.ofRealHom.mapMatrix Λ.1).det = 1 := by
     rw [← RingHom.map_det, hΛ]
     simp
-  have h := sum_leviCivitaSymbol_mul_prod (Complex.ofRealHom.mapMatrix Λ.1)
-    (fun μ => a (finSumFinEquiv μ))
+  have h :=
+    sum_leviCivitaSymbol_mul_prod (Complex.ofRealHom.mapMatrix Λ.1) (fun μ => a (finSumFinEquiv μ))
   rw [hdet, one_mul] at h
-  rw [act, ← h, ← Equiv.sum_comp
-    (Equiv.arrowCongr finSumFinEquiv.symm (Equiv.refl (Fin 1 ⊕ Fin 3)))]
+  rw [act, ← h,
+    ← Equiv.sum_comp (Equiv.arrowCongr finSumFinEquiv.symm (Equiv.refl (Fin 1 ⊕ Fin 3)))]
   refine Finset.sum_congr rfl fun d _ => ?_
   simp only [Equiv.arrowCongr_apply, Equiv.symm_symm, Equiv.coe_refl, Function.comp_def, id]
   congr 1
 
 /-- The four coefficient tensors are invariant. -/
-lemma isInvariantCoeff_contractionCoeff (i : Fin 4) :
-    IsInvariantCoeff fun d => ((contractionCoeff i d : ℤ) : ℂ) := by
+lemma isInvariantCoeff_contractionCoeff (i : Fin 4)
+    : IsInvariantCoeff fun d => ((contractionCoeff i d : ℤ) : ℂ) := by
   intro g
   funext a
   fin_cases i
@@ -239,8 +252,8 @@ lemma isInvariantCoeff_contractionCoeff (i : Fin 4) :
 -/
 
 /-- Each of the four tensors is Lorentz invariant, its coefficient tensor being invariant. -/
-lemma contractionTensor_invariant (i : Fin 4) (g : SL(2,ℂ)) :
-    g • contractionTensor i = contractionTensor i := by
+lemma contractionTensor_invariant (i : Fin 4) (g : SL(2,ℂ))
+    : g • contractionTensor i = contractionTensor i := by
   refine (invariant_iff_isInvariantCoeff _).2 ?_ g
   rw [contractionTensor, LinearEquiv.apply_symm_apply]
   exact isInvariantCoeff_contractionCoeff i
@@ -262,21 +275,23 @@ section SwapTwoThree
 open TensorSpecies
 
 /-- Exchanging the last two of four contravariant slots is a reindexing. -/
-lemma isReindexing_swap_two_three :
-    Tensor.IsReindexing (fun _ : Fin 4 => Color.up) (fun _ => Color.up)
+lemma isReindexing_swap_two_three
+    : Tensor.IsReindexing
+      (fun _ : Fin 4 => Color.up)
+      (fun _ => Color.up)
       ⇑(Equiv.swap (2 : Fin 4) 3) :=
   ⟨(Equiv.swap 2 3).bijective, fun _ => rfl⟩
 
 /-- `η_{μν} η_{ρσ}` is unchanged by exchanging its last two slots. -/
-lemma permT_swap_two_three_contractionTensor_zero :
-    Tensor.permT _ isReindexing_swap_two_three (contractionTensor 0) = contractionTensor 0 := by
+lemma permT_swap_two_three_contractionTensor_zero
+    : Tensor.permT _ isReindexing_swap_two_three (contractionTensor 0) = contractionTensor 0 := by
   rw [contractionTensor, permT_coeffEquiv_symm, Equiv.symm_swap]
   refine congrArg _ (funext fun d => ?_)
   simp [contractionCoeff, Equiv.swap_apply_def, minkowskiMatrixZ.comm (d 3) (d 2)]
 
 /-- Exchanging the last two slots of `η_{μρ} η_{νσ}` gives `η_{μσ} η_{νρ}`. -/
-lemma permT_swap_two_three_contractionTensor_one :
-    Tensor.permT _ isReindexing_swap_two_three (contractionTensor 1) = contractionTensor 2 := by
+lemma permT_swap_two_three_contractionTensor_one
+    : Tensor.permT _ isReindexing_swap_two_three (contractionTensor 1) = contractionTensor 2 := by
   rw [contractionTensor, contractionTensor, permT_coeffEquiv_symm, Equiv.symm_swap]
   refine congrArg _ (funext fun d => ?_)
   simp [contractionCoeff, Equiv.swap_apply_def]
@@ -285,34 +300,35 @@ variable {f : ℂT(fun _ : Fin 4 => Color.up) →ₗ[ℂ] B}
 
 /-- A map antisymmetric in the last two slots sends `η_{μν} η_{ρσ}` to zero. -/
 lemma apply_contractionTensor_zero_of_antisymm
-    (hf : f ∘ₗ Tensor.permT _ isReindexing_swap_two_three = -f) :
-    f (contractionTensor 0) = 0 := by
+    (hf : f ∘ₗ Tensor.permT _ isReindexing_swap_two_three = -f)
+    : f (contractionTensor 0) = 0 := by
   have h := LinearMap.congr_fun hf (contractionTensor 0)
-  rw [LinearMap.comp_apply, permT_swap_two_three_contractionTensor_zero,
-    LinearMap.neg_apply] at h
+  rw [LinearMap.comp_apply, permT_swap_two_three_contractionTensor_zero, LinearMap.neg_apply] at h
   have h2 : (2 : ℂ) • f (contractionTensor 0) = 0 := by
     rw [two_smul]
     exact add_eq_zero_iff_eq_neg.2 h
   exact (smul_eq_zero.1 h2).resolve_left two_ne_zero
 
-/-- A map antisymmetric in the last two slots sends `η_{μσ} η_{νρ}` to minus the image of
-  `η_{μρ} η_{νσ}`. -/
+/--
+A map antisymmetric in the last two slots sends `η_{μσ} η_{νρ}` to minus the image of
+`η_{μρ} η_{νσ}`.
+-/
 lemma apply_contractionTensor_two_of_antisymm
-    (hf : f ∘ₗ Tensor.permT _ isReindexing_swap_two_three = -f) :
-    f (contractionTensor 2) = -f (contractionTensor 1) := by
+    (hf : f ∘ₗ Tensor.permT _ isReindexing_swap_two_three = -f)
+    : f (contractionTensor 2) = - f (contractionTensor 1) := by
   have h := LinearMap.congr_fun hf (contractionTensor 1)
-  rwa [LinearMap.comp_apply, permT_swap_two_three_contractionTensor_one,
-    LinearMap.neg_apply] at h
+  rwa [LinearMap.comp_apply, permT_swap_two_three_contractionTensor_one, LinearMap.neg_apply] at h
 
-/-- For a map antisymmetric in the last two slots, the images of the four invariant tensors
-  span the same as the images of `η_{μρ} η_{νσ}` and `ε_{μνρσ}`. -/
+/--
+For a map antisymmetric in the last two slots, the images of the four invariant tensors
+span the same as the images of `η_{μρ} η_{νσ}` and `ε_{μνρσ}`.
+-/
 lemma span_range_contractionTensor_of_antisymm
-    (hf : f ∘ₗ Tensor.permT _ isReindexing_swap_two_three = -f) :
-    Submodule.span ℂ (Set.range fun i => f (contractionTensor i))
+    (hf : f ∘ₗ Tensor.permT _ isReindexing_swap_two_three = -f)
+    : Submodule.span ℂ (Set.range fun i => f (contractionTensor i))
       = Submodule.span ℂ {f (contractionTensor 1), f (contractionTensor 3)} := by
   refine le_antisymm (Submodule.span_le.2 <| Set.range_subset_iff.2 fun i => ?_)
-    (Submodule.span_mono <| Set.insert_subset_iff.2
-      ⟨⟨1, rfl⟩, Set.singleton_subset_iff.2 ⟨3, rfl⟩⟩)
+    (Submodule.span_mono <| Set.insert_subset_iff.2 ⟨⟨1, rfl⟩, Set.singleton_subset_iff.2 ⟨3, rfl⟩⟩)
   fin_cases i
   · simp [apply_contractionTensor_zero_of_antisymm hf]
   · exact Submodule.subset_span (Set.mem_insert _ _)
@@ -339,25 +355,28 @@ section SwapZeroOne
 open TensorSpecies
 
 /-- Exchanging the first two of four contravariant slots is a reindexing. -/
-lemma isReindexing_swap_zero_one :
-    Tensor.IsReindexing (fun _ : Fin 4 => Color.up) (fun _ => Color.up)
+lemma isReindexing_swap_zero_one
+    : Tensor.IsReindexing
+      (fun _ : Fin 4 => Color.up)
+      (fun _ => Color.up)
       ⇑(Equiv.swap (0 : Fin 4) 1) :=
   ⟨(Equiv.swap 0 1).bijective, fun _ => rfl⟩
 
 /-- Exchanging the first two slots of `η_{μρ} η_{νσ}` gives `η_{μσ} η_{νρ}`. -/
-lemma permT_swap_zero_one_contractionTensor_one :
-    Tensor.permT _ isReindexing_swap_zero_one (contractionTensor 1) = contractionTensor 2 := by
+lemma permT_swap_zero_one_contractionTensor_one
+    : Tensor.permT _ isReindexing_swap_zero_one (contractionTensor 1) = contractionTensor 2 := by
   rw [contractionTensor, contractionTensor, permT_coeffEquiv_symm, Equiv.symm_swap]
   refine congrArg _ (funext fun d => ?_)
   simp [contractionCoeff, Equiv.swap_apply_def, mul_comm]
 
 /-- Exchanging the first two slots negates `ε_{μνρσ}`. -/
-lemma permT_swap_zero_one_contractionTensor_three :
-    Tensor.permT _ isReindexing_swap_zero_one (contractionTensor 3) = -contractionTensor 3 := by
+lemma permT_swap_zero_one_contractionTensor_three
+    : Tensor.permT _ isReindexing_swap_zero_one (contractionTensor 3) = - contractionTensor 3 := by
   rw [contractionTensor, permT_coeffEquiv_symm, Equiv.symm_swap, ← map_neg]
   refine congrArg _ (funext fun d => ?_)
-  have he : (fun μ : Fin 1 ⊕ Fin 3 => (d ∘ Equiv.swap (0 : Fin 4) 1) (finSumFinEquiv μ))
-      = (fun μ : Fin 1 ⊕ Fin 3 => d (finSumFinEquiv μ)) ∘ Equiv.swap (Sum.inl 0) (Sum.inr 0) := by
+  have he
+      : (fun μ : Fin 1 ⊕ Fin 3 => (d ∘ Equiv.swap (0 : Fin 4) 1) (finSumFinEquiv μ))
+        = (fun μ : Fin 1 ⊕ Fin 3 => d (finSumFinEquiv μ)) ∘ Equiv.swap (Sum.inl 0) (Sum.inr 0) := by
     funext μ
     rcases μ with μ | μ <;> fin_cases μ <;> rfl
   simp only [contractionCoeff, Matrix.cons_val, Pi.neg_apply]
@@ -365,15 +384,18 @@ lemma permT_swap_zero_one_contractionTensor_three :
 
 variable {f : ℂT(fun _ : Fin 4 => Color.up) →ₗ[ℂ] B}
 
-/-- A map symmetric in the first two slots and antisymmetric in the last two sends
-  `η_{μρ} η_{νσ}` to zero. -/
+/--
+A map symmetric in the first two slots and antisymmetric in the last two sends
+`η_{μρ} η_{νσ}` to zero.
+-/
 lemma apply_contractionTensor_one_of_symm_of_antisymm
     (hs : f ∘ₗ Tensor.permT _ isReindexing_swap_zero_one = f)
-    (ha : f ∘ₗ Tensor.permT _ isReindexing_swap_two_three = -f) :
-    f (contractionTensor 1) = 0 := by
+    (ha : f ∘ₗ Tensor.permT _ isReindexing_swap_two_three = -f)
+    : f (contractionTensor 1) = 0 := by
   have h := LinearMap.congr_fun hs (contractionTensor 1)
   rw [LinearMap.comp_apply, permT_swap_zero_one_contractionTensor_one,
-    apply_contractionTensor_two_of_antisymm ha] at h
+      apply_contractionTensor_two_of_antisymm ha]
+    at h
   have h2 : (2 : ℂ) • f (contractionTensor 1) = 0 := by
     rw [two_smul]
     exact add_eq_zero_iff_eq_neg.2 h.symm
@@ -381,8 +403,8 @@ lemma apply_contractionTensor_one_of_symm_of_antisymm
 
 /-- A map symmetric in the first two slots sends `ε_{μνρσ}` to zero. -/
 lemma apply_contractionTensor_three_of_symm
-    (hs : f ∘ₗ Tensor.permT _ isReindexing_swap_zero_one = f) :
-    f (contractionTensor 3) = 0 := by
+    (hs : f ∘ₗ Tensor.permT _ isReindexing_swap_zero_one = f)
+    : f (contractionTensor 3) = 0 := by
   have h := LinearMap.congr_fun hs (contractionTensor 3)
   rw [LinearMap.comp_apply, permT_swap_zero_one_contractionTensor_three, map_neg] at h
   have h2 : (2 : ℂ) • f (contractionTensor 3) = 0 := by
@@ -420,19 +442,21 @@ invariance reads `c (cycIdx d) = c d`: `c` is constant on the orbit
 stated for any number of slots in `Invariants.Basic`.
 -/
 
-/-- All three half turns fix the coefficient at `d`, that is the sign product is `1` for each
-  axis. Equivalently, and not used below, all four directions occur an even number of times
-  among the slots, or all four an odd number. -/
-def IsHalfTurnFixed (d : Fin 4 → Fin 1 ⊕ Fin 3) : Prop :=
-  ∀ k : Fin 3, ∏ s, halfTurnSign k (d s) = 1
+/--
+All three half turns fix the coefficient at `d`, that is the sign product is `1` for each
+axis. Equivalently, and not used below, all four directions occur an even number of times
+among the slots, or all four an odd number.
+-/
+def IsHalfTurnFixed (d : Fin 4 → Fin 1 ⊕ Fin 3) : Prop := ∀ k : Fin 3, ∏ s, halfTurnSign k (d s) = 1
 
 instance : DecidablePred IsHalfTurnFixed := fun d =>
   inferInstanceAs (Decidable (∀ k : Fin 3, ∏ s, halfTurnSign k (d s) = 1))
 
 /-- An invariant coefficient tensor vanishes off the half-turn fixed index vectors. -/
-lemma eq_zero_of_not_isHalfTurnFixed {c : (Fin 4 → Fin 1 ⊕ Fin 3) → ℂ}
-    (hc : IsInvariantCoeff c) {d : Fin 4 → Fin 1 ⊕ Fin 3} (hd : ¬IsHalfTurnFixed d) :
-    c d = 0 := by
+lemma eq_zero_of_not_isHalfTurnFixed
+    {c : (Fin 4 → Fin 1 ⊕ Fin 3) → ℂ} (hc : IsInvariantCoeff c)
+    {d : Fin 4 → Fin 1 ⊕ Fin 3} (hd : ¬ IsHalfTurnFixed d)
+    : c d = 0 := by
   obtain ⟨k, hk⟩ := not_forall.1 hd
   exact hc.eq_zero_of_prod_halfTurnSign_ne_one hk
 
@@ -466,14 +490,16 @@ That is the only place the `16` comes from.
 -/
 
 /-- An invariant coefficient tensor is its own weight-zero projection. -/
-lemma sixteen_mul_eq_sum_transitionZ {c : (Fin 4 → Fin 1 ⊕ Fin 3) → ℂ}
-    (hc : IsInvariantCoeff c) (i : Fin 3) (d : Fin 4 → Fin 1 ⊕ Fin 3) :
-    16 * c d = ∑ e, ((transitionZ i d e 0 : ℤ) : ℂ) * c e := by
-  rw [eq_sum_lightConeComponent i c d, ← Finset.sum_filter_add_sum_filter_not Finset.univ
-    (fun κ : Fin 4 → Fin 4 => ∑ s, lightConeWeight (κ s) = 0),
-    Finset.sum_eq_zero (s := Finset.univ.filter fun κ : Fin 4 → Fin 4 =>
-      ¬∑ s, lightConeWeight (κ s) = 0) fun κ hκ => by
-        rw [hc.lightConeComponent_eq_zero i (Finset.mem_filter.1 hκ).2, mul_zero],
+lemma sixteen_mul_eq_sum_transitionZ
+    {c : (Fin 4 → Fin 1 ⊕ Fin 3) → ℂ} (hc : IsInvariantCoeff c)
+    (i : Fin 3) (d : Fin 4 → Fin 1 ⊕ Fin 3)
+    : 16 * c d = ∑ e, ((transitionZ i d e 0 : ℤ) : ℂ) * c e := by
+  rw [eq_sum_lightConeComponent i c d,
+    ← Finset.sum_filter_add_sum_filter_not Finset.univ
+      (fun κ : Fin 4 → Fin 4 => ∑ s, lightConeWeight (κ s) = 0),
+    Finset.sum_eq_zero
+      (s := Finset.univ.filter fun κ : Fin 4 → Fin 4 => ¬ ∑ s, lightConeWeight (κ s) = 0)
+      fun κ hκ => by rw [hc.lightConeComponent_eq_zero i (Finset.mem_filter.1 hκ).2, mul_zero],
     add_zero]
   simp only [lightConeComponent, Finset.mul_sum, transitionZ_eq_sum, Int.cast_sum, Finset.sum_mul]
   rw [Finset.sum_comm]
@@ -521,30 +547,30 @@ def orbitRep : Fin 22 → Fin 4 → Fin 1 ⊕ Fin 3 :=
     ![Sum.inr 0, Sum.inr 2, Sum.inl 0, Sum.inr 1],                            -- xzty
     ![Sum.inr 0, Sum.inr 2, Sum.inr 0, Sum.inr 2],                            -- xzxz
     ![Sum.inr 0, Sum.inr 2, Sum.inr 1, Sum.inl 0],                            -- xzyt
-    ![Sum.inr 0, Sum.inr 2, Sum.inr 2, Sum.inr 0]]                            -- xzzx
+    ![Sum.inr 0, Sum.inr 2, Sum.inr 2, Sum.inr 0]] -- xzzx
 
 /-- The `k`-th representative and its two cyclings; for `tttt` the three coincide. -/
 def orbit (k : Fin 22) : Finset (Fin 4 → Fin 1 ⊕ Fin 3) :=
   {orbitRep k, cycIdx (orbitRep k), cycIdx (cycIdx (orbitRep k))}
 
 /-- The vectors in one of the `22` orbits are exactly the half-turn fixed ones, a finite check. -/
-lemma isHalfTurnFixed_iff_exists_mem_orbit :
-    ∀ d, IsHalfTurnFixed d ↔ ∃ k, d ∈ orbit k := by
+lemma isHalfTurnFixed_iff_exists_mem_orbit : ∀ d, IsHalfTurnFixed d ↔ ∃ k, d ∈ orbit k := by
   decide +kernel
 
 /-- Different orbits share no index vector, a finite check. -/
-lemma disjoint_orbit : ∀ k l : Fin 22, k ≠ l → Disjoint (orbit k) (orbit l) := by
-  decide +kernel
+lemma disjoint_orbit : ∀ k l : Fin 22, k ≠ l → Disjoint (orbit k) (orbit l) := by decide +kernel
 
 /-- An index vector lies in at most one orbit. -/
-lemma eq_of_mem_orbit {k l : Fin 22} {d : Fin 4 → Fin 1 ⊕ Fin 3}
-    (hk : d ∈ orbit k) (hl : d ∈ orbit l) : k = l :=
+lemma eq_of_mem_orbit
+    {k l : Fin 22} {d : Fin 4 → Fin 1 ⊕ Fin 3} (hk : d ∈ orbit k) (hl : d ∈ orbit l)
+    : k = l :=
   by_contra fun h => Finset.disjoint_left.1 (disjoint_orbit k l h) hk hl
 
 /-- A tensor unchanged by cycling takes, on an orbit, its value at the representative. -/
-lemma eq_orbitRep_of_mem_orbit {c : (Fin 4 → Fin 1 ⊕ Fin 3) → ℂ}
-    (hc : ∀ d, c (cycIdx d) = c d) {k : Fin 22} {d : Fin 4 → Fin 1 ⊕ Fin 3}
-    (h : d ∈ orbit k) : c d = c (orbitRep k) := by
+lemma eq_orbitRep_of_mem_orbit
+    {c : (Fin 4 → Fin 1 ⊕ Fin 3) → ℂ} (hc : ∀ d, c (cycIdx d) = c d)
+    {k : Fin 22} {d : Fin 4 → Fin 1 ⊕ Fin 3} (h : d ∈ orbit k)
+    : c d = c (orbitRep k) := by
   simp only [orbit, Finset.mem_insert, Finset.mem_singleton] at h
   rcases h with rfl | rfl | rfl
   · rfl
@@ -556,8 +582,8 @@ noncomputable def ofOrbitCoord (b : Fin 22 → ℂ) (d : Fin 4 → Fin 1 ⊕ Fin
   ∑ k, if d ∈ orbit k then b k else 0
 
 /-- An invariant coefficient tensor is rebuilt from its `22` orbit coordinates. -/
-lemma eq_ofOrbitCoord {c : (Fin 4 → Fin 1 ⊕ Fin 3) → ℂ} (hc : IsInvariantCoeff c) :
-    c = ofOrbitCoord fun k => c (orbitRep k) := by
+lemma eq_ofOrbitCoord {c : (Fin 4 → Fin 1 ⊕ Fin 3) → ℂ} (hc : IsInvariantCoeff c)
+    : c = ofOrbitCoord fun k => c (orbitRep k) := by
   funext d
   by_cases hd : IsHalfTurnFixed d
   · obtain ⟨k, hk⟩ := (isHalfTurnFixed_iff_exists_mem_orbit d).1 hd
@@ -570,8 +596,8 @@ lemma eq_ofOrbitCoord {c : (Fin 4 → Fin 1 ⊕ Fin 3) → ℂ} (hc : IsInvarian
       ite_eq_right fun hk => hd ((isHalfTurnFixed_iff_exists_mem_orbit d).2 ⟨k, hk⟩)).symm
 
 /-- Contracting against such a tensor collects the `256` index vectors into the `22` orbits. -/
-lemma sum_mul_ofOrbitCoord (f : (Fin 4 → Fin 1 ⊕ Fin 3) → ℂ) (b : Fin 22 → ℂ) :
-    ∑ e, f e * ofOrbitCoord b e = ∑ l, (∑ e ∈ orbit l, f e) * b l := by
+lemma sum_mul_ofOrbitCoord (f : (Fin 4 → Fin 1 ⊕ Fin 3) → ℂ) (b : Fin 22 → ℂ)
+    : ∑ e, f e * ofOrbitCoord b e = ∑ l, (∑ e ∈ orbit l, f e) * b l := by
   simp only [ofOrbitCoord, Finset.mul_sum, mul_ite, mul_zero]
   rw [Finset.sum_comm]
   exact Finset.sum_congr rfl fun l _ => by
@@ -590,9 +616,11 @@ integers are not meant to be read; `M` is not symmetric, a row carrying three cy
 column an orbit.
 -/
 
-/-- Forty-eight times the weight-zero projection along `z` on the orbit coordinates, the three
-  cyclings summed and not averaged, so `48 = 3 * 16`. Meaningful only through
-  `orbitMatrix_apply`. -/
+/--
+Forty-eight times the weight-zero projection along `z` on the orbit coordinates, the three
+cyclings summed and not averaged, so `48 = 3 * 16`. Meaningful only through
+`orbitMatrix_apply`.
+-/
 def orbitMatrix : Matrix (Fin 22) (Fin 22) ℤ :=
   !![18, -6, -6, -6, 0, 0, -6, -6, 0, 0, -6, 18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0;
     -2, 22, -2, -2, 0, 0, -2, -2, 0, 0, 6, -2, -8, -8, 0, 0, 0, 0, 0, 0, 0, 0;
@@ -618,31 +646,31 @@ def orbitMatrix : Matrix (Fin 22) (Fin 22) ℤ :=
     0, 0, 0, -8, 0, 0, -8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32]
 
 /-- Decidability for a matrix against a function; search misses the `Matrix` synonym. -/
-private instance decidableForallEntries {n : ℕ} (f : Matrix (Fin n) (Fin n) ℤ)
-    (g : Fin n → Fin n → ℤ) : Decidable (∀ k l, f k l = g k l) :=
-  @Nat.decidableForallFin n _ fun _ => @Nat.decidableForallFin n _ fun _ =>
-    Int.instDecidableEq _ _
+private instance decidableForallEntries
+    {n : ℕ} (f : Matrix (Fin n) (Fin n) ℤ) (g : Fin n → Fin n → ℤ)
+    : Decidable (∀ k l, f k l = g k l) :=
+  @Nat.decidableForallFin n _ fun _ => @Nat.decidableForallFin n _ fun _ => Int.instDecidableEq _ _
 
 /-- The same for two matrices, which is the shape of `certificate`. -/
-private instance decidableForallEntries' {n : ℕ} (f g : Matrix (Fin n) (Fin n) ℤ) :
-    Decidable (∀ k l, f k l = g k l) :=
-  @Nat.decidableForallFin n _ fun _ => @Nat.decidableForallFin n _ fun _ =>
-    Int.instDecidableEq _ _
+private instance decidableForallEntries' {n : ℕ} (f g : Matrix (Fin n) (Fin n) ℤ)
+    : Decidable (∀ k l, f k l = g k l) :=
+  @Nat.decidableForallFin n _ fun _ => @Nat.decidableForallFin n _ fun _ => Int.instDecidableEq _ _
 
 /-- Each entry sums the `z`-axis transitions from orbit `k` into orbit `l`, a finite check. -/
-lemma orbitMatrix_apply : ∀ k l : Fin 22,
-    orbitMatrix k l = ∑ e ∈ orbit l, (transitionZ 2 (orbitRep k) e 0
-      + transitionZ 2 (cycIdx (orbitRep k)) e 0
-      + transitionZ 2 (cycIdx (cycIdx (orbitRep k))) e 0) := by
+lemma orbitMatrix_apply
+    : ∀ k l : Fin 22,
+      orbitMatrix k l
+        = ∑ e ∈ orbit l, (transitionZ 2 (orbitRep k) e 0
+          + transitionZ 2 (cycIdx (orbitRep k)) e 0
+          + transitionZ 2 (cycIdx (cycIdx (orbitRep k))) e 0) := by
   decide +kernel
 
 /-- The orbit coordinates of an invariant coefficient tensor satisfy `M b = 48 b`. -/
-lemma orbitMatrix_mulVec {c : (Fin 4 → Fin 1 ⊕ Fin 3) → ℂ}
-    (hc : IsInvariantCoeff c) :
-    orbitMatrix.map (Int.cast : ℤ → ℂ) *ᵥ (fun k => c (orbitRep k))
+lemma orbitMatrix_mulVec {c : (Fin 4 → Fin 1 ⊕ Fin 3) → ℂ} (hc : IsInvariantCoeff c)
+    : orbitMatrix.map (Int.cast : ℤ → ℂ) *ᵥ (fun k => c (orbitRep k))
       = (48 : ℂ) • fun k => c (orbitRep k) := by
-  have h : ∀ d, 16 * c d
-      = ∑ l, (∑ e ∈ orbit l, ((transitionZ 2 d e 0 : ℤ) : ℂ)) * c (orbitRep l) := by
+  have h
+      : ∀ d, 16 * c d = ∑ l, (∑ e ∈ orbit l, ((transitionZ 2 d e 0 : ℤ) : ℂ)) * c (orbitRep l) := by
     intro d
     rw [sixteen_mul_eq_sum_transitionZ hc 2 d]
     conv_lhs => rw [eq_ofOrbitCoord hc]
@@ -682,9 +710,11 @@ is only where it came from: the file proves nothing about the spectrum.
 /-- The orbit coordinates of the `i`-th coefficient tensor. -/
 def contractionOrbit (i : Fin 4) (k : Fin 22) : ℤ := contractionCoeff i (orbitRep k)
 
-/-- Four rows of `22` integers paired with `contractionOrbit` to build `projector`. Found by
-  computation and characterised by `contractionWeight_mul_contractionOrbit`; unrelated to boost
-  weight. -/
+/--
+Four rows of `22` integers paired with `contractionOrbit` to build `projector`. Found by
+computation and characterised by `contractionWeight_mul_contractionOrbit`; unrelated to boost
+weight.
+-/
 def contractionWeight : Fin 4 → Fin 22 → ℤ :=
   ![![1, -5, 1, 1, 0, 0, 1, 1, 0, 0, -5, 3, 5, 5, 0, -1, -1, 0, 0, -1, 0, -1],
     ![1, 1, -5, 1, 0, 0, 1, -5, 0, 0, 1, 3, -1, -1, 0, 5, -1, 0, 0, 5, 0, -1],
@@ -692,8 +722,9 @@ def contractionWeight : Fin 4 → Fin 22 → ℤ :=
     ![0, 0, 0, 0, 3, -3, 0, 0, -3, 3, 0, 0, 0, 0, 3, 0, 0, -3, -3, 0, 3, 0]]
 
 /-- The weight rows and orbit coordinates pair to `24 δᵢⱼ`, a finite check. -/
-lemma contractionWeight_mul_contractionOrbit : ∀ i j : Fin 4,
-    ∑ k, contractionWeight i k * contractionOrbit j k = if i = j then 24 else 0 := by
+lemma contractionWeight_mul_contractionOrbit
+    : ∀ i j : Fin 4,
+      ∑ k, contractionWeight i k * contractionOrbit j k = if i = j then 24 else 0 := by
   decide +kernel
 
 /-- Four rank-one matrices, so it sends any vector to a combination of the `v i`. -/
@@ -701,20 +732,23 @@ def projector : Matrix (Fin 22) (Fin 22) ℤ :=
   Matrix.of fun k l => ∑ i, contractionOrbit i k * contractionWeight i l
 
 /-- An identity between `22 × 22` integer matrices, a finite check over `484` entries. -/
-lemma certificate :
-    orbitMatrix * (orbitMatrix - 32 • 1) * (orbitMatrix - 16 • 1)
-      * (orbitMatrix * orbitMatrix - 44 • orbitMatrix + 192 • 1) = 393216 • projector := by
+lemma certificate
+    : orbitMatrix * (orbitMatrix - 32 • 1) * (orbitMatrix - 16 • 1)
+        * (orbitMatrix * orbitMatrix - 44 • orbitMatrix + 192 • 1)
+      = 393216 • projector := by
   ext k l
   revert k l
   decide +kernel
 
-/-- The integer projector matrix acts on invariant orbit coordinates by multiplication by `24`.
-  The `24` is the normalization of `projector`: each factor of the certificate acts on such a
-  vector as a scalar, `M` by `48`, `M - z` by `48 - z` and the quadratic factor by
-  `48 ^ 2 - 44 * 48 + 192 = 384`, so the left-hand side scales it by
-  `48 * 32 * 16 * 384 = 9437184`, and dividing by the `393216` on the right leaves `24`. -/
-lemma projector_mulVec {c : (Fin 4 → Fin 1 ⊕ Fin 3) → ℂ} (hc : IsInvariantCoeff c) :
-    projector.map (Int.cast : ℤ → ℂ) *ᵥ (fun k => c (orbitRep k))
+/--
+The integer projector matrix acts on invariant orbit coordinates by multiplication by `24`.
+The `24` is the normalization of `projector`: each factor of the certificate acts on such a
+vector as a scalar, `M` by `48`, `M - z` by `48 - z` and the quadratic factor by
+`48 ^ 2 - 44 * 48 + 192 = 384`, so the left-hand side scales it by
+`48 * 32 * 16 * 384 = 9437184`, and dividing by the `393216` on the right leaves `24`.
+-/
+lemma projector_mulVec {c : (Fin 4 → Fin 1 ⊕ Fin 3) → ℂ} (hc : IsInvariantCoeff c)
+    : projector.map (Int.cast : ℤ → ℂ) *ᵥ (fun k => c (orbitRep k))
       = (24 : ℂ) • fun k => c (orbitRep k) := by
   set b : Fin 22 → ℂ := fun k => c (orbitRep k) with hb
   set M : Matrix (Fin 22) (Fin 22) ℂ := orbitMatrix.map (Int.cast : ℤ → ℂ) with hM
@@ -722,8 +756,8 @@ lemma projector_mulVec {c : (Fin 4 → Fin 1 ⊕ Fin 3) → ℂ} (hc : IsInvaria
   have hlin : ∀ z : ℂ, (M - z • 1) *ᵥ b = (48 - z) • b := fun z => by
     rw [Matrix.sub_mulVec, hMb, Matrix.smul_mulVec, Matrix.one_mulVec, sub_smul]
   have hquad : (M * M - (44 : ℂ) • M + (192 : ℂ) • 1) *ᵥ b = (384 : ℂ) • b := by
-    rw [Matrix.add_mulVec, Matrix.sub_mulVec, ← Matrix.mulVec_mulVec, hMb, Matrix.mulVec_smul,
-      hMb, Matrix.smul_mulVec, hMb, Matrix.smul_mulVec, Matrix.one_mulVec, smul_smul, smul_smul,
+    rw [Matrix.add_mulVec, Matrix.sub_mulVec, ← Matrix.mulVec_mulVec, hMb, Matrix.mulVec_smul, hMb,
+      Matrix.smul_mulVec, hMb, Matrix.smul_mulVec, Matrix.one_mulVec, smul_smul, smul_smul,
       ← sub_smul, ← add_smul]
     norm_num
   have h₂ : (M - (16 : ℂ) • 1) *ᵥ ((384 : ℂ) • b) = (12288 : ℂ) • b := by
@@ -735,32 +769,36 @@ lemma projector_mulVec {c : (Fin 4 → Fin 1 ⊕ Fin 3) → ℂ} (hc : IsInvaria
   have h₄ : M *ᵥ ((196608 : ℂ) • b) = (9437184 : ℂ) • b := by
     rw [Matrix.mulVec_smul, hMb, smul_smul]
     norm_num
-  have hcert : M * (M - (32 : ℂ) • 1) * (M - (16 : ℂ) • 1)
-      * (M * M - (44 : ℂ) • M + (192 : ℂ) • 1)
+  have hcert
+      : M * (M - (32 : ℂ) • 1) * (M - (16 : ℂ) • 1) * (M * M - (44 : ℂ) • M + (192 : ℂ) • 1)
         = (393216 : ℂ) • projector.map (Int.cast : ℤ → ℂ) := by
     have h := congrArg (Int.castRingHom ℂ).mapMatrix certificate
     simpa only [map_mul, map_sub, map_add, map_nsmul, map_one, RingHom.mapMatrix_apply,
-      Int.coe_castRingHom, ← Nat.cast_smul_eq_nsmul ℂ, Nat.cast_ofNat, ← hM] using h
-  have hpb : (M * (M - (32 : ℂ) • 1) * (M - (16 : ℂ) • 1)
-      * (M * M - (44 : ℂ) • M + (192 : ℂ) • 1)) *ᵥ b
+        Int.coe_castRingHom, ← Nat.cast_smul_eq_nsmul ℂ, Nat.cast_ofNat, ← hM]
+      using h
+  have hpb
+      : (M * (M - (32 : ℂ) • 1) * (M - (16 : ℂ) • 1) * (M * M - (44 : ℂ) • M + (192 : ℂ) • 1)) *ᵥ b
         = ((393216 : ℂ) • projector.map (Int.cast : ℤ → ℂ)) *ᵥ b := by
     rw [hcert]
   rw [← Matrix.mulVec_mulVec, hquad, ← Matrix.mulVec_mulVec, h₂, ← Matrix.mulVec_mulVec, h₃, h₄,
-    Matrix.smul_mulVec] at hpb
+      Matrix.smul_mulVec]
+    at hpb
   refine smul_right_injective (Fin 22 → ℂ) (show (393216 : ℂ) ≠ 0 by norm_num) ?_
   simp only [← hpb, smul_smul]
   norm_num
 
-/-- `24` times an orbit coordinate of an invariant tensor, read entry by entry off the previous
-  lemma: `projector` is built from the columns `contractionOrbit i` and the rows
-  `contractionWeight i`. -/
-lemma orbitCoord_eq {c : (Fin 4 → Fin 1 ⊕ Fin 3) → ℂ} (hc : IsInvariantCoeff c)
-    (k : Fin 22) :
-    24 * c (orbitRep k)
+/--
+`24` times an orbit coordinate of an invariant tensor, read entry by entry off the previous
+lemma: `projector` is built from the columns `contractionOrbit i` and the rows
+`contractionWeight i`.
+-/
+lemma orbitCoord_eq {c : (Fin 4 → Fin 1 ⊕ Fin 3) → ℂ} (hc : IsInvariantCoeff c) (k : Fin 22)
+    : 24 * c (orbitRep k)
       = ∑ i, (contractionOrbit i k : ℂ) * ∑ l, (contractionWeight i l : ℂ) * c (orbitRep l) := by
   have hk := congrFun (projector_mulVec hc) k
   simp only [Pi.smul_apply, smul_eq_mul, Matrix.mulVec, dotProduct, Matrix.map_apply, projector,
-    Matrix.of_apply, Int.cast_sum, Int.cast_mul, Finset.sum_mul] at hk
+      Matrix.of_apply, Int.cast_sum, Int.cast_mul, Finset.sum_mul]
+    at hk
   rw [Finset.sum_comm] at hk
   rw [← hk]
   exact Finset.sum_congr rfl fun i _ => by
@@ -768,15 +806,20 @@ lemma orbitCoord_eq {c : (Fin 4 → Fin 1 ⊕ Fin 3) → ℂ} (hc : IsInvariantC
     exact Finset.sum_congr rfl fun l _ => by ring
 
 /-- An invariant coefficient tensor is a combination of the four. -/
-lemma exists_eq_sum {c : (Fin 4 → Fin 1 ⊕ Fin 3) → ℂ} (hc : IsInvariantCoeff c) :
-    ∃ a : Fin 4 → ℂ, c = fun d => ∑ i, a i * ((contractionCoeff i d : ℤ) : ℂ) := by
+lemma exists_eq_sum {c : (Fin 4 → Fin 1 ⊕ Fin 3) → ℂ} (hc : IsInvariantCoeff c)
+    : ∃ a : Fin 4 → ℂ, c = fun d => ∑ i, a i * ((contractionCoeff i d : ℤ) : ℂ) := by
   refine ⟨fun i => 24⁻¹ * ∑ l, (contractionWeight i l : ℂ) * c (orbitRep l), funext fun d => ?_⟩
-  have hfour : ∀ i d, ((contractionCoeff i d : ℤ) : ℂ)
-      = ∑ k, if d ∈ orbit k then (contractionOrbit i k : ℂ) else 0 :=
-    fun i d => congrFun (eq_ofOrbitCoord (isInvariantCoeff_contractionCoeff i)) d
-  have hb : ∀ k, c (orbitRep k) = 24⁻¹ * ∑ i, (contractionOrbit i k : ℂ)
-      * ∑ l, (contractionWeight i l : ℂ) * c (orbitRep l) :=
-    fun k => by rw [← orbitCoord_eq hc]; ring
+  have hfour
+      : ∀ i d,
+        ((contractionCoeff i d : ℤ) : ℂ)
+          = ∑ k, if d ∈ orbit k then (contractionOrbit i k : ℂ) else 0 := fun i d =>
+    congrFun (eq_ofOrbitCoord (isInvariantCoeff_contractionCoeff i)) d
+  have hb
+      : ∀ k,
+        c (orbitRep k)
+          = 24⁻¹ * ∑ i, (contractionOrbit i k : ℂ)
+            * ∑ l, (contractionWeight i l : ℂ) * c (orbitRep l) := fun k => by
+    rw [← orbitCoord_eq hc]; ring
   conv_lhs => rw [eq_ofOrbitCoord hc, ofOrbitCoord]
   rw [Finset.sum_congr rfl fun k _ => by rw [hb k]]
   simp only [hfour, Finset.mul_sum, mul_ite, mul_zero]
@@ -798,41 +841,54 @@ an invariant of `S` is an invariant of `LinearMap.range f ⊔ S`.
 
 variable {f : ℂT(fun _ : Fin 4 => Color.up) →ₗ[ℂ] B}
 
-/-- The invariants of the range of `f` reduce to the span of the images of the four invariant
-  tensors. -/
-lemma reducesInvariantsTo_span_contractionTensor (hf : IsLorentzCovariant 4 B repLorentz f) :
-    ReducesInvariantsTo (fun g : SL(2,ℂ) => repLorentz g) (LinearMap.range f)
-      (Submodule.span ℂ (Set.range fun i => f (contractionTensor i))) :=
-  hf.reducesInvariantsTo_span (fun i d => ((contractionCoeff i d : ℤ) : ℂ)) fun c hc => by
-    obtain ⟨a, rfl⟩ := exists_eq_sum hc
-    refine (Submodule.mem_span_range_iff_exists_fun ℂ).2 ⟨a, funext fun d => ?_⟩
-    simp [Finset.sum_apply]
+/--
+The invariants of the range of `f` reduce to the span of the images of the four invariant
+tensors.
+-/
+lemma reducesInvariantsTo_span_contractionTensor (hf : IsLorentzCovariant 4 B repLorentz f)
+    : ReducesInvariantsTo
+      (fun g : SL(2,ℂ) => repLorentz g)
+      (LinearMap.range f) (Submodule.span ℂ (Set.range fun i => f (contractionTensor i))) :=
+  hf.reducesInvariantsTo_span
+    (fun i d => ((contractionCoeff i d : ℤ) : ℂ))
+    fun c hc => by
+      obtain ⟨a, rfl⟩ := exists_eq_sum hc
+      refine (Submodule.mem_span_range_iff_exists_fun ℂ).2 ⟨a, funext fun d => ?_⟩
+      simp [Finset.sum_apply]
 
-/-- A vector of `LinearMap.range f ⊔ S`, for `S` a Lorentz-stable submodule, is invariant exactly
-  when it is a combination of the images of the four invariant tensors plus an invariant of
-  `S`. `hS` is used only left to right. -/
-lemma mem_range_sup_invariant_iff (hf : IsLorentzCovariant 4 B repLorentz f) (x : B)
-    (S : Submodule ℂ B) (hS : ∀ g : SL(2,ℂ), ∀ y ∈ S, repLorentz g y ∈ S) :
-    (x ∈ LinearMap.range f ⊔ S ∧ ∀ g : SL(2,ℂ), repLorentz g x = x)
-      ↔ ∃ a : Fin 4 → ℂ, ∃ y ∈ S, x = ∑ i, a i • f (contractionTensor i) + y
-        ∧ ∀ g : SL(2,ℂ), repLorentz g y = y := by
-  have hfix : ∀ (a : Fin 4 → ℂ) (g : SL(2,ℂ)),
-      repLorentz g (∑ i, a i • f (contractionTensor i)) = ∑ i, a i • f (contractionTensor i) :=
-    fun a g => by
-      simp only [map_sum, map_smul, hf.rep_map_of_invariant (contractionTensor_invariant _)]
+/--
+A vector of `LinearMap.range f ⊔ S`, for `S` a Lorentz-stable submodule, is invariant exactly
+when it is a combination of the images of the four invariant tensors plus an invariant of
+`S`. `hS` is used only left to right.
+-/
+lemma mem_range_sup_invariant_iff
+    (hf : IsLorentzCovariant 4 B repLorentz f) (x : B)
+    (S : Submodule ℂ B) (hS : ∀ g : SL(2,ℂ), ∀ y ∈ S, repLorentz g y ∈ S)
+    : (x ∈ LinearMap.range f ⊔ S ∧ ∀ g : SL(2,ℂ), repLorentz g x = x)
+      ↔ ∃ a : Fin 4 → ℂ, ∃ y ∈ S,
+        x = ∑ i, a i • f (contractionTensor i) + y ∧ ∀ g : SL(2,ℂ), repLorentz g y = y := by
+  have hfix
+      : ∀ (a : Fin 4 → ℂ) (g : SL(2,ℂ)),
+        repLorentz g (∑ i, a i • f (contractionTensor i))
+          = ∑ i, a i • f (contractionTensor i) := fun a g => by
+    simp only [map_sum, map_smul, hf.rep_map_of_invariant (contractionTensor_invariant _)]
   constructor
   · rintro ⟨hx, hinv⟩
-    obtain ⟨w, hw, y, hy, rfl⟩ := Submodule.mem_sup.1
-      (reducesInvariantsTo_span_contractionTensor hf S hS x hx hinv)
+    obtain ⟨w, hw, y, hy, rfl⟩ :=
+      Submodule.mem_sup.1 (reducesInvariantsTo_span_contractionTensor hf S hS x hx hinv)
     obtain ⟨a, rfl⟩ := (Submodule.mem_span_range_iff_exists_fun ℂ).1 hw
     refine ⟨a, y, hy, rfl, fun g => ?_⟩
     have h := hinv g
     rw [map_add, hfix] at h
     exact add_left_cancel h
   · rintro ⟨a, y, hyS, rfl, hyinv⟩
-    refine ⟨add_mem (Submodule.mem_sup_left (sum_mem fun i _ =>
-      Submodule.smul_mem _ _ (LinearMap.mem_range_self f _))) (Submodule.mem_sup_right hyS),
-      fun g => ?_⟩
+    refine ⟨
+      add_mem
+        (Submodule.mem_sup_left (sum_mem fun i _ =>
+          Submodule.smul_mem _ _ (LinearMap.mem_range_self f _)))
+        (Submodule.mem_sup_right hyS),
+      fun g => ?_
+    ⟩
     rw [map_add, hfix, hyinv g]
 
 end RankFour

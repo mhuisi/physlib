@@ -59,21 +59,25 @@ namespace Weight
 
 /-! ## A. Pushforward of weights -/
 
-/-- Precompose a weight on `E₁` with the adjoint `φ : Channel E₂ E₁` of a channel `E₁ → E₂`,
-giving a weight on `E₂`: the Schrödinger-picture pushforward of `w` along the channel. -/
+/--
+Precompose a weight on `E₁` with the adjoint `φ : Channel E₂ E₁` of a channel `E₁ → E₂`,
+giving a weight on `E₂`: the Schrödinger-picture pushforward of `w` along the channel.
+-/
 noncomputable def comp (w : Weight E₁) (φ : Channel E₂ E₁) : Weight E₂ where
   toFun y := w ⟨φ (y : E₂), φ.map_nonneg y.2⟩
   map_add' x y := by
-    have hxy : (⟨φ ((x + y : PosCone E₂) : E₂), φ.map_nonneg (x + y).2⟩ : PosCone E₁) =
-        ⟨φ (x : E₂), φ.map_nonneg x.2⟩ + ⟨φ (y : E₂), φ.map_nonneg y.2⟩ := by
+    have hxy
+        : (⟨φ ((x + y : PosCone E₂) : E₂), φ.map_nonneg (x + y).2⟩ : PosCone E₁)
+          = ⟨φ (x : E₂), φ.map_nonneg x.2⟩ + ⟨φ (y : E₂), φ.map_nonneg y.2⟩ := by
       apply Subtype.ext
       show φ ((x : E₂) + (y : E₂)) = φ (x : E₂) + φ (y : E₂)
       exact _root_.map_add φ _ _
     show w ⟨φ ((x + y : PosCone E₂) : E₂), _⟩ = _
     rw [hxy, w.map_add]
   map_smul' c y := by
-    have hy : (⟨φ ((c • y : PosCone E₂) : E₂), φ.map_nonneg (c • y).2⟩ : PosCone E₁) =
-        c • (⟨φ (y : E₂), φ.map_nonneg y.2⟩ : PosCone E₁) := by
+    have hy
+        : (⟨φ ((c • y : PosCone E₂) : E₂), φ.map_nonneg (c • y).2⟩ : PosCone E₁)
+          = c • (⟨φ (y : E₂), φ.map_nonneg y.2⟩ : PosCone E₁) := by
       apply Subtype.ext
       show φ ((c : ℝ) • (y : E₂)) = (c : ℝ) • φ (y : E₂)
       exact _root_.map_smul φ (c : ℝ) (y : E₂)
@@ -82,8 +86,9 @@ noncomputable def comp (w : Weight E₁) (φ : Channel E₂ E₁) : Weight E₂ 
     rfl
 
 @[simp]
-lemma comp_apply (w : Weight E₁) (φ : Channel E₂ E₁) (y : PosCone E₂) :
-    w.comp φ y = w ⟨φ (y : E₂), φ.map_nonneg y.2⟩ := rfl
+lemma comp_apply (w : Weight E₁) (φ : Channel E₂ E₁) (y : PosCone E₂)
+    : w.comp φ y = w ⟨φ (y : E₂), φ.map_nonneg y.2⟩ :=
+  rfl
 
 /-! ## B. Functoriality -/
 
@@ -92,32 +97,33 @@ lemma comp_id (w : Weight E₁) : w.comp (.id ℝ E₁) = w := by
   ext y
   simp
 
-lemma comp_comp (w : Weight E₁) (φ : Channel E₂ E₁) (ψ : Channel E₃ E₂) :
-    w.comp (φ.comp ψ) = (w.comp φ).comp ψ := by
+lemma comp_comp (w : Weight E₁) (φ : Channel E₂ E₁) (ψ : Channel E₃ E₂)
+    : w.comp (φ.comp ψ) = (w.comp φ).comp ψ := by
   ext y
   simp
 
 /-! ## C. Preservation of finite weights and states -/
 
-/-- Pushing a finite weight forward along a channel's adjoint stays finite: `φ` never sends the
-cone anywhere `w` is infinite. -/
-lemma IsFinite.comp {w : Weight E₁} (hw : w.IsFinite) (φ : Channel E₂ E₁) :
-    (w.comp φ).IsFinite :=
+/--
+Pushing a finite weight forward along a channel's adjoint stays finite: `φ` never sends the
+cone anywhere `w` is infinite.
+-/
+lemma IsFinite.comp {w : Weight E₁} (hw : w.IsFinite) (φ : Channel E₂ E₁) : (w.comp φ).IsFinite :=
   fun _ => hw _
 
 section OrderUnitSpace
 
 variable {F₁ F₂ : Type*} [OrderUnitSpace F₁] [OrderUnitSpace F₂]
 
-/-- Pushing a state forward along a channel's adjoint gives a state: finiteness survives
-(`IsFinite.comp`) and normalization survives because the adjoint is unital. -/
-lemma IsState.comp {w : Weight F₁} (hw : w.IsState) (φ : Channel F₂ F₁) :
-    (w.comp φ).IsState where
+/--
+Pushing a state forward along a channel's adjoint gives a state: finiteness survives
+(`IsFinite.comp`) and normalization survives because the adjoint is unital.
+-/
+lemma IsState.comp {w : Weight F₁} (hw : w.IsState) (φ : Channel F₂ F₁) : (w.comp φ).IsState where
   finite := hw.finite.comp φ
   normalized := by
     show w ⟨φ (1 : F₂), φ.map_nonneg OrderUnitSpace.one_nonneg⟩ = 1
-    have h1 :
-        (⟨φ (1 : F₂), φ.map_nonneg OrderUnitSpace.one_nonneg⟩ : PosCone F₁) = 1 := by
+    have h1 : (⟨φ (1 : F₂), φ.map_nonneg OrderUnitSpace.one_nonneg⟩ : PosCone F₁) = 1 := by
       apply Subtype.ext
       show φ (1 : F₂) = 1
       exact map_one φ

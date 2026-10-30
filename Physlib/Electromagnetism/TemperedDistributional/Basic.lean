@@ -71,8 +71,8 @@ attribute [-simp] Nat.succ_eq_add_one
 -/
 
 /-- The creation of an electromagnetic potential from a scalar potential. -/
-noncomputable def ofScalarPotential {d} (c : SpeedOfLight) :
-    ((Time × Space d) →d[ℝ] ℝ) →ₗ[ℝ] TempDistElectromagneticPotential d where
+noncomputable def ofScalarPotential {d} (c : SpeedOfLight)
+    : ((Time × Space d) →d[ℝ] ℝ) →ₗ[ℝ] TempDistElectromagneticPotential d where
   toFun φ := Lorentz.Vector.ofTemporalComponent ∘L (distTimeSlice c).symm (((1 : ℝ) / c.val) • φ)
   map_add' φ₁ φ₂ := by
     ext ε
@@ -80,44 +80,48 @@ noncomputable def ofScalarPotential {d} (c : SpeedOfLight) :
   map_smul' r φ := by
     ext ε
     simp only [one_div, map_smul, ContinuousLinearMap.comp_smulₛₗ, map_inv₀, RingHom.id_apply,
-      FunLike.coe_smul, ContinuousLinearMap.coe_comp, Pi.smul_apply,
-      Function.comp_apply]
+      FunLike.coe_smul, ContinuousLinearMap.coe_comp, Pi.smul_apply, Function.comp_apply]
     rw [smul_comm]
 
 /-- The creation of an electromagnetic potential from a static scalar potential. -/
-noncomputable def ofStaticScalarPotential {d} (c : SpeedOfLight) :
-    ((Space d) →d[ℝ] ℝ) →ₗ[ℝ] TempDistElectromagneticPotential d :=
+noncomputable def ofStaticScalarPotential {d} (c : SpeedOfLight)
+    : ((Space d) →d[ℝ] ℝ) →ₗ[ℝ] TempDistElectromagneticPotential d :=
   ofScalarPotential c ∘ₗ Space.constantTime
 
-/-- The creation of an electromagnetic potential from a static scalar-potential function.
+/--
+The creation of an electromagnetic potential from a static scalar-potential function.
 
 If the function is distribution-bounded, it is first promoted to a distribution using
-`Space.distOfFunction`. Otherwise the constructor returns zero. -/
-noncomputable def ofStaticScalarPotentialFunction {d} (c : SpeedOfLight)
-    (φ : Space d → ℝ) : TempDistElectromagneticPotential d := by
+`Space.distOfFunction`. Otherwise the constructor returns zero.
+-/
+noncomputable def ofStaticScalarPotentialFunction {d} (c : SpeedOfLight) (φ : Space d → ℝ)
+    : TempDistElectromagneticPotential d := by
   classical
-  exact if hφ : Space.IsDistBounded φ then
-    ofStaticScalarPotential c (Space.distOfFunction φ hφ) else 0
+  exact
+    if hφ : Space.IsDistBounded φ then
+      ofStaticScalarPotential c (Space.distOfFunction φ hφ)
+    else
+      0
 
 @[simp]
-lemma ofStaticScalarPotentialFunction_of_isDistBounded {d} (c : SpeedOfLight)
-    (φ : Space d → ℝ) (hφ : Space.IsDistBounded φ) :
-    ofStaticScalarPotentialFunction c φ =
-      ofStaticScalarPotential c (Space.distOfFunction φ hφ) := by
+lemma ofStaticScalarPotentialFunction_of_isDistBounded
+    {d} (c : SpeedOfLight) (φ : Space d → ℝ) (hφ : Space.IsDistBounded φ)
+    : ofStaticScalarPotentialFunction c φ
+      = ofStaticScalarPotential c (Space.distOfFunction φ hφ) := by
   classical
   simp [ofStaticScalarPotentialFunction, hφ]
 
 @[simp]
-lemma ofStaticScalarPotentialFunction_eq_zero_of_not_isDistBounded {d}
-    (c : SpeedOfLight) (φ : Space d → ℝ) (hφ : ¬ Space.IsDistBounded φ) :
-    ofStaticScalarPotentialFunction c φ = 0 := by
+lemma ofStaticScalarPotentialFunction_eq_zero_of_not_isDistBounded
+    {d} (c : SpeedOfLight) (φ : Space d → ℝ) (hφ : ¬ Space.IsDistBounded φ)
+    : ofStaticScalarPotentialFunction c φ = 0 := by
   classical
   simp [ofStaticScalarPotentialFunction, hφ]
 
 /-- The creation of an electromagnetic potential from a vector potential. -/
-noncomputable def ofVectorPotential {d} (c : SpeedOfLight) :
-    ((Time × Space d) →d[ℝ] EuclideanSpace ℝ (Fin d)) →ₗ[ℝ]
-    TempDistElectromagneticPotential d where
+noncomputable def ofVectorPotential {d} (c : SpeedOfLight)
+    : ((Time × Space d) →d[ℝ] EuclideanSpace ℝ (Fin d)) →ₗ[ℝ]
+      TempDistElectromagneticPotential d where
   toFun A := (distTimeSlice c).symm (Lorentz.Vector.ofSpatialComponent ∘L A)
   map_add' A₁ A₂ := by
     ext ε
@@ -127,8 +131,8 @@ noncomputable def ofVectorPotential {d} (c : SpeedOfLight) :
     simp
 
 /-- The creation of an electromagnetic potential from a static vector potential. -/
-noncomputable def ofStaticVectorPotential {d} (c : SpeedOfLight) :
-    ((Space d) →d[ℝ] EuclideanSpace ℝ (Fin d)) →ₗ[ℝ] TempDistElectromagneticPotential d :=
+noncomputable def ofStaticVectorPotential {d} (c : SpeedOfLight)
+    : ((Space d) →d[ℝ] EuclideanSpace ℝ (Fin d)) →ₗ[ℝ] TempDistElectromagneticPotential d :=
   ofVectorPotential c ∘ₗ Space.constantTime
 
 TODO "Add a constructor for TempDistElectromagneticPotential from electric and
@@ -140,10 +144,11 @@ TODO "Add a constructor for TempDistElectromagneticPotential from electric and
 
 -/
 
-lemma distTensorDeriv_eq_sum_sum {d} (A : TempDistElectromagneticPotential d)
-    (ε : 𝓢(SpaceTime d, ℝ)) :
-    distTensorDeriv A ε =∑ μ, ∑ ν, (SpaceTime.distDeriv μ A ε ν) •
-      Lorentz.CoVector.basis μ ⊗ₜ[ℝ] Lorentz.Vector.basis ν := by
+lemma distTensorDeriv_eq_sum_sum
+    {d} (A : TempDistElectromagneticPotential d) (ε : 𝓢(SpaceTime d, ℝ))
+    : distTensorDeriv A ε
+      = ∑ μ, ∑ ν, (SpaceTime.distDeriv μ A ε ν) •
+        Lorentz.CoVector.basis μ ⊗ₜ[ℝ] Lorentz.Vector.basis ν := by
   simp [distTensorDeriv_apply]
   congr
   funext μ
@@ -161,44 +166,43 @@ lemma distTensorDeriv_eq_sum_sum {d} (A : TempDistElectromagneticPotential d)
 -/
 
 @[simp]
-lemma distTensorDeriv_basis_repr_apply {d} {μν : (Fin 1 ⊕ Fin d) × (Fin 1 ⊕ Fin d)}
-    (A : TempDistElectromagneticPotential d)
-    (ε : 𝓢(SpaceTime d, ℝ)) :
-    (Lorentz.CoVector.basis.tensorProduct Lorentz.Vector.basis).repr (distTensorDeriv A ε) μν =
-    distDeriv μν.1 A ε μν.2 := by
+lemma distTensorDeriv_basis_repr_apply
+    {d} {μν : (Fin 1 ⊕ Fin d) × (Fin 1 ⊕ Fin d)}
+    (A : TempDistElectromagneticPotential d) (ε : 𝓢(SpaceTime d, ℝ))
+    : (Lorentz.CoVector.basis.tensorProduct Lorentz.Vector.basis).repr (distTensorDeriv A ε) μν
+      = distDeriv μν.1 A ε μν.2 := by
   match μν with
   | (μ, ν) =>
-  rw [distTensorDeriv_eq_sum_sum]
-  simp only [map_sum, map_smul, Finsupp.coe_finsetSum, Finsupp.coe_smul, Finset.sum_apply,
-    Pi.smul_apply, Basis.tensorProduct_repr_tmul_apply, Basis.repr_self, smul_eq_mul]
-  rw [Finset.sum_eq_single μ, Finset.sum_eq_single ν]
-  · simp
-  · intro μ' _ h
-    simp [h]
-  · simp
-  · intro ν' _ h
-    simp [h]
-  · simp
+    rw [distTensorDeriv_eq_sum_sum]
+    simp only [map_sum, map_smul, Finsupp.coe_finsetSum, Finsupp.coe_smul, Finset.sum_apply,
+      Pi.smul_apply, Basis.tensorProduct_repr_tmul_apply, Basis.repr_self, smul_eq_mul]
+    rw [Finset.sum_eq_single μ, Finset.sum_eq_single ν]
+    · simp
+    · intro μ' _ h
+      simp [h]
+    · simp
+    · intro ν' _ h
+      simp [h]
+    · simp
 
-lemma toTensor_distTensorDeriv_basis_repr_apply {d} (A : TempDistElectromagneticPotential d)
-    (ε : 𝓢(SpaceTime d, ℝ)) (b : ComponentIdx (S := realLorentzTensor d)
-      (Fin.append ![Color.down] ![Color.up])) :
-    (Tensor.basis _).repr (Tensorial.toTensor (distTensorDeriv A ε)) b =
-    distDeriv (b 0) A ε (b 1) := by
+lemma toTensor_distTensorDeriv_basis_repr_apply
+    {d} (A : TempDistElectromagneticPotential d) (ε : 𝓢(SpaceTime d, ℝ))
+    (b : ComponentIdx (S := realLorentzTensor d) (Fin.append (![Color.down]) ![Color.up]))
+    : (Tensor.basis _).repr (Tensorial.toTensor (distTensorDeriv A ε)) b
+      = distDeriv (b 0) A ε (b 1) := by
   rw [Tensorial.basis_toTensor_apply]
   rw [Tensorial.basis_map_prod]
   simp only [Nat.reduceSucc, Nat.reduceAdd, Basis.repr_reindex, Fin.isValue]
   rw [Lorentz.Vector.tensor_basis_map_eq_basis_reindex,
     Lorentz.CoVector.tensor_basis_map_eq_basis_reindex]
-  have hb : (((Lorentz.CoVector.basis (d := d)).reindex
-      Lorentz.CoVector.indexEquiv.symm).tensorProduct
-      (Lorentz.Vector.basis.reindex Lorentz.Vector.indexEquiv.symm)) =
-      ((Lorentz.CoVector.basis (d := d)).tensorProduct (Lorentz.Vector.basis (d := d))).reindex
-      (Lorentz.CoVector.indexEquiv.symm.prodCongr Lorentz.Vector.indexEquiv.symm) := by
+  have hb
+      : (((Lorentz.CoVector.basis (d := d)).reindex Lorentz.CoVector.indexEquiv.symm).tensorProduct
+          (Lorentz.Vector.basis.reindex Lorentz.Vector.indexEquiv.symm))
+        = ((Lorentz.CoVector.basis (d := d)).tensorProduct (Lorentz.Vector.basis (d := d))).reindex
+          (Lorentz.CoVector.indexEquiv.symm.prodCongr Lorentz.Vector.indexEquiv.symm) := by
     ext b
     match b with
-    | ⟨i, j⟩ =>
-    simp
+    | ⟨i, j⟩ => simp
   rw [hb]
   rw [Finsupp.equivMapDomain_apply, Module.Basis.repr_reindex_apply,
     distTensorDeriv_basis_repr_apply]

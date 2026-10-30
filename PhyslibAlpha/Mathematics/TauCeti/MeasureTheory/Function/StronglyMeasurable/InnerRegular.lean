@@ -58,22 +58,27 @@ public section
 open MeasureTheory Set TopologicalSpace
 open scoped ENNReal
 
-variable {α β : Type*} [TopologicalSpace α] [MeasurableSpace α] [R1Space α] [BorelSpace α]
-  [TopologicalSpace β] [PseudoMetrizableSpace β] {μ : Measure α} [μ.InnerRegularCompactLTTop]
+variable
+  {α β : Type*} [TopologicalSpace α] [MeasurableSpace α] [R1Space α] [BorelSpace α]
+  [TopologicalSpace β] [PseudoMetrizableSpace β]
+  {μ : Measure α} [μ.InnerRegularCompactLTTop]
 
-/-- For a measure that is inner regular with respect to compact sets on sets of finite measure, a
+/--
+For a measure that is inner regular with respect to compact sets on sets of finite measure, a
 function continuous on a measurable set `s` of finite measure is a.e. strongly measurable for the
-restriction of the measure to `s`. -/
-lemma ContinuousOn.aestronglyMeasurable_of_measure_ne_top {f : α → β} {s : Set α}
-    (hf : ContinuousOn f s) (hs : MeasurableSet s) (hμs : μ s ≠ ∞) :
-    AEStronglyMeasurable f (μ.restrict s) := by
+restriction of the measure to `s`.
+-/
+lemma ContinuousOn.aestronglyMeasurable_of_measure_ne_top
+    {f : α → β} {s : Set α} (hf : ContinuousOn f s) (hs : MeasurableSet s) (hμs : μ s ≠ ∞)
+    : AEStronglyMeasurable f (μ.restrict s) := by
   -- Exhaust `s` up to a null set by countably many closed compact subsets.
   choose K hKs hKc hKcl hμK using fun n : ℕ ↦
     hs.exists_isCompact_isClosed_sdiff_lt hμs (ε := (n + 1 : ℝ≥0∞)⁻¹) (by simp)
   have hnull : μ (s \ ⋃ n, K n) = 0 := by
     refine nonpos_iff_eq_zero.1 (ge_of_tendsto' ENNReal.tendsto_inv_nat_nhds_zero fun n ↦ ?_)
-    calc μ (s \ ⋃ n, K n) ≤ μ (s \ K n) :=
-        measure_mono (sdiff_subset_sdiff_right (subset_iUnion K n))
+    calc
+      μ (s \ ⋃ n, K n)
+        ≤ μ (s \ K n) := measure_mono (sdiff_subset_sdiff_right (subset_iUnion K n))
       _ ≤ (n + 1 : ℝ≥0∞)⁻¹ := (hμK n).le
       _ ≤ (n : ℝ≥0∞)⁻¹ := ENNReal.inv_le_inv.2 le_self_add
   have hae : (⋃ n, K n : Set α) =ᵐ[μ] s :=
@@ -81,28 +86,38 @@ lemma ContinuousOn.aestronglyMeasurable_of_measure_ne_top {f : α → β} {s : S
   rw [← Measure.restrict_congr_set hae, aestronglyMeasurable_iUnion_iff]
   exact fun n ↦ (hf.mono (hKs n)).aestronglyMeasurable_of_isCompact (hKc n) (hKcl n).measurableSet
 
-/-- A continuous function is a.e. strongly measurable for a σ-finite measure that is inner regular
+/--
+A continuous function is a.e. strongly measurable for a σ-finite measure that is inner regular
 with respect to compact sets on sets of finite measure. Compare `Continuous.aestronglyMeasurable`,
-which asks for second countability of the source or the target instead. -/
-lemma Continuous.aestronglyMeasurable_of_sigmaFinite [SigmaFinite μ] {f : α → β}
-    (hf : Continuous f) : AEStronglyMeasurable f μ := by
+which asks for second countability of the source or the target instead.
+-/
+lemma Continuous.aestronglyMeasurable_of_sigmaFinite [SigmaFinite μ] {f : α → β} (hf : Continuous f)
+    : AEStronglyMeasurable f μ := by
   rw [← Measure.restrict_univ (μ := μ), ← iUnion_spanningSets μ, aestronglyMeasurable_iUnion_iff]
-  exact fun n ↦ hf.continuousOn.aestronglyMeasurable_of_measure_ne_top
-    (measurableSet_spanningSets μ n) (measure_spanningSets_lt_top μ n).ne
+  exact fun n ↦
+    hf.continuousOn.aestronglyMeasurable_of_measure_ne_top (measurableSet_spanningSets μ n)
+      (measure_spanningSets_lt_top μ n).ne
 
-/-- The product of an a.e. finitely strongly measurable function `f`, for instance an integrable
+/--
+The product of an a.e. finitely strongly measurable function `f`, for instance an integrable
 one, and a continuous function `g` is a.e. strongly measurable, for a measure that is inner regular
 with respect to compact sets on sets of finite measure. No σ-finiteness of the measure and no
 second countability is needed: `f` vanishes outside a σ-finite set, on which `g` is a.e. strongly
-measurable by `Continuous.aestronglyMeasurable_of_sigmaFinite`. -/
-lemma MeasureTheory.AEFinStronglyMeasurable.aestronglyMeasurable_smul {𝕜 : Type*}
+measurable by `Continuous.aestronglyMeasurable_of_sigmaFinite`.
+-/
+lemma MeasureTheory.AEFinStronglyMeasurable.aestronglyMeasurable_smul
+    {𝕜 : Type*}
     [TopologicalSpace 𝕜] [T2Space 𝕜] [Zero 𝕜] [Zero β] [SMulWithZero 𝕜 β] [ContinuousSMul 𝕜 β]
-    {f : α → 𝕜} (hf : AEFinStronglyMeasurable f μ) {g : α → β} (hg : Continuous g) :
-    AEStronglyMeasurable (fun x ↦ f x • g x) μ := by
+    {f : α → 𝕜} (hf : AEFinStronglyMeasurable f μ)
+    {g : α → β} (hg : Continuous g)
+    : AEStronglyMeasurable (fun x ↦ f x • g x) μ := by
   rw [← Measure.restrict_univ (μ := μ), ← union_compl_self hf.sigmaFiniteSet,
     aestronglyMeasurable_union_iff]
-  refine ⟨(AEStronglyMeasurable.restrict ⟨hf.mk f, hf.finStronglyMeasurable_mk.stronglyMeasurable,
-      hf.ae_eq_mk⟩).smul hg.aestronglyMeasurable_of_sigmaFinite,
-    (aestronglyMeasurable_const (b := (0 : β))).congr ?_⟩
+  refine ⟨
+    (AEStronglyMeasurable.restrict
+        ⟨hf.mk f, hf.finStronglyMeasurable_mk.stronglyMeasurable, hf.ae_eq_mk⟩).smul
+      hg.aestronglyMeasurable_of_sigmaFinite,
+    (aestronglyMeasurable_const (b := (0 : β))).congr ?_
+  ⟩
   filter_upwards [hf.ae_eq_zero_compl] with x hx
   simp [hx]

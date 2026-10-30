@@ -54,18 +54,24 @@ namespace StandardModel
 
 namespace Model
 
-/-- The local gauge data assembled from the factors of the table is the existing local
-  gauge data of the Standard Model. -/
+/--
+The local gauge data assembled from the factors of the table is the existing local
+gauge data of the Standard Model.
+-/
 lemma localGaugeData_eq : StandardModel.localGaugeData = gaugeData := rfl
 
-/-- The quark doublet is indexed by a colour and a weak index, as the existing quark
-  doublet. -/
+/--
+The quark doublet is indexed by a colour and a weak index, as the existing quark
+doublet.
+-/
 example : quarkDoublet.Idx = (Fin 3 × Fin 2) := rfl
 
-/-- The quark doublet acts on its colour–weak index by the existing matrix `u · (U₃ ⊗ U₂)`
-  of the quark doublet. -/
-lemma quarkDoublet_rep_mat (U : JetGaugeGroupI) :
-    quarkDoublet.rep.mat U = QuarkDoublet.jetGaugeMatrix U := by
+/--
+The quark doublet acts on its colour–weak index by the existing matrix `u · (U₃ ⊗ U₂)`
+of the quark doublet.
+-/
+lemma quarkDoublet_rep_mat (U : JetGaugeGroupI)
+    : quarkDoublet.rep.mat U = QuarkDoublet.jetGaugeMatrix U := by
   show MatterField.chargePow 1 U.2.2 • Matrix.kroneckerMap (· * ·) U.1.1 U.2.1.1
     = QuarkDoublet.jetGaugeMatrix U
   simp [MatterField.chargePow, QuarkDoublet.jetGaugeMatrix]

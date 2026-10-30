@@ -24,42 +24,45 @@ open MSSMCharges
 open MSSMACCs
 open BigOperators
 
-/-- `B₃` is the charge which is $B-L$ in all families, but with the third
-family of the opposite sign. -/
-def B₃AsCharge : MSSMACC.Charges := toSpecies.symm
-  ⟨fun s => fun i =>
-    match s, i with
-    | 0, 0 => 1
-    | 0, 1 => 1
-    | 0, 2 => - 1
-    | 1, 0 => - 1
-    | 1, 1 => - 1
-    | 1, 2 => 1
-    | 2, 0 => - 1
-    | 2, 1 => - 1
-    | 2, 2 => 1
-    | 3, 0 => - 3
-    | 3, 1 => - 3
-    | 3, 2 => 3
-    | 4, 0 => 3
-    | 4, 1 => 3
-    | 4, 2 => - 3
-    | 5, 0 => 3
-    | 5, 1 => 3
-    | 5, 2 => - 3,
-  fun s =>
-    match s with
-    | 0 => -3
-    | 1 => 3⟩
+/--
+`B₃` is the charge which is $B-L$ in all families, but with the third
+family of the opposite sign.
+-/
+def B₃AsCharge : MSSMACC.Charges :=
+  toSpecies.symm ⟨
+    fun s => fun i =>
+      match s, i with
+      | 0, 0 => 1
+      | 0, 1 => 1
+      | 0, 2 => -1
+      | 1, 0 => -1
+      | 1, 1 => -1
+      | 1, 2 => 1
+      | 2, 0 => -1
+      | 2, 1 => -1
+      | 2, 2 => 1
+      | 3, 0 => -3
+      | 3, 1 => -3
+      | 3, 2 => 3
+      | 4, 0 => 3
+      | 4, 1 => 3
+      | 4, 2 => -3
+      | 5, 0 => 3
+      | 5, 1 => 3
+      | 5, 2 => -3,
+    fun s =>
+      match s with
+      | 0 => -3
+      | 1 => 3
+  ⟩
 
 /-- `B₃` as a solution. -/
 def B₃ : MSSMACC.Sols :=
-  MSSMACC.AnomalyFreeMk B₃AsCharge (by with_unfolding_all rfl)
+  MSSMACC.AnomalyFreeMk B₃AsCharge (by with_unfolding_all rfl) (by with_unfolding_all rfl)
     (by with_unfolding_all rfl) (by with_unfolding_all rfl) (by with_unfolding_all rfl)
-    (by with_unfolding_all rfl) (by with_unfolding_all rfl)
+    (by with_unfolding_all rfl)
 
-lemma B₃_val : B₃.val = B₃AsCharge := by
-  rfl
+lemma B₃_val : B₃.val = B₃AsCharge := by rfl
 
 set_option backward.isDefEq.respectTransparency false in
 lemma doublePoint_B₃_B₃ (R : MSSMACC.LinSols) : cubeTriLin B₃.val B₃.val R.val = 0 := by
@@ -77,8 +80,8 @@ lemma doublePoint_B₃_B₃ (R : MSSMACC.LinSols) : cubeTriLin B₃.val B₃.val
   have h2 := hLin ⟨2, by simp⟩
   simp only [accGrav, LinearMap.coe_mk, AddHom.coe_mk, accSU3] at h0 h2
   rw [sum_MSSMSpecies_numberCharges_eq_expand] at h0 h2
-  simp only [Fin.isValue, toSMSpecies_apply, Nat.reduceMul, Hd_apply, Fin.reduceFinMk,
-    Hu_apply] at h0 h2
+  simp only [Fin.isValue, toSMSpecies_apply, Nat.reduceMul, Hd_apply, Fin.reduceFinMk, Hu_apply]
+    at h0 h2
   linear_combination (norm := ring_nf) 9 * (h0) - 24 * (h2)
 
 end MSSMACC

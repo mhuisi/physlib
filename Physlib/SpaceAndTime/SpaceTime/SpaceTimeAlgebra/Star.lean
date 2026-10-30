@@ -65,12 +65,13 @@ instance : Star SpaceTimeAlgebra where
   star := map (starRingEnd ℂ)
 
 @[simp]
-lemma coeff_star (n : (Fin 1 ⊕ Fin 3) →₀ ℕ) (f : SpaceTimeAlgebra) :
-    coeff n (star f) = star (coeff n f) := rfl
+lemma coeff_star (n : (Fin 1 ⊕ Fin 3) →₀ ℕ) (f : SpaceTimeAlgebra)
+    : coeff n (star f) = star (coeff n f) :=
+  rfl
 
 @[simp]
-lemma constantCoeff_star (f : SpaceTimeAlgebra) :
-    constantCoeff (star f) = star (constantCoeff f) := rfl
+lemma constantCoeff_star (f : SpaceTimeAlgebra) : constantCoeff (star f) = star (constantCoeff f) :=
+  rfl
 
 /-!
 
@@ -93,11 +94,9 @@ instance : StarRing SpaceTimeAlgebra where
 
 -/
 
-@[simp]
-lemma star_C (a : ℂ) : star (C a : SpaceTimeAlgebra) = C (star a) := map_C _ a
+@[simp] lemma star_C (a : ℂ) : star (C a : SpaceTimeAlgebra) = C (star a) := map_C _ a
 
-@[simp]
-lemma star_X (μ : Fin 1 ⊕ Fin 3) : star (X μ : SpaceTimeAlgebra) = X μ := map_X _ μ
+@[simp] lemma star_X (μ : Fin 1 ⊕ Fin 3) : star (X μ : SpaceTimeAlgebra) = X μ := map_X _ μ
 
 /-!
 
@@ -123,14 +122,14 @@ the natural number `n μ + 1`, which conjugation fixes.
 -/
 
 /-- Conjugation commutes with formal partial derivatives. -/
-lemma pderiv_star (μ : Fin 1 ⊕ Fin 3) (f : SpaceTimeAlgebra) :
-    pderiv μ (star f) = star (pderiv μ f) := by
+lemma pderiv_star (μ : Fin 1 ⊕ Fin 3) (f : SpaceTimeAlgebra)
+    : pderiv μ (star f) = star (pderiv μ f) := by
   ext n
   simp [coeff_pderiv, star_mul']
 
 /-- Conjugation commutes with iterated formal partial derivatives. -/
-lemma iteratedPDeriv_star (s : Multiset (Fin 1 ⊕ Fin 3)) (f : SpaceTimeAlgebra) :
-    iteratedPDeriv s (star f) = star (iteratedPDeriv s f) := by
+lemma iteratedPDeriv_star (s : Multiset (Fin 1 ⊕ Fin 3)) (f : SpaceTimeAlgebra)
+    : iteratedPDeriv s (star f) = star (iteratedPDeriv s f) := by
   induction s using Multiset.induction_on generalizing f with
   | empty => rfl
   | cons μ s ih => rw [iteratedPDeriv_cons, iteratedPDeriv_cons, pderiv_star, ih]

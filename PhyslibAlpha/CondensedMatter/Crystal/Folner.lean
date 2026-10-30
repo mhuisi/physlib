@@ -60,11 +60,10 @@ open Finset Filter Topology ProbabilisticTheory
 /-- The cube `{0, …, m-1}^d` of the lattice `ℤ^d`. -/
 def box (d m : ℕ) : Finset (Fin d → ℤ) := Fintype.piFinset fun _ => Finset.Ico (0 : ℤ) m
 
-lemma card_box (d m : ℕ) : (box d m).card = m ^ d := by
-  simp [box, Fintype.card_piFinset]
+lemma card_box (d m : ℕ) : (box d m).card = m ^ d := by simp [box, Fintype.card_piFinset]
 
-lemma image_add_box (d m : ℕ) (h : Fin d → ℤ) :
-    (box d m).image (· + h) = Fintype.piFinset fun j => Finset.Ico (h j) (m + h j) := by
+lemma image_add_box (d m : ℕ) (h : Fin d → ℤ)
+    : (box d m).image (· + h) = Fintype.piFinset fun j => Finset.Ico (h j) (m + h j) := by
   ext x
   simp only [box, mem_image, Fintype.mem_piFinset, mem_Ico]
   constructor
@@ -82,46 +81,60 @@ lemma card_image_add_box (d m : ℕ) (h : Fin d → ℤ) : ((box d m).image (· 
   rw [card_image_of_injective _ (add_left_injective h), card_box]
 
 /-- The overlap of the cube with its translate. -/
-lemma card_inter_box (d m : ℕ) (h : Fin d → ℤ) :
-    ((box d m).image (· + h) ∩ box d m).card =
-      ∏ j, (Finset.Ico (h j) (m + h j) ∩ Finset.Ico (0 : ℤ) m).card := by
+lemma card_inter_box (d m : ℕ) (h : Fin d → ℤ)
+    : ((box d m).image (· + h) ∩ box d m).card
+      = ∏ j, (Finset.Ico (h j) (m + h j) ∩ Finset.Ico (0 : ℤ) m).card := by
   rw [image_add_box, box, ← Fintype.piFinset_inter, Fintype.card_piFinset]
 
 /-! ## B. The Følner property -/
 
-lemma card_Ico_inter (m : ℕ) (a : ℤ) (ha : |a| ≤ m) :
-    (Finset.Ico a (m + a) ∩ Finset.Ico (0 : ℤ) m).card = m - a.natAbs := by
+lemma card_Ico_inter (m : ℕ) (a : ℤ) (ha : |a| ≤ m)
+    : (Finset.Ico a (m + a) ∩ Finset.Ico (0 : ℤ) m).card = m - a.natAbs := by
   rw [Finset.Ico_inter_Ico, Int.card_Ico]
   rw [abs_le] at ha
   omega
 
 /-- The number of points of the cube not shared with its translate. -/
-lemma card_sdiff_add_card_sdiff (d m : ℕ) (h : Fin d → ℤ) :
-    (((box d m).image (· + h) \ box d m).card + (box d m \ (box d m).image (· + h)).card : ℝ) =
-      2 * ((m : ℝ) ^ d - ∏ j, ((Finset.Ico (h j) (m + h j) ∩ Finset.Ico (0 : ℤ) m).card : ℝ)) := by
+lemma card_sdiff_add_card_sdiff (d m : ℕ) (h : Fin d → ℤ)
+    : (((box d m).image (· + h) \ box d m).card + (box d m \ (box d m).image (· + h)).card : ℝ)
+      = 2
+        * ((m : ℝ) ^ d - ∏ j, ((Finset.Ico (h j) (m + h j) ∩ Finset.Ico (0 : ℤ) m).card : ℝ)) := by
   have h1 := Finset.card_sdiff_add_card_inter ((box d m).image (· + h)) (box d m)
   have h2 := Finset.card_sdiff_add_card_inter (box d m) ((box d m).image (· + h))
   rw [Finset.inter_comm, card_inter_box] at h2
   rw [card_inter_box, card_image_add_box] at h1
-  have h1' : (((box d m).image (· + h) \ box d m).card : ℝ) + (∏ j, ((Finset.Ico (h j) (m + h j) ∩
-      Finset.Ico (0 : ℤ) m).card : ℝ)) = (m : ℝ) ^ d := by exact_mod_cast h1
-  have h2' : ((box d m \ (box d m).image (· + h)).card : ℝ) + (∏ j, ((Finset.Ico (h j) (m + h j) ∩
-      Finset.Ico (0 : ℤ) m).card : ℝ)) = (m : ℝ) ^ d := by
+  have h1'
+      : (((box d m).image (· + h) \ box d m).card : ℝ) + (∏ j, ((Finset.Ico (h j) (m + h j) ∩
+          Finset.Ico (0 : ℤ) m).card : ℝ))
+        = (m : ℝ) ^ d := by
+    exact_mod_cast h1
+  have h2'
+      : ((box d m \ (box d m).image (· + h)).card : ℝ) + (∏ j, ((Finset.Ico (h j) (m + h j) ∩
+          Finset.Ico (0 : ℤ) m).card : ℝ))
+        = (m : ℝ) ^ d := by
     rw [card_box] at h2; exact_mod_cast h2
   linarith
 
-/-- **The cubes are asymptotically invariant under translation**: the fraction of the points of
-`{0, …, n}^d` that are not shared with a fixed translate tends to zero. -/
-lemma tendsto_box_sdiff (d : ℕ) (h : Fin d → ℤ) :
-    Tendsto (fun n : ℕ => (((box d (n + 1)).image (· + h) \ box d (n + 1)).card +
-      (box d (n + 1) \ (box d (n + 1)).image (· + h)).card : ℝ) / ((n + 1 : ℕ) : ℝ) ^ d)
+/--
+**The cubes are asymptotically invariant under translation**: the fraction of the points of
+`{0, …, n}^d` that are not shared with a fixed translate tends to zero.
+-/
+lemma tendsto_box_sdiff (d : ℕ) (h : Fin d → ℤ)
+    : Tendsto
+      (fun n : ℕ =>
+        (((box d (n + 1)).image (· + h) \ box d (n + 1)).card
+              + (box d (n + 1) \ (box d (n + 1)).image (· + h)).card
+            : ℝ)
+          / ((n + 1 : ℕ) : ℝ) ^ d)
       atTop (𝓝 0) := by
-  have hprod : Tendsto (fun n : ℕ => ∏ j, (((Finset.Ico (h j) ((n + 1 : ℕ) + h j) ∩
-      Finset.Ico (0 : ℤ) (n + 1 : ℕ)).card : ℝ) / ((n + 1 : ℕ) : ℝ)))
+  have hprod : Tendsto
+      (fun n : ℕ =>
+        ∏ j, (((Finset.Ico (h j) ((n + 1 : ℕ) + h j) ∩
+          Finset.Ico (0 : ℤ) (n + 1 : ℕ)).card : ℝ) / ((n + 1 : ℕ) : ℝ)))
       atTop (𝓝 (∏ _j : Fin d, 1)) := by
     refine tendsto_finsetProd _ fun j _ => ?_
-    have h1 : Tendsto (fun n : ℕ => 1 - ((h j).natAbs : ℝ) / ((n + 1 : ℕ) : ℝ)) atTop
-        (𝓝 (1 - 0)) := by
+    have h1
+        : Tendsto (fun n : ℕ => 1 - ((h j).natAbs : ℝ) / ((n + 1 : ℕ) : ℝ)) atTop (𝓝 (1 - 0)) := by
       refine tendsto_const_nhds.sub ?_
       exact tendsto_const_nhds.div_atTop (by
         exact tendsto_natCast_atTop_atTop.comp (tendsto_add_atTop_nat 1))
@@ -129,15 +142,20 @@ lemma tendsto_box_sdiff (d : ℕ) (h : Fin d → ℤ) :
     refine h1.congr' ?_
     filter_upwards [eventually_ge_atTop (h j).natAbs] with n hn
     have hab : |h j| ≤ ((n + 1 : ℕ) : ℤ) := by
-      calc |h j| = ((h j).natAbs : ℤ) := Int.abs_eq_natAbs _
+      calc
+        |h j|
+          = ((h j).natAbs : ℤ) := Int.abs_eq_natAbs _
         _ ≤ _ := by exact_mod_cast (by omega : (h j).natAbs ≤ n + 1)
     rw [card_Ico_inter _ _ hab]
     have hle : (h j).natAbs ≤ n + 1 := by omega
     have hpos : (0 : ℝ) < ((n + 1 : ℕ) : ℝ) := by positivity
     rw [Nat.cast_sub hle, sub_div, div_self hpos.ne']
   simp only [Finset.prod_const_one] at hprod
-  have key : Tendsto (fun n : ℕ => 2 * (1 - ∏ j, (((Finset.Ico (h j) ((n + 1 : ℕ) + h j) ∩
-      Finset.Ico (0 : ℤ) (n + 1 : ℕ)).card : ℝ) / ((n + 1 : ℕ) : ℝ)))) atTop (𝓝 (2 * (1 - 1))) :=
+  have key : Tendsto
+      (fun n : ℕ =>
+        2 * (1 - ∏ j, (((Finset.Ico (h j) ((n + 1 : ℕ) + h j) ∩
+          Finset.Ico (0 : ℤ) (n + 1 : ℕ)).card : ℝ) / ((n + 1 : ℕ) : ℝ))))
+      atTop (𝓝 (2 * (1 - 1))) :=
     tendsto_const_nhds.mul (tendsto_const_nhds.sub hprod)
   rw [sub_self, mul_zero] at key
   refine key.congr fun n => ?_
@@ -150,9 +168,9 @@ lemma tendsto_box_sdiff (d : ℕ) (h : Fin d → ℤ) :
 def boxes (d n : ℕ) : Finset (Multiplicative (Fin d → ℤ)) :=
   (box d (n + 1)).map Multiplicative.ofAdd.toEmbedding
 
-lemma image_mul_boxes (d n : ℕ) (h : Multiplicative (Fin d → ℤ)) :
-    (boxes d n).image (· * h) =
-      ((box d (n + 1)).image (· + Multiplicative.toAdd h)).map
+lemma image_mul_boxes (d n : ℕ) (h : Multiplicative (Fin d → ℤ))
+    : (boxes d n).image (· * h)
+      = ((box d (n + 1)).image (· + Multiplicative.toAdd h)).map
         Multiplicative.ofAdd.toEmbedding := by
   ext x
   simp only [boxes, Finset.mem_image, Finset.mem_map, Equiv.coe_toEmbedding]
@@ -162,10 +180,12 @@ lemma image_mul_boxes (d n : ℕ) (h : Multiplicative (Fin d → ℤ)) :
   · rintro ⟨_, ⟨y, hy, rfl⟩, rfl⟩
     exact ⟨Multiplicative.ofAdd y, ⟨y, hy, rfl⟩, rfl⟩
 
-/-- **The cubes are a Følner family** for the translations of `ℤ^d`, along any ultrafilter on
-`ℕ` finer than the filter of large cubes. -/
-lemma isRightFolner_boxes (d : ℕ) (𝒰 : Ultrafilter ℕ) (h𝒰 : (𝒰 : Filter ℕ) ≤ atTop) :
-    IsRightFolner (boxes d) 𝒰 := by
+/--
+**The cubes are a Følner family** for the translations of `ℤ^d`, along any ultrafilter on
+`ℕ` finer than the filter of large cubes.
+-/
+lemma isRightFolner_boxes (d : ℕ) (𝒰 : Ultrafilter ℕ) (h𝒰 : (𝒰 : Filter ℕ) ≤ atTop)
+    : IsRightFolner (boxes d) 𝒰 := by
   intro h
   refine ((tendsto_box_sdiff d (Multiplicative.toAdd h)).mono_left h𝒰).congr fun n => ?_
   rw [image_mul_boxes, boxes, ← Finset.map_sdiff, ← Finset.map_sdiff, Finset.card_map,

@@ -57,18 +57,20 @@ open scoped ComplexOrder
 
 namespace UnitalPositiveLinearMap
 
-variable {A : Type*} [Ring A] [PartialOrder A] [StarRing A]
-    [SelfAdjointDecompose A] [Module ℂ A] [StarModule ℂ A]
+variable
+  {A : Type*}
+  [Ring A] [PartialOrder A] [StarRing A] [SelfAdjointDecompose A] [Module ℂ A] [StarModule ℂ A]
 
 /-- The real state on observables induced by a complex state on the ambient starred space. -/
-noncomputable def onObservables (ω : 𝓢[ℂ, A]) : 𝓢[ℝ, Observable A] :=
-  ω.restrictSAC
+noncomputable def onObservables (ω : 𝓢[ℂ, A]) : 𝓢[ℝ, Observable A] := ω.restrictSAC
 
-/-- Restricting a state to observables does not change its values, after regarding the real
-expectation value as a complex number. -/
+/--
+Restricting a state to observables does not change its values, after regarding the real
+expectation value as a complex number.
+-/
 @[simp, norm_cast]
-lemma coe_onObservables_apply (ω : 𝓢[ℂ, A]) (a : Observable A) :
-    ((ω.onObservables a : ℝ) : ℂ) = ω (a : A) := by
+lemma coe_onObservables_apply (ω : 𝓢[ℂ, A]) (a : Observable A)
+    : ((ω.onObservables a : ℝ) : ℂ) = ω (a : A) := by
   exact coe_restrictSAC_apply ω a
 
 end UnitalPositiveLinearMap
@@ -79,11 +81,10 @@ section OrderUnit
 
 variable {E : Type*} [OrderUnitSpace E] [StarAddMonoid E] [StarModule ℝ E]
 
-example (s : 𝓢[ℝ, E]) (a b : Observable E) :
-    s ((a : E) + (b : E)) = s (a : E) + s (b : E) := map_add s (a : E) (b : E)
+example (s : 𝓢[ℝ, E]) (a b : Observable E) : s ((a : E) + (b : E)) = s (a : E) + s (b : E) :=
+  map_add s (a : E) (b : E)
 
-example (s : 𝓢[ℝ, E]) (c : ℝ) (a : Observable E) :
-    s (c • (a : E)) = c * s (a : E) := by
+example (s : 𝓢[ℝ, E]) (c : ℝ) (a : Observable E) : s (c • (a : E)) = c * s (a : E) := by
   rw [map_smul]; rfl
 
 example (s : 𝓢[ℝ, E]) {a : Observable E} (ha : 0 ≤ (a : E)) : 0 ≤ s (a : E) := s.map_nonneg ha

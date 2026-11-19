@@ -62,8 +62,9 @@ open scoped NNReal
 -/
 
 /-- The hypotheses for Peano's existence theorem on a closed time interval and a closed ball. -/
-structure IsPeano {E : Type*} [NormedAddCommGroup E]
-    (f : ℝ × E → E) (tmin tmax t₀ : ℝ) (x₀ : E) (r L : ℝ≥0) : Prop where
+structure IsPeano
+    {E : Type*} [NormedAddCommGroup E] (f : ℝ × E → E) (tmin tmax t₀ : ℝ) (x₀ : E) (r L : ℝ≥0)
+    : Prop where
   /-- The initial time belongs to the time interval. -/
   t₀_mem : t₀ ∈ Icc tmin tmax
   /-- The vector field is continuous on the set product of a time interval and a closed ball. -/
@@ -75,7 +76,8 @@ structure IsPeano {E : Type*} [NormedAddCommGroup E]
 
 namespace IsPeano
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
+variable
+  {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimensional ℝ E]
   {f : ℝ × E → E} {tmin tmax t₀ : ℝ} {x₀ : E} {r L : ℝ≥0}
 
 /-!

@@ -32,24 +32,25 @@ def lorentzAlgebra : LieSubalgebra ℝ (Matrix (Fin 1 ⊕ Fin 3) (Fin 1 ⊕ Fin 
 namespace lorentzAlgebra
 open minkowskiMatrix
 
-lemma transpose_eta (A : lorentzAlgebra) : A.1ᵀ * η = - η * A.1 := by
+lemma transpose_eta (A : lorentzAlgebra) : A.1ᵀ * η = -η * A.1 := by
   have h : A.1 ∈ skewAdjointMatricesSubmodule η := A.2
   simpa only [mem_skewAdjointMatricesSubmodule, Matrix.IsSkewAdjoint, IsAdjointPair, ← neg_mul_comm]
     using h
 
-lemma mem_of_transpose_eta_eq_eta_mul_self {A : Matrix (Fin 1 ⊕ Fin 3) (Fin 1 ⊕ Fin 3) ℝ}
-    (h : Aᵀ * η = - η * A) : A ∈ lorentzAlgebra := by
+lemma mem_of_transpose_eta_eq_eta_mul_self
+    {A : Matrix (Fin 1 ⊕ Fin 3) (Fin 1 ⊕ Fin 3) ℝ} (h : Aᵀ * η = -η * A)
+    : A ∈ lorentzAlgebra := by
   simp_all only [neg_mul, lorentzAlgebra, LieAlgebra.Orthogonal.so',
     mem_skewAdjointMatricesLieSubalgebra, mem_skewAdjointMatricesSubmodule, Matrix.IsSkewAdjoint,
     IsAdjointPair, mul_neg]
   exact h
 
-lemma mem_iff {A : Matrix (Fin 1 ⊕ Fin 3) (Fin 1 ⊕ Fin 3) ℝ} :
-    A ∈ lorentzAlgebra ↔ Aᵀ * η = - η * A :=
+lemma mem_iff {A : Matrix (Fin 1 ⊕ Fin 3) (Fin 1 ⊕ Fin 3) ℝ}
+    : A ∈ lorentzAlgebra ↔ Aᵀ * η = -η * A :=
   Iff.intro (fun h => transpose_eta ⟨A, h⟩) (fun h => mem_of_transpose_eta_eq_eta_mul_self h)
 
-lemma mem_iff' (A : Matrix (Fin 1 ⊕ Fin 3) (Fin 1 ⊕ Fin 3) ℝ) :
-    A ∈ lorentzAlgebra ↔ A = - η * Aᵀ * η := by
+lemma mem_iff' (A : Matrix (Fin 1 ⊕ Fin 3) (Fin 1 ⊕ Fin 3) ℝ)
+    : A ∈ lorentzAlgebra ↔ A = -η * Aᵀ * η := by
   rw [mem_iff]
   constructor
   · intro h
@@ -61,21 +62,23 @@ lemma mem_iff' (A : Matrix (Fin 1 ⊕ Fin 3) (Fin 1 ⊕ Fin 3) ℝ) :
 lemma diag_comp (Λ : lorentzAlgebra) (μ : Fin 1 ⊕ Fin 3) : Λ.1 μ μ = 0 := by
   have h := congrArg (fun M ↦ M μ μ) $ transpose_eta Λ
   simp only [minkowskiMatrix, LieAlgebra.Orthogonal.indefiniteDiagonal, mul_diagonal,
-    transpose_apply, diagonal_neg, diagonal_mul, neg_mul] at h
-  rcases μ with μ | μ <;>
-    simp only [Sum.elim_inl, Sum.elim_inr, mul_one, one_mul, mul_neg, neg_mul, neg_neg] at h <;>
-    linarith
+      transpose_apply, diagonal_neg, diagonal_mul, neg_mul]
+    at h
+  rcases μ with μ | μ
+    <;> simp only [Sum.elim_inl, Sum.elim_inr, mul_one, one_mul, mul_neg, neg_mul, neg_neg] at h
+    <;> linarith
 
-lemma time_comps (Λ : lorentzAlgebra) (i : Fin 3) :
-    Λ.1 (Sum.inr i) (Sum.inl 0) = Λ.1 (Sum.inl 0) (Sum.inr i) := by
+lemma time_comps (Λ : lorentzAlgebra) (i : Fin 3)
+    : Λ.1 (Sum.inr i) (Sum.inl 0) = Λ.1 (Sum.inl 0) (Sum.inr i) := by
   simpa only [Fin.isValue, minkowskiMatrix, LieAlgebra.Orthogonal.indefiniteDiagonal, mul_diagonal,
-    transpose_apply, Sum.elim_inr, mul_neg, mul_one, diagonal_neg, diagonal_mul, Sum.elim_inl,
-    neg_mul, one_mul, neg_inj] using congrArg (fun M ↦ M (Sum.inl 0) (Sum.inr i)) $ transpose_eta Λ
+      transpose_apply, Sum.elim_inr, mul_neg, mul_one, diagonal_neg, diagonal_mul, Sum.elim_inl,
+      neg_mul, one_mul, neg_inj]
+    using congrArg (fun M ↦ M (Sum.inl 0) (Sum.inr i)) $ transpose_eta Λ
 
-lemma space_comps (Λ : lorentzAlgebra) (i j : Fin 3) :
-    Λ.1 (Sum.inr i) (Sum.inr j) = - Λ.1 (Sum.inr j) (Sum.inr i) := by
+lemma space_comps (Λ : lorentzAlgebra) (i j : Fin 3)
+    : Λ.1 (Sum.inr i) (Sum.inr j) = - Λ.1 (Sum.inr j) (Sum.inr i) := by
   simpa only [minkowskiMatrix, LieAlgebra.Orthogonal.indefiniteDiagonal, diagonal_neg, diagonal_mul,
-    Sum.elim_inr, neg_neg, one_mul, mul_diagonal, transpose_apply, mul_neg, mul_one] using
-    (congrArg (fun M ↦ M (Sum.inr i) (Sum.inr j)) $ transpose_eta Λ).symm
+      Sum.elim_inr, neg_neg, one_mul, mul_diagonal, transpose_apply, mul_neg, mul_one]
+    using (congrArg (fun M ↦ M (Sum.inr i) (Sum.inr j)) $ transpose_eta Λ).symm
 
 end lorentzAlgebra

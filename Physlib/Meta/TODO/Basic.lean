@@ -56,8 +56,8 @@ meta def elabTODO : Elab.Command.CommandElab := fun stx =>
       let modName := env.mainModule
       let todoInfo : todoInfo := { content := str, fileName := modName, line := line, tag := tag }
       modifyEnv fun env => todoExtension.addEntry env todoInfo
-      Elab.Command.liftTermElabM <| Lean.Elab.Term.addTermInfo' s
-        (Lean.mkStrLit s!"TODO tag: {tag}") (expectedType? := none)
+      Elab.Command.liftTermElabM <|
+        Lean.Elab.Term.addTermInfo' s (Lean.mkStrLit s!"TODO tag: {tag}") (expectedType? := none)
     | none => throwError "Invalid syntax for `TODO` command"
   | _ => throwError "Invalid syntax for `TODO` command"
 

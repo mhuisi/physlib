@@ -25,46 +25,54 @@ first.
 -/
 
 def helpText : String :=
-"Download everything needed before a first build, so that `lake build` does \
-not have to compile from source.
+  "Download everything needed before a first build, so that `lake build` does \
+    not have to compile from source.\
+    \n\
+    \nUsage:\
+    \n  lake exe get_cache                fetch everything needed\
+    \n  lake exe get_cache --no-mathlib   skip Mathlib, fetch only Physlib's\
+    \n  lake exe get_cache --no-alpha     skip PhyslibAlpha's cache\n"
 
-Usage:
-  lake exe get_cache                fetch everything needed
-  lake exe get_cache --no-mathlib   skip Mathlib, fetch only Physlib's
-  lake exe get_cache --no-alpha     skip PhyslibAlpha's cache
-"
-
-/-- `println`, then flush stdout immediately. Without this, messages printed
+/--
+`println`, then flush stdout immediately. Without this, messages printed
 before spawning a subprocess can sit in a buffer and appear out of order (or
 not at all until the child exits) whenever stdout is piped rather than a
-terminal -- e.g. `lake exe get_cache | tee log.txt`. -/
+terminal -- e.g. `lake exe get_cache | tee log.txt`.
+-/
 def say (s : String) : IO Unit := do
   IO.println s
   (← IO.getStdout).flush
 
-/-- Run a subprocess, inheriting stdout/stderr, with optional extra
-environment variables. Returns whether it exited successfully. -/
-def runStreamed (cmd : String) (args : Array String)
-    (env : Array (String × Option String) := #[]) : IO Bool := do
+/--
+Run a subprocess, inheriting stdout/stderr, with optional extra
+environment variables. Returns whether it exited successfully.
+-/
+def runStreamed (cmd : String) (args : Array String) (env : Array (String × Option String) := #[])
+    : IO Bool := do
   let child ← IO.Process.spawn { cmd, args, env }
   return (← child.wait) == 0
 
-/-- Whether the `.olean` at `path` was written by a different Lean build than
+/--
+Whether the `.olean` at `path` was written by a different Lean build than
 the one running this program. Every `.olean` starts with the marker `olean` and
 a header recording the githash of the Lean that wrote it, and Lean refuses to
 load one with any other. A file without the marker is never reported stale, so
 a change of header layout makes this miss stale files rather than delete
-current ones. -/
+current ones.
+-/
 def isStaleOlean (path : System.FilePath) : IO Bool := do
   let hash := Lean.githash.toUTF8
   if hash.size == 0 then return false
   let header ← (← IO.FS.Handle.mk path .read).read 128
-  unless (header.extract 0 5).toList == "olean".toUTF8.toList do return false
-  let found := (List.range (header.size + 1 - hash.size)).any fun i =>
-    (header.extract i (i + hash.size)).toList == hash.toList
+  unless (header.extract 0 5).toList == "olean".toUTF8.toList do
+    return false
+  let found :=
+    (List.range (header.size + 1 - hash.size)).any fun i =>
+      (header.extract i (i + hash.size)).toList == hash.toList
   return !found
 
-/-- Delete the build folder of every dependency whose `.olean` files were
+/--
+Delete the build folder of every dependency whose `.olean` files were
 written by another Lean toolchain, as happens right after a toolchain bump.
 Such files can never be loaded again, and the rest are unpacked again from
 Mathlib's cache, so nothing is lost; but on Windows they block unpacking it,
@@ -72,19 +80,23 @@ as they are read-only hard links into Lake's artifact cache, which cannot be
 overwritten. Each folder is renamed before it is deleted: on Windows a file
 still open elsewhere lingers after deletion and blocks creating a new one at
 its path, and the rename moves it out of the way of the unpacking. Returns
-whether every deletion succeeded. -/
+whether every deletion succeeded.
+-/
 def removeStaleDepBuilds : IO Bool := do
   let pkgs : System.FilePath := ".lake" / "packages"
-  unless ← pkgs.pathExists do return true
+  unless ← pkgs.pathExists do
+    return true
   let mut ok := true
   for pkg in ← pkgs.readDir do
     let build := pkg.path / ".lake" / "build"
     let lib := build / "lib" / "lean"
-    unless ← lib.pathExists do continue
+    unless ← lib.pathExists do
+      continue
     -- Every file is checked, not just one: a build interrupted after a toolchain
     -- bump (e.g. by an editor rebuilding) leaves a mix of stale and current files.
     let oleans := (← lib.walkDir).filter (·.extension == some "olean")
-    unless ← oleans.anyM isStaleOlean do continue
+    unless ← oleans.anyM isStaleOlean do
+      continue
     say s!"  removing {build}: built by another Lean toolchain"
     let old := pkg.path / ".lake" / "build-stale"
     try
@@ -96,41 +108,52 @@ def removeStaleDepBuilds : IO Bool := do
       ok := false
   return ok
 
-/-- The options this program understands. Anything else is rejected up
-front, rather than silently ignored and treated as "no flags given". -/
+/--
+The options this program understands. Anything else is rejected up
+front, rather than silently ignored and treated as "no flags given".
+-/
 def knownFlags : List String := ["--help", "-h", "--no-mathlib", "--no-alpha"]
 
-/-- The current toolchain as a cache-scope path component: `/` and `:` become
-`-`, whitespace is dropped (matching the workflow's `tr -d '[:space:]'`). -/
+/--
+The current toolchain as a cache-scope path component: `/` and `:` become
+`-`, whitespace is dropped (matching the workflow's `tr -d '[:space:]'`).
+-/
 def toolchainTag : IO String := do
   let raw ← IO.FS.readFile "lean-toolchain"
   return raw.foldl (init := "") fun acc c =>
-    if c.isWhitespace then acc
-    else if c == '/' || c == ':' then acc.push '-'
-    else acc.push c
+    if c.isWhitespace then
+      acc
+    else if c == '/' || c == ':' then
+      acc.push '-'
+    else
+      acc.push c
 
-/-- The cache scope for one half of the project. Each half gets its own so the
+/--
+The cache scope for one half of the project. Each half gets its own so the
 two CI jobs do not overwrite each other's mappings; the toolchain is a path
 component because Lake ignores `--toolchain` for verbatim scopes.
-`.github/workflows/publish-cache.yml` builds the same strings. -/
-def scopeFor (tc : String) (half : String) : String :=
-  s!"physlib-master/{tc}/{half}"
+`.github/workflows/publish-cache.yml` builds the same strings.
+-/
+def scopeFor (tc : String) (half : String) : String := s!"physlib-master/{tc}/{half}"
 
-/-- Deletes Lake's local copies of Physlib's revision mappings. Lake saves them
+/--
+Deletes Lake's local copies of Physlib's revision mappings. Lake saves them
 at `<cache dir>/revisions/Physlib/<rev>.jsonl` whatever the `--scope`, so the same
-path is shared by Physlib and PhyslibAlpha. -/
+path is shared by Physlib and PhyslibAlpha.
+-/
 def removeRevisionMappings : IO Unit := do
-  let out ← IO.Process.output
-    { cmd := "lake", args := #["env", "printenv", "LAKE_CACHE_DIR"] }
+  let out ← IO.Process.output { cmd := "lake", args := #["env", "printenv", "LAKE_CACHE_DIR"] }
   let dir := out.stdout.trimAscii.toString
   if out.exitCode != 0 || dir.isEmpty then return
   let revs : System.FilePath := dir / "revisions" / "Physlib"
   if ← revs.pathExists then
-    try IO.FS.removeDirAll revs
-    catch e => say s!"  could not remove {revs}: {e}"
+    try
+      IO.FS.removeDirAll revs
+    catch e =>
+      say s!"  could not remove {revs}: {e}"
 
 def main (args : List String) : IO UInt32 := do
-  if let some bad := args.find? (!knownFlags.contains ·) then
+  if let some bad := args.find? (! knownFlags.contains ·) then
     say s!"Unknown option: {bad} (try --help)"
     return 0
 
@@ -162,8 +185,9 @@ def main (args : List String) : IO UInt32 := do
   let tc ← toolchainTag
 
   say "Fetching Physlib's prebuilt files ..."
-  let ok ← runStreamed "lake" #["cache", "get", s!"--scope={scopeFor tc "physlib"}"]
-    #[("LAKE_CONFIG", some configPath)]
+  let ok ←
+    runStreamed "lake" #["cache", "get", s!"--scope={scopeFor tc "physlib"}"]
+      #[("LAKE_CONFIG", some configPath)]
 
   -- Published under its own scope, so it needs its own fetch.
   unless skipAlpha do
@@ -171,7 +195,7 @@ def main (args : List String) : IO UInt32 := do
     say "Fetching PhyslibAlpha's prebuilt files ..."
     removeRevisionMappings
     unless ← runStreamed "lake" #["cache", "get", s!"--scope={scopeFor tc "alpha"}"]
-      #[("LAKE_CONFIG", some configPath)] do
+        #[("LAKE_CONFIG", some configPath)] do
       say "  could not fetch PhyslibAlpha's cache -- continuing anyway."
       say "  ('lake build PhyslibAlpha' would then compile it from source.)"
 

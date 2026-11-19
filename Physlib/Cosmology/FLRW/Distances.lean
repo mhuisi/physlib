@@ -70,19 +70,22 @@ variable (U : FLRW)
 
 -/
 
-/-- The line-of-sight comoving distance `χ = c ∫_t^{t₀} dτ / a(τ)` of a source emitting at `t`
-  and observed at `t₀`. -/
+/--
+The line-of-sight comoving distance `χ = c ∫_t^{t₀} dτ / a(τ)` of a source emitting at `t`
+and observed at `t₀`.
+-/
 noncomputable def comovingDistance (c : ℝ) (t t₀ : Time) : ℝ :=
   c * ∫ τ in t.val..t₀.val, 1 / U.a ⟨τ⟩
 
 /-- For `t` and `t₀` in the interval of the model, `∂ₜ χ = - c / a`. -/
-lemma deriv_comovingDistance {c : ℝ} {t₀ t : Time} (ht₀ : t₀ ∈ U.I) (ht : t ∈ U.I) :
-    ∂ₜ (fun s => U.comovingDistance c s t₀) t = -c / U.a t := by
+lemma deriv_comovingDistance {c : ℝ} {t₀ t : Time} (ht₀ : t₀ ∈ U.I) (ht : t ∈ U.I)
+    : ∂ₜ (fun s => U.comovingDistance c s t₀) t = -c / U.a t := by
   obtain ⟨τ⟩ := t
   have hS : IsOpen {σ : ℝ | (⟨σ⟩ : Time) ∈ U.I} := U.isOpen_I.preimage toRealCLE.symm.continuous
   have hf : ContinuousOn (fun σ : ℝ => 1 / U.a ⟨σ⟩) {σ : ℝ | (⟨σ⟩ : Time) ∈ U.I} :=
-    continuousOn_const.div (U.differentiableOn_a.continuousOn.comp
-      toRealCLE.symm.continuous.continuousOn fun _ h => h) fun _ h => U.a_ne_zero h
+    continuousOn_const.div
+      (U.differentiableOn_a.continuousOn.comp toRealCLE.symm.continuous.continuousOn fun _ h => h)
+      fun _ h => U.a_ne_zero h
   have hsub : Set.uIcc τ t₀.val ⊆ {σ : ℝ | (⟨σ⟩ : Time) ∈ U.I} :=
     Set.OrdConnected.uIcc_subset (s := {σ : ℝ | (⟨σ⟩ : Time) ∈ U.I})
       ⟨fun _ hx _ hy _ hz => U.mk_mem_I_of_mem_Icc hx hy hz⟩ ht ht₀
@@ -98,8 +101,10 @@ lemma deriv_comovingDistance {c : ℝ} {t₀ t : Time} (ht₀ : t₀ ∈ U.I) (h
 
 -/
 
-/-- The redshift `z` of a source emitting at `t` and observed at `t₀`, with
-  `1 + z = a(t₀) / a(t)`. -/
+/--
+The redshift `z` of a source emitting at `t` and observed at `t₀`, with
+`1 + z = a(t₀) / a(t)`.
+-/
 noncomputable def redshift (t₀ t : Time) : ℝ := U.a t₀ / U.a t - 1
 
 lemma one_add_redshift (t₀ t : Time) : 1 + U.redshift t₀ t = U.a t₀ / U.a t := by
@@ -107,8 +112,8 @@ lemma one_add_redshift (t₀ t : Time) : 1 + U.redshift t₀ t = U.a t₀ / U.a 
   ring
 
 /-- For `t` in the interval of the model, `∂ₜ z = -(1 + z) H`. -/
-lemma deriv_redshift {t₀ t : Time} (ht : t ∈ U.I) :
-    ∂ₜ (U.redshift t₀) t = -(1 + U.redshift t₀ t) * hubbleConstant U.a t := by
+lemma deriv_redshift {t₀ t : Time} (ht : t ∈ U.I)
+    : ∂ₜ (U.redshift t₀) t = -(1 + U.redshift t₀ t) * hubbleConstant U.a t := by
   obtain ⟨τ⟩ := t
   have ha := U.a_ne_zero ht
   have hA := hasDerivAt_mk_of_differentiableAt (U.differentiableAt_a ht)
@@ -119,18 +124,20 @@ lemma deriv_redshift {t₀ t : Time} (ht : t ∈ U.I) :
   ring
 
 /-- For `t` in the interval of the model, `∂ₜ a = a H`. -/
-lemma deriv_scaleFactor_eq_mul_hubbleConstant {t : Time} (ht : t ∈ U.I) :
-    ∂ₜ U.a t = U.a t * hubbleConstant U.a t := by
+lemma deriv_scaleFactor_eq_mul_hubbleConstant {t : Time} (ht : t ∈ U.I)
+    : ∂ₜ U.a t = U.a t * hubbleConstant U.a t := by
   have ha := U.a_ne_zero ht
   unfold hubbleConstant
   field_simp
 
-/-- For `t` and `t₀` in the interval of the model with `H(t) ≠ 0`,
-  `∂ₜ χ = (c / (a(t₀) H)) ∂ₜ z`. For `a(t₀) = 1`, this is the change of variables
-  `dχ = c dz / H`. -/
-lemma deriv_comovingDistance_eq_mul_deriv_redshift {c : ℝ} {t₀ t : Time} (ht₀ : t₀ ∈ U.I)
-    (ht : t ∈ U.I) (hH : hubbleConstant U.a t ≠ 0) :
-    ∂ₜ (fun s => U.comovingDistance c s t₀) t
+/--
+For `t` and `t₀` in the interval of the model with `H(t) ≠ 0`,
+`∂ₜ χ = (c / (a(t₀) H)) ∂ₜ z`. For `a(t₀) = 1`, this is the change of variables
+`dχ = c dz / H`.
+-/
+lemma deriv_comovingDistance_eq_mul_deriv_redshift
+    {c : ℝ} {t₀ t : Time} (ht₀ : t₀ ∈ U.I) (ht : t ∈ U.I) (hH : hubbleConstant U.a t ≠ 0)
+    : ∂ₜ (fun s => U.comovingDistance c s t₀) t
       = c / (U.a t₀ * hubbleConstant U.a t) * ∂ₜ (U.redshift t₀) t := by
   rw [U.deriv_comovingDistance ht₀ ht, U.deriv_redshift ht, one_add_redshift]
   have ha := U.a_ne_zero ht
@@ -147,8 +154,8 @@ lemma deriv_comovingDistance_eq_mul_deriv_redshift {c : ℝ} {t₀ t : Time} (ht
 noncomputable def properDistance (χ : ℝ) (t : Time) : ℝ := U.a t * χ
 
 /-- The Hubble-Lemaître law `∂ₜ D = H D`, for `t` in the interval of the model. -/
-lemma deriv_properDistance {χ : ℝ} {t : Time} (ht : t ∈ U.I) :
-    ∂ₜ (U.properDistance χ) t = hubbleConstant U.a t * U.properDistance χ t := by
+lemma deriv_properDistance {χ : ℝ} {t : Time} (ht : t ∈ U.I)
+    : ∂ₜ (U.properDistance χ) t = hubbleConstant U.a t * U.properDistance χ t := by
   obtain ⟨τ⟩ := t
   have ha := U.a_ne_zero ht
   have hA := hasDerivAt_mk_of_differentiableAt (U.differentiableAt_a ht)
@@ -159,11 +166,13 @@ lemma deriv_properDistance {χ : ℝ} {t : Time} (ht : t ∈ U.I) :
 /-- The Hubble radius `R_H = c / H`. -/
 noncomputable def hubbleRadius (c : ℝ) (t : Time) : ℝ := c / hubbleConstant U.a t
 
-/-- For `t` in the interval of the model with `H(t) ≠ 0`, the recession velocity `∂ₜ D` equals
-  `c` exactly at the Hubble radius. -/
-lemma deriv_properDistance_eq_iff {χ c : ℝ} {t : Time} (ht : t ∈ U.I)
-    (hH : hubbleConstant U.a t ≠ 0) :
-    ∂ₜ (U.properDistance χ) t = c ↔ U.properDistance χ t = U.hubbleRadius c t := by
+/--
+For `t` in the interval of the model with `H(t) ≠ 0`, the recession velocity `∂ₜ D` equals
+`c` exactly at the Hubble radius.
+-/
+lemma deriv_properDistance_eq_iff
+    {χ c : ℝ} {t : Time} (ht : t ∈ U.I) (hH : hubbleConstant U.a t ≠ 0)
+    : ∂ₜ (U.properDistance χ) t = c ↔ U.properDistance χ t = U.hubbleRadius c t := by
   rw [U.deriv_properDistance ht, hubbleRadius, eq_div_iff hH]
   constructor <;> intro h <;> linarith [h]
 
@@ -177,8 +186,8 @@ lemma deriv_properDistance_eq_iff {χ c : ℝ} {t : Time} (ht : t ∈ U.I)
 noncomputable def transverseComovingDistance (χ : ℝ) : ℝ := U.geometry.S χ
 
 /-- For a positive curvature parameter `K`, `r(χ) = (1 / √K) sin (√K χ)`. -/
-lemma transverseComovingDistance_of_curvature_pos (hK : 0 < U.geometry.curvature) (χ : ℝ) :
-    U.transverseComovingDistance χ
+lemma transverseComovingDistance_of_curvature_pos (hK : 0 < U.geometry.curvature) (χ : ℝ)
+    : U.transverseComovingDistance χ
       = 1 / √U.geometry.curvature * Real.sin (√U.geometry.curvature * χ) := by
   unfold transverseComovingDistance
   generalize U.geometry = s at hK ⊢
@@ -196,8 +205,8 @@ lemma transverseComovingDistance_of_curvature_pos (hK : 0 < U.geometry.curvature
   | Saddle k hk => linarith [SpatialGeometry.curvature_saddle_neg k hk]
 
 /-- For a zero curvature parameter, `r(χ) = χ`. -/
-lemma transverseComovingDistance_of_curvature_eq_zero (hK : U.geometry.curvature = 0) (χ : ℝ) :
-    U.transverseComovingDistance χ = χ := by
+lemma transverseComovingDistance_of_curvature_eq_zero (hK : U.geometry.curvature = 0) (χ : ℝ)
+    : U.transverseComovingDistance χ = χ := by
   unfold transverseComovingDistance
   generalize U.geometry = s at hK ⊢
   cases s with
@@ -206,8 +215,8 @@ lemma transverseComovingDistance_of_curvature_eq_zero (hK : U.geometry.curvature
   | Saddle k hk => exact absurd hK (SpatialGeometry.curvature_saddle_neg k hk).ne
 
 /-- For a negative curvature parameter `K`, `r(χ) = (1 / √(-K)) sinh (√(-K) χ)`. -/
-lemma transverseComovingDistance_of_curvature_neg (hK : U.geometry.curvature < 0) (χ : ℝ) :
-    U.transverseComovingDistance χ
+lemma transverseComovingDistance_of_curvature_neg (hK : U.geometry.curvature < 0) (χ : ℝ)
+    : U.transverseComovingDistance χ
       = 1 / √(-U.geometry.curvature) * Real.sinh (√(-U.geometry.curvature) * χ) := by
   unfold transverseComovingDistance
   generalize U.geometry = s at hK ⊢
@@ -229,30 +238,36 @@ lemma transverseComovingDistance_of_curvature_neg (hK : U.geometry.curvature < 0
 
 -/
 
-/-- The particle horizon at `t`, the integral of `c / a` over the times of the interval of the
-  model before `t`. It is a Lebesgue integral, equal to `0` when the integrand is not
-  integrable. -/
+/--
+The particle horizon at `t`, the integral of `c / a` over the times of the interval of the
+model before `t`. It is a Lebesgue integral, equal to `0` when the integrand is not
+integrable.
+-/
 noncomputable def particleHorizon (c : ℝ) (t : Time) : ℝ :=
   c * ∫ τ in {τ : ℝ | (⟨τ⟩ : Time) ∈ U.I ∧ τ < t.val}, 1 / U.a ⟨τ⟩
 
-/-- The event horizon at `t`, the integral of `c / a` over the times of the interval of the
-  model after `t`. It is a Lebesgue integral, equal to `0` when the integrand is not
-  integrable. -/
+/--
+The event horizon at `t`, the integral of `c / a` over the times of the interval of the
+model after `t`. It is a Lebesgue integral, equal to `0` when the integrand is not
+integrable.
+-/
 noncomputable def eventHorizon (c : ℝ) (t : Time) : ℝ :=
   c * ∫ τ in {τ : ℝ | (⟨τ⟩ : Time) ∈ U.I ∧ t.val < τ}, 1 / U.a ⟨τ⟩
 
 /-- The particle horizon of the Einstein-de Sitter model at `t > 0` is `3 c t₀^(2/3) t^(1/3)`. -/
-lemma particleHorizon_einsteinDeSitter {t₀ : Time} {c : ℝ} (ht₀ : 0 < t₀.val) {t : Time}
-    (ht : 0 < t.val) :
-    (einsteinDeSitter t₀ ht₀).particleHorizon c t
+lemma particleHorizon_einsteinDeSitter
+    {t₀ : Time} {c : ℝ} (ht₀ : 0 < t₀.val) {t : Time} (ht : 0 < t.val)
+    : (einsteinDeSitter t₀ ht₀).particleHorizon c t
       = 3 * c * t₀.val ^ (2 / 3 : ℝ) * t.val ^ (1 / 3 : ℝ) := by
-  have hset : {τ : ℝ | (⟨τ⟩ : Time) ∈ (einsteinDeSitter t₀ ht₀).I ∧ τ < t.val}
-      = Set.Ioo 0 t.val := rfl
+  have hset : {τ : ℝ | (⟨τ⟩ : Time) ∈ (einsteinDeSitter t₀ ht₀).I ∧ τ < t.val} = Set.Ioo 0 t.val :=
+    rfl
   rw [particleHorizon, hset, ← MeasureTheory.integral_Ioc_eq_integral_Ioo,
     ← intervalIntegral.integral_of_le ht.le]
   show c * ∫ τ in (0 : ℝ)..t.val, 1 / (τ / t₀.val) ^ (2 / 3 : ℝ) = _
-  have hcongr : Set.EqOn (fun τ : ℝ => 1 / (τ / t₀.val) ^ (2 / 3 : ℝ))
-      (fun τ : ℝ => t₀.val ^ (2 / 3 : ℝ) * τ ^ (-(2 / 3) : ℝ)) (Set.uIcc 0 t.val) := by
+  have hcongr : Set.EqOn
+      (fun τ : ℝ => 1 / (τ / t₀.val) ^ (2 / 3 : ℝ))
+      (fun τ : ℝ => t₀.val ^ (2 / 3 : ℝ) * τ ^ (-(2 / 3) : ℝ))
+      (Set.uIcc 0 t.val) := by
     intro τ hτ
     rw [Set.uIcc_of_le ht.le] at hτ
     have h0 : 0 ≤ τ := hτ.1

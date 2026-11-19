@@ -47,13 +47,13 @@ namespace FluidFlow
 -/
 
 /-- The material derivative `D_t f = partial_t f + u · grad f` of a scalar field. -/
-noncomputable def materialDerivative (d : ℕ) (fluid : FluidFlow d)
-    (field : ScalarField d) : ScalarField d :=
-  fun t x => ∂ₜ (field · x) t + ⟪fluid.velocity t x, ∇ (field t) x⟫_ℝ
+noncomputable def materialDerivative (d : ℕ) (fluid : FluidFlow d) (field : ScalarField d)
+    : ScalarField d := fun t x =>
+  ∂ₜ (field · x) t + ⟪fluid.velocity t x, ∇ (field t) x⟫_ℝ
 
 /-- The specific kinetic energy `|u|^2 / 2` of a fluid flow. -/
-noncomputable def specificKineticEnergy (d : ℕ) (fluid : FluidFlow d) : ScalarField d :=
-  fun t x => (1 / 2 : ℝ) * ⟪fluid.velocity t x, fluid.velocity t x⟫_ℝ
+noncomputable def specificKineticEnergy (d : ℕ) (fluid : FluidFlow d) : ScalarField d := fun t x =>
+  (1 / 2 : ℝ) * ⟪fluid.velocity t x, fluid.velocity t x⟫_ℝ
 
 end FluidFlow
 

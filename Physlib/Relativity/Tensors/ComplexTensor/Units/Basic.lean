@@ -104,8 +104,8 @@ lemma dualRightRightUnit_eq_fromConstPair : δR' = fromConstPair Fermion.RightHa
   rw [Fermion.RightHandedWeyl.unit]
   rfl
 
-lemma rightDualRightUnit_eq_fromConstPair :
-    δR = fromConstPair Fermion.DualRightHandedWeyl.unit := by
+lemma rightDualRightUnit_eq_fromConstPair
+    : δR = fromConstPair Fermion.DualRightHandedWeyl.unit := by
   rw [Fermion.DualRightHandedWeyl.unit]
   rfl
 
@@ -152,52 +152,52 @@ lemma rightDualRightUnit_eq_fromPairT : δR = fromPairT (Fermion.DualRightHanded
 -/
 
 open Lorentz in
-lemma coContrUnit_eq_complexCoVector_basis_complexVector_basis : δ' =
-    ∑ i, fromPairT (ComplexCoVector.basis i ⊗ₜ[ℂ] ComplexVector.basis i) := by
+lemma coContrUnit_eq_complexCoVector_basis_complexVector_basis
+    : δ' = ∑ i, fromPairT (ComplexCoVector.basis i ⊗ₜ[ℂ] ComplexVector.basis i) := by
   rw [coContrUnit_eq_fromPairT, ComplexVector.unitVal_expand_tmul]
   rfl
 
 open Lorentz in
-lemma coContrUnit_eq_complexCoVector_basisFin4_complexVector_basisFin4 : δ' =
-    ∑ i, fromPairT (ComplexCoVector.basisFin4 i ⊗ₜ[ℂ] ComplexVector.basisFin4 i) := by
+lemma coContrUnit_eq_complexCoVector_basisFin4_complexVector_basisFin4
+    : δ' = ∑ i, fromPairT (ComplexCoVector.basisFin4 i ⊗ₜ[ℂ] ComplexVector.basisFin4 i) := by
   rw [coContrUnit_eq_complexCoVector_basis_complexVector_basis]
   rw [← finSumFinEquiv.symm.sum_comp]
   simp [ComplexCoVector.basisFin4, ComplexVector.basisFin4]
 
 open Lorentz in
-lemma contrCoUnit_eq_complexVector_basis_complexCoVector_basis : δ =
-    ∑ i, fromPairT (ComplexVector.basis i ⊗ₜ[ℂ] ComplexCoVector.basis i) := by
+lemma contrCoUnit_eq_complexVector_basis_complexCoVector_basis
+    : δ = ∑ i, fromPairT (ComplexVector.basis i ⊗ₜ[ℂ] ComplexCoVector.basis i) := by
   rw [contrCoUnit_eq_fromPairT, ComplexCoVector.unitVal_expand_tmul]
   rfl
 
 open Lorentz in
-lemma contrCoUnit_eq_complexVector_basisFin4_complexCoVector_basisFin4 : δ =
-    ∑ i, fromPairT (ComplexVector.basisFin4 i ⊗ₜ[ℂ] ComplexCoVector.basisFin4 i) := by
+lemma contrCoUnit_eq_complexVector_basisFin4_complexCoVector_basisFin4
+    : δ = ∑ i, fromPairT (ComplexVector.basisFin4 i ⊗ₜ[ℂ] ComplexCoVector.basisFin4 i) := by
   rw [contrCoUnit_eq_complexVector_basis_complexCoVector_basis]
   rw [← finSumFinEquiv.symm.sum_comp]
   simp [ComplexVector.basisFin4, ComplexCoVector.basisFin4]
 
 open Fermion in
-lemma dualLeftLeftUnit_eq_basis : δL' =
-    ∑ i, fromPairT (DualLeftHandedWeyl.basis i ⊗ₜ[ℂ] LeftHandedWeyl.basis i) := by
+lemma dualLeftLeftUnit_eq_basis
+    : δL' = ∑ i, fromPairT (DualLeftHandedWeyl.basis i ⊗ₜ[ℂ] LeftHandedWeyl.basis i) := by
   rw [dualLeftLeftUnit_eq_fromPairT, LeftHandedWeyl.unitVal_expand_tmul]
   rfl
 
 open Fermion in
-lemma leftDualLeftUnit_eq_basis : δL =
-    ∑ i, fromPairT (LeftHandedWeyl.basis i ⊗ₜ[ℂ] DualLeftHandedWeyl.basis i) := by
+lemma leftDualLeftUnit_eq_basis
+    : δL = ∑ i, fromPairT (LeftHandedWeyl.basis i ⊗ₜ[ℂ] DualLeftHandedWeyl.basis i) := by
   rw [leftDualLeftUnit_eq_fromPairT, DualLeftHandedWeyl.unitVal_expand_tmul]
   rfl
 
 open Fermion in
-lemma dualRightRightUnit_eq_basis : δR' =
-    ∑ i, fromPairT (DualRightHandedWeyl.basis i ⊗ₜ[ℂ] RightHandedWeyl.basis i) := by
+lemma dualRightRightUnit_eq_basis
+    : δR' = ∑ i, fromPairT (DualRightHandedWeyl.basis i ⊗ₜ[ℂ] RightHandedWeyl.basis i) := by
   rw [dualRightRightUnit_eq_fromPairT, RightHandedWeyl.unitVal_expand_tmul]
   rfl
 
 open Fermion in
-lemma rightDualRightUnit_eq_basis : δR =
-    ∑ i, fromPairT (RightHandedWeyl.basis i ⊗ₜ[ℂ] DualRightHandedWeyl.basis i) := by
+lemma rightDualRightUnit_eq_basis
+    : δR = ∑ i, fromPairT (RightHandedWeyl.basis i ⊗ₜ[ℂ] DualRightHandedWeyl.basis i) := by
   rw [rightDualRightUnit_eq_fromPairT, DualRightHandedWeyl.unitVal_expand_tmul]
   rfl
 
@@ -207,9 +207,10 @@ lemma rightDualRightUnit_eq_basis : δR =
 
 -/
 
-lemma coContrUnit_eq_basis : δ' =
-    ∑ i, Tensor.basis (S := complexLorentzTensor)
-      ![Color.down, Color.up] (fun | 0 => i | 1 => i) := by
+lemma coContrUnit_eq_basis
+    : δ'
+      = ∑ i, Tensor.basis (S := complexLorentzTensor)
+          ![Color.down, Color.up] (fun | 0 => i | 1 => i) := by
   rw [coContrUnit_eq_complexCoVector_basis_complexVector_basis]
   conv_lhs =>
     enter [2, x]
@@ -218,9 +219,10 @@ lemma coContrUnit_eq_basis : δ' =
     rw [fromPairT_apply_basis_repr]
   rfl
 
-lemma contrCoUnit_eq_basis : δ =
-    ∑ i, Tensor.basis (S := complexLorentzTensor)
-      ![Color.up, Color.down] (fun | 0 => i | 1 => i) := by
+lemma contrCoUnit_eq_basis
+    : δ
+      = ∑ i, Tensor.basis (S := complexLorentzTensor)
+          ![Color.up, Color.down] (fun | 0 => i | 1 => i) := by
   rw [contrCoUnit_eq_complexVector_basis_complexCoVector_basis]
   conv_lhs =>
     enter [2, x]
@@ -229,9 +231,10 @@ lemma contrCoUnit_eq_basis : δ =
     rw [fromPairT_apply_basis_repr]
   rfl
 
-lemma dualLeftLeftUnit_eq_tensor_basis : δL' =
-    ∑ i, Tensor.basis (S := complexLorentzTensor)
-      ![Color.downL, Color.upL] (fun | 0 => i | 1 => i) := by
+lemma dualLeftLeftUnit_eq_tensor_basis
+    : δL'
+      = ∑ i, Tensor.basis (S := complexLorentzTensor)
+          ![Color.downL, Color.upL] (fun | 0 => i | 1 => i) := by
   rw [dualLeftLeftUnit_eq_basis]
   conv_lhs =>
     enter [2, x]
@@ -240,9 +243,10 @@ lemma dualLeftLeftUnit_eq_tensor_basis : δL' =
     rw [fromPairT_apply_basis_repr]
   rfl
 
-lemma leftDualLeftUnit_eq_tensor_basis : δL =
-    ∑ i, Tensor.basis (S := complexLorentzTensor)
-      ![Color.upL, Color.downL] (fun | 0 => i | 1 => i) := by
+lemma leftDualLeftUnit_eq_tensor_basis
+    : δL
+      = ∑ i, Tensor.basis (S := complexLorentzTensor)
+          ![Color.upL, Color.downL] (fun | 0 => i | 1 => i) := by
   rw [leftDualLeftUnit_eq_basis]
   conv_lhs =>
     enter [2, x]
@@ -251,9 +255,10 @@ lemma leftDualLeftUnit_eq_tensor_basis : δL =
     rw [fromPairT_apply_basis_repr]
   rfl
 
-lemma dualRightRightUnit_eq_tensor_basis : δR' =
-    ∑ i, Tensor.basis (S := complexLorentzTensor)
-      ![Color.downR, Color.upR] (fun | 0 => i | 1 => i) := by
+lemma dualRightRightUnit_eq_tensor_basis
+    : δR'
+      = ∑ i, Tensor.basis (S := complexLorentzTensor)
+          ![Color.downR, Color.upR] (fun | 0 => i | 1 => i) := by
   rw [dualRightRightUnit_eq_basis]
   conv_lhs =>
     enter [2, x]
@@ -262,9 +267,10 @@ lemma dualRightRightUnit_eq_tensor_basis : δR' =
     rw [fromPairT_apply_basis_repr]
   rfl
 
-lemma rightDualRightUnit_eq_tensor_basis : δR =
-    ∑ i, Tensor.basis (S := complexLorentzTensor)
-      ![Color.upR, Color.downR] (fun | 0 => i | 1 => i) := by
+lemma rightDualRightUnit_eq_tensor_basis
+    : δR
+      = ∑ i, Tensor.basis (S := complexLorentzTensor)
+          ![Color.upR, Color.downR] (fun | 0 => i | 1 => i) := by
   rw [rightDualRightUnit_eq_basis]
   conv_lhs =>
     enter [2, x]
@@ -280,8 +286,7 @@ lemma rightDualRightUnit_eq_tensor_basis : δR =
 -/
 
 set_option backward.isDefEq.respectTransparency false in
-lemma coContrUnit_eq_ofGaussianInt : δ' = ofGaussianInt fun f =>
-    if f 0 = f 1 then 1 else 0 := by
+lemma coContrUnit_eq_ofGaussianInt : δ' = ofGaussianInt fun f => if f 0 = f 1 then 1 else 0 := by
   rw [coContrUnit_eq_basis]
   conv_lhs =>
     enter [2, x]
@@ -291,8 +296,7 @@ lemma coContrUnit_eq_ofGaussianInt : δ' = ofGaussianInt fun f =>
   with_unfolding_all decide
 
 set_option backward.isDefEq.respectTransparency false in
-lemma contrCoUnit_eq_ofGaussianInt : δ = ofGaussianInt fun f =>
-    if f 0 = f 1 then 1 else 0 := by
+lemma contrCoUnit_eq_ofGaussianInt : δ = ofGaussianInt fun f => if f 0 = f 1 then 1 else 0 := by
   rw [contrCoUnit_eq_basis]
   conv_lhs =>
     enter [2, x]
@@ -302,8 +306,8 @@ lemma contrCoUnit_eq_ofGaussianInt : δ = ofGaussianInt fun f =>
   with_unfolding_all decide
 
 set_option backward.isDefEq.respectTransparency false in
-lemma dualLeftLeftUnit_eq_ofGaussianInt : δL' = ofGaussianInt fun f =>
-    if f 0 = f 1 then 1 else 0 := by
+lemma dualLeftLeftUnit_eq_ofGaussianInt
+    : δL' = ofGaussianInt fun f => if f 0 = f 1 then 1 else 0 := by
   rw [dualLeftLeftUnit_eq_tensor_basis]
   conv_lhs =>
     enter [2, x]
@@ -313,8 +317,8 @@ lemma dualLeftLeftUnit_eq_ofGaussianInt : δL' = ofGaussianInt fun f =>
   with_unfolding_all decide
 
 set_option backward.isDefEq.respectTransparency false in
-lemma leftDualLeftUnit_eq_ofGaussianInt : δL = ofGaussianInt fun f =>
-    if f 0 = f 1 then 1 else 0 := by
+lemma leftDualLeftUnit_eq_ofGaussianInt
+    : δL = ofGaussianInt fun f => if f 0 = f 1 then 1 else 0 := by
   rw [leftDualLeftUnit_eq_tensor_basis]
   conv_lhs =>
     enter [2, x]
@@ -324,8 +328,8 @@ lemma leftDualLeftUnit_eq_ofGaussianInt : δL = ofGaussianInt fun f =>
   with_unfolding_all decide
 
 set_option backward.isDefEq.respectTransparency false in
-lemma dualRightRightUnit_eq_ofGaussianInt : δR' = ofGaussianInt fun f =>
-    if f 0 = f 1 then 1 else 0 := by
+lemma dualRightRightUnit_eq_ofGaussianInt
+    : δR' = ofGaussianInt fun f => if f 0 = f 1 then 1 else 0 := by
   rw [dualRightRightUnit_eq_tensor_basis]
   conv_lhs =>
     enter [2, x]
@@ -335,8 +339,8 @@ lemma dualRightRightUnit_eq_ofGaussianInt : δR' = ofGaussianInt fun f =>
   with_unfolding_all decide
 
 set_option backward.isDefEq.respectTransparency false in
-lemma rightDualRightUnit_eq_ofGaussianInt : δR = ofGaussianInt fun f =>
-    if f 0 = f 1 then 1 else 0 := by
+lemma rightDualRightUnit_eq_ofGaussianInt
+    : δR = ofGaussianInt fun f => if f 0 = f 1 then 1 else 0 := by
   rw [rightDualRightUnit_eq_tensor_basis]
   conv_lhs =>
     enter [2, x]
@@ -353,32 +357,26 @@ lemma rightDualRightUnit_eq_ofGaussianInt : δR = ofGaussianInt fun f =>
 
 set_option backward.isDefEq.respectTransparency false in
 /-- The tensor `coContrUnit` is invariant under the action of `SL(2,ℂ)`. -/
-lemma actionT_coContrUnit (g : SL(2,ℂ)) : g • δ' = δ' := by
-  rw [unitTensor_invariant]
+lemma actionT_coContrUnit (g : SL(2,ℂ)) : g • δ' = δ' := by rw [unitTensor_invariant]
 
 set_option backward.isDefEq.respectTransparency false in
 /-- The tensor `contrCoUnit` is invariant under the action of `SL(2,ℂ)`. -/
-lemma actionT_contrCoUnit (g : SL(2,ℂ)) : g • δ = δ := by
-  rw [unitTensor_invariant]
+lemma actionT_contrCoUnit (g : SL(2,ℂ)) : g • δ = δ := by rw [unitTensor_invariant]
 
 set_option backward.isDefEq.respectTransparency false in
 /-- The tensor `dualLeftLeftUnit` is invariant under the action of `SL(2,ℂ)`. -/
-lemma actionT_dualLeftLeftUnit (g : SL(2,ℂ)) : g • δL' = δL' := by
-  rw [unitTensor_invariant]
+lemma actionT_dualLeftLeftUnit (g : SL(2,ℂ)) : g • δL' = δL' := by rw [unitTensor_invariant]
 
 set_option backward.isDefEq.respectTransparency false in
 /-- The tensor `leftDualLeftUnit` is invariant under the action of `SL(2,ℂ)`. -/
-lemma actionT_leftDualLeftUnit (g : SL(2,ℂ)) : g • δL = δL := by
-  rw [unitTensor_invariant]
+lemma actionT_leftDualLeftUnit (g : SL(2,ℂ)) : g • δL = δL := by rw [unitTensor_invariant]
 
 set_option backward.isDefEq.respectTransparency false in
 /-- The tensor `dualRightRightUnit` is invariant under the action of `SL(2,ℂ)`. -/
-lemma actionT_dualRightRightUnit (g : SL(2,ℂ)) : g • δR' = δR' := by
-  rw [unitTensor_invariant]
+lemma actionT_dualRightRightUnit (g : SL(2,ℂ)) : g • δR' = δR' := by rw [unitTensor_invariant]
 
 set_option backward.isDefEq.respectTransparency false in
 /-- The tensor `rightDualRightUnit` is invariant under the action of `SL(2,ℂ)`. -/
-lemma actionT_rightDualRightUnit (g : SL(2,ℂ)) : g • δR = δR := by
-  rw [unitTensor_invariant]
+lemma actionT_rightDualRightUnit (g : SL(2,ℂ)) : g • δR = δR := by rw [unitTensor_invariant]
 
 end complexLorentzTensor

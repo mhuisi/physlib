@@ -51,13 +51,12 @@ variable {ρ : H →L[ℂ] H} (hpos : 0 ≤ ρ) (hnorm : (ρ : H →ₗ[ℂ] H).
 -/
 
 /-- A trace-one positive continuous linear map defines a state. -/
-noncomputable def ofDensity : 𝓢[ℂ, H →L[ℂ] H] :=
-  { ρ.traceMulOpₚ with map_one' := by simp_all }
+noncomputable def ofDensity : 𝓢[ℂ, H →L[ℂ] H] := { ρ.traceMulOpₚ with map_one' := by simp_all }
 
 @[simp]
-lemma ofDensity_apply {ρ : H →L[ℂ] H} (hpos : 0 ≤ ρ)
-    (hnorm : (ρ : H →ₗ[ℂ] H).trace ℂ H = 1) (x : H →L[ℂ] H) :
-    ofDensity hpos hnorm x = (↑x * ↑ρ : H →ₗ[ℂ] H).trace ℂ H :=
+lemma ofDensity_apply
+    {ρ : H →L[ℂ] H} (hpos : 0 ≤ ρ) (hnorm : (ρ : H →ₗ[ℂ] H).trace ℂ H = 1) (x : H →L[ℂ] H)
+    : ofDensity hpos hnorm x = (↑x * ↑ρ : H →ₗ[ℂ] H).trace ℂ H :=
   ρ.traceMulOpₚ_apply_of_nonneg hpos x
 
 end UnitalPositiveLinearMap

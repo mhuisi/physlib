@@ -80,13 +80,13 @@ namespace AngularMomentumRepresentation
 variable {V W : Type*} [AddCommGroup V] [Module ℂ V] [AddCommGroup W] [Module ℂ W]
 
 /-- The scalar product `L · S = Lx ⊗ Sx + Ly ⊗ Sy + Lz ⊗ Sz` on `V ⊗ W`. -/
-def dot (ρ₁ : AngularMomentumRepresentation V) (ρ₂ : AngularMomentumRepresentation W) :
-    Module.End ℂ (V ⊗[ℂ] W) :=
+def dot (ρ₁ : AngularMomentumRepresentation V) (ρ₂ : AngularMomentumRepresentation W)
+    : Module.End ℂ (V ⊗[ℂ] W) :=
   TensorProduct.map ρ₁.Jx ρ₂.Jx + TensorProduct.map ρ₁.Jy ρ₂.Jy + TensorProduct.map ρ₁.Jz ρ₂.Jz
 
 /-- **`J² = L² + S² + 2 L · S`.** -/
-lemma Jsq_tensor (ρ₁ : AngularMomentumRepresentation V) (ρ₂ : AngularMomentumRepresentation W) :
-    (tensor ρ₁ ρ₂).Jsq = ρ₁.Jsq.rTensor W + ρ₂.Jsq.lTensor V + (2 : ℂ) • dot ρ₁ ρ₂ := by
+lemma Jsq_tensor (ρ₁ : AngularMomentumRepresentation V) (ρ₂ : AngularMomentumRepresentation W)
+    : (tensor ρ₁ ρ₂).Jsq = ρ₁.Jsq.rTensor W + ρ₂.Jsq.lTensor V + (2 : ℂ) • dot ρ₁ ρ₂ := by
   refine TensorProduct.ext' fun x y => ?_
   simp only [Jsq, tensor, LinearMap.add_apply, Module.End.mul_apply, diagEnd_tmul, map_add,
     LinearMap.rTensor_tmul, LinearMap.lTensor_tmul, LinearMap.smul_apply, dot,
@@ -100,9 +100,9 @@ lemma Jsq_tensor (ρ₁ : AngularMomentumRepresentation V) (ρ₂ : AngularMomen
 -/
 
 /-- `J² = j(j + 1)` on the spin-`j` representation `V(2j)`. -/
-lemma Jsq_standard (n : ℕ) :
-    (standard n).Jsq =
-      ((n : ℂ) / 2 * ((n : ℂ) / 2 + 1)) • (1 : Module.End ℂ (StandardSl2Module ℂ n)) := by
+lemma Jsq_standard (n : ℕ)
+    : (standard n).Jsq
+      = ((n : ℂ) / 2 * ((n : ℂ) / 2 + 1)) • (1 : Module.End ℂ (StandardSl2Module ℂ n)) := by
   refine StandardSl2Module.linearMap_ext_vNat fun a => ?_
   rw [Jsq, Jsq_eq_Jp_mul_Jm, standard_Jp, standard_Jm, standard_Jz]
   simp only [LinearMap.sub_apply, LinearMap.add_apply, Module.End.mul_apply, LinearMap.smul_apply,
@@ -121,25 +121,31 @@ open AngularMomentumRepresentation
 
 variable {m n : ℕ}
 
-/-- The eigenvalue `(J(J + 1) - l(l + 1) - s(s + 1)) / 2` of `L · S` for `l = m/2`, `s = n/2`
-and `J = (m + n)/2 - k`. -/
+/--
+The eigenvalue `(J(J + 1) - l(l + 1) - s(s + 1)) / 2` of `L · S` for `l = m/2`, `s = n/2`
+and `J = (m + n)/2 - k`.
+-/
 def spinOrbitValue (m n k : ℕ) : ℂ :=
-  (((m + n - 2 * k : ℕ) : ℂ) / 2 * (((m + n - 2 * k : ℕ) : ℂ) / 2 + 1) -
-    (m : ℂ) / 2 * ((m : ℂ) / 2 + 1) - (n : ℂ) / 2 * ((n : ℂ) / 2 + 1)) / 2
+  (((m + n - 2 * k : ℕ) : ℂ) / 2 * (((m + n - 2 * k : ℕ) : ℂ) / 2 + 1)
+      - (m : ℂ) / 2 * ((m : ℂ) / 2 + 1) - (n : ℂ) / 2 * ((n : ℂ) / 2 + 1))
+    / 2
 
-/-- **Spin–orbit eigenvalues.** Every vector of the `k`-th lowering string of `V(m) ⊗ V(n)`, a
+/--
+**Spin–orbit eigenvalues.** Every vector of the `k`-th lowering string of `V(m) ⊗ V(n)`, a
 state of total angular momentum `J = (m + n)/2 - k`, is an eigenvector of `L · S` with eigenvalue
-`(J(J + 1) - l(l + 1) - s(s + 1)) / 2`. -/
-lemma dot_coupled_stringVec {k : ℕ} (hmn : 0 < m + n) (hkm : k ≤ m) (hkn : k ≤ n) (l : ℕ) :
-    dot (standard m) (standard n) (stringVec m n k l) =
-      spinOrbitValue m n k • stringVec m n k l := by
-  have hT := LinearMap.congr_fun (Jsq_tensor (standard m) (standard n))
-    (stringVec (K := ℂ) m n k l)
+`(J(J + 1) - l(l + 1) - s(s + 1)) / 2`.
+-/
+lemma dot_coupled_stringVec {k : ℕ} (hmn : 0 < m + n) (hkm : k ≤ m) (hkn : k ≤ n) (l : ℕ)
+    : dot (standard m) (standard n) (stringVec m n k l)
+      = spinOrbitValue m n k • stringVec m n k l := by
+  have hT := LinearMap.congr_fun (Jsq_tensor (standard m) (standard n)) (stringVec (K := ℂ) m n k l)
   rw [show tensor (standard m) (standard n) = coupled m n from rfl,
-    Jsq_coupled_stringVec hmn hkm hkn, Jsq_standard, Jsq_standard] at hT
+      Jsq_coupled_stringVec hmn hkm hkn, Jsq_standard, Jsq_standard]
+    at hT
   simp only [LinearMap.add_apply, LinearMap.smul_apply, LinearMap.rTensor_smul,
-    LinearMap.lTensor_smul, Module.End.one_eq_id, LinearMap.rTensor_id, LinearMap.lTensor_id,
-    LinearMap.id_apply] at hT
+      LinearMap.lTensor_smul, Module.End.one_eq_id, LinearMap.rTensor_id, LinearMap.lTensor_id,
+      LinearMap.id_apply]
+    at hT
   rw [spinOrbitValue]
   linear_combination (norm := module) (-1 / 2 : ℂ) • hT
 
@@ -149,21 +155,24 @@ lemma dot_coupled_stringVec {k : ℕ} (hmn : 0 < m + n) (hkm : k ≤ m) (hkn : k
 
 -/
 
-/-- **Fine-structure doublet, upper level.** For spin `1/2` and `J = l + 1/2`,
-`L · S = l/2` (`l = m/2`). -/
-lemma dot_coupled_stringVec_doublet_upper (l' : ℕ) :
-    dot (standard m) (standard 1) (stringVec m 1 0 l') =
-      ((m : ℂ) / 4) • stringVec m 1 0 l' := by
+/--
+**Fine-structure doublet, upper level.** For spin `1/2` and `J = l + 1/2`,
+`L · S = l/2` (`l = m/2`).
+-/
+lemma dot_coupled_stringVec_doublet_upper (l' : ℕ)
+    : dot (standard m) (standard 1) (stringVec m 1 0 l') = ((m : ℂ) / 4) • stringVec m 1 0 l' := by
   rw [dot_coupled_stringVec (by omega) (Nat.zero_le m) (Nat.zero_le 1), spinOrbitValue]
   congr 1
   push_cast
   ring
 
-/-- **Fine-structure doublet, lower level.** For spin `1/2` and `J = l - 1/2`,
-`L · S = -(l + 1)/2` (`l = m/2`, `m ≥ 1`). -/
-lemma dot_coupled_stringVec_doublet_lower (hm : 1 ≤ m) (l' : ℕ) :
-    dot (standard m) (standard 1) (stringVec m 1 1 l') =
-      (-((m : ℂ) + 2) / 4) • stringVec m 1 1 l' := by
+/--
+**Fine-structure doublet, lower level.** For spin `1/2` and `J = l - 1/2`,
+`L · S = -(l + 1)/2` (`l = m/2`, `m ≥ 1`).
+-/
+lemma dot_coupled_stringVec_doublet_lower (hm : 1 ≤ m) (l' : ℕ)
+    : dot (standard m) (standard 1) (stringVec m 1 1 l')
+      = (-((m : ℂ) + 2) / 4) • stringVec m 1 1 l' := by
   rw [dot_coupled_stringVec (by omega) hm le_rfl, spinOrbitValue,
     show m + 1 - 2 * 1 = m - 1 by omega, Nat.cast_sub hm]
   congr 1
@@ -171,18 +180,19 @@ lemma dot_coupled_stringVec_doublet_lower (hm : 1 ≤ m) (l' : ℕ) :
   ring
 
 /-- The doublet splitting `l/2 + (l + 1)/2 = (2l + 1)/2`. -/
-lemma spinOrbitValue_doublet_sub (hm : 1 ≤ m) :
-    spinOrbitValue m 1 0 - spinOrbitValue m 1 1 = ((m : ℂ) + 1) / 2 := by
+lemma spinOrbitValue_doublet_sub (hm : 1 ≤ m)
+    : spinOrbitValue m 1 0 - spinOrbitValue m 1 1 = ((m : ℂ) + 1) / 2 := by
   rw [spinOrbitValue, spinOrbitValue, show m + 1 - 2 * 1 = m - 1 by omega, Nat.cast_sub hm]
   push_cast
   ring
 
-/-- **Landé's interval rule.** The levels `J` and `J - 1` of a multiplet differ in `L · S` by `J`,
-`J = (m + n)/2 - k`. -/
-lemma spinOrbitValue_sub_succ {k : ℕ} (hkm : k + 1 ≤ m) (hkn : k + 1 ≤ n) :
-    spinOrbitValue m n k - spinOrbitValue m n (k + 1) = ((m + n - 2 * k : ℕ) : ℂ) / 2 := by
-  rw [spinOrbitValue, spinOrbitValue,
-    show m + n - 2 * k = m + n - 2 * (k + 1) + 2 by omega]
+/--
+**Landé's interval rule.** The levels `J` and `J - 1` of a multiplet differ in `L · S` by `J`,
+`J = (m + n)/2 - k`.
+-/
+lemma spinOrbitValue_sub_succ {k : ℕ} (hkm : k + 1 ≤ m) (hkn : k + 1 ≤ n)
+    : spinOrbitValue m n k - spinOrbitValue m n (k + 1) = ((m + n - 2 * k : ℕ) : ℂ) / 2 := by
+  rw [spinOrbitValue, spinOrbitValue, show m + n - 2 * k = m + n - 2 * (k + 1) + 2 by omega]
   push_cast
   ring
 

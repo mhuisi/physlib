@@ -71,22 +71,24 @@ open MeasureTheory
 
 namespace TauCeti
 
-variable {G : Type*} [AddCommGroup G] [TopologicalSpace G] [IsTopologicalAddGroup G]
-  [LocallyCompactSpace G]
-  [MeasurableSpace (PontryaginDual (Multiplicative G))]
+variable
+  {G : Type*} [AddCommGroup G] [TopologicalSpace G] [IsTopologicalAddGroup G]
+  [LocallyCompactSpace G] [MeasurableSpace (PontryaginDual (Multiplicative G))]
   [BorelSpace (PontryaginDual (Multiplicative G))]
 
-/-- **Bochner's theorem on a locally compact abelian group**, existence half.
+/--
+**Bochner's theorem on a locally compact abelian group**, existence half.
 A positive-definite function that is continuous at `0` is the Fourier–Stieltjes transform of a
-finite inner regular measure on the Pontryagin dual. -/
-lemma IsPositiveDefiniteSub.exists_pontryaginMeasureTransform_eq_of_continuousAt {φ : G → ℂ}
-    (hφ : IsPositiveDefiniteSub φ) (hφ₀ : ContinuousAt φ 0) :
-    ∃ μ : FiniteMeasure (PontryaginDual (Multiplicative G)),
+finite inner regular measure on the Pontryagin dual.
+-/
+lemma IsPositiveDefiniteSub.exists_pontryaginMeasureTransform_eq_of_continuousAt
+    {φ : G → ℂ} (hφ : IsPositiveDefiniteSub φ) (hφ₀ : ContinuousAt φ 0)
+    : ∃ μ : FiniteMeasure (PontryaginDual (Multiplicative G)),
       μ.toMeasure.InnerRegular ∧ μ.pontryaginMeasureTransform = φ := by
   -- `φ g = ⟪U(g) v, v⟫ = ⟪v, U(-g) v⟫` for the GNS representation `U` and the vector `v` at `0`,
   -- so `φ` is a matrix coefficient of the representation `g ↦ U(-g)`.
-  let π : ContRepresentation ℂ (Multiplicative G) hφ.gnsSpace := .ofMonoidHom <|
-    (unitary _).subtype.comp <|
+  let π : ContRepresentation ℂ (Multiplicative G) hφ.gnsSpace :=
+    .ofMonoidHom <| (unitary _).subtype.comp <|
       Unitary.linearIsometryEquiv.symm.toMonoidHom.comp (hφ.gnsRepresentation.comp invMonoidHom)
   have hπ_apply (g : G) (v : hφ.gnsSpace) : π (.ofAdd g) v = hφ.gnsTranslation (-g) v := by
     rw [← ContRepresentation.toMonoidHom_apply]
@@ -101,54 +103,61 @@ lemma IsPositiveDefiniteSub.exists_pontryaginMeasureTransform_eq_of_continuousAt
   rw [hμ, hπ_apply, ← hφ.gnsRepresentation_ofAdd, hφ.gnsRepresentation_gnsVector, add_zero,
     hφ.inner_gnsVector, zero_sub, neg_neg]
 
-/-- **Unique inner regular form of Bochner's theorem.** A positive-definite function continuous at
+/--
+**Unique inner regular form of Bochner's theorem.** A positive-definite function continuous at
 `0` has a unique finite inner regular representing measure on the Pontryagin dual. No countability
-or metrizability assumption is needed. -/
-lemma
-    IsPositiveDefiniteSub.existsUnique_innerRegular_pontryaginMeasureTransform_eq_of_continuousAt
-    {φ : G → ℂ} (hφ : IsPositiveDefiniteSub φ) (hφ₀ : ContinuousAt φ 0) :
-    ∃! μ : FiniteMeasure (PontryaginDual (Multiplicative G)),
-      μ.toMeasure.InnerRegular ∧ μ.pontryaginMeasureTransform = φ := by
+or metrizability assumption is needed.
+-/
+lemma IsPositiveDefiniteSub.existsUnique_innerRegular_pontryaginMeasureTransform_eq_of_continuousAt
+    {φ : G → ℂ} (hφ : IsPositiveDefiniteSub φ) (hφ₀ : ContinuousAt φ 0)
+    : ∃! μ : FiniteMeasure (PontryaginDual (Multiplicative G)),
+        μ.toMeasure.InnerRegular ∧ μ.pontryaginMeasureTransform = φ := by
   obtain ⟨μ, hμreg, hμ⟩ := hφ.exists_pontryaginMeasureTransform_eq_of_continuousAt hφ₀
   refine ⟨μ, ⟨hμreg, hμ⟩, fun ν hν ↦ ?_⟩
-  exact FiniteMeasure.pontryaginMeasureTransform_injOn_innerRegular hν.1 hμreg
-    (hν.2.trans hμ.symm)
+  exact FiniteMeasure.pontryaginMeasureTransform_injOn_innerRegular hν.1 hμreg (hν.2.trans hμ.symm)
 
-/-- **Bochner's characterization without countability assumptions.** A function on a locally
+/--
+**Bochner's characterization without countability assumptions.** A function on a locally
 compact abelian group is continuous and positive definite if and only if it is the
-Fourier–Stieltjes transform of a unique finite inner regular measure on the Pontryagin dual. -/
+Fourier–Stieltjes transform of a unique finite inner regular measure on the Pontryagin dual.
+-/
 lemma
     continuous_and_isPositiveDefiniteSub_iff_existsUnique_innerRegular_pontryaginMeasureTransform_eq
-    (φ : G → ℂ) :
-    (Continuous φ ∧ IsPositiveDefiniteSub φ) ↔
-      ∃! μ : FiniteMeasure (PontryaginDual (Multiplicative G)),
-        μ.toMeasure.InnerRegular ∧ μ.pontryaginMeasureTransform = φ := by
+    (φ : G → ℂ)
+    : (Continuous φ ∧ IsPositiveDefiniteSub φ)
+      ↔ ∃! μ : FiniteMeasure (PontryaginDual (Multiplicative G)),
+          μ.toMeasure.InnerRegular ∧ μ.pontryaginMeasureTransform = φ := by
   constructor
   · rintro ⟨hcont, hφ⟩
     exact hφ.existsUnique_innerRegular_pontryaginMeasureTransform_eq_of_continuousAt
       hcont.continuousAt
   · rintro ⟨μ, ⟨hμreg, rfl⟩, -⟩
     let _ : μ.toMeasure.InnerRegular := hμreg
-    exact ⟨μ.continuous_pontryaginMeasureTransform
-        isTightMeasureSet_singleton_of_innerRegular,
-      μ.isPositiveDefiniteSub_pontryaginMeasureTransform⟩
+    exact ⟨
+      μ.continuous_pontryaginMeasureTransform isTightMeasureSet_singleton_of_innerRegular,
+      μ.isPositiveDefiniteSub_pontryaginMeasureTransform
+    ⟩
 
-/-- **Bochner's characterization on a locally compact abelian group with Polish dual.** A
+/--
+**Bochner's characterization on a locally compact abelian group with Polish dual.** A
 function is continuous and positive definite if and only if it is the Fourier–Stieltjes
 transform of a unique finite positive Borel measure on the dual group. The dual is Polish when
-the group is second countable. -/
+the group is second countable.
+-/
 lemma continuous_and_isPositiveDefiniteSub_iff_existsUnique_pontryaginMeasureTransform_eq
-    [PolishSpace (PontryaginDual (Multiplicative G))] (φ : G → ℂ) :
-    (Continuous φ ∧ IsPositiveDefiniteSub φ) ↔
-      ∃! μ : FiniteMeasure (PontryaginDual (Multiplicative G)),
-        μ.pontryaginMeasureTransform = φ := by
+    [PolishSpace (PontryaginDual (Multiplicative G))] (φ : G → ℂ)
+    : (Continuous φ ∧ IsPositiveDefiniteSub φ)
+      ↔ ∃! μ : FiniteMeasure (PontryaginDual (Multiplicative G)),
+          μ.pontryaginMeasureTransform = φ := by
   constructor
   · rintro ⟨hcont, hφ⟩
     obtain ⟨μ, -, hμ⟩ := hφ.exists_pontryaginMeasureTransform_eq_of_continuousAt hcont.continuousAt
     refine ⟨μ, hμ, fun ν hν ↦ ?_⟩
     exact FiniteMeasure.pontryaginMeasureTransform_injective (hν.trans hμ.symm)
   · rintro ⟨μ, rfl, _⟩
-    exact ⟨μ.continuous_pontryaginMeasureTransform isTightMeasureSet_singleton,
-      μ.isPositiveDefiniteSub_pontryaginMeasureTransform⟩
+    exact ⟨
+      μ.continuous_pontryaginMeasureTransform isTightMeasureSet_singleton,
+      μ.isPositiveDefiniteSub_pontryaginMeasureTransform
+    ⟩
 
 end TauCeti

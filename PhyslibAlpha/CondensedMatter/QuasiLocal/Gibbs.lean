@@ -86,14 +86,14 @@ lemma gibbsWeight_eq_root_mul (h : Matrix n n ℂ) : gibbsWeight h = gibbsRoot h
   rw [← two_smul ℂ (-((1 / 2 : ℂ) • h)), smul_neg, smul_smul]
   norm_num
 
-lemma gibbsRoot_isHermitian {h : Matrix n n ℂ} (hh : h.IsHermitian) :
-    (gibbsRoot h).IsHermitian := by
+lemma gibbsRoot_isHermitian {h : Matrix n n ℂ} (hh : h.IsHermitian)
+    : (gibbsRoot h).IsHermitian := by
   refine Matrix.IsHermitian.exp ?_
   rw [Matrix.IsHermitian, Matrix.conjTranspose_neg, Matrix.conjTranspose_smul, hh.eq]
   simp
 
-lemma gibbsWeight_isHermitian {h : Matrix n n ℂ} (hh : h.IsHermitian) :
-    (gibbsWeight h).IsHermitian := by
+lemma gibbsWeight_isHermitian {h : Matrix n n ℂ} (hh : h.IsHermitian)
+    : (gibbsWeight h).IsHermitian := by
   rw [gibbsWeight_eq_root_mul]
   have := gibbsRoot_isHermitian hh
   rw [Matrix.IsHermitian, Matrix.conjTranspose_mul, this.eq]
@@ -101,8 +101,8 @@ lemma gibbsWeight_isHermitian {h : Matrix n n ℂ} (hh : h.IsHermitian) :
 /-- The **partition function** `tr e^{-h}`. -/
 def partition (h : Matrix n n ℂ) : ℂ := (gibbsWeight h).trace
 
-lemma partition_eq (h : Matrix n n ℂ) (hh : h.IsHermitian) :
-    partition h = ((gibbsRoot h)ᴴ * gibbsRoot h).trace := by
+lemma partition_eq (h : Matrix n n ℂ) (hh : h.IsHermitian)
+    : partition h = ((gibbsRoot h)ᴴ * gibbsRoot h).trace := by
   rw [partition, gibbsWeight_eq_root_mul, (gibbsRoot_isHermitian hh).eq]
 
 lemma gibbsRoot_ne_zero [Nonempty n] (h : Matrix n n ℂ) : gibbsRoot h ≠ 0 := by
@@ -119,8 +119,8 @@ lemma partition_pos [Nonempty n] {h : Matrix n n ℂ} (hh : h.IsHermitian) : 0 <
   refine lt_of_le_of_ne hnn fun h0 => gibbsRoot_ne_zero h ?_
   exact Matrix.trace_conjTranspose_mul_self_eq_zero_iff.1 h0.symm
 
-lemma partition_ne_zero [Nonempty n] {h : Matrix n n ℂ} (hh : h.IsHermitian) :
-    partition h ≠ 0 := (partition_pos hh).ne'
+lemma partition_ne_zero [Nonempty n] {h : Matrix n n ℂ} (hh : h.IsHermitian) : partition h ≠ 0 :=
+  (partition_pos hh).ne'
 
 /-! ## B. The Gibbs state -/
 
@@ -128,21 +128,24 @@ lemma partition_ne_zero [Nonempty n] {h : Matrix n n ℂ} (hh : h.IsHermitian) :
 def gibbsFunctional (h : Matrix n n ℂ) : Matrix n n ℂ →ₗ[ℂ] ℂ :=
   (partition h)⁻¹ • ((Matrix.traceLinearMap n ℂ ℂ) ∘ₗ LinearMap.mulLeft ℂ (gibbsWeight h))
 
-lemma gibbsFunctional_apply (h a : Matrix n n ℂ) :
-    gibbsFunctional h a = (partition h)⁻¹ * (gibbsWeight h * a).trace := rfl
+lemma gibbsFunctional_apply (h a : Matrix n n ℂ)
+    : gibbsFunctional h a = (partition h)⁻¹ * (gibbsWeight h * a).trace :=
+  rfl
 
 /-- The inverse of the partition function is a nonnegative real number. -/
-lemma inv_partition_nonneg [Nonempty n] {h : Matrix n n ℂ} (hh : h.IsHermitian) :
-    0 ≤ (partition h)⁻¹ := by
+lemma inv_partition_nonneg [Nonempty n] {h : Matrix n n ℂ} (hh : h.IsHermitian)
+    : 0 ≤ (partition h)⁻¹ := by
   have hpos := partition_pos hh
   rw [Complex.lt_def] at hpos
-  have hZ : partition h = ((partition h).re : ℂ) := Complex.ext (by simp)
-    (by simpa using hpos.2.symm)
+  have hZ : partition h = ((partition h).re : ℂ) :=
+    Complex.ext (by simp) (by simpa using hpos.2.symm)
   rw [hZ, ← Complex.ofReal_inv]
   exact Complex.zero_le_real.2 (inv_nonneg.2 hpos.1.le)
 
-/-- **The Gibbs state of a Hermitian operator** is a state of the matrix algebra: normalized,
-Hermitian and positive. -/
+/--
+**The Gibbs state of a Hermitian operator** is a state of the matrix algebra: normalized,
+Hermitian and positive.
+-/
 def gibbsState [Nonempty n] (h : Matrix n n ℂ) (hh : h.IsHermitian) : AlgState (Matrix n n ℂ) where
   toLinearMap := gibbsFunctional h
   map_one' := by
@@ -174,40 +177,45 @@ def gibbsState [Nonempty n] (h : Matrix n n ℂ) (hh : h.IsHermitian) : AlgState
 /-! ## C. The canonical and grand canonical ensembles -/
 
 /-- **The canonical ensemble** at inverse temperature `β` for a Hamiltonian `H`. -/
-def canonicalState [Nonempty n] (β : ℝ) (H : Matrix n n ℂ) (hH : H.IsHermitian) :
-    AlgState (Matrix n n ℂ) :=
+def canonicalState [Nonempty n] (β : ℝ) (H : Matrix n n ℂ) (hH : H.IsHermitian)
+    : AlgState (Matrix n n ℂ) :=
   gibbsState ((β : ℂ) • H) (by
     rw [Matrix.IsHermitian, Matrix.conjTranspose_smul, hH.eq]
     simp)
 
 /-- The operator whose Gibbs weight is the grand canonical weight: `β (H - μ N)`. -/
-def grandCanonicalOp (β μ : ℝ) (H N : Matrix n n ℂ) : Matrix n n ℂ :=
-  (β : ℂ) • (H - (μ : ℂ) • N)
+def grandCanonicalOp (β μ : ℝ) (H N : Matrix n n ℂ) : Matrix n n ℂ := (β : ℂ) • (H - (μ : ℂ) • N)
 
 omit [Fintype n] [DecidableEq n] in
-lemma grandCanonicalOp_isHermitian {H N : Matrix n n ℂ} (hH : H.IsHermitian) (hN : N.IsHermitian)
-    (β μ : ℝ) : (grandCanonicalOp β μ H N).IsHermitian := by
+lemma grandCanonicalOp_isHermitian
+    {H N : Matrix n n ℂ} (hH : H.IsHermitian) (hN : N.IsHermitian) (β μ : ℝ)
+    : (grandCanonicalOp β μ H N).IsHermitian := by
   rw [grandCanonicalOp, Matrix.IsHermitian, Matrix.conjTranspose_smul, Matrix.conjTranspose_sub,
     Matrix.conjTranspose_smul, hH.eq, hN.eq]
   simp
 
-/-- **The grand canonical ensemble** at inverse temperature `β` and chemical potential `μ`, for a
-Hamiltonian `H` and a charge `N`. -/
-def grandCanonicalState [Nonempty n] (β μ : ℝ) (H N : Matrix n n ℂ) (hH : H.IsHermitian)
-    (hN : N.IsHermitian) : AlgState (Matrix n n ℂ) :=
+/--
+**The grand canonical ensemble** at inverse temperature `β` and chemical potential `μ`, for a
+Hamiltonian `H` and a charge `N`.
+-/
+def grandCanonicalState
+    [Nonempty n] (β μ : ℝ) (H N : Matrix n n ℂ) (hH : H.IsHermitian) (hN : N.IsHermitian)
+    : AlgState (Matrix n n ℂ) :=
   gibbsState (grandCanonicalOp β μ H N) (grandCanonicalOp_isHermitian hH hN β μ)
 
 omit [Fintype n] [DecidableEq n] in
 /-- At zero chemical potential the grand canonical ensemble is the canonical one. -/
-lemma grandCanonicalOp_zero (β : ℝ) (H N : Matrix n n ℂ) :
-    grandCanonicalOp β 0 H N = (β : ℂ) • H := by
+lemma grandCanonicalOp_zero (β : ℝ) (H N : Matrix n n ℂ)
+    : grandCanonicalOp β 0 H N = (β : ℂ) • H := by
   simp [grandCanonicalOp]
 
-/-- **Factorization for a conserved charge**: if `H` and `N` commute, the grand canonical weight is
-the canonical weight times the fugacity factor `e^{βμ N}`. -/
-lemma grandCanonicalWeight_of_commute (β μ : ℝ) {H N : Matrix n n ℂ} (hc : Commute H N) :
-    gibbsWeight (grandCanonicalOp β μ H N) =
-      gibbsWeight ((β : ℂ) • H) * NormedSpace.exp (((β * μ : ℝ) : ℂ) • N) := by
+/--
+**Factorization for a conserved charge**: if `H` and `N` commute, the grand canonical weight is
+the canonical weight times the fugacity factor `e^{βμ N}`.
+-/
+lemma grandCanonicalWeight_of_commute (β μ : ℝ) {H N : Matrix n n ℂ} (hc : Commute H N)
+    : gibbsWeight (grandCanonicalOp β μ H N)
+      = gibbsWeight ((β : ℂ) • H) * NormedSpace.exp (((β * μ : ℝ) : ℂ) • N) := by
   have e : -(grandCanonicalOp β μ H N) = -((β : ℂ) • H) + ((β * μ : ℝ) : ℂ) • N := by
     simp only [grandCanonicalOp, smul_sub, smul_smul]
     push_cast
@@ -218,10 +226,12 @@ lemma grandCanonicalWeight_of_commute (β μ : ℝ) {H N : Matrix n n ℂ} (hc :
 
 /-! ## D. Classical systems -/
 
-/-- **For a diagonal energy operator the Gibbs weight is the Boltzmann factor** `e^{-E(c)}` of each
-configuration `c`: the classical Gibbs distribution. -/
-lemma gibbsWeight_diagonal (v : n → ℂ) :
-    gibbsWeight (Matrix.diagonal v) = Matrix.diagonal fun c => Complex.exp (-v c) := by
+/--
+**For a diagonal energy operator the Gibbs weight is the Boltzmann factor** `e^{-E(c)}` of each
+configuration `c`: the classical Gibbs distribution.
+-/
+lemma gibbsWeight_diagonal (v : n → ℂ)
+    : gibbsWeight (Matrix.diagonal v) = Matrix.diagonal fun c => Complex.exp (- v c) := by
   rw [gibbsWeight, Matrix.diagonal_neg, Matrix.exp_diagonal]
   congr 1
   funext c

@@ -43,8 +43,10 @@ to reference the underlying Schwartz maps.
 open SchwartzMap NNReal
 noncomputable section
 
-variable (𝕜 : Type) {E F F' : Type} [RCLike 𝕜] [NormedAddCommGroup E] [NormedAddCommGroup F]
-  [NormedAddCommGroup F'] [NormedSpace ℝ E] [NormedSpace ℝ F]
+variable
+  (𝕜 : Type)
+  {E F F' : Type} [RCLike 𝕜] [NormedAddCommGroup E] [NormedAddCommGroup F] [NormedAddCommGroup F']
+  [NormedSpace ℝ E] [NormedSpace ℝ F]
 
 namespace Space
 
@@ -56,29 +58,28 @@ open MeasureTheory
 
 -/
 
-/-- A distribution `Space d →d[ℝ] F` from a function
-  `f : Space d → F` which satisfies the `IsDistBounded f` condition. -/
-def distOfFunction {d : ℕ} (f : Space d → F) (hf : IsDistBounded f) :
-    (Space d) →d[ℝ] F := by
+/--
+A distribution `Space d →d[ℝ] F` from a function
+`f : Space d → F` which satisfies the `IsDistBounded f` condition.
+-/
+def distOfFunction {d : ℕ} (f : Space d → F) (hf : IsDistBounded f) : (Space d) →d[ℝ] F := by
   refine mkCLMtoNormedSpace (fun η => ∫ x, η x • f x) ?_ ?_ hf.integral_mul_schwartzMap_bounded
-  · /- Addition -/
-    intro η κ
-    simp only [_root_.add_apply]
-    conv_lhs =>
-      enter [2, a]
-      rw [add_smul]
-    rw [integral_add (by fun_prop) (by fun_prop)]
-  · /- SMul-/
-    intro a η
-    simp only [_root_.smul_apply, smul_eq_mul, RingHom.id_apply]
-    conv_lhs =>
-      enter [2, a]
-      rw [← smul_smul]
-    rw [integral_smul]
+  · /- Addition -/ intro η κ
+                   simp only [_root_.add_apply]
+                   conv_lhs =>
+                     enter [2, a]
+                     rw [add_smul]
+                   rw [integral_add (by fun_prop) (by fun_prop)]
+  · /- SMul -/ intro a η
+               simp only [_root_.smul_apply, smul_eq_mul, RingHom.id_apply]
+               conv_lhs =>
+                 enter [2, a]
+                 rw [← smul_smul]
+               rw [integral_smul]
 
-lemma distOfFunction_apply {d : ℕ} (f : Space d → F)
-    (hf : IsDistBounded f) (η : 𝓢(Space d, ℝ)) :
-    distOfFunction f hf η = ∫ x, η x • f x := rfl
+lemma distOfFunction_apply {d : ℕ} (f : Space d → F) (hf : IsDistBounded f) (η : 𝓢(Space d, ℝ))
+    : distOfFunction f hf η = ∫ x, η x • f x :=
+  rfl
 
 /-!
 
@@ -86,14 +87,13 @@ lemma distOfFunction_apply {d : ℕ} (f : Space d → F)
 
 -/
 @[simp]
-lemma distOfFunction_zero_eq_zero {d : ℕ} :
-    distOfFunction (fun _ : Space d => (0 : F)) (by fun_prop) = 0 := by
+lemma distOfFunction_zero_eq_zero {d : ℕ}
+    : distOfFunction (fun _ : Space d => (0 : F)) (by fun_prop) = 0 := by
   ext η
   simp [distOfFunction_apply]
 
-lemma distOfFunction_smul {d : ℕ} (f : Space d → F)
-    (hf : IsDistBounded f) (c : ℝ) :
-    distOfFunction (c • f) (by fun_prop) = c • distOfFunction f hf := by
+lemma distOfFunction_smul {d : ℕ} (f : Space d → F) (hf : IsDistBounded f) (c : ℝ)
+    : distOfFunction (c • f) (by fun_prop) = c • distOfFunction f hf := by
   ext η
   change _ = c • ∫ x, η x • f x
   rw [distOfFunction_apply]
@@ -103,9 +103,8 @@ lemma distOfFunction_smul {d : ℕ} (f : Space d → F)
   funext x
   rw [smul_comm]
 
-lemma distOfFunction_smul_fun {d : ℕ} (f : Space d → F)
-    (hf : IsDistBounded f) (c : ℝ) :
-    distOfFunction (fun x => c • f x) (by fun_prop) = c • distOfFunction f hf := by
+lemma distOfFunction_smul_fun {d : ℕ} (f : Space d → F) (hf : IsDistBounded f) (c : ℝ)
+    : distOfFunction (fun x => c • f x) (by fun_prop) = c • distOfFunction f hf := by
   ext η
   change _ = c • ∫ x, η x • f x
   rw [distOfFunction_apply]
@@ -114,14 +113,12 @@ lemma distOfFunction_smul_fun {d : ℕ} (f : Space d → F)
   funext x
   rw [smul_comm]
 
-lemma distOfFunction_mul_fun {d : ℕ} (f : Space d → ℝ)
-    (hf : IsDistBounded f) (c : ℝ) :
-    distOfFunction (fun x => c * f x) (by fun_prop) = c • distOfFunction f hf := by
+lemma distOfFunction_mul_fun {d : ℕ} (f : Space d → ℝ) (hf : IsDistBounded f) (c : ℝ)
+    : distOfFunction (fun x => c * f x) (by fun_prop) = c • distOfFunction f hf := by
   exact distOfFunction_smul_fun f hf c
 
-lemma distOfFunction_neg {d : ℕ} (f : Space d → F)
-    (hf : IsDistBounded (fun x => - f x)) :
-    distOfFunction (fun x => - f x) hf = - distOfFunction f (by simpa using hf.neg) := by
+lemma distOfFunction_neg {d : ℕ} (f : Space d → F) (hf : IsDistBounded (fun x => - f x))
+    : distOfFunction (fun x => - f x) hf = - distOfFunction f (by simpa using hf.neg) := by
   convert distOfFunction_smul_fun f (by simpa using hf.neg) (-1) using 1
   · simp
   · simp
@@ -134,12 +131,13 @@ lemma distOfFunction_neg {d : ℕ} (f : Space d → F)
 
 open InnerProductSpace
 
-lemma distOfFunction_inner {d n : ℕ} (f : Space d → EuclideanSpace ℝ (Fin n))
-    (hf : IsDistBounded f)
-    (η : 𝓢(Space d, ℝ)) (y : EuclideanSpace ℝ (Fin n)) :
-    ⟪distOfFunction f hf η, y⟫_ℝ = ∫ x, η x * ⟪f x, y⟫_ℝ := by
+lemma distOfFunction_inner
+    {d n : ℕ} (f : Space d → EuclideanSpace ℝ (Fin n)) (hf : IsDistBounded f) (η : 𝓢(Space d, ℝ))
+    (y : EuclideanSpace ℝ (Fin n))
+    : ⟪distOfFunction f hf η, y⟫_ℝ = ∫ x, η x * ⟪f x, y⟫_ℝ := by
   rw [distOfFunction_apply]
-  trans ∫ x, ⟪y, η x • f x⟫_ℝ; swap
+  trans ∫ x, ⟪y, η x • f x⟫_ℝ
+  swap
   · congr
     funext x
     rw [real_inner_comm]
@@ -153,17 +151,19 @@ lemma distOfFunction_inner {d n : ℕ} (f : Space d → EuclideanSpace ℝ (Fin 
 
 -/
 
-/-- The distributional spatial derivative of the distribution associated to a differentiable
-function is the distribution associated to the corresponding pointwise spatial derivative. -/
-lemma distDeriv_distOfFunction {d : ℕ} (μ : Fin d) (f : Space d → F)
-    (hf : IsDistBounded f) (hf_deriv : IsDistBounded (∂[μ] f))
-    (hf_diff : Differentiable ℝ f) :
-    ∂ᵈ[μ] (distOfFunction f hf) = distOfFunction (∂[μ] f) hf_deriv := by
+/--
+The distributional spatial derivative of the distribution associated to a differentiable
+function is the distribution associated to the corresponding pointwise spatial derivative.
+-/
+lemma distDeriv_distOfFunction
+    {d : ℕ} (μ : Fin d) (f : Space d → F) (hf : IsDistBounded f) (hf_deriv : IsDistBounded (∂[μ] f))
+    (hf_diff : Differentiable ℝ f)
+    : ∂ᵈ[μ] (distOfFunction f hf) = distOfFunction (∂[μ] f) hf_deriv := by
   ext η
   rw [distDeriv_apply, Physlib.Distribution.fderivD_apply, distOfFunction_apply,
     distOfFunction_apply]
-  change -∫ (x : Space d), fderiv ℝ η x (basis μ) • f x =
-    ∫ (x : Space d), η x • fderiv ℝ f x (basis μ)
+  change - ∫ (x : Space d), fderiv ℝ η x (basis μ) • f x
+    = ∫ (x : Space d), η x • fderiv ℝ f x (basis μ)
   rw [integral_smul_fderiv_eq_neg_fderiv_smul_of_integrable]
   · exact hf.integrable_space_fderiv η (basis μ)
   · exact hf_deriv.integrable_space η
@@ -178,9 +178,10 @@ lemma distDeriv_distOfFunction {d : ℕ} (μ : Fin d) (f : Space d → F)
 
 -/
 
-lemma distOfFunction_eculid_eval {d n : ℕ} (f : Space d → EuclideanSpace ℝ (Fin n))
-    (hf : IsDistBounded f) (η : 𝓢(Space d, ℝ)) (i : Fin n) :
-    distOfFunction f hf η i = distOfFunction (fun x => f x i) (hf.pi_comp i) η := by
+lemma distOfFunction_eculid_eval
+    {d n : ℕ}
+    (f : Space d → EuclideanSpace ℝ (Fin n)) (hf : IsDistBounded f) (η : 𝓢(Space d, ℝ)) (i : Fin n)
+    : distOfFunction f hf η i = distOfFunction (fun x => f x i) (hf.pi_comp i) η := by
   simp [distOfFunction_apply]
   rw [MeasureTheory.eval_integral_piLp]
   simp only [PiLp.smul_apply, smul_eq_mul]
@@ -188,9 +189,10 @@ lemma distOfFunction_eculid_eval {d n : ℕ} (f : Space d → EuclideanSpace ℝ
   simp only [PiLp.smul_apply, smul_eq_mul]
   fun_prop
 
-lemma distOfFunction_vector_eval {d n : ℕ} (f : Space d → Lorentz.Vector n)
-    (hf : IsDistBounded f) (η : 𝓢(Space d, ℝ)) (i : Fin 1 ⊕ Fin n) :
-    distOfFunction f hf η i = distOfFunction (fun x => f x i) (hf.vector_component i) η := by
+lemma distOfFunction_vector_eval
+    {d n : ℕ}
+    (f : Space d → Lorentz.Vector n) (hf : IsDistBounded f) (η : 𝓢(Space d, ℝ)) (i : Fin 1 ⊕ Fin n)
+    : distOfFunction f hf η i = distOfFunction (fun x => f x i) (hf.vector_component i) η := by
   simp [distOfFunction_apply]
   trans ⟪Lorentz.Vector.basis i, ∫ x, η x • f x⟫_ℝ
   · rw [Lorentz.Vector.basis_inner]

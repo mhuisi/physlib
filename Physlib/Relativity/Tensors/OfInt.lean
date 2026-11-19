@@ -18,11 +18,13 @@ open Module
 
 namespace TensorSpecies
 
-variable {k : Type} [CommRing k] {C : Type} {G : Type} [Group G]
-    {V : C → Type} [∀ c, AddCommGroup (V c)] [∀ c, Module k (V c)]
-    {basisIdx : C → Type} [∀ c, Fintype (basisIdx c)] [∀ c, DecidableEq (basisIdx c)]
-    {rep : (c : C) → Representation k G (V c)} {b : (c : C) → Basis (basisIdx c) k (V c)}
-    (S : TensorSpecies k C G V basisIdx rep b)
+variable
+  {k : Type} [CommRing k]
+  {C : Type} {G : Type} [Group G]
+  {V : C → Type} [∀ c, AddCommGroup (V c)] [∀ c, Module k (V c)]
+  {basisIdx : C → Type} [∀ c, Fintype (basisIdx c)] [∀ c, DecidableEq (basisIdx c)]
+  {rep : (c : C) → Representation k G (V c)} {b : (c : C) → Basis (basisIdx c) k (V c)}
+  (S : TensorSpecies k C G V basisIdx rep b)
 
 namespace Tensor
 
@@ -34,22 +36,20 @@ namespace TensorInt
 variable {S : TensorSpecies k C G V basisIdx rep b}
 
 /-- The element of `S.Tensor c` created from a tensor `TensorInt S c`. -/
-noncomputable def toTensor {n : ℕ} {c : Fin n → C} (f : TensorInt S c) :
-    S.Tensor c := (Tensor.basis c).repr.symm <|
-  (Finsupp.linearEquivFunOnFinite k k ((j : Fin n) → basisIdx (c j))).symm <|
-  (fun j => Int.cast (f j))
+noncomputable def toTensor {n : ℕ} {c : Fin n → C} (f : TensorInt S c) : S.Tensor c :=
+  (Tensor.basis c).repr.symm <|
+    (Finsupp.linearEquivFunOnFinite k k ((j : Fin n) → basisIdx (c j))).symm <|
+      (fun j => Int.cast (f j))
 
-lemma basis_repr_apply {n : ℕ} {c : Fin n → C}
-    (f : TensorInt S c) (b : ComponentIdx c) :
-    (Tensor.basis c).repr (toTensor f) b = Int.cast (f b) := by
+lemma basis_repr_apply {n : ℕ} {c : Fin n → C} (f : TensorInt S c) (b : ComponentIdx c)
+    : (Tensor.basis c).repr (toTensor f) b = Int.cast (f b) := by
   simp only [toTensor, Basis.repr_symm_apply, Basis.repr_linearCombination]
   rfl
 
 end TensorInt
 
-lemma basis_eq_tensorInt {n : ℕ} {c : Fin n → C}
-    (b : ComponentIdx c) :
-    Tensor.basis c b = TensorInt.toTensor (S := S) (fun b' => if b = b' then 1 else 0) := by
+lemma basis_eq_tensorInt {n : ℕ} {c : Fin n → C} (b : ComponentIdx c)
+    : Tensor.basis c b = TensorInt.toTensor (S := S) (fun b' => if b = b' then 1 else 0) := by
   apply (Tensor.basis c).repr.injective
   simp only [Basis.repr_self]
   ext b'

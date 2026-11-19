@@ -15,12 +15,15 @@ open System (FilePath)
 
 open Lake
 
-/-- The file paths of modules exempt from all linters, read from
-  `scripts/lint/exemptions/LinterExemption.txt`. This is used to lint `QuantumInfo` file-by-file. -/
+/--
+The file paths of modules exempt from all linters, read from
+`scripts/lint/exemptions/LinterExemption.txt`. This is used to lint `QuantumInfo` file-by-file.
+-/
 def linterExemptions : IO (Array String) := do
   let path : FilePath :=
     (System.mkFilePath ["scripts", "lint", "exemptions", "LinterExemption"]).addExtension "txt"
-  unless (← path.pathExists) do return #[]
+  unless (← path.pathExists) do
+    return #[]
   let lines ← IO.FS.lines path
   return lines.filterMap (fun l ↦ if l.trimAscii.copy == "" then none else some l.trimAscii.copy)
 
@@ -28,8 +31,10 @@ def linterExemptions : IO (Array String) := do
 def moduleToFilePathString (mod : Name) : String :=
   ((System.mkFilePath (mod.toString.splitToList (· == '.'))).addExtension "lean").toString
 
-/-- Run the Batteries linter on a given module, skipping declarations in exempt modules.
-  Returns `true` if linting failed. -/
+/--
+Run the Batteries linter on a given module, skipping declarations in exempt modules.
+Returns `true` if linting failed.
+-/
 unsafe def runLinterOnModule (module : Name) (exemptions : Array String) : IO Bool := do
   initSearchPath (← findSysroot)
   Lean.enableInitializersExecution
@@ -39,11 +44,12 @@ unsafe def runLinterOnModule (module : Name) (exemptions : Array String) : IO Bo
   let lintFile ← findOLean lintModule
   unless (← lintFile.pathExists) do
     -- run `lake build +Batteries.Tactic.Lint` (and ignore result) if the file hasn't been built yet
-    let child ← IO.Process.spawn {
-      cmd := (← IO.getEnv "LAKE").getD "lake"
-      args := #["build", s!"+{lintModule}"]
-      stdin := .null
-    }
+    let child ←
+      IO.Process.spawn {
+        cmd := (← IO.getEnv "LAKE").getD "lake"
+        args := #["build", s!"+{lintModule}"]
+        stdin := .null
+      }
     _ ← child.wait
   let nolints := #[]
   let env ← importModules #[module, lintModule] {} (trustLevel := 1024) (loadExts := true)
@@ -54,23 +60,26 @@ unsafe def runLinterOnModule (module : Name) (exemptions : Array String) : IO Bo
     let decls ← getDeclsInPackage module.getRoot
     -- Skip declarations whose source module is listed in
     -- `scripts/lint/exemptions/LinterExemption.txt`.
-    let decls := decls.filter fun n =>
-      match env.getModuleIdxFor? n with
-      | some idx => !exemptions.contains (moduleToFilePathString env.header.moduleNames[idx]!)
-      | none => true
+    let decls :=
+      decls.filter fun n =>
+        match env.getModuleIdxFor? n with
+        | some idx => ! exemptions.contains (moduleToFilePathString env.header.moduleNames[idx]!)
+        | none => true
     let linters ← getChecks (slow := true) (runAlways := none) (runOnly := none)
     -- The `defsWithUnderscore` linter also reports names that Physlib does not choose, such as
     -- the ones Lean generates for anonymous instances; see `Physlib.defsWithUnderscoreExempt`.
-    let linters := linters.map fun l =>
-      if l.name == `defsWithUnderscore then Physlib.withDefsWithUnderscoreExemptions l else l
+    let linters :=
+      linters.map fun l =>
+        if l.name == `defsWithUnderscore then Physlib.withDefsWithUnderscoreExemptions l else l
     println! "Results been linted with the following linters:"
     println! linters.map (·.name)
-    println! "Starting parallel running on linters on all declarations. Results if any are
-      shown below."
+    println! "Starting parallel running on linters on all declarations. Results if any are\
+      \n      shown below."
     let results ← lintCore decls linters
-    let results := results.map fun (linter, decls) =>
-      .mk linter <| nolints.foldl (init := decls) fun decls (linter', decl') =>
-        if linter.name == linter' then decls.erase decl' else decls
+    let results :=
+      results.map fun (linter, decls) =>
+        .mk linter <| nolints.foldl (init := decls) fun decls (linter', decl') =>
+          if linter.name == linter' then decls.erase decl' else decls
     let failed := results.any (!·.2.isEmpty)
     if failed then
       let fmtResults ←

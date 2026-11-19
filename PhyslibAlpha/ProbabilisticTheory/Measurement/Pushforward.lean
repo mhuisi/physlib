@@ -63,17 +63,21 @@ end UnitalPositiveLinearMap
 namespace EffectValuedMeasure
 
 /-- Pushing an effect-valued measure forward along a normal channel. -/
-def map (μ : EffectValuedMeasure Ω E) (φ : Channel E F) (hφ : φ.IsNormal) :
-    EffectValuedMeasure Ω F where
+def map (μ : EffectValuedMeasure Ω E) (φ : Channel E F) (hφ : φ.IsNormal)
+    : EffectValuedMeasure Ω F where
   toFun s hs := φ.mapEffect (μ s hs)
   map_empty' := by simp
   map_univ' := by simp
-  countably_additive' _ hs hd := hφ.isLUB_partialSums (fun n => (μ _ (hs n)).2.1)
-    (μ.countably_additive hs hd)
+  countably_additive' _ hs hd :=
+    hφ.isLUB_partialSums (fun n => (μ _ (hs n)).2.1) (μ.countably_additive hs hd)
 
 @[simp]
-lemma coe_map_apply (μ : EffectValuedMeasure Ω E) (φ : Channel E F) (hφ : φ.IsNormal)
-    (s : Set Ω) (hs : MeasurableSet s) : (μ.map φ hφ s hs : F) = φ (μ s hs) := rfl
+lemma coe_map_apply
+    (μ : EffectValuedMeasure Ω E)
+    (φ : Channel E F) (hφ : φ.IsNormal)
+    (s : Set Ω) (hs : MeasurableSet s)
+    : (μ.map φ hφ s hs : F) = φ (μ s hs) :=
+  rfl
 
 end EffectValuedMeasure
 

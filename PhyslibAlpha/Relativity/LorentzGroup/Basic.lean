@@ -55,18 +55,20 @@ variable {d : ℕ}
 
 -/
 
-/-- The defining relation `Λ η Λᵀ = η` over `ℂ`, read on the entry `(a, b)` and with the
-  integer Minkowski matrix in place of `minkowskiMatrix`. This is the form the invariant
-  classifications contract against, one metric pairing per pair of slots. -/
-lemma sum_minkowskiMatrixZ_mul (Λ : LorentzGroup d) (a b : Fin 1 ⊕ Fin d) :
-    ∑ x : Fin 1 ⊕ Fin d, ∑ y : Fin 1 ⊕ Fin d, ((minkowskiMatrixZ x y : ℤ) : ℂ)
-        * (((Λ.1 a x : ℝ) : ℂ) * ((Λ.1 b y : ℝ) : ℂ))
+/--
+The defining relation `Λ η Λᵀ = η` over `ℂ`, read on the entry `(a, b)` and with the
+integer Minkowski matrix in place of `minkowskiMatrix`. This is the form the invariant
+classifications contract against, one metric pairing per pair of slots.
+-/
+lemma sum_minkowskiMatrixZ_mul (Λ : LorentzGroup d) (a b : Fin 1 ⊕ Fin d)
+    : ∑ x : Fin 1 ⊕ Fin d, ∑ y : Fin 1 ⊕ Fin d, ((minkowskiMatrixZ x y : ℤ) : ℂ)
+          * (((Λ.1 a x : ℝ) : ℂ) * ((Λ.1 b y : ℝ) : ℂ))
       = ((minkowskiMatrixZ a b : ℤ) : ℂ) := by
-  have hR : ∑ x : Fin 1 ⊕ Fin d, ∑ y : Fin 1 ⊕ Fin d,
-      ((minkowskiMatrixZ x y : ℤ) : ℝ) * (Λ.1 a x * Λ.1 b y)
+  have hR
+      : ∑ x : Fin 1 ⊕ Fin d, ∑ y : Fin 1 ⊕ Fin d,
+          ((minkowskiMatrixZ x y : ℤ) : ℝ) * (Λ.1 a x * Λ.1 b y)
         = ((minkowskiMatrixZ a b : ℤ) : ℝ) := by
-    have h := congrFun (congrFun
-      (mul_minkowskiMatrix_mul_transpose (Λ := Λ)) a) b
+    have h := congrFun (congrFun (mul_minkowskiMatrix_mul_transpose (Λ := Λ)) a) b
     simp only [Matrix.mul_apply, Matrix.transpose_apply] at h
     rw [minkowskiMatrixZ.cast_apply, ← h, Finset.sum_comm]
     refine Finset.sum_congr rfl fun y _ => ?_

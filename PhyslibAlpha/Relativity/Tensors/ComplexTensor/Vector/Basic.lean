@@ -54,20 +54,21 @@ namespace Lorentz
 
 -/
 
-/-- The dual of the complex covector representation on the dual basis: dual covectors
-  transform contravariantly, by the columns of the (complexified) Lorentz matrix. The
-  complex analogue of `Lorentz.CoVector.sl2Rep_dual_dualBasis`. -/
-lemma ComplexCoVector.SL2CRep_dual_dualBasis (Λ : SL(2,ℂ))
-    (μ : Fin 1 ⊕ Fin 3) :
-    Lorentz.ComplexCoVector.SL2CRep.dual Λ (Lorentz.ComplexCoVector.basis.dualBasis μ) =
-      ∑ j, (((Lorentz.SL2C.toLorentzGroup Λ).1 j μ : ℝ) : ℂ) •
-        Lorentz.ComplexCoVector.basis.dualBasis j := by
+/--
+The dual of the complex covector representation on the dual basis: dual covectors
+transform contravariantly, by the columns of the (complexified) Lorentz matrix. The
+complex analogue of `Lorentz.CoVector.sl2Rep_dual_dualBasis`.
+-/
+lemma ComplexCoVector.SL2CRep_dual_dualBasis (Λ : SL(2,ℂ)) (μ : Fin 1 ⊕ Fin 3)
+    : Lorentz.ComplexCoVector.SL2CRep.dual Λ (Lorentz.ComplexCoVector.basis.dualBasis μ)
+      = ∑ j, (((Lorentz.SL2C.toLorentzGroup Λ).1 j μ : ℝ) : ℂ) •
+          Lorentz.ComplexCoVector.basis.dualBasis j := by
   refine Representation.dual_apply_dualBasis _ _ _ _
-    (Matrix.of fun l j => (((Lorentz.SL2C.toLorentzGroup Λ).1 j l : ℝ) : ℂ))
-    (fun j => ?_)
-  have hexp : Lorentz.ComplexCoVector.SL2CRep Λ⁻¹ (Lorentz.ComplexCoVector.basis j) =
-      ∑ l, (LinearMap.toMatrix Lorentz.ComplexCoVector.basis Lorentz.ComplexCoVector.basis
-        (Lorentz.ComplexCoVector.SL2CRep Λ⁻¹)) l j • Lorentz.ComplexCoVector.basis l := by
+    (Matrix.of fun l j => (((Lorentz.SL2C.toLorentzGroup Λ).1 j l : ℝ) : ℂ)) (fun j => ?_)
+  have hexp
+      : Lorentz.ComplexCoVector.SL2CRep Λ⁻¹ (Lorentz.ComplexCoVector.basis j)
+        = ∑ l, (LinearMap.toMatrix Lorentz.ComplexCoVector.basis Lorentz.ComplexCoVector.basis
+            (Lorentz.ComplexCoVector.SL2CRep Λ⁻¹)) l j • Lorentz.ComplexCoVector.basis l := by
     conv_lhs => rw [← Lorentz.ComplexCoVector.basis.sum_repr
       (Lorentz.ComplexCoVector.SL2CRep Λ⁻¹ (Lorentz.ComplexCoVector.basis j))]
     refine Finset.sum_congr rfl fun l _ => ?_

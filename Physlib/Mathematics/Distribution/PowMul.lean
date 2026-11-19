@@ -28,9 +28,14 @@ variable [NormedSpace ℝ E]
 open ContDiff
 open MeasureTheory
 
-lemma norm_iteratedFDeriv_ofRealCLM {x} (i : ℕ) :
-    ‖iteratedFDeriv ℝ i (RCLike.ofRealCLM (K := 𝕜)) x‖ =
-      if i = 0 then |x| else if i = 1 then 1 else 0 := by
+lemma norm_iteratedFDeriv_ofRealCLM {x} (i : ℕ)
+    : ‖iteratedFDeriv ℝ i (RCLike.ofRealCLM (K := 𝕜)) x‖
+      = if i = 0 then
+          |x|
+        else if i = 1 then
+          1
+        else
+          0 := by
   match i with
   | 0 => simp
   | 1 =>
@@ -43,8 +48,10 @@ lemma norm_iteratedFDeriv_ofRealCLM {x} (i : ℕ) :
     rw [← norm_iteratedFDeriv_fderiv, h, iteratedFDeriv_const_of_ne n.succ_ne_zero]
     simp
 
-/-- The continuous linear map `𝓢(ℝ, 𝕜) →L[𝕜] 𝓢(ℝ, 𝕜)` taking a Schwartz map
-  `η` to `x * η`. -/
+/--
+The continuous linear map `𝓢(ℝ, 𝕜) →L[𝕜] 𝓢(ℝ, 𝕜)` taking a Schwartz map
+`η` to `x * η`.
+-/
 def powOneMul : 𝓢(ℝ, 𝕜) →L[𝕜] 𝓢(ℝ, 𝕜) := by
   refine mkCLM (fun ψ ↦ fun x => x * ψ x) ?_ ?_ ?_ ?_
   · intro ψ1 ψ2 x
@@ -84,7 +91,7 @@ def powOneMul : 𝓢(ℝ, 𝕜) →L[𝕜] 𝓢(ℝ, 𝕜) := by
     match n with
     | 0 =>
       simp only [Real.norm_eq_abs, zero_add, Finset.range_one, mul_ite, mul_one, mul_zero, ite_mul,
-        zero_mul, Finset.sum_singleton, ↓reduceIte, Nat.choose_self, Nat.cast_one, one_mul,
+        zero_mul, Finset.sum_singleton, ↓ reduceIte, Nat.choose_self, Nat.cast_one, one_mul,
         Nat.sub_zero, norm_iteratedFDeriv_zero, CharP.cast_eq_zero, ge_iff_le]
       trans (SchwartzMap.seminorm 𝕜 (k + 1) 0) ψ
       · apply le_trans ?_ (ψ.le_seminorm 𝕜 _ _ x)
@@ -96,7 +103,7 @@ def powOneMul : 𝓢(ℝ, 𝕜) →L[𝕜] 𝓢(ℝ, 𝕜) := by
     | .succ n =>
       rw [Finset.sum_range_succ', Finset.sum_range_succ']
       simp only [Real.norm_eq_abs, Nat.succ_eq_add_one, Nat.add_eq_zero_iff, one_ne_zero, and_false,
-        and_self, ↓reduceIte, Nat.add_eq_right, mul_zero, zero_mul, Finset.sum_const_zero,
+        and_self, ↓ reduceIte, Nat.add_eq_right, mul_zero, zero_mul, Finset.sum_const_zero,
         zero_add, Nat.choose_one_right, Nat.cast_add, Nat.cast_one, mul_one, Nat.reduceAdd,
         Nat.add_one_sub_one, Nat.choose_zero_right, one_mul, Nat.sub_zero, ge_iff_le]
       trans (↑n + 1) * (|x| ^ k * ‖iteratedFDeriv ℝ n (fun x => (ψ) x) x‖)
@@ -112,8 +119,8 @@ def powOneMul : 𝓢(ℝ, 𝕜) →L[𝕜] 𝓢(ℝ, 𝕜) := by
         · exact zero_le_one' ℝ
         · exact ψ.le_seminorm 𝕜 k n x
         · exact ψ.le_seminorm 𝕜 (k + 1) (n + 1) x
-      · by_cases h1 :((SchwartzMap.seminorm 𝕜 (k + 1) (n + 1)) ψ) <
-          ((SchwartzMap.seminorm 𝕜 k n) ψ)
+      · by_cases h1
+          : ((SchwartzMap.seminorm 𝕜 (k + 1) (n + 1)) ψ) < ((SchwartzMap.seminorm 𝕜 k n) ψ)
         · rw [max_eq_left_of_lt h1]
           trans (↑n + 1) * (SchwartzMap.seminorm 𝕜 k n) ψ + (SchwartzMap.seminorm 𝕜 k n) ψ
           apply add_le_add
@@ -133,8 +140,7 @@ def powOneMul : 𝓢(ℝ, 𝕜) →L[𝕜] 𝓢(ℝ, 𝕜) := by
           · apply le_of_eq
             ring
 
-lemma powOneMul_apply (ψ : 𝓢(ℝ, 𝕜)) (x : ℝ) :
-    powOneMul 𝕜 ψ x = x * ψ x := rfl
+lemma powOneMul_apply (ψ : 𝓢(ℝ, 𝕜)) (x : ℝ) : powOneMul 𝕜 ψ x = x * ψ x := rfl
 
 end Distribution
 end Physlib

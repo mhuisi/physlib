@@ -56,14 +56,14 @@ variable {H : Type*} [NormedAddCommGroup H] [InnerProductSpace ℂ H] [CompleteS
 -/
 
 /-- The trace norm of an operator only depends on the operator, not on the trace-class witness. -/
-lemma traceNorm_transport {X Y : H →L[ℂ] H} (hEq : X = Y) (hX : IsTraceClass X) :
-    traceNorm X hX = traceNorm Y (hEq ▸ hX) := by
+lemma traceNorm_transport {X Y : H →L[ℂ] H} (hEq : X = Y) (hX : IsTraceClass X)
+    : traceNorm X hX = traceNorm Y (hEq ▸ hX) := by
   subst hEq; rfl
 
 /-- The Hilbert–Schmidt square sum of `√|A|` computes the trace norm, in every basis. -/
-lemma tsum_sqrt_abs_norm_sq_eq_traceNorm {A : H →L[ℂ] H} (hA : IsTraceClass A) {w : Set H}
-    (b : HilbertBasis w ℂ H) :
-    (∑' i : w, ‖CFC.sqrt (CFC.abs A) (b i)‖ ^ 2) = traceNorm A hA := by
+lemma tsum_sqrt_abs_norm_sq_eq_traceNorm
+    {A : H →L[ℂ] H} (hA : IsTraceClass A) {w : Set H} (b : HilbertBasis w ℂ H)
+    : (∑' i : w, ‖CFC.sqrt (CFC.abs A) (b i)‖ ^ 2) = traceNorm A hA := by
   rw [traceNorm_eq_of_hilbertBasis hA b]
   refine tsum_congr (fun i => ?_)
   set S : H →L[ℂ] H := CFC.sqrt (CFC.abs A) with hSdef
@@ -77,11 +77,13 @@ lemma tsum_sqrt_abs_norm_sq_eq_traceNorm {A : H →L[ℂ] H} (hA : IsTraceClass 
   rw [hinner, inner_self_eq_norm_sq_to_K]
   norm_cast
 
-/-- The contraction pairing `i ↦ ⟪W eᵢ, A eᵢ⟫` is absolutely summable, for trace-class `A` and any
-contraction `W`. -/
-lemma summable_norm_inner_contraction_of_isTraceClass {A W : H →L[ℂ] H} (hA : IsTraceClass A)
-    (hW : ‖W‖ ≤ 1) {w : Set H} (b : HilbertBasis w ℂ H) :
-    Summable (fun i : w => ‖⟪W (b i), A (b i)⟫_ℂ‖) := by
+/--
+The contraction pairing `i ↦ ⟪W eᵢ, A eᵢ⟫` is absolutely summable, for trace-class `A` and any
+contraction `W`.
+-/
+lemma summable_norm_inner_contraction_of_isTraceClass
+    {A W : H →L[ℂ] H} (hA : IsTraceClass A) (hW : ‖W‖ ≤ 1) {w : Set H} (b : HilbertBasis w ℂ H)
+    : Summable (fun i : w => ‖⟪W (b i), A (b i)⟫_ℂ‖) := by
   obtain ⟨hUS, hS, hfactor⟩ := isHilbertSchmidt_polarFactor_mul_sqrt_abs_and_sqrt_abs hA
   set R : H →L[ℂ] H := Polar.polarFactor A * CFC.sqrt (CFC.abs A) with hRdef
   set S : H →L[ℂ] H := CFC.sqrt (CFC.abs A) with hSdef
@@ -92,25 +94,26 @@ lemma summable_norm_inner_contraction_of_isTraceClass {A W : H →L[ℂ] H} (hA 
     summable_norm_sq_apply_of_hilbertBasis w b
       (isHilbertSchmidt_mul_right_of_opNorm_le_one hW hRstar)
   have hSb : Summable (fun i : w => ‖S (b i)‖ ^ 2) := summable_norm_sq_apply_of_hilbertBasis w b hS
-  have hpoint : ∀ i : w, ⟪W (b i), A (b i)⟫_ℂ =
-      ⟪(ContinuousLinearMap.adjoint R * W) (b i), S (b i)⟫_ℂ := by
+  have hpoint
+      : ∀ i : w, ⟪W (b i), A (b i)⟫_ℂ = ⟪(ContinuousLinearMap.adjoint R * W) (b i), S (b i)⟫_ℂ := by
     intro i
     rw [show A = R * S from hfactor.symm, ContinuousLinearMap.mul_def,
       ContinuousLinearMap.comp_apply, ContinuousLinearMap.mul_def, ContinuousLinearMap.comp_apply,
       ContinuousLinearMap.adjoint_inner_left R (S (b i)) (W (b i))]
-  have hprod : Summable (fun i : w =>
-      ‖(ContinuousLinearMap.adjoint R * W) (b i)‖ * ‖S (b i)‖) :=
+  have hprod : Summable (fun i : w => ‖(ContinuousLinearMap.adjoint R * W) (b i)‖ * ‖S (b i)‖) :=
     summable_norm_mul_of_square_sums _ _ hRWb hSb (fun i => norm_nonneg _) (fun i => norm_nonneg _)
   apply Summable.of_nonneg_of_le (fun i => norm_nonneg _) (fun i => ?_) hprod
   rw [hpoint i]
   exact norm_inner_le_norm _ _
 
-/-- **The duality bound**: for trace-class `A`, any contraction `W`, and any basis, the pairing
+/--
+**The duality bound**: for trace-class `A`, any contraction `W`, and any basis, the pairing
 `∑ᵢ ‖⟪W eᵢ, A eᵢ⟫‖` never exceeds `‖A‖₁`. This is the single quantitative estimate feeding
-subadditivity of the trace norm, and the general two-sided ideal estimate below. -/
-lemma tsum_norm_inner_contraction_le_traceNorm {A W : H →L[ℂ] H} (hA : IsTraceClass A)
-    (hW : ‖W‖ ≤ 1) {w : Set H} (b : HilbertBasis w ℂ H) :
-    (∑' i : w, ‖⟪W (b i), A (b i)⟫_ℂ‖) ≤ traceNorm A hA := by
+subadditivity of the trace norm, and the general two-sided ideal estimate below.
+-/
+lemma tsum_norm_inner_contraction_le_traceNorm
+    {A W : H →L[ℂ] H} (hA : IsTraceClass A) (hW : ‖W‖ ≤ 1) {w : Set H} (b : HilbertBasis w ℂ H)
+    : (∑' i : w, ‖⟪W (b i), A (b i)⟫_ℂ‖) ≤ traceNorm A hA := by
   obtain ⟨hUS, hS, hfactor⟩ := isHilbertSchmidt_polarFactor_mul_sqrt_abs_and_sqrt_abs hA
   set R : H →L[ℂ] H := Polar.polarFactor A * CFC.sqrt (CFC.abs A) with hRdef
   set S : H →L[ℂ] H := CFC.sqrt (CFC.abs A) with hSdef
@@ -123,54 +126,63 @@ lemma tsum_norm_inner_contraction_le_traceNorm {A W : H →L[ℂ] H} (hA : IsTra
   have hSb : Summable (fun i : w => ‖S (b i)‖ ^ 2) := summable_norm_sq_apply_of_hilbertBasis w b hS
   have hUSb : Summable (fun i : w => ‖R (b i)‖ ^ 2) :=
     summable_norm_sq_apply_of_hilbertBasis w b hUS
-  have hpoint : ∀ i : w, ⟪W (b i), A (b i)⟫_ℂ =
-      ⟪(ContinuousLinearMap.adjoint R * W) (b i), S (b i)⟫_ℂ := by
+  have hpoint
+      : ∀ i : w, ⟪W (b i), A (b i)⟫_ℂ = ⟪(ContinuousLinearMap.adjoint R * W) (b i), S (b i)⟫_ℂ := by
     intro i
     rw [show A = R * S from hfactor.symm, ContinuousLinearMap.mul_def,
       ContinuousLinearMap.comp_apply, ContinuousLinearMap.mul_def, ContinuousLinearMap.comp_apply,
       ContinuousLinearMap.adjoint_inner_left R (S (b i)) (W (b i))]
-  have hprod : Summable (fun i : w =>
-      ‖(ContinuousLinearMap.adjoint R * W) (b i)‖ * ‖S (b i)‖) :=
+  have hprod : Summable (fun i : w => ‖(ContinuousLinearMap.adjoint R * W) (b i)‖ * ‖S (b i)‖) :=
     summable_norm_mul_of_square_sums _ _ hRWb hSb (fun i => norm_nonneg _) (fun i => norm_nonneg _)
   have hLHSsummable : Summable (fun i : w => ‖⟪W (b i), A (b i)⟫_ℂ‖) := by
     apply Summable.of_nonneg_of_le (fun i => norm_nonneg _) (fun i => ?_) hprod
-    rw [hpoint i]; exact norm_inner_le_norm _ _
-  have hle1 : (∑' i : w, ‖⟪W (b i), A (b i)⟫_ℂ‖) ≤
-      ∑' i : w, ‖(ContinuousLinearMap.adjoint R * W) (b i)‖ * ‖S (b i)‖ :=
+    rw [hpoint i]
+    exact norm_inner_le_norm _ _
+  have hle1
+      : (∑' i : w, ‖⟪W (b i), A (b i)⟫_ℂ‖)
+        ≤ ∑' i : w, ‖(ContinuousLinearMap.adjoint R * W) (b i)‖ * ‖S (b i)‖ :=
     hLHSsummable.tsum_le_tsum (fun i => by rw [hpoint i]; exact norm_inner_le_norm _ _) hprod
-  have hle2 : (∑' i : w, ‖(ContinuousLinearMap.adjoint R * W) (b i)‖ * ‖S (b i)‖) ≤
-      Real.sqrt (∑' i : w, ‖(ContinuousLinearMap.adjoint R * W) (b i)‖ ^ 2) *
-        Real.sqrt (∑' i : w, ‖S (b i)‖ ^ 2) :=
+  have hle2
+      : (∑' i : w, ‖(ContinuousLinearMap.adjoint R * W) (b i)‖ * ‖S (b i)‖)
+        ≤ Real.sqrt (∑' i : w, ‖(ContinuousLinearMap.adjoint R * W) (b i)‖ ^ 2)
+          * Real.sqrt (∑' i : w, ‖S (b i)‖ ^ 2) :=
     tsum_mul_le_sqrt_mul_sqrt hRWb hSb (fun i => norm_nonneg _) (fun i => norm_nonneg _)
-  have hRWSq : (∑' i : w, ‖(ContinuousLinearMap.adjoint R * W) (b i)‖ ^ 2) ≤
-      ∑' i : w, ‖R (b i)‖ ^ 2 := by
-    have hstep := tsum_norm_sq_mul_right_le_of_opNorm_le_one (X := ContinuousLinearMap.adjoint R)
-      hW hRstar b
-    have hadjR : (∑' i : w, ‖(ContinuousLinearMap.adjoint R) (b i)‖ ^ 2) =
-        ∑' i : w, ‖R (b i)‖ ^ 2 := (hasSum_norm_sq_apply_eq_adjoint b b hUSb).tsum_eq
+  have hRWSq
+      : (∑' i : w, ‖(ContinuousLinearMap.adjoint R * W) (b i)‖ ^ 2) ≤ ∑' i : w, ‖R (b i)‖ ^ 2 := by
+    have hstep :=
+      tsum_norm_sq_mul_right_le_of_opNorm_le_one (X := ContinuousLinearMap.adjoint R) hW hRstar b
+    have hadjR
+        : (∑' i : w, ‖(ContinuousLinearMap.adjoint R) (b i)‖ ^ 2) = ∑' i : w, ‖R (b i)‖ ^ 2 :=
+      (hasSum_norm_sq_apply_eq_adjoint b b hUSb).tsum_eq
     rwa [hadjR] at hstep
   have hRSq : (∑' i : w, ‖R (b i)‖ ^ 2) ≤ ∑' i : w, ‖S (b i)‖ ^ 2 := by
     have hpt : ∀ i : w, ‖R (b i)‖ ^ 2 ≤ ‖S (b i)‖ ^ 2 := by
       intro i
       have hle : ‖R (b i)‖ ≤ ‖S (b i)‖ := by
         rw [hRdef, ContinuousLinearMap.mul_def, ContinuousLinearMap.comp_apply]
-        calc ‖Polar.polarFactor A (S (b i))‖ ≤ ‖Polar.polarFactor A‖ * ‖S (b i)‖ :=
-              ContinuousLinearMap.le_opNorm _ _
+        calc
+          ‖Polar.polarFactor A (S (b i))‖
+            ≤ ‖Polar.polarFactor A‖ * ‖S (b i)‖ := ContinuousLinearMap.le_opNorm _ _
           _ ≤ 1 * ‖S (b i)‖ :=
-              mul_le_mul_of_nonneg_right (Polar.polarFactor_opNorm_le A) (norm_nonneg _)
+            mul_le_mul_of_nonneg_right (Polar.polarFactor_opNorm_le A) (norm_nonneg _)
           _ = ‖S (b i)‖ := one_mul _
       exact (sq_le_sq₀ (norm_nonneg _) (norm_nonneg _)).2 hle
     exact hUSb.tsum_le_tsum hpt hSb
-  have hle3 : Real.sqrt (∑' i : w, ‖(ContinuousLinearMap.adjoint R * W) (b i)‖ ^ 2) ≤
-      Real.sqrt (∑' i : w, ‖S (b i)‖ ^ 2) := Real.sqrt_le_sqrt (hRWSq.trans hRSq)
-  have hnonneg : (0:ℝ) ≤ Real.sqrt (∑' i : w, ‖S (b i)‖ ^ 2) := Real.sqrt_nonneg _
+  have hle3
+      : Real.sqrt (∑' i : w, ‖(ContinuousLinearMap.adjoint R * W) (b i)‖ ^ 2)
+        ≤ Real.sqrt (∑' i : w, ‖S (b i)‖ ^ 2) :=
+    Real.sqrt_le_sqrt (hRWSq.trans hRSq)
+  have hnonneg : (0 : ℝ) ≤ Real.sqrt (∑' i : w, ‖S (b i)‖ ^ 2) := Real.sqrt_nonneg _
   calc
-    (∑' i : w, ‖⟪W (b i), A (b i)⟫_ℂ‖) ≤ ∑' i : w,
-        ‖(ContinuousLinearMap.adjoint R * W) (b i)‖ * ‖S (b i)‖ := hle1
-    _ ≤ Real.sqrt (∑' i : w, ‖(ContinuousLinearMap.adjoint R * W) (b i)‖ ^ 2) *
-        Real.sqrt (∑' i : w, ‖S (b i)‖ ^ 2) := hle2
+    (∑' i : w, ‖⟪W (b i), A (b i)⟫_ℂ‖)
+        ≤ ∑' i : w,
+          ‖(ContinuousLinearMap.adjoint R * W) (b i)‖ * ‖S (b i)‖ :=
+      hle1
+    _ ≤ Real.sqrt (∑' i : w, ‖(ContinuousLinearMap.adjoint R * W) (b i)‖ ^ 2)
+        * Real.sqrt (∑' i : w, ‖S (b i)‖ ^ 2) :=
+      hle2
     _ ≤ Real.sqrt (∑' i : w, ‖S (b i)‖ ^ 2) * Real.sqrt (∑' i : w, ‖S (b i)‖ ^ 2) :=
-        mul_le_mul_of_nonneg_right hle3 hnonneg
+      mul_le_mul_of_nonneg_right hle3 hnonneg
     _ = ∑' i : w, ‖S (b i)‖ ^ 2 := Real.mul_self_sqrt (tsum_nonneg (fun i => sq_nonneg _))
     _ = traceNorm A hA := tsum_sqrt_abs_norm_sq_eq_traceNorm hA b
 
@@ -180,17 +192,19 @@ lemma tsum_norm_inner_contraction_le_traceNorm {A W : H →L[ℂ] H} (hA : IsTra
 
 -/
 
-/-- The trace-norm diagonal in the basis `b` equals the norm-diagonal pairing against `T`'s own
+/--
+The trace-norm diagonal in the basis `b` equals the norm-diagonal pairing against `T`'s own
 polar factor: `⟪eᵢ, |T| eᵢ⟫ = ⟪(polarFactor T) eᵢ, T eᵢ⟫` exactly, and the latter is already a
-nonnegative real. -/
-lemma traceNorm_eq_tsum_norm_inner_polarFactor {T : H →L[ℂ] H} (hT : IsTraceClass T)
-    {w : Set H} (b : HilbertBasis w ℂ H) :
-    traceNorm T hT = ∑' i : w, ‖⟪Polar.polarFactor T (b i), T (b i)⟫_ℂ‖ := by
+nonnegative real.
+-/
+lemma traceNorm_eq_tsum_norm_inner_polarFactor
+    {T : H →L[ℂ] H} (hT : IsTraceClass T) {w : Set H} (b : HilbertBasis w ℂ H)
+    : traceNorm T hT = ∑' i : w, ‖⟪Polar.polarFactor T (b i), T (b i)⟫_ℂ‖ := by
   rw [traceNorm_eq_of_hilbertBasis hT b]
   refine tsum_congr (fun i => ?_)
   have hval : ⟪b i, CFC.abs T (b i)⟫_ℂ = ⟪Polar.polarFactor T (b i), T (b i)⟫_ℂ := by
-    have habs : CFC.abs T = star (Polar.polarFactor T) * T := (Polar.star_polarFactor_mul_self
-        T).symm
+    have habs : CFC.abs T = star (Polar.polarFactor T) * T :=
+      (Polar.star_polarFactor_mul_self T).symm
     rw [habs, ContinuousLinearMap.star_eq_adjoint, ContinuousLinearMap.mul_def,
       ContinuousLinearMap.comp_apply,
       ContinuousLinearMap.adjoint_inner_right (Polar.polarFactor T) (b i) (T (b i))]
@@ -213,15 +227,16 @@ lemma traceNorm_eq_tsum_norm_inner_polarFactor {T : H →L[ℂ] H} (hT : IsTrace
   rw [← hnonnegre, hval]
 
 /-- **The trace norm is subadditive.** -/
-lemma traceNorm_add_le {T T' : H →L[ℂ] H} (hT : IsTraceClass T) (hT' : IsTraceClass T')
-    (hTT' : IsTraceClass (T + T')) :
-    traceNorm (T + T') hTT' ≤ traceNorm T hT + traceNorm T' hT' := by
+lemma traceNorm_add_le
+    {T T' : H →L[ℂ] H} (hT : IsTraceClass T) (hT' : IsTraceClass T') (hTT' : IsTraceClass (T + T'))
+    : traceNorm (T + T') hTT' ≤ traceNorm T hT + traceNorm T' hT' := by
   obtain ⟨w, b, _⟩ := exists_hilbertBasis ℂ H
   set W : H →L[ℂ] H := Polar.polarFactor (T + T') with hWdef
   have hWnorm : ‖W‖ ≤ 1 := Polar.polarFactor_opNorm_le (T + T')
   have heq := traceNorm_eq_tsum_norm_inner_polarFactor hTT' b
-  have hpt : ∀ i : w, ‖⟪W (b i), (T + T') (b i)⟫_ℂ‖ ≤
-      ‖⟪W (b i), T (b i)⟫_ℂ‖ + ‖⟪W (b i), T' (b i)⟫_ℂ‖ := by
+  have hpt
+      : ∀ i : w,
+        ‖⟪W (b i), (T + T') (b i)⟫_ℂ‖ ≤ ‖⟪W (b i), T (b i)⟫_ℂ‖ + ‖⟪W (b i), T' (b i)⟫_ℂ‖ := by
     intro i
     rw [add_apply, inner_add_right]
     exact norm_add_le _ _
@@ -229,16 +244,16 @@ lemma traceNorm_add_le {T T' : H →L[ℂ] H} (hT : IsTraceClass T) (hT' : IsTra
     summable_norm_inner_contraction_of_isTraceClass hT hWnorm b
   have hT2 : Summable (fun i : w => ‖⟪W (b i), T' (b i)⟫_ℂ‖) :=
     summable_norm_inner_contraction_of_isTraceClass hT' hWnorm b
-  have hsum : Summable (fun i : w =>
-      ‖⟪W (b i), T (b i)⟫_ℂ‖ + ‖⟪W (b i), T' (b i)⟫_ℂ‖) := hT1.add hT2
+  have hsum : Summable (fun i : w => ‖⟪W (b i), T (b i)⟫_ℂ‖ + ‖⟪W (b i), T' (b i)⟫_ℂ‖) :=
+    hT1.add hT2
   have hTT'sum : Summable (fun i : w => ‖⟪W (b i), (T + T') (b i)⟫_ℂ‖) :=
     summable_norm_inner_contraction_of_isTraceClass hTT' hWnorm b
   calc
-    traceNorm (T + T') hTT' = ∑' i : w, ‖⟪W (b i), (T + T') (b i)⟫_ℂ‖ := heq
+    traceNorm (T + T') hTT'
+      = ∑' i : w, ‖⟪W (b i), (T + T') (b i)⟫_ℂ‖ := heq
     _ ≤ ∑' i : w, (‖⟪W (b i), T (b i)⟫_ℂ‖ + ‖⟪W (b i), T' (b i)⟫_ℂ‖) :=
       hTT'sum.tsum_le_tsum hpt hsum
-    _ = (∑' i : w, ‖⟪W (b i), T (b i)⟫_ℂ‖) + ∑' i : w, ‖⟪W (b i), T' (b i)⟫_ℂ‖ :=
-      hT1.tsum_add hT2
+    _ = (∑' i : w, ‖⟪W (b i), T (b i)⟫_ℂ‖) + ∑' i : w, ‖⟪W (b i), T' (b i)⟫_ℂ‖ := hT1.tsum_add hT2
     _ ≤ traceNorm T hT + traceNorm T' hT' :=
       add_le_add (tsum_norm_inner_contraction_le_traceNorm hT hWnorm b)
         (tsum_norm_inner_contraction_le_traceNorm hT' hWnorm b)
@@ -249,12 +264,16 @@ lemma traceNorm_add_le {T T' : H →L[ℂ] H} (hT : IsTraceClass T) (hT' : IsTra
 
 -/
 
-/-- **Quantitative master lemma**: the trace norm of a product of two Hilbert–Schmidt operators is
-bounded by the product of their Hilbert–Schmidt square-root sums, in any common basis. -/
-lemma traceNorm_mul_le_of_isHilbertSchmidt {R S : H →L[ℂ] H} (hR : IsHilbertSchmidt R)
-    (hS : IsHilbertSchmidt S) (hRS : IsTraceClass (R * S)) {w : Set H} (b : HilbertBasis w ℂ H) :
-    traceNorm (R * S) hRS ≤
-      Real.sqrt (∑' i : w, ‖R (b i)‖ ^ 2) * Real.sqrt (∑' i : w, ‖S (b i)‖ ^ 2) := by
+/--
+**Quantitative master lemma**: the trace norm of a product of two Hilbert–Schmidt operators is
+bounded by the product of their Hilbert–Schmidt square-root sums, in any common basis.
+-/
+lemma traceNorm_mul_le_of_isHilbertSchmidt
+    {R S : H →L[ℂ] H}
+    (hR : IsHilbertSchmidt R) (hS : IsHilbertSchmidt S) (hRS : IsTraceClass (R * S))
+    {w : Set H} (b : HilbertBasis w ℂ H)
+    : traceNorm (R * S) hRS
+      ≤ Real.sqrt (∑' i : w, ‖R (b i)‖ ^ 2) * Real.sqrt (∑' i : w, ‖S (b i)‖ ^ 2) := by
   set W : H →L[ℂ] H := Polar.polarFactor (R * S) with hWdef
   have hWnorm : ‖W‖ ≤ 1 := Polar.polarFactor_opNorm_le (R * S)
   have hRstar : IsHilbertSchmidt (ContinuousLinearMap.adjoint R) := by
@@ -266,46 +285,55 @@ lemma traceNorm_mul_le_of_isHilbertSchmidt {R S : H →L[ℂ] H} (hR : IsHilbert
   have hSb : Summable (fun i : w => ‖S (b i)‖ ^ 2) := summable_norm_sq_apply_of_hilbertBasis w b hS
   have hRb : Summable (fun i : w => ‖R (b i)‖ ^ 2) := summable_norm_sq_apply_of_hilbertBasis w b hR
   have heq := traceNorm_eq_tsum_norm_inner_polarFactor hRS b
-  have hpoint : ∀ i : w, ⟪W (b i), (R * S) (b i)⟫_ℂ =
-      ⟪(ContinuousLinearMap.adjoint R * W) (b i), S (b i)⟫_ℂ := by
+  have hpoint
+      : ∀ i : w,
+        ⟪W (b i), (R * S) (b i)⟫_ℂ = ⟪(ContinuousLinearMap.adjoint R * W) (b i), S (b i)⟫_ℂ := by
     intro i
     rw [ContinuousLinearMap.mul_def, ContinuousLinearMap.comp_apply, ContinuousLinearMap.mul_def,
       ContinuousLinearMap.comp_apply,
       ← ContinuousLinearMap.adjoint_inner_left R (S (b i)) (W (b i))]
-  have hprod : Summable (fun i : w =>
-      ‖(ContinuousLinearMap.adjoint R * W) (b i)‖ * ‖S (b i)‖) :=
+  have hprod : Summable (fun i : w => ‖(ContinuousLinearMap.adjoint R * W) (b i)‖ * ‖S (b i)‖) :=
     summable_norm_mul_of_square_sums _ _ hRWb hSb (fun i => norm_nonneg _) (fun i => norm_nonneg _)
-  have hle1 : (∑' i : w, ‖⟪W (b i), (R * S) (b i)⟫_ℂ‖) ≤
-      ∑' i : w, ‖(ContinuousLinearMap.adjoint R * W) (b i)‖ * ‖S (b i)‖ := by
+  have hle1
+      : (∑' i : w, ‖⟪W (b i), (R * S) (b i)⟫_ℂ‖)
+        ≤ ∑' i : w, ‖(ContinuousLinearMap.adjoint R * W) (b i)‖ * ‖S (b i)‖ := by
     apply Summable.tsum_le_tsum _ _ hprod
     · intro i; rw [hpoint i]; exact norm_inner_le_norm _ _
     · apply Summable.of_nonneg_of_le (fun i => norm_nonneg _) (fun i => ?_) hprod
-      rw [hpoint i]; exact norm_inner_le_norm _ _
-  have hle2 : (∑' i : w, ‖(ContinuousLinearMap.adjoint R * W) (b i)‖ * ‖S (b i)‖) ≤
-      Real.sqrt (∑' i : w, ‖(ContinuousLinearMap.adjoint R * W) (b i)‖ ^ 2) *
-        Real.sqrt (∑' i : w, ‖S (b i)‖ ^ 2) :=
+      rw [hpoint i]
+      exact norm_inner_le_norm _ _
+  have hle2
+      : (∑' i : w, ‖(ContinuousLinearMap.adjoint R * W) (b i)‖ * ‖S (b i)‖)
+        ≤ Real.sqrt (∑' i : w, ‖(ContinuousLinearMap.adjoint R * W) (b i)‖ ^ 2)
+          * Real.sqrt (∑' i : w, ‖S (b i)‖ ^ 2) :=
     tsum_mul_le_sqrt_mul_sqrt hRWb hSb (fun i => norm_nonneg _) (fun i => norm_nonneg _)
-  have hRWSq : (∑' i : w, ‖(ContinuousLinearMap.adjoint R * W) (b i)‖ ^ 2) ≤
-      ∑' i : w, ‖R (b i)‖ ^ 2 := by
-    have hstep := tsum_norm_sq_mul_right_le_of_opNorm_le_one (X := ContinuousLinearMap.adjoint R)
-      hWnorm hRstar b
-    have hadjR : (∑' i : w, ‖(ContinuousLinearMap.adjoint R) (b i)‖ ^ 2) =
-        ∑' i : w, ‖R (b i)‖ ^ 2 := (hasSum_norm_sq_apply_eq_adjoint b b hRb).tsum_eq
+  have hRWSq
+      : (∑' i : w, ‖(ContinuousLinearMap.adjoint R * W) (b i)‖ ^ 2) ≤ ∑' i : w, ‖R (b i)‖ ^ 2 := by
+    have hstep :=
+      tsum_norm_sq_mul_right_le_of_opNorm_le_one (X := ContinuousLinearMap.adjoint R) hWnorm hRstar
+        b
+    have hadjR
+        : (∑' i : w, ‖(ContinuousLinearMap.adjoint R) (b i)‖ ^ 2) = ∑' i : w, ‖R (b i)‖ ^ 2 :=
+      (hasSum_norm_sq_apply_eq_adjoint b b hRb).tsum_eq
     rwa [hadjR] at hstep
-  have hle3 : Real.sqrt (∑' i : w, ‖(ContinuousLinearMap.adjoint R * W) (b i)‖ ^ 2) ≤
-      Real.sqrt (∑' i : w, ‖R (b i)‖ ^ 2) := Real.sqrt_le_sqrt hRWSq
+  have hle3
+      : Real.sqrt (∑' i : w, ‖(ContinuousLinearMap.adjoint R * W) (b i)‖ ^ 2)
+        ≤ Real.sqrt (∑' i : w, ‖R (b i)‖ ^ 2) :=
+    Real.sqrt_le_sqrt hRWSq
   calc
-    traceNorm (R * S) hRS = ∑' i : w, ‖⟪W (b i), (R * S) (b i)⟫_ℂ‖ := heq
+    traceNorm (R * S) hRS
+      = ∑' i : w, ‖⟪W (b i), (R * S) (b i)⟫_ℂ‖ := heq
     _ ≤ ∑' i : w, ‖(ContinuousLinearMap.adjoint R * W) (b i)‖ * ‖S (b i)‖ := hle1
-    _ ≤ Real.sqrt (∑' i : w, ‖(ContinuousLinearMap.adjoint R * W) (b i)‖ ^ 2) *
-        Real.sqrt (∑' i : w, ‖S (b i)‖ ^ 2) := hle2
+    _ ≤ Real.sqrt (∑' i : w, ‖(ContinuousLinearMap.adjoint R * W) (b i)‖ ^ 2)
+        * Real.sqrt (∑' i : w, ‖S (b i)‖ ^ 2) :=
+      hle2
     _ ≤ Real.sqrt (∑' i : w, ‖R (b i)‖ ^ 2) * Real.sqrt (∑' i : w, ‖S (b i)‖ ^ 2) :=
       mul_le_mul_of_nonneg_right hle3 (Real.sqrt_nonneg _)
 
 /-- **The two-sided ideal estimate**: `‖A T B‖₁ ≤ ‖A‖ ‖T‖₁ ‖B‖`. -/
-lemma traceNorm_mul_mul_le {A B T : H →L[ℂ] H} (hT : IsTraceClass T)
-    (hABT : IsTraceClass (A * T * B)) :
-    traceNorm (A * T * B) hABT ≤ ‖A‖ * traceNorm T hT * ‖B‖ := by
+lemma traceNorm_mul_mul_le
+    {A B T : H →L[ℂ] H} (hT : IsTraceClass T) (hABT : IsTraceClass (A * T * B))
+    : traceNorm (A * T * B) hABT ≤ ‖A‖ * traceNorm T hT * ‖B‖ := by
   obtain ⟨_, hS, hfactor⟩ := isHilbertSchmidt_polarFactor_mul_sqrt_abs_and_sqrt_abs hT
   set R₀ : H →L[ℂ] H := Polar.polarFactor T * CFC.sqrt (CFC.abs T) with hR₀def
   set S₀ : H →L[ℂ] H := CFC.sqrt (CFC.abs T) with hS₀def
@@ -326,11 +354,13 @@ lemma traceNorm_mul_mul_le {A B T : H →L[ℂ] H} (hT : IsTraceClass T)
       have hle : ‖(A * R₀) (b i)‖ ≤ ‖A‖ * ‖R₀ (b i)‖ := by
         rw [ContinuousLinearMap.mul_def, ContinuousLinearMap.comp_apply]
         exact ContinuousLinearMap.le_opNorm _ _
-      calc ‖(A * R₀) (b i)‖ ^ 2 ≤ (‖A‖ * ‖R₀ (b i)‖) ^ 2 :=
-            (sq_le_sq₀ (norm_nonneg _) (mul_nonneg (norm_nonneg _) (norm_nonneg _))).2 hle
+      calc
+        ‖(A * R₀) (b i)‖ ^ 2 ≤ (‖A‖ * ‖R₀ (b i)‖) ^ 2 :=
+          (sq_le_sq₀ (norm_nonneg _) (mul_nonneg (norm_nonneg _) (norm_nonneg _))).2 hle
         _ = ‖A‖ ^ 2 * ‖R₀ (b i)‖ ^ 2 := by ring
-    calc (∑' i : w, ‖(A * R₀) (b i)‖ ^ 2) ≤ ∑' i : w, ‖A‖ ^ 2 * ‖R₀ (b i)‖ ^ 2 :=
-          (summable_norm_sq_apply_of_hilbertBasis w b hAR).tsum_le_tsum hpt (hR₀b.mul_left _)
+    calc
+      (∑' i : w, ‖(A * R₀) (b i)‖ ^ 2) ≤ ∑' i : w, ‖A‖ ^ 2 * ‖R₀ (b i)‖ ^ 2 :=
+        (summable_norm_sq_apply_of_hilbertBasis w b hAR).tsum_le_tsum hpt (hR₀b.mul_left _)
       _ = ‖A‖ ^ 2 * ∑' i : w, ‖R₀ (b i)‖ ^ 2 := tsum_mul_left
   have hSBsq : (∑' i : w, ‖(S₀ * B) (b i)‖ ^ 2) ≤ ‖B‖ ^ 2 * ∑' i : w, ‖S₀ (b i)‖ ^ 2 := by
     have hS₀b : Summable (fun i : w => ‖S₀ (b i)‖ ^ 2) :=
@@ -341,23 +371,26 @@ lemma traceNorm_mul_mul_le {A B T : H →L[ℂ] H} (hT : IsTraceClass T)
     · have hBcontr : ‖(‖B‖⁻¹ : ℂ) • B‖ ≤ 1 := by
         rw [norm_smul, norm_inv, Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg (norm_nonneg B),
           inv_mul_cancel₀ hB0]
-      have hstep := tsum_norm_sq_mul_right_le_of_opNorm_le_one
-        (X := S₀) (W := (‖B‖⁻¹ : ℂ) • B) hBcontr hS b
-      have heqB : (fun i : w => ‖(S₀ * ((‖B‖⁻¹ : ℂ) • B)) (b i)‖ ^ 2) =
-          fun i : w => ‖B‖⁻¹ ^ 2 * ‖(S₀ * B) (b i)‖ ^ 2 := by
+      have hstep :=
+        tsum_norm_sq_mul_right_le_of_opNorm_le_one (X := S₀) (W := (‖B‖⁻¹ : ℂ) • B) hBcontr hS b
+      have heqB
+          : (fun i : w => ‖(S₀ * ((‖B‖⁻¹ : ℂ) • B)) (b i)‖ ^ 2)
+            = fun i : w => ‖B‖⁻¹ ^ 2 * ‖(S₀ * B) (b i)‖ ^ 2 := by
         funext i
         have h1 : (S₀ * ((‖B‖⁻¹ : ℂ) • B)) (b i) = (‖B‖⁻¹ : ℂ) • (S₀ * B) (b i) := by
-          rw [ContinuousLinearMap.mul_def, ContinuousLinearMap.comp_apply,
-            smul_apply, map_smul, ContinuousLinearMap.mul_def,
-            ContinuousLinearMap.comp_apply]
+          rw [ContinuousLinearMap.mul_def, ContinuousLinearMap.comp_apply, smul_apply, map_smul,
+            ContinuousLinearMap.mul_def, ContinuousLinearMap.comp_apply]
         rw [h1, norm_smul, norm_inv, Complex.norm_real, Real.norm_eq_abs,
           abs_of_nonneg (norm_nonneg B), mul_pow]
       rw [heqB] at hstep
-      have htsum_smul : (∑' i : w, ‖B‖⁻¹ ^ 2 * ‖(S₀ * B) (b i)‖ ^ 2) =
-          ‖B‖⁻¹ ^ 2 * ∑' i : w, ‖(S₀ * B) (b i)‖ ^ 2 := tsum_mul_left
+      have htsum_smul
+          : (∑' i : w, ‖B‖⁻¹ ^ 2 * ‖(S₀ * B) (b i)‖ ^ 2)
+            = ‖B‖⁻¹ ^ 2 * ∑' i : w, ‖(S₀ * B) (b i)‖ ^ 2 :=
+        tsum_mul_left
       rw [htsum_smul] at hstep
       have hfinal : ‖B‖⁻¹ ^ 2 * (∑' i : w, ‖(S₀ * B) (b i)‖ ^ 2) ≤ ∑' i : w, ‖S₀ (b i)‖ ^ 2 := hstep
-      calc (∑' i : w, ‖(S₀ * B) (b i)‖ ^ 2)
+      calc
+        (∑' i : w, ‖(S₀ * B) (b i)‖ ^ 2)
           = ‖B‖ ^ 2 * (‖B‖⁻¹ ^ 2 * ∑' i : w, ‖(S₀ * B) (b i)‖ ^ 2) := by field_simp
         _ ≤ ‖B‖ ^ 2 * ∑' i : w, ‖S₀ (b i)‖ ^ 2 := mul_le_mul_of_nonneg_left hfinal (sq_nonneg _)
   have hS₀Sq : (∑' i : w, ‖S₀ (b i)‖ ^ 2) = traceNorm T hT :=
@@ -366,39 +399,41 @@ lemma traceNorm_mul_mul_le {A B T : H →L[ℂ] H} (hT : IsTraceClass T)
     traceNorm (A * T * B) hABT = traceNorm ((A * R₀) * (S₀ * B)) hABT' :=
       (traceNorm_transport heq hABT).trans traceNorm_congr
     _ ≤ Real.sqrt (∑' i : w, ‖(A * R₀) (b i)‖ ^ 2) * Real.sqrt (∑' i : w, ‖(S₀ * B) (b i)‖ ^ 2) :=
-        hbound
-    _ ≤ Real.sqrt (‖A‖ ^ 2 * ∑' i : w, ‖R₀ (b i)‖ ^ 2) *
-        Real.sqrt (‖B‖ ^ 2 * ∑' i : w, ‖S₀ (b i)‖ ^ 2) :=
-        mul_le_mul (Real.sqrt_le_sqrt hARsq) (Real.sqrt_le_sqrt hSBsq) (Real.sqrt_nonneg _)
-          (Real.sqrt_nonneg _)
-    _ = ‖A‖ * Real.sqrt (∑' i : w, ‖R₀ (b i)‖ ^ 2) *
-        (‖B‖ * Real.sqrt (∑' i : w, ‖S₀ (b i)‖ ^ 2)) := by
-        rw [Real.sqrt_mul (sq_nonneg _), Real.sqrt_mul (sq_nonneg _), Real.sqrt_sq (norm_nonneg A),
-          Real.sqrt_sq (norm_nonneg B)]
+      hbound
+    _ ≤ Real.sqrt (‖A‖ ^ 2 * ∑' i : w, ‖R₀ (b i)‖ ^ 2)
+        * Real.sqrt (‖B‖ ^ 2 * ∑' i : w, ‖S₀ (b i)‖ ^ 2) :=
+      mul_le_mul (Real.sqrt_le_sqrt hARsq) (Real.sqrt_le_sqrt hSBsq) (Real.sqrt_nonneg _)
+        (Real.sqrt_nonneg _)
+    _ = ‖A‖ * Real.sqrt (∑' i : w, ‖R₀ (b i)‖ ^ 2)
+        * (‖B‖ * Real.sqrt (∑' i : w, ‖S₀ (b i)‖ ^ 2)) := by
+      rw [Real.sqrt_mul (sq_nonneg _), Real.sqrt_mul (sq_nonneg _), Real.sqrt_sq (norm_nonneg A),
+        Real.sqrt_sq (norm_nonneg B)]
     _ ≤ ‖A‖ * Real.sqrt (traceNorm T hT) * (‖B‖ * Real.sqrt (∑' i : w, ‖S₀ (b i)‖ ^ 2)) := by
-        gcongr
-        · calc (∑' i : w, ‖R₀ (b i)‖ ^ 2) ≤ ∑' i : w, ‖S₀ (b i)‖ ^ 2 := by
-                have hS₀b : Summable (fun i : w => ‖S₀ (b i)‖ ^ 2) :=
-                  summable_norm_sq_apply_of_hilbertBasis w b hS
-                have hpt : ∀ i : w, ‖R₀ (b i)‖ ^ 2 ≤ ‖S₀ (b i)‖ ^ 2 := by
-                  intro i
-                  have hle : ‖R₀ (b i)‖ ≤ ‖S₀ (b i)‖ := by
-                    rw [hR₀def, ContinuousLinearMap.mul_def, ContinuousLinearMap.comp_apply]
-                    calc ‖Polar.polarFactor T (S₀ (b i))‖ ≤ ‖Polar.polarFactor T‖ * ‖S₀ (b i)‖ :=
-                          ContinuousLinearMap.le_opNorm _ _
-                      _ ≤ 1 * ‖S₀ (b i)‖ :=
-                          mul_le_mul_of_nonneg_right (Polar.polarFactor_opNorm_le T)
-                            (norm_nonneg _)
-                      _ = ‖S₀ (b i)‖ := one_mul _
-                  exact (sq_le_sq₀ (norm_nonneg _) (norm_nonneg _)).2 hle
-                exact (summable_norm_sq_apply_of_hilbertBasis w b hUS).tsum_le_tsum hpt hS₀b
-            _ = traceNorm T hT := hS₀Sq
+      gcongr
+      · calc
+          (∑' i : w, ‖R₀ (b i)‖ ^ 2) ≤ ∑' i : w, ‖S₀ (b i)‖ ^ 2 := by
+            have hS₀b : Summable (fun i : w => ‖S₀ (b i)‖ ^ 2) :=
+              summable_norm_sq_apply_of_hilbertBasis w b hS
+            have hpt : ∀ i : w, ‖R₀ (b i)‖ ^ 2 ≤ ‖S₀ (b i)‖ ^ 2 := by
+              intro i
+              have hle : ‖R₀ (b i)‖ ≤ ‖S₀ (b i)‖ := by
+                rw [hR₀def, ContinuousLinearMap.mul_def, ContinuousLinearMap.comp_apply]
+                calc
+                  ‖Polar.polarFactor T (S₀ (b i))‖
+                    ≤ ‖Polar.polarFactor T‖ * ‖S₀ (b i)‖ := ContinuousLinearMap.le_opNorm _ _
+                  _ ≤ 1 * ‖S₀ (b i)‖ :=
+                    mul_le_mul_of_nonneg_right (Polar.polarFactor_opNorm_le T) (norm_nonneg _)
+                  _ = ‖S₀ (b i)‖ := one_mul _
+              exact (sq_le_sq₀ (norm_nonneg _) (norm_nonneg _)).2 hle
+            exact (summable_norm_sq_apply_of_hilbertBasis w b hUS).tsum_le_tsum hpt hS₀b
+          _ = traceNorm T hT := hS₀Sq
     _ = ‖A‖ * Real.sqrt (traceNorm T hT) * (‖B‖ * Real.sqrt (traceNorm T hT)) := by rw [hS₀Sq]
     _ = ‖A‖ * traceNorm T hT * ‖B‖ := by
-        rw [show ‖A‖ * Real.sqrt (traceNorm T hT) * (‖B‖ * Real.sqrt (traceNorm T hT)) =
-            ‖A‖ * ‖B‖ * (Real.sqrt (traceNorm T hT) * Real.sqrt (traceNorm T hT)) by ring,
-          Real.mul_self_sqrt (traceNorm_nonneg T hT)]
-        ring
+      rw [show ‖A‖ * Real.sqrt (traceNorm T hT) * (‖B‖ * Real.sqrt (traceNorm T hT))
+            = ‖A‖ * ‖B‖ * (Real.sqrt (traceNorm T hT) * Real.sqrt (traceNorm T hT)) by
+          ring,
+        Real.mul_self_sqrt (traceNorm_nonneg T hT)]
+      ring
 
 end ProbabilisticTheory
 

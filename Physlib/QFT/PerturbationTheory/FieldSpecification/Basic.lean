@@ -59,20 +59,27 @@ The structure `FieldSpecification` is defined to have the following content:
 structure FieldSpecification where
   /-- A type whose elements are the constituent fields of the theory. -/
   Field : Type
-  /-- For every field `f` in `Field`, the type `PositionLabel f` has elements that label the
-    different position operators associated with the field `f`. -/
+  /--
+  For every field `f` in `Field`, the type `PositionLabel f` has elements that label the
+  different position operators associated with the field `f`.
+  -/
   PositionLabel : Field → Type
-  /-- For every field `f` in `Field`, the type `AsymptoticLabel f` has elements that label
-    the different asymptotic based field operators associated with the field `f`. -/
+  /--
+  For every field `f` in `Field`, the type `AsymptoticLabel f` has elements that label
+  the different asymptotic based field operators associated with the field `f`.
+  -/
   AsymptoticLabel : Field → Type
-  /-- For every field `f` in `Field`, the field statistic `statistic f` classifies `f` as either
-    `bosonic` or `fermionic`. -/
+  /--
+  For every field `f` in `Field`, the field statistic `statistic f` classifies `f` as either
+  `bosonic` or `fermionic`.
+  -/
   statistic : Field → FieldStatistic
 
 namespace FieldSpecification
 variable (𝓕 : FieldSpecification)
 
-/-- For a field specification `𝓕`, the inductive type `𝓕.FieldOp` is defined
+/--
+For a field specification `𝓕`, the inductive type `𝓕.FieldOp` is defined
   to contain the following elements:
 - For every `f` in `𝓕.Field`, element of `e` of `AsymptoticLabel f` and `3`-momentum `p`, an
   element labelled `inAsymp f e p` corresponding to an incoming asymptotic field operator
@@ -96,7 +103,6 @@ As an example, if `f` corresponds to a Weyl-fermion field, then
 - `outAsymp f e p`, `e` would correspond to a spin `s`, and `outAsymp f e p` would,
   once represented in the operator algebra, be proportional to the
   annihilation operator `a†(p, s)`.
-
 -/
 inductive FieldOp (𝓕 : FieldSpecification) where
   | inAsymp : (Σ f, 𝓕.AsymptoticLabel f) × (Momentum 3) → 𝓕.FieldOp
@@ -108,14 +114,17 @@ def statesIsPosition : 𝓕.FieldOp → Bool
   | FieldOp.position _ => true
   | _ => false
 
-/-- For a field specification `𝓕`, `𝓕.fieldOpToField` is defined to take field operators
-  to their underlying field. -/
+/--
+For a field specification `𝓕`, `𝓕.fieldOpToField` is defined to take field operators
+to their underlying field.
+-/
 def fieldOpToField : 𝓕.FieldOp → 𝓕.Field
   | FieldOp.inAsymp (f, _) => f.1
   | FieldOp.position (f, _) => f.1
   | FieldOp.outAsymp (f, _) => f.1
 
-/-- For a field specification `𝓕`, and an element `φ` of `𝓕.FieldOp`.
+/--
+For a field specification `𝓕`, and an element `φ` of `𝓕.FieldOp`.
   The field statistic `fieldOpStatistic φ` is defined to be the statistic associated with
   the field underlying `φ`.
 
@@ -124,7 +133,8 @@ def fieldOpToField : 𝓕.FieldOp → 𝓕.Field
 - For `φs` a list of `𝓕.FieldOp`, `𝓕 |>ₛ φs` is the product of `fieldOpStatistic φ` over
   the list `φs`.
 - For a function `f : Fin n → 𝓕.FieldOp` and a finite set `a` of `Fin n`, `𝓕 |>ₛ ⟨f, a⟩` is the
-  product of `fieldOpStatistic (f i)` for all `i ∈ a`. -/
+  product of `fieldOpStatistic (f i)` for all `i ∈ a`.
+-/
 def fieldOpStatistic : 𝓕.FieldOp → FieldStatistic := 𝓕.statistic ∘ 𝓕.fieldOpToField
 
 @[inherit_doc fieldOpStatistic]

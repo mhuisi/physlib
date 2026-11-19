@@ -40,11 +40,12 @@ component indices induced by tensor products and contractions live in sibling fi
 
 namespace TensorSpecies
 
-variable {k : Type} [CommRing k] {C G : Type} [Group G]
+variable
+  {k : Type} [CommRing k]
+  {C G : Type} [Group G]
   {V : C → Type} [∀ c, AddCommGroup (V c)] [∀ c, Module k (V c)]
   {basisIdx : C → Type} [∀ c, Fintype (basisIdx c)] [∀ c, DecidableEq (basisIdx c)]
-  {rep : (c : C) → Representation k G (V c)}
-  {b : (c : C) → Module.Basis (basisIdx c) k (V c)}
+  {rep : (c : C) → Representation k G (V c)} {b : (c : C) → Module.Basis (basisIdx c) k (V c)}
   {S : TensorSpecies k C G V basisIdx rep b}
 
 namespace Tensor
@@ -56,25 +57,28 @@ namespace Tensor
 -/
 
 set_option linter.unusedVariables false in
-/-- Given a list of indices `c : Fin n → C`, the type `ComponentIdx c` is the type of
+/--
+Given a list of indices `c : Fin n → C`, the type `ComponentIdx c` is the type of
 component indices of a tensor with those colors. For instance, if `c = ![.up, .down]`,
 then an element of `ComponentIdx c` specifies one basis index for `.up` and one for
-`.down`. -/
+`.down`.
+-/
 @[nolint unusedArguments]
-abbrev ComponentIdx {n : ℕ} {S : TensorSpecies k C G V basisIdx rep b}
-    (c : Fin n → C) : Type :=
+abbrev ComponentIdx {n : ℕ} {S : TensorSpecies k C G V basisIdx rep b} (c : Fin n → C) : Type :=
   Π j, basisIdx (c j)
 
-lemma ComponentIdx.congr_right {n : ℕ} {c : Fin n → C} (b : ComponentIdx (S := S) c)
-    (i j : Fin n) (h : i = j) : b i = basisIdxCongr (by simp [h]) (b j) := by
+lemma ComponentIdx.congr_right
+    {n : ℕ} {c : Fin n → C} (b : ComponentIdx (S := S) c) (i j : Fin n) (h : i = j)
+    : b i = basisIdxCongr (by simp [h]) (b j) := by
   subst h
   rfl
 
 /-- Casting of a `ComponentIdx` through equivalent color maps. -/
-def ComponentIdx.cast {n m : ℕ} {c : Fin n → C} {cm : Fin m → C}
-    (h : n = m) (hc : c = cm ∘ Fin.cast h) (b : ComponentIdx (S := S) c) :
-    ComponentIdx (S := S) cm := fun j =>
-      basisIdxCongr (by simp [hc]) (b (Fin.cast h.symm j))
+def ComponentIdx.cast
+    {n m : ℕ} {c : Fin n → C} {cm : Fin m → C}
+    (h : n = m) (hc : c = cm ∘ Fin.cast h) (b : ComponentIdx (S := S) c)
+    : ComponentIdx (S := S) cm := fun j =>
+  basisIdxCongr (by simp [hc]) (b (Fin.cast h.symm j))
 
 end Tensor
 

@@ -38,9 +38,11 @@ In this module in addition to defining `CrAnFieldOp` we also define some maps:
 namespace FieldSpecification
 variable (𝓕 : FieldSpecification)
 
-/-- To each field operator the specification of the type of creation and annihilation parts.
-  For asymptotic states there is only one allowed part, whilst for position
-  field operator there is two. -/
+/--
+To each field operator the specification of the type of creation and annihilation parts.
+For asymptotic states there is only one allowed part, whilst for position
+field operator there is two.
+-/
 def fieldOpToCrAnType : 𝓕.FieldOp → Type
   | FieldOp.inAsymp _ => Unit
   | FieldOp.position _ => CreateAnnihilate
@@ -60,10 +62,12 @@ instance : ∀ i, DecidableEq (𝓕.fieldOpToCrAnType i) := fun i =>
   | FieldOp.position _ => inferInstanceAs (DecidableEq CreateAnnihilate)
   | FieldOp.outAsymp _ => inferInstanceAs (DecidableEq Unit)
 
-/-- The equivalence between `𝓕.fieldOpToCreateAnnihilateType i` and
-  `𝓕.fieldOpToCreateAnnihilateType j` from an equality `i = j`. -/
-def fieldOpToCreateAnnihilateTypeCongr : {i j : 𝓕.FieldOp} → i = j →
-    𝓕.fieldOpToCrAnType i ≃ 𝓕.fieldOpToCrAnType j
+/--
+The equivalence between `𝓕.fieldOpToCreateAnnihilateType i` and
+`𝓕.fieldOpToCreateAnnihilateType j` from an equality `i = j`.
+-/
+def fieldOpToCreateAnnihilateTypeCongr
+    : {i j : 𝓕.FieldOp} → i = j → 𝓕.fieldOpToCrAnType i ≃ 𝓕.fieldOpToCrAnType j
   | _, _, rfl => Equiv.refl _
 
 /--
@@ -93,7 +97,6 @@ As an example, if `f` corresponds to a Weyl-fermion field, it would contribute
 
   `∑ s, ∫ d³p/(…) (yₐ(p,s) a†(p, s) e ^ (-i p x))`.
 - For each spin `s`, element corresponding to an outgoing asymptotic operator: `a†(p, s)`.
-
 -/
 def CrAnFieldOp : Type := Σ (s : 𝓕.FieldOp), 𝓕.fieldOpToCrAnType s
 
@@ -101,10 +104,12 @@ def CrAnFieldOp : Type := Σ (s : 𝓕.FieldOp), 𝓕.fieldOpToCrAnType s
 def crAnFieldOpToFieldOp : 𝓕.CrAnFieldOp → 𝓕.FieldOp := Sigma.fst
 
 @[simp]
-lemma crAnFieldOpToFieldOp_prod (s : 𝓕.FieldOp) (t : 𝓕.fieldOpToCrAnType s) :
-    𝓕.crAnFieldOpToFieldOp ⟨s, t⟩ = s := rfl
+lemma crAnFieldOpToFieldOp_prod (s : 𝓕.FieldOp) (t : 𝓕.fieldOpToCrAnType s)
+    : 𝓕.crAnFieldOpToFieldOp ⟨s, t⟩ = s :=
+  rfl
 
-/-- For a field specification `𝓕`, `𝓕.crAnFieldOpToCreateAnnihilate` is the map from
+/--
+For a field specification `𝓕`, `𝓕.crAnFieldOpToCreateAnnihilate` is the map from
   `𝓕.CrAnFieldOp` to `CreateAnnihilate` taking `φ` to `create` if
 - `φ` corresponds to an incoming asymptotic field operator or the creation part of a position based
   field operator.
@@ -117,17 +122,17 @@ def crAnFieldOpToCreateAnnihilate : 𝓕.CrAnFieldOp → CreateAnnihilate
   | ⟨FieldOp.position _, CreateAnnihilate.annihilate⟩ => CreateAnnihilate.annihilate
   | ⟨FieldOp.outAsymp _, _⟩ => CreateAnnihilate.annihilate
 
-/-- For a field specification `𝓕`, and an element `φ` in `𝓕.CrAnFieldOp`, the field
-  statistic `crAnStatistics φ` is defined to be the statistic associated with the field `𝓕.Field`
-  (or the `𝓕.FieldOp`) underlying `φ`.
+/--
+For a field specification `𝓕`, and an element `φ` in `𝓕.CrAnFieldOp`, the field
+statistic `crAnStatistics φ` is defined to be the statistic associated with the field `𝓕.Field`
+(or the `𝓕.FieldOp`) underlying `φ`.
 
-  The following notation is used in relation to `crAnStatistics`:
-  - For `φ` an element of `𝓕.CrAnFieldOp`, `𝓕 |>ₛ φ` is `crAnStatistics φ`.
-  - For `φs` a list of `𝓕.CrAnFieldOp`, `𝓕 |>ₛ φs` is the product of `crAnStatistics φ` over
-    the list `φs`.
+The following notation is used in relation to `crAnStatistics`:
+- For `φ` an element of `𝓕.CrAnFieldOp`, `𝓕 |>ₛ φ` is `crAnStatistics φ`.
+- For `φs` a list of `𝓕.CrAnFieldOp`, `𝓕 |>ₛ φs` is the product of `crAnStatistics φ` over
+  the list `φs`.
 -/
-def crAnStatistics : 𝓕.CrAnFieldOp → FieldStatistic :=
-  𝓕.fieldOpStatistic ∘ 𝓕.crAnFieldOpToFieldOp
+def crAnStatistics : 𝓕.CrAnFieldOp → FieldStatistic := 𝓕.fieldOpStatistic ∘ 𝓕.crAnFieldOpToFieldOp
 
 @[inherit_doc crAnStatistics]
 scoped[FieldSpecification] notation 𝓕 "|>ₛ" φ =>

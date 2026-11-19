@@ -27,9 +27,10 @@ are adapted from `batteries.scripts.check_imports.lean` authored by Joe Hendrix.
 -/
 open Lean System Meta
 
-/--  Recursively finds files in directory. -/
-partial def addModulesIn (recurse : Bool) (prev : Array Name) (root : Name := .anonymous)
-    (path : FilePath) : IO (Array Name) := do
+/-- Recursively finds files in directory. -/
+partial def addModulesIn
+    (recurse : Bool) (prev : Array Name) (root : Name := .anonymous) (path : FilePath)
+    : IO (Array Name) := do
   let mut r := prev
   for entry in ← path.readDir do
     if ← entry.path.isDir then
@@ -48,24 +49,26 @@ partial def addModulesIn (recurse : Bool) (prev : Array Name) (root : Name := .a
 def expectedImports (lib : Name) : IO (Array Name) := do
   let mut needed := #[]
   for top in ← FilePath.readDir lib.toString do
-      let rootname := FilePath.withExtension top.fileName ""
-      let root :=  lib.mkStr rootname.toString
-      if ← top.path.isDir then
-        needed ← addModulesIn (recurse := true) needed (root := root) top.path
-      else if top.path.extension == some "lean" then
-        needed := needed.push root
+    let rootname := FilePath.withExtension top.fileName ""
+    let root := lib.mkStr rootname.toString
+    if ← top.path.isDir then
+      needed ← addModulesIn (recurse := true) needed (root := root) top.path
+    else if top.path.extension == some "lean" then
+      needed := needed.push root
   pure needed
 
-def listDif : (a: List String) → (b : List String) → (List String × List String)
+def listDif : (a : List String) → (b : List String) → (List String × List String)
   | [], [] => ([], [])
   | a :: as, [] => (a :: as, [])
   | [], b :: bs => ([], b :: bs)
   | a :: as, b :: bs =>
-    if a = b then listDif as bs
-    else (a :: (listDif as bs).1, b :: (listDif as bs).2)
+    if a = b then
+      listDif as bs
+    else
+      (a :: (listDif as bs).1, b :: (listDif as bs).2)
 
-/-- Checks whether an array `imports` is sorted after `Init` is removed.  -/
-def arrayImportSorted (imports : Array Import) : IO Bool :=  do
+/-- Checks whether an array `imports` is sorted after `Init` is removed. -/
+def arrayImportSorted (imports : Array Import) : IO Bool := do
   let X := (imports.map (fun x => x.module.toString)).filter (fun x => x != "Init")
   let mut warned := false
   if ! X = X.qsort (· < ·) then
@@ -77,18 +80,21 @@ def arrayImportSorted (imports : Array Import) : IO Bool :=  do
     warned := true
   pure warned
 
-/-- Checks every file in `reqImports` is imported into `modData`
-  return true if this is NOT the case. -/
-def checkMissingImports (lib : Name) (modData : ModuleData) (reqImports : Array Name) :
-    IO Bool := do
+/--
+Checks every file in `reqImports` is imported into `modData`
+return true if this is NOT the case.
+-/
+def checkMissingImports (lib : Name) (modData : ModuleData) (reqImports : Array Name)
+    : IO Bool := do
   let names : Std.HashSet Name := Std.HashSet.ofArray (modData.imports.map (·.module))
   let mut warned := false
-  let nameArray := reqImports.filterMap (
-    fun req => if !names.contains req then
-      some req
-    else
-      none)
-  if nameArray.size ≠ 0  then
+  let nameArray :=
+    reqImports.filterMap (fun req =>
+      if ! names.contains req then
+        some req
+      else
+        none)
+  if nameArray.size ≠ 0 then
     let nameArraySort := nameArray.qsort (·.toString < ·.toString)
     IO.print s!"Files are not imported add the following to the `{lib}` file: \n"
     for name in nameArraySort do
@@ -96,13 +102,15 @@ def checkMissingImports (lib : Name) (modData : ModuleData) (reqImports : Array 
     warned := true
   pure warned
 
-/-- Check one library root `<lib>.lean` against the files under `<lib>/`.
-  Returns `true` if the root is unsorted or has missing imports. -/
+/--
+Check one library root `<lib>.lean` against the files under `<lib>/`.
+Returns `true` if the root is unsorted or has missing imports.
+-/
 def checkLib (lib : Name) : IO Bool := do
-  let imp : Import := {module := lib}
+  let imp : Import := { module := lib }
   let mFile ← findOLean imp.module
   unless (← mFile.pathExists) do
-        throw <| IO.userError s!"object file '{mFile}' of module {imp.module} does not exist"
+    throw <| IO.userError s!"object file '{mFile}' of module {imp.module} does not exist"
   let (libMod, _) ← readModuleData mFile
   let eImports ← expectedImports lib
   let sortedWarned ← arrayImportSorted libMod.imports
@@ -113,8 +121,10 @@ def checkLib (lib : Name) : IO Bool := do
     IO.println s!"\x1b[32mAll files are imported correctly into {lib}.lean.\x1b[0m"
   pure (warned ∨ sortedWarned)
 
-/-- The library roots this check covers. `PhyslibAlpha` has its own check,
-  `alphaFileImports`. -/
+/--
+The library roots this check covers. `PhyslibAlpha` has its own check,
+`alphaFileImports`.
+-/
 def libraries : List Name := [`Physlib, `QuantumInfo]
 
 def main (_ : List String) : IO UInt32 := do
@@ -123,5 +133,6 @@ def main (_ : List String) : IO UInt32 := do
   for lib in libraries do
     failed := (← checkLib lib) || failed
   if failed then
-    throw <| IO.userError s!"\x1b[31mA library root file is not sorted, or has missing imports.\x1b[0m"
+    throw <|
+      IO.userError s!"\x1b[31mA library root file is not sorted, or has missing imports.\x1b[0m"
   pure 0

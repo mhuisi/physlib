@@ -60,30 +60,29 @@ the Taylor series.
 noncomputable def taylorSeries (x₀ : SpaceTime) (f : SpaceTime → ℂ) : SpaceTimeAlgebra :=
   ofDerivValues fun s => iteratedDeriv s f x₀
 
-lemma coeff_taylorSeries (x₀ : SpaceTime) (f : SpaceTime → ℂ) (m : (Fin 1 ⊕ Fin 3) →₀ ℕ) :
-    coeff m (taylorSeries x₀ f) =
-      ((∏ ν, (m ν).factorial : ℕ) : ℂ)⁻¹ * iteratedDeriv (Finsupp.toMultiset m) f x₀ :=
+lemma coeff_taylorSeries (x₀ : SpaceTime) (f : SpaceTime → ℂ) (m : (Fin 1 ⊕ Fin 3) →₀ ℕ)
+    : coeff m (taylorSeries x₀ f)
+      = ((∏ ν, (m ν).factorial : ℕ) : ℂ)⁻¹ * iteratedDeriv (Finsupp.toMultiset m) f x₀ :=
   rfl
 
 /-- The base-point derivative values of `taylorSeries x₀ f` are the derivatives of `f` at `x₀`. -/
-lemma constantCoeff_iteratedPDeriv_taylorSeries (x₀ : SpaceTime) (f : SpaceTime → ℂ)
-    (s : Multiset (Fin 1 ⊕ Fin 3)) :
-    constantCoeff (iteratedPDeriv s (taylorSeries x₀ f)) = iteratedDeriv s f x₀ :=
+lemma constantCoeff_iteratedPDeriv_taylorSeries
+    (x₀ : SpaceTime) (f : SpaceTime → ℂ) (s : Multiset (Fin 1 ⊕ Fin 3))
+    : constantCoeff (iteratedPDeriv s (taylorSeries x₀ f)) = iteratedDeriv s f x₀ :=
   constantCoeff_iteratedPDeriv_ofDerivValues _ s
 
 TODO "Prove Borel's lemma for spacetime, showing that every formal complex series is the Taylor
   series at any chosen point of a smooth complex-valued function on real spacetime."
 
-lemma taylorSeries_add (x₀ : SpaceTime) {f g : SpaceTime → ℂ} (hf : ContDiff ℝ ∞ f)
-    (hg : ContDiff ℝ ∞ g) :
-    taylorSeries x₀ (f + g) = taylorSeries x₀ f + taylorSeries x₀ g := by
-  simp only [taylorSeries, ← derivValuesEquiv_symm_apply, iteratedDeriv_add _ hf hg,
-    Pi.add_apply, ← map_add]
+lemma taylorSeries_add
+    (x₀ : SpaceTime) {f g : SpaceTime → ℂ} (hf : ContDiff ℝ ∞ f) (hg : ContDiff ℝ ∞ g)
+    : taylorSeries x₀ (f + g) = taylorSeries x₀ f + taylorSeries x₀ g := by
+  simp only [taylorSeries, ← derivValuesEquiv_symm_apply, iteratedDeriv_add _ hf hg, Pi.add_apply,
+    ← map_add]
   rfl
 
-lemma taylorSeries_const_smul (x₀ : SpaceTime) (c : ℂ) {f : SpaceTime → ℂ}
-    (hf : ContDiff ℝ ∞ f) :
-    taylorSeries x₀ (c • f) = c • taylorSeries x₀ f := by
+lemma taylorSeries_const_smul (x₀ : SpaceTime) (c : ℂ) {f : SpaceTime → ℂ} (hf : ContDiff ℝ ∞ f)
+    : taylorSeries x₀ (c • f) = c • taylorSeries x₀ f := by
   simp only [taylorSeries, ← derivValuesEquiv_symm_apply, iteratedDeriv_const_smul _ c hf,
     Pi.smul_apply, ← map_smul]
   rfl
@@ -100,9 +99,9 @@ each `s`. A series is determined by its base-point derivative values, so the two
 -/
 
 /-- The Taylor series of a derivative is the formal partial derivative of the Taylor series. -/
-lemma taylorSeries_deriv (x₀ : SpaceTime) (μ : Fin 1 ⊕ Fin 3) {f : SpaceTime → ℂ}
-    (hf : ContDiff ℝ ∞ f) :
-    taylorSeries x₀ (∂_ μ f) = pderiv μ (taylorSeries x₀ f) :=
+lemma taylorSeries_deriv
+    (x₀ : SpaceTime) (μ : Fin 1 ⊕ Fin 3) {f : SpaceTime → ℂ} (hf : ContDiff ℝ ∞ f)
+    : taylorSeries x₀ (∂_ μ f) = pderiv μ (taylorSeries x₀ f) :=
   ext_of_constantCoeff_iteratedPDeriv fun s => by
     rw [constantCoeff_iteratedPDeriv_taylorSeries, ← iteratedPDeriv_cons,
       constantCoeff_iteratedPDeriv_taylorSeries, iteratedDeriv_cons μ s hf]

@@ -58,8 +58,8 @@ variable (T : TightBindingChain)
 noncomputable def maxCurrent : ℝ := 2 * |T.a * T.t| * Real.cos (Real.pi / (T.N + 1))
 
 /-- Every current eigenvalue is at most `maxCurrent` in absolute value. -/
-lemma abs_currentEigenvalue_le {k : ℕ} (hk : 1 ≤ k) (hkN : k ≤ T.N) :
-    |T.currentEigenvalue k| ≤ T.maxCurrent := by
+lemma abs_currentEigenvalue_le {k : ℕ} (hk : 1 ≤ k) (hkN : k ≤ T.N)
+    : |T.currentEigenvalue k| ≤ T.maxCurrent := by
   have hN : (0 : ℝ) < T.N + 1 := by positivity
   have hk' : (1 : ℝ) ≤ k := by exact_mod_cast hk
   have hkN' : (k : ℝ) ≤ T.N := by exact_mod_cast hkN
@@ -67,18 +67,19 @@ lemma abs_currentEigenvalue_le {k : ℕ} (hk : 1 ≤ k) (hkN : k ≤ T.N) :
     rw [div_le_iff₀ hN, sub_mul, div_mul_cancel₀ _ hN.ne']
     nlinarith [Real.pi_pos]
   have hp : 0 < Real.pi / (T.N + 1) := by positivity
-  have h1 := Real.cos_le_cos_of_nonneg_of_le_pi hp.le (by linarith)
-    (div_le_div_of_nonneg_right (le_mul_of_one_le_left Real.pi_pos.le hk') hN.le)
+  have h1 :=
+    Real.cos_le_cos_of_nonneg_of_le_pi hp.le (by linarith)
+      (div_le_div_of_nonneg_right (le_mul_of_one_le_left Real.pi_pos.le hk') hN.le)
   have h2 := Real.cos_le_cos_of_nonneg_of_le_pi (by positivity) (by linarith) hθ
   rw [Real.cos_pi_sub] at h2
-  calc |T.currentEigenvalue k|
-      = 2 * |T.a * T.t| * |Real.cos (k * Real.pi / (T.N + 1))| := by
-        rw [currentEigenvalue, show 2 * T.a * T.t = 2 * (T.a * T.t) by ring, abs_mul, abs_mul,
-          abs_two]
+  calc
+    |T.currentEigenvalue k| = 2 * |T.a * T.t| * |Real.cos (k * Real.pi / (T.N + 1))| := by
+      rw [currentEigenvalue, show 2 * T.a * T.t = 2 * (T.a * T.t) by ring, abs_mul, abs_mul,
+        abs_two]
     _ ≤ T.maxCurrent := by
-        unfold maxCurrent
-        gcongr
-        exact abs_le.mpr ⟨by linarith, h1⟩
+      unfold maxCurrent
+      gcongr
+      exact abs_le.mpr ⟨by linarith, h1⟩
 
 /-!
 
@@ -93,8 +94,8 @@ noncomputable def currentBasisVec (k : Fin T.N) : T.HilbertSpace :=
 lemma norm_currentBasisVec (k : Fin T.N) : ‖T.currentBasisVec k‖ = 1 := by
   rw [currentBasisVec, norm_smul, Complex.norm_real, Real.norm_of_nonneg (Real.sqrt_nonneg _),
     ← Real.sqrt_sq (norm_nonneg _), T.norm_sq_currentEigenstate (by omega) (by omega),
-    ← Real.sqrt_mul (by positivity), div_mul_div_comm, mul_comm (2 : ℝ),
-    div_self (by positivity), Real.sqrt_one]
+    ← Real.sqrt_mul (by positivity), div_mul_div_comm, mul_comm (2 : ℝ), div_self (by positivity),
+    Real.sqrt_one]
 
 /-- The normalized current eigenstates are orthonormal. -/
 lemma orthonormal_currentBasisVec (ht : T.t ≠ 0) : Orthonormal ℂ T.currentBasisVec := by
@@ -105,8 +106,8 @@ lemma orthonormal_currentBasisVec (ht : T.t ≠ 0) : Orthonormal ℂ T.currentBa
     rw [inner_self_eq_norm_sq_to_K, T.norm_currentBasisVec]
     simp
   · have hN : (0 : ℝ) < T.N + 1 := by positivity
-    have hmem (m : Fin T.N) :
-        (((m : ℕ) + 1 : ℕ) : ℝ) * Real.pi / (T.N + 1) ∈ Set.Icc 0 Real.pi := by
+    have hmem (m : Fin T.N)
+        : (((m : ℕ) + 1 : ℕ) : ℝ) * Real.pi / (T.N + 1) ∈ Set.Icc 0 Real.pi := by
       have hm : (((m : ℕ) + 1 : ℕ) : ℝ) ≤ T.N + 1 := by
         exact_mod_cast (by omega : (m : ℕ) + 1 ≤ T.N + 1)
       exact ⟨by positivity, by rw [div_le_iff₀ hN]; nlinarith [Real.pi_pos]⟩
@@ -116,8 +117,9 @@ lemma orthonormal_currentBasisVec (ht : T.t ≠ 0) : Orthonormal ℂ T.currentBa
       have := Real.injOn_cos (hmem k) (hmem l) hc
       rw [div_left_inj' hN.ne', mul_left_inj' Real.pi_pos.ne', Nat.cast_inj] at this
       exact h (Fin.ext (by omega))
-    have hJ (m : Fin T.N) : T.current (T.currentBasisVec m) =
-        (T.currentEigenvalue ((m : ℕ) + 1) : ℂ) • T.currentBasisVec m := by
+    have hJ (m : Fin T.N)
+        : T.current (T.currentBasisVec m)
+          = (T.currentEigenvalue ((m : ℕ) + 1) : ℂ) • T.currentBasisVec m := by
       rw [currentBasisVec, map_smul, current_currentEigenstate, smul_comm]
     have key := T.current_hermitian (T.currentBasisVec k) (T.currentBasisVec l)
     rw [hJ, hJ, inner_smul_left, inner_smul_right, Complex.conj_ofReal] at key
@@ -137,17 +139,19 @@ noncomputable def currentBasis (ht : T.t ≠ 0) : OrthonormalBasis (Fin T.N) ℂ
 -/
 
 /-- The current on the basis of current eigenstates. -/
-lemma current_currentBasis (ht : T.t ≠ 0) (k : Fin T.N) :
-    T.current (T.currentBasis ht k) =
-      (T.currentEigenvalue ((k : ℕ) + 1) : ℂ) • T.currentBasis ht k := by
+lemma current_currentBasis (ht : T.t ≠ 0) (k : Fin T.N)
+    : T.current (T.currentBasis ht k)
+      = (T.currentEigenvalue ((k : ℕ) + 1) : ℂ) • T.currentBasis ht k := by
   simp only [currentBasis, OrthonormalBasis.coe_mk, currentBasisVec, map_smul,
     current_currentEigenstate, smul_comm _ (T.currentEigenvalue _ : ℂ)]
 
-/-- The mean current in the basis of current eigenstates:
-`re ⟨ψ|J|ψ⟩ = ∑ k, λ_k |⟨k|ψ⟩|²`. -/
-lemma re_inner_current_eq_sum (ht : T.t ≠ 0) (ψ : T.HilbertSpace) :
-    (⟪ψ, T.current ψ⟫_ℂ).re =
-      ∑ k : Fin T.N, T.currentEigenvalue ((k : ℕ) + 1) * ‖⟪T.currentBasis ht k, ψ⟫_ℂ‖ ^ 2 := by
+/--
+The mean current in the basis of current eigenstates:
+`re ⟨ψ|J|ψ⟩ = ∑ k, λ_k |⟨k|ψ⟩|²`.
+-/
+lemma re_inner_current_eq_sum (ht : T.t ≠ 0) (ψ : T.HilbertSpace)
+    : (⟪ψ, T.current ψ⟫_ℂ).re
+      = ∑ k : Fin T.N, T.currentEigenvalue ((k : ℕ) + 1) * ‖⟪T.currentBasis ht k, ψ⟫_ℂ‖ ^ 2 := by
   rw [← (T.currentBasis ht).sum_inner_mul_inner, Complex.re_sum]
   refine Finset.sum_congr rfl fun k _ => ?_
   rw [← T.current_hermitian, current_currentBasis, inner_smul_left, Complex.conj_ofReal,
@@ -155,29 +159,30 @@ lemma re_inner_current_eq_sum (ht : T.t ≠ 0) (ψ : T.HilbertSpace) :
     ← Complex.ofReal_mul, Complex.ofReal_re]
 
 /-- In every vector, `|re ⟨ψ|J|ψ⟩| ≤ maxCurrent ‖ψ‖²`. -/
-lemma abs_re_inner_current_le (ht : T.t ≠ 0) (ψ : T.HilbertSpace) :
-    |(⟪ψ, T.current ψ⟫_ℂ).re| ≤ T.maxCurrent * ‖ψ‖ ^ 2 := by
+lemma abs_re_inner_current_le (ht : T.t ≠ 0) (ψ : T.HilbertSpace)
+    : |(⟪ψ, T.current ψ⟫_ℂ).re| ≤ T.maxCurrent * ‖ψ‖ ^ 2 := by
   let b := T.currentBasis ht
   have hsum := T.re_inner_current_eq_sum ht ψ
   rw [hsum, ← b.sum_sq_norm_inner_right, Finset.mul_sum]
   refine (Finset.abs_sum_le_sum_abs _ _).trans (Finset.sum_le_sum fun k _ => ?_)
   have hk := k.isLt
   rw [abs_mul, abs_of_nonneg (sq_nonneg ‖⟪b k, ψ⟫_ℂ‖)]
-  exact mul_le_mul_of_nonneg_right (T.abs_currentEigenvalue_le (by omega) (by omega))
-    (sq_nonneg _)
+  exact mul_le_mul_of_nonneg_right (T.abs_currentEigenvalue_le (by omega) (by omega)) (sq_nonneg _)
 
-/-- **Speed limit.** In every state, `|⟨J⟩| ≤ maxCurrent`: no state of the open chain moves
-faster than `2 |a t| cos (π / (N + 1))`. -/
-lemma abs_expectation_current_le (ht : T.t ≠ 0)
-    (ω : 𝓢[ℂ, T.HilbertSpace →L[ℂ] T.HilbertSpace]) :
-    |ω⟨T.currentObservable⟩| ≤ T.maxCurrent := by
-  have hpos (s : ℝ) (hs : |s| = 1) :
-      0 ≤ ((T.maxCurrent : ℂ) • 1 - (s : ℂ) • (T.currentObservable :
-        T.HilbertSpace →L[ℂ] T.HilbertSpace)) := by
+/--
+**Speed limit.** In every state, `|⟨J⟩| ≤ maxCurrent`: no state of the open chain moves
+faster than `2 |a t| cos (π / (N + 1))`.
+-/
+lemma abs_expectation_current_le (ht : T.t ≠ 0) (ω : 𝓢[ℂ, T.HilbertSpace →L[ℂ] T.HilbertSpace])
+    : |ω⟨T.currentObservable⟩| ≤ T.maxCurrent := by
+  have hpos (s : ℝ) (hs : |s| = 1)
+      : 0
+        ≤ ((T.maxCurrent : ℂ) • 1
+          - (s : ℂ) • (T.currentObservable : T.HilbertSpace →L[ℂ] T.HilbertSpace)) := by
     rw [ContinuousLinearMap.nonneg_iff_isPositive]
     refine ⟨fun x y => ?_, fun x => ?_⟩
-    · change ⟪(T.maxCurrent : ℂ) • x - (s : ℂ) • T.current x, y⟫_ℂ =
-        ⟪x, (T.maxCurrent : ℂ) • y - (s : ℂ) • T.current y⟫_ℂ
+    · change ⟪(T.maxCurrent : ℂ) • x - (s : ℂ) • T.current x, y⟫_ℂ
+        = ⟪x, (T.maxCurrent : ℂ) • y - (s : ℂ) • T.current y⟫_ℂ
       rw [inner_sub_left, inner_sub_right, inner_smul_left, inner_smul_left, inner_smul_right,
         inner_smul_right, Complex.conj_ofReal, Complex.conj_ofReal, current_hermitian]
     · change 0 ≤ (⟪(T.maxCurrent : ℂ) • x - (s : ℂ) • T.current x, x⟫_ℂ).re
@@ -189,28 +194,34 @@ lemma abs_expectation_current_le (ht : T.t ≠ 0)
       rw [hn]
       linarith [T.abs_re_inner_current_le ht x]
   have hω (s : ℝ) (hs : |s| = 1) : s * ω⟨T.currentObservable⟩ ≤ T.maxCurrent := by
-    have h : 0 ≤ ω ((T.maxCurrent : ℂ) • 1 - (s : ℂ) • (T.currentObservable :
-        T.HilbertSpace →L[ℂ] T.HilbertSpace)) := ω.map_nonneg (hpos s hs)
+    have h
+        : 0
+          ≤ ω
+            ((T.maxCurrent : ℂ) • 1
+              - (s : ℂ) • (T.currentObservable : T.HilbertSpace →L[ℂ] T.HilbertSpace)) :=
+      ω.map_nonneg (hpos s hs)
     rw [map_sub, map_smul, map_smul, map_one, apply_observable_eq_expectation] at h
     have := (Complex.nonneg_iff.mp h).1
     simpa using this
   exact abs_le.mpr ⟨by linarith [hω (-1) (by simp)], by linarith [hω 1 (by simp)]⟩
 
 /-- The maximal current state carries the current `⟨J⟩ = 2 a t cos (π / (N + 1))`. -/
-lemma expectation_current_maxCurrentState :
-    T.maxCurrentVectorState⟨T.currentObservable⟩ =
-      2 * (T.a * T.t * Real.cos (Real.pi / (T.N + 1))) := by
+lemma expectation_current_maxCurrentState
+    : T.maxCurrentVectorState⟨T.currentObservable⟩
+      = 2 * (T.a * T.t * Real.cos (Real.pi / (T.N + 1))) := by
   have h := T.expectation_bracket_openHamiltonian_position T.maxCurrentVectorState
   rw [expectation_bracket_maxCurrentState] at h
   linarith
 
 /-- The maximal current state moves at the speed limit. -/
-lemma abs_expectation_current_maxCurrentState :
-    |T.maxCurrentVectorState⟨T.currentObservable⟩| = T.maxCurrent := by
+lemma abs_expectation_current_maxCurrentState
+    : |T.maxCurrentVectorState⟨T.currentObservable⟩| = T.maxCurrent := by
   have hN : (1 : ℝ) ≤ T.N := by exact_mod_cast Nat.one_le_iff_ne_zero.mpr (NeZero.ne T.N)
-  have hc : 0 ≤ Real.cos (Real.pi / (T.N + 1)) := Real.cos_nonneg_of_mem_Icc
-    ⟨by linarith [show 0 < Real.pi / (T.N + 1) by positivity, Real.pi_pos],
-      div_le_div_of_nonneg_left Real.pi_pos.le two_pos (by linarith)⟩
+  have hc : 0 ≤ Real.cos (Real.pi / (T.N + 1)) :=
+    Real.cos_nonneg_of_mem_Icc ⟨
+      by linarith [show 0 < Real.pi / (T.N + 1) by positivity, Real.pi_pos],
+      div_le_div_of_nonneg_left Real.pi_pos.le two_pos (by linarith)
+    ⟩
   rw [expectation_current_maxCurrentState, maxCurrent, abs_mul, abs_two, abs_mul (T.a * T.t),
     abs_of_nonneg hc]
   ring

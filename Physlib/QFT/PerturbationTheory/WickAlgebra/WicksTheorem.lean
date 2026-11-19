@@ -39,9 +39,10 @@ open FieldStatistic
 
 -/
 
-lemma wicks_theorem_congr {φs φs' : List 𝓕.FieldOp} (h : φs = φs') :
-    ∑ (φsΛ : WickContraction φs.length), φsΛ.wickTerm
-    = ∑ (φs'Λ : WickContraction φs'.length), φs'Λ.wickTerm := h ▸ rfl
+lemma wicks_theorem_congr {φs φs' : List 𝓕.FieldOp} (h : φs = φs')
+    : ∑ (φsΛ : WickContraction φs.length), φsΛ.wickTerm
+      = ∑ (φs'Λ : WickContraction φs'.length), φs'Λ.wickTerm :=
+  h ▸ rfl
 
 /--
 For a list `φs` of `𝓕.FieldOp`, Wick's theorem states that
@@ -76,23 +77,26 @@ For the RHS:
 Both sides are now sums over the same thing and their terms equate by the nature of the
 lemmas used.
 -/
-theorem wicks_theorem : (φs : List 𝓕.FieldOp) → 𝓣(ofFieldOpList φs) =
-    ∑ (φsΛ : WickContraction φs.length), φsΛ.wickTerm
+theorem wicks_theorem
+    : (φs : List 𝓕.FieldOp)
+      → 𝓣(ofFieldOpList φs) = ∑ (φsΛ : WickContraction φs.length), φsΛ.wickTerm
   | [] => by
     simp only [timeOrder_ofFieldOpList_nil, List.length_nil, sum_WickContraction_nil,
       wickTerm_empty_nil]
   | φ :: φs => by
     have ih := wicks_theorem (eraseMaxTimeField φ φs)
     conv_lhs => rw [timeOrder_eq_maxTimeField_mul_finset, ih, Finset.mul_sum]
-    have h1 : φ :: φs =
-        (eraseMaxTimeField φ φs).insertIdx (maxTimeFieldPosFin φ φs) (maxTimeField φ φs) := by
+    have h1
+        : φ :: φs
+          = (eraseMaxTimeField φ φs).insertIdx (maxTimeFieldPosFin φ φs) (maxTimeField φ φs) := by
       simp only [eraseMaxTimeField, insertionSortDropMinPos, List.length_cons, Nat.succ_eq_add_one,
         maxTimeField, insertionSortMin, List.get_eq_getElem]
       erw [insertIdx_eraseIdx_fin]
     conv_rhs => rw [wicks_theorem_congr h1, insertLift_sum]
     refine Finset.sum_congr rfl fun c _ => ?_
-    rw [Algebra.smul_mul_assoc, mul_wickTerm_eq_sum
-      (maxTimeField φ φs) (eraseMaxTimeField φ φs) (maxTimeFieldPosFin φ φs) c, smul_smul]
+    rw [Algebra.smul_mul_assoc,
+      mul_wickTerm_eq_sum (maxTimeField φ φs) (eraseMaxTimeField φ φs) (maxTimeFieldPosFin φ φs) c,
+      smul_smul]
     simp only [exchangeSign_mul_self, Nat.succ_eq_add_one, Fintype.sum_option,
       Finset.univ_eq_attach, smul_add, one_smul]
     · exact fun k => timeOrder_maxTimeField _ _ k

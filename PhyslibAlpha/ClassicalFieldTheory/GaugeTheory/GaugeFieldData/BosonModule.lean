@@ -62,8 +62,11 @@ open Matrix MatrixGroups TensorProduct
 
 namespace GaugeFieldData
 
-variable {G₀ : Type} [Group G₀] {𝔤 : Type} [LieRing 𝔤] [LieAlgebra ℝ 𝔤] [Module.Finite ℝ 𝔤]
-  {GJ : Type} [Group GJ] {𝔤J : Type} [LieRing 𝔤J] [LieAlgebra ℝ 𝔤J]
+variable
+  {G₀ : Type} [Group G₀]
+  {𝔤 : Type} [LieRing 𝔤] [LieAlgebra ℝ 𝔤] [Module.Finite ℝ 𝔤]
+  {GJ : Type} [Group GJ]
+  {𝔤J : Type} [LieRing 𝔤J] [LieAlgebra ℝ 𝔤J]
   {jets : LocalGaugeData G₀ 𝔤 GJ 𝔤J} (T : GaugeFieldData jets)
 
 /-!
@@ -72,12 +75,14 @@ variable {G₀ : Type} [Group G₀] {𝔤 : Type} [LieRing 𝔤] [LieAlgebra ℝ
 
 -/
 
-/-- **The bosonic module of a gauge theory**: the product, over the bosonic species,
-  of their value spaces. One element of it is a value of the entire bosonic content of
-  the theory — the column of all the boson fields — as opposed to
-  `GaugeFieldData.BosonGenerators`, which is a space of component *functions* and is
-  infinite-dimensional. Since the species type is finite the product is also their direct
-  sum. -/
+/--
+**The bosonic module of a gauge theory**: the product, over the bosonic species,
+of their value spaces. One element of it is a value of the entire bosonic content of
+the theory — the column of all the boson fields — as opposed to
+`GaugeFieldData.BosonGenerators`, which is a space of component *functions* and is
+infinite-dimensional. Since the species type is finite the product is also their direct
+sum.
+-/
 abbrev BosonModule : Type := ∀ i, T.BosonValue i
 
 /-!
@@ -87,43 +92,47 @@ abbrev BosonModule : Type := ∀ i, T.BosonValue i
 -/
 
 /-- The component of a bosonic configuration in one species. -/
-abbrev projBosonValue (i : T.BosonSpecies) :
-    T.BosonModule →ₗ[ℂ] T.BosonValue i :=
-  LinearMap.proj i
+abbrev projBosonValue (i : T.BosonSpecies) : T.BosonModule →ₗ[ℂ] T.BosonValue i := LinearMap.proj i
 
-/-- The inclusion of one bosonic species into the bosonic module, extending a value
-  of that species by zero in every other. -/
-abbrev inclBosonValue (i : T.BosonSpecies) :
-    T.BosonValue i →ₗ[ℂ] T.BosonModule :=
+/--
+The inclusion of one bosonic species into the bosonic module, extending a value
+of that species by zero in every other.
+-/
+abbrev inclBosonValue (i : T.BosonSpecies) : T.BosonValue i →ₗ[ℂ] T.BosonModule :=
   LinearMap.single ℂ T.BosonValue i
 
 variable {T}
 
 @[simp]
-lemma projBosonValue_apply (i : T.BosonSpecies) (v : T.BosonModule) :
-    T.projBosonValue i v = v i := rfl
+lemma projBosonValue_apply (i : T.BosonSpecies) (v : T.BosonModule) : T.projBosonValue i v = v i :=
+  rfl
 
-lemma projBosonValue_inclBosonValue_self (i : T.BosonSpecies)
-    (v : T.BosonValue i) : T.projBosonValue i (T.inclBosonValue i v) = v :=
+lemma projBosonValue_inclBosonValue_self (i : T.BosonSpecies) (v : T.BosonValue i)
+    : T.projBosonValue i (T.inclBosonValue i v) = v :=
   Pi.single_eq_same i v
 
-/-- A value of one species has no component in any other species: the inclusions of
-  distinct species have disjoint supports. -/
-lemma projBosonValue_inclBosonValue_of_ne {i j : T.BosonSpecies} (h : i ≠ j)
-    (v : T.BosonValue j) : T.projBosonValue i (T.inclBosonValue j v) = 0 :=
+/--
+A value of one species has no component in any other species: the inclusions of
+distinct species have disjoint supports.
+-/
+lemma projBosonValue_inclBosonValue_of_ne {i j : T.BosonSpecies} (h : i ≠ j) (v : T.BosonValue j)
+    : T.projBosonValue i (T.inclBosonValue j v) = 0 :=
   Pi.single_eq_of_ne h v
 
-/-- **A bosonic configuration is the sum of its species components**. The product over
-  the species is their direct sum, the species type being finite, so nothing is lost in
-  describing the bosonic content of the theory by one module. -/
-lemma sum_inclBosonValue_proj (v : T.BosonModule) :
-    ∑ i, T.inclBosonValue i (v i) = v :=
+/--
+**A bosonic configuration is the sum of its species components**. The product over
+the species is their direct sum, the species type being finite, so nothing is lost in
+describing the bosonic content of the theory by one module.
+-/
+lemma sum_inclBosonValue_proj (v : T.BosonModule) : ∑ i, T.inclBosonValue i (v i) = v :=
   LinearMap.sum_single_apply T.BosonValue v
 
 /-- Two linear maps out of the bosonic module agreeing on every species are equal. -/
-lemma bosonModule_hom_ext {N : Type} [AddCommGroup N] [Module ℂ N]
+lemma bosonModule_hom_ext
+    {N : Type} [AddCommGroup N] [Module ℂ N]
     {F F' : T.BosonModule →ₗ[ℂ] N}
-    (h : ∀ i, F.comp (T.inclBosonValue i) = F'.comp (T.inclBosonValue i)) : F = F' :=
+    (h : ∀ i, F.comp (T.inclBosonValue i) = F'.comp (T.inclBosonValue i))
+    : F = F' :=
   LinearMap.pi_ext' fun i => h i
 
 /-!
@@ -134,11 +143,13 @@ lemma bosonModule_hom_ext {N : Type} [AddCommGroup N] [Module ℂ N]
 
 variable (T)
 
-/-- **The dimension of the bosonic module is the sum of the dimensions of the
-  species**, each species contributing the number of complex components of its
-  multiplet. -/
-lemma finrank_bosonModule :
-    Module.finrank ℂ T.BosonModule = ∑ i, Module.finrank ℂ (T.BosonValue i) :=
+/--
+**The dimension of the bosonic module is the sum of the dimensions of the
+species**, each species contributing the number of complex components of its
+multiplet.
+-/
+lemma finrank_bosonModule
+    : Module.finrank ℂ T.BosonModule = ∑ i, Module.finrank ℂ (T.BosonValue i) :=
   Module.finrank_pi_fintype ℂ
 
 end GaugeFieldData

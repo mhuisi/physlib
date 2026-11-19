@@ -53,32 +53,38 @@ variable {A : Type*} [CStarAlgebra A] [PartialOrder A] [StarOrderedRing A]
 -/
 
 /-- In a partially ordered additive group, two nonnegative terms summing to zero vanish. -/
-lemma nonneg_add_eq_zero {x y : A} (hx : 0 ≤ x) (hy : 0 ≤ y) (hxy : x + y = 0) :
-    x = 0 := by
+lemma nonneg_add_eq_zero {x y : A} (hx : 0 ≤ x) (hy : 0 ≤ y) (hxy : x + y = 0) : x = 0 := by
   apply le_antisymm
   · rw [← hxy]
     exact le_add_of_nonneg_right hy
   · exact hx
 
-/-- If `b * x * b = 0` for `b` self-adjoint and `x ≥ 0`, then `√x * b = 0`: the C⋆-identity
-`‖z⋆z‖ = ‖z‖²`, applied to `z := √x * b`, since `z⋆z = b * √x * √x * b = b * x * b`. -/
-lemma sandwich_eq_zero {b x : A} (hb : IsSelfAdjoint b) (hx : 0 ≤ x)
-    (h : b * x * b = 0) : CFC.sqrt x * b = 0 := by
+/--
+If `b * x * b = 0` for `b` self-adjoint and `x ≥ 0`, then `√x * b = 0`: the C⋆-identity
+`‖z⋆z‖ = ‖z‖²`, applied to `z := √x * b`, since `z⋆z = b * √x * √x * b = b * x * b`.
+-/
+lemma sandwich_eq_zero {b x : A} (hb : IsSelfAdjoint b) (hx : 0 ≤ x) (h : b * x * b = 0)
+    : CFC.sqrt x * b = 0 := by
   refine star_mul_self_eq_zero.mp ?_
   have hstar : star (CFC.sqrt x * b) = b * CFC.sqrt x := by
     rw [star_mul, hb.star_eq, (CFC.sqrt_nonneg x).isSelfAdjoint.star_eq]
   rw [hstar]
-  calc b * CFC.sqrt x * (CFC.sqrt x * b) = b * (CFC.sqrt x * CFC.sqrt x) * b := by noncomm_ring
+  calc
+    b * CFC.sqrt x * (CFC.sqrt x * b)
+      = b * (CFC.sqrt x * CFC.sqrt x) * b := by noncomm_ring
     _ = b * x * b := by rw [CFC.sqrt_mul_sqrt_self x hx]
     _ = 0 := h
 
-/-- The algebraic heart of `IsIdempotentElem.isSharp`, stated on bare elements of `A`: an
+/--
+The algebraic heart of `IsIdempotentElem.isSharp`, stated on bare elements of `A`: an
 idempotent `a` between `0` and `1` cannot be written as a nontrivial mixture of two different
-effects. -/
-lemma eq_of_mem_openSegment_of_isIdempotentElem {a y₁ y₂ : A} (ha0 : 0 ≤ a) (_ha1 : a ≤ 1)
-    (hidem : a * a = a) (hy₁0 : 0 ≤ y₁) (hy₁1 : y₁ ≤ 1) (hy₂0 : 0 ≤ y₂) (hy₂1 : y₂ ≤ 1)
-    {t s : ℝ} (ht : 0 < t) (hs : 0 < s) (hts : t + s = 1) (heq : t • y₁ + s • y₂ = a) :
-    y₁ = a := by
+effects.
+-/
+lemma eq_of_mem_openSegment_of_isIdempotentElem
+    {a y₁ y₂ : A} (ha0 : 0 ≤ a) (_ha1 : a ≤ 1) (hidem : a * a = a) (hy₁0 : 0 ≤ y₁) (hy₁1 : y₁ ≤ 1)
+    (hy₂0 : 0 ≤ y₂) (hy₂1 : y₂ ≤ 1)
+    {t s : ℝ} (ht : 0 < t) (hs : 0 < s) (hts : t + s = 1) (heq : t • y₁ + s • y₂ = a)
+    : y₁ = a := by
   have ha : IsSelfAdjoint a := IsSelfAdjoint.of_nonneg ha0
   have hone : IsSelfAdjoint (1 : A) := IsSelfAdjoint.one A
   have hb : IsSelfAdjoint (1 - a) := hone.sub ha
@@ -97,8 +103,7 @@ lemma eq_of_mem_openSegment_of_isIdempotentElem {a y₁ y₂ : A} (ha0 : 0 ≤ a
   have hb2 : 0 ≤ (1 - a) * y₂ * (1 - a) := hb.conjugate_nonneg hy₂0
   have hz1 : t • ((1 - a) * y₁ * (1 - a)) = 0 :=
     nonneg_add_eq_zero (smul_nonneg ht.le hb1) (smul_nonneg hs.le hb2) hsplit
-  have h1 : (1 - a) * y₁ * (1 - a) = 0 :=
-    (smul_eq_zero.mp hz1).resolve_left ht.ne'
+  have h1 : (1 - a) * y₁ * (1 - a) = 0 := (smul_eq_zero.mp hz1).resolve_left ht.ne'
   -- Hence `y₁` commutes with `1 - a`, i.e. with `a`, and is fixed by conjugating with `a`.
   have hsq := sandwich_eq_zero hb hy₁0 h1
   have hcomm1 : y₁ * (1 - a) = 0 := by
@@ -121,10 +126,8 @@ lemma eq_of_mem_openSegment_of_isIdempotentElem {a y₁ y₂ : A} (ha0 : 0 ≤ a
     have := ha.conjugate_le_conjugate hy₁1
     rwa [mul_one, hidem, hfix] at this
   have hz2 : s • ((1 - a) * y₂ * (1 - a)) = 0 :=
-    nonneg_add_eq_zero (smul_nonneg hs.le hb2) (smul_nonneg ht.le hb1)
-      (by rwa [add_comm] at hsplit)
-  have h2 : (1 - a) * y₂ * (1 - a) = 0 :=
-    (smul_eq_zero.mp hz2).resolve_left hs.ne'
+    nonneg_add_eq_zero (smul_nonneg hs.le hb2) (smul_nonneg ht.le hb1) (by rwa [add_comm] at hsplit)
+  have h2 : (1 - a) * y₂ * (1 - a) = 0 := (smul_eq_zero.mp hz2).resolve_left hs.ne'
   have hsq2 := sandwich_eq_zero hb hy₂0 h2
   have hcomm1' : y₂ * (1 - a) = 0 := by
     have : CFC.sqrt y₂ * (CFC.sqrt y₂ * (1 - a)) = CFC.sqrt y₂ * 0 := by rw [hsq2]
@@ -143,10 +146,12 @@ lemma eq_of_mem_openSegment_of_isIdempotentElem {a y₁ y₂ : A} (ha0 : 0 ≤ a
   -- Averaging `a - y₁ ≥ 0` and `a - y₂ ≥ 0` back against `a = t • y₁ + s • y₂` forces both to `0`.
   have hfin : t • (a - y₁) + s • (a - y₂) = 0 := by
     have h1 : t • a + s • a = a := by rw [← add_smul, hts, one_smul]
-    rw [smul_sub, smul_sub, show t • a - t • y₁ + (s • a - s • y₂) =
-      (t • a + s • a) - (t • y₁ + s • y₂) from by abel, h1, heq, sub_self]
-  have hz3 : t • (a - y₁) = 0 := nonneg_add_eq_zero (smul_nonneg ht.le (sub_nonneg.mpr hle1))
-    (smul_nonneg hs.le (sub_nonneg.mpr hle2)) hfin
+    rw [smul_sub, smul_sub,
+      show t • a - t • y₁ + (s • a - s • y₂) = (t • a + s • a) - (t • y₁ + s • y₂) from by abel, h1,
+      heq, sub_self]
+  have hz3 : t • (a - y₁) = 0 :=
+    nonneg_add_eq_zero (smul_nonneg ht.le (sub_nonneg.mpr hle1))
+      (smul_nonneg hs.le (sub_nonneg.mpr hle2)) hfin
   have h3 : a - y₁ = 0 := (smul_eq_zero.mp hz3).resolve_left ht.ne'
   exact (sub_eq_zero.mp h3).symm
 
@@ -156,10 +161,13 @@ lemma eq_of_mem_openSegment_of_isIdempotentElem {a y₁ y₂ : A} (ha0 : 0 ≤ a
 
 -/
 
-/-- **Projections are sharp**: an idempotent effect is not a proper mixture of two different
-effects. -/
-lemma _root_.IsIdempotentElem.isSharp {e : Effect (selfAdjoint A)}
-    (h : IsIdempotentElem ((e : selfAdjoint A) : A)) : Effect.IsSharp e := by
+/--
+**Projections are sharp**: an idempotent effect is not a proper mixture of two different
+effects.
+-/
+lemma _root_.IsIdempotentElem.isSharp
+    {e : Effect (selfAdjoint A)} (h : IsIdempotentElem ((e : selfAdjoint A) : A))
+    : Effect.IsSharp e := by
   refine ⟨e.2, fun x₁ hx₁ x₂ hx₂ hseg => ?_⟩
   obtain ⟨t, s, ht, hs, hts, hz⟩ := hseg
   apply Subtype.ext

@@ -58,8 +58,10 @@ namespace EffectivePotential
 ## A. The effective potential and its gauge invariance
 -/
 
-/-- The proposition that the general potential is invariant under
-  the global action of the gauge group. -/
+/--
+The proposition that the general potential is invariant under
+the global action of the gauge group.
+-/
 def IsInvariant (V : EffectivePotential) : Prop :=
   ∀ (g : GaugeGroupI), ∀ (φ : TwoHiggsDoublet), V (g • φ) = V φ
 
@@ -67,25 +69,36 @@ def IsInvariant (V : EffectivePotential) : Prop :=
 ## B. Maximum mass dimension
 -/
 
-/-- The proposition that the potential `V` has a maximum mass dimension
-  less then or equal to `n` - also implying it is a polynomial. -/
+/--
+The proposition that the potential `V` has a maximum mass dimension
+less then or equal to `n` - also implying it is a polynomial.
+-/
 def HasMaxMassDimLE (V : EffectivePotential) (n : ℕ) : Prop :=
-  ∃ p : MvPolynomial (Module.Dual ℝ TwoHiggsDoublet) ℝ, (∀ φ : TwoHiggsDoublet, V φ = p.eval
-   (fun i => i φ) ) ∧ p.totalDegree ≤ n
+  ∃ p : MvPolynomial (Module.Dual ℝ TwoHiggsDoublet) ℝ,
+    (∀ φ : TwoHiggsDoublet, V φ = p.eval (fun i => i φ)) ∧ p.totalDegree ≤ n
 
-/-- A polynomial potential, restricted along any real-linear parametrisation `L` of field
-  configurations, is a genuine polynomial in the parameters. This is the bookkeeping that lets the
-  potential be evaluated on the field components of a gauge slice. -/
-lemma HasMaxMassDimLE.exists_comp_linear_poly {V : EffectivePotential} {n : ℕ}
-    (h : HasMaxMassDimLE V n) {ι : Type*} [Fintype ι] [DecidableEq ι]
-    (L : (ι → ℝ) →ₗ[ℝ] TwoHiggsDoublet) :
-    ∃ P : MvPolynomial ι ℝ, ∀ a : ι → ℝ, V (L a) = P.eval a := by
+/--
+A polynomial potential, restricted along any real-linear parametrisation `L` of field
+configurations, is a genuine polynomial in the parameters. This is the bookkeeping that lets the
+potential be evaluated on the field components of a gauge slice.
+-/
+lemma HasMaxMassDimLE.exists_comp_linear_poly
+    {V : EffectivePotential} {n : ℕ} (h : HasMaxMassDimLE V n)
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (L : (ι → ℝ) →ₗ[ℝ] TwoHiggsDoublet)
+    : ∃ P : MvPolynomial ι ℝ, ∀ a : ι → ℝ, V (L a) = P.eval a := by
   obtain ⟨p, hp, -⟩ := h
-  refine ⟨MvPolynomial.aeval
-    (fun i => ∑ k : ι, MvPolynomial.C (i (L (Pi.single k 1))) * MvPolynomial.X k) p, fun a => ?_⟩
-  have key : (fun i : Module.Dual ℝ TwoHiggsDoublet => i (L a))
-      = fun i => MvPolynomial.eval a
-        (∑ k : ι, MvPolynomial.C (i (L (Pi.single k 1))) * MvPolynomial.X k) := by
+  refine ⟨
+    MvPolynomial.aeval
+      (fun i => ∑ k : ι, MvPolynomial.C (i (L (Pi.single k 1))) * MvPolynomial.X k)
+      p,
+    fun a => ?_
+  ⟩
+  have key
+      : (fun i : Module.Dual ℝ TwoHiggsDoublet => i (L a))
+        = fun i =>
+          MvPolynomial.eval a
+            (∑ k : ι, MvPolynomial.C (i (L (Pi.single k 1))) * MvPolynomial.X k) := by
     funext i
     have ha : a = ∑ k : ι, a k • (Pi.single k 1 : ι → ℝ) := by
       funext j

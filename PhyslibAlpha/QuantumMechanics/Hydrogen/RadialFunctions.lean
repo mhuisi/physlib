@@ -78,8 +78,9 @@ namespace PhyslibAlpha.Hydrogen
 
 open Polynomial MeasureTheory Set
 
-lemma hasDerivAt_eval_mul_exp (Q : ℝ[X]) (β ρ : ℝ) :
-    HasDerivAt (fun ρ => Q.eval ρ * Real.exp (-(β * ρ)))
+lemma hasDerivAt_eval_mul_exp (Q : ℝ[X]) (β ρ : ℝ)
+    : HasDerivAt
+      (fun ρ => Q.eval ρ * Real.exp (-(β * ρ)))
       ((derivative Q - C β * Q).eval ρ * Real.exp (-(β * ρ))) ρ := by
   have h2 : HasDerivAt (fun ρ => Real.exp (-(β * ρ))) (Real.exp (-(β * ρ)) * (-β)) ρ := by
     simpa using ((hasDerivAt_id ρ).const_mul β).neg.exp
@@ -87,9 +88,9 @@ lemma hasDerivAt_eval_mul_exp (Q : ℝ[X]) (β ρ : ℝ) :
   simp only [eval_sub, eval_mul, eval_C]
   ring
 
-lemma deriv_eval_mul_exp (Q : ℝ[X]) (β : ℝ) :
-    deriv (fun ρ => Q.eval ρ * Real.exp (-(β * ρ))) =
-      fun ρ => (derivative Q - C β * Q).eval ρ * Real.exp (-(β * ρ)) :=
+lemma deriv_eval_mul_exp (Q : ℝ[X]) (β : ℝ)
+    : deriv (fun ρ => Q.eval ρ * Real.exp (-(β * ρ)))
+      = fun ρ => (derivative Q - C β * Q).eval ρ * Real.exp (-(β * ρ)) :=
   funext fun ρ => (hasDerivAt_eval_mul_exp Q β ρ).deriv
 
 /-!
@@ -101,48 +102,51 @@ lemma deriv_eval_mul_exp (Q : ℝ[X]) (β : ℝ) :
 variable (ν l : ℕ)
 
 /-- The polynomial `ρ^(l+1) L_{ν-l-1}^(2l+1)(2ρ/ν)`. -/
-def radialPoly : ℝ[X] :=
-  X ^ (l + 1) * (laguerre (ν - l - 1) (2 * l + 1)).comp (C (2 / (ν : ℝ)) * X)
+def radialPoly : ℝ[X] := X ^ (l + 1) * (laguerre (ν - l - 1) (2 * l + 1)).comp (C (2 / (ν : ℝ)) * X)
 
-/-- The reduced radial function `u_{νl}(ρ) = ρ^(l+1) e^(-ρ/ν) L_{ν-l-1}^(2l+1)(2ρ/ν)` of the
+/--
+The reduced radial function `u_{νl}(ρ) = ρ^(l+1) e^(-ρ/ν) L_{ν-l-1}^(2l+1)(2ρ/ν)` of the
 hydrogen atom, in units of the Bohr radius and not normalised; `ν` is the principal quantum
-number. The radial wave function is `R_{νl}(ρ) = u_{νl}(ρ)/ρ`. -/
+number. The radial wave function is `R_{νl}(ρ) = u_{νl}(ρ)/ρ`.
+-/
 def radialU (ρ : ℝ) : ℝ := (radialPoly ν l).eval ρ * Real.exp (-(1 / (ν : ℝ) * ρ))
 
 variable {ν l}
 
-lemma eval_radialPoly (ρ : ℝ) :
-    (radialPoly ν l).eval ρ =
-      ρ ^ (l + 1) * (laguerre (ν - l - 1) (2 * l + 1)).eval (2 / (ν : ℝ) * ρ) := by
+lemma eval_radialPoly (ρ : ℝ)
+    : (radialPoly ν l).eval ρ
+      = ρ ^ (l + 1) * (laguerre (ν - l - 1) (2 * l + 1)).eval (2 / (ν : ℝ) * ρ) := by
   simp [radialPoly, eval_comp]
 
-lemma eval_derivative_radialPoly (ρ : ℝ) :
-    (derivative (radialPoly ν l)).eval ρ =
-      ((l : ℝ) + 1) * ρ ^ l * (laguerre (ν - l - 1) (2 * l + 1)).eval (2 / (ν : ℝ) * ρ) +
-        2 / (ν : ℝ) * ρ ^ (l + 1) *
-          (derivative (laguerre (ν - l - 1) (2 * l + 1))).eval (2 / (ν : ℝ) * ρ) := by
+lemma eval_derivative_radialPoly (ρ : ℝ)
+    : (derivative (radialPoly ν l)).eval ρ
+      = ((l : ℝ) + 1) * ρ ^ l * (laguerre (ν - l - 1) (2 * l + 1)).eval (2 / (ν : ℝ) * ρ)
+        + 2 / (ν : ℝ) * ρ ^ (l + 1)
+          * (derivative (laguerre (ν - l - 1) (2 * l + 1))).eval (2 / (ν : ℝ) * ρ) := by
   simp [radialPoly, derivative_mul, derivative_comp, eval_comp]
   ring
 
-lemma eval_derivative_derivative_radialPoly (ρ : ℝ) :
-    (derivative (derivative (radialPoly ν l))).eval ρ =
-      ((l : ℝ) + 1) * l * ρ ^ (l - 1) *
-          (laguerre (ν - l - 1) (2 * l + 1)).eval (2 / (ν : ℝ) * ρ) +
-        2 * ((l : ℝ) + 1) * (2 / (ν : ℝ)) * ρ ^ l *
-          (derivative (laguerre (ν - l - 1) (2 * l + 1))).eval (2 / (ν : ℝ) * ρ) +
-        (2 / (ν : ℝ)) ^ 2 * ρ ^ (l + 1) *
-          (derivative (derivative (laguerre (ν - l - 1) (2 * l + 1)))).eval
+lemma eval_derivative_derivative_radialPoly (ρ : ℝ)
+    : (derivative (derivative (radialPoly ν l))).eval ρ
+      = ((l : ℝ) + 1) * l * ρ ^ (l - 1) * (laguerre (ν - l - 1) (2 * l + 1)).eval (2 / (ν : ℝ) * ρ)
+        + 2 * ((l : ℝ) + 1) * (2 / (ν : ℝ)) * ρ ^ l
+          * (derivative (laguerre (ν - l - 1) (2 * l + 1))).eval (2 / (ν : ℝ) * ρ)
+        + (2 / (ν : ℝ)) ^ 2 * ρ ^ (l + 1)
+          * (derivative (derivative (laguerre (ν - l - 1) (2 * l + 1)))).eval
             (2 / (ν : ℝ) * ρ) := by
   simp [radialPoly, derivative_mul, derivative_comp, eval_comp, derivative_X_pow]
   ring
 
-/-- The polynomial identity behind the radial equation:
-`ρ² (Q'' - 2Q'/ν + Q/ν²) = (l(l+1) - 2ρ + ρ²/ν²) Q` for `Q = radialPoly ν l`. -/
-lemma radialPoly_identity (hl : l < ν) (ρ : ℝ) :
-    ρ ^ 2 * ((derivative (derivative (radialPoly ν l))).eval ρ -
-        2 * (1 / (ν : ℝ)) * (derivative (radialPoly ν l)).eval ρ +
-          (1 / (ν : ℝ)) ^ 2 * (radialPoly ν l).eval ρ) =
-      ((l : ℝ) * (l + 1) - 2 * ρ + (1 / (ν : ℝ)) ^ 2 * ρ ^ 2) * (radialPoly ν l).eval ρ := by
+/--
+The polynomial identity behind the radial equation:
+`ρ² (Q'' - 2Q'/ν + Q/ν²) = (l(l+1) - 2ρ + ρ²/ν²) Q` for `Q = radialPoly ν l`.
+-/
+lemma radialPoly_identity (hl : l < ν) (ρ : ℝ)
+    : ρ ^ 2
+        * ((derivative (derivative (radialPoly ν l))).eval ρ
+          - 2 * (1 / (ν : ℝ)) * (derivative (radialPoly ν l)).eval ρ
+          + (1 / (ν : ℝ)) ^ 2 * (radialPoly ν l).eval ρ)
+      = ((l : ℝ) * (l + 1) - 2 * ρ + (1 / (ν : ℝ)) ^ 2 * ρ ^ 2) * (radialPoly ν l).eval ρ := by
   obtain ⟨N, rfl⟩ : ∃ N, ν = l + 1 + N := ⟨ν - l - 1, by omega⟩
   have hN : l + 1 + N - l - 1 = N := by omega
   rw [eval_derivative_derivative_radialPoly, eval_derivative_radialPoly, eval_radialPoly]
@@ -164,23 +168,26 @@ lemma radialPoly_identity (hl : l < ν) (ρ : ℝ) :
     push_cast at hE hβ ⊢
     linear_combination (2 * b * ρ ^ (l + 3)) * hE - 2 * ρ ^ (l + 3) * G * hβ
 
-lemma deriv_deriv_radialU (ρ : ℝ) :
-    deriv (deriv (radialU ν l)) ρ =
-      ((derivative (derivative (radialPoly ν l))).eval ρ -
-        2 * (1 / (ν : ℝ)) * (derivative (radialPoly ν l)).eval ρ +
-          (1 / (ν : ℝ)) ^ 2 * (radialPoly ν l).eval ρ) * Real.exp (-(1 / (ν : ℝ) * ρ)) := by
+lemma deriv_deriv_radialU (ρ : ℝ)
+    : deriv (deriv (radialU ν l)) ρ
+      = ((derivative (derivative (radialPoly ν l))).eval ρ
+          - 2 * (1 / (ν : ℝ)) * (derivative (radialPoly ν l)).eval ρ
+          + (1 / (ν : ℝ)) ^ 2 * (radialPoly ν l).eval ρ)
+        * Real.exp (-(1 / (ν : ℝ) * ρ)) := by
   rw [show radialU ν l = fun ρ => (radialPoly ν l).eval ρ * Real.exp (-(1 / (ν : ℝ) * ρ)) from rfl,
     deriv_eval_mul_exp, deriv_eval_mul_exp]
   simp only [derivative_sub, derivative_mul, derivative_C, zero_mul, zero_add, eval_sub, eval_mul,
     eval_C]
   ring
 
-/-- **The radial Schrödinger equation of hydrogen.** In units of the Bohr radius and the
+/--
+**The radial Schrödinger equation of hydrogen.** In units of the Bohr radius and the
 Rydberg energy, `u_{νl}'' = (l(l+1)/ρ² - 2/ρ + 1/ν²) u_{νl}`, i.e. `u_{νl}` is an eigenfunction
-of `-d²/dρ² + l(l+1)/ρ² - 2/ρ` with eigenvalue `-1/ν²`. -/
-lemma radialU_ode (hl : l < ν) {ρ : ℝ} (hρ : ρ ≠ 0) :
-    deriv (deriv (radialU ν l)) ρ =
-      ((l : ℝ) * (l + 1) / ρ ^ 2 - 2 / ρ + 1 / (ν : ℝ) ^ 2) * radialU ν l ρ := by
+of `-d²/dρ² + l(l+1)/ρ² - 2/ρ` with eigenvalue `-1/ν²`.
+-/
+lemma radialU_ode (hl : l < ν) {ρ : ℝ} (hρ : ρ ≠ 0)
+    : deriv (deriv (radialU ν l)) ρ
+      = ((l : ℝ) * (l + 1) / ρ ^ 2 - 2 / ρ + 1 / (ν : ℝ) ^ 2) * radialU ν l ρ := by
   have key := radialPoly_identity hl ρ
   have hρ2 : ρ ^ 2 ≠ 0 := pow_ne_zero 2 hρ
   rw [deriv_deriv_radialU, eq_div_of_mul_eq hρ2 ((mul_comm _ _).trans key), radialU]
@@ -192,12 +199,14 @@ lemma radialU_ode (hl : l < ν) {ρ : ℝ} (hρ : ρ ≠ 0) :
 
 -/
 
-lemma integral_pow_mul_exp_mul_laguerre_sq_comp (e N α : ℕ) {b : ℝ} (hb : 0 < b) :
-    ∫ ρ in Ioi (0 : ℝ), ρ ^ e * Real.exp (-(b * ρ)) * ((laguerre N α).eval (b * ρ)) ^ 2 =
-      b⁻¹ * (b⁻¹ ^ e *
-        ∫ x in Ioi (0 : ℝ), x ^ e * Real.exp (-x) * ((laguerre N α).eval x) ^ 2) := by
-  have h := integral_comp_mul_left_Ioi
-    (fun x : ℝ => ((b⁻¹ * x) ^ e * Real.exp (-x) * ((laguerre N α).eval x) ^ 2 : ℝ)) 0 hb
+lemma integral_pow_mul_exp_mul_laguerre_sq_comp (e N α : ℕ) {b : ℝ} (hb : 0 < b)
+    : ∫ ρ in Ioi (0 : ℝ), ρ ^ e * Real.exp (-(b * ρ)) * ((laguerre N α).eval (b * ρ)) ^ 2
+      = b⁻¹
+        * (b⁻¹ ^ e * ∫ x in Ioi (0 : ℝ), x ^ e * Real.exp (-x) * ((laguerre N α).eval x) ^ 2) := by
+  have h :=
+    integral_comp_mul_left_Ioi
+      (fun x : ℝ => ((b⁻¹ * x) ^ e * Real.exp (-x) * ((laguerre N α).eval x) ^ 2 : ℝ))
+      0 hb
   simp only [mul_zero, inv_mul_cancel_left₀ hb.ne'] at h
   rw [h, smul_eq_mul]
   congr 1
@@ -207,9 +216,10 @@ lemma integral_pow_mul_exp_mul_laguerre_sq_comp (e N α : ℕ) {b : ℝ} (hb : 0
   simp only [mul_pow]
   ring
 
-lemma radialU_sq_div_pow {k : ℕ} (hk : k ≤ 2 * l + 2) {ρ : ℝ} (hρ : 0 < ρ) :
-    radialU ν l ρ ^ 2 / ρ ^ k = ρ ^ (2 * l + 2 - k) * Real.exp (-(2 / (ν : ℝ) * ρ)) *
-      ((laguerre (ν - l - 1) (2 * l + 1)).eval (2 / (ν : ℝ) * ρ)) ^ 2 := by
+lemma radialU_sq_div_pow {k : ℕ} (hk : k ≤ 2 * l + 2) {ρ : ℝ} (hρ : 0 < ρ)
+    : radialU ν l ρ ^ 2 / ρ ^ k
+      = ρ ^ (2 * l + 2 - k) * Real.exp (-(2 / (ν : ℝ) * ρ))
+        * ((laguerre (ν - l - 1) (2 * l + 1)).eval (2 / (ν : ℝ) * ρ)) ^ 2 := by
   have hp : ρ ^ (2 * l + 2) = ρ ^ (2 * l + 2 - k) * ρ ^ k := by
     rw [← pow_add, Nat.sub_add_cancel hk]
   have he : Real.exp (-(1 / (ν : ℝ) * ρ)) ^ 2 = Real.exp (-(2 / (ν : ℝ) * ρ)) := by
@@ -225,10 +235,12 @@ def radialMoment (ν l k : ℕ) : ℝ := ∫ ρ in Ioi (0 : ℝ), radialU ν l �
 /-- The expectation value `⟨ρ^(-k)⟩` in the state `u_{νl}`. -/
 def radialMean (ν l k : ℕ) : ℝ := radialMoment ν l k / radialMoment ν l 0
 
-lemma radialMoment_eq (hl : l < ν) {k : ℕ} (hk : k ≤ 2 * l + 2) :
-    radialMoment ν l k = ((ν : ℝ) / 2) * (((ν : ℝ) / 2) ^ (2 * l + 2 - k) *
-      ∫ x in Ioi (0 : ℝ), x ^ (2 * l + 2 - k) * Real.exp (-x) *
-        ((laguerre (ν - l - 1) (2 * l + 1)).eval x) ^ 2) := by
+lemma radialMoment_eq (hl : l < ν) {k : ℕ} (hk : k ≤ 2 * l + 2)
+    : radialMoment ν l k
+      = ((ν : ℝ) / 2)
+        * (((ν : ℝ) / 2) ^ (2 * l + 2 - k)
+          * ∫ x in Ioi (0 : ℝ), x ^ (2 * l + 2 - k) * Real.exp (-x) *
+              ((laguerre (ν - l - 1) (2 * l + 1)).eval x) ^ 2) := by
   have hν : (0 : ℝ) < 2 / (ν : ℝ) := by
     have : (0 : ℝ) < ν := by exact_mod_cast (show 0 < ν by omega)
     positivity
@@ -236,9 +248,10 @@ lemma radialMoment_eq (hl : l < ν) {k : ℕ} (hk : k ≤ 2 * l + 2) :
     integral_pow_mul_exp_mul_laguerre_sq_comp _ _ _ hν, inv_div]
 
 /-- The squared norm `∫ u_{νl}² dρ = (ν/2)^(2l+3) (ν+l)!/(ν-l-1)! · 2ν`. -/
-lemma radialMoment_zero (hl : l < ν) :
-    radialMoment ν l 0 = ((ν : ℝ) / 2) ^ (2 * l + 3) *
-      (((ν + l).factorial : ℝ) / (ν - l - 1).factorial * (2 * ν)) := by
+lemma radialMoment_zero (hl : l < ν)
+    : radialMoment ν l 0
+      = ((ν : ℝ) / 2) ^ (2 * l + 3)
+        * (((ν + l).factorial : ℝ) / (ν - l - 1).factorial * (2 * ν)) := by
   rw [radialMoment_eq hl (by omega), show 2 * l + 2 - 0 = 2 * l + 1 + 1 by omega,
     integral_laguerre_sq_alpha_add_one, show ν - l - 1 + (2 * l + 1) = ν + l by omega]
   obtain ⟨N, rfl⟩ : ∃ N, ν = l + 1 + N := ⟨ν - l - 1, by omega⟩
@@ -246,26 +259,28 @@ lemma radialMoment_zero (hl : l < ν) :
   push_cast
   ring
 
-lemma radialMoment_one (hl : l < ν) :
-    radialMoment ν l 1 = ((ν : ℝ) / 2) ^ (2 * l + 2) *
-      (((ν + l).factorial : ℝ) / (ν - l - 1).factorial) := by
+lemma radialMoment_one (hl : l < ν)
+    : radialMoment ν l 1
+      = ((ν : ℝ) / 2) ^ (2 * l + 2) * (((ν + l).factorial : ℝ) / (ν - l - 1).factorial) := by
   rw [radialMoment_eq hl (by omega), show 2 * l + 2 - 1 = 2 * l + 1 by omega,
     integral_laguerre_sq_alpha, show ν - l - 1 + (2 * l + 1) = ν + l by omega]
   ring
 
-lemma radialMoment_two (hl : l < ν) :
-    radialMoment ν l 2 = ((ν : ℝ) / 2) ^ (2 * l + 1) *
-      (((ν + l).factorial : ℝ) / ((ν - l - 1).factorial * (2 * l + 1))) := by
+lemma radialMoment_two (hl : l < ν)
+    : radialMoment ν l 2
+      = ((ν : ℝ) / 2) ^ (2 * l + 1)
+        * (((ν + l).factorial : ℝ) / ((ν - l - 1).factorial * (2 * l + 1))) := by
   rw [radialMoment_eq hl (by omega), show 2 * l + 2 - 2 = 2 * l + 1 - 1 by omega,
     integral_laguerre_sq_alpha_sub_one (by omega), show ν - l - 1 + (2 * l + 1) = ν + l by omega,
     show 2 * l + 1 - 1 = 2 * l by omega]
   push_cast
   ring
 
-lemma radialMoment_three (hl : l < ν) (hl1 : 1 ≤ l) :
-    radialMoment ν l 3 = ((ν : ℝ) / 2) ^ (2 * l) *
-      (((ν + l).factorial : ℝ) * (2 * ν) /
-        ((ν - l - 1).factorial * (2 * l * (2 * l + 1) * (2 * l + 2)))) := by
+lemma radialMoment_three (hl : l < ν) (hl1 : 1 ≤ l)
+    : radialMoment ν l 3
+      = ((ν : ℝ) / 2) ^ (2 * l)
+        * (((ν + l).factorial : ℝ) * (2 * ν)
+          / ((ν - l - 1).factorial * (2 * l * (2 * l + 1) * (2 * l + 2)))) := by
   rw [radialMoment_eq hl (by omega), show 2 * l + 2 - 3 = 2 * l + 1 - 2 by omega,
     integral_laguerre_sq_alpha_sub_two (by omega), show ν - l - 1 + (2 * l + 1) = ν + l by omega,
     show 2 * l + 1 - 2 = 2 * l - 1 by omega]
@@ -283,16 +298,15 @@ lemma radialMean_one (hl : l < ν) : radialMean ν l 1 = 1 / (ν : ℝ) ^ 2 := b
   ring
 
 /-- `⟨1/ρ²⟩ = 1/(ν³ (l + 1/2))`. -/
-lemma radialMean_two (hl : l < ν) :
-    radialMean ν l 2 = 1 / ((ν : ℝ) ^ 3 * (l + 1 / 2)) := by
+lemma radialMean_two (hl : l < ν) : radialMean ν l 2 = 1 / ((ν : ℝ) ^ 3 * (l + 1 / 2)) := by
   have hν : (ν : ℝ) ≠ 0 := by exact_mod_cast (show ν ≠ 0 by omega)
   rw [radialMean, radialMoment_two hl, radialMoment_zero hl]
   field_simp
   ring
 
 /-- `⟨1/ρ³⟩ = 1/(ν³ l (l + 1/2) (l + 1))` for `l ≥ 1`. -/
-lemma radialMean_three (hl : l < ν) (hl1 : 1 ≤ l) :
-    radialMean ν l 3 = 1 / ((ν : ℝ) ^ 3 * (l * (l + 1 / 2) * (l + 1))) := by
+lemma radialMean_three (hl : l < ν) (hl1 : 1 ≤ l)
+    : radialMean ν l 3 = 1 / ((ν : ℝ) ^ 3 * (l * (l + 1 / 2) * (l + 1))) := by
   have hν : (ν : ℝ) ≠ 0 := by exact_mod_cast (show ν ≠ 0 by omega)
   have hl0 : (l : ℝ) ≠ 0 := by exact_mod_cast (show l ≠ 0 by omega)
   rw [radialMean, radialMoment_three hl hl1, radialMoment_zero hl]
@@ -314,8 +328,8 @@ lemma radialU_eq_mul_radialR (ρ : ℝ) : radialU ν l ρ = ρ * radialR ν l ρ
   ring
 
 /-- For an `s` state the normalised density at the nucleus is `|R_{ν0}(0)|²/‖u‖² = 4/ν³`. -/
-lemma radialR_zero_sq_div (hν : 0 < ν) :
-    radialR ν 0 0 ^ 2 / radialMoment ν 0 0 = 4 / (ν : ℝ) ^ 3 := by
+lemma radialR_zero_sq_div (hν : 0 < ν)
+    : radialR ν 0 0 ^ 2 / radialMoment ν 0 0 = 4 / (ν : ℝ) ^ 3 := by
   have hν' : (ν : ℝ) ≠ 0 := by exact_mod_cast hν.ne'
   rw [radialMoment_zero hν]
   simp only [radialR, pow_zero, mul_zero, neg_zero, Real.exp_zero, mul_one, one_mul,
@@ -347,27 +361,29 @@ lemma bohrRadius_pos (H : HydrogenAtom d) (hk : 0 < H.k) : 0 < bohrRadius H :=
 /-- The reduced radial function `u_{νl}(r/a)` in physical units. -/
 def radialFun (H : HydrogenAtom d) (ν l : ℕ) (r : ℝ) : ℝ := radialU ν l ((bohrRadius H)⁻¹ * r)
 
-/-- **The radial Schrödinger equation of hydrogen in physical units.** For `d = 3` and an
+/--
+**The radial Schrödinger equation of hydrogen in physical units.** For `d = 3` and an
 attractive potential, `u_{νl}(r/a)` solves
 `-ℏ²/(2m) u'' + (ℏ² l(l+1)/(2m r²) - k/r) u = E u` with `E = -Ry/ν²`, the Bohr level
-`H.energyLevel (ν - 1)` of physlib. -/
-lemma radialFun_schrodinger (H : HydrogenAtom 3) (hk : 0 < H.k) (hl : l < ν)
-    {r : ℝ} (hr : r ≠ 0) :
-    -((ℏ : ℝ) ^ 2 / (2 * H.m)) * deriv (deriv (radialFun H ν l)) r +
-        ((ℏ : ℝ) ^ 2 * ((l : ℝ) * (l + 1)) / (2 * H.m * r ^ 2) - H.k / r) * radialFun H ν l r =
-      H.energyLevel (ν - 1) * radialFun H ν l r := by
+`H.energyLevel (ν - 1)` of physlib.
+-/
+lemma radialFun_schrodinger (H : HydrogenAtom 3) (hk : 0 < H.k) (hl : l < ν) {r : ℝ} (hr : r ≠ 0)
+    : -((ℏ : ℝ) ^ 2 / (2 * H.m)) * deriv (deriv (radialFun H ν l)) r
+        + ((ℏ : ℝ) ^ 2 * ((l : ℝ) * (l + 1)) / (2 * H.m * r ^ 2) - H.k / r) * radialFun H ν l r
+      = H.energyLevel (ν - 1) * radialFun H ν l r := by
   set c := (bohrRadius H)⁻¹ with hc
   have hc0 : c ≠ 0 := inv_ne_zero (bohrRadius_pos H hk).ne'
   have h1 : deriv (radialFun H ν l) = fun r => c * deriv (radialU ν l) (c * r) := by
     funext r
     rw [show radialFun H ν l = (radialU ν l <| c * ·) from rfl, deriv_comp_mul_left, smul_eq_mul]
   have h2 : deriv (deriv (radialFun H ν l)) r = c * (c * deriv (deriv (radialU ν l)) (c * r)) := by
-    rw [h1, deriv_const_mul_field, show (fun r => deriv (radialU ν l) (c * r)) =
-      (deriv (radialU ν l) <| c * ·) from rfl, deriv_comp_mul_left, smul_eq_mul]
+    rw [h1, deriv_const_mul_field,
+      show (fun r => deriv (radialU ν l) (c * r)) = (deriv (radialU ν l) <| c * ·) from rfl,
+      deriv_comp_mul_left, smul_eq_mul]
   rw [h2, radialU_ode hl (mul_ne_zero hc0 hr),
-    show radialFun H ν l r = radialU ν l (c * r) from rfl,
-    HydrogenAtom.energyLevel_eq, HydrogenAtom.levelIndex_eq, HydrogenAtom.rydbergEnergy_eq,
-    Nat.cast_sub (show 1 ≤ ν by omega), hc, bohrRadius]
+    show radialFun H ν l r = radialU ν l (c * r) from rfl, HydrogenAtom.energyLevel_eq,
+    HydrogenAtom.levelIndex_eq, HydrogenAtom.rydbergEnergy_eq, Nat.cast_sub (show 1 ≤ ν by omega),
+    hc, bohrRadius]
   have hm := H.m_pos.ne'
   have hk0 := hk.ne'
   have hℏ := ℏ_ne_zero

@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Robert Sneiderman
 -/
 module
+
 public import PhyslibAlpha.SpaceAndTime.Space.Surfaces.SphericalShell
 public import Physlib.SpaceAndTime.Space.Integrals.Basic
 public import Mathlib.MeasureTheory.Measure.Lebesgue.EqHaar
@@ -44,8 +45,10 @@ is replaced by a statement that the solid sphere has positive ambient volume.
 open SchwartzMap NNReal
 noncomputable section
 open Physlib Distribution
-variable (𝕜 : Type) {E F F' : Type} [RCLike 𝕜] [NormedAddCommGroup E] [NormedAddCommGroup F]
-  [NormedAddCommGroup F'] [NormedSpace ℝ E] [NormedSpace ℝ F]
+variable
+  (𝕜 : Type)
+  {E F F' : Type} [RCLike 𝕜] [NormedAddCommGroup E] [NormedAddCommGroup F] [NormedAddCommGroup F']
+  [NormedSpace ℝ E] [NormedSpace ℝ F]
 
 namespace Space
 
@@ -73,8 +76,8 @@ lemma solidSphere_measurableEmbedding (d : ℕ) : MeasurableEmbedding (solidSphe
   · exact solidSphere_injective d
 
 @[simp]
-lemma norm_solidSphere_le (d : ℕ) (x : Metric.closedBall (0 : Space d) 1) :
-    ‖solidSphere d x‖ ≤ 1 := by
+lemma norm_solidSphere_le (d : ℕ) (x : Metric.closedBall (0 : Space d) 1)
+    : ‖solidSphere d x‖ ≤ 1 := by
   have hx := x.2
   rw [Metric.mem_closedBall, dist_eq_norm, sub_zero] at hx
   exact hx
@@ -85,18 +88,19 @@ lemma norm_solidSphere_le (d : ℕ) (x : Metric.closedBall (0 : Space d) 1) :
 
 -/
 
-/-- The measure on `Space d` corresponding to integration over a solid sphere, i.e. the
-  ambient volume measure restricted to the closed unit ball. -/
+/--
+The measure on `Space d` corresponding to integration over a solid sphere, i.e. the
+ambient volume measure restricted to the closed unit ball.
+-/
 def solidSphereMeasure (d : ℕ) : Measure (Space d) :=
   volume.restrict (Metric.closedBall (0 : Space d) 1)
 
-instance solidSphereMeasure_isFiniteMeasure (d : ℕ) :
-    IsFiniteMeasure (solidSphereMeasure d) := by
+instance solidSphereMeasure_isFiniteMeasure (d : ℕ) : IsFiniteMeasure (solidSphereMeasure d) := by
   rw [solidSphereMeasure, isFiniteMeasure_restrict]
   exact (Metric.isBounded_closedBall).measure_lt_top.ne
 
-instance solidSphereMeasure_hasTemperateGrowth (d : ℕ) :
-    (solidSphereMeasure d).HasTemperateGrowth :=
+instance solidSphereMeasure_hasTemperateGrowth (d : ℕ)
+    : (solidSphereMeasure d).HasTemperateGrowth :=
   inferInstance
 
 /-!
@@ -105,18 +109,19 @@ instance solidSphereMeasure_hasTemperateGrowth (d : ℕ) :
 
 -/
 
-/-- The distribution on `Space d` corresponding to integration over a solid sphere.
-  One can roughly think of this distribution as taking a test function `f` to its integral against
-  a mass, charge or current density spread over a solid ball. -/
-def solidSphereDist (d : ℕ) : (Space d) →d[ℝ] ℝ :=
-  SchwartzMap.integralCLM ℝ (solidSphereMeasure d)
+/--
+The distribution on `Space d` corresponding to integration over a solid sphere.
+One can roughly think of this distribution as taking a test function `f` to its integral against
+a mass, charge or current density spread over a solid ball.
+-/
+def solidSphereDist (d : ℕ) : (Space d) →d[ℝ] ℝ := SchwartzMap.integralCLM ℝ (solidSphereMeasure d)
 
-lemma solidSphereDist_apply_eq_integral_solidSphereMeasure (d : ℕ) (f : 𝓢(Space d, ℝ)) :
-    solidSphereDist d f = ∫ x, f x ∂solidSphereMeasure d := by
+lemma solidSphereDist_apply_eq_integral_solidSphereMeasure (d : ℕ) (f : 𝓢(Space d, ℝ))
+    : solidSphereDist d f = ∫ x, f x ∂solidSphereMeasure d := by
   rw [solidSphereDist, SchwartzMap.integralCLM_apply]
 
-lemma solidSphereDist_apply_eq_integral_closedBall (d : ℕ) (f : 𝓢(Space d, ℝ)) :
-    solidSphereDist d f = ∫ x in Metric.closedBall (0 : Space d) 1, f x := by
+lemma solidSphereDist_apply_eq_integral_closedBall (d : ℕ) (f : 𝓢(Space d, ℝ))
+    : solidSphereDist d f = ∫ x in Metric.closedBall (0 : Space d) 1, f x := by
   rw [solidSphereDist_apply_eq_integral_solidSphereMeasure, solidSphereMeasure]
 
 /-!
@@ -125,8 +130,7 @@ lemma solidSphereDist_apply_eq_integral_closedBall (d : ℕ) (f : 𝓢(Space d, 
 
 -/
 
-lemma solidSphere_volume_pos (d : ℕ) :
-    0 < volume (Metric.closedBall (0 : Space d) 1) := by
+lemma solidSphere_volume_pos (d : ℕ) : 0 < volume (Metric.closedBall (0 : Space d) 1) := by
   apply lt_of_lt_of_le (b := volume (Metric.ball (0 : Space d) 1))
   · exact (Metric.isOpen_ball).measure_pos volume (Metric.nonempty_ball.mpr one_pos)
   · exact measure_mono Metric.ball_subset_closedBall

@@ -54,16 +54,18 @@ namespace SimpleGraph
 
 variable {X : Type*}
 
-/-- Number of connections from sites in `Λ` to sites in `M`. For disjoint regions,
-each bond between them is counted once; with `M = Λ`, each internal bond is counted twice. -/
+/--
+Number of connections from sites in `Λ` to sites in `M`. For disjoint regions,
+each bond between them is counted once; with `M = Λ`, each internal bond is counted twice.
+-/
 def bondCountBetween (g : SimpleGraph X) [DecidableRel g.Adj] (Λ M : Finset X) : ℕ :=
   ∑ x ∈ Λ, (M.filter (fun y => g.Adj x y)).card
 
 /-- A bound on coordination numbers bounds the number of connections from a finite region. -/
-lemma bondCountBetween_le (g : SimpleGraph X) [DecidableRel g.Adj] [g.LocallyFinite]
-    (Λ M : Finset X) (q : ℕ)
-    (hq : ∀ x ∈ Λ, (g.neighborFinset x).card ≤ q) :
-    g.bondCountBetween Λ M ≤ q * Λ.card := by
+lemma bondCountBetween_le
+    (g : SimpleGraph X) [DecidableRel g.Adj] [g.LocallyFinite]
+    (Λ M : Finset X) (q : ℕ) (hq : ∀ x ∈ Λ, (g.neighborFinset x).card ≤ q)
+    : g.bondCountBetween Λ M ≤ q * Λ.card := by
   calc
     g.bondCountBetween Λ M ≤ ∑ x ∈ Λ, q := by
       apply Finset.sum_le_sum
@@ -79,14 +81,15 @@ namespace CondensedMatter.Crystal
 
 /-! ## B. Translation-invariant connectivity -/
 
-/-- A periodic pattern of undirected connections between crystal sites, with finitely many
-neighbors at each site. -/
+/--
+A periodic pattern of undirected connections between crystal sites, with finitely many
+neighbors at each site.
+-/
 structure PeriodicGraph {G : Type*} [AddGroup G] (C : Crystal G) where
   /-- The undirected connections between crystal sites. -/
   toSimpleGraph : SimpleGraph C.Site
   /-- Translating both sites preserves their connection. -/
-  adj_vadd : ∀ (a : G) (x y : C.Site),
-    toSimpleGraph.Adj (a +ᵥ x) (a +ᵥ y) ↔ toSimpleGraph.Adj x y
+  adj_vadd : ∀ (a : G) (x y : C.Site), toSimpleGraph.Adj (a +ᵥ x) (a +ᵥ y) ↔ toSimpleGraph.Adj x y
   /-- Connectivity can be checked for any pair of sites. -/
   [decidableAdj : DecidableRel toSimpleGraph.Adj]
   /-- Each site is connected to only finitely many other sites. -/
@@ -103,24 +106,25 @@ def connected (g : PeriodicGraph C) (x y : C.Site) : Bool :=
   @decide (g.toSimpleGraph.Adj x y) (g.decidableAdj x y)
 
 /-- The executable connection test agrees with graph adjacency. -/
-@[simp] lemma connected_eq_true (g : PeriodicGraph C) (x y : C.Site) :
-    g.connected x y = true ↔ g.toSimpleGraph.Adj x y := by
+@[simp]
+lemma connected_eq_true (g : PeriodicGraph C) (x y : C.Site)
+    : g.connected x y = true ↔ g.toSimpleGraph.Adj x y := by
   simp only [connected, decide_eq_true_eq]
 
 /-- A common cell translation preserves the executable connection test. -/
-@[simp] lemma connected_vadd (g : PeriodicGraph C) (a : G) (x y : C.Site) :
-    g.connected (a +ᵥ x) (a +ᵥ y) = g.connected x y := by
+@[simp]
+lemma connected_vadd (g : PeriodicGraph C) (a : G) (x y : C.Site)
+    : g.connected (a +ᵥ x) (a +ᵥ y) = g.connected x y := by
   apply Bool.eq_iff_iff.mpr
-  exact (g.connected_eq_true _ _).trans ((g.adj_vadd a x y).trans
-    (g.connected_eq_true x y).symm)
+  exact (g.connected_eq_true _ _).trans ((g.adj_vadd a x y).trans (g.connected_eq_true x y).symm)
 
 /-- The finite set of sites connected to a given site. -/
-def neighbors (g : PeriodicGraph C) (x : C.Site) : Finset C.Site :=
-  g.toSimpleGraph.neighborFinset x
+def neighbors (g : PeriodicGraph C) (x : C.Site) : Finset C.Site := g.toSimpleGraph.neighborFinset x
 
 /-- Graph neighbors are exactly the sites connected by an edge. -/
-@[simp] lemma mem_neighbors (g : PeriodicGraph C) (x y : C.Site) :
-    y ∈ g.neighbors x ↔ g.toSimpleGraph.Adj x y :=
+@[simp]
+lemma mem_neighbors (g : PeriodicGraph C) (x y : C.Site)
+    : y ∈ g.neighbors x ↔ g.toSimpleGraph.Adj x y :=
   g.toSimpleGraph.mem_neighborFinset x y
 
 /-- A cell translation is an automorphism of the bond graph. -/
@@ -129,8 +133,8 @@ def translateIso (g : PeriodicGraph C) (a : G) : g.toSimpleGraph ≃g g.toSimple
   map_rel_iff' := g.adj_vadd a _ _
 
 /-- Translating a site translates all of its graph neighbors. -/
-lemma neighbors_vadd (g : PeriodicGraph C) (a : G) (x : C.Site) :
-    g.neighbors (a +ᵥ x) = (g.neighbors x).map (AddAction.toPerm a).toEmbedding := by
+lemma neighbors_vadd (g : PeriodicGraph C) (a : G) (x : C.Site)
+    : g.neighbors (a +ᵥ x) = (g.neighbors x).map (AddAction.toPerm a).toEmbedding := by
   ext y
   constructor
   · intro hy
@@ -145,8 +149,8 @@ lemma neighbors_vadd (g : PeriodicGraph C) (a : G) (x : C.Site) :
     exact (g.mem_neighbors _ _).mpr ((g.adj_vadd a x z).mpr ((g.mem_neighbors x z).mp hz))
 
 /-- The coordination number is constant along translated copies of a site. -/
-lemma card_neighbors_vadd (g : PeriodicGraph C) (a : G) (x : C.Site) :
-    (g.neighbors (a +ᵥ x)).card = (g.neighbors x).card := by
+lemma card_neighbors_vadd (g : PeriodicGraph C) (a : G) (x : C.Site)
+    : (g.neighbors (a +ᵥ x)).card = (g.neighbors x).card := by
   rw [neighbors_vadd, Finset.card_map]
 
 /-! ## C. Bonds between finite regions -/
@@ -155,13 +159,14 @@ lemma card_neighbors_vadd (g : PeriodicGraph C) (a : G) (x : C.Site) :
 def bondCountBetween (g : PeriodicGraph C) (Λ M : Finset C.Site) : ℕ :=
   @SimpleGraph.bondCountBetween _ g.toSimpleGraph g.decidableAdj Λ M
 
-
 end PeriodicGraph
 
 /-! ## D. Bonds in a unit cell -/
 
-/-- A bond from label `source` in a reference cell to label `target` in the cell indexed
-by `displacement`. Translating both endpoints gives the copies of this bond in other cells. -/
+/--
+A bond from label `source` in a reference cell to label `target` in the cell indexed
+by `displacement`. Translating both endpoints gives the copies of this bond in other cells.
+-/
 structure Bond (G F : Type*) where
   /-- The site label at the start of the bond. -/
   source : F
@@ -169,7 +174,7 @@ structure Bond (G F : Type*) where
   target : F
   /-- Translation from the source cell to the target cell. -/
   displacement : G
-  deriving DecidableEq
+deriving DecidableEq
 
 namespace Bond
 
@@ -180,28 +185,27 @@ def Links (b : Bond G F) (x y : CellSite G F) : Prop :=
   x.label = b.source ∧ y.label = b.target ∧ y.cell = x.cell + b.displacement
 
 /-- The source and target of a bond can be checked from their site addresses. -/
-instance [DecidableEq G] [DecidableEq F] (b : Bond G F) : DecidableRel b.Links :=
-  fun x y => inferInstanceAs (Decidable (x.label = b.source ∧ y.label = b.target ∧
-    y.cell = x.cell + b.displacement))
+instance [DecidableEq G] [DecidableEq F] (b : Bond G F) : DecidableRel b.Links := fun x y =>
+  inferInstanceAs
+    (Decidable (x.label = b.source ∧ y.label = b.target ∧ y.cell = x.cell + b.displacement))
 
 /-- The sites reached by following this bond in either direction. -/
-def endpoints [DecidableEq G] [DecidableEq F] (b : Bond G F) (x : CellSite G F) :
-    Finset (CellSite G F) :=
-  (if x.label = b.source then {⟨x.cell + b.displacement, b.target⟩} else ∅) ∪
-  (if x.label = b.target then {⟨x.cell - b.displacement, b.source⟩} else ∅)
+def endpoints [DecidableEq G] [DecidableEq F] (b : Bond G F) (x : CellSite G F)
+    : Finset (CellSite G F) :=
+  (if x.label = b.source then {⟨x.cell + b.displacement, b.target⟩} else ∅)
+    ∪ (if x.label = b.target then {⟨x.cell - b.displacement, b.source⟩} else ∅)
 
 /-- A site reached through this bond is connected in one of its two directions. -/
-lemma mem_endpoints [DecidableEq G] [DecidableEq F] (b : Bond G F) (x y : CellSite G F) :
-    y ∈ b.endpoints x ↔ b.Links x y ∨ b.Links y x := by
+lemma mem_endpoints [DecidableEq G] [DecidableEq F] (b : Bond G F) (x y : CellSite G F)
+    : y ∈ b.endpoints x ↔ b.Links x y ∨ b.Links y x := by
   rcases y with ⟨m, j⟩
   simp only [endpoints, Finset.mem_union]
   split_ifs <;> simp_all [Links, eq_sub_iff_add_eq] <;> tauto
 
 /-- Translating the endpoints gives another copy of the same bond. -/
-lemma links_vadd (b : Bond G F) (a : G) (x y : CellSite G F) :
-    b.Links (a +ᵥ x) (a +ᵥ y) ↔ b.Links x y := by
-  change (x.label = b.source ∧ y.label = b.target ∧
-    a + y.cell = (a + x.cell) + b.displacement) ↔ _
+lemma links_vadd (b : Bond G F) (a : G) (x y : CellSite G F)
+    : b.Links (a +ᵥ x) (a +ᵥ y) ↔ b.Links x y := by
+  change (x.label = b.source ∧ y.label = b.target ∧ a + y.cell = (a + x.cell) + b.displacement) ↔ _
   simp only [add_assoc, add_left_cancel_iff, Links]
 
 end Bond
@@ -209,77 +213,89 @@ end Bond
 /-! ## E. Building the graph from bonds -/
 
 /-- The undirected graph generated by translating every supplied bond. -/
-def graphFromBonds {G F : Type*} [AddGroup G] (bonds : List (Bond G F)) :
-    SimpleGraph (CellSite G F) where
+def graphFromBonds {G F : Type*} [AddGroup G] (bonds : List (Bond G F))
+    : SimpleGraph (CellSite G F) where
   Adj x y := x ≠ y ∧ ∃ b ∈ bonds, b.Links x y ∨ b.Links y x
   symm := ⟨by intro x y h; exact ⟨h.1.symm, by simpa [or_comm] using h.2⟩⟩
   loopless := ⟨by intro x h; exact h.1 rfl⟩
 
 /-- Connections generated by a finite bond list can be decided. -/
-instance {G F : Type*} [AddGroup G] [DecidableEq G] [DecidableEq F]
-    (bonds : List (Bond G F)) : DecidableRel (graphFromBonds bonds).Adj :=
-  fun x y => inferInstanceAs (Decidable (x ≠ y ∧ ∃ b ∈ bonds,
-    b.Links x y ∨ b.Links y x))
+instance {G F : Type*} [AddGroup G] [DecidableEq G] [DecidableEq F] (bonds : List (Bond G F))
+    : DecidableRel (graphFromBonds bonds).Adj := fun x y =>
+  inferInstanceAs (Decidable (x ≠ y ∧ ∃ b ∈ bonds, b.Links x y ∨ b.Links y x))
 
 /-- The sites reached from `x` by following any of the listed bonds in either direction. -/
-def bondEndpoints {G F : Type*} [AddGroup G] [DecidableEq G] [DecidableEq F]
-    (bonds : List (Bond G F)) (x : CellSite G F) : Finset (CellSite G F) :=
+def bondEndpoints
+    {G F : Type*} [AddGroup G] [DecidableEq G] [DecidableEq F]
+    (bonds : List (Bond G F)) (x : CellSite G F)
+    : Finset (CellSite G F) :=
   (bonds.map (fun b => b.endpoints x)).foldr (· ∪ ·) ∅
 
 /-- Every reached site is an endpoint of one of the listed bonds. -/
-lemma mem_bondEndpoints {G F : Type*} [AddGroup G] [DecidableEq G] [DecidableEq F]
-    (bonds : List (Bond G F)) (x y : CellSite G F) :
-    y ∈ bondEndpoints bonds x ↔ ∃ b ∈ bonds, b.Links x y ∨ b.Links y x := by
+lemma mem_bondEndpoints
+    {G F : Type*} [AddGroup G] [DecidableEq G] [DecidableEq F]
+    (bonds : List (Bond G F)) (x y : CellSite G F)
+    : y ∈ bondEndpoints bonds x ↔ ∃ b ∈ bonds, b.Links x y ∨ b.Links y x := by
   induction bonds with
   | nil => simp [bondEndpoints]
   | cons b bs ih => simp [bondEndpoints, Bond.mem_endpoints, ← ih]
 
 /-- Adjacency generated by bonds is unchanged by a common cell translation. -/
-@[simp] lemma graphFromBonds_adj_vadd {G F : Type*} [AddGroup G]
-    (bonds : List (Bond G F)) (a : G) (x y : CellSite G F) :
-    (graphFromBonds bonds).Adj (a +ᵥ x) (a +ᵥ y) ↔ (graphFromBonds bonds).Adj x y := by
+@[simp]
+lemma graphFromBonds_adj_vadd
+    {G F : Type*} [AddGroup G] (bonds : List (Bond G F)) (a : G) (x y : CellSite G F)
+    : (graphFromBonds bonds).Adj (a +ᵥ x) (a +ᵥ y) ↔ (graphFromBonds bonds).Adj x y := by
   simp only [graphFromBonds, Bond.links_vadd, ne_eq, vadd_left_cancel_iff]
 
 /-- The distinct neighboring sites connected by the listed bonds, excluding `x` itself. -/
-def neighborsFromBonds {G F : Type*} [AddGroup G] [DecidableEq G] [DecidableEq F]
-    (bonds : List (Bond G F)) (x : CellSite G F) : Finset (CellSite G F) :=
+def neighborsFromBonds
+    {G F : Type*} [AddGroup G] [DecidableEq G] [DecidableEq F]
+    (bonds : List (Bond G F)) (x : CellSite G F)
+    : Finset (CellSite G F) :=
   (bondEndpoints bonds x).erase x
 
 /-- Bond enumeration gives exactly the neighbors of the generated simple graph. -/
-@[simp] lemma mem_neighborsFromBonds {G F : Type*} [AddGroup G]
-    [DecidableEq G] [DecidableEq F] (bonds : List (Bond G F)) (x y : CellSite G F) :
-    y ∈ neighborsFromBonds bonds x ↔ (graphFromBonds bonds).Adj x y := by
+@[simp]
+lemma mem_neighborsFromBonds
+    {G F : Type*} [AddGroup G] [DecidableEq G] [DecidableEq F]
+    (bonds : List (Bond G F)) (x y : CellSite G F)
+    : y ∈ neighborsFromBonds bonds x ↔ (graphFromBonds bonds).Adj x y := by
   simp [neighborsFromBonds, mem_bondEndpoints, graphFromBonds, ne_comm]
 
-/-- Construct the periodic graph of a repeated unit cell from its bonds.
+/--
+Construct the periodic graph of a repeated unit cell from its bonds.
 Each bond connects its source label to its target label at the specified cell displacement,
 in every cell. Connections are undirected; repeated connections and self-loops do not add
-neighbors. -/
-def PeriodicGraph.ofBonds {G F : Type*} [AddGroup G] [Finite F]
-    [DecidableEq G] [DecidableEq F] (bonds : List (Bond G F)) :
-    PeriodicGraph (Crystal.ofUnitCell G F) where
+neighbors.
+-/
+def PeriodicGraph.ofBonds
+    {G F : Type*} [AddGroup G] [Finite F] [DecidableEq G] [DecidableEq F] (bonds : List (Bond G F))
+    : PeriodicGraph (Crystal.ofUnitCell G F) where
   toSimpleGraph := graphFromBonds bonds
   adj_vadd := graphFromBonds_adj_vadd bonds
   decidableAdj := inferInstanceAs (DecidableRel (graphFromBonds bonds).Adj)
-  locallyFinite x := Fintype.ofFinset (neighborsFromBonds bonds x)
-    (fun y => mem_neighborsFromBonds bonds x y)
+  locallyFinite x :=
+    Fintype.ofFinset (neighborsFromBonds bonds x) (fun y => mem_neighborsFromBonds bonds x y)
 
-/-- The neighbors in the graph of a bond list are the endpoints of its bonds, without the site
-itself. -/
-lemma PeriodicGraph.neighbors_ofBonds {G F : Type*} [AddGroup G] [Finite F]
-    [DecidableEq G] [DecidableEq F] (bonds : List (Bond G F)) (x : CellSite G F) :
-    (PeriodicGraph.ofBonds bonds).neighbors x = neighborsFromBonds bonds x := by
+/--
+The neighbors in the graph of a bond list are the endpoints of its bonds, without the site
+itself.
+-/
+lemma PeriodicGraph.neighbors_ofBonds
+    {G F : Type*} [AddGroup G] [Finite F] [DecidableEq G] [DecidableEq F]
+    (bonds : List (Bond G F)) (x : CellSite G F)
+    : (PeriodicGraph.ofBonds bonds).neighbors x = neighborsFromBonds bonds x := by
   ext y
   rw [PeriodicGraph.mem_neighbors, mem_neighborsFromBonds]
   rfl
 
 /-- The coordination number of a cell site equals that of its reference-cell copy. -/
-lemma PeriodicGraph.card_neighbors_cell {G F : Type*} [AddGroup G] [Finite F]
-    (g : PeriodicGraph (Crystal.ofUnitCell G F)) (n : G) (i : F) :
-    (g.neighbors ⟨n, i⟩).card = (g.neighbors ⟨0, i⟩).card := by
+lemma PeriodicGraph.card_neighbors_cell
+    {G F : Type*} [AddGroup G] [Finite F]
+    (g : PeriodicGraph (Crystal.ofUnitCell G F)) (n : G) (i : F)
+    : (g.neighbors ⟨n, i⟩).card = (g.neighbors ⟨0, i⟩).card := by
   have h := g.card_neighbors_vadd n (⟨0, i⟩ : (Crystal.ofUnitCell G F).Site)
   change (g.neighbors ⟨n + 0, i⟩).card = (g.neighbors ⟨0, i⟩).card at h
   simpa only [add_zero] using h
 
 end CondensedMatter.Crystal
-

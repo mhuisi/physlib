@@ -23,9 +23,11 @@ variable {n : ℕ} (c : WickContraction n)
 open Physlib.List
 open Physlib.Fin
 
-/-- Given a Wick contraction `WickContraction n.succ` and a `i : Fin n.succ` the
-  Wick contraction associated with `n` obtained by removing `i`.
-  If `i` is contracted with `j` in the new Wick contraction `j` will be uncontracted. -/
+/--
+Given a Wick contraction `WickContraction n.succ` and a `i : Fin n.succ` the
+Wick contraction associated with `n` obtained by removing `i`.
+If `i` is contracted with `j` in the new Wick contraction `j` will be uncontracted.
+-/
 def erase (c : WickContraction n.succ) (i : Fin n.succ) : WickContraction n := by
   refine ⟨Finset.filter (fun x => Finset.map i.succAboveEmb x ∈ c.1) Finset.univ, ?_, ?_⟩
   · intro a ha
@@ -36,9 +38,9 @@ def erase (c : WickContraction n.succ) (i : Fin n.succ) : WickContraction n := b
     exact c.2.2 _ ha _ hb
 
 set_option backward.isDefEq.respectTransparency false in
-lemma mem_erase_uncontracted_iff (c : WickContraction n.succ) (i : Fin n.succ) (j : Fin n) :
-    j ∈ (c.erase i).uncontracted ↔
-    i.succAbove j ∈ c.uncontracted ∨ c.getDual? (i.succAbove j) = some i := by
+lemma mem_erase_uncontracted_iff (c : WickContraction n.succ) (i : Fin n.succ) (j : Fin n)
+    : j ∈ (c.erase i).uncontracted
+      ↔ i.succAbove j ∈ c.uncontracted ∨ c.getDual? (i.succAbove j) = some i := by
   rw [getDual?_eq_some_iff_mem]
   simp only [uncontracted, getDual?, erase, Nat.succ_eq_add_one, Finset.mem_filter, Finset.mem_univ,
     Finset.map_insert, Fin.succAboveEmb_apply, Finset.map_singleton, true_and]
@@ -62,21 +64,22 @@ lemma mem_erase_uncontracted_iff (c : WickContraction n.succ) (i : Fin n.succ) (
     · by_contra hn
       have hc := c.2.2 _ h _ (by simpa using hn)
       simp only [Nat.succ_eq_add_one, Finset.disjoint_insert_right, Finset.mem_insert,
-        Finset.mem_singleton, true_or, not_true_eq_false, Finset.disjoint_singleton_right, not_or,
-        false_and, or_false] at hc
-      have hi : i ∈ ({i.succAbove j, i.succAbove k} : Finset (Fin n.succ)) := by
-        simp [← hc]
+          Finset.mem_singleton, true_or, not_true_eq_false, Finset.disjoint_singleton_right, not_or,
+          false_and, or_false]
+        at hc
+      have hi : i ∈ ({i.succAbove j, i.succAbove k} : Finset (Fin n.succ)) := by simp [← hc]
       simp only [Nat.succ_eq_add_one, Finset.mem_insert, Finset.mem_singleton] at hi
       rcases hi with hi | hi
       · exact False.elim (Fin.succAbove_ne _ _ hi.symm)
       · exact False.elim (Fin.succAbove_ne _ _ hi.symm)
 
-lemma mem_not_eq_erase_of_isSome (c : WickContraction n.succ) (i : Fin n.succ)
-    (h : (c.getDual? i).isSome) (ha : a ∈ c.1) (ha2 : a ≠ {i, (c.getDual? i).get h}) :
-    ∃ a', a' ∈ (c.erase i).1 ∧ a = Finset.map i.succAboveEmb a' := by
+lemma mem_not_eq_erase_of_isSome
+    (c : WickContraction n.succ) (i : Fin n.succ) (h : (c.getDual? i).isSome)
+    (ha : a ∈ c.1) (ha2 : a ≠ {i, (c.getDual? i).get h})
+    : ∃ a', a' ∈ (c.erase i).1 ∧ a = Finset.map i.succAboveEmb a' := by
   have h2a := c.2.1 a ha
   rw [@Finset.card_eq_two] at h2a
-  obtain ⟨x, y, hx,hy⟩ := h2a
+  obtain ⟨x, y, hx, hy⟩ := h2a
   subst hy
   have hxn : ¬ x = i := by
     by_contra hx
@@ -100,12 +103,12 @@ lemma mem_not_eq_erase_of_isSome (c : WickContraction n.succ) (i : Fin n.succ)
     Fin.succAboveEmb_apply, Finset.map_singleton, true_and, and_true]
   exact ha
 
-lemma mem_not_eq_erase_of_isNone (c : WickContraction n.succ) (i : Fin n.succ)
-    (h : (c.getDual? i).isNone) (ha : a ∈ c.1) :
-    ∃ a', a' ∈ (c.erase i).1 ∧ a = Finset.map i.succAboveEmb a' := by
+lemma mem_not_eq_erase_of_isNone
+    (c : WickContraction n.succ) (i : Fin n.succ) (h : (c.getDual? i).isNone) (ha : a ∈ c.1)
+    : ∃ a', a' ∈ (c.erase i).1 ∧ a = Finset.map i.succAboveEmb a' := by
   have h2a := c.2.1 a ha
   rw [@Finset.card_eq_two] at h2a
-  obtain ⟨x, y, hx,hy⟩ := h2a
+  obtain ⟨x, y, hx, hy⟩ := h2a
   subst hy
   have hi : i ∈ c.uncontracted := by
     simp only [Nat.succ_eq_add_one, uncontracted, Finset.mem_filter, Finset.mem_univ, true_and]
@@ -128,37 +131,39 @@ lemma mem_not_eq_erase_of_isNone (c : WickContraction n.succ) (i : Fin n.succ)
     Fin.succAboveEmb_apply, Finset.map_singleton, true_and, and_true]
   exact ha
 
-/-- Given a Wick contraction `c : WickContraction n.succ` and a `i : Fin n.succ` the (optional)
-  element of `(erase c i).uncontracted` which comes from the element in `c` contracted
-  with `i`. -/
-def getDualErase {n : ℕ} (c : WickContraction n.succ) (i : Fin n.succ) :
-    Option ((erase c i).uncontracted) := by
+/--
+Given a Wick contraction `c : WickContraction n.succ` and a `i : Fin n.succ` the (optional)
+element of `(erase c i).uncontracted` which comes from the element in `c` contracted
+with `i`.
+-/
+def getDualErase {n : ℕ} (c : WickContraction n.succ) (i : Fin n.succ)
+    : Option ((erase c i).uncontracted) := by
   match n with
   | 0 => exact none
   | Nat.succ n =>
-  refine if hj : (c.getDual? i).isSome then some ⟨(predAboveI i ((c.getDual? i).get hj)), ?_⟩
-    else none
-  rw [mem_erase_uncontracted_iff]
-  apply Or.inr
-  rw [succsAbove_predAboveI, getDual?_eq_some_iff_mem]
-  · simp
-  · apply c.getDual?_eq_some_neq _ _ _
-    simp
+    refine
+      if hj : (c.getDual? i).isSome then
+        some ⟨(predAboveI i ((c.getDual? i).get hj)), ?_⟩
+      else
+        none
+    rw [mem_erase_uncontracted_iff]
+    apply Or.inr
+    rw [succsAbove_predAboveI, getDual?_eq_some_iff_mem]
+    · simp
+    · apply c.getDual?_eq_some_neq _ _ _
+      simp
 
 @[simp]
-lemma getDualErase_isSome_iff_getDual?_isSome (c : WickContraction n.succ) (i : Fin n.succ) :
-    (c.getDualErase i).isSome ↔ (c.getDual? i).isSome := by
+lemma getDualErase_isSome_iff_getDual?_isSome (c : WickContraction n.succ) (i : Fin n.succ)
+    : (c.getDualErase i).isSome ↔ (c.getDual? i).isSome := by
   match n with
   | 0 =>
     fin_cases i
     simp [getDualErase]
-
-  | Nat.succ n =>
-    simp [getDualErase]
+  | Nat.succ n => simp [getDualErase]
 
 @[simp]
-lemma getDualErase_one (c : WickContraction 1) (i : Fin 1) :
-    c.getDualErase i = none := by
+lemma getDualErase_one (c : WickContraction 1) (i : Fin 1) : c.getDualErase i = none := by
   fin_cases i
   simp [getDualErase]
 

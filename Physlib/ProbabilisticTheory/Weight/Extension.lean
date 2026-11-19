@@ -52,8 +52,8 @@ lemma coe_nnreal_smul (t : ℝ≥0) (P : PosCone E) : ((t • P : PosCone E) : E
   rfl
 
 /-- `P - Q ↦ f P - f Q` does not depend on how an element is written as a difference. -/
-lemma map_sub_eq_map_sub {P Q P' Q' : PosCone E} (h : (P : E) - Q = P' - Q') :
-    f P - f Q = f P' - f Q' := by
+lemma map_sub_eq_map_sub {P Q P' Q' : PosCone E} (h : (P : E) - Q = P' - Q')
+    : f P - f Q = f P' - f Q' := by
   rw [sub_eq_sub_iff_add_eq_add] at *
   rw [← Submodule.coe_add, ← Submodule.coe_add, Subtype.val_inj] at h
   simpa using congrArg f h
@@ -67,8 +67,7 @@ lemma exists_sub (A : E) : ∃ P Q : PosCone E, (P : E) - Q = A := by
 noncomputable def extendFun (A : E) : ℝ :=
   f (exists_sub A).choose - f (exists_sub A).choose_spec.choose
 
-lemma extendFun_eq {A : E} {P Q : PosCone E} (h : (P : E) - Q = A) :
-    extendFun f A = f P - f Q :=
+lemma extendFun_eq {A : E} {P Q : PosCone E} (h : (P : E) - Q = A) : extendFun f A = f P - f Q :=
   map_sub_eq_map_sub f ((exists_sub A).choose_spec.choose_spec.trans h.symm)
 
 /-- The `ℝ`-linear extension of an `ℝ≥0`-linear map on an order unit space's positive cone. -/
@@ -78,8 +77,8 @@ noncomputable def extend : E →ₗ[ℝ] ℝ where
     obtain ⟨P, Q, rfl⟩ := exists_sub A
     obtain ⟨P', Q', rfl⟩ := exists_sub B
     rw [extendFun_eq f rfl, extendFun_eq f rfl,
-      extendFun_eq f (P := P + P') (Q := Q + Q') (by simp only [Submodule.coe_add]; abel),
-      map_add, map_add]
+      extendFun_eq f (P := P + P') (Q := Q + Q') (by simp only [Submodule.coe_add]; abel), map_add,
+      map_add]
     ring
   map_smul' t A := by
     obtain ⟨P, Q, rfl⟩ := exists_sub A
@@ -94,8 +93,7 @@ noncomputable def extend : E →ₗ[ℝ] ℝ where
       ring
 
 @[simp]
-lemma extend_apply {P Q : PosCone E} : extend f ((P : E) - Q) = f P - f Q :=
-  extendFun_eq f rfl
+lemma extend_apply {P Q : PosCone E} : extend f ((P : E) - Q) = f P - f Q := extendFun_eq f rfl
 
 @[simp]
 lemma extend_coe (P : PosCone E) : extend f (P : E) = f P := by
@@ -131,12 +129,11 @@ section OrderUnitSpace
 variable {E : Type*} [OrderUnitSpace E] {w : Weight E}
 
 /-- The `ℝ`-linear map extending a finite weight. -/
-noncomputable def IsFinite.toLinearMap (hw : w.IsFinite) : E →ₗ[ℝ] ℝ :=
-  PosCone.extend hw.toReal
+noncomputable def IsFinite.toLinearMap (hw : w.IsFinite) : E →ₗ[ℝ] ℝ := PosCone.extend hw.toReal
 
 @[simp]
-lemma IsFinite.toLinearMap_coe (hw : w.IsFinite) (A : PosCone E) :
-    hw.toLinearMap (A : E) = (w A).toReal := by
+lemma IsFinite.toLinearMap_coe (hw : w.IsFinite) (A : PosCone E)
+    : hw.toLinearMap (A : E) = (w A).toReal := by
   simp [toLinearMap]
 
 end OrderUnitSpace

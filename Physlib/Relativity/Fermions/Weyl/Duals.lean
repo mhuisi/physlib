@@ -39,9 +39,11 @@ The dual of `LeftHandedWeyl` is `DualLeftHandedWeyl`, and the dual of `RightHand
 
 -/
 
-/-- The morphism between the representation `leftHanded` and the representation
-  `dualLeftHanded` defined by multiplying an element of
-  `leftHanded` by the matrix `εᵃ⁰ᵃ¹ = !![0, 1; -1, 0]]`. -/
+/--
+The morphism between the representation `leftHanded` and the representation
+`dualLeftHanded` defined by multiplying an element of
+`leftHanded` by the matrix `εᵃ⁰ᵃ¹ = !![0, 1; -1, 0]]`.
+-/
 def LeftHandedWeyl.dual : LeftHandedWeyl.rep.IntertwiningMap DualLeftHandedWeyl.rep where
   toFun := fun ψ => DualLeftHandedWeyl.toFin2ℂEquiv.symm (!![0, 1; -1, 0] *ᵥ ψ.toFin2ℂ)
   map_add' := by
@@ -54,25 +56,26 @@ def LeftHandedWeyl.dual : LeftHandedWeyl.rep.IntertwiningMap DualLeftHandedWeyl.
   isIntertwining' := by
     intro M
     refine LinearMap.ext (fun ψ => ?_)
-    change DualLeftHandedWeyl.toFin2ℂEquiv.symm (!![0, 1; -1, 0] *ᵥ M.1 *ᵥ ψ.val) =
-      DualLeftHandedWeyl.toFin2ℂEquiv.symm ((M.1⁻¹)ᵀ *ᵥ !![0, 1; -1, 0] *ᵥ ψ.val)
+    change DualLeftHandedWeyl.toFin2ℂEquiv.symm (!![0, 1; -1, 0] *ᵥ M.1 *ᵥ ψ.val)
+      = DualLeftHandedWeyl.toFin2ℂEquiv.symm ((M.1⁻¹)ᵀ *ᵥ !![0, 1; -1, 0] *ᵥ ψ.val)
     apply congrArg
     rw [mulVec_mulVec, mulVec_mulVec, Lorentz.SL2C.inverse_coe, eta_fin_two M.1]
     refine congrFun (congrArg _ ?_) _
-    rw [SpecialLinearGroup.coe_inv, Matrix.adjugate_fin_two,
-      Matrix.mul_fin_two, eta_fin_two !![M.1 1 1, -M.1 0 1; -M.1 1 0, M.1 0 0]ᵀ]
+    rw [SpecialLinearGroup.coe_inv, Matrix.adjugate_fin_two, Matrix.mul_fin_two,
+      eta_fin_two !![M.1 1 1, -M.1 0 1; -M.1 1 0, M.1 0 0]ᵀ]
     simp
 
-lemma LeftHandedWeyl.dual_hom_apply (ψ : LeftHandedWeyl) :
-    LeftHandedWeyl.dual ψ =
-    DualLeftHandedWeyl.toFin2ℂEquiv.symm (!![0, 1; -1, 0] *ᵥ ψ.toFin2ℂ) := rfl
+lemma LeftHandedWeyl.dual_hom_apply (ψ : LeftHandedWeyl)
+    : LeftHandedWeyl.dual ψ = DualLeftHandedWeyl.toFin2ℂEquiv.symm (!![0, 1; -1, 0] *ᵥ ψ.toFin2ℂ) :=
+  rfl
 
-/-- The morphism from `dualLeftHanded` to
-  `leftHanded` defined by multiplying an element of
-  DualLeftHandedWeyl by the matrix `εₐ₁ₐ₂ = !![0, -1; 1, 0]`. -/
+/--
+The morphism from `dualLeftHanded` to
+`leftHanded` defined by multiplying an element of
+DualLeftHandedWeyl by the matrix `εₐ₁ₐ₂ = !![0, -1; 1, 0]`.
+-/
 def DualLeftHandedWeyl.dual : DualLeftHandedWeyl.rep.IntertwiningMap LeftHandedWeyl.rep where
-  toFun := fun ψ =>
-      LeftHandedWeyl.toFin2ℂEquiv.symm (!![0, -1; 1, 0] *ᵥ ψ.toFin2ℂ)
+  toFun := fun ψ => LeftHandedWeyl.toFin2ℂEquiv.symm (!![0, -1; 1, 0] *ᵥ ψ.toFin2ℂ)
   map_add' := by
     intro ψ ψ'
     simp only [map_add]
@@ -85,24 +88,26 @@ def DualLeftHandedWeyl.dual : DualLeftHandedWeyl.rep.IntertwiningMap LeftHandedW
   isIntertwining' := by
     intro M
     refine LinearMap.ext (fun ψ => ?_)
-    change LeftHandedWeyl.toFin2ℂEquiv.symm (!![0, -1; 1, 0] *ᵥ (M.1⁻¹)ᵀ *ᵥ ψ.val) =
-      LeftHandedWeyl.toFin2ℂEquiv.symm (M.1 *ᵥ !![0, -1; 1, 0] *ᵥ ψ.val)
+    change LeftHandedWeyl.toFin2ℂEquiv.symm (!![0, -1; 1, 0] *ᵥ (M.1⁻¹)ᵀ *ᵥ ψ.val)
+      = LeftHandedWeyl.toFin2ℂEquiv.symm (M.1 *ᵥ !![0, -1; 1, 0] *ᵥ ψ.val)
     rw [EquivLike.apply_eq_iff_eq, mulVec_mulVec, mulVec_mulVec, Lorentz.SL2C.inverse_coe,
       eta_fin_two M.1]
     refine congrFun (congrArg _ ?_) _
-    rw [SpecialLinearGroup.coe_inv, Matrix.adjugate_fin_two,
-      Matrix.mul_fin_two, eta_fin_two !![M.1 1 1, -M.1 0 1; -M.1 1 0, M.1 0 0]ᵀ]
+    rw [SpecialLinearGroup.coe_inv, Matrix.adjugate_fin_two, Matrix.mul_fin_two,
+      eta_fin_two !![M.1 1 1, -M.1 0 1; -M.1 1 0, M.1 0 0]ᵀ]
     simp
 
-lemma DualLeftHandedWeyl.dual_hom_apply (ψ : DualLeftHandedWeyl) :
-    DualLeftHandedWeyl.dual ψ =
-    LeftHandedWeyl.toFin2ℂEquiv.symm (!![0, -1; 1, 0] *ᵥ ψ.toFin2ℂ) := rfl
+lemma DualLeftHandedWeyl.dual_hom_apply (ψ : DualLeftHandedWeyl)
+    : DualLeftHandedWeyl.dual ψ = LeftHandedWeyl.toFin2ℂEquiv.symm (!![0, -1; 1, 0] *ᵥ ψ.toFin2ℂ) :=
+  rfl
 
-/-- The equivalence between the representation `leftHanded` and the representation
-  `dualLeftHanded` defined by multiplying an element of
-  `leftHanded` by the matrix `εᵃ⁰ᵃ¹ = !![0, 1; -1, 0]]`. -/
+/--
+The equivalence between the representation `leftHanded` and the representation
+`dualLeftHanded` defined by multiplying an element of
+`leftHanded` by the matrix `εᵃ⁰ᵃ¹ = !![0, 1; -1, 0]]`.
+-/
 def LeftHandedWeyl.dualEquiv : LeftHandedWeyl.rep.Equiv DualLeftHandedWeyl.rep := by
-  refine Representation.Equiv.mk'  LeftHandedWeyl.dual DualLeftHandedWeyl.dual ?_ ?_
+  refine Representation.Equiv.mk' LeftHandedWeyl.dual DualLeftHandedWeyl.dual ?_ ?_
   · intro x
     simp only [AddHom.toFun_eq_coe, LinearMap.coe_toAddHom,
       Representation.IntertwiningMap.coe_toLinearMap]
@@ -120,17 +125,23 @@ def LeftHandedWeyl.dualEquiv : LeftHandedWeyl.rep.Equiv DualLeftHandedWeyl.rep :
     rw [one_mulVec]
     rfl
 
-/-- `leftHandedDualEquiv` acting on an element `ψ : leftHanded` corresponds
-  to multiplying `ψ` by the matrix `!![0, 1; -1, 0]`. -/
-lemma LeftHandedWeyl.dualEquiv_hom_hom_apply (ψ : LeftHandedWeyl) :
-    LeftHandedWeyl.dualEquiv ψ =
-    DualLeftHandedWeyl.toFin2ℂEquiv.symm (!![0, 1; -1, 0] *ᵥ ψ.toFin2ℂ) := rfl
+/--
+`leftHandedDualEquiv` acting on an element `ψ : leftHanded` corresponds
+to multiplying `ψ` by the matrix `!![0, 1; -1, 0]`.
+-/
+lemma LeftHandedWeyl.dualEquiv_hom_hom_apply (ψ : LeftHandedWeyl)
+    : LeftHandedWeyl.dualEquiv ψ
+      = DualLeftHandedWeyl.toFin2ℂEquiv.symm (!![0, 1; -1, 0] *ᵥ ψ.toFin2ℂ) :=
+  rfl
 
-/-- The inverse of `leftHandedDualEquiv` acting on an element`ψ : dualLeftHanded` corresponds
-  to multiplying `ψ` by the matrix `!![0, -1; 1, 0]`. -/
-lemma LeftHandedWeyl.dualEquiv_inv_hom_apply (ψ : DualLeftHandedWeyl) :
-    LeftHandedWeyl.dualEquiv.symm ψ =
-    LeftHandedWeyl.toFin2ℂEquiv.symm (!![0, -1; 1, 0] *ᵥ ψ.toFin2ℂ) := rfl
+/--
+The inverse of `leftHandedDualEquiv` acting on an element`ψ : dualLeftHanded` corresponds
+to multiplying `ψ` by the matrix `!![0, -1; 1, 0]`.
+-/
+lemma LeftHandedWeyl.dualEquiv_inv_hom_apply (ψ : DualLeftHandedWeyl)
+    : LeftHandedWeyl.dualEquiv.symm ψ
+      = LeftHandedWeyl.toFin2ℂEquiv.symm (!![0, -1; 1, 0] *ᵥ ψ.toFin2ℂ) :=
+  rfl
 
 /-- The linear equivalence between `rightHandedWeyl` and `DualRightHandedWeyl` given by multiplying
 an element of `rightHandedWeyl` by the matrix `εᵃ⁰ᵃ¹ = !![0, 1; -1, 0]]`.

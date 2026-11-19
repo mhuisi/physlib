@@ -46,8 +46,8 @@ namespace Lorentz.SL2C
 -/
 
 /-- Hermiticity read on the entries: conjugating an entry of an axis boost transposes it. -/
-lemma star_boostAxis_apply (i : Fin 3) (t : ℝ) (ht : t ≠ 0) (β α : Fin 2) :
-    star ((boostAxis i t ht).1 β α) = (boostAxis i t ht).1 α β := by
+lemma star_boostAxis_apply (i : Fin 3) (t : ℝ) (ht : t ≠ 0) (β α : Fin 2)
+    : star ((boostAxis i t ht).1 β α) = (boostAxis i t ht).1 α β := by
   have h := congrFun (congrFun (boostAxis_conjTranspose i t ht) α) β
   rwa [Matrix.conjTranspose_apply] at h
 

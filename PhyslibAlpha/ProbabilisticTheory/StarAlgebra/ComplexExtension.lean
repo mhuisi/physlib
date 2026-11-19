@@ -56,8 +56,10 @@ variable {A : Type*} [AddCommGroup A] [Module ℂ A] [StarAddMonoid A] [StarModu
 
 -/
 
-/-- The complex-linear extension of an expectation value on self-adjoint operators to all
-operators: `⟨a⟩ = ⟨ℜ a⟩ + i ⟨ℑ a⟩`. -/
+/--
+The complex-linear extension of an expectation value on self-adjoint operators to all
+operators: `⟨a⟩ = ⟨ℜ a⟩ + i ⟨ℑ a⟩`.
+-/
 noncomputable def complexExtension (φ : selfAdjoint A →ₗ[ℝ] ℝ) : A →ₗ[ℂ] ℂ where
   toFun a := φ (ℜ a) + Complex.I * φ (ℑ a)
   map_add' a b := by
@@ -68,8 +70,9 @@ noncomputable def complexExtension (φ : selfAdjoint A →ₗ[ℝ] ℝ) : A →�
       RingHom.id_apply, Complex.ofReal_add, Complex.ofReal_mul, Complex.ofReal_sub]
     apply Complex.ext <;> simp
 
-lemma complexExtension_apply (φ : selfAdjoint A →ₗ[ℝ] ℝ) (a : A) :
-    complexExtension φ a = φ (ℜ a) + Complex.I * φ (ℑ a) := rfl
+lemma complexExtension_apply (φ : selfAdjoint A →ₗ[ℝ] ℝ) (a : A)
+    : complexExtension φ a = φ (ℜ a) + Complex.I * φ (ℑ a) :=
+  rfl
 
 /-!
 
@@ -78,16 +81,15 @@ lemma complexExtension_apply (φ : selfAdjoint A →ₗ[ℝ] ℝ) (a : A) :
 -/
 
 /-- On self-adjoint operators the extension is the original expectation value. -/
-lemma complexExtension_coe (φ : selfAdjoint A →ₗ[ℝ] ℝ) (a : selfAdjoint A) :
-    complexExtension φ (a : A) = φ a := by
+lemma complexExtension_coe (φ : selfAdjoint A →ₗ[ℝ] ℝ) (a : selfAdjoint A)
+    : complexExtension φ (a : A) = φ a := by
   simp [complexExtension_apply]
 
 /-- The expectation value of the adjoint is the complex conjugate of the expectation value. -/
-lemma complexExtension_star (φ : selfAdjoint A →ₗ[ℝ] ℝ) (a : A) :
-    complexExtension φ (star a) = starRingEnd ℂ (complexExtension φ a) := by
-  have hr : ℜ (star a) = ℜ a := by
-    ext; simp [realPart_apply_coe, add_comm]
-  have hi : ℑ (star a) = -ℑ a := by
+lemma complexExtension_star (φ : selfAdjoint A →ₗ[ℝ] ℝ) (a : A)
+    : complexExtension φ (star a) = starRingEnd ℂ (complexExtension φ a) := by
+  have hr : ℜ (star a) = ℜ a := by ext; simp [realPart_apply_coe, add_comm]
+  have hi : ℑ (star a) = - ℑ a := by
     ext
     simp [imaginaryPart_apply_coe, sub_eq_add_neg, add_comm, smul_neg]
   simp [complexExtension_apply, hr, hi]
@@ -100,20 +102,25 @@ lemma complexExtension_star (φ : selfAdjoint A →ₗ[ℝ] ℝ) (a : A) :
 
 section Hom
 
-variable {C D : Type*} [AddCommGroup C] [Module ℂ C] [StarAddMonoid C] [StarModule ℂ C]
-  [AddCommGroup D] [Module ℂ D] [StarAddMonoid D] [StarModule ℂ D]
+variable
+  {C D : Type*} [AddCommGroup C] [Module ℂ C] [StarAddMonoid C] [StarModule ℂ C] [AddCommGroup D]
+  [Module ℂ D] [StarAddMonoid D] [StarModule ℂ D]
 
-/-- A complex-linear map commuting with the adjoint maps the real part of an operator to the real
-part of its image. -/
-lemma realPart_linearMap (f : C →ₗ[ℂ] D) (hf : ∀ a, f (star a) = star (f a)) (a : C) :
-    ((ℜ (f a) : selfAdjoint D) : D) = f (ℜ a : C) := by
+/--
+A complex-linear map commuting with the adjoint maps the real part of an operator to the real
+part of its image.
+-/
+lemma realPart_linearMap (f : C →ₗ[ℂ] D) (hf : ∀ a, f (star a) = star (f a)) (a : C)
+    : ((ℜ (f a) : selfAdjoint D) : D) = f (ℜ a : C) := by
   rw [realPart_apply_coe, realPart_apply_coe]
   simp only [← Complex.coe_smul, map_smul, map_add, hf]
 
-/-- A complex-linear map commuting with the adjoint maps the imaginary part of an operator to the
-imaginary part of its image. -/
-lemma imaginaryPart_linearMap (f : C →ₗ[ℂ] D) (hf : ∀ a, f (star a) = star (f a)) (a : C) :
-    ((ℑ (f a) : selfAdjoint D) : D) = f (ℑ a : C) := by
+/--
+A complex-linear map commuting with the adjoint maps the imaginary part of an operator to the
+imaginary part of its image.
+-/
+lemma imaginaryPart_linearMap (f : C →ₗ[ℂ] D) (hf : ∀ a, f (star a) = star (f a)) (a : C)
+    : ((ℑ (f a) : selfAdjoint D) : D) = f (ℑ a : C) := by
   rw [imaginaryPart_apply_coe, imaginaryPart_apply_coe]
   simp only [← Complex.coe_smul, map_smul, map_sub, hf]
 

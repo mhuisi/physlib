@@ -59,11 +59,13 @@ variable {d : ℕ} (i : Fin d)
 
 -/
 
-/-- Component `i` of the momentum operator is the continuous linear map
-from `𝓢(Space d, ℂ)` to itself which maps `ψ` to `-iℏ ∂ᵢψ`. -/
+/--
+Component `i` of the momentum operator is the continuous linear map
+from `𝓢(Space d, ℂ)` to itself which maps `ψ` to `-iℏ ∂ᵢψ`.
+-/
 def momentumCLM : 𝓢(Space d, ℂ) →L[ℂ] 𝓢(Space d, ℂ) :=
-  (- Complex.I * ℏ) • (SchwartzMap.evalCLM ℂ (Space d) ℂ (basis i)) ∘L
-    (SchwartzMap.fderivCLM ℂ (Space d) ℂ)
+  (-Complex.I * ℏ)
+    • (SchwartzMap.evalCLM ℂ (Space d) ℂ (basis i)) ∘L (SchwartzMap.fderivCLM ℂ (Space d) ℂ)
 
 @[inherit_doc momentumCLM]
 notation "𝐩" => momentumCLM
@@ -74,8 +76,7 @@ notation "𝐩[" d' "]" => momentumCLM (d := d')
 lemma momentumCLM_apply_fun (ψ : 𝓢(Space d, ℂ)) : 𝐩 i ψ = (-I * ℏ) • ∂[i] ψ := rfl
 
 @[simp]
-lemma momentumCLM_apply (ψ : 𝓢(Space d, ℂ)) (x : Space d) : 𝐩 i ψ x = -I * ℏ * ∂[i] ψ x :=
-  rfl
+lemma momentumCLM_apply (ψ : 𝓢(Space d, ℂ)) (x : Space d) : 𝐩 i ψ x = -I * ℏ * ∂[i] ψ x := rfl
 
 /-!
 
@@ -96,11 +97,12 @@ def momentumOperator : SpaceDHilbertSpace d →ₗ.[ℂ] SpaceDHilbertSpace d wh
 @[inherit_doc momentumOperator]
 notation "𝓟" => momentumOperator
 
-lemma momentumOperator_apply (ψ : SchwartzSubmodule d) :
-    𝓟 i ψ = schwartzEquiv volume (𝐩 i ((schwartzEquiv volume).symm ψ)) := rfl
+lemma momentumOperator_apply (ψ : SchwartzSubmodule d)
+    : 𝓟 i ψ = schwartzEquiv volume (𝐩 i ((schwartzEquiv volume).symm ψ)) :=
+  rfl
 
-lemma momentumOperator_apply_ae (ψ : SchwartzSubmodule d) :
-    𝓟 i ψ =ᵐ[volume] 𝐩 i ((schwartzEquiv volume).symm ψ) :=
+lemma momentumOperator_apply_ae (ψ : SchwartzSubmodule d)
+    : 𝓟 i ψ =ᵐ[volume] 𝐩 i ((schwartzEquiv volume).symm ψ) :=
   schwartzEquiv_coe_ae _
 
 lemma momentumOperator_range (ψ : SchwartzSubmodule d) : 𝓟 i ψ ∈ SchwartzSubmodule d := by
@@ -139,11 +141,11 @@ lemma momentumOperator_isSymmetric : (𝓟 i).IsSymmetric := by
 
 open scoped InnerProductSpace in
 /-- The momentum operator is symmetric on Schwartz maps, in terms of `momentumCLM`. -/
-lemma momentumCLM_inner (f g : 𝓢(Space d, ℂ)) :
-    ⟪(schwartzEquiv volume (𝐩 i f) : SpaceDHilbertSpace d), schwartzEquiv volume g⟫_ℂ
+lemma momentumCLM_inner (f g : 𝓢(Space d, ℂ))
+    : ⟪(schwartzEquiv volume (𝐩 i f) : SpaceDHilbertSpace d), schwartzEquiv volume g⟫_ℂ
       = ⟪(schwartzEquiv volume f : SpaceDHilbertSpace d), schwartzEquiv volume (𝐩 i g)⟫_ℂ := by
-  have h := momentumOperator_isSymmetric (d := d) i (schwartzEquiv volume f)
-    (schwartzEquiv volume g)
+  have h :=
+    momentumOperator_isSymmetric (d := d) i (schwartzEquiv volume f) (schwartzEquiv volume g)
   simpa [momentumOperator_apply] using h
 
 lemma momentumOperator_isUnbounded : (𝓟 i).IsUnbounded := by
@@ -155,8 +157,9 @@ lemma momentumOperator_isUnbounded : (𝓟 i).IsUnbounded := by
 def momentumSqOperator : SpaceDHilbertSpace d →ₗ.[ℂ] SpaceDHilbertSpace d :=
   sum fun i ↦ (𝓟 i).comp (𝓟 i) (momentumOperator_range i)
 
-lemma momentumSqOperator_eq :
-    momentumSqOperator (d := d) = sum fun i ↦ (𝓟 i).comp (𝓟 i) (momentumOperator_range i) := rfl
+lemma momentumSqOperator_eq
+    : momentumSqOperator (d := d) = sum fun i ↦ (𝓟 i).comp (𝓟 i) (momentumOperator_range i) :=
+  rfl
 
 lemma momentumSqOperator_domain_eq : momentumSqOperator.domain = SchwartzSubmodule d := by
   rw [momentumSqOperator_eq, sum_domain]

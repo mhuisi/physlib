@@ -68,8 +68,8 @@ lemma dist_eq_orderUnitNorm (e f : Effect E) : dist e f = orderUnitNorm ((e : E)
 -/
 
 /-- Doubling and re-centering an effect at the order unit lands in the order-unit-norm ball. -/
-lemma orderUnitNorm_two_smul_sub_one_le_one (e : Effect E) :
-    orderUnitNorm (2 • (e : E) - 1) ≤ 1 := by
+lemma orderUnitNorm_two_smul_sub_one_le_one (e : Effect E)
+    : orderUnitNorm (2 • (e : E) - 1) ≤ 1 := by
   rw [← Nat.cast_smul_eq_nsmul ℝ]
   norm_num only [Nat.cast_ofNat]
   rw [orderUnitNorm_le_iff]
@@ -82,30 +82,32 @@ lemma orderUnitNorm_two_smul_sub_one_le_one (e : Effect E) :
     exact smul_nonneg (by norm_num) (sub_nonneg.mpr e.2.2)
 
 /-- Undoing the re-centering on a point of the order-unit-norm ball gives back an effect. -/
-lemma mem_effect_two_inv_smul_one_add {A : E} (hA : orderUnitNorm A ≤ 1) :
-    (2 : ℝ)⁻¹ • (1 + A) ∈ Effect E := by
+lemma mem_effect_two_inv_smul_one_add {A : E} (hA : orderUnitNorm A ≤ 1)
+    : (2 : ℝ)⁻¹ • (1 + A) ∈ Effect E := by
   obtain ⟨-, hAl, hAu⟩ := orderUnitNorm_le_iff.mp hA
   rw [one_smul] at hAl hAu
   refine ⟨smul_nonneg (by norm_num) (by simpa using add_le_add (le_refl (1 : E)) hAl), ?_⟩
-  have h2 := smul_le_smul_of_nonneg_left (add_le_add (le_refl (1 : E)) hAu)
-    (show (0 : ℝ) ≤ (2 : ℝ)⁻¹ by norm_num)
+  have h2 :=
+    smul_le_smul_of_nonneg_left (add_le_add (le_refl (1 : E)) hAu)
+      (show (0 : ℝ) ≤ (2 : ℝ)⁻¹ by norm_num)
   rw [show (1 : E) + 1 = (2 : ℝ) • (1 : E) from by module] at h2
   rwa [smul_smul, inv_mul_cancel₀ (two_ne_zero), one_smul] at h2
 
 /-- Re-centering, then undoing it, returns the original effect. -/
-lemma two_inv_smul_one_add_two_smul_sub_one (e : Effect E) :
-    (2 : ℝ)⁻¹ • (1 + (2 • (e : E) - 1)) = (e : E) := by
+lemma two_inv_smul_one_add_two_smul_sub_one (e : Effect E)
+    : (2 : ℝ)⁻¹ • (1 + (2 • (e : E) - 1)) = (e : E) := by
   rw [← Nat.cast_smul_eq_nsmul ℝ]
   module
 
 /-- Undoing the re-centering, then redoing it, returns the original ball point. -/
-lemma two_smul_two_inv_smul_one_add_sub_one (A : E) :
-    2 • ((2 : ℝ)⁻¹ • (1 + A)) - 1 = A := by
+lemma two_smul_two_inv_smul_one_add_sub_one (A : E) : 2 • ((2 : ℝ)⁻¹ • (1 + A)) - 1 = A := by
   rw [← Nat.cast_smul_eq_nsmul ℝ, smul_smul]
   norm_num
 
-/-- Effects correspond to points of the order-unit-norm ball by doubling and re-centering at the
-order unit: `e ↦ 2 • e - 1`, with inverse `A ↦ (1 + A) / 2`. -/
+/--
+Effects correspond to points of the order-unit-norm ball by doubling and re-centering at the
+order unit: `e ↦ 2 • e - 1`, with inverse `A ↦ (1 + A) / 2`.
+-/
 noncomputable def effectEquiv : Effect E ≃ {A : E // orderUnitNorm A ≤ 1} where
   toFun e := ⟨2 • (e : E) - 1, orderUnitNorm_two_smul_sub_one_le_one e⟩
   invFun A := ⟨(2 : ℝ)⁻¹ • (1 + (A : E)), mem_effect_two_inv_smul_one_add A.2⟩

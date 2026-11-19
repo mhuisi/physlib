@@ -71,12 +71,15 @@ initial-condition types.
 
 -/
 
-/-- Initial conditions for the harmonic oscillator specified by an amplitude `A` and a phase
-  offset `φ`, describing the solution `x(t) = A cos (ω t - φ)`.
+/--
+Initial conditions for the harmonic oscillator specified by an amplitude `A` and a phase
+offset `φ`, describing the solution `x(t) = A cos (ω t - φ)`.
 
-  The conditions can be converted to the standard `InitialConditions` format using the
-  `toInitialConditions` function. -/
-@[ext] structure AmplitudePhase where
+The conditions can be converted to the standard `InitialConditions` format using the
+`toInitialConditions` function.
+-/
+@[ext]
+structure AmplitudePhase where
   /-- The amplitude of the oscillation. -/
   A : ℝ
   /-- The phase offset of the oscillation. -/
@@ -93,13 +96,15 @@ position and velocity at `t = 0`.
 
 -/
 
-/-- Convert amplitude–phase initial conditions to standard initial conditions at `t = 0`, via
-  `x₀ = A cos φ` and `v₀ = A ω sin φ`.
+/--
+Convert amplitude–phase initial conditions to standard initial conditions at `t = 0`, via
+`x₀ = A cos φ` and `v₀ = A ω sin φ`.
 
-  See `toInitialConditions_trajectory_eq_cos` and `toInitialConditions_velocity_eq_sin` in
-  section E.3 for the correctness proofs. -/
-noncomputable def toInitialConditions (S : HarmonicOscillator) (IC : AmplitudePhase) :
-    InitialConditions where
+See `toInitialConditions_trajectory_eq_cos` and `toInitialConditions_velocity_eq_sin` in
+section E.3 for the correctness proofs.
+-/
+noncomputable def toInitialConditions (S : HarmonicOscillator) (IC : AmplitudePhase)
+    : InitialConditions where
   x₀ := EuclideanSpace.single 0 (IC.A * cos IC.φ)
   v₀ := EuclideanSpace.single 0 (IC.A * S.ω * sin IC.φ)
 
@@ -113,11 +118,13 @@ factor `1 / ω` of the standard solution cancels the `ω` in `v₀ = A ω sin φ
 
 -/
 
-/-- The trajectory of amplitude–phase initial conditions is the cosine normal form
-  `x(t) = A cos (ω t - φ)`. -/
-lemma toInitialConditions_trajectory_eq_cos (S : HarmonicOscillator) (IC : AmplitudePhase)
-    (t : Time) :
-    (IC.toInitialConditions S).trajectory S t
+/--
+The trajectory of amplitude–phase initial conditions is the cosine normal form
+`x(t) = A cos (ω t - φ)`.
+-/
+lemma toInitialConditions_trajectory_eq_cos
+    (S : HarmonicOscillator) (IC : AmplitudePhase) (t : Time)
+    : (IC.toInitialConditions S).trajectory S t
       = EuclideanSpace.single 0 (IC.A * cos (S.ω * t - IC.φ)) := by
   rw [InitialConditions.trajectory_eq, toInitialConditions]
   ext i
@@ -126,9 +133,8 @@ lemma toInitialConditions_trajectory_eq_cos (S : HarmonicOscillator) (IC : Ampli
   field_simp [S.ω_ne_zero]
 
 /-- The velocity of the amplitude–phase trajectory is `v(t) = -A ω sin (ω t - φ)`. -/
-lemma toInitialConditions_velocity_eq_sin (S : HarmonicOscillator) (IC : AmplitudePhase)
-    (t : Time) :
-    ∂ₜ ((IC.toInitialConditions S).trajectory S) t
+lemma toInitialConditions_velocity_eq_sin (S : HarmonicOscillator) (IC : AmplitudePhase) (t : Time)
+    : ∂ₜ ((IC.toInitialConditions S).trajectory S) t
       = EuclideanSpace.single 0 (-(IC.A * S.ω * sin (S.ω * t.val - IC.φ))) := by
   rw [InitialConditions.trajectory_velocity, toInitialConditions]
   ext i
@@ -151,21 +157,24 @@ initial conditions.
 
 -/
 
-/-- Recover amplitude–phase data from standard initial conditions, as the polar coordinates of the
-  phase vector `(x₀, v₀ / ω)` embedded as `z = x₀ + (v₀ / ω) i`: the amplitude is `‖z‖` and the
-  phase is `Complex.arg z`.
+/--
+Recover amplitude–phase data from standard initial conditions, as the polar coordinates of the
+phase vector `(x₀, v₀ / ω)` embedded as `z = x₀ + (v₀ / ω) i`: the amplitude is `‖z‖` and the
+phase is `Complex.arg z`.
 
-  See `toInitialConditions_fromInitialConditions` for the right-inverse identity. -/
-noncomputable def fromInitialConditions (S : HarmonicOscillator) (IC : InitialConditions) :
-    AmplitudePhase where
+See `toInitialConditions_fromInitialConditions` for the right-inverse identity.
+-/
+noncomputable def fromInitialConditions (S : HarmonicOscillator) (IC : InitialConditions)
+    : AmplitudePhase where
   A := ‖(⟨IC.x₀ 0, IC.v₀ 0 / S.ω⟩ : ℂ)‖
   φ := Complex.arg (⟨IC.x₀ 0, IC.v₀ 0 / S.ω⟩ : ℂ)
 
-/-- `fromInitialConditions` is a right inverse of `toInitialConditions`: converting initial
-  conditions to amplitude–phase form and back recovers them exactly. -/
-lemma toInitialConditions_fromInitialConditions (S : HarmonicOscillator)
-    (IC : InitialConditions) :
-    (fromInitialConditions S IC).toInitialConditions S = IC := by
+/--
+`fromInitialConditions` is a right inverse of `toInitialConditions`: converting initial
+conditions to amplitude–phase form and back recovers them exactly.
+-/
+lemma toInitialConditions_fromInitialConditions (S : HarmonicOscillator) (IC : InitialConditions)
+    : (fromInitialConditions S IC).toInitialConditions S = IC := by
   have hω : S.ω ≠ 0 := S.ω_ne_zero
   set z : ℂ := (⟨IC.x₀ 0, IC.v₀ 0 / S.ω⟩ : ℂ)
   -- polar identities
@@ -178,13 +187,17 @@ lemma toInitialConditions_fromInitialConditions (S : HarmonicOscillator)
   · -- Position: `‖z‖ cos (arg z) = Re z = IC.x₀ 0`, and `single 0 (IC.x₀ 0) = IC.x₀`.
     show EuclideanSpace.single 0 (‖z‖ * cos (Complex.arg z)) = IC.x₀
     rw [hcos, hre]
-    ext i; fin_cases i; simp
+    ext i
+    fin_cases i
+    simp
   · -- Velocity: `‖z‖ ω sin (arg z) = ω · Im z = ω · (v₀ / ω) = IC.v₀ 0`, then reassemble.
     show EuclideanSpace.single 0 (‖z‖ * S.ω * sin (Complex.arg z)) = IC.v₀
     have hv : ‖z‖ * S.ω * sin (Complex.arg z) = IC.v₀ 0 := by
       rw [mul_right_comm, hsin, him]; field_simp
     rw [hv]
-    ext i; fin_cases i; simp
+    ext i
+    fin_cases i
+    simp
 
 end AmplitudePhase
 

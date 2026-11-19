@@ -112,16 +112,20 @@ namespace TauCeti
 
 section Normed
 
-variable {𝕜 G E : Type*} [RCLike 𝕜] [AddGroup G] [TopologicalSpace G] [MeasurableSpace G]
-  [R1Space G] [BorelSpace G]
-  [NormedAddCommGroup E] [NormedSpace 𝕜 E] [NormedSpace ℝ E] [SMulCommClass ℝ 𝕜 E]
-  {μ : Measure G} [μ.InnerRegularCompactLTTop] {π : ContRepresentation 𝕜 (Multiplicative G) E}
+variable
+  {𝕜 G E : Type*} [RCLike 𝕜] [AddGroup G] [TopologicalSpace G] [MeasurableSpace G] [R1Space G]
+  [BorelSpace G] [NormedAddCommGroup E] [NormedSpace 𝕜 E] [NormedSpace ℝ E] [SMulCommClass ℝ 𝕜 E]
+  {μ : Measure G} [μ.InnerRegularCompactLTTop]
+  {π : ContRepresentation 𝕜 (Multiplicative G) E}
 
 omit [NormedSpace ℝ E] [SMulCommClass ℝ 𝕜 E] in
 /-- The integrand of the integrated form is integrable. -/
-private lemma integrable_smul_apply (hcont : ∀ v, Continuous fun g : G ↦ π (.ofAdd g) v)
-    {C : ℝ} (hC : ∀ g, ‖π g‖ ≤ C) {f : G → 𝕜} (hf : Integrable f μ) (v : E) :
-    Integrable (fun g ↦ f g • π (.ofAdd g) v) μ := by
+private lemma integrable_smul_apply
+    (hcont : ∀ v, Continuous fun g : G ↦ π (.ofAdd g) v)
+    {C : ℝ} (hC : ∀ g, ‖π g‖ ≤ C)
+    {f : G → 𝕜} (hf : Integrable f μ)
+    (v : E)
+    : Integrable (fun g ↦ f g • π (.ofAdd g) v) μ := by
   refine (hf.norm.mul_const (C * ‖v‖)).mono'
     (hf.aefinStronglyMeasurable.aestronglyMeasurable_smul (hcont v)) (.of_forall fun g ↦ ?_)
   rw [norm_smul]
@@ -130,29 +134,35 @@ private lemma integrable_smul_apply (hcont : ∀ v, Continuous fun g : G ↦ π 
 
 omit [TopologicalSpace G] [R1Space G] [BorelSpace G] [μ.InnerRegularCompactLTTop]
   [SMulCommClass ℝ 𝕜 E] in
-/-- The integral of the integrand of the integrated form is bounded by the `L¹` norm of the
-weight. -/
-private lemma norm_integral_smul_apply_le {C : ℝ} (hC : ∀ g, ‖π g‖ ≤ C) {f : G → 𝕜}
-    (hf : Integrable f μ) (v : E) :
-    ‖∫ g, f g • π (.ofAdd g) v ∂μ‖ ≤ C * (∫ g, ‖f g‖ ∂μ) * ‖v‖ := by
-  calc ‖∫ g, f g • π (.ofAdd g) v ∂μ‖ ≤ ∫ g, ‖f g‖ * (C * ‖v‖) ∂μ := by
-        refine norm_integral_le_of_norm_le (hf.norm.mul_const _) (.of_forall fun g ↦ ?_)
-        rw [norm_smul]
-        gcongr
-        exact (π _).le_of_opNorm_le (hC _) v
+/--
+The integral of the integrand of the integrated form is bounded by the `L¹` norm of the
+weight.
+-/
+private lemma norm_integral_smul_apply_le
+    {C : ℝ} (hC : ∀ g, ‖π g‖ ≤ C) {f : G → 𝕜} (hf : Integrable f μ) (v : E)
+    : ‖∫ g, f g • π (.ofAdd g) v ∂μ‖ ≤ C * (∫ g, ‖f g‖ ∂μ) * ‖v‖ := by
+  calc
+    ‖∫ g, f g • π (.ofAdd g) v ∂μ‖ ≤ ∫ g, ‖f g‖ * (C * ‖v‖) ∂μ := by
+      refine norm_integral_le_of_norm_le (hf.norm.mul_const _) (.of_forall fun g ↦ ?_)
+      rw [norm_smul]
+      gcongr
+      exact (π _).le_of_opNorm_le (hC _) v
     _ = C * (∫ g, ‖f g‖ ∂μ) * ‖v‖ := by rw [integral_mul_const]; ring
 
 variable (π) in
-/-- The **integrated form** of a strongly continuous, uniformly bounded representation `π` of an
+/--
+The **integrated form** of a strongly continuous, uniformly bounded representation `π` of an
 additive group `G` (written multiplicatively as `Multiplicative G`): the bounded operator
 `π(f) = ∫ g, f g • π g ∂μ` attached to an integrable weight `f`, defined pointwise by the Bochner
-integral `π(f) v = ∫ g, f g • π g v ∂μ` of the continuous orbit `g ↦ π g v`. -/
+integral `π(f) v = ∫ g, f g • π g v ∂μ` of the continuous orbit `g ↦ π g v`.
+-/
 noncomputable def _root_.ContRepresentation.integratedOperatorL1
-    (hcont : ∀ v, Continuous fun g : G ↦ π (.ofAdd g) v)
-    (hbdd : ∃ C, ∀ g, ‖π g‖ ≤ C) (μ : Measure G) [μ.InnerRegularCompactLTTop] :
-    (G →₁[μ] 𝕜) →L[𝕜] E →L[𝕜] E :=
+    (hcont : ∀ v, Continuous fun g : G ↦ π (.ofAdd g) v) (hbdd : ∃ C, ∀ g, ‖π g‖ ≤ C)
+    (μ : Measure G) [μ.InnerRegularCompactLTTop]
+    : (G →₁[μ] 𝕜) →L[𝕜] E →L[𝕜] E :=
   LinearMap.mkContinuous₂
-    (LinearMap.mk₂ 𝕜 (fun (f : G →₁[μ] 𝕜) v ↦ ∫ g, f g • π (.ofAdd g) v ∂μ)
+    (LinearMap.mk₂ 𝕜
+      (fun (f : G →₁[μ] 𝕜) v ↦ ∫ g, f g • π (.ofAdd g) v ∂μ)
       (fun f₁ f₂ v ↦ by
         rw [← integral_add (integrable_smul_apply hcont hbdd.choose_spec (L1.integrable_coeFn _) v)
           (integrable_smul_apply hcont hbdd.choose_spec (L1.integrable_coeFn _) v)]
@@ -171,52 +181,57 @@ noncomputable def _root_.ContRepresentation.integratedOperatorL1
       (fun c f v ↦ by
         rw [← integral_smul]
         simp_rw [map_smul, smul_comm c]))
-    hbdd.choose fun f v ↦ by
-      simpa [L1.norm_eq_integral_norm] using norm_integral_smul_apply_le hbdd.choose_spec
-        (L1.integrable_coeFn f) v
+    hbdd.choose
+    fun f v ↦ by
+      simpa [L1.norm_eq_integral_norm] using
+        norm_integral_smul_apply_le hbdd.choose_spec (L1.integrable_coeFn f) v
 
 variable {hcont : ∀ v, Continuous fun g : G ↦ π (.ofAdd g) v} {hbdd : ∃ C, ∀ g, ‖π g‖ ≤ C}
 
 /-- The integrated form acts on a vector by integrating its orbit against the weight. -/
-lemma _root_.ContRepresentation.integratedOperatorL1_apply (f : G →₁[μ] 𝕜) (v : E) :
-    π.integratedOperatorL1 hcont hbdd μ f v = ∫ g, f g • π (.ofAdd g) v ∂μ :=
+lemma _root_.ContRepresentation.integratedOperatorL1_apply (f : G →₁[μ] 𝕜) (v : E)
+    : π.integratedOperatorL1 hcont hbdd μ f v = ∫ g, f g • π (.ofAdd g) v ∂μ :=
   (rfl)
 
 /-- The integrated form of the class of an integrable function. -/
 @[simp]
-lemma _root_.ContRepresentation.integratedOperatorL1_toL1 {f : G → 𝕜} (hf : Integrable f μ)
-    (v : E) :
-    π.integratedOperatorL1 hcont hbdd μ (hf.toL1 f) v = ∫ g, f g • π (.ofAdd g) v ∂μ := by
+lemma _root_.ContRepresentation.integratedOperatorL1_toL1 {f : G → 𝕜} (hf : Integrable f μ) (v : E)
+    : π.integratedOperatorL1 hcont hbdd μ (hf.toL1 f) v = ∫ g, f g • π (.ofAdd g) v ∂μ := by
   rw [ContRepresentation.integratedOperatorL1_apply]
   refine integral_congr_ae ?_
   filter_upwards [hf.coeFn_toL1] with g hg
   rw [hg]
 
-/-- The integrated form is bounded by the uniform bound of the representation times the `L¹`
-norm of the weight. -/
-lemma _root_.ContRepresentation.norm_integratedOperatorL1_le {C : ℝ} (hC : ∀ g, ‖π g‖ ≤ C)
-    (f : G →₁[μ] 𝕜) :
-    ‖π.integratedOperatorL1 hcont hbdd μ f‖ ≤ C * ‖f‖ := by
+/--
+The integrated form is bounded by the uniform bound of the representation times the `L¹`
+norm of the weight.
+-/
+lemma _root_.ContRepresentation.norm_integratedOperatorL1_le
+    {C : ℝ} (hC : ∀ g, ‖π g‖ ≤ C) (f : G →₁[μ] 𝕜)
+    : ‖π.integratedOperatorL1 hcont hbdd μ f‖ ≤ C * ‖f‖ := by
   have hC0 : 0 ≤ C := (norm_nonneg _).trans (hC 1)
   refine ContinuousLinearMap.opNorm_le_bound _ (by positivity) fun v ↦ ?_
   simpa [ContRepresentation.integratedOperatorL1_apply, L1.norm_eq_integral_norm] using
     norm_integral_smul_apply_le hC (L1.integrable_coeFn f) v
 
-/-- Translating the weight on the left by `h` amounts to composing the integrated form with
-`π h`. -/
-lemma _root_.ContRepresentation.comp_integratedOperatorL1 [CompleteSpace E] [MeasurableAdd G]
-    [μ.IsAddLeftInvariant] (h : G) (f : G →₁[μ] 𝕜) :
-    π (.ofAdd h) ∘L π.integratedOperatorL1 hcont hbdd μ f =
-      π.integratedOperatorL1 hcont hbdd μ
+/--
+Translating the weight on the left by `h` amounts to composing the integrated form with
+`π h`.
+-/
+lemma _root_.ContRepresentation.comp_integratedOperatorL1
+    [CompleteSpace E] [MeasurableAdd G] [μ.IsAddLeftInvariant] (h : G) (f : G →₁[μ] 𝕜)
+    : π (.ofAdd h) ∘L π.integratedOperatorL1 hcont hbdd μ f
+      = π.integratedOperatorL1 hcont hbdd μ
         (Lp.compMeasurePreserving (fun g ↦ -h + g) (measurePreserving_add_left μ (-h)) f) := by
   ext v
   rw [ContinuousLinearMap.comp_apply, ContRepresentation.integratedOperatorL1_apply,
     ContRepresentation.integratedOperatorL1_apply,
     ← (π _).integral_comp_comm
       (integrable_smul_apply hcont hbdd.choose_spec (L1.integrable_coeFn f) v)]
-  have hcomp : ∫ g, (Lp.compMeasurePreserving (fun g ↦ -h + g)
-        (measurePreserving_add_left μ (-h)) f) g • π (.ofAdd g) v ∂μ =
-      ∫ g, f (-h + g) • π (.ofAdd g) v ∂μ := by
+  have hcomp
+      : ∫ g, (Lp.compMeasurePreserving (fun g ↦ -h + g)
+          (measurePreserving_add_left μ (-h)) f) g • π (.ofAdd g) v ∂μ
+        = ∫ g, f (-h + g) • π (.ofAdd g) v ∂μ := by
     refine integral_congr_ae ?_
     filter_upwards [Lp.coeFn_compMeasurePreserving f (measurePreserving_add_left μ (-h))]
       with g hg
@@ -224,35 +239,41 @@ lemma _root_.ContRepresentation.comp_integratedOperatorL1 [CompleteSpace E] [Mea
   rw [hcomp, ← integral_add_left_eq_self (fun g ↦ f (-h + g) • π (.ofAdd g) v) h]
   simp [ofAdd_add]
 
-/-- Although `π` is only strongly continuous, `h ↦ π h ∘L π(f)` is continuous in the operator norm:
+/--
+Although `π` is only strongly continuous, `h ↦ π h ∘L π(f)` is continuous in the operator norm:
 by `comp_integratedOperatorL1` it is the integrated form of the left translates of `f`, which
-depend continuously on `h` in `L¹`. -/
-lemma _root_.ContRepresentation.continuous_comp_integratedOperatorL1 [CompleteSpace E]
-    [IsTopologicalAddGroup G] [MeasurableAdd G] [μ.IsAddLeftInvariant] [IsLocallyFiniteMeasure μ]
-    (f : G →₁[μ] 𝕜) :
-    Continuous fun h : G ↦ π (.ofAdd h) ∘L π.integratedOperatorL1 hcont hbdd μ f := by
+depend continuously on `h` in `L¹`.
+-/
+lemma _root_.ContRepresentation.continuous_comp_integratedOperatorL1
+    [CompleteSpace E] [IsTopologicalAddGroup G] [MeasurableAdd G] [μ.IsAddLeftInvariant]
+    [IsLocallyFiniteMeasure μ]
+    (f : G →₁[μ] 𝕜)
+    : Continuous fun h : G ↦ π (.ofAdd h) ∘L π.integratedOperatorL1 hcont hbdd μ f := by
   simp_rw [ContRepresentation.comp_integratedOperatorL1]
   exact (π.integratedOperatorL1 hcont hbdd μ).continuous.comp
     (continuous_const.compMeasurePreservingLp
       (ContinuousMap.curry ⟨fun p : G × G ↦ -p.1 + p.2, by fun_prop⟩).continuous
-      (fun h ↦ measurePreserving_add_left μ (-h)) ENNReal.one_ne_top)
+      (fun h ↦ measurePreserving_add_left μ (-h))
+      ENNReal.one_ne_top)
 
 end Normed
 
 section Commute
 
-variable {𝕜 G E : Type*} [RCLike 𝕜] [AddCommGroup G] [TopologicalSpace G]
-  [MeasurableSpace G] [R1Space G] [BorelSpace G]
-  [NormedAddCommGroup E] [NormedSpace 𝕜 E] [NormedSpace ℝ E] [SMulCommClass ℝ 𝕜 E]
-  [CompleteSpace E]
-  {μ : Measure G} [μ.InnerRegularCompactLTTop] {π : ContRepresentation 𝕜 (Multiplicative G) E}
+variable
+  {𝕜 G E : Type*}
+  [RCLike 𝕜] [AddCommGroup G] [TopologicalSpace G] [MeasurableSpace G] [R1Space G] [BorelSpace G]
+  [NormedAddCommGroup E] [NormedSpace 𝕜 E] [NormedSpace ℝ E] [SMulCommClass ℝ 𝕜 E] [CompleteSpace E]
+  {μ : Measure G} [μ.InnerRegularCompactLTTop]
+  {π : ContRepresentation 𝕜 (Multiplicative G) E}
   {hcont : ∀ v, Continuous fun g : G ↦ π (.ofAdd g) v} {hbdd : ∃ C, ∀ g, ‖π g‖ ≤ C}
 
-/-- Every action operator of a representation of an abelian group commutes with its
-integrated operators. No invariance hypothesis on the measure is needed. -/
-lemma _root_.ContRepresentation.commute_integratedOperatorL1
-    (g : Multiplicative G) (f : G →₁[μ] 𝕜) :
-    Commute (π g) (π.integratedOperatorL1 hcont hbdd μ f) := by
+/--
+Every action operator of a representation of an abelian group commutes with its
+integrated operators. No invariance hypothesis on the measure is needed.
+-/
+lemma _root_.ContRepresentation.commute_integratedOperatorL1 (g : Multiplicative G) (f : G →₁[μ] 𝕜)
+    : Commute (π g) (π.integratedOperatorL1 hcont hbdd μ f) := by
   apply ContinuousLinearMap.ext
   intro v
   simp only [mul_apply_eq_comp, ContRepresentation.integratedOperatorL1_apply]
@@ -261,13 +282,13 @@ lemma _root_.ContRepresentation.commute_integratedOperatorL1
   apply integral_congr_ae
   filter_upwards [] with t
   rw [map_smul]
-  exact congrArg (fun w => f t • w)
-    (congrArg (fun T : E →L[𝕜] E => T v)
-      ((Commute.all g (.ofAdd t)).map π.toMonoidHom).eq)
+  exact congrArg
+    (fun w => f t • w)
+    (congrArg (fun T : E →L[𝕜] E => T v) ((Commute.all g (.ofAdd t)).map π.toMonoidHom).eq)
 
 /-- Integrated operators of an abelian-group representation commute for any measure. -/
-lemma _root_.ContRepresentation.integratedOperatorL1_commute (f₁ f₂ : G →₁[μ] 𝕜) :
-    Commute (π.integratedOperatorL1 hcont hbdd μ f₁)
+lemma _root_.ContRepresentation.integratedOperatorL1_commute (f₁ f₂ : G →₁[μ] 𝕜)
+    : Commute (π.integratedOperatorL1 hcont hbdd μ f₁)
       (π.integratedOperatorL1 hcont hbdd μ f₂) := by
   apply ContinuousLinearMap.ext
   intro v
@@ -279,43 +300,45 @@ lemma _root_.ContRepresentation.integratedOperatorL1_commute (f₁ f₂ : G →�
   refine integral_congr_ae (.of_forall fun t ↦ ?_)
   dsimp only
   rw [map_smul]
-  exact congrArg (fun w ↦ f₂ t • w)
-    (congrArg (fun T : E →L[𝕜] E ↦ T v)
-      (π.commute_integratedOperatorL1 (.ofAdd t) f₁).symm.eq)
+  exact congrArg
+    (fun w ↦ f₂ t • w)
+    (congrArg (fun T : E →L[𝕜] E ↦ T v) (π.commute_integratedOperatorL1 (.ofAdd t) f₁).symm.eq)
 
 end Commute
 
 section Convolution
 
-variable {𝕜 G E : Type*} [RCLike 𝕜] [AddCommGroup G] [TopologicalSpace G] [MeasurableSpace G]
-  [R1Space G] [BorelSpace G] [MeasurableAdd₂ G] [MeasurableNeg G]
-  [NormedAddCommGroup E] [NormedSpace 𝕜 E] [NormedSpace ℝ E] [SMulCommClass ℝ 𝕜 E]
-  [CompleteSpace E] [SecondCountableTopologyEither G E]
+variable
+  {𝕜 G E : Type*} [RCLike 𝕜] [AddCommGroup G] [TopologicalSpace G] [MeasurableSpace G] [R1Space G]
+  [BorelSpace G] [MeasurableAdd₂ G] [MeasurableNeg G] [NormedAddCommGroup E] [NormedSpace 𝕜 E]
+  [NormedSpace ℝ E] [SMulCommClass ℝ 𝕜 E] [CompleteSpace E] [SecondCountableTopologyEither G E]
   {μ : Measure G} [μ.InnerRegularCompactLTTop] [SFinite μ] [μ.IsAddRightInvariant]
   {π : ContRepresentation 𝕜 (Multiplicative G) E}
   {hcont : ∀ v, Continuous fun g : G ↦ π (.ofAdd g) v} {hbdd : ∃ C, ∀ g, ‖π g‖ ≤ C}
 
-/-- The integrated form turns convolution of weights into composition of operators:
-`π(f₁ ⋆ f₂) = π(f₁) ∘L π(f₂)`. -/
-lemma _root_.ContRepresentation.integratedOperatorL1_convolution {f₁ f₂ : G → 𝕜}
-    (hf₁ : Integrable f₁ μ) (hf₂ : Integrable f₂ μ) :
-    π.integratedOperatorL1 hcont hbdd μ
-        ((hf₁.integrable_convolution (ContinuousLinearMap.mul 𝕜 𝕜) hf₂).toL1 _) =
-      π.integratedOperatorL1 hcont hbdd μ (hf₁.toL1 f₁) ∘L
-        π.integratedOperatorL1 hcont hbdd μ (hf₂.toL1 f₂) := by
+/--
+The integrated form turns convolution of weights into composition of operators:
+`π(f₁ ⋆ f₂) = π(f₁) ∘L π(f₂)`.
+-/
+lemma _root_.ContRepresentation.integratedOperatorL1_convolution
+    {f₁ f₂ : G → 𝕜} (hf₁ : Integrable f₁ μ) (hf₂ : Integrable f₂ μ)
+    : π.integratedOperatorL1 hcont hbdd μ
+        ((hf₁.integrable_convolution (ContinuousLinearMap.mul 𝕜 𝕜) hf₂).toL1 _)
+      = π.integratedOperatorL1 hcont hbdd μ (hf₁.toL1 f₁)
+        ∘L π.integratedOperatorL1 hcont hbdd μ (hf₂.toL1 f₂) := by
   obtain ⟨C, hC⟩ := hbdd
   ext v
   rw [ContinuousLinearMap.comp_apply, ContRepresentation.integratedOperatorL1_toL1,
     ContRepresentation.integratedOperatorL1_toL1, ContRepresentation.integratedOperatorL1_toL1]
   -- Push `π t` inside the inner integral and substitute `x = t + s` there.
-  have hinner (t : G) : f₁ t • π (.ofAdd t) (∫ s, f₂ s • π (.ofAdd s) v ∂μ) =
-      ∫ x, (f₁ t * f₂ (x - t)) • π (.ofAdd x) v ∂μ := by
+  have hinner (t : G)
+      : f₁ t • π (.ofAdd t) (∫ s, f₂ s • π (.ofAdd s) v ∂μ)
+        = ∫ x, (f₁ t * f₂ (x - t)) • π (.ofAdd x) v ∂μ := by
     rw [← (π _).integral_comp_comm (integrable_smul_apply hcont hC hf₂ v), ← integral_smul,
       ← integral_sub_right_eq_self _ t]
     refine integral_congr_ae (.of_forall fun x ↦ ?_)
     dsimp only
-    rw [map_smul, ← mul_apply_eq_comp, ← map_mul, ← ofAdd_add, add_sub_cancel,
-      mul_smul]
+    rw [map_smul, ← mul_apply_eq_comp, ← map_mul, ← ofAdd_add, add_sub_cancel, mul_smul]
   simp_rw [hinner]
   -- Exchange the order of integration.
   have hint : Integrable (Function.uncurry fun t x ↦ (f₁ t * f₂ (x - t)) • π (.ofAdd x) v)
@@ -338,27 +361,32 @@ end Convolution
 
 section InnerProduct
 
-variable {𝕜 G E : Type*} [RCLike 𝕜] [AddGroup G] [TopologicalSpace G] [MeasurableSpace G]
-  [R1Space G] [BorelSpace G]
-  [NormedAddCommGroup E] [InnerProductSpace 𝕜 E] [NormedSpace ℝ E] [SMulCommClass ℝ 𝕜 E]
-  [CompleteSpace E]
-  {μ : Measure G} [μ.InnerRegularCompactLTTop] {π : ContRepresentation 𝕜 (Multiplicative G) E}
+variable
+  {𝕜 G E : Type*} [RCLike 𝕜] [AddGroup G] [TopologicalSpace G] [MeasurableSpace G] [R1Space G]
+  [BorelSpace G] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E] [NormedSpace ℝ E]
+  [SMulCommClass ℝ 𝕜 E] [CompleteSpace E]
+  {μ : Measure G} [μ.InnerRegularCompactLTTop]
+  {π : ContRepresentation 𝕜 (Multiplicative G) E}
   {hcont : ∀ v, Continuous fun g : G ↦ π (.ofAdd g) v} {hbdd : ∃ C, ∀ g, ‖π g‖ ≤ C}
 
-/-- Matrix coefficients of the integrated form are the integrals of the matrix coefficients of the
-representation against the weight. -/
-lemma _root_.ContRepresentation.inner_integratedOperatorL1_apply (f : G →₁[μ] 𝕜) (w v : E) :
-    ⟪w, π.integratedOperatorL1 hcont hbdd μ f v⟫_𝕜 = ∫ g, f g * ⟪w, π (.ofAdd g) v⟫_𝕜 ∂μ := by
+/--
+Matrix coefficients of the integrated form are the integrals of the matrix coefficients of the
+representation against the weight.
+-/
+lemma _root_.ContRepresentation.inner_integratedOperatorL1_apply (f : G →₁[μ] 𝕜) (w v : E)
+    : ⟪w, π.integratedOperatorL1 hcont hbdd μ f v⟫_𝕜 = ∫ g, f g * ⟪w, π (.ofAdd g) v⟫_𝕜 ∂μ := by
   rw [ContRepresentation.integratedOperatorL1_apply,
     ← integral_inner (integrable_smul_apply hcont hbdd.choose_spec (L1.integrable_coeFn f) v)]
   simp_rw [inner_smul_right]
 
-/-- The adjoint of the integrated form of a unitary representation is the integrated form of the
-involuted weight `g ↦ conj (f (-g))`. -/
-lemma _root_.ContRepresentation.adjoint_integratedOperatorL1 [MeasurableNeg G]
-    [μ.IsNegInvariant] (hπ : ContRepresentation.IsUnitary π) (f : G →₁[μ] 𝕜) :
-    ContinuousLinearMap.adjoint (π.integratedOperatorL1 hcont hbdd μ f) =
-      π.integratedOperatorL1 hcont hbdd μ
+/--
+The adjoint of the integrated form of a unitary representation is the integrated form of the
+involuted weight `g ↦ conj (f (-g))`.
+-/
+lemma _root_.ContRepresentation.adjoint_integratedOperatorL1
+    [MeasurableNeg G] [μ.IsNegInvariant] (hπ : ContRepresentation.IsUnitary π) (f : G →₁[μ] 𝕜)
+    : ContinuousLinearMap.adjoint (π.integratedOperatorL1 hcont hbdd μ f)
+      = π.integratedOperatorL1 hcont hbdd μ
         (star (Lp.compMeasurePreserving Neg.neg (Measure.measurePreserving_neg μ) f)) := by
   refine ((ContinuousLinearMap.eq_adjoint_iff _ _).2 fun w v ↦ ?_).symm
   rw [← inner_conj_symm _ v, ContRepresentation.inner_integratedOperatorL1_apply,
@@ -368,29 +396,27 @@ lemma _root_.ContRepresentation.adjoint_integratedOperatorL1 [MeasurableNeg G]
   filter_upwards [Lp.coeFn_star (Lp.compMeasurePreserving Neg.neg
       (Measure.measurePreserving_neg μ) f),
     Lp.coeFn_compMeasurePreserving f (Measure.measurePreserving_neg μ)] with g hstar hcomp
-  rw [hstar, Pi.star_apply, hcomp, Function.comp_apply, map_mul, RCLike.star_def,
-    RCLike.conj_conj, inner_conj_symm, hπ.inner_map_left, ← ofAdd_neg]
+  rw [hstar, Pi.star_apply, hcomp, Function.comp_apply, map_mul, RCLike.star_def, RCLike.conj_conj,
+    inner_conj_symm, hπ.inner_map_left, ← ofAdd_neg]
 
 end InnerProduct
 
 section Unitary
 
-variable {𝕜 G E : Type*} [RCLike 𝕜] [AddCommGroup G] [TopologicalSpace G]
-  [MeasurableSpace G] [R1Space G] [BorelSpace G] [MeasurableNeg G]
-  [NormedAddCommGroup E] [InnerProductSpace 𝕜 E] [NormedSpace ℝ E] [SMulCommClass ℝ 𝕜 E]
-  [CompleteSpace E]
+variable
+  {𝕜 G E : Type*} [RCLike 𝕜] [AddCommGroup G] [TopologicalSpace G] [MeasurableSpace G] [R1Space G]
+  [BorelSpace G] [MeasurableNeg G] [NormedAddCommGroup E] [InnerProductSpace 𝕜 E] [NormedSpace ℝ E]
+  [SMulCommClass ℝ 𝕜 E] [CompleteSpace E]
   {μ : Measure G} [μ.InnerRegularCompactLTTop] [μ.IsNegInvariant]
   {π : ContRepresentation 𝕜 (Multiplicative G) E}
-  {hcont : ∀ v, Continuous fun g : G ↦ π (.ofAdd g) v}
-  {hbdd : ∃ C, ∀ g, ‖π g‖ ≤ C}
+  {hcont : ∀ v, Continuous fun g : G ↦ π (.ofAdd g) v} {hbdd : ∃ C, ∀ g, ‖π g‖ ≤ C}
 
 /-- The integrated operators of a unitary abelian-group representation are normal. -/
 lemma _root_.ContRepresentation.isStarNormal_integratedOperatorL1
-    (hπ : ContRepresentation.IsUnitary π) (f : G →₁[μ] 𝕜) :
-    IsStarNormal (π.integratedOperatorL1 hcont hbdd μ f) := by
+    (hπ : ContRepresentation.IsUnitary π) (f : G →₁[μ] 𝕜)
+    : IsStarNormal (π.integratedOperatorL1 hcont hbdd μ f) := by
   constructor
-  rw [ContinuousLinearMap.star_eq_adjoint,
-    ContRepresentation.adjoint_integratedOperatorL1 hπ]
+  rw [ContinuousLinearMap.star_eq_adjoint, ContRepresentation.adjoint_integratedOperatorL1 hπ]
   exact π.integratedOperatorL1_commute
     (star (Lp.compMeasurePreserving Neg.neg (Measure.measurePreserving_neg μ) f)) f
 
@@ -398,40 +424,50 @@ end Unitary
 
 section ApproximateIdentity
 
-variable {𝕜 G E : Type*} [RCLike 𝕜] [AddGroup G] [TopologicalSpace G] [MeasurableSpace G]
-  [R1Space G] [BorelSpace G]
-  [NormedAddCommGroup E] [NormedSpace 𝕜 E] [NormedSpace ℝ E] [SMulCommClass ℝ 𝕜 E]
-  [CompleteSpace E]
-  {μ : Measure G} [μ.InnerRegularCompactLTTop] {π : ContRepresentation 𝕜 (Multiplicative G) E}
+variable
+  {𝕜 G E : Type*}
+  [RCLike 𝕜] [AddGroup G] [TopologicalSpace G] [MeasurableSpace G] [R1Space G] [BorelSpace G]
+  [NormedAddCommGroup E] [NormedSpace 𝕜 E] [NormedSpace ℝ E] [SMulCommClass ℝ 𝕜 E] [CompleteSpace E]
+  {μ : Measure G} [μ.InnerRegularCompactLTTop]
+  {π : ContRepresentation 𝕜 (Multiplicative G) E}
   {hcont : ∀ v, Continuous fun g : G ↦ π (.ofAdd g) v} {hbdd : ∃ C, ∀ g, ‖π g‖ ≤ C}
 
-/-- **Approximate identities for the integrated form.** If the weights `f i` eventually have unit
+/--
+**Approximate identities for the integrated form.** If the weights `f i` eventually have unit
 integral and `L¹` norm at most `C`, and concentrate at `0` (for every neighbourhood `U` of `0`,
 eventually `f i` vanishes almost everywhere outside `U`), then `π(f i)` tends strongly to the
-identity: `π(f i) v → v` for every `v`. -/
-lemma _root_.ContRepresentation.tendsto_integratedOperatorL1_apply {ι : Type*} {l : Filter ι}
-    {f : ι → G →₁[μ] 𝕜} {C : ℝ} (hf : ∀ᶠ i in l, ∫ g, f i g ∂μ = 1)
-    (hfC : ∀ᶠ i in l, ‖f i‖ ≤ C)
-    (hf₀ : ∀ U ∈ 𝓝 (0 : G), ∀ᶠ i in l, ∀ᵐ g ∂μ, g ∉ U → f i g = 0) (v : E) :
-    Tendsto (fun i ↦ π.integratedOperatorL1 hcont hbdd μ (f i) v) l (𝓝 v) := by
+identity: `π(f i) v → v` for every `v`.
+-/
+lemma _root_.ContRepresentation.tendsto_integratedOperatorL1_apply
+    {ι : Type*} {l : Filter ι} {f : ι → G →₁[μ] 𝕜} {C : ℝ} (hf : ∀ᶠ i in l, ∫ g, f i g ∂μ = 1)
+    (hfC : ∀ᶠ i in l, ‖f i‖ ≤ C) (hf₀ : ∀ U ∈ 𝓝 (0 : G), ∀ᶠ i in l, ∀ᵐ g ∂μ, g ∉ U → f i g = 0)
+    (v : E)
+    : Tendsto (fun i ↦ π.integratedOperatorL1 hcont hbdd μ (f i) v) l (𝓝 v) := by
   simp_rw [ContRepresentation.integratedOperatorL1_apply]
-  refine tendsto_integral_smul_of_tendsto hf hfC hf₀ (.of_forall fun i ↦
-    (L1.integrable_coeFn (f i)).aefinStronglyMeasurable.aestronglyMeasurable_smul (hcont v)) ?_
+  refine tendsto_integral_smul_of_tendsto hf hfC hf₀
+    (.of_forall fun i ↦
+      (L1.integrable_coeFn (f i)).aefinStronglyMeasurable.aestronglyMeasurable_smul (hcont v))
+    ?_
   simpa using (hcont v).tendsto 0
 
-/-- **The integrated form is nondegenerate.** For a measure positive on nonempty open sets and
+/--
+**The integrated form is nondegenerate.** For a measure positive on nonempty open sets and
 finite on some neighbourhood of each point, such as a Haar measure on a locally compact group, every
-vector `v` is a limit of vectors `π(f) v`. -/
+vector `v` is a limit of vectors `π(f) v`.
+-/
 lemma _root_.ContRepresentation.mem_closure_range_integratedOperatorL1_apply
-    [μ.IsOpenPosMeasure] [IsLocallyFiniteMeasure μ] (v : E) :
-    v ∈ closure (Set.range fun f : G →₁[μ] 𝕜 ↦ π.integratedOperatorL1 hcont hbdd μ f v) := by
+    [μ.IsOpenPosMeasure] [IsLocallyFiniteMeasure μ] (v : E)
+    : v ∈ closure (Set.range fun f : G →₁[μ] 𝕜 ↦ π.integratedOperatorL1 hcont hbdd μ f v) := by
   -- One normalized weight inside each neighbourhood of `0`, indexed as a net shrinking to `0`.
   choose f hf using fun U : {U : Set G // U ∈ 𝓝 (0 : G)} ↦
     exists_integral_eq_one_norm_eq_one 𝕜 μ U.2
   have := comap_val_smallSets_neBot (𝓝 (0 : G))
-  refine mem_closure_of_tendsto (ContRepresentation.tendsto_integratedOperatorL1_apply
-    (l := comap Subtype.val (𝓝 (0 : G)).smallSets) (C := 1) (.of_forall fun U ↦ (hf U).1)
-    (.of_forall fun U ↦ (hf U).2.1.le) (fun V hV ↦ ?_) v)
+  refine mem_closure_of_tendsto
+    (ContRepresentation.tendsto_integratedOperatorL1_apply
+      (l := comap Subtype.val (𝓝 (0 : G)).smallSets) (C := 1) (.of_forall fun U ↦ (hf U).1)
+      (.of_forall fun U ↦ (hf U).2.1.le)
+      (fun V hV ↦ ?_)
+      v)
     (.of_forall fun U ↦ Set.mem_range_self _)
   filter_upwards [(eventually_smallSets_subset.2 hV).comap Subtype.val] with U hU
   filter_upwards [(hf U).2.2] with g hg hgV using hg fun hgU ↦ hgV (hU hgU)

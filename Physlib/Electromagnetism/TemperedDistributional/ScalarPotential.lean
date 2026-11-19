@@ -58,9 +58,9 @@ attribute [-simp] Fintype.sum_sum_type
 attribute [-simp] Nat.succ_eq_add_one
 
 /-- The scalar potential of an electromagnetic potential which is a distribution. -/
-noncomputable def scalarPotential {d} (c : SpeedOfLight) :
-    TempDistElectromagneticPotential d →ₗ[ℝ]
-    (Time × Space d) →d[ℝ] ℝ where
+noncomputable def scalarPotential {d} (c : SpeedOfLight)
+    : TempDistElectromagneticPotential d →ₗ[ℝ]
+      (Time × Space d) →d[ℝ] ℝ where
   toFun A := Lorentz.Vector.temporalCLM d ∘L distTimeSlice c (c.val • A)
   map_add' A₁ A₂ := by
     ext ε

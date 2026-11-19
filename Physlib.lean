@@ -228,7 +228,8 @@ public import Physlib.Particles.BeyondTheStandardModel.RHN.AnomalyCancellation.B
 public import Physlib.Particles.BeyondTheStandardModel.RHN.AnomalyCancellation.FamilyMaps
 public import Physlib.Particles.BeyondTheStandardModel.RHN.AnomalyCancellation.NoGrav.Basic
 public import Physlib.Particles.BeyondTheStandardModel.RHN.AnomalyCancellation.Ordinary.Basic
-public import Physlib.Particles.BeyondTheStandardModel.RHN.AnomalyCancellation.Ordinary.DimSevenPlane
+public import
+  Physlib.Particles.BeyondTheStandardModel.RHN.AnomalyCancellation.Ordinary.DimSevenPlane
 public import Physlib.Particles.BeyondTheStandardModel.RHN.AnomalyCancellation.Ordinary.FamilyMaps
 public import Physlib.Particles.BeyondTheStandardModel.RHN.AnomalyCancellation.Permutations
 public import Physlib.Particles.BeyondTheStandardModel.RHN.AnomalyCancellation.PlusU1.BMinusL

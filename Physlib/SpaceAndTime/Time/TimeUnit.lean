@@ -31,8 +31,10 @@ existence of the time unit of seconds, and construct all other time units from t
 
 open NNReal
 
-/-- The choices of translationally-invariant metrics on the time manifold.
-  Such a choice corresponds to a choice of units for time. -/
+/--
+The choices of translationally-invariant metrics on the time manifold.
+Such a choice corresponds to a choice of units for time.
+-/
 structure TimeUnit : Type where
   /-- The underlying scale of the unit. -/
   val : ℝ
@@ -66,25 +68,25 @@ From this choice of second, we can define other length units by scaling second.
 def seconds : TimeUnit := ⟨1, by norm_num⟩
 
 /-- The time unit of femtoseconds (10⁻¹⁵ of a second). -/
-noncomputable def femtoseconds : TimeUnit := scale ((1/10) ^ (15)) seconds
+noncomputable def femtoseconds : TimeUnit := scale ((1 / 10) ^ (15)) seconds
 
 /-- The time unit of picoseconds (10⁻¹² of a second). -/
-noncomputable def picoseconds : TimeUnit := scale ((1/10) ^ (12)) seconds
+noncomputable def picoseconds : TimeUnit := scale ((1 / 10) ^ (12)) seconds
 
 /-- The time unit of nanoseconds (10⁻⁹ of a second). -/
-noncomputable def nanoseconds : TimeUnit := scale ((1/10) ^ (9)) seconds
+noncomputable def nanoseconds : TimeUnit := scale ((1 / 10) ^ (9)) seconds
 
 /-- The time unit of microseconds (10⁻⁶ of a second). -/
-noncomputable def microseconds : TimeUnit := scale ((1/10) ^ (6)) seconds
+noncomputable def microseconds : TimeUnit := scale ((1 / 10) ^ (6)) seconds
 
 /-- The time unit of milliseconds (10⁻³ of a second). -/
-noncomputable def milliseconds : TimeUnit := scale ((1/10) ^ (3)) seconds
+noncomputable def milliseconds : TimeUnit := scale ((1 / 10) ^ (3)) seconds
 
 /-- The time unit of centiseconds (10⁻² of a second). -/
-noncomputable def centiseconds : TimeUnit := scale ((1/10) ^ (2)) seconds
+noncomputable def centiseconds : TimeUnit := scale ((1 / 10) ^ (2)) seconds
 
 /-- The time unit of deciseconds (10⁻¹ of a second). -/
-noncomputable def deciseconds : TimeUnit := scale ((1/10) ^ (1)) seconds
+noncomputable def deciseconds : TimeUnit := scale ((1 / 10) ^ (1)) seconds
 
 /-- The time unit of minutes. -/
 noncomputable def minutes : TimeUnit := scale 60 seconds
@@ -104,40 +106,44 @@ noncomputable def weeks : TimeUnit := scale (7 * 24 * 60 * 60) seconds
 
 -/
 
-lemma minutes_div_seconds : minutes / seconds = (60 : ℝ≥0) := NNReal.eq <| by
-  simp [minutes]; rw [toReal]
+lemma minutes_div_seconds : minutes / seconds = (60 : ℝ≥0) :=
+  NNReal.eq <| by simp [minutes]; rw [toReal]
 
-lemma hours_div_seconds : hours / seconds = (3600 : ℝ≥0) := NNReal.eq <| by
-  simp [hours]; rw [toReal]; norm_num
+lemma hours_div_seconds : hours / seconds = (3600 : ℝ≥0) :=
+  NNReal.eq <| by simp [hours]; rw [toReal]; norm_num
 
-lemma days_div_seconds : days / seconds = (86400 : ℝ≥0) := NNReal.eq <| by
-  simp [days]; rw [toReal]; norm_num
+lemma days_div_seconds : days / seconds = (86400 : ℝ≥0) :=
+  NNReal.eq <| by simp [days]; rw [toReal]; norm_num
 
-lemma weeks_div_seconds : weeks / seconds = (604800 : ℝ≥0) := NNReal.eq <| by
-  simp [weeks]; rw [toReal]; norm_num
+lemma weeks_div_seconds : weeks / seconds = (604800 : ℝ≥0) :=
+  NNReal.eq <| by simp [weeks]; rw [toReal]; norm_num
 
-lemma days_div_minutes : days / minutes = (1440 : ℝ≥0) := NNReal.eq <| by
-  simp [days, minutes]
-  show (24 * 60 * 60 : ℝ) / 60 = ((1440 : ℝ≥0) : ℝ)
-  push_cast
-  norm_num
+lemma days_div_minutes : days / minutes = (1440 : ℝ≥0) :=
+  NNReal.eq <| by
+    simp [days, minutes]
+    show (24 * 60 * 60 : ℝ) / 60 = ((1440 : ℝ≥0) : ℝ)
+    push_cast
+    norm_num
 
-lemma weeks_div_minutes : weeks / minutes = (10080 : ℝ≥0) := NNReal.eq <| by
-  simp [weeks, minutes]
-  show (7 * 24 * 60 * 60 : ℝ) / 60 = ((10080 : ℝ≥0) : ℝ)
-  push_cast
-  norm_num
+lemma weeks_div_minutes : weeks / minutes = (10080 : ℝ≥0) :=
+  NNReal.eq <| by
+    simp [weeks, minutes]
+    show (7 * 24 * 60 * 60 : ℝ) / 60 = ((10080 : ℝ≥0) : ℝ)
+    push_cast
+    norm_num
 
-lemma days_div_hours : days / hours = (24 : ℝ≥0) := NNReal.eq <| by
-  simp [hours, days]
-  show (24 * 60 * 60 : ℝ) / (60 * 60) = ((24 : ℝ≥0) : ℝ)
-  push_cast
-  norm_num
+lemma days_div_hours : days / hours = (24 : ℝ≥0) :=
+  NNReal.eq <| by
+    simp [hours, days]
+    show (24 * 60 * 60 : ℝ) / (60 * 60) = ((24 : ℝ≥0) : ℝ)
+    push_cast
+    norm_num
 
-lemma weeks_div_hours : weeks / hours = (168 : ℝ≥0) := NNReal.eq <| by
-  simp [weeks, hours]
-  show (7 * 24 * 60 * 60 : ℝ) / (60 * 60) = ((168 : ℝ≥0) : ℝ)
-  push_cast
-  norm_num
+lemma weeks_div_hours : weeks / hours = (168 : ℝ≥0) :=
+  NNReal.eq <| by
+    simp [weeks, hours]
+    show (7 * 24 * 60 * 60 : ℝ) / (60 * 60) = ((168 : ℝ≥0) : ℝ)
+    push_cast
+    norm_num
 
 end TimeUnit

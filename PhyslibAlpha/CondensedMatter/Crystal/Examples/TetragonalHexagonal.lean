@@ -63,15 +63,18 @@ namespace CondensedMatter.Crystal
 def tetragonal := Crystal.ofUnitCell (Fin 3 → ℤ) Unit
 
 /-- The primitive tetragonal lattice embedded with in-plane length `a` and period `c`. -/
-noncomputable def tetragonalGeometry (a c : ℝ) (ha : 0 < a) (hc : 0 < c) :
-    Geometry tetragonal (EuclideanSpace ℝ (Fin 3)) :=
+noncomputable def tetragonalGeometry (a c : ℝ) (ha : 0 < a) (hc : 0 < c)
+    : Geometry tetragonal (EuclideanSpace ℝ (Fin 3)) :=
   orthorhombicGeometry ![a, a, c] fun i => by fin_cases i <;> simpa
 
-/-- The bonds of the first three shells for `a < c < a √2`, up to sign: the two in-plane axes,
-the period, and the two in-plane diagonals. -/
-def tetragonalBonds : List (Bond (Fin 3 → ℤ) Unit) :=
-  [⟨(), (), ![1, 0, 0]⟩, ⟨(), (), ![0, 1, 0]⟩, ⟨(), (), ![0, 0, 1]⟩,
-    ⟨(), (), ![1, 1, 0]⟩, ⟨(), (), ![1, -1, 0]⟩]
+/--
+The bonds of the first three shells for `a < c < a √2`, up to sign: the two in-plane axes,
+the period, and the two in-plane diagonals.
+-/
+def tetragonalBonds : List (Bond (Fin 3 → ℤ) Unit) := [
+  ⟨(), (), ![1, 0, 0]⟩, ⟨(), (), ![0, 1, 0]⟩, ⟨(), (), ![0, 0, 1]⟩,
+  ⟨(), (), ![1, 1, 0]⟩, ⟨(), (), ![1, -1, 0]⟩
+]
 
 /-- The ten-neighbour primitive tetragonal graph. -/
 def tetragonalGraph : PeriodicGraph tetragonal := PeriodicGraph.ofBonds tetragonalBonds
@@ -82,18 +85,23 @@ def tetragonalGraph : PeriodicGraph tetragonal := PeriodicGraph.ofBonds tetragon
 @[reducible]
 def bodyCentredTetragonal := Crystal.ofUnitCell (Fin 3 → ℤ) Unit
 
-/-- The body-centred tetragonal lattice embedded with in-plane length `a` and period `c`, with
-the primitive vectors `bccVectors a a c`. -/
-noncomputable def bodyCentredTetragonalGeometry (a c : ℝ) (ha : 0 < a) (hc : 0 < c) :
-    Geometry bodyCentredTetragonal (EuclideanSpace ℝ (Fin 3)) :=
+/--
+The body-centred tetragonal lattice embedded with in-plane length `a` and period `c`, with
+the primitive vectors `bccVectors a a c`.
+-/
+noncomputable def bodyCentredTetragonalGeometry (a c : ℝ) (ha : 0 < a) (hc : 0 < c)
+    : Geometry bodyCentredTetragonal (EuclideanSpace ℝ (Fin 3)) :=
   bccGeometry a a c ha ha hc
 
-/-- The bonds of the first three shells for `a √2 < c < a √6`, up to sign: the four body
+/--
+The bonds of the first three shells for `a √2 < c < a √6`, up to sign: the four body
 diagonals, the two in-plane axes and the two in-plane diagonals. In the basis `bccVectors a a c`
-the in-plane axes are `![0, 1, 1]` and `![1, 0, 1]`. -/
-def bodyCentredTetragonalBonds : List (Bond (Fin 3 → ℤ) Unit) :=
-  [⟨(), (), ![1, 0, 0]⟩, ⟨(), (), ![0, 1, 0]⟩, ⟨(), (), ![0, 0, 1]⟩, ⟨(), (), ![1, 1, 1]⟩,
-    ⟨(), (), ![0, 1, 1]⟩, ⟨(), (), ![1, 0, 1]⟩, ⟨(), (), ![1, 1, 2]⟩, ⟨(), (), ![-1, 1, 0]⟩]
+the in-plane axes are `![0, 1, 1]` and `![1, 0, 1]`.
+-/
+def bodyCentredTetragonalBonds : List (Bond (Fin 3 → ℤ) Unit) := [
+  ⟨(), (), ![1, 0, 0]⟩, ⟨(), (), ![0, 1, 0]⟩, ⟨(), (), ![0, 0, 1]⟩, ⟨(), (), ![1, 1, 1]⟩,
+  ⟨(), (), ![0, 1, 1]⟩, ⟨(), (), ![1, 0, 1]⟩, ⟨(), (), ![1, 1, 2]⟩, ⟨(), (), ![-1, 1, 0]⟩
+]
 
 /-- The sixteen-neighbour body-centred tetragonal graph. -/
 def bodyCentredTetragonalGraph : PeriodicGraph bodyCentredTetragonal :=
@@ -105,15 +113,19 @@ def bodyCentredTetragonalGraph : PeriodicGraph bodyCentredTetragonal :=
 @[reducible]
 def hexagonal := Crystal.ofUnitCell (Fin 3 → ℤ) Unit
 
-/-- The primitive hexagonal lattice embedded with in-plane length `a` and period `c`, with the
-primitive vectors `hcpVectors a c`. -/
-noncomputable def hexagonalGeometry (a c : ℝ) (ha : 0 < a) (hc : 0 < c) :
-    Geometry hexagonal (EuclideanSpace ℝ (Fin 3)) :=
+/--
+The primitive hexagonal lattice embedded with in-plane length `a` and period `c`, with the
+primitive vectors `hcpVectors a c`.
+-/
+noncomputable def hexagonalGeometry (a c : ℝ) (ha : 0 < a) (hc : 0 < c)
+    : Geometry hexagonal (EuclideanSpace ℝ (Fin 3)) :=
   Geometry.ofLattice (latticeMap (hcpVectors a c))
     (latticeMap_injective (hcpVectors_independent ha hc))
 
-/-- The bonds of the first shells for `c < a √3`, up to sign: three in the plane, at `120°`
-from each other, and the period. -/
+/--
+The bonds of the first shells for `c < a √3`, up to sign: three in the plane, at `120°`
+from each other, and the period.
+-/
 def hexagonalBonds : List (Bond (Fin 3 → ℤ) Unit) :=
   [⟨(), (), ![1, 0, 0]⟩, ⟨(), (), ![0, 1, 0]⟩, ⟨(), (), ![1, 1, 0]⟩, ⟨(), (), ![0, 0, 1]⟩]
 
@@ -123,24 +135,23 @@ def hexagonalGraph : PeriodicGraph hexagonal := PeriodicGraph.ofBonds hexagonalB
 /-! ## D. Coordination numbers -/
 
 /-- Each site of the primitive tetragonal lattice has ten neighbours. -/
-lemma tetragonal_neighbors_card (x : tetragonal.Site) :
-    (tetragonalGraph.neighbors x).card = 10 := by
+lemma tetragonal_neighbors_card (x : tetragonal.Site)
+    : (tetragonalGraph.neighbors x).card = 10 := by
   rcases x with ⟨n, i⟩
   cases i
   have h : (tetragonalGraph.neighbors ⟨0, ()⟩).card = 10 := by decide
   exact (tetragonalGraph.card_neighbors_cell n ()).trans h
 
 /-- Each site of the body-centred tetragonal lattice has sixteen neighbours. -/
-lemma bodyCentredTetragonal_neighbors_card (x : bodyCentredTetragonal.Site) :
-    (bodyCentredTetragonalGraph.neighbors x).card = 16 := by
+lemma bodyCentredTetragonal_neighbors_card (x : bodyCentredTetragonal.Site)
+    : (bodyCentredTetragonalGraph.neighbors x).card = 16 := by
   rcases x with ⟨n, i⟩
   cases i
   have h : (bodyCentredTetragonalGraph.neighbors ⟨0, ()⟩).card = 16 := by decide
   exact (bodyCentredTetragonalGraph.card_neighbors_cell n ()).trans h
 
 /-- Each site of the primitive hexagonal lattice has eight neighbours. -/
-lemma hexagonal_neighbors_card (x : hexagonal.Site) :
-    (hexagonalGraph.neighbors x).card = 8 := by
+lemma hexagonal_neighbors_card (x : hexagonal.Site) : (hexagonalGraph.neighbors x).card = 8 := by
   rcases x with ⟨n, i⟩
   cases i
   have h : (hexagonalGraph.neighbors ⟨0, ()⟩).card = 8 := by decide

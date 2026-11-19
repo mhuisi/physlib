@@ -47,7 +47,8 @@ meta initialize wantedExtension : SimplePersistentEnvExtension WantedInfo (Array
     addImportedFn := fun es => es.foldl (· ++ ·) #[]
   }
 
-/-- A semiformal result is either a
+/--
+A semiformal result is either a
 - definition in which the type is given but not the definition.
 - proof in which the proposition is given but not the proof.
 Semiformal results cannot be used in further code. They are essentially
@@ -55,10 +56,11 @@ forgot about after made.
 
 With minor modification they act in a similar way to `proof_wanted`, however
 they appear in Physlib's TODO list and must be tagged accordingly.
-They must also always have a doc-string. -/
+They must also always have a doc-string.
+-/
 @[command_parser]
-meta def «semiformal_result» := leading_parser
-    docComment >> "semiformal_result" >> strLit >> declId >> ppIndent declSig
+meta def «semiformal_result» :=
+  leading_parser docComment >> "semiformal_result" >> strLit >> declId >> ppIndent declSig
 
 /-- The elaborator for semiformal results. -/
 @[command_elab «semiformal_result»]
@@ -76,19 +78,21 @@ meta def elabLemmaWanted : CommandElab := fun stx =>
       let line := filePos.line
       let modName := env.mainModule
       let wantedInfo : WantedInfo := {
-        content := docString,
-        name := (Lean.Elab.expandDeclIdCore name).1,
-        fileName := modName,
-        line := line,
-        tag := tag }
+        content := docString
+        name := (Lean.Elab.expandDeclIdCore name).1
+        fileName := modName
+        line := line
+        tag := tag
+      }
       let _ ← modifyEnv fun env => wantedExtension.addEntry env wantedInfo
-      let _ ← withoutModifyingEnv do
-      elabCommand <| ←
-        `(section
-        set_option linter.unusedVariables false
-        axiom helper {α : Sort _} : α
-        $doc:docComment noncomputable def $name $args* : $res := helper
-        end)
-      pure ()
+      let _ ←
+        withoutModifyingEnv do
+          elabCommand <|
+            ← `(section
+              set_option linter.unusedVariables false
+              axiom helper {α : Sort _} : α
+              $doc:docComment noncomputable def $name $args* : $res := helper
+              end)
+          pure ()
     | none => throwError "Invalid syntax for `lemma_wanted` command"
   | _ => throwError "Invalid syntax for `lemma_wanted` command"

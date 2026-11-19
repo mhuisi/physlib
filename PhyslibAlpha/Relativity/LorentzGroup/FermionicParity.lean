@@ -57,27 +57,32 @@ namespace LorentzGroup
 
 -/
 
-/-- Fermionic parity: the nontrivial element `-1` of the kernel of the two-to-one homomorphism
-  `SL(2, ℂ) → LorentzGroup 3`, that is the rotation by `2π`. It acts trivially on tensors and by
-  `-1` on spinors. -/
+/--
+Fermionic parity: the nontrivial element `-1` of the kernel of the two-to-one homomorphism
+`SL(2, ℂ) → LorentzGroup 3`, that is the rotation by `2π`. It acts trivially on tensors and by
+`-1` on spinors.
+-/
 def fermionicParity : SL(2, ℂ) := -1
 
-/-- Fermionic parity acts trivially on self-adjoint matrices: conjugation by `-1` is the
-  identity. -/
-lemma toSelfAdjointMap_fermionicParity :
-    Lorentz.SL2C.toSelfAdjointMap fermionicParity = LinearMap.id := by
+/--
+Fermionic parity acts trivially on self-adjoint matrices: conjugation by `-1` is the
+identity.
+-/
+lemma toSelfAdjointMap_fermionicParity
+    : Lorentz.SL2C.toSelfAdjointMap fermionicParity = LinearMap.id := by
   ext A
   rw [Lorentz.SL2C.toSelfAdjointMap_apply]
   simp [fermionicParity, Matrix.conjTranspose_neg]
 
-/-- Fermionic parity projects to the identity Lorentz transformation: it is invisible on
-  tensors. -/
-lemma toLorentzGroup_fermionicParity :
-    Lorentz.SL2C.toLorentzGroup fermionicParity = 1 := by
+/--
+Fermionic parity projects to the identity Lorentz transformation: it is invisible on
+tensors.
+-/
+lemma toLorentzGroup_fermionicParity : Lorentz.SL2C.toLorentzGroup fermionicParity = 1 := by
   ext i j
   show Lorentz.SL2C.toMatrix fermionicParity i j = _
-  rw [Lorentz.SL2C.toMatrix, MonoidHom.coe_mk, OneHom.coe_mk,
-    toSelfAdjointMap_fermionicParity, LinearMap.toMatrix_id]
+  rw [Lorentz.SL2C.toMatrix, MonoidHom.coe_mk, OneHom.coe_mk, toSelfAdjointMap_fermionicParity,
+    LinearMap.toMatrix_id]
   rfl
 
 @[simp]
@@ -85,8 +90,10 @@ lemma fermionicParity_sq : fermionicParity ^ 2 = 1 := by
   rw [fermionicParity, neg_pow, one_pow]
   simp
 
-/-- Fermionic parity is not the identity of `SL(2, ℂ)`: the covering is genuinely
-  two-to-one. -/
+/--
+Fermionic parity is not the identity of `SL(2, ℂ)`: the covering is genuinely
+two-to-one.
+-/
 lemma fermionicParity_ne_one : fermionicParity ≠ 1 := by
   intro h
   have h1 : ((fermionicParity : SL(2, ℂ)) : Matrix (Fin 2) (Fin 2) ℂ) 0 0 = -1 := by
@@ -104,10 +111,12 @@ makes it measure the parity of the number of spinor indices.
 
 -/
 
-/-- Fermionic parity acts trivially on complex covariant Lorentz vectors, since it projects to
-  the identity Lorentz transformation. -/
-lemma complexCoVector_SL2CRep_fermionicParity :
-    Lorentz.ComplexCoVector.SL2CRep fermionicParity = LinearMap.id := by
+/--
+Fermionic parity acts trivially on complex covariant Lorentz vectors, since it projects to
+the identity Lorentz transformation.
+-/
+lemma complexCoVector_SL2CRep_fermionicParity
+    : Lorentz.ComplexCoVector.SL2CRep fermionicParity = LinearMap.id := by
   ext v
   rw [Lorentz.ComplexCoVector.SL2CRep_val]
   show ((LorentzGroup.toComplex (Lorentz.SL2C.toLorentzGroup fermionicParity))⁻¹ᵀ *ᵥ v.val) _ = _
@@ -115,13 +124,12 @@ lemma complexCoVector_SL2CRep_fermionicParity :
   simp
 
 /-- Fermionic parity acts by `-1` on right-handed Weyl spinors. -/
-lemma rightHandedWeyl_rep_fermionicParity :
-    Fermion.RightHandedWeyl.rep fermionicParity = -LinearMap.id := by
+lemma rightHandedWeyl_rep_fermionicParity
+    : Fermion.RightHandedWeyl.rep fermionicParity = -LinearMap.id := by
   refine Fermion.RightHandedWeyl.basis.ext fun i => ?_
   rw [Fermion.RightHandedWeyl.rep_apply_basis]
   simp only [LinearMap.neg_apply, LinearMap.id_coe, id_eq]
   rw [show ((fermionicParity : SL(2, ℂ)) : Matrix (Fin 2) (Fin 2) ℂ) = -1 from rfl]
-  fin_cases i <;>
-    simp [Matrix.one_apply]
+  fin_cases i <;> simp [Matrix.one_apply]
 
 end LorentzGroup

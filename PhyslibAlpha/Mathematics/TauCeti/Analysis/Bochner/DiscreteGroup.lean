@@ -54,19 +54,24 @@ open MeasureTheory
 
 namespace TauCeti
 
-variable {G : Type*} [AddCommGroup G] [TopologicalSpace G] [DiscreteTopology G]
+variable
+  {G : Type*} [AddCommGroup G] [TopologicalSpace G] [DiscreteTopology G]
   [MeasurableSpace (PontryaginDual (Multiplicative G))]
   [BorelSpace (PontryaginDual (Multiplicative G))]
 
-/-- **Bochner's theorem on a discrete abelian group.** A function on a discrete abelian group is
+/--
+**Bochner's theorem on a discrete abelian group.** A function on a discrete abelian group is
 positive definite if and only if it is the Fourier–Stieltjes transform of a finite inner regular
-measure on the Pontryagin dual. -/
-lemma isPositiveDefiniteSub_iff_exists_pontryaginMeasureTransform_eq (φ : G → ℂ) :
-    IsPositiveDefiniteSub φ ↔
-      ∃ μ : FiniteMeasure (PontryaginDual (Multiplicative G)),
-        μ.toMeasure.InnerRegular ∧ μ.pontryaginMeasureTransform = φ :=
-  ⟨fun hφ ↦ hφ.exists_pontryaginMeasureTransform_eq_of_continuousAt
+measure on the Pontryagin dual.
+-/
+lemma isPositiveDefiniteSub_iff_exists_pontryaginMeasureTransform_eq (φ : G → ℂ)
+    : IsPositiveDefiniteSub φ
+      ↔ ∃ μ : FiniteMeasure (PontryaginDual (Multiplicative G)),
+        μ.toMeasure.InnerRegular ∧ μ.pontryaginMeasureTransform = φ := ⟨
+  fun hφ ↦
+    hφ.exists_pontryaginMeasureTransform_eq_of_continuousAt
       continuous_of_discreteTopology.continuousAt,
-    fun ⟨μ, _, hμ⟩ ↦ hμ ▸ μ.isPositiveDefiniteSub_pontryaginMeasureTransform⟩
+  fun ⟨μ, _, hμ⟩ ↦ hμ ▸ μ.isPositiveDefiniteSub_pontryaginMeasureTransform
+⟩
 
 end TauCeti

@@ -56,26 +56,29 @@ noncomputable section
 
 -/
 
-/-- The element `!![a, -conj b; b, conj a]` of `SL(2, ℂ)`, given by its Cayley–Klein
-parameters `a b` with `‖a‖² + ‖b‖² = 1`. -/
-def cayleyKlein (a b : ℂ) (h : normSq a + normSq b = 1) : SL(2, ℂ) :=
-  ⟨!![a, -(starRingEnd ℂ b); b, starRingEnd ℂ a], by
+/--
+The element `!![a, -conj b; b, conj a]` of `SL(2, ℂ)`, given by its Cayley–Klein
+parameters `a b` with `‖a‖² + ‖b‖² = 1`.
+-/
+def cayleyKlein (a b : ℂ) (h : normSq a + normSq b = 1) : SL(2, ℂ) := ⟨
+  !![a, -(starRingEnd ℂ b); b, starRingEnd ℂ a],
+  by
     rw [det_fin_two_of, neg_mul, sub_neg_eq_add, mul_conj, mul_comm _ b, mul_conj]
-    exact_mod_cast h⟩
+    exact_mod_cast h
+⟩
 
 /-- A Cayley–Klein element is unitary. -/
-lemma cayleyKlein_mem_unitaryGroup (a b : ℂ) (h : normSq a + normSq b = 1) :
-    (cayleyKlein a b h).1 ∈ unitaryGroup (Fin 2) ℂ := by
+lemma cayleyKlein_mem_unitaryGroup (a b : ℂ) (h : normSq a + normSq b = 1)
+    : (cayleyKlein a b h).1 ∈ unitaryGroup (Fin 2) ℂ := by
   have h' : (normSq a : ℂ) + normSq b = 1 := by exact_mod_cast h
   rw [mem_unitaryGroup_iff]
   ext i j
-  fin_cases i <;> fin_cases j <;>
-    simp [cayleyKlein, Matrix.mul_apply, Fin.sum_univ_two, mul_conj, ← h'] <;>
-    ring
+  fin_cases i <;> fin_cases j
+    <;> simp [cayleyKlein, Matrix.mul_apply, Fin.sum_univ_two, mul_conj, ← h'] <;> ring
 
 /-- The image of a Cayley–Klein element is a rotation. -/
-lemma toLorentzGroup_cayleyKlein_mem_rotations (a b : ℂ) (h : normSq a + normSq b = 1) :
-    toLorentzGroup (cayleyKlein a b h) ∈ LorentzGroup.Rotations 3 := by
+lemma toLorentzGroup_cayleyKlein_mem_rotations (a b : ℂ) (h : normSq a + normSq b = 1)
+    : toLorentzGroup (cayleyKlein a b h) ∈ LorentzGroup.Rotations 3 := by
   refine ⟨?_, toLorentzGroup_det_one _⟩
   rw [toLorentzGroup_inl_inl]
   simp [cayleyKlein, Complex.sq_norm]
@@ -87,28 +90,30 @@ lemma toLorentzGroup_cayleyKlein_mem_rotations (a b : ℂ) (h : normSq a + normS
 
 -/
 
-/-- The rotation of the Cayley–Klein parameters `a b`, as an element of the Lorentz rotation
-subgroup. -/
+/--
+The rotation of the Cayley–Klein parameters `a b`, as an element of the Lorentz rotation
+subgroup.
+-/
 def cayleyKleinRotation (a b : ℂ) (h : normSq a + normSq b = 1) : LorentzGroup.Rotations 3 :=
   ⟨toLorentzGroup (cayleyKlein a b h), toLorentzGroup_cayleyKlein_mem_rotations a b h⟩
 
 /-- The spatial block of the rotation of the Cayley–Klein parameters `a b`. -/
-lemma cayleyKleinRotation_inr_inr (a b : ℂ) (h : normSq a + normSq b = 1) (i j : Fin 3) :
-    (cayleyKleinRotation a b h).1.1 (Sum.inr i) (Sum.inr j) =
-      !![(a ^ 2 - b ^ 2).re, (a ^ 2 - b ^ 2).im, 2 * (a * starRingEnd ℂ b).re;
-        -(a ^ 2 + b ^ 2).im, (a ^ 2 + b ^ 2).re, -2 * (a * starRingEnd ℂ b).im;
-        -2 * (a * b).re, -2 * (a * b).im, normSq a - normSq b] i j := by
+lemma cayleyKleinRotation_inr_inr (a b : ℂ) (h : normSq a + normSq b = 1) (i j : Fin 3)
+    : (cayleyKleinRotation a b h).1.1 (Sum.inr i) (Sum.inr j)
+      = !![(a ^ 2 - b ^ 2).re, (a ^ 2 - b ^ 2).im, 2 * (a * starRingEnd ℂ b).re;
+          -(a ^ 2 + b ^ 2).im, (a ^ 2 + b ^ 2).re, -2 * (a * starRingEnd ℂ b).im;
+          -2 * (a * b).re, -2 * (a * b).im, normSq a - normSq b]
+        i j := by
   apply ofReal_injective
   rw [cayleyKleinRotation, toLorentzGroup_eq_trace, trace_pauliSelfAdjoint'_mul_apply]
-  fin_cases i <;> fin_cases j <;>
-      simp [cayleyKlein, pauliSelfAdjoint', pauliMatrix, Matrix.mul_apply, Fin.sum_univ_two] <;>
-    apply Complex.ext <;> simp [sq, normSq_apply] <;> ring
+  fin_cases i <;> fin_cases j
+    <;> simp [cayleyKlein, pauliSelfAdjoint', pauliMatrix, Matrix.mul_apply, Fin.sum_univ_two]
+    <;> apply Complex.ext <;> simp [sq, normSq_apply] <;> ring
 
 /-- Every unit vector is the image of the third axis under some Cayley–Klein rotation. -/
-lemma exists_cayleyKleinRotation_apply_two (n : Fin 3 → ℝ)
-    (hn : n 0 ^ 2 + n 1 ^ 2 + n 2 ^ 2 = 1) :
-    ∃ a b, ∃ h : normSq a + normSq b = 1,
-      ∀ i, (cayleyKleinRotation a b h).1.1 (Sum.inr i) (Sum.inr 2) = n i := by
+lemma exists_cayleyKleinRotation_apply_two (n : Fin 3 → ℝ) (hn : n 0 ^ 2 + n 1 ^ 2 + n 2 ^ 2 = 1)
+    : ∃ a b, ∃ h : normSq a + normSq b = 1, ∀ i,
+      (cayleyKleinRotation a b h).1.1 (Sum.inr i) (Sum.inr 2) = n i := by
   by_cases h2 : n 2 = -1
   · have h0 : n 0 = 0 := by nlinarith
     have h1 : n 1 = 0 := by nlinarith

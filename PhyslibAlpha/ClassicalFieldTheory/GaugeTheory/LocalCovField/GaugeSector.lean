@@ -56,8 +56,11 @@ open TensorProduct Matrix MatrixGroups
 
 namespace GaugeFieldData
 
-variable {G₀ : Type} [Group G₀] {𝔤 : Type} [LieRing 𝔤] [LieAlgebra ℝ 𝔤] [Module.Finite ℝ 𝔤]
-  {GJ : Type} [Group GJ] {𝔤J : Type} [LieRing 𝔤J] [LieAlgebra ℝ 𝔤J]
+variable
+  {G₀ : Type} [Group G₀]
+  {𝔤 : Type} [LieRing 𝔤] [LieAlgebra ℝ 𝔤] [Module.Finite ℝ 𝔤]
+  {GJ : Type} [Group GJ]
+  {𝔤J : Type} [LieRing 𝔤J] [LieAlgebra ℝ 𝔤J]
   {jets : LocalGaugeData G₀ 𝔤 GJ 𝔤J} (T : GaugeFieldData jets)
 
 /-!
@@ -66,23 +69,26 @@ variable {G₀ : Type} [Group G₀] {𝔤 : Type} [LieRing 𝔤] [LieAlgebra ℝ
 
 -/
 
-/-- The complexified covariant gauge-only algebra inside the local field algebra: the
-  complexification of the real covariant subalgebra inclusion, followed by the connection
-  inclusion. -/
-noncomputable def includeCovConnection :
-    (ℂ ⊗[ℝ] LocalGaugeCovFieldAlgebra 𝔤) →ₐ[ℂ] T.LocalFieldAlgebra :=
+/--
+The complexified covariant gauge-only algebra inside the local field algebra: the
+complexification of the real covariant subalgebra inclusion, followed by the connection
+inclusion.
+-/
+noncomputable def includeCovConnection
+    : (ℂ ⊗[ℝ] LocalGaugeCovFieldAlgebra 𝔤) →ₐ[ℂ] T.LocalFieldAlgebra :=
   T.includeConnection.comp (LocalGaugeCovFieldAlgebra.complexVal 𝔤)
 
 variable {T}
 
 @[simp]
-lemma includeCovConnection_apply (y : ℂ ⊗[ℝ] LocalGaugeCovFieldAlgebra 𝔤) :
-    T.includeCovConnection y
-      = T.includeConnection (LocalGaugeCovFieldAlgebra.complexVal 𝔤 y) := rfl
+lemma includeCovConnection_apply (y : ℂ ⊗[ℝ] LocalGaugeCovFieldAlgebra 𝔤)
+    : T.includeCovConnection y = T.includeConnection (LocalGaugeCovFieldAlgebra.complexVal 𝔤 y) :=
+  rfl
 
-lemma includeCovConnection_one_tmul (x : LocalGaugeCovFieldAlgebra 𝔤) :
-    T.includeCovConnection ((1 : ℂ) ⊗ₜ[ℝ] x)
-      = T.includeConnection ((1 : ℂ) ⊗ₜ[ℝ] (x : LocalGaugeFieldAlgebra 𝔤)) := rfl
+lemma includeCovConnection_one_tmul (x : LocalGaugeCovFieldAlgebra 𝔤)
+    : T.includeCovConnection ((1 : ℂ) ⊗ₜ[ℝ] x)
+      = T.includeConnection ((1 : ℂ) ⊗ₜ[ℝ] (x : LocalGaugeFieldAlgebra 𝔤)) :=
+  rfl
 
 /-!
 
@@ -103,12 +109,13 @@ lemma includeCovConnection_injective : Function.Injective T.includeCovConnection
 variable (T)
 
 /-- The range of the inclusion is the covariant gauge sector. -/
-lemma range_includeCovConnection :
-    T.includeCovConnection.range = T.CovSectorAlgebra {FieldCategory.gauge} := by
+lemma range_includeCovConnection
+    : T.includeCovConnection.range = T.CovSectorAlgebra {FieldCategory.gauge} := by
   refine le_antisymm ?_ (Algebra.adjoin_le ?_)
   · refine Algebra.range_le_of_adjoin_eq_top
       (Algebra.TensorProduct.adjoin_one_tmul_eq_top ℂ _
-        LocalGaugeCovFieldAlgebra.adjoin_preimage_tower_eq_top) T.includeCovConnection ?_
+        LocalGaugeCovFieldAlgebra.adjoin_preimage_tower_eq_top)
+      T.includeCovConnection ?_
     rintro _ ⟨x, hx, rfl⟩
     obtain ⟨l, μ, ν, φ, hxl⟩ :=
       (LocalGaugeCovFieldAlgebra.mem_tower_iff (x : LocalGaugeFieldAlgebra 𝔤)).mp hx
@@ -120,13 +127,16 @@ lemma range_includeCovConnection :
     exact CovSectorAlgebra.covDerivFieldStrength_mem (Finset.mem_singleton_self _) l μ ν φ
   · intro b hb
     exact CovSectorAlgebra.covSectorGenerators_cases
-      (P := fun b => b ∈ T.includeCovConnection.range) hb
+      (P := fun b => b ∈ T.includeCovConnection.range)
+      hb
       (fun _ l μ ν φ => ⟨(1 : ℂ) ⊗ₜ[ℝ] LocalGaugeCovFieldAlgebra.covF 𝔤 l μ ν φ, rfl⟩)
-      (fun hS => absurd hS (by decide)) (fun hS => absurd hS (by decide))
-      (fun hS => absurd hS (by decide)) (fun hS => absurd hS (by decide))
+      (fun hS => absurd hS (by decide))
+      (fun hS => absurd hS (by decide))
+      (fun hS => absurd hS (by decide))
+      (fun hS => absurd hS (by decide))
 
-lemma includeCovConnection_mem_covGaugeSector (y : ℂ ⊗[ℝ] LocalGaugeCovFieldAlgebra 𝔤) :
-    T.includeCovConnection y ∈ T.CovSectorAlgebra {FieldCategory.gauge} := by
+lemma includeCovConnection_mem_covGaugeSector (y : ℂ ⊗[ℝ] LocalGaugeCovFieldAlgebra 𝔤)
+    : T.includeCovConnection y ∈ T.CovSectorAlgebra {FieldCategory.gauge} := by
   rw [← range_includeCovConnection T]
   exact ⟨y, rfl⟩
 
@@ -136,10 +146,12 @@ lemma includeCovConnection_mem_covGaugeSector (y : ℂ ⊗[ℝ] LocalGaugeCovFie
 
 -/
 
-/-- The covariant gauge sector is the complexification of the covariant gauge-only algebra:
-  the inclusion, corestricted to its range. -/
-noncomputable def covGaugeSectorEquiv :
-    (ℂ ⊗[ℝ] LocalGaugeCovFieldAlgebra 𝔤) ≃ₐ[ℂ] ↥(T.CovSectorAlgebra {FieldCategory.gauge}) :=
+/--
+The covariant gauge sector is the complexification of the covariant gauge-only algebra:
+the inclusion, corestricted to its range.
+-/
+noncomputable def covGaugeSectorEquiv
+    : (ℂ ⊗[ℝ] LocalGaugeCovFieldAlgebra 𝔤) ≃ₐ[ℂ] ↥(T.CovSectorAlgebra {FieldCategory.gauge}) :=
   (AlgEquiv.ofInjective T.includeCovConnection includeCovConnection_injective).trans
     (Subalgebra.equivOfEq _ _ (range_includeCovConnection T))
 
@@ -147,15 +159,19 @@ variable {T}
 
 /-- In the local field algebra the equivalence is the canonical inclusion. -/
 @[simp]
-lemma coe_covGaugeSectorEquiv (y : ℂ ⊗[ℝ] LocalGaugeCovFieldAlgebra 𝔤) :
-    (T.covGaugeSectorEquiv y : T.LocalFieldAlgebra) = T.includeCovConnection y := rfl
+lemma coe_covGaugeSectorEquiv (y : ℂ ⊗[ℝ] LocalGaugeCovFieldAlgebra 𝔤)
+    : (T.covGaugeSectorEquiv y : T.LocalFieldAlgebra) = T.includeCovConnection y :=
+  rfl
 
 /-- The inverse recovers an element from its inclusion. -/
-lemma covGaugeSectorEquiv_symm_includeCovConnection (y : ℂ ⊗[ℝ] LocalGaugeCovFieldAlgebra 𝔤)
-    (hy : T.includeCovConnection y ∈ T.CovSectorAlgebra {FieldCategory.gauge}) :
-    T.covGaugeSectorEquiv.symm ⟨T.includeCovConnection y, hy⟩ = y := by
+lemma covGaugeSectorEquiv_symm_includeCovConnection
+    (y : ℂ ⊗[ℝ] LocalGaugeCovFieldAlgebra 𝔤)
+    (hy : T.includeCovConnection y ∈ T.CovSectorAlgebra {FieldCategory.gauge})
+    : T.covGaugeSectorEquiv.symm ⟨T.includeCovConnection y, hy⟩ = y := by
   rw [show (⟨T.includeCovConnection y, hy⟩ : ↥(T.CovSectorAlgebra {FieldCategory.gauge}))
-      = T.covGaugeSectorEquiv y from Subtype.ext rfl, AlgEquiv.symm_apply_apply]
+        = T.covGaugeSectorEquiv y from
+      Subtype.ext rfl,
+    AlgEquiv.symm_apply_apply]
 
 /-!
 
@@ -163,23 +179,27 @@ lemma covGaugeSectorEquiv_symm_includeCovConnection (y : ℂ ⊗[ℝ] LocalGauge
 
 -/
 
-/-- A generator, embedded with the scalar `1`, is the included tower element with the same
-  derivative labels, spacetime indices and adjoint covector. -/
-lemma coe_covGaugeSectorEquiv_one_tmul_covF (l : List (Fin 1 ⊕ Fin 3)) (μ ν : Fin 1 ⊕ Fin 3)
-    (φ : Module.Dual ℝ 𝔤) :
-    (T.covGaugeSectorEquiv ((1 : ℂ) ⊗ₜ[ℝ] LocalGaugeCovFieldAlgebra.covF 𝔤 l μ ν φ) :
-        T.LocalFieldAlgebra) = T.covDerivFieldStrength l μ ν φ := rfl
+/--
+A generator, embedded with the scalar `1`, is the included tower element with the same
+derivative labels, spacetime indices and adjoint covector.
+-/
+lemma coe_covGaugeSectorEquiv_one_tmul_covF
+    (l : List (Fin 1 ⊕ Fin 3)) (μ ν : Fin 1 ⊕ Fin 3) (φ : Module.Dual ℝ 𝔤)
+    : (T.covGaugeSectorEquiv ((1 : ℂ) ⊗ₜ[ℝ] LocalGaugeCovFieldAlgebra.covF 𝔤 l μ ν φ)
+        : T.LocalFieldAlgebra)
+      = T.covDerivFieldStrength l μ ν φ :=
+  rfl
 
 /-- Zero covariant derivatives: the included field strength itself. -/
-lemma coe_covGaugeSectorEquiv_one_tmul_covF_nil (μ ν : Fin 1 ⊕ Fin 3)
-    (φ : Module.Dual ℝ 𝔤) :
-    (T.covGaugeSectorEquiv ((1 : ℂ) ⊗ₜ[ℝ] LocalGaugeCovFieldAlgebra.covF 𝔤 [] μ ν φ) :
-        T.LocalFieldAlgebra)
-      = T.includeConnection ((1 : ℂ) ⊗ₜ[ℝ] LocalGaugeFieldAlgebra.fieldStrength 𝔤 μ ν φ) := rfl
+lemma coe_covGaugeSectorEquiv_one_tmul_covF_nil (μ ν : Fin 1 ⊕ Fin 3) (φ : Module.Dual ℝ 𝔤)
+    : (T.covGaugeSectorEquiv ((1 : ℂ) ⊗ₜ[ℝ] LocalGaugeCovFieldAlgebra.covF 𝔤 [] μ ν φ)
+        : T.LocalFieldAlgebra)
+      = T.includeConnection ((1 : ℂ) ⊗ₜ[ℝ] LocalGaugeFieldAlgebra.fieldStrength 𝔤 μ ν φ) :=
+  rfl
 
 /-- `z ⊗ₜ x` maps to `z` times the image of `1 ⊗ₜ x`. -/
-lemma coe_covGaugeSectorEquiv_tmul (z : ℂ) (x : LocalGaugeCovFieldAlgebra 𝔤) :
-    (T.covGaugeSectorEquiv (z ⊗ₜ[ℝ] x) : T.LocalFieldAlgebra)
+lemma coe_covGaugeSectorEquiv_tmul (z : ℂ) (x : LocalGaugeCovFieldAlgebra 𝔤)
+    : (T.covGaugeSectorEquiv (z ⊗ₜ[ℝ] x) : T.LocalFieldAlgebra)
       = z • (T.covGaugeSectorEquiv ((1 : ℂ) ⊗ₜ[ℝ] x) : T.LocalFieldAlgebra) := by
   have h : z ⊗ₜ[ℝ] x = z • ((1 : ℂ) ⊗ₜ[ℝ] x) := by
     rw [TensorProduct.smul_tmul', smul_eq_mul, mul_one]
@@ -193,23 +213,25 @@ lemma coe_covGaugeSectorEquiv_tmul (z : ℂ) (x : LocalGaugeCovFieldAlgebra 𝔤
 
 -/
 
-/-- The equivalence intertwines the complexified gauge-only action of the ordinary gauge
-  group with the value action of the covariant gauge sector. -/
-lemma covGaugeSectorEquiv_complexRepValue (g : G₀) (y : ℂ ⊗[ℝ] LocalGaugeCovFieldAlgebra 𝔤) :
-    T.covGaugeSectorEquiv (LocalGaugeCovFieldAlgebra.complexRepValue jets g y)
+/--
+The equivalence intertwines the complexified gauge-only action of the ordinary gauge
+group with the value action of the covariant gauge sector.
+-/
+lemma covGaugeSectorEquiv_complexRepValue (g : G₀) (y : ℂ ⊗[ℝ] LocalGaugeCovFieldAlgebra 𝔤)
+    : T.covGaugeSectorEquiv (LocalGaugeCovFieldAlgebra.complexRepValue jets g y)
       = CovSectorAlgebra.repValue T {FieldCategory.gauge} g (T.covGaugeSectorEquiv y) :=
   Subtype.ext (by
-    simp only [coe_covGaugeSectorEquiv, CovSectorAlgebra.coe_repValue,
-      includeCovConnection_apply, LocalGaugeCovFieldAlgebra.complexVal_complexRepValue,
-      repJet_includeConnection])
+    simp only [coe_covGaugeSectorEquiv, CovSectorAlgebra.coe_repValue, includeCovConnection_apply,
+      LocalGaugeCovFieldAlgebra.complexVal_complexRepValue, repJet_includeConnection])
 
-/-- The equivalence intertwines the complexified gauge-only Lorentz action with the Lorentz
-  action of the covariant gauge sector. -/
-lemma covGaugeSectorEquiv_complexRepLorentzGroup (hGL : T.GaugeLorentzCompatible)
-    (Λ : SL(2,ℂ)) (y : ℂ ⊗[ℝ] LocalGaugeCovFieldAlgebra 𝔤) :
-    T.covGaugeSectorEquiv (LocalGaugeCovFieldAlgebra.complexRepLorentzGroup 𝔤 Λ y)
-      = CovSectorAlgebra.repLorentzGroup T {FieldCategory.gauge} hGL Λ
-          (T.covGaugeSectorEquiv y) :=
+/--
+The equivalence intertwines the complexified gauge-only Lorentz action with the Lorentz
+action of the covariant gauge sector.
+-/
+lemma covGaugeSectorEquiv_complexRepLorentzGroup
+    (hGL : T.GaugeLorentzCompatible) (Λ : SL(2,ℂ)) (y : ℂ ⊗[ℝ] LocalGaugeCovFieldAlgebra 𝔤)
+    : T.covGaugeSectorEquiv (LocalGaugeCovFieldAlgebra.complexRepLorentzGroup 𝔤 Λ y)
+      = CovSectorAlgebra.repLorentzGroup T {FieldCategory.gauge} hGL Λ (T.covGaugeSectorEquiv y) :=
   Subtype.ext (by
     simp only [coe_covGaugeSectorEquiv, CovSectorAlgebra.coe_repLorentzGroup,
       includeCovConnection_apply, LocalGaugeCovFieldAlgebra.complexVal_complexRepLorentzGroup,

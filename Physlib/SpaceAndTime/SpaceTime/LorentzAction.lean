@@ -64,11 +64,13 @@ attribute [-simp] Fintype.sum_sum_type
 
 -/
 
-/-- The Lorentz group action on Schwartz functions taking the Lorentz group to
-  continuous linear maps. -/
+/--
+The Lorentz group action on Schwartz functions taking the Lorentz group to
+continuous linear maps.
+-/
 def schwartzAction {d} : LorentzGroup d →* 𝓢(SpaceTime d, ℝ) →L[ℝ] 𝓢(SpaceTime d, ℝ) where
-  toFun Λ := SchwartzMap.compCLM (𝕜 := ℝ)
-    (Lorentz.Vector.actionCLM Λ⁻¹).hasTemperateGrowth <| by
+  toFun Λ :=
+    SchwartzMap.compCLM (𝕜 := ℝ) (Lorentz.Vector.actionCLM Λ⁻¹).hasTemperateGrowth <| by
       use 1, ‖Lorentz.Vector.actionCLM Λ‖
       simp only [pow_one]
       intro x
@@ -91,15 +93,13 @@ def schwartzAction {d} : LorentzGroup d →* 𝓢(SpaceTime d, ℝ) →L[ℝ] �
 
 -/
 
-lemma schwartzAction_mul_apply {d} (Λ₁ Λ₂ : LorentzGroup d)
-    (η : 𝓢(SpaceTime d, ℝ)) :
-    schwartzAction Λ₂ (schwartzAction (Λ₁) η) =
-    schwartzAction (Λ₂ * Λ₁) η := by
+lemma schwartzAction_mul_apply {d} (Λ₁ Λ₂ : LorentzGroup d) (η : 𝓢(SpaceTime d, ℝ))
+    : schwartzAction Λ₂ (schwartzAction (Λ₁) η) = schwartzAction (Λ₂ * Λ₁) η := by
   simp
 
-lemma schwartzAction_apply {d} (Λ : LorentzGroup d)
-    (η : 𝓢(SpaceTime d, ℝ)) (x : SpaceTime d) :
-    (schwartzAction Λ η) x = η (Λ⁻¹ • x) := rfl
+lemma schwartzAction_apply {d} (Λ : LorentzGroup d) (η : 𝓢(SpaceTime d, ℝ)) (x : SpaceTime d)
+    : (schwartzAction Λ η) x = η (Λ⁻¹ • x) :=
+  rfl
 
 /-!
 
@@ -107,12 +107,14 @@ lemma schwartzAction_apply {d} (Λ : LorentzGroup d)
 
 -/
 
-lemma schwartzAction_injective {d} (Λ : LorentzGroup d) :
-    Function.Injective (schwartzAction Λ) := by
+lemma schwartzAction_injective {d} (Λ : LorentzGroup d)
+    : Function.Injective (schwartzAction Λ) := by
   intro η1 η2 h
   ext x
-  have h1 : (schwartzAction Λ⁻¹ * schwartzAction Λ) η1 =
-    (schwartzAction Λ⁻¹ * schwartzAction Λ) η2 := by simp [h]
+  have h1
+      : (schwartzAction Λ⁻¹ * schwartzAction Λ) η1
+        = (schwartzAction Λ⁻¹ * schwartzAction Λ) η2 := by
+    simp [h]
   rw [← map_mul] at h1
   simp at h1
   rw [h1]
@@ -123,8 +125,8 @@ lemma schwartzAction_injective {d} (Λ : LorentzGroup d) :
 
 -/
 
-lemma schwartzAction_surjective {d} (Λ : LorentzGroup d) :
-    Function.Surjective (schwartzAction Λ) := by
+lemma schwartzAction_surjective {d} (Λ : LorentzGroup d)
+    : Function.Surjective (schwartzAction Λ) := by
   intro η
   use (schwartzAction Λ⁻¹ η)
   change (schwartzAction Λ * schwartzAction Λ⁻¹) η = _
@@ -144,15 +146,17 @@ section Distribution
 
 -/
 variable
-    {c : Fin n → realLorentzTensor.Color} {M : Type} [NormedAddCommGroup M]
-      [NormedSpace ℝ M] [Tensorial (realLorentzTensor d) c M] [T2Space M]
+  {c : Fin n → realLorentzTensor.Color} {M : Type}
+  [NormedAddCommGroup M] [NormedSpace ℝ M] [Tensorial (realLorentzTensor d) c M] [T2Space M]
 
 open Distribution
 instance : SMul (LorentzGroup d) ((SpaceTime d) →d[ℝ] M) where
   smul Λ f := (Tensorial.actionCLM (realLorentzTensor d) Λ) ∘L f ∘L (schwartzAction Λ⁻¹)
 
-lemma lorentzGroup_smul_dist_apply (Λ : LorentzGroup d) (f : (SpaceTime d) →d[ℝ] M)
-    (η : 𝓢(SpaceTime d, ℝ)) : (Λ • f) η = Λ • (f (schwartzAction Λ⁻¹ η)) := rfl
+lemma lorentzGroup_smul_dist_apply
+    (Λ : LorentzGroup d) (f : (SpaceTime d) →d[ℝ] M) (η : 𝓢(SpaceTime d, ℝ))
+    : (Λ • f) η = Λ • (f (schwartzAction Λ⁻¹ η)) :=
+  rfl
 
 /-!
 
@@ -196,9 +200,11 @@ instance : SMulCommClass ℝ (LorentzGroup d) ((SpaceTime d) →d[ℝ] M) where
 -/
 
 /-- The Lorentz action on distributions as a linear map. -/
-def distActionLinearMap {d} {M : Type} [NormedAddCommGroup M]
-    [NormedSpace ℝ M] [Tensorial (realLorentzTensor d) c M] [T2Space M](Λ : LorentzGroup d) :
-    ((SpaceTime d) →d[ℝ] M) →ₗ[ℝ] ((SpaceTime d) →d[ℝ] M) where
+def distActionLinearMap
+    {d} {M : Type}
+    [NormedAddCommGroup M] [NormedSpace ℝ M] [Tensorial (realLorentzTensor d) c M] [T2Space M]
+    (Λ : LorentzGroup d)
+    : ((SpaceTime d) →d[ℝ] M) →ₗ[ℝ] ((SpaceTime d) →d[ℝ] M) where
   toFun f := Λ • f
   map_add' f1 f2 := by
     ext η

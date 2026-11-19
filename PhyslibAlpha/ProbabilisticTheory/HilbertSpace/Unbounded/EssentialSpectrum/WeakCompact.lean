@@ -57,11 +57,13 @@ variable {H : Type*} [NormedAddCommGroup H] [InnerProductSpace ℂ H] [CompleteS
 -/
 
 omit [CompleteSpace H] in
-/-- An orthonormal sequence is **weakly null**: for every fixed `g`, the inner products
+/--
+An orthonormal sequence is **weakly null**: for every fixed `g`, the inner products
 `⟪g, ψ n⟫` tend to `0`. (Bessel's inequality makes `∑ ‖⟪ψ n, g⟫‖²` summable, so its terms — hence
-`‖⟪g, ψ n⟫‖` — tend to `0`.) -/
-lemma _root_.Orthonormal.tendsto_inner_atTop_zero {ψ : ℕ → H} (hψ : Orthonormal ℂ ψ) (g : H) :
-    Tendsto (fun n => ⟪g, ψ n⟫_ℂ) atTop (𝓝 0) := by
+`‖⟪g, ψ n⟫‖` — tend to `0`.)
+-/
+lemma _root_.Orthonormal.tendsto_inner_atTop_zero {ψ : ℕ → H} (hψ : Orthonormal ℂ ψ) (g : H)
+    : Tendsto (fun n => ⟪g, ψ n⟫_ℂ) atTop (𝓝 0) := by
   have hsq : Tendsto (fun n => ‖⟪ψ n, g⟫_ℂ‖ ^ 2) atTop (𝓝 0) :=
     (hψ.inner_products_summable g).tendsto_atTop_zero
   have hnorm : Tendsto (fun n => ‖⟪ψ n, g⟫_ℂ‖) atTop (𝓝 0) := by
@@ -72,7 +74,8 @@ lemma _root_.Orthonormal.tendsto_inner_atTop_zero {ψ : ℕ → H} (hψ : Orthon
   rw [tendsto_zero_iff_norm_tendsto_zero]
   have heq : (fun n => ‖⟪g, ψ n⟫_ℂ‖) = fun n => ‖⟪ψ n, g⟫_ℂ‖ :=
     funext fun n => norm_inner_symm g (ψ n)
-  rw [heq]; exact hnorm
+  rw [heq]
+  exact hnorm
 
 /-!
 
@@ -80,18 +83,20 @@ lemma _root_.Orthonormal.tendsto_inner_atTop_zero {ψ : ℕ → H} (hψ : Orthon
 
 -/
 
-/-- A **compact** operator maps a bounded weakly-null sequence to a norm-null sequence.
+/--
+A **compact** operator maps a bounded weakly-null sequence to a norm-null sequence.
 
 `hbdd` bounds the sequence (`‖u n‖ ≤ C`); `hweak` is weak nullness stated concretely as
 `∀ g, ⟪g, u n⟫ → 0`. The proof: if `‖K (u n)‖` does *not* tend to `0`, extract a subsequence on
 which it stays `≥ ε`; it lands in the compact set `closure (K '' closedBall 0 C)`, so a further
 subsequence converges in norm to some `a`; weak nullness (via the adjoint) forces `⟪a, a⟫ = 0`,
-i.e. `a = 0`, contradicting `ε ≤ ‖a‖`. -/
+i.e. `a = 0`, contradicting `ε ≤ ‖a‖`.
+-/
 lemma _root_.IsCompactOperator.tendsto_norm_apply_of_weaklyNull
-    {K : H →L[ℂ] H} (hK : IsCompactOperator (K : H → H)) {u : ℕ → H} {C : ℝ}
-    (hbdd : ∀ n, ‖u n‖ ≤ C)
-    (hweak : ∀ g : H, Tendsto (fun n => ⟪g, u n⟫_ℂ) atTop (𝓝 0)) :
-    Tendsto (fun n => ‖K (u n)‖) atTop (𝓝 0) := by
+    {K : H →L[ℂ] H} (hK : IsCompactOperator (K : H → H))
+    {u : ℕ → H} {C : ℝ}
+    (hbdd : ∀ n, ‖u n‖ ≤ C) (hweak : ∀ g : H, Tendsto (fun n => ⟪g, u n⟫_ℂ) atTop (𝓝 0))
+    : Tendsto (fun n => ‖K (u n)‖) atTop (𝓝 0) := by
   by_contra hcon
   rw [Metric.tendsto_atTop] at hcon
   push Not at hcon
@@ -116,8 +121,7 @@ lemma _root_.IsCompactOperator.tendsto_norm_apply_of_weaklyNull
     have h1 : Tendsto (fun n => ⟪a, K (u (φ (ψ n)))⟫_ℂ) atTop (𝓝 ⟪a, a⟫_ℂ) :=
       Tendsto.inner tendsto_const_nhds hψ_tend
     have h2 : Tendsto (fun n => ⟪a, K (u (φ (ψ n)))⟫_ℂ) atTop (𝓝 0) := by
-      have hcomp : Tendsto (fun n => φ (ψ n)) atTop atTop :=
-        (hφ_mono.comp hψ_mono).tendsto_atTop
+      have hcomp : Tendsto (fun n => φ (ψ n)) atTop atTop := (hφ_mono.comp hψ_mono).tendsto_atTop
       have hw : Tendsto (fun n => ⟪ContinuousLinearMap.adjoint K a, u (φ (ψ n))⟫_ℂ) atTop (𝓝 0) :=
         (hweak (ContinuousLinearMap.adjoint K a)).comp hcomp
       refine hw.congr (fun n => ?_)

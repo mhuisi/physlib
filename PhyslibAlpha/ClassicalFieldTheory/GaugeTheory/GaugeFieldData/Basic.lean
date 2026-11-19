@@ -81,26 +81,31 @@ different context. `GaugeFieldData` adds only the matter content on top of it.
 
 -/
 
-/-- The field data of a gauge theory. Over a gauge context, given by a jet gauge group `GJ`
-  with global group `G₀`, a finite-dimensional real gauge algebra `𝔤` with jet algebra
-  `𝔤J` and a local-gauge-data package `jets` over them, it records a finite family of fermionic
-  species and a finite family of bosonic species, each given by an existing
-  `MatterField jets`. The species types are `Fintype` rather than merely `Finite`, so
-  that a theory may be summed over its species: this is what lets the several fermionic
-  multiplets be assembled into the single fermionic matter field of
-  `GaugeFieldData.fermionMatterField`.
+/--
+The field data of a gauge theory. Over a gauge context, given by a jet gauge group `GJ`
+with global group `G₀`, a finite-dimensional real gauge algebra `𝔤` with jet algebra
+`𝔤J` and a local-gauge-data package `jets` over them, it records a finite family of fermionic
+species and a finite family of bosonic species, each given by an existing
+`MatterField jets`. The species types are `Fintype` rather than merely `Finite`, so
+that a theory may be summed over its species: this is what lets the several fermionic
+multiplets be assembled into the single fermionic matter field of
+`GaugeFieldData.fermionMatterField`.
 
-  Nothing is repeated from `MatterField`, whose fields already carry the value space, the
-  Lorentz representation, the local-gauge-data action and the mass weight of a species. Nothing is
-  repeated from the gauge context either, and the gauge bosons are not a species, since
-  their generator space is determined by `𝔤` alone.
+Nothing is repeated from `MatterField`, whose fields already carry the value space, the
+Lorentz representation, the local-gauge-data action and the mass weight of a species. Nothing is
+repeated from the gauge context either, and the gauge bosons are not a species, since
+their generator space is determined by `𝔤` alone.
 
-  This is data before a Lagrangian. Collecting representations of the several species does
-  not assert that they are jointly consistent. Gauge-Lorentz compatibility, factorization
-  of the jet action through its global value, and richness of the jet group are separate
-  conditions, none of them imposed here. -/
-structure GaugeFieldData {G₀ : Type} [Group G₀] {𝔤 : Type} [LieRing 𝔤] [LieAlgebra ℝ 𝔤]
-    [Module.Finite ℝ 𝔤] {GJ : Type} [Group GJ] {𝔤J : Type} [LieRing 𝔤J] [LieAlgebra ℝ 𝔤J]
+This is data before a Lagrangian. Collecting representations of the several species does
+not assert that they are jointly consistent. Gauge-Lorentz compatibility, factorization
+of the jet action through its global value, and richness of the jet group are separate
+conditions, none of them imposed here.
+-/
+structure GaugeFieldData
+    {G₀ : Type} [Group G₀]
+    {𝔤 : Type} [LieRing 𝔤] [LieAlgebra ℝ 𝔤] [Module.Finite ℝ 𝔤]
+    {GJ : Type} [Group GJ]
+    {𝔤J : Type} [LieRing 𝔤J] [LieAlgebra ℝ 𝔤J]
     (jets : LocalGaugeData G₀ 𝔤 GJ 𝔤J) where
   /-- The index type of the fermionic species. -/
   FermionSpecies : Type
@@ -115,14 +120,17 @@ structure GaugeFieldData {G₀ : Type} [Group G₀] {𝔤 : Type} [LieRing 𝔤]
   /-- The matter field of each bosonic species. -/
   boson : BosonSpecies → MatterField jets
 
-attribute [instance] GaugeFieldData.decidableEqFermionSpecies
-  GaugeFieldData.fintypeFermionSpecies GaugeFieldData.decidableEqBosonSpecies
-  GaugeFieldData.fintypeBosonSpecies
+attribute [instance]
+  GaugeFieldData.decidableEqFermionSpecies GaugeFieldData.fintypeFermionSpecies
+  GaugeFieldData.decidableEqBosonSpecies GaugeFieldData.fintypeBosonSpecies
 
 namespace GaugeFieldData
 
-variable {G₀ : Type} [Group G₀] {𝔤 : Type} [LieRing 𝔤] [LieAlgebra ℝ 𝔤] [Module.Finite ℝ 𝔤]
-  {GJ : Type} [Group GJ] {𝔤J : Type} [LieRing 𝔤J] [LieAlgebra ℝ 𝔤J]
+variable
+  {G₀ : Type} [Group G₀]
+  {𝔤 : Type} [LieRing 𝔤] [LieAlgebra ℝ 𝔤] [Module.Finite ℝ 𝔤]
+  {GJ : Type} [Group GJ]
+  {𝔤J : Type} [LieRing 𝔤J] [LieAlgebra ℝ 𝔤J]
   {jets : LocalGaugeData G₀ 𝔤 GJ 𝔤J} (T : GaugeFieldData jets)
 
 /-!
@@ -171,8 +179,10 @@ field data; the covariant derivative theory assumes them where it needs them.
 def PureJetsActTrivially : Prop :=
   (∀ i, (T.fermion i).PureJetsActTrivially) ∧ (∀ j, (T.boson j).PureJetsActTrivially)
 
-/-- The infinitesimal gauge action of every species of the datum commutes with its Lorentz
-  representation. -/
+/--
+The infinitesimal gauge action of every species of the datum commutes with its Lorentz
+representation.
+-/
 def GaugeLorentzCompatible : Prop :=
   (∀ i, (T.fermion i).GaugeLorentzCompatible) ∧ (∀ j, (T.boson j).GaugeLorentzCompatible)
 

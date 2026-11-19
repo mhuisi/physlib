@@ -45,29 +45,32 @@ open Dimension
 
 namespace ParametricDimensionExamples
 
-/-- The concrete dimension equality `(length / time) · time = length` holds by
-definitional equality. -/
+/--
+The concrete dimension equality `(length / time) · time = length` holds by
+definitional equality.
+-/
 example : (L𝓭 / T𝓭) * T𝓭 = L𝓭 := rfl
 
-/-- The two concrete `WithDim` types are definitionally equal, so multiplication has
-the required result type without a cast. -/
-example (v : WithDim (L𝓭 / T𝓭) ℝ) (t : WithDim T𝓭 ℝ) : WithDim L𝓭 ℝ :=
-  v * t
+/--
+The two concrete `WithDim` types are definitionally equal, so multiplication has
+the required result type without a cast.
+-/
+example (v : WithDim (L𝓭 / T𝓭) ℝ) (t : WithDim T𝓭 ℝ) : WithDim L𝓭 ℝ := v * t
 
 /-- The end-to-end comparison: a length equals a velocity times a time directly. -/
-example (x : WithDim L𝓭 ℝ) (v : WithDim (L𝓭 / T𝓭) ℝ) (t : WithDim T𝓭 ℝ) : Prop :=
-  x = v * t
+example (x : WithDim L𝓭 ℝ) (v : WithDim (L𝓭 / T𝓭) ℝ) (t : WithDim T𝓭 ℝ) : Prop := x = v * t
 
-/-- Two half-powers of length multiply definitionally to length. The unannotated exponent also
-regresses the default away from natural-number division. -/
+/--
+Two half-powers of length multiply definitionally to length. The unannotated exponent also
+regresses the default away from natural-number division.
+-/
 example : (L𝓭 ^ (1 / 2)) * (L𝓭 ^ (1 / 2)) = L𝓭 := rfl
 
 /-- Reducible dimension powers also cancel for non-half fractional exponents. -/
 example : (L𝓭 ^ (2 / 3 : Exponent)) * (L𝓭 ^ (1 / 3 : Exponent)) = L𝓭 := rfl
 
 /-- Quantities carrying half-powers of length multiply directly to a length. -/
-example (a b : WithDim (L𝓭 ^ (1 / 2)) ℝ) : WithDim L𝓭 ℝ :=
-  a * b
+example (a b : WithDim (L𝓭 ^ (1 / 2)) ℝ) : WithDim L𝓭 ℝ := a * b
 
 /-!
 ## The same comparison over a non-standard basis
@@ -86,18 +89,26 @@ inductive Info
 instance : DimensionBasis Info := DimensionBasis.pi _
 
 /-- The `bit` base dimension. -/
-def bitDim : Dimension Info := Dimension.ofFunction fun | .bit => 1 | .symbol => 0
+def bitDim : Dimension Info :=
+  Dimension.ofFunction fun
+    | .bit => 1
+    | .symbol => 0
 
 /-- The `symbol` base dimension. -/
-def symbolDim : Dimension Info := Dimension.ofFunction fun | .bit => 0 | .symbol => 1
+def symbolDim : Dimension Info :=
+  Dimension.ofFunction fun
+    | .bit => 0
+    | .symbol => 1
 
 /-- Cancellation works identically over the non-standard basis. -/
 example : (bitDim / symbolDim) * symbolDim = bitDim := by ext; simp
 
-/-- And so does the `cast`-based comparison: an information content equals an
-information rate (`bit / symbol`) times a number of symbols. -/
-example (x : WithDim bitDim ℝ) (r : WithDim (bitDim / symbolDim) ℝ)
-    (n : WithDim symbolDim ℝ) : Prop :=
+/--
+And so does the `cast`-based comparison: an information content equals an
+information rate (`bit / symbol`) times a number of symbols.
+-/
+example (x : WithDim bitDim ℝ) (r : WithDim (bitDim / symbolDim) ℝ) (n : WithDim symbolDim ℝ)
+    : Prop :=
   x = (r * n).cast
 
 end ParametricDimensionExamples

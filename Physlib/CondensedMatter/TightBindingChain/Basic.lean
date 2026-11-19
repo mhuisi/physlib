@@ -113,14 +113,16 @@ instance : NeZero T.N := T.N_ne_zero
 
 -/
 
-/-- The Hilbert space of a `TightBindingchain` is the `N`-dimensional finite dimensional
-Hilbert space. -/
+/--
+The Hilbert space of a `TightBindingchain` is the `N`-dimensional finite dimensional
+Hilbert space.
+-/
 abbrev HilbertSpace := QuantumMechanics.FiniteHilbertSpace (Fin T.N)
 
 /-- The Hilbert space of the chain has dimension `N`. -/
 lemma finrank_hilbertSpace : Module.finrank ℂ T.HilbertSpace = T.N := by
-  simpa using Module.finrank_eq_card_basis
-    (QuantumMechanics.FiniteHilbertSpace.basisFun (Fin T.N)).toBasis
+  simpa using
+    Module.finrank_eq_card_basis (QuantumMechanics.FiniteHilbertSpace.basisFun (Fin T.N)).toBasis
 
 /-!
 
@@ -137,8 +139,8 @@ Localized states correspond to the electron being located on a specific site in 
 -/
 
 /-- The eigenstate corresponding to the particle been located on the `n`th site. -/
-noncomputable def localizedState {T : TightBindingChain} :
-    OrthonormalBasis (Fin T.N) ℂ (HilbertSpace T) :=
+noncomputable def localizedState {T : TightBindingChain}
+    : OrthonormalBasis (Fin T.N) ℂ (HilbertSpace T) :=
   QuantumMechanics.FiniteHilbertSpace.basisFun (Fin T.N)
 
 /-!
@@ -163,8 +165,8 @@ scoped notation "⟨" m "|" n "⟩" => ⟪localizedState m, localizedState n⟫_
 lemma localizedState_orthonormal : Orthonormal ℂ (localizedState (T := T)) :=
   (localizedState (T := T)).orthonormal
 
-lemma localizedState_orthonormal_eq_ite (m n : Fin T.N) :
-    ⟨m|n⟩ = if m = n then 1 else 0 := orthonormal_iff_ite.mp T.localizedState_orthonormal _ _
+lemma localizedState_orthonormal_eq_ite (m n : Fin T.N) : ⟨m|n⟩ = if m = n then 1 else 0 :=
+  orthonormal_iff_ite.mp T.localizedState_orthonormal _ _
 
 /-!
 
@@ -179,8 +181,8 @@ lemma localizedState_orthonormal_eq_ite (m n : Fin T.N) :
 -/
 
 /-- The linear map `|m⟩⟨n|` for `⟨n|` localized states. -/
-noncomputable def localizedComp {T : TightBindingChain} (m n : Fin T.N) :
-    T.HilbertSpace →ₗ[ℂ] T.HilbertSpace where
+noncomputable def localizedComp {T : TightBindingChain} (m n : Fin T.N)
+    : T.HilbertSpace →ₗ[ℂ] T.HilbertSpace where
   toFun ψ := ⟪|n⟩, ψ⟫_ℂ • |m⟩
   map_add' ψ1 ψ2 := by rw [inner_add_right, add_smul]
   map_smul' _ _ := by rw [inner_smul_right, RingHom.id_apply, smul_smul]
@@ -199,14 +201,14 @@ scoped notation "|" n "⟩⟨" m "|" => localizedComp n m
 ### C.3. The operator `|m⟩⟨n|` applied to a localized state
 
 -/
-lemma localizedComp_apply_localizedState (m n p : Fin T.N) :
-    |m⟩⟨n| |p⟩ = if n = p then |m⟩ else 0 := by
-  rw [localizedComp, LinearMap.coe_mk, AddHom.coe_mk,
-    T.localizedState_orthonormal_eq_ite n p, ite_smul, one_smul, zero_smul]
+lemma localizedComp_apply_localizedState (m n p : Fin T.N)
+    : |m⟩⟨n| |p⟩ = if n = p then |m⟩ else 0 := by
+  rw [localizedComp, LinearMap.coe_mk, AddHom.coe_mk, T.localizedState_orthonormal_eq_ite n p,
+    ite_smul, one_smul, zero_smul]
 
 /-- The adjoint of localizedComp |m⟩⟨n| is |n⟩⟨m|. -/
-lemma localizedComp_adjoint (m n : Fin T.N) (ψ φ : T.HilbertSpace) :
-    ⟪|m⟩⟨n| ψ, φ⟫_ℂ = ⟪ψ, |n⟩⟨m| φ⟫_ℂ := by
+lemma localizedComp_adjoint (m n : Fin T.N) (ψ φ : T.HilbertSpace)
+    : ⟪|m⟩⟨n| ψ, φ⟫_ℂ = ⟪ψ, |n⟩⟨m| φ⟫_ℂ := by
   simp only [localizedComp, LinearMap.coe_mk, AddHom.coe_mk, inner_smul_left, inner_smul_right,
     inner_conj_symm]
   ring
@@ -217,10 +219,12 @@ lemma localizedComp_adjoint (m n : Fin T.N) (ψ φ : T.HilbertSpace) :
 
 -/
 
-/-- The Hamiltonian of the tight binding chain with periodic
-  boundary conditions is given by `E₀ ∑ n, |n⟩⟨n| - t ∑ n, (|n⟩⟨n + 1| + |n + 1⟩⟨n|)`.
-  The periodic boundary conditions is manifested by the `+` in `n + 1` being
-  within `Fin T.N` (that is modulo `T.N`). -/
+/--
+The Hamiltonian of the tight binding chain with periodic
+boundary conditions is given by `E₀ ∑ n, |n⟩⟨n| - t ∑ n, (|n⟩⟨n + 1| + |n + 1⟩⟨n|)`.
+The periodic boundary conditions is manifested by the `+` in `n + 1` being
+within `Fin T.N` (that is modulo `T.N`).
+-/
 noncomputable def hamiltonian : T.HilbertSpace →ₗ[ℂ] T.HilbertSpace :=
   T.E0 • ∑ n : Fin T.N, |n⟩⟨n| - T.t • ∑ n : Fin T.N, (|n⟩⟨n + 1| + |n + 1⟩⟨n|)
 
@@ -231,8 +235,8 @@ noncomputable def hamiltonian : T.HilbertSpace →ₗ[ℂ] T.HilbertSpace :=
 -/
 
 /-- The hamiltonian of the tight binding chain is hermitian. -/
-lemma hamiltonian_hermitian (ψ φ : T.HilbertSpace) :
-    ⟪T.hamiltonian ψ, φ⟫_ℂ = ⟪ψ, T.hamiltonian φ⟫_ℂ := by
+lemma hamiltonian_hermitian (ψ φ : T.HilbertSpace)
+    : ⟪T.hamiltonian ψ, φ⟫_ℂ = ⟪ψ, T.hamiltonian φ⟫_ℂ := by
   simp only [hamiltonian, LinearMap.sub_apply, LinearMap.smul_apply, LinearMap.coe_sum,
     Finset.sum_apply, LinearMap.add_apply, inner_sub_left, inner_sub_right]
   congr 1
@@ -250,10 +254,12 @@ lemma hamiltonian_hermitian (ψ φ : T.HilbertSpace) :
 
 -/
 
-/-- The Hamiltonian applied to the localized state `|n⟩` gives
-  `T.E0 • |n⟩ - T.t • (|n + 1⟩ + |n - 1⟩)`. -/
-lemma hamiltonian_apply_localizedState (n : Fin T.N) :
-    T.hamiltonian |n⟩ = (T.E0 : ℂ) • |n⟩ - (T.t : ℂ) • (|n + 1⟩ + |n - 1⟩) := by
+/--
+The Hamiltonian applied to the localized state `|n⟩` gives
+`T.E0 • |n⟩ - T.t • (|n + 1⟩ + |n - 1⟩)`.
+-/
+lemma hamiltonian_apply_localizedState (n : Fin T.N)
+    : T.hamiltonian |n⟩ = (T.E0 : ℂ) • |n⟩ - (T.t : ℂ) • (|n + 1⟩ + |n - 1⟩) := by
   simp only [hamiltonian, LinearMap.sub_apply, LinearMap.smul_apply, LinearMap.coe_sum,
     Finset.sum_apply, LinearMap.add_apply, smul_add, Finset.sum_add_distrib,
     localizedComp_apply_localizedState, ← eq_sub_iff_add_eq, Finset.sum_ite_eq', Finset.mem_univ,
@@ -266,13 +272,15 @@ lemma hamiltonian_apply_localizedState (n : Fin T.N) :
 
 -/
 
-/-- The energy of a localized state in the tight binding chain is `E0`.
-  This lemma assumes that there is more then one site in the chain otherwise the
-  result is not true. -/
+/--
+The energy of a localized state in the tight binding chain is `E0`.
+This lemma assumes that there is more then one site in the chain otherwise the
+result is not true.
+-/
 lemma energy_localizedState (n : Fin T.N) (htn : 1 < T.N) : ⟪|n⟩, T.hamiltonian |n⟩⟫_ℂ = T.E0 := by
   rw [hamiltonian_apply_localizedState]
   simp only [smul_add, inner_sub_right, inner_add_right, inner_smul_right,
-    localizedState_orthonormal_eq_ite, ↓reduceIte, mul_one, left_eq_add, eq_sub_iff_add_eq,
+    localizedState_orthonormal_eq_ite, ↓ reduceIte, mul_one, left_eq_add, eq_sub_iff_add_eq,
     add_eq_left, Fin.one_eq_zero_iff, mul_ite, mul_zero, sub_eq_self]
   simp [show T.N ≠ 1 from by omega]
 
@@ -288,9 +296,11 @@ lemma energy_localizedState (n : Fin T.N) (htn : 1 < T.N) : ⟪|n⟩, T.hamilton
 
 -/
 
-/-- The Brillouin zone of the tight binding model is `[-π/a, π/a)`.
-  This is the set in which wave functions are uniquely defined. -/
-noncomputable def BrillouinZone : Set ℝ := Set.Ico (- Real.pi / T.a) (Real.pi / T.a)
+/--
+The Brillouin zone of the tight binding model is `[-π/a, π/a)`.
+This is the set in which wave functions are uniquely defined.
+-/
+noncomputable def BrillouinZone : Set ℝ := Set.Ico (-Real.pi / T.a) (Real.pi / T.a)
 
 /-!
 
@@ -298,10 +308,13 @@ noncomputable def BrillouinZone : Set ℝ := Set.Ico (- Real.pi / T.a) (Real.pi 
 
 -/
 
-/-- The wavenumbers associated with the energy eigenstates.
-  This corresponds to the set `2 π / (a N) * (n - ⌊N/2⌋)` for `n : Fin T.N`.
-  It is defined as such so it sits in the Brillouin zone. -/
-def QuantaWaveNumber : Set ℝ := {x | (∃ n : Fin T.N,
+/--
+The wavenumbers associated with the energy eigenstates.
+This corresponds to the set `2 π / (a N) * (n - ⌊N/2⌋)` for `n : Fin T.N`.
+It is defined as such so it sits in the Brillouin zone.
+-/
+def QuantaWaveNumber : Set ℝ :=
+  {x | (∃ n : Fin T.N,
     2 * Real.pi / (T.a * T.N) * ((n : ℝ) - (T.N / 2 : ℕ)) = x)}
 
 /-- The quantized wavenumber `2 π / (a N) * (n - ⌊N/2⌋)` of the index `n`. -/
@@ -310,8 +323,8 @@ noncomputable def quantaWaveNumber (n : Fin T.N) : T.QuantaWaveNumber := ⟨_, n
 /-- Distinct indices give distinct quantized wavenumbers. -/
 lemma quantaWaveNumber_injective : Function.Injective T.quantaWaveNumber := by
   intro m n h
-  have hc : 2 * Real.pi / (T.a * T.N) ≠ 0 := div_ne_zero (by positivity)
-    (mul_ne_zero T.a_pos.ne' (Nat.cast_ne_zero.2 (NeZero.ne T.N)))
+  have hc : 2 * Real.pi / (T.a * T.N) ≠ 0 :=
+    div_ne_zero (by positivity) (mul_ne_zero T.a_pos.ne' (Nat.cast_ne_zero.2 (NeZero.ne T.N)))
   have := mul_left_cancel₀ hc (Subtype.ext_iff.1 h)
   exact Fin.ext (by exact_mod_cast sub_left_inj.1 this)
 
@@ -347,8 +360,8 @@ lemma quantaWaveNumber_subset_brillouinZone : T.QuantaWaveNumber ⊆ T.Brillouin
 
 -/
 
-lemma quantaWaveNumber_exp_N (n : ℕ) (k : T.QuantaWaveNumber) :
-    Complex.exp (Complex.I * k * n * T.N * T.a) = 1 := by
+lemma quantaWaveNumber_exp_N (n : ℕ) (k : T.QuantaWaveNumber)
+    : Complex.exp (Complex.I * k * n * T.N * T.a) = 1 := by
   refine Complex.exp_eq_one_iff.mpr ?_
   obtain ⟨_, m, rfl⟩ := k
   use ((m : Int) - (T.N / 2 : ℕ)) * (n : ℤ)
@@ -358,23 +371,24 @@ lemma quantaWaveNumber_exp_N (n : ℕ) (k : T.QuantaWaveNumber) :
     Complex.ofReal_sub, Int.cast_mul, Int.cast_sub, Int.cast_natCast]
   field_simp
 
-lemma quantaWaveNumber_exp_sub_one (n : Fin T.N) (k : T.QuantaWaveNumber) :
-    Complex.exp (Complex.I * k * (n - 1).val * T.a) =
-    Complex.exp (Complex.I * k * n * T.a) * Complex.exp (- Complex.I * k * T.a) := by
+lemma quantaWaveNumber_exp_sub_one (n : Fin T.N) (k : T.QuantaWaveNumber)
+    : Complex.exp (Complex.I * k * (n - 1).val * T.a)
+      = Complex.exp (Complex.I * k * n * T.a) * Complex.exp (-Complex.I * k * T.a) := by
   rw [Fin.val_sub]
   trans Complex.exp (Complex.I * ↑↑k * ↑(((T.N - 1 + n)/T.N) * T.N + (n - 1).val) * ↑T.a)
   · simp only [Nat.cast_add, Nat.cast_mul]
-    have h0 : (Complex.I * ↑↑k * (↑((T.N - 1 + ↑n) / T.N) * ↑T.N + (n - 1).val) * ↑T.a)
-        = Complex.I * ↑↑k * ↑((T.N - 1 + ↑n) / T.N) * ↑T.N * ↑T.a +
-        Complex.I * ↑↑k * ((n - 1).val* ↑T.a) := by ring
+    have h0
+        : (Complex.I * ↑ ↑k * (↑((T.N - 1 + ↑n) / T.N) * ↑T.N + (n - 1).val) * ↑T.a)
+          = Complex.I * ↑ ↑k * ↑((T.N - 1 + ↑n) / T.N) * ↑T.N * ↑T.a
+            + Complex.I * ↑ ↑k * ((n - 1).val * ↑T.a) := by
+      ring
     rw [h0, Complex.exp_add, quantaWaveNumber_exp_N]
     simp only [Fin.val_one', one_mul]
     congr 1
     simp only [mul_assoc, mul_eq_mul_left_iff, mul_eq_mul_right_iff, Nat.cast_inj,
       Complex.ofReal_eq_zero, Complex.I_ne_zero, or_false]
     aesop
-  · have hx : (((T.N - 1 + n)/T.N) * T.N + (n - 1).val) =
-        (T.N - 1 + n) := by
+  · have hx : (((T.N - 1 + n) / T.N) * T.N + (n - 1).val) = (T.N - 1 + n) := by
       conv_rhs => rw [← Nat.div_add_mod' (a := T.N - 1 + n) (b := T.N)]
       congr
       by_cases hn : T.N = 1
@@ -386,20 +400,23 @@ lemma quantaWaveNumber_exp_sub_one (n : Fin T.N) (k : T.QuantaWaveNumber) :
         congr
         simp [Nat.one_mod_eq_one.mpr hn]
     rw [hx]
-    have hl : (Complex.I * ↑↑k * ↑(T.N - 1 + ↑n) * ↑T.a) =
-        Complex.I * ↑↑k * n * ↑T.a + Complex.I * ↑↑k * ↑(T.N - 1) * ↑T.a := by
+    have hl
+        : (Complex.I * ↑ ↑k * ↑(T.N - 1 + ↑n) * ↑T.a)
+          = Complex.I * ↑ ↑k * n * ↑T.a + Complex.I * ↑ ↑k * ↑(T.N - 1) * ↑T.a := by
       simp only [Nat.cast_add]
       ring
     rw [hl, Complex.exp_add]
     congr 1
     rw [Nat.cast_pred (Nat.pos_of_neZero T.N)]
-    have hl : (Complex.I * ↑↑k * (↑T.N - 1) * ↑T.a) =
-      Complex.I * ↑↑k * (1 : ℕ) * ↑T.N * ↑T.a + (- Complex.I * ↑↑k * ↑T.a) := by ring
+    have hl
+        : (Complex.I * ↑ ↑k * (↑T.N - 1) * ↑T.a)
+          = Complex.I * ↑ ↑k * (1 : ℕ) * ↑T.N * ↑T.a + (-Complex.I * ↑ ↑k * ↑T.a) := by
+      ring
     rw [hl, Complex.exp_add, quantaWaveNumber_exp_N, neg_mul, one_mul]
 
-lemma quantaWaveNumber_exp_add_one (n : Fin T.N) (k : T.QuantaWaveNumber) :
-    Complex.exp (Complex.I * k * (n + 1).val * T.a) =
-    Complex.exp (Complex.I * k * n * T.a) * Complex.exp (Complex.I * k * T.a) := by
+lemma quantaWaveNumber_exp_add_one (n : Fin T.N) (k : T.QuantaWaveNumber)
+    : Complex.exp (Complex.I * k * (n + 1).val * T.a)
+      = Complex.exp (Complex.I * k * n * T.a) * Complex.exp (Complex.I * k * T.a) := by
   conv_rhs =>
     rw [show n = (n + 1) - 1 from (add_sub_cancel_right n 1).symm,
       quantaWaveNumber_exp_sub_one, mul_assoc, ← Complex.exp_add]
@@ -417,8 +434,10 @@ lemma quantaWaveNumber_exp_add_one (n : Fin T.N) (k : T.QuantaWaveNumber) :
 
 -/
 
-/-- The energy eigenstates of the tight binding chain They are given by
-  `∑ n, exp (I * k * n * T.a) • |n⟩`. -/
+/--
+The energy eigenstates of the tight binding chain They are given by
+`∑ n, exp (I * k * n * T.a) • |n⟩`.
+-/
 noncomputable def energyEigenstate (k : T.QuantaWaveNumber) : T.HilbertSpace :=
   ∑ n : Fin T.N, Complex.exp (Complex.I * k * n * T.a) • |n⟩
 
@@ -430,13 +449,15 @@ lemma energyEigenstate_ne_zero (k : T.QuantaWaveNumber) : T.energyEigenstate k �
   simp at this
 
 /-- The inner product of an energy eigenstate with itself is `N`. -/
-lemma energyEigenstate_inner_self (k : T.QuantaWaveNumber) :
-    ⟪T.energyEigenstate k, T.energyEigenstate k⟫_ℂ = T.N := by
+lemma energyEigenstate_inner_self (k : T.QuantaWaveNumber)
+    : ⟪T.energyEigenstate k, T.energyEigenstate k⟫_ℂ = T.N := by
   simp only [energyEigenstate, sum_inner]
   simp_rw [inner_sum, inner_smul_left, inner_smul_right, localizedState_orthonormal_eq_ite]
-  simp only [mul_ite, mul_one, mul_zero, Finset.sum_ite_eq, Finset.mem_univ, ↓reduceIte]
-  have h1 (n : Fin T.N) : (starRingEnd ℂ) (Complex.exp (Complex.I * k * n * T.a)) *
-      Complex.exp (Complex.I * k * n * T.a) = 1 := by
+  simp only [mul_ite, mul_one, mul_zero, Finset.sum_ite_eq, Finset.mem_univ, ↓ reduceIte]
+  have h1 (n : Fin T.N)
+      : (starRingEnd ℂ) (Complex.exp (Complex.I * k * n * T.a))
+          * Complex.exp (Complex.I * k * n * T.a)
+        = 1 := by
     rw [← Complex.exp_conj, ← Complex.exp_add]
     simp only [map_mul, Complex.conj_I, Complex.conj_ofReal, Complex.conj_natCast]
     ring_nf
@@ -449,99 +470,110 @@ lemma energyEigenstate_inner_self (k : T.QuantaWaveNumber) :
 
 -/
 
-/-- The energy eigenstates of the tight binding chain are orthogonal.
+/--
+The energy eigenstates of the tight binding chain are orthogonal.
 
 This is a fundamental quantum mechanical result: eigenstates of a Hermitian operator
 (the Hamiltonian) with distinct eigenvalues are orthogonal. Here we prove it directly
 using the periodic boundary conditions which quantize the wavenumbers.
 
 The key physical insight is that different wavenumbers k₁ ≠ k₂ give rise to different
-N-th roots of unity exp(i(k₂-k₁)a), and the sum of all N-th roots of unity equals zero. -/
-lemma energyEigenstate_orthogonal :
-    Pairwise fun k1 k2 => ⟪T.energyEigenstate k1, T.energyEigenstate k2⟫_ℂ = 0 := by
+N-th roots of unity exp(i(k₂-k₁)a), and the sum of all N-th roots of unity equals zero.
+-/
+lemma energyEigenstate_orthogonal
+    : Pairwise fun k1 k2 => ⟪T.energyEigenstate k1, T.energyEigenstate k2⟫_ℂ = 0 := by
   intro k1 k2 hne
   set ω := Complex.exp (Complex.I * (k2 - k1) * T.a) with hω_def
   -- Each term of the overlap is a power of the `N`-th root of unity `ω`.
-  have hterm (n : ℕ) : (starRingEnd ℂ) (Complex.exp (Complex.I * k1 * n * T.a)) *
-      Complex.exp (Complex.I * k2 * n * T.a) = ω ^ n := by
+  have hterm (n : ℕ)
+      : (starRingEnd ℂ) (Complex.exp (Complex.I * k1 * n * T.a))
+          * Complex.exp (Complex.I * k2 * n * T.a)
+        = ω ^ n := by
     rw [← Complex.exp_conj, ← Complex.exp_add, hω_def, ← Complex.exp_nat_mul]
     simp only [map_mul, Complex.conj_I, Complex.conj_ofReal, Complex.conj_natCast]
     ring_nf
   have hω_pow : ω ^ T.N = 1 := by
-    rw [hω_def, ← Complex.exp_nat_mul, show (T.N : ℂ) * (Complex.I * (k2 - k1) * T.a) =
-      Complex.I * k2 * (1 : ℕ) * T.N * T.a - Complex.I * k1 * (1 : ℕ) * T.N * T.a by
+    rw [hω_def, ← Complex.exp_nat_mul,
+      show (T.N : ℂ) * (Complex.I * (k2 - k1) * T.a)
+          = Complex.I * k2 * (1 : ℕ) * T.N * T.a - Complex.I * k1 * (1 : ℕ) * T.N * T.a by
         push_cast; ring,
       Complex.exp_sub, T.quantaWaveNumber_exp_N 1 k2, T.quantaWaveNumber_exp_N 1 k1, div_one]
   -- Distinct quantized wavenumbers differ by a non-multiple of `2π / a`, so `ω ≠ 1`.
-  have hω_ne_one : ω ≠ 1 := fun hω_eq_one => hne <| by
-    obtain ⟨_, ⟨n1, rfl⟩⟩ := k1
-    obtain ⟨_, ⟨n2, rfl⟩⟩ := k2
-    obtain ⟨m, hm⟩ := Complex.exp_eq_one_iff.mp (hω_def ▸ hω_eq_one)
-    have ha : (T.a : ℂ) ≠ 0 := Complex.ne_zero_of_re_pos T.a_pos
-    have hN : (T.N : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (NeZero.ne T.N)
-    push_cast at hm
-    field_simp at hm
-    have hm_int : (T.N : ℤ) ∣ (n2 : ℤ) - n1 := ⟨m, by
-      have : (n2 : ℂ) - n1 = (T.N : ℂ) * m := by ring_nf at hm ⊢; exact hm
-      exact_mod_cast this⟩
-    have := Int.eq_zero_of_abs_lt_dvd hm_int
-      (abs_lt.mpr ⟨by have := n1.isLt; omega, by have := n2.isLt; omega⟩)
-    simp only [show n1.val = n2.val by omega]
+  have hω_ne_one : ω ≠ 1 := fun hω_eq_one =>
+    hne <| by
+      obtain ⟨_, ⟨n1, rfl⟩⟩ := k1
+      obtain ⟨_, ⟨n2, rfl⟩⟩ := k2
+      obtain ⟨m, hm⟩ := Complex.exp_eq_one_iff.mp (hω_def ▸ hω_eq_one)
+      have ha : (T.a : ℂ) ≠ 0 := Complex.ne_zero_of_re_pos T.a_pos
+      have hN : (T.N : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (NeZero.ne T.N)
+      push_cast at hm
+      field_simp at hm
+      have hm_int : (T.N : ℤ) ∣ (n2 : ℤ) - n1 := ⟨
+        m,
+        by
+          have : (n2 : ℂ) - n1 = (T.N : ℂ) * m := by ring_nf at hm ⊢; exact hm
+          exact_mod_cast this
+      ⟩
+      have :=
+        Int.eq_zero_of_abs_lt_dvd hm_int
+          (abs_lt.mpr ⟨by have := n1.isLt; omega, by have := n2.isLt; omega⟩)
+      simp only [show n1.val = n2.val by omega]
   -- The sum of all `N`-th roots of unity vanishes, since `ω ^ N = 1` and `ω ≠ 1`.
   simp only [energyEigenstate, sum_inner]
   simp_rw [inner_sum, inner_smul_left, inner_smul_right, localizedState_orthonormal_eq_ite]
-  simp only [mul_ite, mul_one, mul_zero, Finset.sum_ite_eq, Finset.mem_univ, ↓reduceIte, hterm]
+  simp only [mul_ite, mul_one, mul_zero, Finset.sum_ite_eq, Finset.mem_univ, ↓ reduceIte, hterm]
   rw [Fin.sum_univ_eq_sum_range (ω ^ ·), geom_sum_eq hω_ne_one, hω_pow, sub_self, zero_div]
 
 /-- The energy eigenstates are linearly independent. -/
-lemma energyEigenstate_linearIndependent :
-    LinearIndependent ℂ (fun n : Fin T.N => T.energyEigenstate (T.quantaWaveNumber n)) :=
+lemma energyEigenstate_linearIndependent
+    : LinearIndependent ℂ (fun n : Fin T.N => T.energyEigenstate (T.quantaWaveNumber n)) :=
   linearIndependent_of_ne_zero_of_inner_eq_zero
     (fun n => T.energyEigenstate_ne_zero (T.quantaWaveNumber n))
     (fun _ _ h => T.energyEigenstate_orthogonal (T.quantaWaveNumber_injective.ne h))
 
 /-- The energy eigenstates span the Hilbert space. -/
-lemma energyEigenstate_span :
-    ⊤ ≤ Submodule.span ℂ (Set.range fun n : Fin T.N =>
-      T.energyEigenstate (T.quantaWaveNumber n)) :=
-  le_of_eq (T.energyEigenstate_linearIndependent.span_eq_top_of_card_eq_finrank'
-    (by simp [T.finrank_hilbertSpace])).symm
+lemma energyEigenstate_span
+    : ⊤
+      ≤ Submodule.span ℂ (Set.range fun n : Fin T.N => T.energyEigenstate (T.quantaWaveNumber n)) :=
+  le_of_eq (T.energyEigenstate_linearIndependent.span_eq_top_of_card_eq_finrank' (by
+    simp [T.finrank_hilbertSpace])).symm
 
 /-- The normalized energy eigenstates `N ^ (-1/2) • energyEigenstate k` are orthonormal. -/
-lemma energyEigenstate_orthonormal :
-    Orthonormal ℂ (fun n : Fin T.N =>
+lemma energyEigenstate_orthonormal
+    : Orthonormal ℂ (fun n : Fin T.N =>
       (((Real.sqrt T.N)⁻¹ : ℝ) : ℂ) • T.energyEigenstate (T.quantaWaveNumber n)) := by
   rw [orthonormal_iff_ite]
   intro m n
   rw [inner_smul_left, inner_smul_right]
   by_cases h : m = n
   · subst h
-    simp only [↓reduceIte, energyEigenstate_inner_self]
+    simp only [↓ reduceIte, energyEigenstate_inner_self]
     have hN : (0 : ℝ) < T.N := Nat.cast_pos.2 (Nat.pos_of_ne_zero (NeZero.ne T.N))
     have hs : (Real.sqrt T.N : ℂ) ^ 2 = T.N := by
       rw [← Complex.ofReal_pow, Real.sq_sqrt hN.le, Complex.ofReal_natCast]
-    have hs0 : (Real.sqrt T.N : ℂ) ≠ 0 := by
-      exact_mod_cast (Real.sqrt_pos.2 hN).ne'
+    have hs0 : (Real.sqrt T.N : ℂ) ≠ 0 := by exact_mod_cast (Real.sqrt_pos.2 hN).ne'
     rw [Complex.conj_ofReal]
     simp only [Complex.ofReal_inv]
     rw [← hs]
     field_simp
-  · simp only [h, ↓reduceIte, T.energyEigenstate_orthogonal (T.quantaWaveNumber_injective.ne h)]
+  · simp only [h, ↓ reduceIte, T.energyEigenstate_orthogonal (T.quantaWaveNumber_injective.ne h)]
     simp
 
 /-- The normalized energy eigenstates form an orthonormal basis of the Hilbert space. -/
 noncomputable def energyEigenbasis : OrthonormalBasis (Fin T.N) ℂ T.HilbertSpace :=
   OrthonormalBasis.mk T.energyEigenstate_orthonormal <| by
-    rw [← Set.smul_set_range, Submodule.span_smul_eq_of_isUnit _ _
-      (Ne.isUnit (by simp [NeZero.ne T.N]))]
+    rw [← Set.smul_set_range,
+      Submodule.span_smul_eq_of_isUnit _ _ (Ne.isUnit (by simp [NeZero.ne T.N]))]
     exact T.energyEigenstate_span
 
-/-- The `n`-th vector of the basis is the normalized energy eigenstate of the `n`-th
-wavenumber. -/
+/--
+The `n`-th vector of the basis is the normalized energy eigenstate of the `n`-th
+wavenumber.
+-/
 @[simp]
-lemma energyEigenbasis_apply (n : Fin T.N) :
-    T.energyEigenbasis n =
-      (((Real.sqrt T.N)⁻¹ : ℝ) : ℂ) • T.energyEigenstate (T.quantaWaveNumber n) := by
+lemma energyEigenbasis_apply (n : Fin T.N)
+    : T.energyEigenbasis n
+      = (((Real.sqrt T.N)⁻¹ : ℝ) : ℂ) • T.energyEigenstate (T.quantaWaveNumber n) := by
   simp [energyEigenbasis]
 
 /-!
@@ -550,8 +582,10 @@ lemma energyEigenbasis_apply (n : Fin T.N) :
 
 -/
 
-/-- The energy eigenvalue of the tight binding chain for a `k` in `QuantaWaveNumber` is
-  `E0 - 2 * t * Real.cos (k * T.a)`. -/
+/--
+The energy eigenvalue of the tight binding chain for a `k` in `QuantaWaveNumber` is
+`E0 - 2 * t * Real.cos (k * T.a)`.
+-/
 noncomputable def energyEigenvalue (k : T.QuantaWaveNumber) : ℝ :=
   T.E0 - 2 * T.t * Real.cos (k * T.a)
 
@@ -562,46 +596,50 @@ noncomputable def energyEigenvalue (k : T.QuantaWaveNumber) : ℝ :=
 -/
 
 /-- The energy eigenstates satisfy the time-independent Schrodinger equation. -/
-lemma hamiltonian_energyEigenstate (k : T.QuantaWaveNumber) :
-    T.hamiltonian (T.energyEigenstate k) = T.energyEigenvalue k• T.energyEigenstate k := by
+lemma hamiltonian_energyEigenstate (k : T.QuantaWaveNumber)
+    : T.hamiltonian (T.energyEigenstate k) = T.energyEigenvalue k • T.energyEigenstate k := by
   trans (T.energyEigenvalue k : ℂ) • T.energyEigenstate k
   swap
   · rfl
   rw [energyEigenstate]
-  have hp1 : (∑ n : Fin T.N, Complex.exp (Complex.I * k * n * T.a) • |n + 1⟩)
-    = ∑ n : Fin T.N, Complex.exp (Complex.I * k * (n - 1).val * T.a) • |n⟩ := by
+  have hp1
+      : (∑ n : Fin T.N, Complex.exp (Complex.I * k * n * T.a) • |n + 1⟩)
+        = ∑ n : Fin T.N, Complex.exp (Complex.I * k * (n - 1).val * T.a) • |n⟩ := by
     conv_rhs => rw [← Equiv.sum_comp (Equiv.addRight (1 : Fin T.N))]
     simp [Equiv.coe_addRight, add_sub_cancel_right]
-  have hm1 : (∑ n : Fin T.N, Complex.exp (Complex.I * k * n * T.a) • |n - 1⟩)
-    = ∑ n : Fin T.N, Complex.exp (Complex.I * k * (n + 1).val * T.a) • |n⟩ := by
+  have hm1
+      : (∑ n : Fin T.N, Complex.exp (Complex.I * k * n * T.a) • |n - 1⟩)
+        = ∑ n : Fin T.N, Complex.exp (Complex.I * k * (n + 1).val * T.a) • |n⟩ := by
     conv_rhs => rw [← Equiv.sum_comp (Equiv.subRight (1 : Fin T.N))]
     simp [Equiv.subRight_apply, sub_add_cancel]
   calc
-      _ = ∑ n : Fin T.N, Complex.exp (Complex.I * k * n * T.a) • T.hamiltonian |n⟩ := by simp
-      _ = ∑ n : Fin T.N, Complex.exp (Complex.I * k * n * T.a) • (T.E0 • |n⟩
-          - T.t • (|n + 1⟩ + |n - 1⟩)) := by
-          simp [hamiltonian_apply_localizedState, Complex.coe_smul, smul_add]
-      _ = T.E0 • (∑ n : Fin T.N, Complex.exp (Complex.I * k * n * T.a) • |n⟩)
-        - T.t • ((∑ n : Fin T.N, Complex.exp (Complex.I * k * n * T.a) • |n + 1⟩) +
-          (∑ n : Fin T.N, Complex.exp (Complex.I * k * n * T.a) • |n - 1⟩)) := by
-        simp only [smul_add, Finset.smul_sum, ← Finset.sum_add_distrib, ← Finset.sum_sub_distrib]
-        refine Finset.sum_congr rfl fun n _ => ?_
-        module
-      _ = T.E0 • (∑ n : Fin T.N, Complex.exp (Complex.I * k * n * T.a) • |n⟩)
-        - T.t • ((∑ n : Fin T.N, Complex.exp (Complex.I * k * (n - 1).val * T.a) • |n⟩) +
-          (∑ n : Fin T.N, Complex.exp (Complex.I * k * (n + 1).val * T.a) • |n⟩)) := by
-          rw [hp1, hm1]
-      _ = ∑ n : Fin T.N, (T.E0 * Complex.exp (Complex.I * k * n * T.a) - T.t *
-          (Complex.exp (Complex.I * k * (n - 1).val * T.a) +
-          Complex.exp (Complex.I * k * (n + 1).val * T.a))) • |n⟩ := by
-        simp [Finset.smul_sum, ← Finset.sum_add_distrib,
-          ← add_smul, sub_smul, ← smul_smul, Finset.sum_sub_distrib]
+    _ = ∑ n : Fin T.N, Complex.exp (Complex.I * k * n * T.a) • T.hamiltonian |n⟩ := by simp
+    _ = ∑ n : Fin T.N, Complex.exp (Complex.I * k * n * T.a) • (T.E0 • |n⟩
+        - T.t • (|n + 1⟩ + |n - 1⟩)) := by
+      simp [hamiltonian_apply_localizedState, Complex.coe_smul, smul_add]
+    _ = T.E0 • (∑ n : Fin T.N, Complex.exp (Complex.I * k * n * T.a) • |n⟩)
+        - T.t
+          • ((∑ n : Fin T.N, Complex.exp (Complex.I * k * n * T.a) • |n + 1⟩)
+            + (∑ n : Fin T.N, Complex.exp (Complex.I * k * n * T.a) • |n - 1⟩)) := by
+      simp only [smul_add, Finset.smul_sum, ← Finset.sum_add_distrib, ← Finset.sum_sub_distrib]
+      refine Finset.sum_congr rfl fun n _ => ?_
+      module
+    _ = T.E0 • (∑ n : Fin T.N, Complex.exp (Complex.I * k * n * T.a) • |n⟩)
+        - T.t
+          • ((∑ n : Fin T.N, Complex.exp (Complex.I * k * (n - 1).val * T.a) • |n⟩)
+            + (∑ n : Fin T.N, Complex.exp (Complex.I * k * (n + 1).val * T.a) • |n⟩)) := by
+      rw [hp1, hm1]
+    _ = ∑ n : Fin T.N, (T.E0 * Complex.exp (Complex.I * k * n * T.a) - T.t *
+        (Complex.exp (Complex.I * k * (n - 1).val * T.a) +
+        Complex.exp (Complex.I * k * (n + 1).val * T.a))) • |n⟩ := by
+      simp [Finset.smul_sum, ← Finset.sum_add_distrib, ← add_smul, sub_smul, ← smul_smul,
+        Finset.sum_sub_distrib]
   rw [Finset.smul_sum]
   refine Finset.sum_congr rfl fun n _ => ?_
   rw [smul_smul]
   simp only [quantaWaveNumber_exp_sub_one, quantaWaveNumber_exp_add_one, energyEigenvalue,
     Complex.ofReal_sub, Complex.ofReal_mul, Complex.ofReal_ofNat, Complex.ofReal_cos,
-      Complex.cos.eq_1]
+    Complex.cos.eq_1]
   ring_nf
 
 /-!
@@ -610,14 +648,21 @@ lemma hamiltonian_energyEigenstate (k : T.QuantaWaveNumber) :
 
 -/
 
-/-- The eigenvalues of the Hamiltonian are exactly the energies `E0 - 2 t cos (k a)` of the
-quantized wavenumbers. -/
-lemma hasEigenvalue_hamiltonian_iff (E : ℂ) :
-    Module.End.HasEigenvalue T.hamiltonian E ↔
-      ∃ k : T.QuantaWaveNumber, E = T.energyEigenvalue k := by
-  refine ⟨fun h => ?_, fun ⟨k, hk⟩ => hk ▸ Module.End.hasEigenvalue_of_hasEigenvector
-    ⟨Module.End.mem_eigenspace_iff.2 (T.hamiltonian_energyEigenstate k),
-      T.energyEigenstate_ne_zero k⟩⟩
+/--
+The eigenvalues of the Hamiltonian are exactly the energies `E0 - 2 t cos (k a)` of the
+quantized wavenumbers.
+-/
+lemma hasEigenvalue_hamiltonian_iff (E : ℂ)
+    : Module.End.HasEigenvalue T.hamiltonian E
+      ↔ ∃ k : T.QuantaWaveNumber, E = T.energyEigenvalue k := by
+  refine ⟨
+    fun h => ?_,
+    fun ⟨k, hk⟩ =>
+      hk ▸ Module.End.hasEigenvalue_of_hasEigenvector ⟨
+        Module.End.mem_eigenspace_iff.2 (T.hamiltonian_energyEigenstate k),
+        T.energyEigenstate_ne_zero k
+      ⟩
+  ⟩
   obtain ⟨ψ, hψ, hψ0⟩ := h.exists_hasEigenvector
   rw [Module.End.mem_eigenspace_iff] at hψ
   obtain ⟨n, hn⟩ : ∃ n, ⟪T.energyEigenstate (T.quantaWaveNumber n), ψ⟫_ℂ ≠ 0 := by

@@ -62,15 +62,17 @@ variable {U : ℝ → H →L[ℂ] H} (hUmul : ∀ s t, U (s + t) = U s * U t)
 -/
 
 variable (U) in
-/-- The Gårding vector of `ψ` against a generic (real-valued) kernel `k`, generalizing
-`analyticGardingVector U ε ψ = gardingVectorAt U (gaussianKernel ε) ψ`. -/
+/--
+The Gårding vector of `ψ` against a generic (real-valued) kernel `k`, generalizing
+`analyticGardingVector U ε ψ = gardingVectorAt U (gaussianKernel ε) ψ`.
+-/
 def gardingVectorAt (k : ℝ → ℝ) (ψ : H) : H := ∫ t : ℝ, (k t : ℂ) • U t ψ
 
 include hUmul in
 /-- Translating a Gårding vector by `U s` translates the kernel by `s`. -/
-lemma gardingVectorAt_translate (k : ℝ → ℝ) (ψ : H)
-    (hk_integrable : Integrable (fun t : ℝ => (k t : ℂ) • U t ψ)) (s : ℝ) :
-    U s (gardingVectorAt U k ψ) = ∫ u : ℝ, (k (u - s) : ℂ) • U u ψ := by
+lemma gardingVectorAt_translate
+    (k : ℝ → ℝ) (ψ : H) (hk_integrable : Integrable (fun t : ℝ => (k t : ℂ) • U t ψ)) (s : ℝ)
+    : U s (gardingVectorAt U k ψ) = ∫ u : ℝ, (k (u - s) : ℂ) • U u ψ := by
   unfold gardingVectorAt
   rw [← ContinuousLinearMap.integral_comp_comm (U s) hk_integrable]
   have hpt : ∀ t : ℝ, U s ((k t : ℂ) • U t ψ) = (k t : ℂ) • U (t + s) ψ := by
@@ -89,23 +91,31 @@ lemma gardingVectorAt_translate (k : ℝ → ℝ) (ψ : H)
 -/
 
 include hUmul in
-/-- If `k` is differentiable with a locally dominated continuous derivative `k'`, the orbit of the
-Gårding vector of `k` is differentiable at `0`, with derivative the Gårding vector of `-k'`. -/
-lemma gardingVectorAt_hasDerivAt (hUunit : ∀ t, U t ∈ unitary (H →L[ℂ] H))
-    (hUcont : ∀ ξ : H, Continuous (fun t : ℝ => U t ξ)) (k k' : ℝ → ℝ)
+/--
+If `k` is differentiable with a locally dominated continuous derivative `k'`, the orbit of the
+Gårding vector of `k` is differentiable at `0`, with derivative the Gårding vector of `-k'`.
+-/
+lemma gardingVectorAt_hasDerivAt
+    (hUunit : ∀ t, U t ∈ unitary (H →L[ℂ] H)) (hUcont : ∀ ξ : H, Continuous (fun t : ℝ => U t ξ))
+    (k k' : ℝ → ℝ)
     (hk_cont : Continuous k) (hk'_cont : Continuous k') (hk_deriv : ∀ t, HasDerivAt k (k' t) t)
     (ψ : H) (hk_integrable : Integrable (fun t : ℝ => (k t : ℂ) • U t ψ))
     (bound : ℝ → ℝ) (hbound_int : Integrable bound)
-    (hbound : ∀ u : ℝ, ∀ x ∈ Metric.ball (0 : ℝ) 1, |k' (u - x)| * ‖ψ‖ ≤ bound u) :
-    HasDerivAt (fun s : ℝ => U s (gardingVectorAt U k ψ))
+    (hbound : ∀ u : ℝ, ∀ x ∈ Metric.ball (0 : ℝ) 1, |k' (u - x)| * ‖ψ‖ ≤ bound u)
+    : HasDerivAt
+      (fun s : ℝ => U s (gardingVectorAt U k ψ))
       (∫ u : ℝ, ((-(k' u) : ℝ) : ℂ) • U u ψ) 0 := by
   -- The orbit function, rewritten via the translation identity.
-  have horbit : (fun s : ℝ => U s (gardingVectorAt U k ψ)) =
-      fun s : ℝ => ∫ u : ℝ, (k (u - s) : ℂ) • U u ψ :=
+  have horbit
+      : (fun s : ℝ => U s (gardingVectorAt U k ψ))
+        = fun s : ℝ => ∫ u : ℝ, (k (u - s) : ℂ) • U u ψ :=
     funext (gardingVectorAt_translate hUmul k ψ hk_integrable)
   -- Per-point derivative in `s`, for every `u`, at every `s`.
-  have hpt_deriv : ∀ u s : ℝ, HasDerivAt (fun s : ℝ => (k (u - s) : ℂ) • U u ψ)
-      (((-(k' (u - s)) : ℝ) : ℂ) • U u ψ) s := by
+  have hpt_deriv
+      : ∀ u s : ℝ,
+        HasDerivAt
+          (fun s : ℝ => (k (u - s) : ℂ) • U u ψ)
+          (((-(k' (u - s)) : ℝ) : ℂ) • U u ψ) s := by
     intro u s
     have hf1 := hk_deriv (u - s)
     have hcomp : HasDerivAt (fun s : ℝ => u - s) (-1 : ℝ) s := (hasDerivAt_id s).const_sub u
@@ -113,7 +123,8 @@ lemma gardingVectorAt_hasDerivAt (hUunit : ∀ t, U t ∈ unitary (H →L[ℂ] H
     have hgcs := hg.ofReal_comp.smul_const (U u ψ)
     have heq : ((-(k' (u - s)) : ℝ) : ℂ) • U u ψ = ((k' (u - s) * (-1) : ℝ) : ℂ) • U u ψ := by
       congr 1; push_cast; ring
-    rw [heq]; exact hgcs
+    rw [heq]
+    exact hgcs
   -- Continuity facts feeding measurability.
   have hFmeas : ∀ s : ℝ, Continuous (fun u : ℝ => (k (u - s) : ℂ) • U u ψ) := by
     intro s
@@ -123,20 +134,18 @@ lemma gardingVectorAt_hasDerivAt (hUunit : ∀ t, U t ∈ unitary (H →L[ℂ] H
     have h1 : Continuous (fun u : ℝ => ((-(k' u) : ℝ) : ℂ)) := by fun_prop
     exact h1.smul (hUcont ψ)
   -- Assemble via the dominated-derivative theorem.
-  obtain ⟨-, hderiv⟩ := hasDerivAt_integral_of_dominated_loc_of_deriv_le
-    (F := fun s u : ℝ => (k (u - s) : ℂ) • U u ψ)
-    (F' := fun s u : ℝ => ((-(k' (u - s)) : ℝ) : ℂ) • U u ψ)
-    (x₀ := (0 : ℝ)) (bound := bound)
-    (Metric.ball_mem_nhds 0 one_pos)
-    (Filter.Eventually.of_forall (fun s => (hFmeas s).aestronglyMeasurable))
-    (by simpa using hk_integrable)
-    (by simpa using hF'meas.aestronglyMeasurable)
-    (ae_of_all _ (fun u => fun x hx => by
-      rw [norm_smul, Complex.norm_real, Real.norm_eq_abs, abs_neg,
-        ContinuousLinearMap.norm_map_of_mem_unitary (hUunit u)]
-      exact hbound u x hx))
-    hbound_int
-    (ae_of_all _ (fun u => fun x _ => hpt_deriv u x))
+  obtain ⟨-, hderiv⟩ :=
+    hasDerivAt_integral_of_dominated_loc_of_deriv_le
+      (F := fun s u : ℝ => (k (u - s) : ℂ) • U u ψ)
+      (F' := fun s u : ℝ => ((-(k' (u - s)) : ℝ) : ℂ) • U u ψ)
+      (x₀ := (0 : ℝ)) (bound := bound) (Metric.ball_mem_nhds 0 one_pos)
+      (Filter.Eventually.of_forall (fun s => (hFmeas s).aestronglyMeasurable))
+      (by simpa using hk_integrable) (by simpa using hF'meas.aestronglyMeasurable)
+      (ae_of_all _ (fun u => fun x hx => by
+        rw [norm_smul, Complex.norm_real, Real.norm_eq_abs, abs_neg,
+          ContinuousLinearMap.norm_map_of_mem_unitary (hUunit u)]
+        exact hbound u x hx))
+      hbound_int (ae_of_all _ (fun u => fun x _ => hpt_deriv u x))
   rw [← horbit] at hderiv
   simpa only [sub_zero] using hderiv
 

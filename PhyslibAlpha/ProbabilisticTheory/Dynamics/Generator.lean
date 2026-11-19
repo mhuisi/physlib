@@ -43,16 +43,20 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 
 /-! ## A. The generator -/
 
-/-- `D` is the infinitesimal generator, at `t = 0`, of the one-parameter family `α`: for every `a`,
+/--
+`D` is the infinitesimal generator, at `t = 0`, of the one-parameter family `α`: for every `a`,
 `t ↦ α t a` is differentiable at `0` with derivative `D a`. No algebraic structure on `E` (product,
-order, `⋆`) is assumed — this is purely about the curve `t ↦ α t a` in a normed space. -/
-def IsGenerator (α : ℝ → E → E) (D : E → E) : Prop :=
-  ∀ a : E, HasDerivAt (fun t => α t a) (D a) 0
+order, `⋆`) is assumed — this is purely about the curve `t ↦ α t a` in a normed space.
+-/
+def IsGenerator (α : ℝ → E → E) (D : E → E) : Prop := ∀ a : E, HasDerivAt (fun t => α t a) (D a) 0
 
-/-- The generator of a one-parameter family, if it exists, is unique — immediate from uniqueness of
-derivatives (`HasDerivAt.unique`). -/
-lemma IsGenerator.unique {α : ℝ → E → E} {D₁ D₂ : E → E} (h₁ : IsGenerator α D₁)
-    (h₂ : IsGenerator α D₂) : D₁ = D₂ :=
+/--
+The generator of a one-parameter family, if it exists, is unique — immediate from uniqueness of
+derivatives (`HasDerivAt.unique`).
+-/
+lemma IsGenerator.unique
+    {α : ℝ → E → E} {D₁ D₂ : E → E} (h₁ : IsGenerator α D₁) (h₂ : IsGenerator α D₂)
+    : D₁ = D₂ :=
   funext fun a => (h₁ a).unique (h₂ a)
 
 end ProbabilisticTheory

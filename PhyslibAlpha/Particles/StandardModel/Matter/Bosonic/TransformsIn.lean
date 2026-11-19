@@ -62,8 +62,11 @@ namespace BosonicAlgebra
 
 open Matrix MatrixGroups TensorProduct
 
-variable {G₀ : Type} [Group G₀] {𝔤 : Type} [LieRing 𝔤] [LieAlgebra ℝ 𝔤]
-  {GJ : Type} [Group GJ] {𝔤J : Type} [LieRing 𝔤J] [LieAlgebra ℝ 𝔤J]
+variable
+  {G₀ : Type} [Group G₀]
+  {𝔤 : Type} [LieRing 𝔤] [LieAlgebra ℝ 𝔤]
+  {GJ : Type} [Group GJ]
+  {𝔤J : Type} [LieRing 𝔤J] [LieAlgebra ℝ 𝔤J]
   {jets : LocalGaugeData G₀ 𝔤 GJ 𝔤J} {M : MatterField jets}
 
 /-!
@@ -72,29 +75,35 @@ variable {G₀ : Type} [Group G₀] {𝔤 : Type} [LieRing 𝔤] [LieAlgebra ℝ
 
 -/
 
-/-- A multiset sum in the unconjugated half of the component space passes through the
-  inclusion of the generators. -/
-private lemma sum_inl (m : Multiset (SpaceTimeDerivAlgebraℂ ⊗[ℂ] Module.Dual ℂ M.V)) :
-    SymmetricAlgebra.ι ℂ _ ((m.sum, 0) : JetComponentSpace M)
-      = (m.map fun a =>
-          SymmetricAlgebra.ι ℂ _ ((a, 0) : JetComponentSpace M)).sum := by
+/--
+A multiset sum in the unconjugated half of the component space passes through the
+inclusion of the generators.
+-/
+private lemma sum_inl (m : Multiset (SpaceTimeDerivAlgebraℂ ⊗[ℂ] Module.Dual ℂ M.V))
+    : SymmetricAlgebra.ι ℂ _ ((m.sum, 0) : JetComponentSpace M)
+      = (m.map fun a => SymmetricAlgebra.ι ℂ _ ((a, 0) : JetComponentSpace M)).sum := by
   rw [show SymmetricAlgebra.ι ℂ (JetComponentSpace M) ((m.sum, 0) : JetComponentSpace M)
-      = ((SymmetricAlgebra.ι ℂ (JetComponentSpace M)).comp
-          (LinearMap.inl ℂ (SpaceTimeDerivAlgebraℂ ⊗[ℂ] Module.Dual ℂ M.V)
-            (SpaceTimeDerivAlgebraℂ ⊗[ℂ] Module.Dual ℂ (ConjModule M.V)))) m.sum from rfl,
+        = ((SymmetricAlgebra.ι ℂ (JetComponentSpace M)).comp
+            (LinearMap.inl ℂ (SpaceTimeDerivAlgebraℂ ⊗[ℂ] Module.Dual ℂ M.V)
+              (SpaceTimeDerivAlgebraℂ ⊗[ℂ] Module.Dual ℂ (ConjModule M.V))))
+          m.sum from
+      rfl,
     map_multiset_sum]
   rfl
 
-/-- A multiset sum in the conjugate half of the component space passes through the
-  inclusion of the generators. -/
-private lemma sum_inr (m : Multiset (SpaceTimeDerivAlgebraℂ ⊗[ℂ] Module.Dual ℂ (ConjModule M.V))) :
-    SymmetricAlgebra.ι ℂ _ ((0, m.sum) : JetComponentSpace M)
-      = (m.map fun a =>
-          SymmetricAlgebra.ι ℂ _ ((0, a) : JetComponentSpace M)).sum := by
+/--
+A multiset sum in the conjugate half of the component space passes through the
+inclusion of the generators.
+-/
+private lemma sum_inr (m : Multiset (SpaceTimeDerivAlgebraℂ ⊗[ℂ] Module.Dual ℂ (ConjModule M.V)))
+    : SymmetricAlgebra.ι ℂ _ ((0, m.sum) : JetComponentSpace M)
+      = (m.map fun a => SymmetricAlgebra.ι ℂ _ ((0, a) : JetComponentSpace M)).sum := by
   rw [show SymmetricAlgebra.ι ℂ (JetComponentSpace M) ((0, m.sum) : JetComponentSpace M)
-      = ((SymmetricAlgebra.ι ℂ (JetComponentSpace M)).comp
-          (LinearMap.inr ℂ (SpaceTimeDerivAlgebraℂ ⊗[ℂ] Module.Dual ℂ M.V)
-            (SpaceTimeDerivAlgebraℂ ⊗[ℂ] Module.Dual ℂ (ConjModule M.V)))) m.sum from rfl,
+        = ((SymmetricAlgebra.ι ℂ (JetComponentSpace M)).comp
+            (LinearMap.inr ℂ (SpaceTimeDerivAlgebraℂ ⊗[ℂ] Module.Dual ℂ M.V)
+              (SpaceTimeDerivAlgebraℂ ⊗[ℂ] Module.Dual ℂ (ConjModule M.V))))
+          m.sum from
+      rfl,
     map_multiset_sum]
   rfl
 
@@ -104,29 +113,34 @@ private lemma sum_inr (m : Multiset (SpaceTimeDerivAlgebraℂ ⊗[ℂ] Module.Du
 
 -/
 
-
 /-!
 
 ### B.1. The field
 
 -/
 
-/-- The transformation law of the derivative generators of a matter field: a jet of gauge
-  transformations mixes `∂_s ψ_φ` with the lower generators, each splitting `s = s₁ + s₂` of
-  the derivative multiset contributing the base-point Taylor coefficient of the gauge jet at
-  `s₁` acting on the target index of `∂_{s₂} ψ_φ`. There is no inhomogeneous term: unlike a
-  gauge field, a matter field transforms linearly. -/
+/--
+The transformation law of the derivative generators of a matter field: a jet of gauge
+transformations mixes `∂_s ψ_φ` with the lower generators, each splitting `s = s₁ + s₂` of
+the derivative multiset contributing the base-point Taylor coefficient of the gauge jet at
+`s₁` acting on the target index of `∂_{s₂} ψ_φ`. There is no inhomogeneous term: unlike a
+gauge field, a matter field transforms linearly.
+-/
 lemma repJetGaugeGroupI_iteratedJetDeriv_ofField
-    (U : GJ) (φ : Module.Dual ℂ M.V) (s : Multiset (Fin 1 ⊕ Fin 3)) :
-    repJetGaugeGroupI M U (iteratedJetDeriv s (ofField φ)) =
-      (s.antidiagonal.map fun p =>
+    (U : GJ) (φ : Module.Dual ℂ M.V) (s : Multiset (Fin 1 ⊕ Fin 3))
+    : repJetGaugeGroupI M U (iteratedJetDeriv s (ofField φ))
+      = (s.antidiagonal.map fun p =>
         iteratedJetDeriv p.2
           (ofField (GaugeAlgebraRealization.repDualCoeff M.repJet U⁻¹ p.1 φ))).sum := by
   rw [iteratedJetDeriv_ofField, repJetGaugeGroupI_ι,
     show JetComponentSpace.repJet M U
-        ((SpaceTimeDerivAlgebraℂ.basis s ⊗ₜ[ℂ] φ, 0) : JetComponentSpace M)
-      = (JetComponentSpace.repDual M.repJet M.repJet_smul U (SpaceTimeDerivAlgebraℂ.basis s ⊗ₜ[ℂ]
-        φ), 0) from by
+          ((SpaceTimeDerivAlgebraℂ.basis s ⊗ₜ[ℂ] φ, 0) : JetComponentSpace M)
+        = (
+          JetComponentSpace.repDual M.repJet M.repJet_smul U
+            (SpaceTimeDerivAlgebraℂ.basis s ⊗ₜ[ℂ]
+              φ),
+          0
+        ) from by
       refine Prod.ext rfl ?_
       rw [JetComponentSpace.repJet_snd]
       exact map_zero _,
@@ -134,12 +148,14 @@ lemma repJetGaugeGroupI_iteratedJetDeriv_ofField
   refine congrArg Multiset.sum (Multiset.map_congr rfl fun p _ => ?_)
   rw [Function.comp_apply, iteratedJetDeriv_ofField]
 
-/-- The derivative generators of a matter field transform in the representation `rep`
-  carried by its jets, in the sense demanded by `LocalGaugeData.TransformsIn`. -/
-lemma transformsIn_iteratedJetDeriv_ofField :
-    LocalGaugeData.TransformsIn (repJetGaugeGroupI M) M.repJet
-      fun s => (iteratedJetDeriv s).comp (ofField (M := M)) :=
-  fun U φ s => repJetGaugeGroupI_iteratedJetDeriv_ofField (M := M) U φ s
+/--
+The derivative generators of a matter field transform in the representation `rep`
+carried by its jets, in the sense demanded by `LocalGaugeData.TransformsIn`.
+-/
+lemma transformsIn_iteratedJetDeriv_ofField
+    : LocalGaugeData.TransformsIn (repJetGaugeGroupI M) M.repJet fun s =>
+      (iteratedJetDeriv s).comp (ofField (M := M)) := fun U φ s =>
+  repJetGaugeGroupI_iteratedJetDeriv_ofField (M := M) U φ s
 
 /-!
 
@@ -147,25 +163,28 @@ lemma transformsIn_iteratedJetDeriv_ofField :
 
 -/
 
-/-- The transformation law of the derivative generators of the conjugate matter field. It
-  is the law of the field itself for the conjugate action `JetComponentSpace.repConj M.repJet` on
-  the jets of the
-  conjugate field — the physicists' `ψ̄ ↦ ψ̄ U†` and its derivatives. -/
+/--
+The transformation law of the derivative generators of the conjugate matter field. It
+is the law of the field itself for the conjugate action `JetComponentSpace.repConj M.repJet` on
+the jets of the
+conjugate field — the physicists' `ψ̄ ↦ ψ̄ U†` and its derivatives.
+-/
 lemma repJetGaugeGroupI_iteratedJetDeriv_ofConjField
-    (U : GJ) (φ : Module.Dual ℂ (ConjModule M.V))
-    (s : Multiset (Fin 1 ⊕ Fin 3)) :
-    repJetGaugeGroupI M U (iteratedJetDeriv s (ofConjField φ)) =
-      (s.antidiagonal.map fun p =>
+    (U : GJ) (φ : Module.Dual ℂ (ConjModule M.V)) (s : Multiset (Fin 1 ⊕ Fin 3))
+    : repJetGaugeGroupI M U (iteratedJetDeriv s (ofConjField φ))
+      = (s.antidiagonal.map fun p =>
         iteratedJetDeriv p.2
-          (ofConjField
-            (GaugeAlgebraRealization.repDualCoeff (JetComponentSpace.repConj M.repJet) U⁻¹ p.1
-              φ))).sum := by
+          (ofConjField (GaugeAlgebraRealization.repDualCoeff (JetComponentSpace.repConj M.repJet)
+            U⁻¹ p.1 φ))).sum := by
   rw [iteratedJetDeriv_ofConjField, repJetGaugeGroupI_ι,
     show JetComponentSpace.repJet M U
-        ((0, SpaceTimeDerivAlgebraℂ.basis s ⊗ₜ[ℂ] φ) : JetComponentSpace M)
-      = (0, JetComponentSpace.repDual (JetComponentSpace.repConj M.repJet)
-          (JetComponentSpace.repConj_smul_comm M.repJet_smul) U
-          (SpaceTimeDerivAlgebraℂ.basis s ⊗ₜ[ℂ] φ)) from by
+          ((0, SpaceTimeDerivAlgebraℂ.basis s ⊗ₜ[ℂ] φ) : JetComponentSpace M)
+        = (
+          0,
+          JetComponentSpace.repDual (JetComponentSpace.repConj M.repJet)
+            (JetComponentSpace.repConj_smul_comm M.repJet_smul) U
+            (SpaceTimeDerivAlgebraℂ.basis s ⊗ₜ[ℂ] φ)
+        ) from by
       refine Prod.ext ?_ rfl
       rw [JetComponentSpace.repJet_fst]
       exact map_zero _,
@@ -173,13 +192,15 @@ lemma repJetGaugeGroupI_iteratedJetDeriv_ofConjField
   refine congrArg Multiset.sum (Multiset.map_congr rfl fun p _ => ?_)
   rw [Function.comp_apply, iteratedJetDeriv_ofConjField]
 
-/-- The derivative generators of the conjugate matter field transform in the conjugate
-  representation `JetComponentSpace.repConj M.repJet`, in the sense demanded by
-  `LocalGaugeData.TransformsIn`. -/
-lemma transformsIn_iteratedJetDeriv_ofConjField :
-    LocalGaugeData.TransformsIn (repJetGaugeGroupI M) (JetComponentSpace.repConj M.repJet)
-      fun s => (iteratedJetDeriv s).comp (ofConjField (M := M)) :=
-  fun U φ s => repJetGaugeGroupI_iteratedJetDeriv_ofConjField (M := M) U φ s
+/--
+The derivative generators of the conjugate matter field transform in the conjugate
+representation `JetComponentSpace.repConj M.repJet`, in the sense demanded by
+`LocalGaugeData.TransformsIn`.
+-/
+lemma transformsIn_iteratedJetDeriv_ofConjField
+    : LocalGaugeData.TransformsIn (repJetGaugeGroupI M) (JetComponentSpace.repConj M.repJet)
+      fun s => (iteratedJetDeriv s).comp (ofConjField (M := M)) := fun U φ s =>
+  repJetGaugeGroupI_iteratedJetDeriv_ofConjField (M := M) U φ s
 
 end BosonicAlgebra
 

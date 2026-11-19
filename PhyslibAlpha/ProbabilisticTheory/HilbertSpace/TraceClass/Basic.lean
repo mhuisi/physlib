@@ -71,9 +71,11 @@ variable {H : Type*} [NormedAddCommGroup H] [InnerProductSpace ℂ H] [CompleteS
 
 /-! ## A. Trace class -/
 
-/-- **`T` is trace class**: `∑ᵢ ⟪eᵢ, |T| eᵢ⟫` converges for some Hilbert basis `{eᵢ}` of `H`
+/--
+**`T` is trace class**: `∑ᵢ ⟪eᵢ, |T| eᵢ⟫` converges for some Hilbert basis `{eᵢ}` of `H`
 (`|T| := CFC.abs T`, Mathlib's continuous functional calculus absolute value `√(T⋆T)`). By the
-basis-independence theorem below, "some" is equivalent to "every". -/
+basis-independence theorem below, "some" is equivalent to "every".
+-/
 def IsTraceClass (T : H →L[ℂ] H) : Prop :=
   ∃ (w : Set H) (b : HilbertBasis w ℂ H), Summable (fun i => (⟪b i, CFC.abs T (b i)⟫_ℂ).re)
 
@@ -84,30 +86,30 @@ bases. -/
 
 omit [CompleteSpace H] in
 /-- **Parseval's identity**: `∑ᵢ |⟪eᵢ, y⟫|² = ‖y‖²` for a Hilbert basis `{eᵢ}`. -/
-lemma hasSum_norm_sq_inner_basis {w : Set H} (b : HilbertBasis w ℂ H) (y : H) :
-    HasSum (fun i : w => ‖⟪b i, y⟫_ℂ‖ ^ 2) (‖y‖ ^ 2) := by
+lemma hasSum_norm_sq_inner_basis {w : Set H} (b : HilbertBasis w ℂ H) (y : H)
+    : HasSum (fun i : w => ‖⟪b i, y⟫_ℂ‖ ^ 2) (‖y‖ ^ 2) := by
   have h := b.hasSum_inner_mul_inner y y
   have hpt : ∀ i : w, ⟪y, b i⟫_ℂ * ⟪b i, y⟫_ℂ = ((‖⟪b i, y⟫_ℂ‖ ^ 2 : ℝ) : ℂ) := fun i => by
     rw [← inner_conj_symm y (b i), RCLike.conj_mul]
     norm_cast
-  have hval : ⟪y, y⟫_ℂ = ((‖y‖ ^ 2 : ℝ) : ℂ) := by
-    rw [inner_self_eq_norm_sq_to_K]; norm_cast
+  have hval : ⟪y, y⟫_ℂ = ((‖y‖ ^ 2 : ℝ) : ℂ) := by rw [inner_self_eq_norm_sq_to_K]; norm_cast
   simp_rw [hpt] at h
   rw [hval] at h
   exact Complex.hasSum_ofReal.mp h
 
 /-- For self-adjoint `S`, the sum `∑ᵢ ‖S eᵢ‖²` does not depend on the Hilbert basis. -/
-lemma hasSum_norm_sq_apply_of_selfAdjoint {S : H →L[ℂ] H} (hS : IsSelfAdjoint S)
-    {w w' : Set H} (b : HilbertBasis w ℂ H) (c : HilbertBasis w' ℂ H)
-    (hb : Summable (fun i : w => ‖S (b i)‖ ^ 2)) :
-    HasSum (fun j : w' => ‖S (c j)‖ ^ 2) (∑' i : w, ‖S (b i)‖ ^ 2) := by
+lemma hasSum_norm_sq_apply_of_selfAdjoint
+    {S : H →L[ℂ] H} (hS : IsSelfAdjoint S)
+    {w w' : Set H}
+    (b : HilbertBasis w ℂ H) (c : HilbertBasis w' ℂ H) (hb : Summable (fun i : w => ‖S (b i)‖ ^ 2))
+    : HasSum (fun j : w' => ‖S (c j)‖ ^ 2) (∑' i : w, ‖S (b i)‖ ^ 2) := by
   classical
   set F : w → w' → ℝ := fun i j => ‖⟪c j, S (b i)⟫_ℂ‖ ^ 2 with hFdef
   have hFnonneg : 0 ≤ Function.uncurry F := fun _ => sq_nonneg _
   have hrow : ∀ i : w, HasSum (F i) (‖S (b i)‖ ^ 2) := fun i =>
     hasSum_norm_sq_inner_basis c (S (b i))
-  have hSstar : ContinuousLinearMap.adjoint S = S := (ContinuousLinearMap.star_eq_adjoint
-      S).symm.trans hS
+  have hSstar : ContinuousLinearMap.adjoint S = S :=
+    (ContinuousLinearMap.star_eq_adjoint S).symm.trans hS
   have hcol : ∀ j : w', HasSum (fun i : w => F i j) (‖S (c j)‖ ^ 2) := by
     intro j
     have e1 : ∀ i : w, ⟪c j, S (b i)⟫_ℂ = ⟪S (c j), b i⟫_ℂ := fun i => by
@@ -153,24 +155,27 @@ lemma hasSum_norm_sq_apply_of_selfAdjoint {S : H →L[ℂ] H} (hS : IsSelfAdjoin
   rw [← hEq]
   exact hcolSummable.hasSum
 
-/-- **Trace class does not depend on the basis**: the diagonal of `|T|` is summable in every Hilbert
-basis. -/
-lemma summable_inner_abs_of_hilbertBasis {T : H →L[ℂ] H} (h : IsTraceClass T) {w : Set H}
-    (b : HilbertBasis w ℂ H) :
-    Summable (fun i => (⟪b i, CFC.abs T (b i)⟫_ℂ).re) := by
+/--
+**Trace class does not depend on the basis**: the diagonal of `|T|` is summable in every Hilbert
+basis.
+-/
+lemma summable_inner_abs_of_hilbertBasis
+    {T : H →L[ℂ] H} (h : IsTraceClass T) {w : Set H} (b : HilbertBasis w ℂ H)
+    : Summable (fun i => (⟪b i, CFC.abs T (b i)⟫_ℂ).re) := by
   obtain ⟨w₀, b₀, hb₀⟩ := h
   set A : H →L[ℂ] H := CFC.abs T with hAdef
   have hAnonneg : 0 ≤ A := CFC.abs_nonneg T
   have hAself : IsSelfAdjoint A := .of_nonneg hAnonneg
   set S : H →L[ℂ] H := CFC.sqrt A with hSdef
   have hSself : IsSelfAdjoint S := .of_nonneg (CFC.sqrt_nonneg A)
-  have hpt : ∀ {w' : Set H} (b' : HilbertBasis w' ℂ H) (i : w'),
-      (⟪b' i, A (b' i)⟫_ℂ).re = ‖S (b' i)‖ ^ 2 := by
+  have hpt
+      : ∀ {w' : Set H} (b' : HilbertBasis w' ℂ H) (i : w'),
+        (⟪b' i, A (b' i)⟫_ℂ).re = ‖S (b' i)‖ ^ 2 := by
     intro w' b' i
     have hSS : S * S = A := CFC.sqrt_mul_sqrt_self A hAnonneg
     have : ⟪b' i, A (b' i)⟫_ℂ = ⟪S (b' i), S (b' i)⟫_ℂ := by
-      have hSstar : ContinuousLinearMap.adjoint S = S := (ContinuousLinearMap.star_eq_adjoint
-          S).symm.trans hSself
+      have hSstar : ContinuousLinearMap.adjoint S = S :=
+        (ContinuousLinearMap.star_eq_adjoint S).symm.trans hSself
       rw [← hSS]
       show ⟪b' i, (S * S) (b' i)⟫_ℂ = _
       rw [ContinuousLinearMap.mul_def, ContinuousLinearMap.comp_apply]
@@ -178,15 +183,14 @@ lemma summable_inner_abs_of_hilbertBasis {T : H →L[ℂ] H} (h : IsTraceClass T
     have hval : ⟪S (b' i), S (b' i)⟫_ℂ = ((‖S (b' i)‖ ^ 2 : ℝ) : ℂ) := by
       rw [inner_self_eq_norm_sq_to_K]; norm_cast
     rw [this, hval, Complex.ofReal_re]
-  have hb₀' : Summable (fun i : w₀ => ‖S (b₀ i)‖ ^ 2) := by
-    simpa [hpt b₀] using hb₀
+  have hb₀' : Summable (fun i : w₀ => ‖S (b₀ i)‖ ^ 2) := by simpa [hpt b₀] using hb₀
   have := hasSum_norm_sq_apply_of_selfAdjoint hSself b₀ b hb₀'
   simpa [hpt b] using this.summable
 
 /-- An operator is trace class iff the diagonal of `|T|` is summable in every Hilbert basis. -/
-lemma isTraceClass_iff {T : H →L[ℂ] H} :
-    IsTraceClass T ↔
-      ∀ (w : Set H) (b : HilbertBasis w ℂ H),
+lemma isTraceClass_iff {T : H →L[ℂ] H}
+    : IsTraceClass T
+      ↔ ∀ (w : Set H) (b : HilbertBasis w ℂ H),
         Summable (fun i => (⟪b i, CFC.abs T (b i)⟫_ℂ).re) := by
   constructor
   · intro h w b
@@ -196,8 +200,8 @@ lemma isTraceClass_iff {T : H →L[ℂ] H} :
     exact ⟨w, b, h w b⟩
 
 /-- Every operator on a finite-dimensional Hilbert space is trace class. -/
-lemma isTraceClass_of_finiteDimensional [FiniteDimensional ℂ H] (T : H →L[ℂ] H) :
-    IsTraceClass T := by
+lemma isTraceClass_of_finiteDimensional [FiniteDimensional ℂ H] (T : H →L[ℂ] H)
+    : IsTraceClass T := by
   obtain ⟨w, b, _⟩ := exists_hilbertBasis ℂ H
   let : Finite w := b.orthonormal.linearIndependent.finite
   let : Fintype w := Fintype.ofFinite w
@@ -208,56 +212,63 @@ lemma isTraceClass_of_finiteDimensional [FiniteDimensional ℂ H] (T : H →L[�
 omit [CompleteSpace H] in
 /-- The ordinary finite-dimensional trace is the diagonal sum in any Hilbert basis. -/
 lemma trace_eq_sum_inner_hilbertBasis_of_finiteDimensional
-    [FiniteDimensional ℂ H] (T : H →L[ℂ] H) {w : Set H} (b : HilbertBasis w ℂ H) :
-    LinearMap.trace ℂ H T.toLinearMap = ∑' i : w, ⟪b i, T (b i)⟫_ℂ := by
+    [FiniteDimensional ℂ H] (T : H →L[ℂ] H) {w : Set H} (b : HilbertBasis w ℂ H)
+    : LinearMap.trace ℂ H T.toLinearMap = ∑' i : w, ⟪b i, T (b i)⟫_ℂ := by
   let : Finite w := b.orthonormal.linearIndependent.finite
   let : Fintype w := Fintype.ofFinite w
   rw [tsum_fintype]
   simpa only [HilbertBasis.coe_toOrthonormalBasis, ContinuousLinearMap.coe_coe] using
     LinearMap.trace_eq_sum_inner T.toLinearMap b.toOrthonormalBasis
 
-/-- The trace norm `‖T‖₁ := ∑ᵢ ⟪eᵢ, |T| eᵢ⟫`, computed via a chosen witness Hilbert basis (any
+/--
+The trace norm `‖T‖₁ := ∑ᵢ ⟪eᵢ, |T| eᵢ⟫`, computed via a chosen witness Hilbert basis (any
 basis gives the same value, by `summable_inner_abs_of_hilbertBasis` — this definition just needs
-*a* witness to compute with). -/
+*a* witness to compute with).
+-/
 def traceNorm (T : H →L[ℂ] H) (h : IsTraceClass T) : ℝ :=
   ∑' i : h.choose, (⟪h.choose_spec.choose i, CFC.abs T (h.choose_spec.choose i)⟫_ℂ).re
 
-/-- The witness proof argument of `traceNorm` is immaterial.  This small lemma is useful when
+/--
+The witness proof argument of `traceNorm` is immaterial.  This small lemma is useful when
 transporting a trace-class operator through a construction that produces a new proof of the same
-proposition. -/
-lemma traceNorm_congr {T : H →L[ℂ] H} {h₁ h₂ : IsTraceClass T} :
-    traceNorm T h₁ = traceNorm T h₂ := by
+proposition.
+-/
+lemma traceNorm_congr {T : H →L[ℂ] H} {h₁ h₂ : IsTraceClass T}
+    : traceNorm T h₁ = traceNorm T h₂ := by
   have hh : h₁ = h₂ := Subsingleton.elim _ _
   rw [hh]
 
-/-- **The trace** `Tr T = ∑ᵢ ⟪eᵢ, T eᵢ⟫` of a trace-class operator, in the basis witnessing that it
-is trace class. -/
+/--
+**The trace** `Tr T = ∑ᵢ ⟪eᵢ, T eᵢ⟫` of a trace-class operator, in the basis witnessing that it
+is trace class.
+-/
 def trace (T : H →L[ℂ] H) (h : IsTraceClass T) : ℂ :=
   ∑' i : h.choose, ⟪h.choose_spec.choose i, T (h.choose_spec.choose i)⟫_ℂ
 
 /-- The trace does not depend on the proof that the operator is trace class. -/
-lemma trace_congr {T : H →L[ℂ] H} {h₁ h₂ : IsTraceClass T} :
-    trace T h₁ = trace T h₂ := by
+lemma trace_congr {T : H →L[ℂ] H} {h₁ h₂ : IsTraceClass T} : trace T h₁ = trace T h₂ := by
   have hh : h₁ = h₂ := Subsingleton.elim _ _
   rw [hh]
 
-/-- The trace norm is independent of the witness basis used in `IsTraceClass`.  This is the
+/--
+The trace norm is independent of the witness basis used in `IsTraceClass`.  This is the
 strong form of `summable_inner_abs_of_hilbertBasis`: the square-root/Parseval argument identifies
-the actual sums, not merely their convergence. -/
-lemma traceNorm_eq_of_hilbertBasis {T : H →L[ℂ] H} (h : IsTraceClass T) {w : Set H}
-    (b : HilbertBasis w ℂ H) :
-    traceNorm T h = ∑' i, (⟪b i, CFC.abs T (b i)⟫_ℂ).re := by
+the actual sums, not merely their convergence.
+-/
+lemma traceNorm_eq_of_hilbertBasis
+    {T : H →L[ℂ] H} (h : IsTraceClass T) {w : Set H} (b : HilbertBasis w ℂ H)
+    : traceNorm T h = ∑' i, (⟪b i, CFC.abs T (b i)⟫_ℂ).re := by
   let w₀ : Set H := h.choose
   let b₀ : HilbertBasis w₀ ℂ H := h.choose_spec.choose
-  have hb₀ : Summable (fun i : w₀ => (⟪b₀ i, CFC.abs T (b₀ i)⟫_ℂ).re) :=
-    h.choose_spec.choose_spec
+  have hb₀ : Summable (fun i : w₀ => (⟪b₀ i, CFC.abs T (b₀ i)⟫_ℂ).re) := h.choose_spec.choose_spec
   set A : H →L[ℂ] H := CFC.abs T with hAdef
   have hAnonneg : 0 ≤ A := CFC.abs_nonneg T
   have hAself : IsSelfAdjoint A := .of_nonneg hAnonneg
   set S : H →L[ℂ] H := CFC.sqrt A with hSdef
   have hSself : IsSelfAdjoint S := .of_nonneg (CFC.sqrt_nonneg A)
-  have hpt : ∀ {w' : Set H} (b' : HilbertBasis w' ℂ H) (i : w'),
-      (⟪b' i, A (b' i)⟫_ℂ).re = ‖S (b' i)‖ ^ 2 := by
+  have hpt
+      : ∀ {w' : Set H} (b' : HilbertBasis w' ℂ H) (i : w'),
+        (⟪b' i, A (b' i)⟫_ℂ).re = ‖S (b' i)‖ ^ 2 := by
     intro w' b' i
     have hSS : S * S = A := CFC.sqrt_mul_sqrt_self A hAnonneg
     have hinner : ⟪b' i, A (b' i)⟫_ℂ = ⟪S (b' i), S (b' i)⟫_ℂ := by
@@ -275,8 +286,8 @@ lemma traceNorm_eq_of_hilbertBasis {T : H →L[ℂ] H} (h : IsTraceClass T) {w :
     rw [hAdef, hpt]
   have hnorm := hasSum_norm_sq_apply_of_selfAdjoint hSself b₀ b hb₀'
   calc
-    traceNorm T h = ∑' i : w₀, (⟪b₀ i, A (b₀ i)⟫_ℂ).re := by
-      rfl
+    traceNorm T h
+      = ∑' i : w₀, (⟪b₀ i, A (b₀ i)⟫_ℂ).re := by rfl
     _ = ∑' i : w₀, ‖S (b₀ i)‖ ^ 2 := by
       apply tsum_congr
       intro i
@@ -286,12 +297,10 @@ lemma traceNorm_eq_of_hilbertBasis {T : H →L[ℂ] H} (h : IsTraceClass T) {w :
       apply tsum_congr
       intro i
       exact (hpt b i).symm
-    _ = ∑' i, (⟪b i, CFC.abs T (b i)⟫_ℂ).re := by
-      rfl
+    _ = ∑' i, (⟪b i, CFC.abs T (b i)⟫_ℂ).re := by rfl
 
 omit [CompleteSpace H] in
-lemma real_inner_nonneg_of_nonneg {T : H →L[ℂ] H} (hT : 0 ≤ T) (x : H) :
-    0 ≤ (⟪x, T x⟫_ℂ).re := by
+lemma real_inner_nonneg_of_nonneg {T : H →L[ℂ] H} (hT : 0 ≤ T) (x : H) : 0 ≤ (⟪x, T x⟫_ℂ).re := by
   have hpos : T.IsPositive := T.nonneg_iff_isPositive.mp hT
   have hx := (ContinuousLinearMap.isPositive_iff_complex T).mp hpos x
   have heq : (⟪T x, x⟫_ℂ).re = (⟪x, T x⟫_ℂ).re := by
@@ -300,16 +309,17 @@ lemma real_inner_nonneg_of_nonneg {T : H →L[ℂ] H} (hT : 0 ≤ T) (x : H) :
   rw [← heq]
   exact hx.2
 
-/-- The trace norm is nonnegative.  This is exposed separately from its basis-independence result
-so norm estimates can use it without unpacking the chosen Hilbert-basis witness. -/
+/--
+The trace norm is nonnegative.  This is exposed separately from its basis-independence result
+so norm estimates can use it without unpacking the chosen Hilbert-basis witness.
+-/
 lemma traceNorm_nonneg (T : H →L[ℂ] H) (h : IsTraceClass T) : 0 ≤ traceNorm T h := by
   unfold traceNorm
-  exact tsum_nonneg fun i => real_inner_nonneg_of_nonneg (CFC.abs_nonneg T)
-    (h.choose_spec.choose i)
+  exact tsum_nonneg fun i => real_inner_nonneg_of_nonneg (CFC.abs_nonneg T) (h.choose_spec.choose i)
 
 omit [CompleteSpace H] in
-lemma real_inner_mono_of_le {P Q : H →L[ℂ] H} (hPQ : P ≤ Q) (x : H) :
-    (⟪x, P x⟫_ℂ).re ≤ (⟪x, Q x⟫_ℂ).re := by
+lemma real_inner_mono_of_le {P Q : H →L[ℂ] H} (hPQ : P ≤ Q) (x : H)
+    : (⟪x, P x⟫_ℂ).re ≤ (⟪x, Q x⟫_ℂ).re := by
   have hdiff : 0 ≤ Q - P := sub_nonneg.mpr hPQ
   have hpos : (Q - P).IsPositive := (Q - P).nonneg_iff_isPositive.mp hdiff
   have hx := (ContinuousLinearMap.isPositive_iff_complex (Q - P)).mp hpos x
@@ -321,8 +331,9 @@ lemma real_inner_mono_of_le {P Q : H →L[ℂ] H} (hPQ : P ≤ Q) (x : H) :
     exact hx.2
   simpa [sub_apply, inner_sub_right, map_sub] using hx'
 
-lemma isTraceClass_posPart_of_isSelfAdjoint {T : H →L[ℂ] H} (hT : IsSelfAdjoint T)
-    (h : IsTraceClass T) : IsTraceClass T⁺ := by
+lemma isTraceClass_posPart_of_isSelfAdjoint
+    {T : H →L[ℂ] H} (hT : IsSelfAdjoint T) (h : IsTraceClass T)
+    : IsTraceClass T⁺ := by
   obtain ⟨w, b, hb⟩ := h
   refine ⟨w, b, ?_⟩
   rw [CFC.abs_of_nonneg T⁺ (CFC.posPart_nonneg T)]
@@ -337,8 +348,9 @@ lemma isTraceClass_posPart_of_isSelfAdjoint {T : H →L[ℂ] H} (hT : IsSelfAdjo
     exact real_inner_mono_of_le hle (b i)
   · exact hb
 
-lemma isTraceClass_negPart_of_isSelfAdjoint {T : H →L[ℂ] H} (hT : IsSelfAdjoint T)
-    (h : IsTraceClass T) : IsTraceClass T⁻ := by
+lemma isTraceClass_negPart_of_isSelfAdjoint
+    {T : H →L[ℂ] H} (hT : IsSelfAdjoint T) (h : IsTraceClass T)
+    : IsTraceClass T⁻ := by
   obtain ⟨w, b, hb⟩ := h
   refine ⟨w, b, ?_⟩
   rw [CFC.abs_of_nonneg T⁻ (CFC.negPart_nonneg T)]
@@ -353,14 +365,13 @@ lemma isTraceClass_negPart_of_isSelfAdjoint {T : H →L[ℂ] H} (hT : IsSelfAdjo
     exact real_inner_mono_of_le hle (b i)
   · exact hb
 
-lemma summable_inner_of_nonneg {T : H →L[ℂ] H} (hT : 0 ≤ T) (h : IsTraceClass T)
-    {w : Set H} (b : HilbertBasis w ℂ H) :
-    Summable (fun i => ⟪b i, T (b i)⟫_ℂ) := by
+lemma summable_inner_of_nonneg
+    {T : H →L[ℂ] H} (hT : 0 ≤ T) (h : IsTraceClass T) {w : Set H} (b : HilbertBasis w ℂ H)
+    : Summable (fun i => ⟪b i, T (b i)⟫_ℂ) := by
   have hr : Summable (fun i : w => (⟪b i, CFC.abs T (b i)⟫_ℂ).re) :=
     summable_inner_abs_of_hilbertBasis h b
   have habs : CFC.abs T = T := CFC.abs_of_nonneg T hT
-  have heq (i : w) : ⟪b i, T (b i)⟫_ℂ =
-      ((⟪b i, CFC.abs T (b i)⟫_ℂ).re : ℂ) := by
+  have heq (i : w) : ⟪b i, T (b i)⟫_ℂ = ((⟪b i, CFC.abs T (b i)⟫_ℂ).re : ℂ) := by
     rw [habs]
     have hpos : T.IsPositive := T.nonneg_iff_isPositive.mp hT
     have hx := (ContinuousLinearMap.isPositive_iff_complex T).mp hpos (b i)
@@ -370,10 +381,9 @@ lemma summable_inner_of_nonneg {T : H →L[ℂ] H} (hT : 0 ≤ T) (h : IsTraceCl
       exact Complex.conj_re _
     have hinner : ⟪b i, T (b i)⟫_ℂ = ((⟪T (b i), b i⟫_ℂ).re : ℂ) := by
       calc
-        ⟪b i, T (b i)⟫_ℂ = (starRingEnd ℂ) ⟪T (b i), b i⟫_ℂ :=
-          (inner_conj_symm (b i) (T (b i))).symm
-        _ = (starRingEnd ℂ) ((⟪T (b i), b i⟫_ℂ).re : ℂ) :=
-          congrArg (starRingEnd ℂ) hA
+        ⟪b i, T (b i)⟫_ℂ
+          = (starRingEnd ℂ) ⟪T (b i), b i⟫_ℂ := (inner_conj_symm (b i) (T (b i))).symm
+        _ = (starRingEnd ℂ) ((⟪T (b i), b i⟫_ℂ).re : ℂ) := congrArg (starRingEnd ℂ) hA
         _ = ((⟪T (b i), b i⟫_ℂ).re : ℂ) := by simp
     exact hinner.trans (congrArg (fun r : ℝ => (r : ℂ)) hre)
   have hs : Summable (fun i : w => ((⟪b i, CFC.abs T (b i)⟫_ℂ).re : ℂ)) :=
@@ -388,14 +398,15 @@ functional-calculus square root turns every diagonal coefficient into a squared 
 Parseval double-sum theorem already proved above gives the same sum in every Hilbert basis.  This
 is the positive case needed by density operators and does not use polar decomposition.
 -/
-lemma trace_eq_of_hilbertBasis_of_nonneg {T : H →L[ℂ] H} (hT : 0 ≤ T)
-    (h : IsTraceClass T) {w : Set H} (b : HilbertBasis w ℂ H) :
-    trace T h = ∑' i, ⟪b i, T (b i)⟫_ℂ := by
+lemma trace_eq_of_hilbertBasis_of_nonneg
+    {T : H →L[ℂ] H} (hT : 0 ≤ T) (h : IsTraceClass T) {w : Set H} (b : HilbertBasis w ℂ H)
+    : trace T h = ∑' i, ⟪b i, T (b i)⟫_ℂ := by
   let S : H →L[ℂ] H := CFC.sqrt T
   have hSself : IsSelfAdjoint S := .of_nonneg (CFC.sqrt_nonneg T)
   have hSS : S * S = T := CFC.sqrt_mul_sqrt_self T hT
-  have hdiag : ∀ {w' : Set H} (b' : HilbertBasis w' ℂ H) (i : w'),
-      ⟪b' i, T (b' i)⟫_ℂ = ((‖S (b' i)‖ ^ 2 : ℝ) : ℂ) := by
+  have hdiag
+      : ∀ {w' : Set H} (b' : HilbertBasis w' ℂ H) (i : w'),
+        ⟪b' i, T (b' i)⟫_ℂ = ((‖S (b' i)‖ ^ 2 : ℝ) : ℂ) := by
     intro w' b' i
     have hSstar : ContinuousLinearMap.adjoint S = S :=
       (ContinuousLinearMap.star_eq_adjoint S).symm.trans hSself
@@ -409,8 +420,8 @@ lemma trace_eq_of_hilbertBasis_of_nonneg {T : H →L[ℂ] H} (hT : 0 ≤ T)
   let w₀ : Set H := h.choose
   let b₀ : HilbertBasis w₀ ℂ H := h.choose_spec.choose
   have hWdiag : Summable (fun i : w₀ => ‖S (b₀ i)‖ ^ 2) := by
-    have hbase : Summable (fun i : w₀ =>
-        (⟪b₀ i, CFC.abs T (b₀ i)⟫_ℂ).re) := h.choose_spec.choose_spec
+    have hbase : Summable (fun i : w₀ => (⟪b₀ i, CFC.abs T (b₀ i)⟫_ℂ).re) :=
+      h.choose_spec.choose_spec
     have habs : CFC.abs T = T := CFC.abs_of_nonneg T hT
     apply hbase.congr
     intro i
@@ -418,28 +429,29 @@ lemma trace_eq_of_hilbertBasis_of_nonneg {T : H →L[ℂ] H} (hT : 0 ≤ T)
     rfl
   have hnorm := hasSum_norm_sq_apply_of_selfAdjoint hSself b₀ b hWdiag
   calc
-    trace T h = ∑' i : w₀, ⟪b₀ i, T (b₀ i)⟫_ℂ := by
-      rfl
+    trace T h
+      = ∑' i : w₀, ⟪b₀ i, T (b₀ i)⟫_ℂ := by rfl
     _ = ∑' i : w₀, ((‖S (b₀ i)‖ ^ 2 : ℝ) : ℂ) := by
       apply tsum_congr
       intro i
       exact hdiag b₀ i
     _ = ((∑' i : w₀, ‖S (b₀ i)‖ ^ 2 : ℝ) : ℂ) :=
       (Complex.ofReal_tsum (fun i : w₀ => ‖S (b₀ i)‖ ^ 2)).symm
-    _ = ((∑' i : w, ‖S (b i)‖ ^ 2 : ℝ) : ℂ) := by
-      rw [hnorm.tsum_eq]
+    _ = ((∑' i : w, ‖S (b i)‖ ^ 2 : ℝ) : ℂ) := by rw [hnorm.tsum_eq]
     _ = ∑' i : w, ⟪b i, T (b i)⟫_ℂ := by
       rw [Complex.ofReal_tsum]
       apply tsum_congr
       intro i
       exact (hdiag b i).symm
 
-/-- Basis-independent trace for self-adjoint trace-class operators.  The proof reduces to the
+/--
+Basis-independent trace for self-adjoint trace-class operators.  The proof reduces to the
 positive theorem through the continuous-functional-calculus decomposition `T = T⁺ - T⁻`; no
-polar decomposition is needed for this self-adjoint case. -/
-lemma trace_eq_of_hilbertBasis_of_isSelfAdjoint {T : H →L[ℂ] H} (hT : IsSelfAdjoint T)
-    (h : IsTraceClass T) {w : Set H} (b : HilbertBasis w ℂ H) :
-    trace T h = ∑' i, ⟪b i, T (b i)⟫_ℂ := by
+polar decomposition is needed for this self-adjoint case.
+-/
+lemma trace_eq_of_hilbertBasis_of_isSelfAdjoint
+    {T : H →L[ℂ] H} (hT : IsSelfAdjoint T) (h : IsTraceClass T) {w : Set H} (b : HilbertBasis w ℂ H)
+    : trace T h = ∑' i, ⟪b i, T (b i)⟫_ℂ := by
   let P : H →L[ℂ] H := T⁺
   let N : H →L[ℂ] H := T⁻
   have hP : IsTraceClass P := isTraceClass_posPart_of_isSelfAdjoint hT h
@@ -447,10 +459,8 @@ lemma trace_eq_of_hilbertBasis_of_isSelfAdjoint {T : H →L[ℂ] H} (hT : IsSelf
   have hPnonneg : 0 ≤ P := CFC.posPart_nonneg T
   have hNnonneg : 0 ≤ N := CFC.negPart_nonneg T
   have hdecomp : P - N = T := CFC.posPart_sub_negPart T hT
-  have hPsum : Summable (fun i : w => ⟪b i, P (b i)⟫_ℂ) :=
-    summable_inner_of_nonneg hPnonneg hP b
-  have hNsum : Summable (fun i : w => ⟪b i, N (b i)⟫_ℂ) :=
-    summable_inner_of_nonneg hNnonneg hN b
+  have hPsum : Summable (fun i : w => ⟪b i, P (b i)⟫_ℂ) := summable_inner_of_nonneg hPnonneg hP b
+  have hNsum : Summable (fun i : w => ⟪b i, N (b i)⟫_ℂ) := summable_inner_of_nonneg hNnonneg hN b
   let w₀ : Set H := h.choose
   let b₀ : HilbertBasis w₀ ℂ H := h.choose_spec.choose
   have hPsum₀ : Summable (fun i : w₀ => ⟪b₀ i, P (b₀ i)⟫_ℂ) :=
@@ -459,25 +469,25 @@ lemma trace_eq_of_hilbertBasis_of_isSelfAdjoint {T : H →L[ℂ] H} (hT : IsSelf
     summable_inner_of_nonneg hNnonneg hN b₀
   have htrace_sub : trace T h = trace P hP - trace N hN := by
     calc
-      trace T h = ∑' i : w₀, ⟪b₀ i, T (b₀ i)⟫_ℂ := by rfl
+      trace T h
+        = ∑' i : w₀, ⟪b₀ i, T (b₀ i)⟫_ℂ := by rfl
       _ = ∑' i : w₀, (⟪b₀ i, P (b₀ i)⟫_ℂ - ⟪b₀ i, N (b₀ i)⟫_ℂ) := by
         apply tsum_congr
         intro i
         rw [← hdecomp]
         simp [sub_apply, inner_sub_right]
-      _ = (∑' i : w₀, ⟪b₀ i, P (b₀ i)⟫_ℂ) -
-          (∑' i : w₀, ⟪b₀ i, N (b₀ i)⟫_ℂ) := hPsum₀.tsum_sub hNsum₀
+      _ = (∑' i : w₀, ⟪b₀ i, P (b₀ i)⟫_ℂ) - (∑' i : w₀, ⟪b₀ i, N (b₀ i)⟫_ℂ) :=
+        hPsum₀.tsum_sub hNsum₀
       _ = trace P hP - trace N hN := by
         rw [trace_eq_of_hilbertBasis_of_nonneg hPnonneg hP b₀,
           trace_eq_of_hilbertBasis_of_nonneg hNnonneg hN b₀]
   calc
-    trace T h = trace P hP - trace N hN := htrace_sub
-    _ = (∑' i : w, ⟪b i, P (b i)⟫_ℂ) -
-        (∑' i : w, ⟪b i, N (b i)⟫_ℂ) := by
+    trace T h
+      = trace P hP - trace N hN := htrace_sub
+    _ = (∑' i : w, ⟪b i, P (b i)⟫_ℂ) - (∑' i : w, ⟪b i, N (b i)⟫_ℂ) := by
       rw [trace_eq_of_hilbertBasis_of_nonneg hPnonneg hP b,
         trace_eq_of_hilbertBasis_of_nonneg hNnonneg hN b]
-    _ = ∑' i : w, (⟪b i, P (b i)⟫_ℂ - ⟪b i, N (b i)⟫_ℂ) :=
-      (hPsum.tsum_sub hNsum).symm
+    _ = ∑' i : w, (⟪b i, P (b i)⟫_ℂ - ⟪b i, N (b i)⟫_ℂ) := (hPsum.tsum_sub hNsum).symm
     _ = ∑' i : w, ⟪b i, T (b i)⟫_ℂ := by
       apply tsum_congr
       intro i
@@ -490,9 +500,8 @@ lemma trace_eq_of_hilbertBasis_of_isSelfAdjoint {T : H →L[ℂ] H} (hT : IsSelf
 def HasFiniteMultiplicity (p : H →L[ℂ] H) : Prop := IsStarProjection p ∧ IsTraceClass p
 
 /-- A projection of finite multiplicity has finite-dimensional range. -/
-lemma HasFiniteMultiplicity.finiteDimensional_range {p : H →L[ℂ] H}
-    (hp : HasFiniteMultiplicity p) :
-    FiniteDimensional ℂ (LinearMap.range p.toLinearMap) := by
+lemma HasFiniteMultiplicity.finiteDimensional_range {p : H →L[ℂ] H} (hp : HasFiniteMultiplicity p)
+    : FiniteDimensional ℂ (LinearMap.range p.toLinearMap) := by
   let W : Submodule ℂ H := LinearMap.range p.toLinearMap
   have hpIdem : IsIdempotentElem p.toLinearMap :=
     (ContinuousLinearMap.isIdempotentElem_toLinearMap_iff).2 hp.1.isIdempotentElem
@@ -508,32 +517,26 @@ lemma HasFiniteMultiplicity.finiteDimensional_range {p : H →L[ℂ] H}
   let s : Set H := Set.range (fun i : w => (b i : H))
   have hsOrtho : Orthonormal ℂ ((↑) : s → H) := hbOrtho.toSubtypeRange
   obtain ⟨wH, bH, hsH, hbH⟩ := hsOrtho.exists_hilbertBasis_extension
-  have hdiag : Summable (fun i : wH =>
-      (⟪bH i, CFC.abs p (bH i)⟫_ℂ).re) :=
+  have hdiag : Summable (fun i : wH => (⟪bH i, CFC.abs p (bH i)⟫_ℂ).re) :=
     summable_inner_abs_of_hilbertBasis hp.2 bH
   have habs : CFC.abs p = p := CFC.abs_of_nonneg p hp.1.nonneg
-  let g : w → wH := fun i =>
-    ⟨(b i : H), hsH (show (b i : H) ∈ s from ⟨i, rfl⟩)⟩
+  let g : w → wH := fun i => ⟨(b i : H), hsH (show (b i : H) ∈ s from ⟨i, rfl⟩)⟩
   have hgInjective : Function.Injective g := by
     intro i j hij
     apply Subtype.ext
-    exact congrArg (fun k : w => (k : W))
-      (hbInjective (congrArg (fun z : wH => (z : H)) hij))
+    exact congrArg (fun k : w => (k : W)) (hbInjective (congrArg (fun z : wH => (z : H)) hij))
   have hconst : Summable (fun _ : w => (1 : ℝ)) := by
     have hcomp := hdiag.comp_injective hgInjective
     apply hcomp.congr
     intro i
     change (⟪bH (g i), CFC.abs p (bH (g i))⟫_ℂ).re = 1
-    have hbi : bH (g i) = (b i : H) := by
-      rw [hbH]
+    have hbi : bH (g i) = (b i : H) := by rw [hbH]
     rw [hbi, habs]
     have hfix : p (b i : H) = (b i : H) := by
       exact (LinearMap.IsIdempotentElem.mem_range_iff hpIdem).mp (b i).property
     rw [hfix]
-    have hnorm : ‖(b i : H)‖ = 1 := by
-      simpa using hbOrtho.1 i
-    rw [show ⟪(b i : H), (b i : H)⟫_ℂ =
-        ((‖(b i : H)‖ ^ 2 : ℝ) : ℂ) by
+    have hnorm : ‖(b i : H)‖ = 1 := by simpa using hbOrtho.1 i
+    rw [show ⟪(b i : H), (b i : H)⟫_ℂ = ((‖(b i : H)‖ ^ 2 : ℝ) : ℂ) by
       rw [inner_self_eq_norm_sq_to_K]
       norm_cast]
     simp [hnorm]
@@ -542,12 +545,13 @@ lemma HasFiniteMultiplicity.finiteDimensional_range {p : H →L[ℂ] H}
   change FiniteDimensional ℂ W
   exact b.toOrthonormalBasis.toBasis.finiteDimensional_of_finite
 
-/-- A finite-multiplicity projection has the expected trace.  The basis calculation is finite-rank:
+/--
+A finite-multiplicity projection has the expected trace.  The basis calculation is finite-rank:
 extend an orthonormal basis of the range to one of `H`; the projection vanishes on the complementary
-basis vectors and is the identity on the range basis. -/
-lemma HasFiniteMultiplicity.trace_eq_finrank_range
-    {p : H →L[ℂ] H} (hp : HasFiniteMultiplicity p) :
-    trace p hp.2 = (Module.finrank ℂ (LinearMap.range p.toLinearMap) : ℂ) := by
+basis vectors and is the identity on the range basis.
+-/
+lemma HasFiniteMultiplicity.trace_eq_finrank_range {p : H →L[ℂ] H} (hp : HasFiniteMultiplicity p)
+    : trace p hp.2 = (Module.finrank ℂ (LinearMap.range p.toLinearMap) : ℂ) := by
   have hp' : IsStarProjection p ∧ IsTraceClass p := hp
   let W : Submodule ℂ H := LinearMap.range p.toLinearMap
   let : FiniteDimensional ℂ W := by
@@ -572,15 +576,12 @@ lemma HasFiniteMultiplicity.trace_eq_finrank_range
   let s : Set H := Set.range (fun i : w => (b i : H))
   have hsOrtho : Orthonormal ℂ ((↑) : s → H) := hbOrtho.toSubtypeRange
   obtain ⟨wH, bH, hsH, hbH⟩ := hsOrtho.exists_hilbertBasis_extension
-  let g : w → wH := fun i =>
-    ⟨(b i : H), hsH (show (b i : H) ∈ s from ⟨i, rfl⟩)⟩
+  let g : w → wH := fun i => ⟨(b i : H), hsH (show (b i : H) ∈ s from ⟨i, rfl⟩)⟩
   have hgInjective : Function.Injective g := by
     intro i j hij
     apply Subtype.ext
-    exact congrArg (fun k : w => (k : W))
-      (hbInjective (congrArg (fun z : wH => (z : H)) hij))
-  have hbi (i : w) : bH (g i) = (b i : H) := by
-    rw [hbH]
+    exact congrArg (fun k : w => (k : W)) (hbInjective (congrArg (fun z : wH => (z : H)) hij))
+  have hbi (i : w) : bH (g i) = (b i : H) := by rw [hbH]
   have hfix (i : w) : p (b i : H) = (b i : H) := by
     exact (LinearMap.IsIdempotentElem.mem_range_iff hpIdem).mp (b i).property
   let f : wH → ℝ := fun j => (⟪bH j, CFC.abs p (bH j)⟫_ℂ).re
@@ -596,24 +597,22 @@ lemma HasFiniteMultiplicity.trace_eq_finrank_range
     simp
   let w₀ : Set H := hp.2.choose
   let b₀ : HilbertBasis w₀ ℂ H := hp.2.choose_spec.choose
-  have hWdiagBase : Summable (fun i : w₀ =>
-      (⟪b₀ i, CFC.abs p (b₀ i)⟫_ℂ).re) := hp.2.choose_spec.choose_spec
+  have hWdiagBase : Summable (fun i : w₀ => (⟪b₀ i, CFC.abs p (b₀ i)⟫_ℂ).re) :=
+    hp.2.choose_spec.choose_spec
   have hWdiag : Summable (fun i : w₀ => ‖p (b₀ i)‖ ^ 2) := by
     apply hWdiagBase.congr
     intro i
     rw [habs, hpdiag]
     rfl
   have hdiagC : Summable (fun j : wH => ⟪bH j, p (bH j)⟫_ℂ) := by
-    have hreal : Summable (fun j : wH =>
-        ((f j : ℝ) : ℂ)) := Complex.summable_ofReal.mpr hdiag
+    have hreal : Summable (fun j : wH => ((f j : ℝ) : ℂ)) := Complex.summable_ofReal.mpr hdiag
     apply hreal.congr
     intro j
     dsimp [f]
     rw [habs, hpdiag]
     change ((‖p (bH j)‖ ^ 2 : ℝ) : ℂ) = ((‖p (bH j)‖ ^ 2 : ℝ) : ℂ)
     rfl
-  have hzero_of_not_mem_range (j : wH) (hj : j ∉ Set.range g) :
-      p (bH j) = 0 := by
+  have hzero_of_not_mem_range (j : wH) (hj : j ∉ Set.range g) : p (bH j) = 0 := by
     have hjS : bH j ∉ s := by
       intro hjs
       rcases hjs with ⟨i, hi⟩
@@ -633,8 +632,8 @@ lemma HasFiniteMultiplicity.trace_eq_finrank_range
         simpa [hbi i] using h
       have h := ContinuousLinearMap.adjoint_inner_right p (bH j) (b i : H)
       calc
-        ⟪p (bH j), (b i : H)⟫_ℂ =
-            ⟪(bH j : H), ContinuousLinearMap.adjoint p (b i : H)⟫_ℂ := h.symm
+        ⟪p (bH j), (b i : H)⟫_ℂ
+          = ⟪(bH j : H), ContinuousLinearMap.adjoint p (b i : H)⟫_ℂ := h.symm
         _ = ⟪(bH j : H), p (b i : H)⟫_ℂ := by rw [hpAdj]
         _ = ⟪(bH j : H), (b i : H)⟫_ℂ := by rw [hfix i]
         _ = 0 := horth
@@ -647,8 +646,7 @@ lemma HasFiniteMultiplicity.trace_eq_finrank_range
   have hfg (i : w) : f (g i) = 1 := by
     dsimp [f]
     rw [hbi i, habs, hfix i]
-    have hnorm : ‖(b i : H)‖ = 1 := by
-      simpa using hbOrtho.1 i
+    have hnorm : ‖(b i : H)‖ = 1 := by simpa using hbOrtho.1 i
     rw [inner_self_eq_norm_sq_to_K]
     simp [hnorm]
   have hsupport : Function.support f ⊆ Set.range g := by
@@ -670,27 +668,25 @@ lemma HasFiniteMultiplicity.trace_eq_finrank_range
         apply tsum_congr
         intro i
         rw [he i]
-      _ = ∑' j : Set.range g, f (j : wH) :=
-        e.tsum_eq (fun j : Set.range g => f (j : wH))
-  have hnormSum : HasSum (fun j : wH => ‖p (bH j)‖ ^ 2)
-      (∑' i : w₀, ‖p (b₀ i)‖ ^ 2) :=
+      _ = ∑' j : Set.range g, f (j : wH) := e.tsum_eq (fun j : Set.range g => f (j : wH))
+  have hnormSum : HasSum (fun j : wH => ‖p (bH j)‖ ^ 2) (∑' i : w₀, ‖p (b₀ i)‖ ^ 2) :=
     hasSum_norm_sq_apply_of_selfAdjoint hp'.1.isSelfAdjoint b₀ bH hWdiag
   have hsum_real : ∑' j : wH, f j = ∑' i : w, f (g i) := by
     calc
-      (∑' j : wH, f j) = ∑' j : Set.range g, f j := hsum_support.symm
+      (∑' j : wH, f j)
+        = ∑' j : Set.range g, f j := hsum_support.symm
       _ = ∑' i : w, f (g i) := hsum_reindex.symm
   have htrace_real : trace p hp.2 = ((∑' j : wH, f j : ℝ) : ℂ) := by
     calc
-      trace p hp.2 = ∑' i : w₀, ⟪b₀ i, p (b₀ i)⟫_ℂ := by
-        rfl
+      trace p hp.2
+        = ∑' i : w₀, ⟪b₀ i, p (b₀ i)⟫_ℂ := by rfl
       _ = ∑' i : w₀, ((‖p (b₀ i)‖ ^ 2 : ℝ) : ℂ) := by
         apply tsum_congr
         intro i
         exact hpdiag (b₀ i)
       _ = ((∑' i : w₀, ‖p (b₀ i)‖ ^ 2 : ℝ) : ℂ) :=
         (Complex.ofReal_tsum (fun i : w₀ => ‖p (b₀ i)‖ ^ 2)).symm
-      _ = ((∑' j : wH, ‖p (bH j)‖ ^ 2 : ℝ) : ℂ) := by
-        rw [hnormSum.tsum_eq]
+      _ = ((∑' j : wH, ‖p (bH j)‖ ^ 2 : ℝ) : ℂ) := by rw [hnormSum.tsum_eq]
       _ = ((∑' j : wH, f j : ℝ) : ℂ) := by
         congr 1
         apply tsum_congr
@@ -707,8 +703,8 @@ lemma HasFiniteMultiplicity.trace_eq_finrank_range
 
 /-- In finite dimension, the trace of a projection is the dimension of its range. -/
 lemma HasFiniteMultiplicity.trace_eq_finrank_range_of_finiteDimensional
-    [FiniteDimensional ℂ H] {p : H →L[ℂ] H} (hp : HasFiniteMultiplicity p) :
-    trace p hp.2 = (Module.finrank ℂ (LinearMap.range p.toLinearMap) : ℂ) := by
+    [FiniteDimensional ℂ H] {p : H →L[ℂ] H} (hp : HasFiniteMultiplicity p)
+    : trace p hp.2 = (Module.finrank ℂ (LinearMap.range p.toLinearMap) : ℂ) := by
   obtain ⟨w, b, _⟩ := exists_hilbertBasis ℂ H
   let : Finite w := b.orthonormal.linearIndependent.finite
   let : Fintype w := Fintype.ofFinite w
@@ -717,8 +713,7 @@ lemma HasFiniteMultiplicity.trace_eq_finrank_range_of_finiteDimensional
   calc
     trace p hp.2 = LinearMap.trace ℂ H p.toLinearMap := by
       unfold trace
-      exact (trace_eq_sum_inner_hilbertBasis_of_finiteDimensional
-        p hp.2.choose_spec.choose).symm
+      exact (trace_eq_sum_inner_hilbertBasis_of_finiteDimensional p hp.2.choose_spec.choose).symm
     _ = (Module.finrank ℂ (LinearMap.range p.toLinearMap) : ℂ) :=
       (LinearMap.IsIdempotentElem.isProj_range p.toLinearMap hpIdem).trace
 

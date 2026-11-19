@@ -72,16 +72,23 @@ open Real Time Cosmology.FLRW.FriedmannEquation
 
 -/
 
-/-- An FLRW model filled with the cosmic fluid `F` solves the Friedmann equations with the
-  cosmological constant `Λ` if and only if it solves them without cosmological constant for the
-  fluid `F` with `Λ` folded in. -/
-lemma _root_.Cosmology.FLRW.friedmannSolution_iff_addCosmologicalConstant {U : FLRW}
-    {F : CosmicFluid} {Λ G c : ℝ} (hG : G ≠ 0) (hc : c ≠ 0) :
-    U.FriedmannSolution F Λ G c ↔ U.FriedmannSolution (F.addCosmologicalConstant Λ G c) 0 G c :=
-  ⟨fun h => ⟨fun t ht => (firstOrderFriedmann_iff_lambdaFluid hG).mp (h.firstOrder t ht),
-      fun t ht => (secondOrderFriedmann_iff_lambdaFluid hG hc).mp (h.secondOrder t ht)⟩,
-    fun h => ⟨fun t ht => (firstOrderFriedmann_iff_lambdaFluid hG).mpr (h.firstOrder t ht),
-      fun t ht => (secondOrderFriedmann_iff_lambdaFluid hG hc).mpr (h.secondOrder t ht)⟩⟩
+/--
+An FLRW model filled with the cosmic fluid `F` solves the Friedmann equations with the
+cosmological constant `Λ` if and only if it solves them without cosmological constant for the
+fluid `F` with `Λ` folded in.
+-/
+lemma _root_.Cosmology.FLRW.friedmannSolution_iff_addCosmologicalConstant
+    {U : FLRW} {F : CosmicFluid} {Λ G c : ℝ} (hG : G ≠ 0) (hc : c ≠ 0)
+    : U.FriedmannSolution F Λ G c ↔ U.FriedmannSolution (F.addCosmologicalConstant Λ G c) 0 G c := ⟨
+  fun h => ⟨
+    fun t ht => (firstOrderFriedmann_iff_lambdaFluid hG).mp (h.firstOrder t ht),
+    fun t ht => (secondOrderFriedmann_iff_lambdaFluid hG hc).mp (h.secondOrder t ht)
+  ⟩,
+  fun h => ⟨
+    fun t ht => (firstOrderFriedmann_iff_lambdaFluid hG).mpr (h.firstOrder t ht),
+    fun t ht => (secondOrderFriedmann_iff_lambdaFluid hG hc).mpr (h.secondOrder t ht)
+  ⟩
+⟩
 
 variable {U : FLRW} {F : CosmicFluid} {Λ G c : ℝ}
 
@@ -91,12 +98,15 @@ variable {U : FLRW} {F : CosmicFluid} {Λ G c : ℝ}
 
 -/
 
-/-- On the interval of a solution without cosmological constant, the second derivative
-  `∂ₜ ∂ₜ a` of the scale factor is positive (the expansion accelerates) if and only if
-  `ρ + 3 p / c² < 0`, that is, if and only if the strong energy condition of the cosmic fluid
-  fails through its second inequality. -/
-lemma deriv_deriv_scaleFactor_pos_iff (h : U.FriedmannSolution F 0 G c) (hG : 0 < G) {t : Time}
-    (ht : t ∈ U.I) : 0 < ∂ₜ (∂ₜ U.a) t ↔ F.ρ t + 3 * F.p t / c ^ 2 < 0 := by
+/--
+On the interval of a solution without cosmological constant, the second derivative
+`∂ₜ ∂ₜ a` of the scale factor is positive (the expansion accelerates) if and only if
+`ρ + 3 p / c² < 0`, that is, if and only if the strong energy condition of the cosmic fluid
+fails through its second inequality.
+-/
+lemma deriv_deriv_scaleFactor_pos_iff
+    (h : U.FriedmannSolution F 0 G c) (hG : 0 < G) {t : Time} (ht : t ∈ U.I)
+    : 0 < ∂ₜ (∂ₜ U.a) t ↔ F.ρ t + 3 * F.p t / c ^ 2 < 0 := by
   have hF2 := h.secondOrder t ht
   unfold SecondOrderFriedmann at hF2
   rw [← div_pos_iff_of_pos_right (U.a_pos t ht), hF2]
@@ -112,13 +122,17 @@ lemma deriv_deriv_scaleFactor_pos_iff (h : U.FriedmannSolution F 0 G c) (hG : 0 
     have := mul_pos hk (neg_pos.mpr h)
     linarith
 
-/-- With cosmological constant `Λ`, on the interval of a solution, `∂ₜ ∂ₜ a` is positive if and
-  only if the total fluid, `Λ` folded in as the `w = -1` component, violates
-  `0 ≤ ρ + 3 p / c²`. -/
-lemma deriv_deriv_scaleFactor_pos_iff_lambda (h : U.FriedmannSolution F Λ G c) (hG : 0 < G)
-    (hc : c ≠ 0) {t : Time} (ht : t ∈ U.I) :
-    0 < ∂ₜ (∂ₜ U.a) t ↔ (F.ρ t + cosmologicalConstantDensity Λ G c)
-      + 3 * (F.p t + cosmologicalConstantPressure Λ G c) / c ^ 2 < 0 :=
+/--
+With cosmological constant `Λ`, on the interval of a solution, `∂ₜ ∂ₜ a` is positive if and
+only if the total fluid, `Λ` folded in as the `w = -1` component, violates
+`0 ≤ ρ + 3 p / c²`.
+-/
+lemma deriv_deriv_scaleFactor_pos_iff_lambda
+    (h : U.FriedmannSolution F Λ G c) (hG : 0 < G) (hc : c ≠ 0) {t : Time} (ht : t ∈ U.I)
+    : 0 < ∂ₜ (∂ₜ U.a) t
+      ↔ (F.ρ t + cosmologicalConstantDensity Λ G c)
+          + 3 * (F.p t + cosmologicalConstantPressure Λ G c) / c ^ 2
+        < 0 :=
   ((friedmannSolution_iff_addCosmologicalConstant hG.ne' hc).mp h).deriv_deriv_scaleFactor_pos_iff
     hG ht
 
@@ -128,32 +142,35 @@ lemma deriv_deriv_scaleFactor_pos_iff_lambda (h : U.FriedmannSolution F Λ G c) 
 
 -/
 
-/-- For a solution of the Friedmann equations without cosmological constant whose cosmic fluid is
-  a sum of barotropic components of pressure `w_i ρ_i c²`, the deceleration parameter is
-  `q = ½ Σ_i Ω_i (1 + 3 w_i)` at the times of the interval of the model at which `H ≠ 0`, for
-  `G ≠ 0` and `c ≠ 0`. -/
-lemma decelerationParameter_eq_sum {n : ℕ} {Fi : Fin n → CosmicFluid} {w : Fin n → ℝ}
-    (h : U.FriedmannSolution F 0 G c) (hG : G ≠ 0) (hc : c ≠ 0)
-    (hρ : ∀ s, F.ρ s = ∑ i, (Fi i).ρ s) (hp : ∀ s, F.p s = ∑ i, (Fi i).p s)
-    (hw : ∀ i, (Fi i).p = barotropicPressure (w i) (Fi i).ρ c) {t : Time} (ht : t ∈ U.I)
-    (hH : hubbleConstant U.a t ≠ 0) :
-    decelerationParameter U.a t
-      = 1 / 2 * ∑ i, U.densityParameter (Fi i) G t * (1 + 3 * w i) := by
+/--
+For a solution of the Friedmann equations without cosmological constant whose cosmic fluid is
+a sum of barotropic components of pressure `w_i ρ_i c²`, the deceleration parameter is
+`q = ½ Σ_i Ω_i (1 + 3 w_i)` at the times of the interval of the model at which `H ≠ 0`, for
+`G ≠ 0` and `c ≠ 0`.
+-/
+lemma decelerationParameter_eq_sum
+    {n : ℕ} {Fi : Fin n → CosmicFluid} {w : Fin n → ℝ}
+    (h : U.FriedmannSolution F 0 G c) (hG : G ≠ 0) (hc : c ≠ 0) (hρ : ∀ s, F.ρ s = ∑ i, (Fi i).ρ s)
+    (hp : ∀ s, F.p s = ∑ i, (Fi i).p s) (hw : ∀ i, (Fi i).p = barotropicPressure (w i) (Fi i).ρ c)
+    {t : Time} (ht : t ∈ U.I) (hH : hubbleConstant U.a t ≠ 0)
+    : decelerationParameter U.a t = 1 / 2 * ∑ i, U.densityParameter (Fi i) G t * (1 + 3 * w i) := by
   have hp' : ∀ s, F.p s = ∑ i, w i * (Fi i).ρ s * c ^ 2 := fun s => by
     simp only [hp s, hw, barotropicPressure]
   have hF2 := h.secondOrder t ht
   have ha := U.a_ne_zero ht
   unfold SecondOrderFriedmann at hF2
   rw [hρ t, hp' t] at hF2
-  have hsum1 : (∑ i, (Fi i).ρ t) + 3 * (∑ i, w i * (Fi i).ρ t * c ^ 2) / c ^ 2
-      = ∑ i, (Fi i).ρ t * (1 + 3 * w i) := by
+  have hsum1
+      : (∑ i, (Fi i).ρ t) + 3 * (∑ i, w i * (Fi i).ρ t * c ^ 2) / c ^ 2
+        = ∑ i, (Fi i).ρ t * (1 + 3 * w i) := by
     rw [mul_div_assoc, Finset.sum_div, Finset.mul_sum, ← Finset.sum_add_distrib]
     refine Finset.sum_congr rfl fun i _ => ?_
     field_simp
   rw [hsum1] at hF2
   have ha'' := (div_eq_iff ha).mp hF2
-  have hsum2 : ∑ i, U.densityParameter (Fi i) G t * (1 + 3 * w i)
-      = 8 * π * G / (3 * hubbleConstant U.a t ^ 2) * ∑ i, (Fi i).ρ t * (1 + 3 * w i) := by
+  have hsum2
+      : ∑ i, U.densityParameter (Fi i) G t * (1 + 3 * w i)
+        = 8 * π * G / (3 * hubbleConstant U.a t ^ 2) * ∑ i, (Fi i).ρ t * (1 + 3 * w i) := by
     rw [Finset.mul_sum]
     refine Finset.sum_congr rfl fun i _ => ?_
     unfold densityParameter criticalDensity
@@ -167,16 +184,22 @@ lemma decelerationParameter_eq_sum {n : ℕ} {Fi : Fin n → CosmicFluid} {w : F
   field_simp
   ring
 
-/-- For a solution of the Friedmann equations whose cosmic fluid is the sum of matter (zero
-  pressure) and radiation (pressure `ρ_r c² / 3`), the deceleration parameter is
-  `q = ½ (Ω_m + 2 Ω_r - 2 Ω_Λ)` at the times of the interval of the model, for `c ≠ 0` (the ΛCDM
-  case). -/
-lemma decelerationParameter_lambdaCDM {Fm Fr : CosmicFluid} (h : U.FriedmannSolution F Λ G c)
-    (hc : c ≠ 0) (hρ : ∀ s, F.ρ s = Fm.ρ s + Fr.ρ s) (hp : ∀ s, F.p s = Fm.p s + Fr.p s)
-    (hm : Fm.p = barotropicPressure 0 Fm.ρ c) (hr : Fr.p = barotropicPressure (1 / 3) Fr.ρ c)
-    {t : Time} (ht : t ∈ U.I) :
-    decelerationParameter U.a t = 1 / 2 * (U.densityParameter Fm G t
-      + 2 * U.densityParameter Fr G t - 2 * U.lambdaDensityParameter Λ c t) := by
+/--
+For a solution of the Friedmann equations whose cosmic fluid is the sum of matter (zero
+pressure) and radiation (pressure `ρ_r c² / 3`), the deceleration parameter is
+`q = ½ (Ω_m + 2 Ω_r - 2 Ω_Λ)` at the times of the interval of the model, for `c ≠ 0` (the ΛCDM
+case).
+-/
+lemma decelerationParameter_lambdaCDM
+    {Fm Fr : CosmicFluid}
+    (h : U.FriedmannSolution F Λ G c) (hc : c ≠ 0) (hρ : ∀ s, F.ρ s = Fm.ρ s + Fr.ρ s)
+    (hp : ∀ s, F.p s = Fm.p s + Fr.p s) (hm : Fm.p = barotropicPressure 0 Fm.ρ c)
+    (hr : Fr.p = barotropicPressure (1 / 3) Fr.ρ c)
+    {t : Time} (ht : t ∈ U.I)
+    : decelerationParameter U.a t
+      = 1 / 2
+        * (U.densityParameter Fm G t + 2 * U.densityParameter Fr G t
+          - 2 * U.lambdaDensityParameter Λ c t) := by
   have hp' : ∀ s, F.p s = Fr.ρ s * c ^ 2 / 3 := fun s => by
     rw [hp s, hm, hr]
     simp only [barotropicPressure]
@@ -199,18 +222,20 @@ lemma decelerationParameter_lambdaCDM {Fm Fr : CosmicFluid} (h : U.FriedmannSolu
 
 -/
 
-/-- For a spatial geometry of non-positive curvature parameter, `0 ≤ Λ` and a positive density
-  at a time `t` of the interval, the first-order Friedmann equation forces `0 < H²` at `t`:
-  the derivative `∂ₜ a` of the scale factor does not vanish at `t`. -/
-lemma deriv_scaleFactor_ne_zero (h : U.FriedmannSolution F Λ G c)
-    (hk : U.geometry.curvature ≤ 0) (hΛ : 0 ≤ Λ) (hG : 0 < G) {t : Time} (ht : t ∈ U.I)
-    (hρ : 0 < F.ρ t) : ∂ₜ U.a t ≠ 0 := by
+/--
+For a spatial geometry of non-positive curvature parameter, `0 ≤ Λ` and a positive density
+at a time `t` of the interval, the first-order Friedmann equation forces `0 < H²` at `t`:
+the derivative `∂ₜ a` of the scale factor does not vanish at `t`.
+-/
+lemma deriv_scaleFactor_ne_zero
+    (h : U.FriedmannSolution F Λ G c) (hk : U.geometry.curvature ≤ 0) (hΛ : 0 ≤ Λ) (hG : 0 < G)
+    {t : Time} (ht : t ∈ U.I) (hρ : 0 < F.ρ t)
+    : ∂ₜ U.a t ≠ 0 := by
   have h1 := h.firstOrder t ht
   unfold FirstOrderFriedmann at h1
   have ha2 : 0 < U.a t ^ 2 := pow_pos (U.a_pos t ht) 2
   have hkc : U.geometry.curvature * c ^ 2 ≤ 0 := by nlinarith [sq_nonneg c, hk]
-  have h2 : U.geometry.curvature * c ^ 2 / U.a t ^ 2 ≤ 0 :=
-    (div_le_iff₀ ha2).mpr (by linarith)
+  have h2 : U.geometry.curvature * c ^ 2 / U.a t ^ 2 ≤ 0 := (div_le_iff₀ ha2).mpr (by linarith)
   have h3 : 0 < 8 * π * G / 3 * F.ρ t := by positivity
   have h4 : 0 ≤ Λ * c ^ 2 / 3 := by positivity
   have hsq : 0 < (∂ₜ U.a t / U.a t) ^ 2 := by
@@ -220,12 +245,17 @@ lemma deriv_scaleFactor_ne_zero (h : U.FriedmannSolution F Λ G c)
   rw [h0, zero_div] at hsq
   simp at hsq
 
-/-- If moreover the density is positive on the interval and the model expands at one time `t₀`
-  of `U.I`, it expands at all times of `U.I`: with a non-positive curvature parameter, `0 ≤ Λ`
-  and a positive density, an expanding model expands forever. -/
-lemma deriv_scaleFactor_pos (h : U.FriedmannSolution F Λ G c) (hk : U.geometry.curvature ≤ 0)
-    (hΛ : 0 ≤ Λ) (hG : 0 < G) (hρ : ∀ s ∈ U.I, 0 < F.ρ s) {t₀ : Time} (ht₀ : t₀ ∈ U.I)
-    (h0 : 0 < ∂ₜ U.a t₀) {t : Time} (ht : t ∈ U.I) : 0 < ∂ₜ U.a t := by
+/--
+If moreover the density is positive on the interval and the model expands at one time `t₀`
+of `U.I`, it expands at all times of `U.I`: with a non-positive curvature parameter, `0 ≤ Λ`
+and a positive density, an expanding model expands forever.
+-/
+lemma deriv_scaleFactor_pos
+    (h : U.FriedmannSolution F Λ G c) (hk : U.geometry.curvature ≤ 0) (hΛ : 0 ≤ Λ) (hG : 0 < G)
+    (hρ : ∀ s ∈ U.I, 0 < F.ρ s)
+    {t₀ : Time} (ht₀ : t₀ ∈ U.I) (h0 : 0 < ∂ₜ U.a t₀)
+    {t : Time} (ht : t ∈ U.I)
+    : 0 < ∂ₜ U.a t := by
   have hne : ∀ s ∈ U.I, ∂ₜ U.a s ≠ 0 := fun s hs =>
     h.deriv_scaleFactor_ne_zero hk hΛ hG hs (hρ s hs)
   by_contra hle
@@ -247,11 +277,14 @@ lemma deriv_scaleFactor_pos (h : U.FriedmannSolution F Λ G c) (hk : U.geometry.
 
 -/
 
-/-- With `0 ≤ ρ`, `0 ≤ p` and `Λ = 0` at a time `t` of the interval, the second-order Friedmann
-  equation gives `∂ₜ ∂ₜ a ≤ 0` at `t`: the expansion decelerates. -/
-lemma deriv_deriv_scaleFactor_nonpos (h : U.FriedmannSolution F 0 G c) (hG : 0 < G)
-    (hc : c ≠ 0) {t : Time} (ht : t ∈ U.I) (hρ : 0 ≤ F.ρ t) (hp : 0 ≤ F.p t) :
-    ∂ₜ (∂ₜ U.a) t ≤ 0 := by
+/--
+With `0 ≤ ρ`, `0 ≤ p` and `Λ = 0` at a time `t` of the interval, the second-order Friedmann
+equation gives `∂ₜ ∂ₜ a ≤ 0` at `t`: the expansion decelerates.
+-/
+lemma deriv_deriv_scaleFactor_nonpos
+    (h : U.FriedmannSolution F 0 G c) (hG : 0 < G) (hc : c ≠ 0)
+    {t : Time} (ht : t ∈ U.I) (hρ : 0 ≤ F.ρ t) (hp : 0 ≤ F.p t)
+    : ∂ₜ (∂ₜ U.a) t ≤ 0 := by
   have hF2 := h.secondOrder t ht
   have ha := U.a_pos t ht
   unfold SecondOrderFriedmann at hF2
@@ -263,13 +296,17 @@ lemma deriv_deriv_scaleFactor_nonpos (h : U.FriedmannSolution F 0 G c) (hG : 0 <
   have := mul_nonneg (mul_nonneg hk hX) ha.le
   linarith
 
-/-- The Big-Bang bound for a solution of the Friedmann equations with `0 ≤ ρ`, `0 ≤ p` and
-  `Λ = 0` on its interval: if the model expands at `t₀ ∈ U.I`, every time of `U.I` is later than
-  `t₀ - 1 / H(t₀)`, the Big Bang being at most `1 / H(t₀)` in the past. -/
-lemma lt_of_mem_I (h : U.FriedmannSolution F 0 G c) (hG : 0 < G) (hc : c ≠ 0)
-    (hρ : ∀ s ∈ U.I, 0 ≤ F.ρ s) (hp : ∀ s ∈ U.I, 0 ≤ F.p s) {t₀ : Time} (ht₀ : t₀ ∈ U.I)
-    (h0 : 0 < ∂ₜ U.a t₀) {t : Time} (ht : t ∈ U.I) :
-    t₀.val - 1 / hubbleConstant U.a t₀ < t.val := by
+/--
+The Big-Bang bound for a solution of the Friedmann equations with `0 ≤ ρ`, `0 ≤ p` and
+`Λ = 0` on its interval: if the model expands at `t₀ ∈ U.I`, every time of `U.I` is later than
+`t₀ - 1 / H(t₀)`, the Big Bang being at most `1 / H(t₀)` in the past.
+-/
+lemma lt_of_mem_I
+    (h : U.FriedmannSolution F 0 G c) (hG : 0 < G) (hc : c ≠ 0) (hρ : ∀ s ∈ U.I, 0 ≤ F.ρ s)
+    (hp : ∀ s ∈ U.I, 0 ≤ F.p s)
+    {t₀ : Time} (ht₀ : t₀ ∈ U.I) (h0 : 0 < ∂ₜ U.a t₀)
+    {t : Time} (ht : t ∈ U.I)
+    : t₀.val - 1 / hubbleConstant U.a t₀ < t.val := by
   have hdec : ∀ s ∈ U.I, ∂ₜ (∂ₜ U.a) s ≤ 0 := fun s hs =>
     h.deriv_deriv_scaleFactor_nonpos hG hc hs (hρ s hs) (hp s hs)
   have := U.lt_of_mem_I_of_decelerating hdec ht₀ h0 ht
@@ -277,10 +314,13 @@ lemma lt_of_mem_I (h : U.FriedmannSolution F 0 G c) (hG : 0 < G) (hc : c ≠ 0)
   rwa [one_div_div]
 
 /-- Under the same assumptions, the interval of the model is bounded below. -/
-lemma bddBelow_I (h : U.FriedmannSolution F 0 G c) (hG : 0 < G) (hc : c ≠ 0)
-    (hρ : ∀ s ∈ U.I, 0 ≤ F.ρ s) (hp : ∀ s ∈ U.I, 0 ≤ F.p s) {t₀ : Time} (ht₀ : t₀ ∈ U.I)
-    (h0 : 0 < ∂ₜ U.a t₀) : BddBelow U.I :=
+lemma bddBelow_I
+    (h : U.FriedmannSolution F 0 G c) (hG : 0 < G) (hc : c ≠ 0) (hρ : ∀ s ∈ U.I, 0 ≤ F.ρ s)
+    (hp : ∀ s ∈ U.I, 0 ≤ F.p s)
+    {t₀ : Time} (ht₀ : t₀ ∈ U.I) (h0 : 0 < ∂ₜ U.a t₀)
+    : BddBelow U.I :=
   U.bddBelow_I_of_decelerating
-    (fun s hs => h.deriv_deriv_scaleFactor_nonpos hG hc hs (hρ s hs) (hp s hs)) ht₀ h0
+    (fun s hs => h.deriv_deriv_scaleFactor_nonpos hG hc hs (hρ s hs) (hp s hs))
+    ht₀ h0
 
 end Cosmology.FLRW.FriedmannSolution

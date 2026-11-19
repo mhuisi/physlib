@@ -33,13 +33,13 @@ open Module Physlib.List
 /-- The normal-time ordering on `FieldOpFreeAlgebra`. -/
 def normTimeOrder : FieldOpFreeAlgebra 𝓕 →ₗ[ℂ] FieldOpFreeAlgebra 𝓕 :=
   Basis.constr ofCrAnListFBasis ℂ fun φs =>
-  normTimeOrderSign φs • ofCrAnListF (normTimeOrderList φs)
+    normTimeOrderSign φs • ofCrAnListF (normTimeOrderList φs)
 
 @[inherit_doc normTimeOrder]
 scoped[FieldSpecification.FieldOpFreeAlgebra] notation "𝓣𝓝ᶠ(" a ")" => normTimeOrder a
 
-lemma normTimeOrder_ofCrAnListF (φs : List 𝓕.CrAnFieldOp) :
-    𝓣𝓝ᶠ(ofCrAnListF φs) = normTimeOrderSign φs • ofCrAnListF (normTimeOrderList φs) := by
+lemma normTimeOrder_ofCrAnListF (φs : List 𝓕.CrAnFieldOp)
+    : 𝓣𝓝ᶠ(ofCrAnListF φs) = normTimeOrderSign φs • ofCrAnListF (normTimeOrderList φs) := by
   rw [← ofListBasis_eq_ofList]
   simp only [normTimeOrder, Basis.constr_basis]
 

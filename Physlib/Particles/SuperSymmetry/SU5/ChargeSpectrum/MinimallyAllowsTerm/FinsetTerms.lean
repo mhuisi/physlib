@@ -70,9 +70,11 @@ finite set of potential terms, and prove some basic properties there of.
 ### A.1. `MinimallyAllowsFinsetTerms`: Prop of minimally allowing a finset of potential terms
 
 -/
-/-- A collection of charge spectra is said to minimally allow
-  a finite set of potential terms `Ts` if it allows
-  all terms in `Ts` and no strict subset of it allows all terms in `Ts`. -/
+/--
+A collection of charge spectra is said to minimally allow
+a finite set of potential terms `Ts` if it allows
+all terms in `Ts` and no strict subset of it allows all terms in `Ts`.
+-/
 def MinimallyAllowsFinsetTerms (x : ChargeSpectrum 𝓩) (Ts : Finset PotentialTerm) : Prop :=
   ∀ y ∈ x.powerset, y = x ↔ ∀ T ∈ Ts, y.AllowsTerm T
 
@@ -82,8 +84,8 @@ def MinimallyAllowsFinsetTerms (x : ChargeSpectrum 𝓩) (Ts : Finset PotentialT
 
 -/
 
-instance (x : ChargeSpectrum 𝓩) (Ts : Finset PotentialTerm) :
-    Decidable (x.MinimallyAllowsFinsetTerms Ts) :=
+instance (x : ChargeSpectrum 𝓩) (Ts : Finset PotentialTerm)
+    : Decidable (x.MinimallyAllowsFinsetTerms Ts) :=
   inferInstanceAs (Decidable (∀ y ∈ powerset x, y = x ↔ ∀ T ∈ Ts, y.AllowsTerm T))
 
 /-!
@@ -94,8 +96,9 @@ instance (x : ChargeSpectrum 𝓩) (Ts : Finset PotentialTerm) :
 
 variable {Ts : Finset PotentialTerm} {x : ChargeSpectrum 𝓩}
 
-lemma allowsTerm_of_minimallyAllowsFinsetTerms {T : PotentialTerm}
-    (h : x.MinimallyAllowsFinsetTerms Ts) (hT : T ∈ Ts) : x.AllowsTerm T :=
+lemma allowsTerm_of_minimallyAllowsFinsetTerms
+    {T : PotentialTerm} (h : x.MinimallyAllowsFinsetTerms Ts) (hT : T ∈ Ts)
+    : x.AllowsTerm T :=
   (h x (self_mem_powerset x)).mp rfl T hT
 
 /-!
@@ -105,8 +108,8 @@ lemma allowsTerm_of_minimallyAllowsFinsetTerms {T : PotentialTerm}
 -/
 
 @[simp]
-lemma minimallyAllowsFinsetTerms_singleton {T : PotentialTerm} :
-    x.MinimallyAllowsFinsetTerms {T} ↔ x.MinimallyAllowsTerm T := by
+lemma minimallyAllowsFinsetTerms_singleton {T : PotentialTerm}
+    : x.MinimallyAllowsFinsetTerms {T} ↔ x.MinimallyAllowsTerm T := by
   simp [MinimallyAllowsFinsetTerms, MinimallyAllowsTerm]
 
 /-!
@@ -130,11 +133,14 @@ Here we define `minTopBottom` in a way which is computationally efficient.
 
 -/
 
-/-- The set of charges of the form `(qHd, qHu, {q5}, {-qHd-q5, q10, qHu - q10})`
-  This includes every charge which minimally allows for the top and bottom Yukawas. -/
-def minTopBottom (S5 S10 : Finset 𝓩) : Multiset (ChargeSpectrum 𝓩) := Multiset.dedup <|
-  (S5.val ×ˢ S5.val ×ˢ S5.val ×ˢ S10.val).map
-    (fun x => ⟨x.1, x.2.1, {x.2.2.1}, {- x.1 - x.2.2.1, x.2.2.2, x.2.1 - x.2.2.2}⟩)
+/--
+The set of charges of the form `(qHd, qHu, {q5}, {-qHd-q5, q10, qHu - q10})`
+This includes every charge which minimally allows for the top and bottom Yukawas.
+-/
+def minTopBottom (S5 S10 : Finset 𝓩) : Multiset (ChargeSpectrum 𝓩) :=
+  Multiset.dedup <|
+    (S5.val ×ˢ S5.val ×ˢ S5.val ×ˢ S10.val).map
+      (fun x => ⟨x.1, x.2.1, {x.2.2.1}, {-x.1 - x.2.2.1, x.2.2.2, x.2.1 - x.2.2.2}⟩)
 
 /-!
 
@@ -142,9 +148,9 @@ def minTopBottom (S5 S10 : Finset 𝓩) : Multiset (ChargeSpectrum 𝓩) := Mult
 
 -/
 
-lemma allowsTerm_topYukawa_of_mem_minTopBottom {S5 S10 : Finset 𝓩}
-    {x : ChargeSpectrum 𝓩} (h : x ∈ minTopBottom S5 S10) :
-    x.AllowsTerm topYukawa := by
+lemma allowsTerm_topYukawa_of_mem_minTopBottom
+    {S5 S10 : Finset 𝓩} {x : ChargeSpectrum 𝓩} (h : x ∈ minTopBottom S5 S10)
+    : x.AllowsTerm topYukawa := by
   simp [minTopBottom] at h
   obtain ⟨qHd, qHu, q5, q10, _, rfl⟩ := h
   simp [allowsTerm_iff_subset_allowsTermForm, allowsTermForm, subset_def]
@@ -156,9 +162,9 @@ lemma allowsTerm_topYukawa_of_mem_minTopBottom {S5 S10 : Finset 𝓩}
 
 -/
 
-lemma allowsTerm_bottomYukawa_of_mem_minTopBottom {S5 S10 : Finset 𝓩}
-    {x : ChargeSpectrum 𝓩} (h : x ∈ minTopBottom S5 S10) :
-    x.AllowsTerm bottomYukawa := by
+lemma allowsTerm_bottomYukawa_of_mem_minTopBottom
+    {S5 S10 : Finset 𝓩} {x : ChargeSpectrum 𝓩} (h : x ∈ minTopBottom S5 S10)
+    : x.AllowsTerm bottomYukawa := by
   simp [minTopBottom] at h
   obtain ⟨qHd, qHu, q5, q10, _, rfl⟩ := h
   simp [allowsTerm_iff_subset_allowsTermForm, allowsTermForm, subset_def]
@@ -171,9 +177,8 @@ lemma allowsTerm_bottomYukawa_of_mem_minTopBottom {S5 S10 : Finset 𝓩}
 
 lemma mem_minTopBottom_of_minimallyAllowsFinsetTerms
     {x : ChargeSpectrum 𝓩} {S5 S10 : Finset 𝓩}
-    (h : x.MinimallyAllowsFinsetTerms {topYukawa, bottomYukawa})
-    (hx : x ∈ ofFinset S5 S10) :
-    x ∈ minTopBottom S5 S10 := by
+    (h : x.MinimallyAllowsFinsetTerms {topYukawa, bottomYukawa}) (hx : x ∈ ofFinset S5 S10)
+    : x ∈ minTopBottom S5 S10 := by
   simp [minTopBottom]
   have hTop : x.AllowsTerm topYukawa := allowsTerm_of_minimallyAllowsFinsetTerms h (by simp)
   have hBottom : x.AllowsTerm bottomYukawa := allowsTerm_of_minimallyAllowsFinsetTerms h (by simp)
@@ -183,20 +188,20 @@ lemma mem_minTopBottom_of_minimallyAllowsFinsetTerms
   | ⟨qHd, none, Q5, Q10⟩ =>
     simp [allowsTerm_iff_subset_allowsTermForm, allowsTermForm, subset_def] at hTop
   | ⟨some qHd, some qHu, Q5, Q10⟩ =>
-  simp [allowsTerm_iff_subset_allowsTermForm, allowsTermForm, subset_def] at hTop hBottom
-  obtain ⟨n, hn, q10, h10⟩ := hTop
-  obtain ⟨q5, h5⟩ := hBottom
-  use qHd, qHu, q5, q10
-  simp [mem_ofFinset_iff] at hx
-  refine ⟨⟨hx.1, hx.2.1, hx.2.2.1 h5.1, hx.2.2.2 (h10 (Finset.mem_insert_self _ _))⟩, ?_⟩
-  refine (h _ ?_).mpr ?_
-  · simp [subset_def]
-    exact ⟨h5.1, Finset.insert_subset h5.2 (hn ▸ h10)⟩
-  · intro T hT
-    fin_cases hT
-    · simp [allowsTerm_iff_subset_allowsTermForm, allowsTermForm, subset_def]
-      exact ⟨-qHu, by simp, q10, by simp⟩
-    · simp [allowsTerm_iff_subset_allowsTermForm, allowsTermForm, subset_def]
+    simp [allowsTerm_iff_subset_allowsTermForm, allowsTermForm, subset_def] at hTop hBottom
+    obtain ⟨n, hn, q10, h10⟩ := hTop
+    obtain ⟨q5, h5⟩ := hBottom
+    use qHd, qHu, q5, q10
+    simp [mem_ofFinset_iff] at hx
+    refine ⟨⟨hx.1, hx.2.1, hx.2.2.1 h5.1, hx.2.2.2 (h10 (Finset.mem_insert_self _ _))⟩, ?_⟩
+    refine (h _ ?_).mpr ?_
+    · simp [subset_def]
+      exact ⟨h5.1, Finset.insert_subset h5.2 (hn ▸ h10)⟩
+    · intro T hT
+      fin_cases hT
+      · simp [allowsTerm_iff_subset_allowsTermForm, allowsTermForm, subset_def]
+        exact ⟨-qHu, by simp, q10, by simp⟩
+      · simp [allowsTerm_iff_subset_allowsTermForm, allowsTermForm, subset_def]
 
 end ChargeSpectrum
 

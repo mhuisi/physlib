@@ -50,11 +50,12 @@ namespace MvPolynomial
 -/
 
 open scoped Classical in
-/-- Rescaling each variable `Xᵢ` by a constant `d i` multiplies the coefficient of the monomial `m`
-  by `∏ᵢ (d i) ^ (m i)`. -/
-lemma coeff_aeval_diag {σ R : Type*} [CommRing R] (d : σ → R) (f : MvPolynomial σ R)
-    (m : σ →₀ ℕ) :
-    (aeval (fun i => C (d i) * X i) f).coeff m = (m.prod fun i k => d i ^ k) * f.coeff m := by
+/--
+Rescaling each variable `Xᵢ` by a constant `d i` multiplies the coefficient of the monomial `m`
+by `∏ᵢ (d i) ^ (m i)`.
+-/
+lemma coeff_aeval_diag {σ R : Type*} [CommRing R] (d : σ → R) (f : MvPolynomial σ R) (m : σ →₀ ℕ)
+    : (aeval (fun i => C (d i) * X i) f).coeff m = (m.prod fun i k => d i ^ k) * f.coeff m := by
   induction f using MvPolynomial.induction_on generalizing m with
   | C a =>
     rw [aeval_C, MvPolynomial.algebraMap_eq, coeff_C]
@@ -65,8 +66,9 @@ lemma coeff_aeval_diag {σ R : Type*} [CommRing R] (d : σ → R) (f : MvPolynom
     simp only [map_add, AddMonoidAlgebra.coeff_add, Finsupp.add_apply, hp m, hq m, mul_add]
   | mul_X p i hp =>
     rw [map_mul, aeval_X]
-    have hrw : (aeval (fun i => C (d i) * X i) p) * (C (d i) * X i)
-        = C (d i) * ((aeval (fun i => C (d i) * X i) p) * X i) := by
+    have hrw
+        : (aeval (fun i => C (d i) * X i) p) * (C (d i) * X i)
+          = C (d i) * ((aeval (fun i => C (d i) * X i) p) * X i) := by
       rw [mul_left_comm]
     rw [hrw, coeff_C_mul, coeff_mul_X', coeff_mul_X']
     by_cases hi : i ∈ m.support
@@ -75,8 +77,9 @@ lemma coeff_aeval_diag {σ R : Type*} [CommRing R] (d : σ → R) (f : MvPolynom
       have hle : Finsupp.single i 1 ≤ m := Finsupp.single_le_iff.mpr hmi
       have hsplit : m = (m - Finsupp.single i 1) + Finsupp.single i 1 :=
         (tsub_add_cancel_of_le hle).symm
-      have hprod : (m.prod fun i k => d i ^ k)
-          = ((m - Finsupp.single i 1).prod fun i k => d i ^ k) * d i := by
+      have hprod
+          : (m.prod fun i k => d i ^ k)
+            = ((m - Finsupp.single i 1).prod fun i k => d i ^ k) * d i := by
         conv_lhs => rw [hsplit]
         rw [Finsupp.prod_add_index' (by intro a; simp) (by intro a b c; rw [pow_add]),
           Finsupp.prod_single_index (by simp)]
@@ -91,19 +94,22 @@ lemma coeff_aeval_diag {σ R : Type*} [CommRing R] (d : σ → R) (f : MvPolynom
 
 -/
 
-/-- **Charge balancing.** If each variable `Xᵢ` carries an integer charge `w i`, `c` is a phase of
-  infinite order, and the polynomial `f` is invariant under the charge rotation
-  `Xᵢ ↦ c^{wᵢ} Xᵢ`, then every monomial with nonzero net charge has vanishing coefficient. -/
-lemma coeff_eq_zero_of_charge_ne_zero {σ K : Type*} [Field K] (w : σ → ℤ) (c : K) (hc : c ≠ 0)
-    (hroot : ∀ n : ℤ, c ^ n = 1 → n = 0) {f : MvPolynomial σ K}
-    (hf : aeval (fun i => C (c ^ (w i)) * X i) f = f) {m : σ →₀ ℕ}
-    (hm : ∑ i ∈ m.support, (m i : ℤ) * w i ≠ 0) :
-    f.coeff m = 0 := by
+/--
+**Charge balancing.** If each variable `Xᵢ` carries an integer charge `w i`, `c` is a phase of
+infinite order, and the polynomial `f` is invariant under the charge rotation
+`Xᵢ ↦ c^{wᵢ} Xᵢ`, then every monomial with nonzero net charge has vanishing coefficient.
+-/
+lemma coeff_eq_zero_of_charge_ne_zero
+    {σ K : Type*} [Field K]
+    (w : σ → ℤ)
+    (c : K) (hc : c ≠ 0) (hroot : ∀ n : ℤ, c ^ n = 1 → n = 0)
+    {f : MvPolynomial σ K} (hf : aeval (fun i => C (c ^ (w i)) * X i) f = f)
+    {m : σ →₀ ℕ} (hm : ∑ i ∈ m.support, (m i : ℤ) * w i ≠ 0)
+    : f.coeff m = 0 := by
   classical
   have key := coeff_aeval_diag (fun i => c ^ (w i)) f m
   rw [hf] at key
-  have hgen : ∀ s : Finset σ, ∏ i ∈ s, (c ^ (w i)) ^ (m i)
-      = c ^ (∑ i ∈ s, (m i : ℤ) * w i) := by
+  have hgen : ∀ s : Finset σ, ∏ i ∈ s, (c ^ (w i)) ^ (m i) = c ^ (∑ i ∈ s, (m i : ℤ) * w i) := by
     intro s
     induction s using Finset.induction with
     | empty => simp

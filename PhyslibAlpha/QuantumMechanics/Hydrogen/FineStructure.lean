@@ -74,25 +74,31 @@ variable (H : HydrogenAtom 3) (c : SpeedOfLight)
 /-- The fine-structure constant `α = k/(ℏ c)` of the atom. -/
 def fineStructureConstant : ℝ := H.k / ((ℏ : ℝ) * c)
 
-/-- The relativistic kinetic correction `-⟨p⁴⟩/(8 m³ c²) = -⟨(E - V)²⟩/(2 m c²)` in the state
+/--
+The relativistic kinetic correction `-⟨p⁴⟩/(8 m³ c²) = -⟨(E - V)²⟩/(2 m c²)` in the state
 `(ν, l)`, written with `p² = 2m(E - V)`, `V = -k/r` and the radial expectation values
-`⟨1/r⟩ = ⟨1/ρ⟩/a`, `⟨1/r²⟩ = ⟨1/ρ²⟩/a²`. -/
+`⟨1/r⟩ = ⟨1/ρ⟩/a`, `⟨1/r²⟩ = ⟨1/ρ²⟩/a²`.
+-/
 def relativisticShift (ν l : ℕ) : ℝ :=
-  -(1 / (2 * H.m * (c : ℝ) ^ 2)) * (H.energyLevel (ν - 1) ^ 2 +
-    2 * H.energyLevel (ν - 1) * H.k * (radialMean ν l 1 / bohrRadius H) +
-      H.k ^ 2 * (radialMean ν l 2 / bohrRadius H ^ 2))
+  -(1 / (2 * H.m * (c : ℝ) ^ 2))
+    * (H.energyLevel (ν - 1) ^ 2
+      + 2 * H.energyLevel (ν - 1) * H.k * (radialMean ν l 1 / bohrRadius H)
+      + H.k ^ 2 * (radialMean ν l 2 / bohrRadius H ^ 2))
 
 /-- The spin–orbit correction `k/(2 m² c²) ⟨1/r³⟩ ⟨L · S⟩`, where `⟨L · S⟩ = ℏ² ls`. -/
 def spinOrbitShift (ν l : ℕ) (ls : ℝ) : ℝ :=
   H.k * (ℏ : ℝ) ^ 2 * ls / (2 * H.m ^ 2 * (c : ℝ) ^ 2) * (radialMean ν l 3 / bohrRadius H ^ 3)
 
-/-- The Darwin correction `π k ℏ²/(2 m² c²) |ψ(0)|²`, which is non-zero only for `s` states;
-there `|ψ(0)|² = |R(0)|²/(4π)` with `R` normalised in physical units. -/
+/--
+The Darwin correction `π k ℏ²/(2 m² c²) |ψ(0)|²`, which is non-zero only for `s` states;
+there `|ψ(0)|² = |R(0)|²/(4π)` with `R` normalised in physical units.
+-/
 def darwinShift (ν l : ℕ) : ℝ :=
   if l = 0 then
-    H.k * (ℏ : ℝ) ^ 2 / (8 * H.m ^ 2 * (c : ℝ) ^ 2) *
-      (radialR ν 0 0 ^ 2 / radialMoment ν 0 0 / bohrRadius H ^ 3)
-  else 0
+    H.k * (ℏ : ℝ) ^ 2 / (8 * H.m ^ 2 * (c : ℝ) ^ 2)
+      * (radialR ν 0 0 ^ 2 / radialMoment ν 0 0 / bohrRadius H ^ 3)
+  else
+    0
 
 /-- The total first-order fine-structure shift of the level `(ν, l)` with `⟨L · S⟩ = ℏ² ls`. -/
 def fineStructureShift (ν l : ℕ) (ls : ℝ) : ℝ :=
@@ -118,8 +124,8 @@ lemma ls_upper {ls : ℝ} (hls : (ls : ℂ) = Sl2.spinOrbitValue (2 * l) 1 0) : 
     ring
   exact_mod_cast h
 
-lemma ls_lower (hl1 : 1 ≤ l) {ls : ℝ} (hls : (ls : ℂ) = Sl2.spinOrbitValue (2 * l) 1 1) :
-    ls = -((l : ℝ) + 1) / 2 := by
+lemma ls_lower (hl1 : 1 ≤ l) {ls : ℝ} (hls : (ls : ℂ) = Sl2.spinOrbitValue (2 * l) 1 1)
+    : ls = -((l : ℝ) + 1) / 2 := by
   have h : (ls : ℂ) = ((-((l : ℝ) + 1) / 2 : ℝ) : ℂ) := by
     rw [hls, Sl2.spinOrbitValue, show 2 * l + 1 - 2 * 1 = 2 * l - 1 by omega,
       Nat.cast_sub (show 1 ≤ 2 * l by omega)]
@@ -127,14 +133,17 @@ lemma ls_lower (hl1 : 1 ≤ l) {ls : ℝ} (hls : (ls : ℂ) = Sl2.spinOrbitValue
     ring
   exact_mod_cast h
 
-/-- **Fine structure, `j = l + 1/2`.** With `⟨L · S⟩/ℏ²` the eigenvalue of `L · S` on the
+/--
+**Fine structure, `j = l + 1/2`.** With `⟨L · S⟩/ℏ²` the eigenvalue of `L · S` on the
 `j = l + 1/2` string (`Sl2.dot_coupled_stringVec`), the three corrections add up to
 `E_ν α²/ν² (ν/(j + 1/2) - 3/4)`. For `l = 0` the spin–orbit term vanishes and the Darwin term
-takes its place. -/
-lemma fineStructureShift_upper (hk : 0 < H.k) (hl : l < ν) {ls : ℝ}
-    (hls : (ls : ℂ) = Sl2.spinOrbitValue (2 * l) 1 0) :
-    fineStructureShift H c ν l ls = H.energyLevel (ν - 1) * fineStructureConstant H c ^ 2 /
-      (ν : ℝ) ^ 2 * ((ν : ℝ) / ((l + 1 / 2 : ℝ) + 1 / 2) - 3 / 4) := by
+takes its place.
+-/
+lemma fineStructureShift_upper
+    (hk : 0 < H.k) (hl : l < ν) {ls : ℝ} (hls : (ls : ℂ) = Sl2.spinOrbitValue (2 * l) 1 0)
+    : fineStructureShift H c ν l ls
+      = H.energyLevel (ν - 1) * fineStructureConstant H c ^ 2 / (ν : ℝ) ^ 2
+        * ((ν : ℝ) / ((l + 1 / 2 : ℝ) + 1 / 2) - 3 / 4) := by
   rw [ls_upper hls]
   have hm := H.m_pos.ne'
   have hk0 := hk.ne'
@@ -142,27 +151,31 @@ lemma fineStructureShift_upper (hk : 0 < H.k) (hl : l < ν) {ls : ℝ}
   have hc := c.val_ne_zero
   have hν : (ν : ℝ) ≠ 0 := by exact_mod_cast (show ν ≠ 0 by omega)
   rcases Nat.eq_zero_or_pos l with rfl | hl1
-  · simp only [fineStructureShift, relativisticShift, spinOrbitShift, darwinShift, ↓reduceIte,
+  · simp only [fineStructureShift, relativisticShift, spinOrbitShift, darwinShift, ↓ reduceIte,
       radialMean_one hl, radialMean_two hl, radialR_zero_sq_div hl, Nat.cast_zero, zero_div,
       mul_zero, zero_mul, add_zero]
-    rw [HydrogenAtom.energyLevel_eq, levelIndex_sub_one (by omega),
-      HydrogenAtom.rydbergEnergy_eq, fineStructureConstant, bohrRadius]
+    rw [HydrogenAtom.energyLevel_eq, levelIndex_sub_one (by omega), HydrogenAtom.rydbergEnergy_eq,
+      fineStructureConstant, bohrRadius]
     field_simp
     ring
   · have hl0 : (l : ℝ) ≠ 0 := by exact_mod_cast hl1.ne'
-    simp only [fineStructureShift, relativisticShift, spinOrbitShift, darwinShift,
-      hl1.ne', ↓reduceIte, radialMean_one hl, radialMean_two hl, radialMean_three hl hl1, add_zero]
-    rw [HydrogenAtom.energyLevel_eq, levelIndex_sub_one (by omega),
-      HydrogenAtom.rydbergEnergy_eq, fineStructureConstant, bohrRadius]
+    simp only [fineStructureShift, relativisticShift, spinOrbitShift, darwinShift, hl1.ne',
+      ↓ reduceIte, radialMean_one hl, radialMean_two hl, radialMean_three hl hl1, add_zero]
+    rw [HydrogenAtom.energyLevel_eq, levelIndex_sub_one (by omega), HydrogenAtom.rydbergEnergy_eq,
+      fineStructureConstant, bohrRadius]
     field_simp
     ring
 
-/-- **Fine structure, `j = l - 1/2`.** For `l ≥ 1` the three corrections add up to
-`E_ν α²/ν² (ν/(j + 1/2) - 3/4)` with `j = l - 1/2`. -/
-lemma fineStructureShift_lower (hk : 0 < H.k) (hl : l < ν) (hl1 : 1 ≤ l)
-    {ls : ℝ} (hls : (ls : ℂ) = Sl2.spinOrbitValue (2 * l) 1 1) :
-    fineStructureShift H c ν l ls = H.energyLevel (ν - 1) * fineStructureConstant H c ^ 2 /
-      (ν : ℝ) ^ 2 * ((ν : ℝ) / ((l - 1 / 2 : ℝ) + 1 / 2) - 3 / 4) := by
+/--
+**Fine structure, `j = l - 1/2`.** For `l ≥ 1` the three corrections add up to
+`E_ν α²/ν² (ν/(j + 1/2) - 3/4)` with `j = l - 1/2`.
+-/
+lemma fineStructureShift_lower
+    (hk : 0 < H.k) (hl : l < ν) (hl1 : 1 ≤ l)
+    {ls : ℝ} (hls : (ls : ℂ) = Sl2.spinOrbitValue (2 * l) 1 1)
+    : fineStructureShift H c ν l ls
+      = H.energyLevel (ν - 1) * fineStructureConstant H c ^ 2 / (ν : ℝ) ^ 2
+        * ((ν : ℝ) / ((l - 1 / 2 : ℝ) + 1 / 2) - 3 / 4) := by
   rw [ls_lower hl1 hls]
   have hm := H.m_pos.ne'
   have hk0 := hk.ne'
@@ -171,22 +184,24 @@ lemma fineStructureShift_lower (hk : 0 < H.k) (hl : l < ν) (hl1 : 1 ≤ l)
   have hν : (ν : ℝ) ≠ 0 := by exact_mod_cast (show ν ≠ 0 by omega)
   have hl0 : (l : ℝ) ≠ 0 := by exact_mod_cast (show l ≠ 0 by omega)
   simp only [fineStructureShift, relativisticShift, spinOrbitShift, darwinShift,
-    show l ≠ 0 by omega, ↓reduceIte, radialMean_one hl, radialMean_two hl, radialMean_three hl hl1,
+    show l ≠ 0 by omega, ↓ reduceIte, radialMean_one hl, radialMean_two hl, radialMean_three hl hl1,
     add_zero]
-  rw [HydrogenAtom.energyLevel_eq, levelIndex_sub_one (by omega),
-    HydrogenAtom.rydbergEnergy_eq, fineStructureConstant, bohrRadius]
+  rw [HydrogenAtom.energyLevel_eq, levelIndex_sub_one (by omega), HydrogenAtom.rydbergEnergy_eq,
+    fineStructureConstant, bohrRadius]
   field_simp
   ring
 
-/-- **The fine-structure shift depends on `j` only.** The levels `(ν, l, j = l + 1/2)` and
+/--
+**The fine-structure shift depends on `j` only.** The levels `(ν, l, j = l + 1/2)` and
 `(ν, l + 1, j = l + 1/2)` are shifted by the same amount; for `ν = 2`, `l = 0` this is the
-degeneracy of `2s_{1/2}` and `2p_{1/2}` that the Lamb shift lifts. -/
-lemma fineStructureShift_upper_eq_lower (hk : 0 < H.k) (hl : l + 1 < ν)
+degeneracy of `2s_{1/2}` and `2p_{1/2}` that the Lamb shift lifts.
+-/
+lemma fineStructureShift_upper_eq_lower
+    (hk : 0 < H.k) (hl : l + 1 < ν)
     {ls ls' : ℝ} (hls : (ls : ℂ) = Sl2.spinOrbitValue (2 * l) 1 0)
-    (hls' : (ls' : ℂ) = Sl2.spinOrbitValue (2 * (l + 1)) 1 1) :
-    fineStructureShift H c ν l ls = fineStructureShift H c ν (l + 1) ls' := by
-  rw [fineStructureShift_upper hk (by omega) hls,
-    fineStructureShift_lower hk hl (by omega) hls']
+    (hls' : (ls' : ℂ) = Sl2.spinOrbitValue (2 * (l + 1)) 1 1)
+    : fineStructureShift H c ν l ls = fineStructureShift H c ν (l + 1) ls' := by
+  rw [fineStructureShift_upper hk (by omega) hls, fineStructureShift_lower hk hl (by omega) hls']
   push_cast
   ring_nf
 

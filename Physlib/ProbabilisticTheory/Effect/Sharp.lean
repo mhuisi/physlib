@@ -48,25 +48,32 @@ variable {E : Type*} [OrderUnitSpace E]
 
 -/
 
-/-- An effect is sharp when it is an extreme point of the effect interval: it cannot be written as
-a nontrivial mixture of two distinct effects. -/
+/--
+An effect is sharp when it is an extreme point of the effect interval: it cannot be written as
+a nontrivial mixture of two distinct effects.
+-/
 def IsSharp (e : Effect E) : Prop := (e : E) ∈ Set.extremePoints ℝ (Effect E)
 
 /-- The impossible outcome 0 is sharp. -/
 lemma isSharp_zero : IsSharp (0 : Effect E) := by
   refine ⟨(0 : Effect E).2, fun x₁ hx₁ x₂ hx₂ ⟨a, b, ha, hb, _, hz⟩ => ?_⟩
-  have hax := (add_eq_zero_iff_of_nonneg (smul_nonneg ha.le hx₁.1)
-    (smul_nonneg hb.le hx₂.1)).mp (by simpa using hz) |>.1
+  have hax :=
+    (add_eq_zero_iff_of_nonneg (smul_nonneg ha.le hx₁.1) (smul_nonneg hb.le hx₂.1)).mp
+        (by simpa using hz)
+      |>.1
   exact (smul_eq_zero.mp hax).resolve_left ha.ne'
 
-/-- Sharpness is preserved by taking the complement:
-`e ↦ 1 - e` is an affine involution of the effect interval. -/
+/--
+Sharpness is preserved by taking the complement:
+`e ↦ 1 - e` is an affine involution of the effect interval.
+-/
 lemma isSharp_complement {e : Effect E} (h : IsSharp e) : IsSharp (complement e) := by
   refine ⟨(complement e).2, fun x₁ hx₁ x₂ hx₂ ⟨a, b, ha, hb, hab, hz⟩ => ?_⟩
   rw [coe_complement] at hz ⊢
-  have h₁ := (mem_extremePoints_iff_left.mp h).2 (1 - x₁) (complement ⟨x₁, hx₁⟩).2 (1 - x₂)
-    (complement ⟨x₂, hx₂⟩).2
-    ⟨a, b, ha, hb, hab, by linear_combination (norm := module) hab • (1 : E) - hz⟩
+  have h₁ :=
+    (mem_extremePoints_iff_left.mp h).2 (1 - x₁) (complement ⟨x₁, hx₁⟩).2 (1 - x₂)
+      (complement ⟨x₂, hx₂⟩).2
+      ⟨a, b, ha, hb, hab, by linear_combination (norm := module) hab • (1 : E) - hz⟩
   rw [← h₁, sub_sub_cancel]
 
 /-- Sharpness is preserved by taking the complement, in either direction. -/

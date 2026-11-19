@@ -54,10 +54,12 @@ see `Physlib.SpaceAndTime.Space.Basic` for a discussion of the (dis)advantages o
 ## A. The `WaveVectorSpace` type
 -/
 
-/-- The type `WaveVectorSpace d` is the real vector space which corresponds to `d`-dimensional
+/--
+The type `WaveVectorSpace d` is the real vector space which corresponds to `d`-dimensional
 (angular) wave vectors in `Space d` with a given (but arbitrary) choice of inverse length unit.
 
-The default value of `d` is `3`. Thus `WaveVectorSpace = WaveVectorSpace 3`-/
+The default value of `d` is `3`. Thus `WaveVectorSpace = WaveVectorSpace 3`
+-/
 structure WaveVectorSpace (d : ℕ := 3) where
   /-- The underlying map `Fin d → ℝ` associated with a vector in `WaveVectorSpace`. -/
   val : Fin d → ℝ
@@ -187,8 +189,7 @@ noncomputable instance instNormedAddCommGroup : NormedAddCommGroup (WaveVectorSp
 noncomputable instance instInnerProductSpaceReal : InnerProductSpace ℝ (WaveVectorSpace d) :=
   InnerProductSpace.ofCore instCoreReal.toCore
 
-lemma norm_eq : ‖k‖ = √(∑ i, k i ^ 2) := by
-  simp_rw [norm_eq_sqrt_real_inner, inner_apply, pow_two]
+lemma norm_eq : ‖k‖ = √(∑ i, k i ^ 2) := by simp_rw [norm_eq_sqrt_real_inner, inner_apply, pow_two]
 
 lemma norm_sq_eq : ‖k‖ ^ 2 = ∑ i, k i ^ 2 := by
   simp_rw [← real_inner_self_eq_norm_sq, inner_apply, pow_two]

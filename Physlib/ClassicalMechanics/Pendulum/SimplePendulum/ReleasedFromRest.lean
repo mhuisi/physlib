@@ -90,41 +90,51 @@ analytic input is needed here, only the two special values of the energy at time
 
 -/
 
-/-- Along a solution of the simple pendulum with `θ 0 0 = θ₀` and released from rest,
-  `∂ₜ θ 0 = 0`, the energy first integral holds at every instant in the form
-  `I θ̇² = 2 m g ℓ (cos θ - cos θ₀)`, with the moment of inertia `I` and the mass `m` not yet
-  cancelled. This is read off from energy conservation (`IsSolution.energy_eq`) at the two
-  special values of the energy at time `0`: zero kinetic energy and potential energy
-  `m g ℓ (1 - cos θ₀)`. -/
+/--
+Along a solution of the simple pendulum with `θ 0 0 = θ₀` and released from rest,
+`∂ₜ θ 0 = 0`, the energy first integral holds at every instant in the form
+`I θ̇² = 2 m g ℓ (cos θ - cos θ₀)`, with the moment of inertia `I` and the mass `m` not yet
+cancelled. This is read off from energy conservation (`IsSolution.energy_eq`) at the two
+special values of the energy at time `0`: zero kinetic energy and potential energy
+`m g ℓ (1 - cos θ₀)`.
+-/
 lemma inertia_mul_sq_deriv_eq_of_isSolution_of_deriv_zero
-    {θ : Time → EuclideanSpace ℝ (Fin 1)} {θ₀ : ℝ} (h : S.IsSolution θ) (hx0 : θ 0 0 = θ₀)
-    (hv0 : ∂ₜ θ 0 = 0) (t : Time) :
-    S.inertia * (∂ₜ θ t 0) ^ 2 = 2 * (S.m * S.g * S.ℓ) * (Real.cos (θ t 0) - Real.cos θ₀) := by
+    {θ : Time → EuclideanSpace ℝ (Fin 1)} {θ₀ : ℝ}
+    (h : S.IsSolution θ) (hx0 : θ 0 0 = θ₀) (hv0 : ∂ₜ θ 0 = 0)
+    (t : Time)
+    : S.inertia * (∂ₜ θ t 0) ^ 2 = 2 * (S.m * S.g * S.ℓ) * (Real.cos (θ t 0) - Real.cos θ₀) := by
   have hE := h.energy_eq t
-  simp only [energy_eq, kineticEnergy_eq, potentialEnergy_eq, hv0, hx0, inner_zero_left,
-    mul_zero, zero_add] at hE
+  simp only [energy_eq, kineticEnergy_eq, potentialEnergy_eq, hv0, hx0, inner_zero_left, mul_zero,
+      zero_add]
+    at hE
   rw [PiLp.inner_apply, Fin.sum_univ_one, RCLike.inner_apply, conj_trivial] at hE
   linear_combination 2 * hE
 
-/-- Along a solution of the simple pendulum with `θ 0 0 = θ₀` and released from rest,
-  `∂ₜ θ 0 = 0`, the energy first integral holds with the mass cancelled,
-  `θ̇² = 2 ω² (cos θ - cos θ₀)`, where `ω = √(g/ℓ)`. -/
+/--
+Along a solution of the simple pendulum with `θ 0 0 = θ₀` and released from rest,
+`∂ₜ θ 0 = 0`, the energy first integral holds with the mass cancelled,
+`θ̇² = 2 ω² (cos θ - cos θ₀)`, where `ω = √(g/ℓ)`.
+-/
 lemma sq_deriv_eq_of_isSolution_of_deriv_zero
-    {θ : Time → EuclideanSpace ℝ (Fin 1)} {θ₀ : ℝ} (h : S.IsSolution θ) (hx0 : θ 0 0 = θ₀)
-    (hv0 : ∂ₜ θ 0 = 0) (t : Time) :
-    (∂ₜ θ t 0) ^ 2 = 2 * S.ω ^ 2 * (Real.cos (θ t 0) - Real.cos θ₀) := by
+    {θ : Time → EuclideanSpace ℝ (Fin 1)} {θ₀ : ℝ}
+    (h : S.IsSolution θ) (hx0 : θ 0 0 = θ₀) (hv0 : ∂ₜ θ 0 = 0)
+    (t : Time)
+    : (∂ₜ θ t 0) ^ 2 = 2 * S.ω ^ 2 * (Real.cos (θ t 0) - Real.cos θ₀) := by
   have hkey := S.inertia_mul_sq_deriv_eq_of_isSolution_of_deriv_zero h hx0 hv0 t
   have h' : S.inertia * ((∂ₜ θ t 0) ^ 2 - 2 * S.ω ^ 2 * (Real.cos (θ t 0) - Real.cos θ₀)) = 0 := by
     linear_combination hkey - 2 * (Real.cos (θ t 0) - Real.cos θ₀) * S.ω_sq_mul_inertia
   exact sub_eq_zero.mp ((mul_eq_zero.mp h').resolve_left S.inertia_ne_zero)
 
-/-- Along a solution of the simple pendulum with `θ 0 0 = θ₀` and released from rest,
-  `∂ₜ θ 0 = 0`, the energy first integral in the classical `g / ℓ` form:
-  `θ̇² = (2 g / ℓ) (cos θ - cos θ₀)`. -/
+/--
+Along a solution of the simple pendulum with `θ 0 0 = θ₀` and released from rest,
+`∂ₜ θ 0 = 0`, the energy first integral in the classical `g / ℓ` form:
+`θ̇² = (2 g / ℓ) (cos θ - cos θ₀)`.
+-/
 lemma sq_deriv_eq_of_isSolution_of_deriv_zero'
-    {θ : Time → EuclideanSpace ℝ (Fin 1)} {θ₀ : ℝ} (h : S.IsSolution θ) (hx0 : θ 0 0 = θ₀)
-    (hv0 : ∂ₜ θ 0 = 0) (t : Time) :
-    (∂ₜ θ t 0) ^ 2 = 2 * (S.g / S.ℓ) * (Real.cos (θ t 0) - Real.cos θ₀) := by
+    {θ : Time → EuclideanSpace ℝ (Fin 1)} {θ₀ : ℝ}
+    (h : S.IsSolution θ) (hx0 : θ 0 0 = θ₀) (hv0 : ∂ₜ θ 0 = 0)
+    (t : Time)
+    : (∂ₜ θ t 0) ^ 2 = 2 * (S.g / S.ℓ) * (Real.cos (θ t 0) - Real.cos θ₀) := by
   rw [S.sq_deriv_eq_of_isSolution_of_deriv_zero h hx0 hv0 t, S.ω_sq]
 
 /-!
@@ -145,19 +155,23 @@ motion.
 
 -/
 
-/-- The small-angle motion of the pendulum released from rest at initial angle `θ₀`: the
-  cosine `θ₀ cos (ω t)` of angular frequency `ω`. -/
-noncomputable def releasedFromRest (θ₀ : ℝ) : Time → EuclideanSpace ℝ (Fin 1) :=
-  fun t => Real.cos (S.ω * t.val) • EuclideanSpace.single (0 : Fin 1) θ₀
+/--
+The small-angle motion of the pendulum released from rest at initial angle `θ₀`: the
+cosine `θ₀ cos (ω t)` of angular frequency `ω`.
+-/
+noncomputable def releasedFromRest (θ₀ : ℝ) : Time → EuclideanSpace ℝ (Fin 1) := fun t =>
+  Real.cos (S.ω * t.val) • EuclideanSpace.single (0 : Fin 1) θ₀
 
-/-- The motion released from rest at angle `θ₀` is the small-angle trajectory of the initial
-  conditions with initial angle `θ₀` and zero initial angular velocity. -/
-lemma releasedFromRest_eq (θ₀ : ℝ) :
-    S.releasedFromRest θ₀ = S.smallAngleTrajectory ⟨EuclideanSpace.single 0 θ₀, 0⟩ := by
+/--
+The motion released from rest at angle `θ₀` is the small-angle trajectory of the initial
+conditions with initial angle `θ₀` and zero initial angular velocity.
+-/
+lemma releasedFromRest_eq (θ₀ : ℝ)
+    : S.releasedFromRest θ₀ = S.smallAngleTrajectory ⟨EuclideanSpace.single 0 θ₀, 0⟩ := by
   funext t
   ext i
-  simp [releasedFromRest, smallAngleTrajectory,
-    HarmonicOscillator.InitialConditions.trajectory, toHarmonicOscillator_ω]
+  simp [releasedFromRest, smallAngleTrajectory, HarmonicOscillator.InitialConditions.trajectory,
+    toHarmonicOscillator_ω]
 
 /-!
 
@@ -167,28 +181,33 @@ lemma releasedFromRest_eq (θ₀ : ℝ) :
 
 /-- At time `0` the motion released from rest at angle `θ₀` is at the angle `θ₀`. -/
 @[simp]
-lemma releasedFromRest_at_zero (θ₀ : ℝ) :
-    S.releasedFromRest θ₀ 0 = EuclideanSpace.single 0 θ₀ := by
+lemma releasedFromRest_at_zero (θ₀ : ℝ) : S.releasedFromRest θ₀ 0 = EuclideanSpace.single 0 θ₀ := by
   simp [releasedFromRest]
 
-/-- The motion released from rest at angle `θ₀` is genuinely released from rest: its angular
-  velocity at time `0` vanishes. -/
+/--
+The motion released from rest at angle `θ₀` is genuinely released from rest: its angular
+velocity at time `0` vanishes.
+-/
 @[simp]
 lemma releasedFromRest_velocity_at_zero (θ₀ : ℝ) : ∂ₜ (S.releasedFromRest θ₀) 0 = 0 := by
   rw [S.releasedFromRest_eq θ₀]
   exact S.smallAngleTrajectory_velocity_at_zero ⟨EuclideanSpace.single 0 θ₀, 0⟩
 
-/-- The motion released from rest at angle `θ₀` satisfies the linearized equation of
-  motion. -/
-lemma releasedFromRest_linearizedEquationOfMotion (θ₀ : ℝ) :
-    S.LinearizedEquationOfMotion (S.releasedFromRest θ₀) := by
+/--
+The motion released from rest at angle `θ₀` satisfies the linearized equation of
+motion.
+-/
+lemma releasedFromRest_linearizedEquationOfMotion (θ₀ : ℝ)
+    : S.LinearizedEquationOfMotion (S.releasedFromRest θ₀) := by
   rw [S.releasedFromRest_eq θ₀]
   exact S.smallAngleTrajectory_linearizedEquationOfMotion ⟨EuclideanSpace.single 0 θ₀, 0⟩
 
-/-- The motion released from rest at angle `θ₀` is periodic with the small-angle period: after
-  each time `2π √(ℓ/g)` the motion returns to the angle `θ₀` with zero angular velocity. -/
-lemma releasedFromRest_periodic (θ₀ : ℝ) :
-    Function.Periodic (S.releasedFromRest θ₀) (S.smallAnglePeriod : Time) := by
+/--
+The motion released from rest at angle `θ₀` is periodic with the small-angle period: after
+each time `2π √(ℓ/g)` the motion returns to the angle `θ₀` with zero angular velocity.
+-/
+lemma releasedFromRest_periodic (θ₀ : ℝ)
+    : Function.Periodic (S.releasedFromRest θ₀) (S.smallAnglePeriod : Time) := by
   rw [S.releasedFromRest_eq θ₀]
   exact S.smallAngleTrajectory_periodic ⟨EuclideanSpace.single 0 θ₀, 0⟩
 

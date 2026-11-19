@@ -62,8 +62,8 @@ open ProbabilisticTheory ProbabilisticTheory.QuasiLocal ProbabilisticTheory.Quan
 open CondensedMatter.QuasiLocal
 
 variable {G F : Type*} [AddCommGroup G] [DecidableEq (CellSite G F)]
-variable [TopologicalSpace G] [DiscreteTopology G]
-  [MeasurableSpace (PontryaginDual (Multiplicative G))]
+variable
+  [TopologicalSpace G] [DiscreteTopology G] [MeasurableSpace (PontryaginDual (Multiplicative G))]
   [BorelSpace (PontryaginDual (Multiplicative G))]
 variable {Ω₀ : Type*} [Fintype Ω₀] [DecidableEq Ω₀]
 variable (H : Subgroup (CellSymmetry G F))
@@ -79,8 +79,7 @@ def manyBodyRep : H →* unitary (ω.GNS →L[ℂ] ω.GNS) :=
 variable (htrans : ∀ a : G, CellSymmetry.translation a ∈ H)
 
 /-- The translations as elements of the symmetry subgroup. -/
-def translationIn : Multiplicative G →* H :=
-  (translationHom G F).codRestrict H fun _a => htrans _
+def translationIn : Multiplicative G →* H := (translationHom G F).codRestrict H fun _a => htrans _
 
 include htrans in
 /-- The translation representation on the GNS space. -/
@@ -92,8 +91,9 @@ omit [DiscreteTopology G] in
 omit [BorelSpace (PontryaginDual (Multiplicative G))] in
 omit [MeasurableSpace (PontryaginDual (Multiplicative G))] in
 omit [TopologicalSpace G] in
-lemma manyBodyTranslation_apply (a : Multiplicative G) :
-    manyBodyTranslation H ω hω htrans a = manyBodyRep H ω hω (translationIn H htrans a) := rfl
+lemma manyBodyTranslation_apply (a : Multiplicative G)
+    : manyBodyTranslation H ω hω htrans a = manyBodyRep H ω hω (translationIn H htrans a) :=
+  rfl
 
 /-- The action of a symmetry on the lattice of translations, through its linear part. -/
 def linearAut : H →* MulAut (Multiplicative G) where
@@ -107,14 +107,14 @@ omit [BorelSpace (PontryaginDual (Multiplicative G))] in
 omit [MeasurableSpace (PontryaginDual (Multiplicative G))] in
 omit [TopologicalSpace G] in
 /-- **The translations and the symmetries are covariant on the GNS space.** -/
-lemma manyBodyRep_covariant :
-    UnitaryRep.IsCovariantRep (linearAut H) (manyBodyTranslation H ω hω htrans)
+lemma manyBodyRep_covariant
+    : UnitaryRep.IsCovariantRep (linearAut H) (manyBodyTranslation H ω hω htrans)
       (manyBodyRep H ω hω) := by
-  refine UnitaryRep.isCovariantRep_comp (linearAut H) (manyBodyRep H ω hω)
-    (translationIn H htrans) fun s a => Subtype.ext ?_
-  change (s : CellSymmetry G F) * CellSymmetry.translation (Multiplicative.toAdd a) =
-    CellSymmetry.translation ((s : CellSymmetry G F).linear (Multiplicative.toAdd a)) *
-      (s : CellSymmetry G F)
+  refine UnitaryRep.isCovariantRep_comp (linearAut H) (manyBodyRep H ω hω) (translationIn H htrans)
+    fun s a => Subtype.ext ?_
+  change (s : CellSymmetry G F) * CellSymmetry.translation (Multiplicative.toAdd a)
+    = CellSymmetry.translation ((s : CellSymmetry G F).linear (Multiplicative.toAdd a))
+      * (s : CellSymmetry G F)
   rw [← CellSymmetry.mul_translation_mul_inv (s : CellSymmetry G F) (Multiplicative.toAdd a),
     mul_assoc, inv_mul_cancel, mul_one]
 
@@ -122,8 +122,8 @@ lemma manyBodyRep_covariant :
 
 section Dynamics
 
-variable (τ : crystalAlgebra Ω₀ G F ≃⋆ₐ[ℂ] crystalAlgebra Ω₀ G F)
-  (hτ : ∀ a, ω (τ a) = ω a)
+variable
+  (τ : crystalAlgebra Ω₀ G F ≃⋆ₐ[ℂ] crystalAlgebra Ω₀ G F) (hτ : ∀ a, ω (τ a) = ω a)
   (hcomm : ∀ s : H, τ * cellSymmetryAction Ω₀ s = cellSymmetryAction Ω₀ s * τ)
 
 include hcomm in
@@ -131,10 +131,12 @@ omit [DiscreteTopology G] in
 omit [BorelSpace (PontryaginDual (Multiplicative G))] in
 omit [MeasurableSpace (PontryaginDual (Multiplicative G))] in
 omit [TopologicalSpace G] in
-/-- A dynamics commuting with a symmetry is implemented by an operator commuting with the
-unitary implementing the symmetry. -/
-lemma commute_manyBodyRep (s : H) :
-    Commute ((manyBodyRep H ω hω s : unitary (ω.GNS →L[ℂ] ω.GNS)) : ω.GNS →L[ℂ] ω.GNS)
+/--
+A dynamics commuting with a symmetry is implemented by an operator commuting with the
+unitary implementing the symmetry.
+-/
+lemma commute_manyBodyRep (s : H)
+    : Commute ((manyBodyRep H ω hω s : unitary (ω.GNS →L[ℂ] ω.GNS)) : ω.GNS →L[ℂ] ω.GNS)
       (AlgState.gnsAut τ hτ) :=
   (AlgState.gnsAut_commute (hω s) hτ (hcomm s).symm)
 
@@ -144,30 +146,32 @@ omit [BorelSpace (PontryaginDual (Multiplicative G))] in
 omit [MeasurableSpace (PontryaginDual (Multiplicative G))] in
 omit [TopologicalSpace G] in
 /-- A dynamics commuting with the symmetries commutes with the translation representation. -/
-lemma commute_manyBodyTranslation (a : Multiplicative G) :
-    Commute ((manyBodyTranslation H ω hω htrans a : unitary (ω.GNS →L[ℂ] ω.GNS)) :
-      ω.GNS →L[ℂ] ω.GNS) (AlgState.gnsAut τ hτ) :=
+lemma commute_manyBodyTranslation (a : Multiplicative G)
+    : Commute
+      ((manyBodyTranslation H ω hω htrans a : unitary (ω.GNS →L[ℂ] ω.GNS)) : ω.GNS →L[ℂ] ω.GNS)
+      (AlgState.gnsAut τ hτ) :=
   commute_manyBodyRep H ω hω τ hτ hcomm (translationIn H htrans a)
 
 variable [Countable G]
 
 include hcomm htrans in
-/-- **Symmetry reduction of a many-body dynamics on an infinite crystal.** Let `ω` be a state of the
+/--
+**Symmetry reduction of a many-body dynamics on an infinite crystal.** Let `ω` be a state of the
 quasi-local algebra invariant under a group `H` of cell symmetries containing the translations,
 and `τ` an automorphism preserving `ω` and commuting with `H`: a time evolution. Then the unitary
 implementing `τ` is reduced by the sectors of total momentum, and its restriction to the sector of
 the momenta in a set `S` has the same spectrum as its restriction to the sector of the momenta in
-the image of `S` under any symmetry `s` in `H`. -/
-lemma spectrum_sectorOp_eq_manyBody (s : H)
-    {S : Set (PontryaginDual (Multiplicative G))} (hS : MeasurableSet S) :
-    spectrum ℂ (UnitaryRep.sectorOp
-        (commute_manyBodyTranslation H ω hω htrans τ hτ hcomm) S) =
-      spectrum ℂ (UnitaryRep.sectorOp
-        (commute_manyBodyTranslation H ω hω htrans τ hτ hcomm)
-        (UnitaryRep.dualAct (linearAut H) s '' S)) :=
+the image of `S` under any symmetry `s` in `H`.
+-/
+lemma spectrum_sectorOp_eq_manyBody
+    (s : H) {S : Set (PontryaginDual (Multiplicative G))} (hS : MeasurableSet S)
+    : spectrum ℂ (UnitaryRep.sectorOp (commute_manyBodyTranslation H ω hω htrans τ hτ hcomm) S)
+      = spectrum ℂ
+        (UnitaryRep.sectorOp (commute_manyBodyTranslation H ω hω htrans τ hτ hcomm)
+          (UnitaryRep.dualAct (linearAut H) s '' S)) :=
   UnitaryRep.spectrum_sectorOp_eq (manyBodyRep_covariant H ω hω htrans)
-    (commute_manyBodyTranslation H ω hω htrans τ hτ hcomm)
-    (commute_manyBodyRep H ω hω τ hτ hcomm) s hS
+    (commute_manyBodyTranslation H ω hω htrans τ hτ hcomm) (commute_manyBodyRep H ω hω τ hτ hcomm) s
+    hS
 
 end Dynamics
 

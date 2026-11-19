@@ -67,8 +67,8 @@ lemma apply_mem_Icc (ω : 𝓢[ℝ, E]) (e : Effect E) : ω e ∈ Set.Icc 0 1 :=
   ⟨map_nonneg ω e.2.1, ω.apply_le_one e.2.2⟩
 
 /-- Evaluation is affine in the effect argument. -/
-lemma apply_mix (ω : 𝓢[ℝ, E]) (e f : Effect E) (t : unitInterval) :
-    ω (Effect.mix e f t) = (t : ℝ) * ω e + (1 - (t : ℝ)) * ω f := by
+lemma apply_mix (ω : 𝓢[ℝ, E]) (e f : Effect E) (t : unitInterval)
+    : ω (Effect.mix e f t) = (t : ℝ) * ω e + (1 - (t : ℝ)) * ω f := by
   simp [Effect.coe_mix]
 
 /-!
@@ -78,21 +78,20 @@ lemma apply_mix (ω : 𝓢[ℝ, E]) (e f : Effect E) (t : unitInterval) :
 -/
 
 /-- Two states that agree on all effects agree on every nonnegative element. -/
-lemma ext_of_effect_eq_of_nonneg {ω φ : 𝓢[ℝ, E]}
-    (h : ∀ e : Effect E, ω e = φ e) {B : E} (hB : 0 ≤ B) : ω B = φ B := by
+lemma ext_of_effect_eq_of_nonneg
+    {ω φ : 𝓢[ℝ, E]} (h : ∀ e : Effect E, ω e = φ e) {B : E} (hB : 0 ≤ B)
+    : ω B = φ B := by
   obtain ⟨r, hr, hrB⟩ := Effect.exists_pos_smul_mem hB
   exact mul_left_cancel₀ hr.ne' (by simpa using h ⟨r • B, hrB⟩)
 
 /-- A state is determined by its values on effects. -/
-lemma ext_of_effect_eq {ω φ : 𝓢[ℝ, E]}
-    (h : ∀ e : Effect E, ω e = φ e) : ω = φ := by
+lemma ext_of_effect_eq {ω φ : 𝓢[ℝ, E]} (h : ∀ e : Effect E, ω e = φ e) : ω = φ := by
   refine DFunLike.ext _ _ fun A => ?_
   obtain ⟨Ap, An, hAp, hAn, rfl⟩ := OrderUnitSpace.exists_eq_sub_nonneg A
   rw [map_sub, map_sub, ext_of_effect_eq_of_nonneg h hAp, ext_of_effect_eq_of_nonneg h hAn]
 
 /-- Evaluation on effects is injective on states. -/
-lemma injective_apply_effect :
-    Function.Injective (fun (ω : 𝓢[ℝ, E]) (e : Effect E) => ω e) :=
+lemma injective_apply_effect : Function.Injective (fun (ω : 𝓢[ℝ, E]) (e : Effect E) => ω e) :=
   fun _ _ h => ext_of_effect_eq (congrFun h)
 
 end UnitalPositiveLinearMap
@@ -109,21 +108,21 @@ variable [ArchimedeanOrderUnitSpace E]
 
 -/
 
-/-- The distance between two effects is the supremum of the difference in their evaluations over
-all states. -/
-lemma dist_eq_sSup_abs_apply [Nontrivial E] (e f : Effect E) :
-    Dist.dist e f = sSup (Set.range fun ω : 𝓢[ℝ, E] => |ω e - ω f|) := by
+/--
+The distance between two effects is the supremum of the difference in their evaluations over
+all states.
+-/
+lemma dist_eq_sSup_abs_apply [Nontrivial E] (e f : Effect E)
+    : Dist.dist e f = sSup (Set.range fun ω : 𝓢[ℝ, E] => |ω e - ω f|) := by
   rw [dist_eq_orderUnitNorm, ← sSup_abs_apply_eq_orderUnitNorm]
   simp_rw [map_sub]
 
 /-- An effect is determined by its values under all states. -/
-lemma ext_of_forall_apply_eq {e f : Effect E}
-    (h : ∀ ω : 𝓢[ℝ, E], ω e = ω f) : e = f :=
+lemma ext_of_forall_apply_eq {e f : Effect E} (h : ∀ ω : 𝓢[ℝ, E], ω e = ω f) : e = f :=
   Subtype.ext (UnitalPositiveLinearMap.ext_of_forall_apply_eq h)
 
 /-- Evaluation by states is injective on effects. -/
-lemma injective_apply_state :
-    Function.Injective (fun (e : Effect E) (ω : 𝓢[ℝ, E]) => ω e) :=
+lemma injective_apply_state : Function.Injective (fun (e : Effect E) (ω : 𝓢[ℝ, E]) => ω e) :=
   fun _ _ h => ext_of_forall_apply_eq (congrFun h)
 
 end Effect

@@ -45,7 +45,8 @@ namespace CauchyFlow
 
 -/
 
-/-- A Cauchy flow is inviscid with pressure `p` when its stress is the isotropic pressure stress
+/--
+A Cauchy flow is inviscid with pressure `p` when its stress is the isotropic pressure stress
 `-p I`.
 
 In this formulation, inviscid means that the Cauchy stress has no viscous or shear contribution.
@@ -55,9 +56,9 @@ def IsInviscid (d : ℕ) (flow : CauchyFlow d) (pressure : ScalarField d) : Prop
   ∀ t x, flow.stress t x = (-(pressure t x)) • (1 : Matrix (Fin d) (Fin d) ℝ)
 
 /-- The matrix divergence of the inviscid pressure stress `-p I` is `-grad p`. -/
-lemma matrixDiv_inviscid_pressure_stress (d : ℕ) (pressureAtTime : Space d → ℝ) :
-    matrixDiv d (fun x => (-(pressureAtTime x)) • (1 : Matrix (Fin d) (Fin d) ℝ)) =
-      -∇ pressureAtTime := by
+lemma matrixDiv_inviscid_pressure_stress (d : ℕ) (pressureAtTime : Space d → ℝ)
+    : matrixDiv d (fun x => (-(pressureAtTime x)) • (1 : Matrix (Fin d) (Fin d) ℝ))
+      = - ∇ pressureAtTime := by
   ext x i
   rw [matrixDiv_apply]
   rw [Finset.sum_eq_single i]
@@ -68,15 +69,16 @@ lemma matrixDiv_inviscid_pressure_stress (d : ℕ) (pressureAtTime : Space d →
   · intro hi
     simp at hi
 
-/-- In an inviscid Cauchy flow, the stress-divergence force is the usual
-negative pressure-gradient term. -/
+/--
+In an inviscid Cauchy flow, the stress-divergence force is the usual
+negative pressure-gradient term.
+-/
 theorem matrixDiv_stress_eq_neg_grad_pressure_of_is_inviscid
     (d : ℕ) (flow : CauchyFlow d) (pressure : ScalarField d)
-    (hInviscid : IsInviscid d flow pressure) :
-    ∀ t, matrixDiv d (flow.stress t) = -∇ (pressure t) := by
+    (hInviscid : IsInviscid d flow pressure)
+    : ∀ t, matrixDiv d (flow.stress t) = - ∇ (pressure t) := by
   intro t
-  rw [show flow.stress t =
-      fun x => (-(pressure t x)) • (1 : Matrix (Fin d) (Fin d) ℝ) by
+  rw [show flow.stress t = fun x => (-(pressure t x)) • (1 : Matrix (Fin d) (Fin d) ℝ) by
     funext x
     exact hInviscid t x]
   exact matrixDiv_inviscid_pressure_stress d (pressure t)

@@ -39,11 +39,11 @@ noncomputable def bar : DimPressure := toDimensionful SI ⟨100000⟩
 noncomputable def standardAtmosphere : DimPressure := toDimensionful SI ⟨101325⟩
 
 /-- The dimensional pressure corresponding to 1 torr (1/760 of standard atmosphere pressure). -/
-noncomputable def torr : DimPressure := (1/760 : ℝ≥0) • standardAtmosphere
+noncomputable def torr : DimPressure := (1 / 760 : ℝ≥0) • standardAtmosphere
 
 /-- The dimensional pressure corresponding to 1 pound per square inch. -/
-noncomputable def psi : DimPressure := toDimensionful ({SI with
-  mass := MassUnit.pounds,
-  length := LengthUnit.inches} : LTMCTUnitChoices) ⟨1⟩
+noncomputable def psi : DimPressure :=
+  toDimensionful
+    ({ SI with mass := MassUnit.pounds, length := LengthUnit.inches } : LTMCTUnitChoices) ⟨1⟩
 
 end DimPressure

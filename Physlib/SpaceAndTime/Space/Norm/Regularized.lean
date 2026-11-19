@@ -46,24 +46,24 @@ open MeasureTheory Function
 -/
 
 /-- Power of regularized norm, `(‖x‖² + ε²)^(s/2)`. -/
-def normRegularizedPow (d : ℕ) (ε s : ℝ) : Space d → ℝ :=
-  fun x ↦ (‖x‖ ^ 2 + ε ^ 2) ^ (s / 2)
+def normRegularizedPow (d : ℕ) (ε s : ℝ) : Space d → ℝ := fun x ↦ (‖x‖ ^ 2 + ε ^ 2) ^ (s / 2)
 
-lemma normRegularizedPow_eq (d : ℕ) (ε s : ℝ) :
-    normRegularizedPow d ε s = fun x ↦ (‖x‖ ^ 2 + ε ^ 2) ^ (s / 2) := rfl
+lemma normRegularizedPow_eq (d : ℕ) (ε s : ℝ)
+    : normRegularizedPow d ε s = fun x ↦ (‖x‖ ^ 2 + ε ^ 2) ^ (s / 2) :=
+  rfl
 
 /-- For a nonzero regularization parameter, `‖x‖² + ε²` is positive. -/
 lemma norm_sq_add_unit_sq_pos {d : ℕ} (ε : ℝˣ) (x : Space d) : 0 < ‖x‖ ^ 2 + ε ^ 2 :=
-    Left.add_pos_of_nonneg_of_pos (sq_nonneg ‖x‖) (sq_pos_iff.mpr <| Units.ne_zero ε)
+  Left.add_pos_of_nonneg_of_pos (sq_nonneg ‖x‖) (sq_pos_iff.mpr <| Units.ne_zero ε)
 
 /-- The regularized norm power is positive for nonzero regularization parameter. -/
-lemma normRegularizedPow_pos (d : ℕ) (ε : ℝˣ) (s : ℝ) (x : Space d) :
-    0 < normRegularizedPow d ε s x :=
+lemma normRegularizedPow_pos (d : ℕ) (ε : ℝˣ) (s : ℝ) (x : Space d)
+    : 0 < normRegularizedPow d ε s x :=
   Real.rpow_pos_of_pos (norm_sq_add_unit_sq_pos ε x) (s / 2)
 
 /-- The regularized norm power has temperate growth. -/
-lemma normRegularizedPow_hasTemperateGrowth (d : ℕ) (ε : ℝˣ) (s : ℝ) :
-    HasTemperateGrowth (normRegularizedPow d ε s) := by
+lemma normRegularizedPow_hasTemperateGrowth (d : ℕ) (ε : ℝˣ) (s : ℝ)
+    : HasTemperateGrowth (normRegularizedPow d ε s) := by
   let f1 := fun (x : ℝ) ↦ (ε ^ 2) ^ (s / 2) * x
   let f2 := fun (x : Space d) ↦ (1 + ‖x‖ ^ 2) ^ (s / 2)
   let f3 := fun (x : Space d) ↦ ε.1⁻¹ • x
@@ -76,8 +76,7 @@ lemma normRegularizedPow_hasTemperateGrowth (d : ℕ) (ε : ℝˣ) (s : ℝ) :
   fun_prop
 
 @[fun_prop]
-lemma normRegularizedPow_measurable (d : ℕ) (ε s : ℝ) :
-    Measurable (normRegularizedPow d ε s) := by
+lemma normRegularizedPow_measurable (d : ℕ) (ε s : ℝ) : Measurable (normRegularizedPow d ε s) := by
   rw [normRegularizedPow_eq]
   fun_prop
 

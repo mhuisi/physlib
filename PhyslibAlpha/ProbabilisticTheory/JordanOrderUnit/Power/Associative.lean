@@ -42,8 +42,7 @@ namespace ProbabilisticTheory
 
 namespace JordanAlgebra
 
-variable {E : Type*} [NonAssocCommRing E] [Module ℝ E] [SMulCommClass ℝ E E]
-  [IsCommJordan E]
+variable {E : Type*} [NonAssocCommRing E] [Module ℝ E] [SMulCommClass ℝ E E] [IsCommJordan E]
 
 open scoped JordanAlgebra
 
@@ -59,53 +58,59 @@ lemma commute_mulLeft_sq (a : E) : Commute (L a) (L (a ^[2])) := by
   exact h.symm
 
 omit [IsCommJordan E] in
-/-- A pointwise restatement of `Commute (L a) (L x)`: `a` and `x` "cross-associate" against any
-third element `y`. -/
-lemma commute_mulLeft_apply {a x : E} (h : Commute (L a) (L x)) (y : E) :
-    a * (x * y) = x * (a * y) := by
+/--
+A pointwise restatement of `Commute (L a) (L x)`: `a` and `x` "cross-associate" against any
+third element `y`.
+-/
+lemma commute_mulLeft_apply {a x : E} (h : Commute (L a) (L x)) (y : E)
+    : a * (x * y) = x * (a * y) := by
   have hpt := LinearMap.congr_fun h.eq y
   simpa only [Module.End.mul_apply, mulLeft_apply] using hpt
 
 omit [SMulCommClass ℝ E E] in
-/-- A polarized form of the Jordan identity. This is Basic Identity (2.1.2) in McCrimmon's
+/--
+A polarized form of the Jordan identity. This is Basic Identity (2.1.2) in McCrimmon's
 *A Taste of Jordan Algebras*. It is the algebraic engine behind the recursion for multiplication
-operators of powers. -/
-lemma linearized_mul_sq (a y z : E) :
-    (a * a * y) * z =
-      -(2 : ℝ) • (a * (y * (a * z))) + (a * a) * (y * z) +
-        (2 : ℝ) • ((a * y) * (a * z)) := by
+operators of powers.
+-/
+lemma linearized_mul_sq (a y z : E)
+    : (a * a * y) * z
+      = -(2 : ℝ) • (a * (y * (a * z))) + (a * a) * (y * z) + (2 : ℝ) • ((a * y) * (a * z)) := by
   have hp := IsCommJordan.lmul_comm_rmul_rmul (a + z) y
   have hm := IsCommJordan.lmul_comm_rmul_rmul (a - z) y
   have hz := IsCommJordan.lmul_comm_rmul_rmul z y
   simp only [add_mul, mul_add, sub_mul, mul_sub] at hp hm
   have h := congrArg₂ (fun u v : E => u - v) hp hm
   abel_nf at h
-  rw [mul_comm z a, mul_comm (z * y) (a * a), mul_comm z (y * (a * a)),
-    mul_comm y (a * a)] at h
+  rw [mul_comm z a, mul_comm (z * y) (a * a), mul_comm z (y * (a * a)), mul_comm y (a * a)] at h
   rw [hz] at h
   abel_nf at h
-  have hclean :
-      (2 : ℤ) • (z * (y * (z * z))) +
-          ((2 : ℤ) • (a * a * (z * y)) + (4 : ℤ) • (a * y * (a * z))) =
-        (2 : ℤ) • (z * (y * (z * z))) +
-          ((2 : ℤ) • (a * a * y * z) + (4 : ℤ) • (a * (y * (a * z)))) := by
+  have hclean
+      : (2 : ℤ) • (z * (y * (z * z))) + ((2 : ℤ) • (a * a * (z * y)) + (4 : ℤ) • (a * y * (a * z)))
+        = (2 : ℤ) • (z * (y * (z * z)))
+          + ((2 : ℤ) • (a * a * y * z) + (4 : ℤ) • (a * (y * (a * z)))) := by
     calc
-      _ = (2 : ℤ) • (a * a * (z * y)) +
-          ((4 : ℤ) • (a * y * (a * z)) + (2 : ℤ) • (z * (y * (z * z)))) := by abel
+      _ = (2 : ℤ) • (a * a * (z * y))
+          + ((4 : ℤ) • (a * y * (a * z)) + (2 : ℤ) • (z * (y * (z * z)))) := by
+        abel
       _ = _ := h
       _ = _ := by abel
   have hc := add_left_cancel hclean
-  have h' : (2 : ℤ) • (a * a * y * z) =
-      (2 : ℤ) • (-(2 : ℝ) • (a * (y * (a * z))) +
-        (a * a) * (y * z) + (2 : ℝ) • ((a * y) * (a * z))) := by
+  have h'
+      : (2 : ℤ) • (a * a * y * z)
+        = (2 : ℤ)
+          • (-(2 : ℝ) • (a * (y * (a * z))) + (a * a) * (y * z)
+            + (2 : ℝ) • ((a * y) * (a * z))) := by
     calc
-      _ = (2 : ℤ) • (a * a * (z * y)) + (4 : ℤ) • (a * y * (a * z)) -
-          (4 : ℤ) • (a * (y * (a * z))) := by rw [hc]; module
+      _ = (2 : ℤ) • (a * a * (z * y)) + (4 : ℤ) • (a * y * (a * z))
+          - (4 : ℤ) • (a * (y * (a * z))) := by
+        rw [hc]; module
       _ = _ := by rw [mul_comm z y]; module
   calc
     _ = (1 / 2 : ℝ) • ((2 : ℤ) • (a * a * y * z)) := by module
-    _ = (1 / 2 : ℝ) • ((2 : ℤ) • (-(2 : ℝ) • (a * (y * (a * z))) +
-        (a * a) * (y * z) + (2 : ℝ) • ((a * y) * (a * z)))) :=
+    _ = (1 / 2 : ℝ)
+        • ((2 : ℤ)
+          • (-(2 : ℝ) • (a * (y * (a * z))) + (a * a) * (y * z) + (2 : ℝ) • ((a * y) * (a * z)))) :=
       congrArg (fun w : E => (1 / 2 : ℝ) • w) h'
     _ = _ := by module
 
@@ -114,58 +119,61 @@ lemma square_mul_jpow (a : E) (n : ℕ) : (a * a) * a ^[n] = a ^[n + 2] := by
   induction n with
   | zero => simp [jpow_two]
   | succ n ih =>
-      rw [jpow_succ, ← jpow_two]
-      rw [← commute_mulLeft_apply (commute_mulLeft_sq a) (a ^[n])]
-      rw [jpow_two, ih, ← jpow_succ]
+    rw [jpow_succ, ← jpow_two]
+    rw [← commute_mulLeft_apply (commute_mulLeft_sq a) (a ^[n])]
+    rw [jpow_two, ih, ← jpow_succ]
 
-/-- The multiplication operator of `a^[n+2]`, expressed recursively in the commuting generators
-`L_a` and `L_(a²)`. -/
-lemma mulLeft_jpow_add_two (a : E) (n : ℕ) :
-    L (a ^[n + 2]) =
-      -(2 : ℝ) • ((L a) * ((L (a ^[n])) * (L a))) +
-        ((L (a * a)) * (L (a ^[n])) +
-          (2 : ℝ) • ((L (a ^[n + 1])) * (L a))) := by
+/--
+The multiplication operator of `a^[n+2]`, expressed recursively in the commuting generators
+`L_a` and `L_(a²)`.
+-/
+lemma mulLeft_jpow_add_two (a : E) (n : ℕ)
+    : L (a ^[n + 2])
+      = -(2 : ℝ) • ((L a) * ((L (a ^[n])) * (L a)))
+        + ((L (a * a)) * (L (a ^[n])) + (2 : ℝ) • ((L (a ^[n + 1])) * (L a))) := by
   ext z
   simp only [LinearMap.add_apply, LinearMap.smul_apply, Module.End.mul_apply, mulLeft_apply]
   rw [← square_mul_jpow a n]
   simpa only [← jpow_succ, add_assoc] using linearized_mul_sq a (a ^[n]) z
 
-/-- Both fundamental commuting operators `L_a` and `L_(a²)` commute with multiplication by every
-power of `a`. -/
-lemma fundamental_mulLeft_commute_pow (a : E) (n : ℕ) :
-    Commute (L a) (L (a ^[n])) ∧ Commute (L (a * a)) (L (a ^[n])) := by
+/--
+Both fundamental commuting operators `L_a` and `L_(a²)` commute with multiplication by every
+power of `a`.
+-/
+lemma fundamental_mulLeft_commute_pow (a : E) (n : ℕ)
+    : Commute (L a) (L (a ^[n])) ∧ Commute (L (a * a)) (L (a ^[n])) := by
   induction n using Nat.twoStepInduction with
   | zero =>
-      constructor <;> ext z <;>
-        simp only [jpow_zero, Module.End.mul_apply, mulLeft_apply, one_mul]
+    constructor <;> ext z <;> simp only [jpow_zero, Module.End.mul_apply, mulLeft_apply, one_mul]
   | one =>
-      constructor
-      · simpa only [jpow_one] using Commute.refl (L a)
-      · simpa only [jpow_one, jpow_two] using (commute_mulLeft_sq a).symm
+    constructor
+    · simpa only [jpow_one] using Commute.refl (L a)
+    · simpa only [jpow_one, jpow_two] using (commute_mulLeft_sq a).symm
   | more n hn hn1 =>
-      rw [mulLeft_jpow_add_two]
-      let X := L a
-      let Y := L (a * a)
-      let N := L (a ^[n])
-      let M := L (a ^[n + 1])
-      have hXY : Commute X Y := by simpa [X, Y, jpow_two] using commute_mulLeft_sq a
-      have hXN : Commute X N := by simpa [X, N] using hn.1
-      have hYN : Commute Y N := by simpa [Y, N] using hn.2
-      have hXM : Commute X M := by simpa [X, M] using hn1.1
-      have hYM : Commute Y M := by simpa [Y, M] using hn1.2
-      constructor
-      · simpa [X, Y, N, M] using
-          (Commute.smul_right
-            ((Commute.refl X).mul_right (hXN.mul_right (Commute.refl X))) (-2 : ℝ)).add_right
-            ((hXY.mul_right hXN).add_right
-              ((hXM.mul_right (Commute.refl X)).smul_right (2 : ℝ)))
-      · simpa [X, Y, N, M] using
-          ((((hXY.symm.mul_right (hYN.mul_right hXY.symm))).smul_right (-2 : ℝ)).add_right
-            (((Commute.refl Y).mul_right hYN).add_right
-              ((hYM.mul_right hXY.symm).smul_right (2 : ℝ))))
+    rw [mulLeft_jpow_add_two]
+    let X := L a
+    let Y := L (a * a)
+    let N := L (a ^[n])
+    let M := L (a ^[n + 1])
+    have hXY : Commute X Y := by simpa [X, Y, jpow_two] using commute_mulLeft_sq a
+    have hXN : Commute X N := by simpa [X, N] using hn.1
+    have hYN : Commute Y N := by simpa [Y, N] using hn.2
+    have hXM : Commute X M := by simpa [X, M] using hn1.1
+    have hYM : Commute Y M := by simpa [Y, M] using hn1.2
+    constructor
+    · simpa [X, Y, N, M] using
+        (Commute.smul_right ((Commute.refl X).mul_right (hXN.mul_right (Commute.refl X)))
+            (-2 : ℝ)).add_right
+          ((hXY.mul_right hXN).add_right ((hXM.mul_right (Commute.refl X)).smul_right (2 : ℝ)))
+    · simpa [X, Y, N, M] using
+        ((((hXY.symm.mul_right (hYN.mul_right hXY.symm))).smul_right (-2 : ℝ)).add_right
+          (((Commute.refl Y).mul_right hYN).add_right
+            ((hYM.mul_right hXY.symm).smul_right (2 : ℝ))))
 
-/-- `a` commutes, as a Jordan multiplication operator, with the multiplication operator of every
-one of its powers. -/
+/--
+`a` commutes, as a Jordan multiplication operator, with the multiplication operator of every
+one of its powers.
+-/
 lemma commute_mulLeft_pow (a : E) (n : ℕ) : Commute (L a) (L (a ^[n])) :=
   (fundamental_mulLeft_commute_pow a n).1
 
@@ -176,11 +184,13 @@ lemma pow_add (a : E) (m n : ℕ) : a ^[m] * a ^[n] = a ^[m + n] := by
   induction n with
   | zero => simp
   | succ n ih =>
-      have hpt := commute_mulLeft_apply (commute_mulLeft_pow a m) (a ^[n])
-      calc a ^[m] * a ^[n + 1] = a ^[m] * (a * a ^[n]) := by rw [jpow_succ]
-        _ = a * (a ^[m] * a ^[n]) := hpt.symm
-        _ = a * a ^[m + n] := by rw [ih]
-        _ = a ^[m + n + 1] := (jpow_succ a (m + n)).symm
+    have hpt := commute_mulLeft_apply (commute_mulLeft_pow a m) (a ^[n])
+    calc
+      a ^[m] * a ^[n + 1]
+        = a ^[m] * (a * a ^[n]) := by rw [jpow_succ]
+      _ = a * (a ^[m] * a ^[n]) := hpt.symm
+      _ = a * a ^[m + n] := by rw [ih]
+      _ = a ^[m + n + 1] := (jpow_succ a (m + n)).symm
 
 end JordanAlgebra
 

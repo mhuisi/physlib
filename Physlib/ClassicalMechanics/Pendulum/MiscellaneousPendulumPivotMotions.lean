@@ -141,7 +141,8 @@ Ignoring the total time derivate term, the final lagrangian becomes:
 $$
 L = \tfrac{1}{2} m l^2\dot{\phi}^2 + m g l \cos\phi - m a l \gamma^2 \cos\phi\cos(\gamma t)
 $$
--/@[expose] public section
+-/
+@[expose] public section
 
 namespace ClassicalMechanics
 

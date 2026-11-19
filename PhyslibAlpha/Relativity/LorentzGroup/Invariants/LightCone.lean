@@ -73,27 +73,55 @@ namespace Invariants
 
 /-- The four light-cone directions of axis `i`, as integers. -/
 def lightConeCoeffZ (i : Fin 3) (κ : Fin 4) (μ : Fin 1 ⊕ Fin 3) : ℤ :=
-  if κ = 0 then (if μ = Sum.inl 0 then 1 else if μ = Sum.inr i then -1 else 0)
-  else if κ = 1 then (if μ = Sum.inl 0 then 1 else if μ = Sum.inr i then 1 else 0)
-  else if κ = 2 then (if μ = Sum.inr (i + 1) then 1 else 0)
-  else (if μ = Sum.inr (i + 2) then 1 else 0)
+  if κ = 0 then
+    (if μ = Sum.inl 0 then
+       1
+     else if μ = Sum.inr i then
+       -1
+     else
+       0)
+  else if κ = 1 then
+    (if μ = Sum.inl 0 then
+       1
+     else if μ = Sum.inr i then
+       1
+     else
+       0)
+  else if κ = 2 then
+    (if μ = Sum.inr (i + 1) then 1 else 0)
+  else
+    (if μ = Sum.inr (i + 2) then 1 else 0)
 
 /-- The integer copy casts to `lightConeCoeff`. -/
-lemma coe_lightConeCoeffZ (i : Fin 3) (κ : Fin 4) (μ : Fin 1 ⊕ Fin 3) :
-    ((lightConeCoeffZ i κ μ : ℤ) : ℂ) = lightConeCoeff i κ μ := by
+lemma coe_lightConeCoeffZ (i : Fin 3) (κ : Fin 4) (μ : Fin 1 ⊕ Fin 3)
+    : ((lightConeCoeffZ i κ μ : ℤ) : ℂ) = lightConeCoeff i κ μ := by
   rw [lightConeCoeffZ, lightConeCoeff]
   split_ifs <;> norm_num
 
 /-- Twice the coordinate directions in the light-cone basis, the `2` clearing the halves. -/
 def lightConeCoeffInvZ (i : Fin 3) (μ : Fin 1 ⊕ Fin 3) (κ : Fin 4) : ℤ :=
-  if μ = Sum.inl 0 then (if κ = 0 then 1 else if κ = 1 then 1 else 0)
-  else if μ = Sum.inr i then (if κ = 0 then -1 else if κ = 1 then 1 else 0)
-  else if μ = Sum.inr (i + 1) then (if κ = 2 then 2 else 0)
-  else (if κ = 3 then 2 else 0)
+  if μ = Sum.inl 0 then
+    (if κ = 0 then
+       1
+     else if κ = 1 then
+       1
+     else
+       0)
+  else if μ = Sum.inr i then
+    (if κ = 0 then
+       -1
+     else if κ = 1 then
+       1
+     else
+       0)
+  else if μ = Sum.inr (i + 1) then
+    (if κ = 2 then 2 else 0)
+  else
+    (if κ = 3 then 2 else 0)
 
 /-- The integer copy is exactly twice `lightConeCoeffInv`. -/
-lemma coe_lightConeCoeffInvZ_eq_two_mul (i : Fin 3) (μ : Fin 1 ⊕ Fin 3) (κ : Fin 4) :
-    ((lightConeCoeffInvZ i μ κ : ℤ) : ℂ) = 2 * lightConeCoeffInv i μ κ := by
+lemma coe_lightConeCoeffInvZ_eq_two_mul (i : Fin 3) (μ : Fin 1 ⊕ Fin 3) (κ : Fin 4)
+    : ((lightConeCoeffInvZ i μ κ : ℤ) : ℂ) = 2 * lightConeCoeffInv i μ κ := by
   rw [lightConeCoeffInvZ, lightConeCoeffInv]
   split_ifs <;> norm_num
 
@@ -114,15 +142,15 @@ instance (i : Fin 3) (μ : Fin 1 ⊕ Fin 3) : Decidable (InBoostPlane i μ) :=
   inferInstanceAs (Decidable (_ ∨ _))
 
 /-- A direction in the boost plane has no transverse light-cone components. -/
-lemma lightConeCoeffInvZ_eq_zero_of_inBoostPlane {i : Fin 3} {μ : Fin 1 ⊕ Fin 3}
-    (hμ : InBoostPlane i μ) {κ : Fin 4} (hκ : κ = 2 ∨ κ = 3) :
-    lightConeCoeffInvZ i μ κ = 0 := by
+lemma lightConeCoeffInvZ_eq_zero_of_inBoostPlane
+    {i : Fin 3} {μ : Fin 1 ⊕ Fin 3} (hμ : InBoostPlane i μ) {κ : Fin 4} (hκ : κ = 2 ∨ κ = 3)
+    : lightConeCoeffInvZ i μ κ = 0 := by
   rcases hμ with rfl | rfl <;> rcases hκ with rfl | rfl <;> simp [lightConeCoeffInvZ]
 
 /-- A transverse direction has no light-cone components in the boost plane. -/
-lemma lightConeCoeffInvZ_eq_zero_of_not_inBoostPlane {i : Fin 3} {μ : Fin 1 ⊕ Fin 3}
-    (hμ : ¬InBoostPlane i μ) {κ : Fin 4} (hκ : κ = 0 ∨ κ = 1) :
-    lightConeCoeffInvZ i μ κ = 0 := by
+lemma lightConeCoeffInvZ_eq_zero_of_not_inBoostPlane
+    {i : Fin 3} {μ : Fin 1 ⊕ Fin 3} (hμ : ¬ InBoostPlane i μ) {κ : Fin 4} (hκ : κ = 0 ∨ κ = 1)
+    : lightConeCoeffInvZ i μ κ = 0 := by
   simp only [InBoostPlane, not_or] at hμ
   rcases hκ with rfl | rfl <;> simp [lightConeCoeffInvZ, hμ.1, hμ.2]
 
@@ -149,31 +177,35 @@ slot off a weight-constrained sum over tuples, which is `Physlib.Fin.sum_filter_
 def slotZ (i : Fin 3) (κ : Fin 4) (μ ν : Fin 1 ⊕ Fin 3) : ℤ :=
   lightConeCoeffInvZ i μ κ * lightConeCoeffZ i κ ν
 
-/-- Two to the number of slots times the entry, at `d` and `e`, of the map keeping the light-cone
-  components of total weight `m` along axis `i`; the factor is the one `lightConeCoeffInvZ`
-  carries, one per slot. A slot of `d` in the boost plane takes weight `2` or `-2`, leaving
-  `m - 2` or `m + 2`; a transverse slot takes weight `0` and leaves `m`. -/
+/--
+Two to the number of slots times the entry, at `d` and `e`, of the map keeping the light-cone
+components of total weight `m` along axis `i`; the factor is the one `lightConeCoeffInvZ`
+carries, one per slot. A slot of `d` in the boost plane takes weight `2` or `-2`, leaving
+`m - 2` or `m + 2`; a transverse slot takes weight `0` and leaves `m`.
+-/
 def transitionZ (i : Fin 3) : {n : ℕ} → (d e : Fin n → Fin 1 ⊕ Fin 3) → ℤ → ℤ
   | 0, _, _, m => if m = 0 then 1 else 0
   | _ + 1, d, e, m =>
     if InBoostPlane i (d 0) then
       slotZ i 0 (d 0) (e 0) * transitionZ i (Fin.tail d) (Fin.tail e) (m - 2)
         + slotZ i 1 (d 0) (e 0) * transitionZ i (Fin.tail d) (Fin.tail e) (m + 2)
-    else (slotZ i 2 (d 0) (e 0) + slotZ i 3 (d 0) (e 0))
-      * transitionZ i (Fin.tail d) (Fin.tail e) m
+    else
+      (slotZ i 2 (d 0) (e 0) + slotZ i 3 (d 0) (e 0)) * transitionZ i (Fin.tail d) (Fin.tail e) m
 
-/-- One slot of the transition, with the case split of the recursion resolved: the first slot
-  runs over all four light-cone directions, each taking its own weight out of `m`. The two
-  directions of the boost plane drop out of a transverse slot and the two transverse ones drop
-  out of a slot in the boost plane, which is what the two branches of `transitionZ` record. -/
-lemma transitionZ_succ (i : Fin 3) {n : ℕ} (d e : Fin (n + 1) → Fin 1 ⊕ Fin 3) (m : ℤ) :
-    transitionZ i d e m
+/--
+One slot of the transition, with the case split of the recursion resolved: the first slot
+runs over all four light-cone directions, each taking its own weight out of `m`. The two
+directions of the boost plane drop out of a transverse slot and the two transverse ones drop
+out of a slot in the boost plane, which is what the two branches of `transitionZ` record.
+-/
+lemma transitionZ_succ (i : Fin 3) {n : ℕ} (d e : Fin (n + 1) → Fin 1 ⊕ Fin 3) (m : ℤ)
+    : transitionZ i d e m
       = ∑ κ : Fin 4, slotZ i κ (d 0) (e 0)
           * transitionZ i (Fin.tail d) (Fin.tail e) (m - lightConeWeight κ) := by
   rw [Fin.sum_univ_four, transitionZ]
   simp only [show lightConeWeight 0 = 2 from rfl, show lightConeWeight 1 = -2 from rfl,
-    show lightConeWeight 2 = 0 from rfl, show lightConeWeight 3 = 0 from rfl,
-    sub_neg_eq_add, sub_zero]
+    show lightConeWeight 2 = 0 from rfl, show lightConeWeight 3 = 0 from rfl, sub_neg_eq_add,
+    sub_zero]
   by_cases h : InBoostPlane i (d 0)
   · rw [ite_eq_left h]
     simp [slotZ, lightConeCoeffInvZ_eq_zero_of_inBoostPlane h]
@@ -182,12 +214,12 @@ lemma transitionZ_succ (i : Fin 3) {n : ℕ} (d e : Fin (n + 1) → Fin 1 ⊕ Fi
     ring
 
 /-- The recursion unfolded, as a sum over the multi-indices of total weight `m`. -/
-lemma transitionZ_eq_sum (i : Fin 3) :
-    ∀ {n : ℕ} (d e : Fin n → Fin 1 ⊕ Fin 3) (m : ℤ),
-    transitionZ i d e m
-      = ∑ κ ∈ Finset.univ.filter
-          (fun κ : Fin n → Fin 4 => (∑ s, lightConeWeight (κ s)) = m),
-        ∏ s, slotZ i (κ s) (d s) (e s)
+lemma transitionZ_eq_sum (i : Fin 3)
+    : ∀ {n : ℕ} (d e : Fin n → Fin 1 ⊕ Fin 3) (m : ℤ),
+      transitionZ i d e m
+        = ∑ κ ∈ Finset.univ.filter
+            (fun κ : Fin n → Fin 4 => (∑ s, lightConeWeight (κ s)) = m),
+          ∏ s, slotZ i (κ s) (d s) (e s)
   | 0, d, e, m => by
     rw [Finset.sum_filter, Fintype.sum_unique]
     simp [transitionZ, eq_comm]

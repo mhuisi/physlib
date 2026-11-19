@@ -60,14 +60,16 @@ section Characters
 
 variable {d D : ℕ} (a : Fin d → EuclideanSpace ℝ (Fin D))
 
-/-- The phase accumulated by a plane wave of wave vector `k` under the lattice translation
-`n`. -/
+/--
+The phase accumulated by a plane wave of wave vector `k` under the lattice translation
+`n`.
+-/
 noncomputable def phase (k : EuclideanSpace ℝ (Fin D)) (n : Multiplicative (Fin d → ℤ)) : ℝ :=
   ∑ j, (n.toAdd j : ℝ) * ⟪a j, k⟫
 
 /-- The character of the translation group `ℤ^d` given by the plane wave of wave vector `k`. -/
-noncomputable def dualCharacter (k : EuclideanSpace ℝ (Fin D)) :
-    PontryaginDual (Multiplicative (Fin d → ℤ)) where
+noncomputable def dualCharacter (k : EuclideanSpace ℝ (Fin D))
+    : PontryaginDual (Multiplicative (Fin d → ℤ)) where
   toFun n := Circle.exp (phase a k n)
   map_one' := by simp [phase]
   map_mul' n m := by
@@ -76,8 +78,10 @@ noncomputable def dualCharacter (k : EuclideanSpace ℝ (Fin D)) :
     simp [phase, add_mul, Finset.sum_add_distrib]
   continuous_toFun := continuous_of_discreteTopology
 
-/-- The reciprocal lattice: wave vectors whose plane wave is trivial on every lattice
-translation. -/
+/--
+The reciprocal lattice: wave vectors whose plane wave is trivial on every lattice
+translation.
+-/
 def reciprocalLattice : AddSubgroup (EuclideanSpace ℝ (Fin D)) where
   carrier := {k | ∀ j, ∃ m : ℤ, ⟪a j, k⟫ = 2 * Real.pi * m}
   zero_mem' j := ⟨0, by simp⟩
@@ -90,17 +94,18 @@ def reciprocalLattice : AddSubgroup (EuclideanSpace ℝ (Fin D)) where
     exact ⟨-m, by rw [inner_neg_right, hm]; push_cast; ring⟩
 
 /-- Evaluating the character of a wave vector gives the exponential of the phase. -/
-lemma dualCharacter_apply (k : EuclideanSpace ℝ (Fin D)) (n : Multiplicative (Fin d → ℤ)) :
-    dualCharacter a k n = Circle.exp (phase a k n) := rfl
+lemma dualCharacter_apply (k : EuclideanSpace ℝ (Fin D)) (n : Multiplicative (Fin d → ℤ))
+    : dualCharacter a k n = Circle.exp (phase a k n) :=
+  rfl
 
 /-- The phase of a lattice translation is additive in the wave vector. -/
-lemma phase_add (k l : EuclideanSpace ℝ (Fin D)) (n : Multiplicative (Fin d → ℤ)) :
-    phase a (k + l) n = phase a k n + phase a l n := by
+lemma phase_add (k l : EuclideanSpace ℝ (Fin D)) (n : Multiplicative (Fin d → ℤ))
+    : phase a (k + l) n = phase a k n + phase a l n := by
   simp [phase, inner_add_right, mul_add, Finset.sum_add_distrib]
 
 /-- A wave vector gives the trivial character exactly when it lies in the reciprocal lattice. -/
-lemma dualCharacter_eq_one_iff (k : EuclideanSpace ℝ (Fin D)) :
-    dualCharacter a k = 1 ↔ k ∈ reciprocalLattice a := by
+lemma dualCharacter_eq_one_iff (k : EuclideanSpace ℝ (Fin D))
+    : dualCharacter a k = 1 ↔ k ∈ reciprocalLattice a := by
   constructor
   · intro h j
     have h1 : Circle.exp (phase a k (Multiplicative.ofAdd (Pi.single j 1))) = 1 := by
@@ -121,11 +126,13 @@ lemma dualCharacter_eq_one_iff (k : EuclideanSpace ℝ (Fin D)) :
     exact Finset.sum_congr rfl fun j _ => by ring
 
 /-- Wave vectors differing by a reciprocal lattice vector give the same character. -/
-lemma dualCharacter_add_of_mem {k l : EuclideanSpace ℝ (Fin D)}
-    (hl : l ∈ reciprocalLattice a) : dualCharacter a (k + l) = dualCharacter a k := by
+lemma dualCharacter_add_of_mem {k l : EuclideanSpace ℝ (Fin D)} (hl : l ∈ reciprocalLattice a)
+    : dualCharacter a (k + l) = dualCharacter a k := by
   have h1 : ∀ n, Circle.exp (phase a l n) = 1 := fun n => by
-    have := congrArg (fun χ : PontryaginDual (Multiplicative (Fin d → ℤ)) => χ n)
-      ((dualCharacter_eq_one_iff a l).2 hl)
+    have :=
+      congrArg
+        (fun χ : PontryaginDual (Multiplicative (Fin d → ℤ)) => χ n)
+        ((dualCharacter_eq_one_iff a l).2 hl)
     exact this
   refine ContinuousMonoidHom.ext fun n => ?_
   change Circle.exp (phase a (k + l) n) = Circle.exp (phase a k n)
@@ -140,26 +147,26 @@ section Basis
 variable {d : ℕ} [NeZero d] {a : Fin d → EuclideanSpace ℝ (Fin d)}
 
 /-- The basis of space formed by independent primitive translations. -/
-noncomputable def latticeBasis (ha : LinearIndependent ℝ a) :
-    Module.Basis (Fin d) ℝ (EuclideanSpace ℝ (Fin d)) :=
+noncomputable def latticeBasis (ha : LinearIndependent ℝ a)
+    : Module.Basis (Fin d) ℝ (EuclideanSpace ℝ (Fin d)) :=
   basisOfLinearIndependentOfCardEqFinrank ha (by simp)
 
 /-- The reciprocal basis `b_i`, characterized by `⟨a_j, b_i⟩ = 2π δ_ij`. -/
-noncomputable def reciprocalBasis (ha : LinearIndependent ℝ a) (i : Fin d) :
-    EuclideanSpace ℝ (Fin d) :=
-  (2 * Real.pi) •
-    (InnerProductSpace.toDual ℝ _).symm (((latticeBasis ha).coord i).toContinuousLinearMap)
+noncomputable def reciprocalBasis (ha : LinearIndependent ℝ a) (i : Fin d)
+    : EuclideanSpace ℝ (Fin d) :=
+  (2 * Real.pi)
+    • (InnerProductSpace.toDual ℝ _).symm (((latticeBasis ha).coord i).toContinuousLinearMap)
 
 /-- The reciprocal basis is dual to the primitive translations up to the factor `2π`. -/
-lemma inner_reciprocalBasis (ha : LinearIndependent ℝ a) (i j : Fin d) :
-    ⟪a j, reciprocalBasis ha i⟫ = if i = j then 2 * Real.pi else 0 := by
+lemma inner_reciprocalBasis (ha : LinearIndependent ℝ a) (i j : Fin d)
+    : ⟪a j, reciprocalBasis ha i⟫ = if i = j then 2 * Real.pi else 0 := by
   rw [reciprocalBasis, inner_smul_right, real_inner_comm, InnerProductSpace.toDual_symm_apply]
   have : latticeBasis ha j = a j := by simp [latticeBasis]
   simp [← this, Module.Basis.coord_apply, Finsupp.single_apply, eq_comm]
 
 /-- Every character of the translation group is the plane wave of some wave vector. -/
-lemma dualCharacter_surjective (ha : LinearIndependent ℝ a) :
-    Function.Surjective (dualCharacter a) := by
+lemma dualCharacter_surjective (ha : LinearIndependent ℝ a)
+    : Function.Surjective (dualCharacter a) := by
   intro χ
   let θ : Fin d → ℝ := fun j => Complex.arg (χ (Multiplicative.ofAdd (Pi.single j 1)))
   refine ⟨∑ i, (θ i / (2 * Real.pi)) • reciprocalBasis ha i, ?_⟩

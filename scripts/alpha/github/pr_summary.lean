@@ -171,8 +171,7 @@ def trimStart (s : String) : String := s.trimAsciiStart.copy
 def trimEnd (s : String) : String := s.trimAsciiEnd.copy
 
 /-- `n` and `noun`, pluralised unless `n` is one: `1 file`, `2 files`. -/
-def plural (n : Nat) (noun : String) : String :=
-  if n == 1 then s!"{n} {noun}" else s!"{n} {noun}s"
+def plural (n : Nat) (noun : String) : String := if n == 1 then s!"{n} {noun}" else s!"{n} {noun}s"
 
 /-- The non-zero counts of `items` with their labels, as in `2 added, 1 removed`. -/
 def tally (items : Array (Nat × String)) : String :=
@@ -181,27 +180,35 @@ def tally (items : Array (Nat × String)) : String :=
 /-- `s` as a Markdown code span, or an em dash if `s` is empty. -/
 def code (s : String) : String := if s.isEmpty then "—" else s!"`{s}`"
 
-/-- The first `limit` of `lines`, then a line counting the rest. GitHub caps a comment at 65536
-characters. -/
+/--
+The first `limit` of `lines`, then a line counting the rest. GitHub caps a comment at 65536
+characters.
+-/
 def truncate (lines : Array String) (limit : Nat) : Array String :=
-  if lines.size ≤ limit then lines
-  else lines.take limit ++
-    #[s!"… and {plural (lines.size - limit) "further line"}, left out to keep this short."]
+  if lines.size ≤ limit then
+    lines
+  else
+    lines.take limit
+      ++ #[s!"… and {plural (lines.size - limit) "further line"}, left out to keep this short."]
 
 /-- The repository the links point into. -/
 def repository : String := "leanprover-community/physlib"
 
-/-- The two commits being compared. A removed line is linked in `base`, since it is no longer in
-`head`; everything else is linked in `head`. -/
+/--
+The two commits being compared. A removed line is linked in `base`, since it is no longer in
+`head`; everything else is linked in `head`.
+-/
 structure Source where
   /-- The commit the removed lines belong to: the merge base of the two revisions. -/
   base : String := ""
   /-- The commit the added lines belong to. -/
   head : String := ""
-  deriving Repr, DecidableEq, Inhabited
+deriving Repr, DecidableEq, Inhabited
 
-/-- `text` linked to `file` in `repository`, at line `line` unless that is zero, in `src.head` if
-`added` and in `src.base` otherwise. -/
+/--
+`text` linked to `file` in `repository`, at line `line` unless that is zero, in `src.head` if
+`added` and in `src.base` otherwise.
+-/
 def Source.link (src : Source) (text file : String) (added : Bool) (line : Nat := 0) : String :=
   let commit := if added then src.head else src.base
   let anchor := if line == 0 then "" else s!"#L{line}"
@@ -218,10 +225,12 @@ inductive FileStatus where
   | renamed (oldPath : String)
   /-- Copied from `oldPath`. -/
   | copied (oldPath : String)
-  deriving Repr, DecidableEq, Inhabited
+deriving Repr, DecidableEq, Inhabited
 
-/-- The order in which the statuses are reported, as in leaff: additions, removals, then
-modifications. -/
+/--
+The order in which the statuses are reported, as in leaff: additions, removals, then
+modifications.
+-/
 def FileStatus.rank : FileStatus → Nat
   | .added => 0
   | .removed => 1
@@ -238,14 +247,16 @@ structure FileChange where
   insertions : Option Nat := none
   /-- Lines removed; `none` for a binary file. -/
   deletions : Option Nat := none
-  /-- The namespaces a `.lean` file opens, in the order it opens them: in the head revision,
-  or, for a removed file, in the base revision. -/
+  /--
+  The namespaces a `.lean` file opens, in the order it opens them: in the head revision,
+  or, for a removed file, in the base revision.
+  -/
   namespaces : Array String := #[]
   /-- The namespaces the head revision of the file opens and its base revision does not. -/
   addedNamespaces : Array String := #[]
   /-- The namespaces the base revision of the file opens and its head revision does not. -/
   removedNamespaces : Array String := #[]
-  deriving Repr, DecidableEq, Inhabited
+deriving Repr, DecidableEq, Inhabited
 
 /-- Files are reported by status, then by path. -/
 def FileChange.lt (c d : FileChange) : Bool :=
@@ -257,8 +268,10 @@ def FileChange.oldPath (c : FileChange) : String :=
   | .renamed oldPath | .copied oldPath => oldPath
   | _ => c.path
 
-/-- The paths the diff may give for lines of the file: its path, and, if it was renamed or
-copied, its old path. -/
+/--
+The paths the diff may give for lines of the file: its path, and, if it was renamed or
+copied, its old path.
+-/
 def FileChange.paths (c : FileChange) : List String :=
   if c.oldPath == c.path then [c.path] else [c.path, c.oldPath]
 
@@ -292,8 +305,7 @@ def parseNameStatusLine (line : String) : Option FileChange :=
   | _ => none
 
 /-- The file changes recorded by the lines of `git diff --name-status`. -/
-def parseNameStatus (lines : Array String) : Array FileChange :=
-  lines.filterMap parseNameStatusLine
+def parseNameStatus (lines : Array String) : Array FileChange := lines.filterMap parseNameStatusLine
 
 /-! ### B.2. Reading `git diff --numstat`
 
@@ -337,8 +349,8 @@ def parseNumstat (fields : Array String) : Array (String × Option Nat × Option
   return result
 
 /-- `changes` with the counts of `counts` filled in by path. -/
-def withLineCounts (changes : Array FileChange)
-    (counts : Array (String × Option Nat × Option Nat)) : Array FileChange :=
+def withLineCounts (changes : Array FileChange) (counts : Array (String × Option Nat × Option Nat))
+    : Array FileChange :=
   changes.map fun c =>
     match counts.find? (·.1 == c.path) with
     | some (_, insertions, deletions) => { c with insertions, deletions }
@@ -354,9 +366,10 @@ them, so that the keyword is at the start of the line.
 -/
 
 /-- The modifiers which may precede a declaration keyword. -/
-def modifiers : Array String :=
-  #["private", "protected", "public", "noncomputable", "nonrec", "partial", "unsafe", "scoped",
-    "local"]
+def modifiers : Array String := #[
+  "private", "protected", "public", "noncomputable", "nonrec", "partial", "unsafe", "scoped",
+  "local"
+]
 
 /-- The brackets which open a group. -/
 def openBrackets : List Char := ['(', '[', '{', '⟨', '⦃']
@@ -364,16 +377,20 @@ def openBrackets : List Char := ['(', '[', '{', '⟨', '⦃']
 /-- The brackets which close a group. -/
 def closeBrackets : List Char := [')', ']', '}', '⟩', '⦄']
 
-/-- `cs` after the bracket which closes the group `depth` brackets deep, or `none` if the group
-is not closed in `cs`. -/
+/--
+`cs` after the bracket which closes the group `depth` brackets deep, or `none` if the group
+is not closed in `cs`.
+-/
 def afterCloseBracket (cs : List Char) (depth : Nat) : Option (List Char) :=
   match cs with
   | [] => none
   | c :: rest =>
-    if openBrackets.contains c then afterCloseBracket rest (depth + 1)
+    if openBrackets.contains c then
+      afterCloseBracket rest (depth + 1)
     else if closeBrackets.contains c then
       if depth ≤ 1 then some rest else afterCloseBracket rest (depth - 1)
-    else afterCloseBracket rest depth
+    else
+      afterCloseBracket rest depth
 
 /-- `s` without its leading bracketed group, if it starts with a group which is closed. -/
 def dropBalanced? (s : String) : Option String :=
@@ -397,7 +414,8 @@ def dropScopePrefix? (s : String) : Option String :=
     match s.splitOn " in " with
     | _ :: rest@(_ :: _) => some (" in ".intercalate rest)
     | _ => none
-  else none
+  else
+    none
 
 /-- `s` with every leading attribute, modifier and `… in` prefix removed. -/
 def normalise (s : String) : String := Id.run do
@@ -420,39 +438,51 @@ keywords below followed by a name. The name is the first token after the keyword
   the declaration is recorded by its signature.
 -/
 
-/-- The keywords which start a declaration. `remark`, `informal_definition` and
-`informal_lemma` are Physlib's own. -/
-def declKeywords : Array String :=
-  #["theorem", "lemma", "def", "abbrev", "instance", "structure", "class", "inductive",
-    "alias", "opaque", "axiom", "remark", "informal_definition", "informal_lemma"]
+/--
+The keywords which start a declaration. `remark`, `informal_definition` and
+`informal_lemma` are Physlib's own.
+-/
+def declKeywords : Array String := #[
+  "theorem", "lemma", "def", "abbrev", "instance", "structure", "class", "inductive",
+  "alias", "opaque", "axiom", "remark", "informal_definition", "informal_lemma"
+]
 
 /-- The characters which end a name. -/
 def nameStop : List Char :=
   [' ', '\t', '(', ')', '[', ']', '{', '}', '⟨', '⟩', '⦃', '⦄', ':', '=', ',', '"']
 
 /-- The leading token of `s`: its characters up to the first in `nameStop`. -/
-def firstToken (s : String) : String := (s.takeWhile fun c => !nameStop.contains c).copy
+def firstToken (s : String) : String := (s.takeWhile fun c => ! nameStop.contains c).copy
 
-/-- Whether `s` starts like a name: with a letter, an underscore or a non-ASCII character, as in
-`ψ_eq`. A `⟨` or `{` starts a signature instead. -/
+/--
+Whether `s` starts like a name: with a letter, an underscore or a non-ASCII character, as in
+`ψ_eq`. A `⟨` or `{` starts a signature instead.
+-/
 def isIdentifier (s : String) : Bool :=
   !s.isEmpty && (s.front.isAlpha || s.front == '_' || s.front.val > 127)
 
-/-- `s` up to its first `:=` outside brackets: the `:=` of `(priority := 100)` is not the one
-which starts the body. -/
+/--
+`s` up to its first `:=` outside brackets: the `:=` of `(priority := 100)` is not the one
+which starts the body.
+-/
 def beforeAssignment (s : String) : String := Id.run do
   let cs := s.toList
   let mut depth := 0
   let mut out : Array Char := #[]
   for (c, i) in cs.zipIdx do
-    if openBrackets.contains c then depth := depth + 1
-    else if closeBrackets.contains c then depth := depth - 1
-    else if depth == 0 && c == ':' && cs[i + 1]? == some '=' then break
+    if openBrackets.contains c then
+      depth := depth + 1
+    else if closeBrackets.contains c then
+      depth := depth - 1
+    else if depth == 0 && c == ':' && cs[i + 1]? == some '=' then
+      break
     out := out.push c
   return String.ofList out.toList
 
-/-- The signature in `s`, the part of a line after its keyword: what precedes the body, with a
-trailing `where` dropped. -/
+/--
+The signature in `s`, the part of a line after its keyword: what precedes the body, with a
+trailing `where` dropped.
+-/
 def signature (s : String) : String :=
   let s := trimEnd (beforeAssignment s)
   trimEnd (((s.dropSuffix? " where").map (·.copy)).getD s)
@@ -464,7 +494,7 @@ structure DeclHead where
   name : String
   /-- Whether `name` is a signature rather than a name. -/
   anonymous : Bool := false
-  deriving Repr, DecidableEq, Inhabited
+deriving Repr, DecidableEq, Inhabited
 
 /-- `h` as the report shows it: `lemma foo`, or `instance : Foo X`. -/
 def DeclHead.display (h : DeclHead) : String := s!"{h.keyword} {h.name}"
@@ -489,24 +519,33 @@ def aliasHeads (rest : String) : Array DeclHead :=
     let name := trim name
     if isIdentifier name && name != "_" then some { keyword := "alias", name } else none
 
-/-- The declaration `instance` followed by `rest` starts: named, after an optional
-`(priority := …)`, or else anonymous and recorded by its signature. -/
+/--
+The declaration `instance` followed by `rest` starts: named, after an optional
+`(priority := …)`, or else anonymous and recorded by its signature.
+-/
 def instanceHead (rest : String) : Array DeclHead :=
-  let rest := if rest.startsWith "(priority" then trimStart ((dropBalanced? rest).getD rest)
-    else rest
+  let rest :=
+    if rest.startsWith "(priority" then
+      trimStart ((dropBalanced? rest).getD rest)
+    else
+      rest
   let name := firstToken rest
-  if isIdentifier name then #[{ keyword := "instance", name }]
-  else #[{ keyword := "instance", name := signature rest, anonymous := true }]
+  if isIdentifier name then
+    #[{ keyword := "instance", name }]
+  else
+    #[{ keyword := "instance", name := signature rest, anonymous := true }]
 
 /-- The declarations the line `line` starts: none, one, or two for `alias ⟨a, b⟩`. -/
 def declHeads (line : String) : Array DeclHead :=
-  if line.isEmpty || line.front.isWhitespace then #[] else
-  match splitKeyword? (normalise line) with
-  | none => #[]
-  | some ("alias", rest) =>
-    if rest.startsWith "⟨" then aliasHeads rest else namedHead "alias" rest
-  | some ("instance", rest) => instanceHead rest
-  | some (keyword, rest) => namedHead keyword rest
+  if line.isEmpty || line.front.isWhitespace then
+    #[]
+  else
+    match splitKeyword? (normalise line) with
+    | none => #[]
+    | some ("alias", rest) =>
+      if rest.startsWith "⟨" then aliasHeads rest else namedHead "alias" rest
+    | some ("instance", rest) => instanceHead rest
+    | some (keyword, rest) => namedHead keyword rest
 
 /-! ### C.3. The declaration lines of a diff
 
@@ -531,7 +570,7 @@ structure Location where
   line : Nat
   /-- Whether the line is in the head revision (`+`) rather than the base revision (`-`). -/
   added : Bool
-  deriving Repr, DecidableEq, Inhabited
+deriving Repr, DecidableEq, Inhabited
 
 /-- A line of the diff which starts a declaration. -/
 structure DeclLine where
@@ -539,7 +578,7 @@ structure DeclLine where
   decl : DeclHead
   /-- The line without its `+` or `-`; two equal texts mean the declaration moved. -/
   text : String
-  deriving Repr, DecidableEq, Inhabited
+deriving Repr, DecidableEq, Inhabited
 
 /-- The path a `--- ` or `+++ ` header gives, without its `a/` or `b/`. -/
 def diffPath (s : String) : String :=
@@ -548,14 +587,16 @@ def diffPath (s : String) : String :=
 
 /-- The base and head line numbers a hunk header `@@ -<base>[,n] +<head>[,m] @@` starts at. -/
 def parseHunkHeader (line : String) : Option (Nat × Nat) :=
-  if !line.startsWith "@@ " then none else
-  match (line.splitOn " ").drop 1 with
-  | base :: head :: _ =>
-    match ((dropChars base 1).splitOn ",").head?.bind String.toNat?,
+  if ! line.startsWith "@@ " then
+    none
+  else
+    match (line.splitOn " ").drop 1 with
+    | base :: head :: _ =>
+      match ((dropChars base 1).splitOn ",").head?.bind String.toNat?,
         ((dropChars head 1).splitOn ",").head?.bind String.toNat? with
-    | some base, some head => some (base, head)
-    | _, _ => none
-  | _ => none
+      | some base, some head => some (base, head)
+      | _, _ => none
+    | _ => none
 
 /-- The declaration lines of the output of `git diff --unified=0`. -/
 def parseDiff (lines : Array String) : Array DeclLine := Id.run do
@@ -581,10 +622,11 @@ def parseDiff (lines : Array String) : Array DeclLine := Id.run do
     else if line.startsWith "+" || line.startsWith "-" then
       let added := line.startsWith "+"
       let text := trimEnd (dropChars line 1)
-      let loc : Location :=
-        { file := if added then addedFile else removedFile
-          line := if added then addedLine else removedLine
-          added }
+      let loc : Location := {
+        file := if added then addedFile else removedFile
+        line := if added then addedLine else removedLine
+        added
+      }
       for decl in declHeads text do
         result := result.push { loc, decl, text }
       if added then addedLine := addedLine + 1 else removedLine := removedLine + 1
@@ -604,10 +646,12 @@ inductive DeclChange where
   /-- Its line is unchanged but is now elsewhere, possibly in another file. -/
   | moved (old new : Location)
   | removed (loc : Location)
-  deriving Repr, DecidableEq, Inhabited
+deriving Repr, DecidableEq, Inhabited
 
-/-- The order in which the changes are reported, as in leaff: additions, removals, then
-modifications. -/
+/--
+The order in which the changes are reported, as in leaff: additions, removals, then
+modifications.
+-/
 def DeclChange.rank : DeclChange → Nat
   | .added .. => 0
   | .removed .. => 1
@@ -628,27 +672,31 @@ def DeclChange.target : DeclChange → Location
 structure DeclDiff where
   decl : DeclHead
   change : DeclChange
-  deriving Repr, DecidableEq, Inhabited
+deriving Repr, DecidableEq, Inhabited
 
 /-- Declarations are reported by change, then keyword, then name. -/
 def DeclDiff.lt (c d : DeclDiff) : Bool :=
-  c.change.rank < d.change.rank || c.change.rank == d.change.rank &&
-    (c.decl.keyword < d.decl.keyword || c.decl.keyword == d.decl.keyword &&
-      c.decl.name < d.decl.name)
+  c.change.rank < d.change.rank
+    || c.change.rank == d.change.rank
+      && (c.decl.keyword < d.decl.keyword
+        || c.decl.keyword == d.decl.keyword && c.decl.name < d.decl.name)
 
 /-- The declaration as a code span linked to the line to read it on. -/
 def DeclDiff.link (src : Source) (d : DeclDiff) : String :=
   let target := d.change.target
   src.link (code d.decl.display) target.file target.added target.line
 
-/-- The declaration lines grouped by name and classified: a name only on added lines was
+/--
+The declaration lines grouped by name and classified: a name only on added lines was
 added, only on removed lines was removed, on both with the same texts was moved, and on both
-with different texts was restated. Namespaces are not considered. -/
+with different texts was restated. Namespaces are not considered.
+-/
 def declDiff (lines : Array DeclLine) : Array DeclDiff := Id.run do
   -- Names in order of first appearance, so the output does not depend on a hash map.
   let mut names : Array String := #[]
   for l in lines do
-    unless names.contains l.decl.name do names := names.push l.decl.name
+    unless names.contains l.decl.name do
+      names := names.push l.decl.name
   let mut result : Array DeclDiff := #[]
   for name in names do
     let group := lines.filter (·.decl.name == name)
@@ -659,8 +707,9 @@ def declDiff (lines : Array DeclLine) : Array DeclDiff := Id.run do
     else if added.isEmpty then
       result := result ++ removed.map fun l => { decl := l.decl, change := .removed l.loc }
     else if (added.map (·.text)).qsort (· < ·) == (removed.map (·.text)).qsort (· < ·) then
-      result := result ++ (removed.zip added).map fun (r, a) =>
-        { decl := a.decl, change := .moved r.loc a.loc }
+      result :=
+        result
+          ++ (removed.zip added).map fun (r, a) => { decl := a.decl, change := .moved r.loc a.loc }
     else
       result := result.push { decl := added[0]!.decl, change := .restated added[0]!.loc }
   return result
@@ -680,7 +729,7 @@ structure FileContents where
   /-- Whether this is the head revision (`true`) or the base revision (`false`). -/
   added : Bool
   lines : Array String
-  deriving Repr, DecidableEq, Inhabited
+deriving Repr, DecidableEq, Inhabited
 
 /-- The namespaces the lines of a `.lean` file open, in the order they first open them. -/
 def namespacesOf (lines : Array String) : Array String := Id.run do
@@ -694,25 +743,34 @@ def namespacesOf (lines : Array String) : Array String := Id.run do
     | "namespace" :: name :: _ =>
       scopes := name.splitOn "." :: scopes
       let full := ".".intercalate scopes.reverse.flatten
-      unless result.contains full do result := result.push full
+      unless result.contains full do
+        result := result.push full
     | "section" :: _ | "mutual" :: _ => scopes := [] :: scopes
     | "end" :: _ => scopes := scopes.tail
     | _ => pure ()
   return result
 
-/-- `changes` with the namespaces of each file filled in from `contents`, and, for a file in
-both revisions, the namespaces it gained and lost. -/
-def withNamespaces (changes : Array FileChange) (contents : Array FileContents) :
-    Array FileChange :=
+/--
+`changes` with the namespaces of each file filled in from `contents`, and, for a file in
+both revisions, the namespaces it gained and lost.
+-/
+def withNamespaces (changes : Array FileChange) (contents : Array FileContents)
+    : Array FileChange :=
   changes.map fun c =>
     let head := (contents.find? fun f => f.added && f.path == c.path).map (namespacesOf ·.lines)
-    let base := (contents.find? fun f => !f.added && f.path == c.oldPath).map
-      (namespacesOf ·.lines)
+    let base := (contents.find? fun f => !f.added && f.path == c.oldPath).map (namespacesOf ·.lines)
     match head, base with
-    | some h, some b =>
-      { c with namespaces := h, addedNamespaces := h.filter (!b.contains ·),
-               removedNamespaces := b.filter (!h.contains ·) }
-    | some h, none | none, some h => { c with namespaces := h }
+    | some h, some b => {
+      c with
+      namespaces := h
+      addedNamespaces := h.filter (! b.contains ·)
+      removedNamespaces := b.filter (! h.contains ·)
+    }
+    | some h, none
+    | none, some h => {
+      c with
+      namespaces := h
+    }
     | none, none => c
 
 /-! ## E. Rendering the summary -/
@@ -759,15 +817,19 @@ def DeclDiff.line (d : DeclDiff) : String :=
   | .removed _ => s!"- removed {d.decl.display}"
   | .restated _ => s!"! statement changed for {d.decl.display}"
   | .moved old new =>
-    if old.file == new.file then s!"! moved {d.decl.display} within {kindOf new.file}"
-    else s!"! moved {d.decl.display} from {moduleOf old.file} to {moduleOf new.file}"
+    if old.file == new.file then
+      s!"! moved {d.decl.display} within {kindOf new.file}"
+    else
+      s!"! moved {d.decl.display} from {moduleOf old.file} to {moduleOf new.file}"
 
-/-- The block: each file in order of status then path, under a header, followed by its
+/--
+The block: each file in order of status then path, under a header, followed by its
 namespaces, the namespaces it gained and lost, and the changes to its declarations in order of
 importance; at most `limit` lines; then the number of
-changes. A moved declaration is listed under the file it is now in. -/
-def diffBlock (files : Array FileChange) (decls : Array DeclDiff) (limit : Nat := 300) :
-    String := Id.run do
+changes. A moved declaration is listed under the file it is now in.
+-/
+def diffBlock (files : Array FileChange) (decls : Array DeclDiff) (limit : Nat := 300)
+    : String := Id.run do
   if files.isEmpty && decls.isEmpty then return "No differences found."
   let mut lines : Array String := #[]
   let mut listed : Array DeclDiff := #[]
@@ -784,11 +846,11 @@ def diffBlock (files : Array FileChange) (decls : Array DeclDiff) (limit : Nat :
       listed := listed.push d
   -- Every declaration line of the diff is in a changed file, so this is empty; it is here so
   -- that the count below is right even if `git` says otherwise.
-  for d in (decls.filter (!listed.contains ·)).qsort DeclDiff.lt do
+  for d in (decls.filter (! listed.contains ·)).qsort DeclDiff.lt do
     lines := lines.push s!"@@ {moduleOf d.change.target.file} @@"
     lines := lines.push d.line
-  let namespaceChanges := files.foldl
-    (fun n c => n + c.addedNamespaces.size + c.removedNamespaces.size) 0
+  let namespaceChanges :=
+    files.foldl (fun n c => n + c.addedNamespaces.size + c.removedNamespaces.size) 0
   let count := plural (files.size + namespaceChanges + decls.size) "difference"
   return "\n".intercalate (#["Found differences:"] ++ truncate lines limit ++ #[count]).toList
 
@@ -807,48 +869,64 @@ def theoremsFile : String := "scripts/lint/exemptions/Theorems.txt"
 def newTheorems (decls : Array DeclDiff) : Array DeclDiff :=
   decls.filter fun d => d.decl.keyword == "theorem" && d.change.isNew
 
-/-- The call-out, or the empty string if the pull-request writes no `theorem`. It also says
-whether the pull-request changes the theorems file. -/
+/--
+The call-out, or the empty string if the pull-request writes no `theorem`. It also says
+whether the pull-request changes the theorems file.
+-/
 def theoremCallout (src : Source) (files : Array FileChange) (decls : Array DeclDiff) : String :=
   let theorems := (newTheorems decls).qsort DeclDiff.lt
-  if theorems.isEmpty then "" else
-  let names := ", ".intercalate (theorems.map (·.link src)).toList
-  let listed := if files.any (·.path == theoremsFile) then "which this PR also changes"
-    else "**which this PR does not change**"
-  -- Markdown joins the lines of a block quote into one paragraph.
-  "\n".intercalate [
-    "> [!IMPORTANT]",
-    s!"> This PR writes {plural theorems.size "result"} with `theorem`:",
-    s!"> {names}.",
-    ">",
-    "> `theorem` is reserved for the results which are significant in the physics literature,",
-    "> usually known by name; every other result is a `lemma`. Each one needs a doc-string and",
-    s!"> a line under the section of its library in `{theoremsFile}`,",
-    s!"> {listed}.",
-    "> `lake exe theorem_lint` checks both."]
+  if theorems.isEmpty then
+    ""
+  else
+    let names := ", ".intercalate (theorems.map (·.link src)).toList
+    let listed :=
+      if files.any (·.path == theoremsFile) then
+        "which this PR also changes"
+      else
+        "**which this PR does not change**"
+    -- Markdown joins the lines of a block quote into one paragraph.
+    "\n".intercalate [
+      "> [!IMPORTANT]",
+      s!"> This PR writes {plural theorems.size "result"} with `theorem`:",
+      s!"> {names}.",
+      ">",
+      "> `theorem` is reserved for the results which are significant in the physics literature,",
+      "> usually known by name; every other result is a `lemma`. Each one needs a doc-string and",
+      s!"> a line under the section of its library in `{theoremsFile}`,",
+      s!"> {listed}.",
+      "> `lake exe theorem_lint` checks both."
+    ]
 
 /-! ### E.3. The summary -/
 
 /-- The closing sentence, so a reader knows how far to trust the block. -/
 def caveat : String :=
   "The declarations are found by reading the diff as text, without regard for namespaces, so a \
-  declaration whose keyword and name are on different lines is missed, and two declarations of \
-  the same name in different namespaces are listed as one. A change to a proof, or to the body \
-  of a definition, does not appear. See `scripts/alpha/github/pr_summary.lean`."
+    declaration whose keyword and name are on different lines is missed, and two declarations of \
+    the same name in different namespaces are listed as one. A change to a proof, or to the body \
+    of a definition, does not appear. See `scripts/alpha/github/pr_summary.lean`."
 
 /-- The call-out, if any, then the block in a `diff` fence, then the caveat. -/
 def render (src : Source) (files : Array FileChange) (decls : Array DeclDiff) : String :=
-  let parts := #[theoremCallout src files decls, s!"```diff\n{diffBlock files decls}\n```", caveat]
+  let parts := #[
+    theoremCallout src files decls,
+    s!"```diff\
+      \n{diffBlock files decls}\
+      \n```",
+    caveat
+  ]
   "\n\n".intercalate (parts.filter (!·.isEmpty)).toList
 
-/-- The whole summary, from the lines of `git diff --name-status` and `git diff --unified=0`,
+/--
+The whole summary, from the lines of `git diff --name-status` and `git diff --unified=0`,
 the fields of `git diff --numstat -z`, and the changed `.lean` files in each revision. This is
-the entire behaviour of the script except for running `git`, and is what G tests. -/
-def summarise (src : Source) (nameStatus numstat diff : Array String)
-    (contents : Array FileContents) : String :=
+the entire behaviour of the script except for running `git`, and is what G tests.
+-/
+def summarise
+    (src : Source) (nameStatus numstat diff : Array String) (contents : Array FileContents)
+    : String :=
   render src
-    (withNamespaces (withLineCounts (parseNameStatus nameStatus) (parseNumstat numstat))
-      contents)
+    (withNamespaces (withLineCounts (parseNameStatus nameStatus) (parseNumstat numstat)) contents)
     (declDiff (parseDiff diff))
 
 /-! ## F. Running `git`
@@ -862,7 +940,8 @@ def git (args : Array String) : IO String := do
   let out ← IO.Process.output { cmd := "git", args }
   if out.exitCode ≠ 0 then
     throw <| IO.userError s!"`git {" ".intercalate args.toList}` exited with code \
-      {out.exitCode}:\n{out.stderr.trimAscii}"
+      {out.exitCode}:\
+      \n{out.stderr.trimAscii}"
   return out.stdout
 
 /-- The output of `git args` as lines, without the final empty one. -/
@@ -874,13 +953,16 @@ def gitLines (args : Array String) : IO (Array String) := do
 def gitFields (args : Array String) : IO (Array String) := do
   return ((← git args).splitOn "\x00").toArray.filter (!·.isEmpty)
 
-/-- The changed `.lean` files of `nameStatus` in each revision they are in: the head revision of
+/--
+The changed `.lean` files of `nameStatus` in each revision they are in: the head revision of
 every file but a removed one, and the base revision, at its old path, of every file but an added
-one. -/
+one.
+-/
 def gitContents (src : Source) (nameStatus : Array String) : IO (Array FileContents) := do
   let mut result : Array FileContents := #[]
   for c in parseNameStatus nameStatus do
-    unless c.path.endsWith ".lean" do continue
+    unless c.path.endsWith ".lean" do
+      continue
     unless c.status == .removed do
       let lines ← gitLines #["show", s!"{src.head}:{c.path}"]
       result := result.push { path := c.path, added := true, lines }
@@ -889,28 +971,33 @@ def gitContents (src : Source) (nameStatus : Array String) : IO (Array FileConte
       result := result.push { path := c.oldPath, added := false, lines }
   return result
 
-/-- The commit `revision` names. A link must use a commit: a link to `HEAD` would follow the
-branch rather than point at what was summarised. -/
-def commitOf (revision : String) : IO String :=
-  return trimEnd (← git #["rev-parse", revision])
+/--
+The commit `revision` names. A link must use a commit: a link to `HEAD` would follow the
+branch rather than point at what was summarised.
+-/
+def commitOf (revision : String) : IO String := return trimEnd (← git #["rev-parse", revision])
 
-/-- The commit which `git diff base...head` compares `head` with: the merge base of the two, or
-`base` itself if they have none. -/
+/--
+The commit which `git diff base...head` compares `head` with: the merge base of the two, or
+`base` itself if they have none.
+-/
 def mergeBase (base head : String) : IO String := do
-  try return trimEnd (← git #["merge-base", base, head])
-  catch _ => commitOf base
+  try
+    return trimEnd (← git #["merge-base", base, head])
+  catch _ =>
+    commitOf base
 
-/-- The summary of the changes `head` makes to `base`. `-M` makes `git` report a renamed file as
+/--
+The summary of the changes `head` makes to `base`. `-M` makes `git` report a renamed file as
 renamed rather than as removed and added, so its declarations are not all reported as moved and
-its lines are counted against its old self. -/
+its lines are counted against its old self.
+-/
 def gitSummary (base head : String) : IO String := do
   let range := s!"{base}...{head}"
   let src : Source := { base := ← mergeBase base head, head := ← commitOf head }
   let nameStatus ← gitLines #["diff", "--name-status", "-M", range]
-  return summarise src nameStatus
-    (← gitFields #["diff", "--numstat", "-M", "-z", range])
-    (← gitLines #["diff", "--unified=0", "-M", range])
-    (← gitContents src nameStatus)
+  return summarise src nameStatus (← gitFields #["diff", "--numstat", "-M", "-z", range])
+    (← gitLines #["diff", "--unified=0", "-M", range]) (← gitContents src nameStatus)
 
 /-- The revisions from the arguments: `origin/master` and `HEAD` unless given. -/
 def revisions : List String → Except String (String × String)
@@ -970,11 +1057,16 @@ definition, does not appear. See `scripts/alpha/github/pr_summary.lean`.
 -/
 #guard_msgs (whitespace := lax) in
 #eval IO.println (shortLinks (summarise testSource
-  #["M\tPhyslib/Foo.lean",
-    "A\tPhyslib/Bar.lean"]
-  #["3\t0\tPhyslib/Foo.lean",
-    "8\t0\tPhyslib/Bar.lean"]
-  #["diff --git a/Physlib/Foo.lean b/Physlib/Foo.lean",
+  #[
+    "M\tPhyslib/Foo.lean",
+    "A\tPhyslib/Bar.lean"
+  ]
+  #[
+    "3\t0\tPhyslib/Foo.lean",
+    "8\t0\tPhyslib/Bar.lean"
+  ]
+  #[
+    "diff --git a/Physlib/Foo.lean b/Physlib/Foo.lean",
     "--- a/Physlib/Foo.lean",
     "+++ b/Physlib/Foo.lean",
     "@@ -11,0 +12,3 @@ namespace Foo",
@@ -993,11 +1085,17 @@ definition, does not appear. See `scripts/alpha/github/pr_summary.lean`.
     "+/-- A lemma. -/",
     "+lemma Bar.baz : True := trivial",
     "+",
-    "+end Bar"]
-  #[{ path := "Physlib/Foo.lean", added := false, lines := #["namespace Foo", "end Foo"] },
+    "+end Bar"
+  ]
+  #[
+    { path := "Physlib/Foo.lean", added := false, lines := #["namespace Foo", "end Foo"] },
     { path := "Physlib/Foo.lean", added := true, lines := #["namespace Foo", "end Foo"] },
-    { path := "Physlib/Bar.lean", added := true,
-      lines := #["import Physlib.Foo", "namespace Bar", "end Bar"] }]))
+    {
+      path := "Physlib/Bar.lean"
+      added := true
+      lines := #["import Physlib.Foo", "namespace Bar", "end Bar"]
+    }
+  ]))
 
 /-! ### G.2. A renamed file, a removed file, and declarations moving between them
 
@@ -1032,13 +1130,18 @@ definition, does not appear. See `scripts/alpha/github/pr_summary.lean`.
 -/
 #guard_msgs (whitespace := lax) in
 #eval IO.println (shortLinks (summarise testSource
-  #["R090\tPhyslib/Old.lean\tPhyslib/New.lean",
+  #[
+    "R090\tPhyslib/Old.lean\tPhyslib/New.lean",
     "D\tPhyslib/Gone.lean",
-    "M\tdocs/figure.png"]
-  #["3\t1\t", "Physlib/Old.lean", "Physlib/New.lean",
+    "M\tdocs/figure.png"
+  ]
+  #[
+    "3\t1\t", "Physlib/Old.lean", "Physlib/New.lean",
     "0\t2\tPhyslib/Gone.lean",
-    "-\t-\tdocs/figure.png"]
-  #["diff --git a/Physlib/Old.lean b/Physlib/New.lean",
+    "-\t-\tdocs/figure.png"
+  ]
+  #[
+    "diff --git a/Physlib/Old.lean b/Physlib/New.lean",
     "similarity index 90%",
     "rename from Physlib/Old.lean",
     "rename to Physlib/New.lean",
@@ -1055,14 +1158,28 @@ definition, does not appear. See `scripts/alpha/github/pr_summary.lean`.
     "+++ /dev/null",
     "@@ -1,2 +0,0 @@",
     "-def baz : Nat := 0",
-    "-lemma qux : True := trivial"]
-  #[{ path := "Physlib/Old.lean", added := false,
-      lines := #["namespace Foo", "lemma foo : 1 = 1 := rfl", "end Foo"] },
-    { path := "Physlib/New.lean", added := true,
-      lines := #["namespace Foo", "noncomputable section", "namespace Bar",
-        "lemma foo : (1 : ℕ) = 1 := rfl", "end Bar", "end", "end Foo"] },
-    { path := "Physlib/Gone.lean", added := false,
-      lines := #["namespace Gone", "def baz : Nat := 0", "  match x with", "  end", "end Gone"] }]))
+    "-lemma qux : True := trivial"
+  ]
+  #[
+    {
+      path := "Physlib/Old.lean"
+      added := false
+      lines := #["namespace Foo", "lemma foo : 1 = 1 := rfl", "end Foo"]
+    },
+    {
+      path := "Physlib/New.lean"
+      added := true
+      lines := #[
+        "namespace Foo", "noncomputable section", "namespace Bar",
+        "lemma foo : (1 : ℕ) = 1 := rfl", "end Bar", "end", "end Foo"
+      ]
+    },
+    {
+      path := "Physlib/Gone.lean"
+      added := false
+      lines := #["namespace Gone", "def baz : Nat := 0", "  match x with", "  end", "end Gone"]
+    }
+  ]))
 
 /-! ### G.3. A theorem, with the theorems file changed
 
@@ -1097,11 +1214,16 @@ definition, does not appear. See `scripts/alpha/github/pr_summary.lean`.
 -/
 #guard_msgs (whitespace := lax) in
 #eval IO.println (shortLinks (summarise testSource
-  #["M\tPhyslib/Foo.lean",
-    "M\tscripts/lint/exemptions/Theorems.txt"]
-  #["1\t0\tPhyslib/Foo.lean",
-    "1\t0\tscripts/lint/exemptions/Theorems.txt"]
-  #["diff --git a/Physlib/Foo.lean b/Physlib/Foo.lean",
+  #[
+    "M\tPhyslib/Foo.lean",
+    "M\tscripts/lint/exemptions/Theorems.txt"
+  ]
+  #[
+    "1\t0\tPhyslib/Foo.lean",
+    "1\t0\tscripts/lint/exemptions/Theorems.txt"
+  ]
+  #[
+    "diff --git a/Physlib/Foo.lean b/Physlib/Foo.lean",
     "--- a/Physlib/Foo.lean",
     "+++ b/Physlib/Foo.lean",
     "@@ -4,0 +5 @@",
@@ -1110,7 +1232,8 @@ definition, does not appear. See `scripts/alpha/github/pr_summary.lean`.
     "--- a/scripts/lint/exemptions/Theorems.txt",
     "+++ b/scripts/lint/exemptions/Theorems.txt",
     "@@ -2,0 +3 @@",
-    "+Foo.gauss_law"]
+    "+Foo.gauss_law"
+  ]
   #[]))
 
 /-! ### G.4. Nothing changed -/
@@ -1131,13 +1254,17 @@ definition, does not appear. See `scripts/alpha/github/pr_summary.lean`.
 end PRSummary
 
 open PRSummary in
-/-- Reads the revisions from the arguments, prints the summary to standard output and anything
-else to standard error. Exits with `1` on a bad argument or a `git` error. -/
+/--
+Reads the revisions from the arguments, prints the summary to standard output and anything
+else to standard error. Exits with `1` on a bad argument or a `git` error.
+-/
 def main (args : List String) : IO UInt32 := do
-  let (base, head) ← match revisions args with
+  let (base, head) ←
+    match revisions args with
     | .ok revs => pure revs
     | .error e =>
-      IO.eprintln s!"{e}\nUsage: lake exe pr_summary [<base> [<head>]]"
+      IO.eprintln s!"{e}\
+        \nUsage: lake exe pr_summary [<base> [<head>]]"
       return 1
   IO.eprintln s!"Summarising `git diff {base}...{head}`."
   try

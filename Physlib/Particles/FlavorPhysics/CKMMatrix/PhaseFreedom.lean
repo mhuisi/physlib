@@ -29,74 +29,80 @@ open ComplexConjugate
 section phaseShiftApply
 variable (u c t d s b : ℝ)
 
-lemma shift_ud_phase_zero (V : CKMMatrix) (h1 : u + d = - arg [V]ud) :
-    [phaseShiftApply V u c t d s b]ud = VudAbs ⟦V⟧ := by
+lemma shift_ud_phase_zero (V : CKMMatrix) (h1 : u + d = - arg [V]ud)
+    : [phaseShiftApply V u c t d s b]ud = VudAbs ⟦V⟧ := by
   rw [phaseShiftApply.ud]
   conv_lhs => rw [← norm_mul_exp_arg_mul_I [V]ud]
   rw [mul_left_comm, ← exp_add]
   rw [show (u : ℂ) * I + d * I + arg [V]ud * I = 0 from by
-    have hc : (u : ℂ) + d + arg [V]ud = 0 := by
-      exact_mod_cast (show u + d + arg [V]ud = (0 : ℝ) by linarith)
-    linear_combination hc * I, exp_zero, mul_one]
+      have hc : (u : ℂ) + d + arg [V]ud = 0 := by
+        exact_mod_cast (show u + d + arg [V]ud = (0 : ℝ) by linarith)
+      linear_combination hc * I,
+    exp_zero, mul_one]
   rfl
 
-lemma shift_us_phase_zero {V : CKMMatrix} (h1 : u + s = - arg [V]us) :
-    [phaseShiftApply V u c t d s b]us = VusAbs ⟦V⟧ := by
+lemma shift_us_phase_zero {V : CKMMatrix} (h1 : u + s = - arg [V]us)
+    : [phaseShiftApply V u c t d s b]us = VusAbs ⟦V⟧ := by
   rw [phaseShiftApply.us]
   conv_lhs => rw [← norm_mul_exp_arg_mul_I [V]us]
   rw [mul_left_comm, ← exp_add]
   rw [show (u : ℂ) * I + s * I + arg [V]us * I = 0 from by
-    have hc : (u : ℂ) + s + arg [V]us = 0 := by
-      exact_mod_cast (show u + s + arg [V]us = (0 : ℝ) by linarith)
-    linear_combination hc * I, exp_zero, mul_one]
+      have hc : (u : ℂ) + s + arg [V]us = 0 := by
+        exact_mod_cast (show u + s + arg [V]us = (0 : ℝ) by linarith)
+      linear_combination hc * I,
+    exp_zero, mul_one]
   rfl
 
-lemma shift_ub_phase_zero {V : CKMMatrix} (h1 : u + b = - arg [V]ub) :
-    [phaseShiftApply V u c t d s b]ub = VubAbs ⟦V⟧ := by
+lemma shift_ub_phase_zero {V : CKMMatrix} (h1 : u + b = - arg [V]ub)
+    : [phaseShiftApply V u c t d s b]ub = VubAbs ⟦V⟧ := by
   rw [phaseShiftApply.ub]
   conv_lhs => rw [← norm_mul_exp_arg_mul_I [V]ub]
   rw [mul_left_comm, ← exp_add]
   rw [show (u : ℂ) * I + b * I + arg [V]ub * I = 0 from by
-    have hc : (u : ℂ) + b + arg [V]ub = 0 := by
-      exact_mod_cast (show u + b + arg [V]ub = (0 : ℝ) by linarith)
-    linear_combination hc * I, exp_zero, mul_one]
+      have hc : (u : ℂ) + b + arg [V]ub = 0 := by
+        exact_mod_cast (show u + b + arg [V]ub = (0 : ℝ) by linarith)
+      linear_combination hc * I,
+    exp_zero, mul_one]
   rfl
 
-lemma shift_cs_phase_zero {V : CKMMatrix} (h1 : c + s = - arg [V]cs) :
-    [phaseShiftApply V u c t d s b]cs = VcsAbs ⟦V⟧ := by
+lemma shift_cs_phase_zero {V : CKMMatrix} (h1 : c + s = - arg [V]cs)
+    : [phaseShiftApply V u c t d s b]cs = VcsAbs ⟦V⟧ := by
   rw [phaseShiftApply.cs]
   conv_lhs => rw [← norm_mul_exp_arg_mul_I [V]cs]
   rw [mul_left_comm, ← exp_add]
   rw [show (c : ℂ) * I + s * I + arg [V]cs * I = 0 from by
-    have hc : (c : ℂ) + s + arg [V]cs = 0 := by
-      exact_mod_cast (show c + s + arg [V]cs = (0 : ℝ) by linarith)
-    linear_combination hc * I, exp_zero, mul_one]
+      have hc : (c : ℂ) + s + arg [V]cs = 0 := by
+        exact_mod_cast (show c + s + arg [V]cs = (0 : ℝ) by linarith)
+      linear_combination hc * I,
+    exp_zero, mul_one]
   rfl
 
-lemma shift_cb_phase_zero {V : CKMMatrix} (h1 : c + b = - arg [V]cb) :
-    [phaseShiftApply V u c t d s b]cb = VcbAbs ⟦V⟧ := by
+lemma shift_cb_phase_zero {V : CKMMatrix} (h1 : c + b = - arg [V]cb)
+    : [phaseShiftApply V u c t d s b]cb = VcbAbs ⟦V⟧ := by
   rw [phaseShiftApply.cb]
   conv_lhs => rw [← norm_mul_exp_arg_mul_I [V]cb]
   rw [mul_left_comm, ← exp_add]
   rw [show (c : ℂ) * I + b * I + arg [V]cb * I = 0 from by
-    have hc : (c : ℂ) + b + arg [V]cb = 0 := by
-      exact_mod_cast (show c + b + arg [V]cb = (0 : ℝ) by linarith)
-    linear_combination hc * I, exp_zero, mul_one]
+      have hc : (c : ℂ) + b + arg [V]cb = 0 := by
+        exact_mod_cast (show c + b + arg [V]cb = (0 : ℝ) by linarith)
+      linear_combination hc * I,
+    exp_zero, mul_one]
   rfl
 
-lemma shift_tb_phase_zero {V : CKMMatrix} (h1 : t + b = - arg [V]tb) :
-    [phaseShiftApply V u c t d s b]tb = VtbAbs ⟦V⟧ := by
+lemma shift_tb_phase_zero {V : CKMMatrix} (h1 : t + b = - arg [V]tb)
+    : [phaseShiftApply V u c t d s b]tb = VtbAbs ⟦V⟧ := by
   rw [phaseShiftApply.tb]
   conv_lhs => rw [← norm_mul_exp_arg_mul_I [V]tb]
   rw [mul_left_comm, ← exp_add]
   rw [show (t : ℂ) * I + b * I + arg [V]tb * I = 0 from by
-    have hc : (t : ℂ) + b + arg [V]tb = 0 := by
-      exact_mod_cast (show t + b + arg [V]tb = (0 : ℝ) by linarith)
-    linear_combination hc * I, exp_zero, mul_one]
+      have hc : (t : ℂ) + b + arg [V]tb = 0 := by
+        exact_mod_cast (show t + b + arg [V]tb = (0 : ℝ) by linarith)
+      linear_combination hc * I,
+    exp_zero, mul_one]
   rfl
 
-lemma shift_cd_phase_pi {V : CKMMatrix} (h1 : c + d = Real.pi - arg [V]cd) :
-    [phaseShiftApply V u c t d s b]cd = - VcdAbs ⟦V⟧ := by
+lemma shift_cd_phase_pi {V : CKMMatrix} (h1 : c + d = Real.pi - arg [V]cd)
+    : [phaseShiftApply V u c t d s b]cd = - VcdAbs ⟦V⟧ := by
   rw [phaseShiftApply.cd]
   rw [← norm_mul_exp_arg_mul_I [V]cd]
   rw [mul_comm, mul_assoc, ← exp_add]
@@ -108,10 +114,11 @@ lemma shift_cd_phase_pi {V : CKMMatrix} (h1 : c + d = Real.pi - arg [V]cd) :
     ofReal_inj]
   rfl
 
-lemma shift_cross_product_phase_zero {V : CKMMatrix} {τ : ℝ}
-    (hτ : cexp (τ * I) • (conj [V]u ⨯₃ conj [V]c) = [V]t) (h1 : τ = - u - c - t - d - s - b) :
-    [phaseShiftApply V u c t d s b]t =
-    conj [phaseShiftApply V u c t d s b]u ⨯₃ conj [phaseShiftApply V u c t d s b]c := by
+lemma shift_cross_product_phase_zero
+    {V : CKMMatrix} {τ : ℝ}
+    (hτ : cexp (τ * I) • (conj [V]u ⨯₃ conj [V]c) = [V]t) (h1 : τ = -u - c - t - d - s - b)
+    : [phaseShiftApply V u c t d s b]t
+      = conj [phaseShiftApply V u c t d s b]u ⨯₃ conj [phaseShiftApply V u c t d s b]c := by
   change _ = phaseShiftApply.ucCross _ _ _ _ _ _ _
   funext i
   fin_cases i
@@ -127,8 +134,7 @@ lemma shift_cross_product_phase_zero {V : CKMMatrix} {τ : ℝ}
     ring
   · simp only [Fin.mk_one, Fin.isValue]
     rw [phaseShiftApply.ucCross_snd]
-    simp only [tRow, Fin.isValue, phaseShiftApply_coe, phaseShiftApply.ts, cons_val_one,
-      neg_mul]
+    simp only [tRow, Fin.isValue, phaseShiftApply_coe, phaseShiftApply.ts, cons_val_one, neg_mul]
     have hτ0 := congrFun hτ 1
     simp only [Fin.isValue, Pi.smul_apply, smul_eq_mul, tRow, cons_val_one, cons_val_zero] at hτ0
     rw [← hτ0]
@@ -143,7 +149,8 @@ lemma shift_cross_product_phase_zero {V : CKMMatrix} {τ : ℝ}
       Nat.succ_eq_add_one, Nat.reduceAdd, tail_cons, head_cons, neg_mul]
     have hτ0 := congrFun hτ 2
     simp only [Fin.isValue, Pi.smul_apply, smul_eq_mul, tRow, cons_val_two, Nat.succ_eq_add_one,
-      Nat.reduceAdd, tail_cons, head_cons] at hτ0
+        Nat.reduceAdd, tail_cons, head_cons]
+      at hτ0
     rw [← hτ0, ← mul_assoc, ← exp_add, h1]
     congr 2
     simp only [ofReal_sub, ofReal_neg]
@@ -153,40 +160,39 @@ end phaseShiftApply
 
 variable (a b c d e f : ℝ)
 
-/-- A proposition which is satisfied by a CKM matrix if its `ud`, `us`, `cb` and `tb` elements
+/--
+A proposition which is satisfied by a CKM matrix if its `ud`, `us`, `cb` and `tb` elements
 are positive and real, and there is no phase difference between the `t`th-row and
-the cross product of the conjugates of the `u`th and `c`th rows. -/
-def FstRowThdColRealCond (U : CKMMatrix) : Prop := [U]ud = VudAbs ⟦U⟧ ∧ [U]us = VusAbs ⟦U⟧
-    ∧ [U]cb = VcbAbs ⟦U⟧ ∧ [U]tb = VtbAbs ⟦U⟧ ∧ [U]t = conj [U]u ⨯₃ conj [U]c
+the cross product of the conjugates of the `u`th and `c`th rows.
+-/
+def FstRowThdColRealCond (U : CKMMatrix) : Prop :=
+  [U]ud = VudAbs ⟦U⟧ ∧ [U]us = VusAbs ⟦U⟧ ∧ [U]cb = VcbAbs ⟦U⟧ ∧ [U]tb = VtbAbs ⟦U⟧
+    ∧ [U]t = conj [U]u ⨯₃ conj [U]c
 
-/-- A proposition which is satisfied by a CKM matrix `ub` is one, `ud`, `us` and `cb` are zero,
+/--
+A proposition which is satisfied by a CKM matrix `ub` is one, `ud`, `us` and `cb` are zero,
   there is no phase difference between the `t`th-row and
 the cross product of the conjugates of the `u`th and `c`th rows, and the `cd`th and `cs`th
 elements are real and related in a set way.
 -/
 def ubOnePhaseCond (U : CKMMatrix) : Prop :=
-    [U]ud = 0 ∧ [U]us = 0 ∧ [U]cb = 0 ∧ [U]ub = 1 ∧ [U]t = conj [U]u ⨯₃ conj [U]c
+  [U]ud = 0 ∧ [U]us = 0 ∧ [U]cb = 0 ∧ [U]ub = 1 ∧ [U]t = conj [U]u ⨯₃ conj [U]c
     ∧ [U]cd = - VcdAbs ⟦U⟧ ∧ [U]cs = √(1 - VcdAbs ⟦U⟧ ^ 2)
 
-lemma fstRowThdColRealCond_shift_solution {V : CKMMatrix} (h1 : a + d = - arg [V]ud)
-    (h2 : a + e = - arg [V]us) (h3 : b + f = - arg [V]cb)
-    (h4 : c + f = - arg [V]tb) (h5 : τ = - a - b - c - d - e - f) :
-    b = - τ + arg [V]ud + arg [V]us + arg [V]tb + a ∧
-    c = - τ + arg [V]cb + arg [V]ud + arg [V]us + a ∧
-    d = - arg [V]ud - a ∧
-    e = - arg [V]us - a ∧
-    f = τ - arg [V]ud - arg [V]us - arg [V]cb - arg [V]tb - a := by
-  have hd : d = - arg [V]ud - a := by
-    linear_combination h1
+lemma fstRowThdColRealCond_shift_solution
+    {V : CKMMatrix} (h1 : a + d = - arg [V]ud) (h2 : a + e = - arg [V]us) (h3 : b + f = - arg [V]cb)
+    (h4 : c + f = - arg [V]tb)
+    (h5 : τ = -a - b - c - d - e - f)
+    : b = -τ + arg [V]ud + arg [V]us + arg [V]tb + a
+      ∧ c = -τ + arg [V]cb + arg [V]ud + arg [V]us + a ∧ d = - arg [V]ud - a ∧ e = - arg [V]us - a
+      ∧ f = τ - arg [V]ud - arg [V]us - arg [V]cb - arg [V]tb - a := by
+  have hd : d = - arg [V]ud - a := by linear_combination h1
   subst hd
-  have he : e = - arg [V]us - a := by
-    linear_combination h2
+  have he : e = - arg [V]us - a := by linear_combination h2
   subst he
   simp_all only [add_sub_cancel, neg_sub, true_and]
-  have hbf : b = - arg [V]cb - f := by
-    linear_combination h3
-  have hcf : c = - arg [V]tb - f := by
-    linear_combination h4
+  have hbf : b = - arg [V]cb - f := by linear_combination h3
+  have hcf : c = - arg [V]tb - f := by linear_combination h4
   rw [hbf, hcf] at h5
   simp_all only [sub_add_cancel]
   ring_nf at h5
@@ -198,38 +204,29 @@ lemma fstRowThdColRealCond_shift_solution {V : CKMMatrix} (h1 : a + d = - arg [V
   ring_nf
   simp
 
-lemma ubOnePhaseCond_shift_solution {V : CKMMatrix} (h1 : a + f = - arg [V]ub)
-    (h2 : 0 = - a - b - c - d - e - f)
-    (h3 : b + d = Real.pi - arg [V]cd) (h5 : b + e = - arg [V]cs) :
-    c = - Real.pi + arg [V]cd + arg [V]cs + arg [V]ub + b ∧
-    d = Real.pi - arg [V]cd - b ∧
-    e = - arg [V]cs - b ∧
-    f = - arg [V]ub - a := by
-  have hf : f = - arg [V]ub - a := by
-    linear_combination h1
+lemma ubOnePhaseCond_shift_solution
+    {V : CKMMatrix} (h1 : a + f = - arg [V]ub)
+    (h2 : 0 = -a - b - c - d - e - f) (h3 : b + d = Real.pi - arg [V]cd) (h5 : b + e = - arg [V]cs)
+    : c = -Real.pi + arg [V]cd + arg [V]cs + arg [V]ub + b ∧ d = Real.pi - arg [V]cd - b
+      ∧ e = - arg [V]cs - b ∧ f = - arg [V]ub - a := by
+  have hf : f = - arg [V]ub - a := by linear_combination h1
   subst hf
-  have he : e = - arg [V]cs - b := by
-    linear_combination h5
-  have hd : d = Real.pi - arg [V]cd - b := by
-    linear_combination h3
+  have he : e = - arg [V]cs - b := by linear_combination h5
+  have hd : d = Real.pi - arg [V]cd - b := by linear_combination h3
   subst he hd
   simp_all only [add_sub_cancel, and_self, and_true]
   ring_nf at h2
-  have hc : c = - Real.pi + arg [V]cd + arg [V]cs + arg [V]ub + b := by
-    linear_combination h2
+  have hc : c = -Real.pi + arg [V]cd + arg [V]cs + arg [V]ub + b := by linear_combination h2
   subst hc
   rfl
 
-lemma fstRowThdColRealCond_holds_up_to_equiv (V : CKMMatrix) :
-    ∃ (U : CKMMatrix), V ≈ U ∧ FstRowThdColRealCond U:= by
+lemma fstRowThdColRealCond_holds_up_to_equiv (V : CKMMatrix)
+    : ∃ (U : CKMMatrix), V ≈ U ∧ FstRowThdColRealCond U := by
   obtain ⟨τ, hτ⟩ := V.uRow_cross_cRow_eq_tRow
-  let U : CKMMatrix := phaseShiftApply V
-    0
-    (- τ + arg [V]ud + arg [V]us + arg [V]tb)
-    (- τ + arg [V]cb + arg [V]ud + arg [V]us)
-    (- arg [V]ud)
-    (- arg [V]us)
-    (τ - arg [V]ud - arg [V]us - arg [V]cb - arg [V]tb)
+  let U : CKMMatrix :=
+    phaseShiftApply V 0 (-τ + arg [V]ud + arg [V]us + arg [V]tb)
+      (-τ + arg [V]cb + arg [V]ud + arg [V]us) (- arg [V]ud) (- arg [V]us)
+      (τ - arg [V]ud - arg [V]us - arg [V]cb - arg [V]tb)
   have hUV : Quotient.mk CKMMatrixSetoid U = ⟦V⟧ := by
     simp only [Quotient.eq]
     symm
@@ -256,13 +253,14 @@ lemma fstRowThdColRealCond_holds_up_to_equiv (V : CKMMatrix) :
           · apply shift_cross_product_phase_zero _ _ _ _ _ _ hτ.symm
             ring
 
-lemma ubOnePhaseCond_hold_up_to_equiv_of_ub_one {V : CKMMatrix} (hb : ¬ ([V]ud ≠ 0 ∨ [V]us ≠ 0))
-    (hV : FstRowThdColRealCond V) :
-    ∃ (U : CKMMatrix), V ≈ U ∧ ubOnePhaseCond U:= by
-  let U : CKMMatrix := phaseShiftApply V 0 0 (- Real.pi + arg [V]cd + arg [V]cs + arg [V]ub)
-    (Real.pi - arg [V]cd) (- arg [V]cs) (- arg [V]ub)
+lemma ubOnePhaseCond_hold_up_to_equiv_of_ub_one
+    {V : CKMMatrix} (hb : ¬([V]ud ≠ 0 ∨ [V]us ≠ 0)) (hV : FstRowThdColRealCond V)
+    : ∃ (U : CKMMatrix), V ≈ U ∧ ubOnePhaseCond U := by
+  let U : CKMMatrix :=
+    phaseShiftApply V 0 0 (-Real.pi + arg [V]cd + arg [V]cs + arg [V]ub) (Real.pi - arg [V]cd)
+      (- arg [V]cs) (- arg [V]ub)
   use U
-  have hUV : Quotient.mk CKMMatrixSetoid U= ⟦V⟧ := by
+  have hUV : Quotient.mk CKMMatrixSetoid U = ⟦V⟧ := by
     simp only [Quotient.eq]
     symm
     exact phaseShiftApply.equiv _ _ _ _ _ _ _
@@ -295,7 +293,7 @@ lemma ubOnePhaseCond_hold_up_to_equiv_of_ub_one {V : CKMMatrix} (hb : ¬ ([V]ud 
         apply shift_ub_phase_zero _ _ _ _ _ _ _
         ring
       rw [hU1]
-      have h1:= (ud_us_ne_zero_iff_ub_ne_one V).mpr.mt hb
+      have h1 := (ud_us_ne_zero_iff_ub_ne_one V).mpr.mt hb
       simp_all only [Fin.isValue, ne_eq, not_or, Decidable.not_not, VubAbs, ofReal_eq_one]
       exact h1
     apply And.intro
@@ -314,11 +312,12 @@ lemma ubOnePhaseCond_hold_up_to_equiv_of_ub_one {V : CKMMatrix} (hb : ¬ ([V]ud 
       ring
     rw [hcs, hUV, cs_of_ud_us_zero hb]
 
-lemma cd_of_fstRowThdColRealCond {V : CKMMatrix} (hb : [V]ud ≠ 0 ∨ [V]us ≠ 0)
-    (hV : FstRowThdColRealCond V) :
-    [V]cd = (- VtbAbs ⟦V⟧ * VusAbs ⟦V⟧ / (VudAbs ⟦V⟧ ^2 + VusAbs ⟦V⟧ ^2)) +
-    (- VubAbs ⟦V⟧ * VudAbs ⟦V⟧ * VcbAbs ⟦V⟧ / (VudAbs ⟦V⟧ ^2 + VusAbs ⟦V⟧ ^2))
-    * cexp (- arg [V]ub * I) := by
+lemma cd_of_fstRowThdColRealCond
+    {V : CKMMatrix} (hb : [V]ud ≠ 0 ∨ [V]us ≠ 0) (hV : FstRowThdColRealCond V)
+    : [V]cd
+      = (- VtbAbs ⟦V⟧ * VusAbs ⟦V⟧ / (VudAbs ⟦V⟧ ^ 2 + VusAbs ⟦V⟧ ^ 2))
+        + (- VubAbs ⟦V⟧ * VudAbs ⟦V⟧ * VcbAbs ⟦V⟧ / (VudAbs ⟦V⟧ ^ 2 + VusAbs ⟦V⟧ ^ 2))
+          * cexp (- arg [V]ub * I) := by
   have hτ : [V]t = cexp ((0 : ℝ) * I) • (conj ([V]u) ⨯₃ conj ([V]c)) := by
     simp only [ofReal_zero, zero_mul, exp_zero, one_smul]
     exact hV.2.2.2.2
@@ -335,11 +334,12 @@ lemma cd_of_fstRowThdColRealCond {V : CKMMatrix} (hb : [V]ud ≠ 0 ∨ [V]us ≠
   rw [h1]
   ring_nf
 
-lemma cs_of_fstRowThdColRealCond {V : CKMMatrix} (hb : [V]ud ≠ 0 ∨ [V]us ≠ 0)
-    (hV : FstRowThdColRealCond V) :
-    [V]cs = (VtbAbs ⟦V⟧ * VudAbs ⟦V⟧ / (VudAbs ⟦V⟧ ^2 + VusAbs ⟦V⟧ ^2))
-    + (- VubAbs ⟦V⟧ * VusAbs ⟦V⟧ * VcbAbs ⟦V⟧/ (VudAbs ⟦V⟧ ^2 + VusAbs ⟦V⟧ ^2))
-    * cexp (- arg [V]ub * I) := by
+lemma cs_of_fstRowThdColRealCond
+    {V : CKMMatrix} (hb : [V]ud ≠ 0 ∨ [V]us ≠ 0) (hV : FstRowThdColRealCond V)
+    : [V]cs
+      = (VtbAbs ⟦V⟧ * VudAbs ⟦V⟧ / (VudAbs ⟦V⟧ ^ 2 + VusAbs ⟦V⟧ ^ 2))
+        + (- VubAbs ⟦V⟧ * VusAbs ⟦V⟧ * VcbAbs ⟦V⟧ / (VudAbs ⟦V⟧ ^ 2 + VusAbs ⟦V⟧ ^ 2))
+          * cexp (- arg [V]ub * I) := by
   have hτ : [V]t = cexp ((0 : ℝ) * I) • (conj ([V]u) ⨯₃ conj ([V]c)) := by
     simp only [ofReal_zero, zero_mul, exp_zero, one_smul]
     exact hV.2.2.2.2

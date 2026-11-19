@@ -60,8 +60,10 @@ open MeasureTheory Real Constants Temperature CanonicalEnsemble
 
 -/
 
-/-- The quantized oscillator with level spacing `ε`: the microstates `n : ℕ` have energy `n ε`
-and are counted with unit weight. -/
+/--
+The quantized oscillator with level spacing `ε`: the microstates `n : ℕ` have energy `n ε`
+and are counted with unit weight.
+-/
 noncomputable def quantizedOscillator (ε : ℝ) : CanonicalEnsemble ℕ where
   energy n := n * ε
   dof := 0
@@ -79,35 +81,36 @@ lemma exp_neg_mul_nat (b ε : ℝ) (n : ℕ) : exp (-b * (n * ε)) = exp (-(b * 
   ring_nf
 
 /-- The partition sum of the levels: `∑ e^{-β n ε} = (1 - e^{-β ε})⁻¹`. -/
-lemma hasSum_exp_neg_levels {b ε : ℝ} (hb : 0 < b * ε) :
-    HasSum (fun n : ℕ => exp (-b * (n * ε))) (1 - exp (-(b * ε)))⁻¹ := by
+lemma hasSum_exp_neg_levels {b ε : ℝ} (hb : 0 < b * ε)
+    : HasSum (fun n : ℕ => exp (-b * (n * ε))) (1 - exp (-(b * ε)))⁻¹ := by
   simpa only [exp_neg_mul_nat] using hasSum_geometric_of_norm_lt_one (exp_neg_lt_one hb)
 
 /-- The energy sum of the levels: `∑ n ε e^{-β n ε} = ε e^{-β ε} / (1 - e^{-β ε})²`. -/
-lemma hasSum_energy_levels {b ε : ℝ} (hb : 0 < b * ε) :
-    HasSum (fun n : ℕ => n * ε * exp (-b * (n * ε)))
+lemma hasSum_energy_levels {b ε : ℝ} (hb : 0 < b * ε)
+    : HasSum
+      (fun n : ℕ => n * ε * exp (-b * (n * ε)))
       (ε * (exp (-(b * ε)) / (1 - exp (-(b * ε))) ^ 2)) := by
   convert (hasSum_coe_mul_geometric_of_norm_lt_one (exp_neg_lt_one hb)).mul_left ε using 2
   rw [exp_neg_mul_nat]
   ring
 
 /-- The mean energy of the quantized oscillator is Planck's `ε / (e^{β ε} - 1)`. -/
-lemma quantizedOscillator_meanEnergy {ε : ℝ} (hε : 0 < ε) {T : Temperature}
-    (hT : 0 < (T : ℝ)) :
-    (quantizedOscillator ε).meanEnergy T = ε / (exp (T.β * ε) - 1) := by
+lemma quantizedOscillator_meanEnergy {ε : ℝ} (hε : 0 < ε) {T : Temperature} (hT : 0 < (T : ℝ))
+    : (quantizedOscillator ε).meanEnergy T = ε / (exp (T.β * ε) - 1) := by
   have hb : 0 < (T.β : ℝ) * ε := by
     rw [β_toReal]
     exact mul_pos (one_div_pos.mpr (mul_pos kB_pos hT)) hε
   have hZ := hasSum_exp_neg_levels hb
   have hU := hasSum_energy_levels hb
-  have hint {f : ℕ → ℝ} {a : ℝ} (hf : HasSum f a) (hf0 : ∀ n, 0 ≤ f n) :
-      ∫ n, f n ∂Measure.count = a := by
-    rw [integral_countable (integrable_count_iff.mpr
-      (hf.summable.congr fun n => (norm_of_nonneg (hf0 n)).symm))]
+  have hint {f : ℕ → ℝ} {a : ℝ} (hf : HasSum f a) (hf0 : ∀ n, 0 ≤ f n)
+      : ∫ n, f n ∂Measure.count = a := by
+    rw [integral_countable (integrable_count_iff.mpr (hf.summable.congr fun n =>
+      (norm_of_nonneg (hf0 n)).symm))]
     simpa using hf.tsum_eq
   rw [meanEnergy_eq_ratio_of_integrals]
-  change (∫ n : ℕ, (n : ℝ) * ε * exp (-T.β * (n * ε)) ∂Measure.count) /
-    (∫ n : ℕ, exp (-T.β * ((n : ℝ) * ε)) ∂Measure.count) = _
+  change (∫ n : ℕ, (n : ℝ) * ε * exp (-T.β * (n * ε)) ∂Measure.count)
+      / (∫ n : ℕ, exp (-T.β * ((n : ℝ) * ε)) ∂Measure.count)
+    = _
   rw [hint hU fun n => by positivity, hint hZ fun n => (exp_pos _).le]
   have h1 : 1 - exp (-(T.β * ε)) ≠ 0 := by
     have := exp_lt_one_iff.mpr (neg_lt_zero.mpr hb)
@@ -130,8 +133,8 @@ noncomputable def classicalOscillator : CanonicalEnsemble ℝ where
   μ := volume.restrict (Set.Ioi 0)
 
 /-- Equipartition: the mean energy of the classical oscillator is `kB T`. -/
-lemma classicalOscillator_meanEnergy {T : Temperature} (hT : 0 < (T : ℝ)) :
-    classicalOscillator.meanEnergy T = kB * T := by
+lemma classicalOscillator_meanEnergy {T : Temperature} (hT : 0 < (T : ℝ))
+    : classicalOscillator.meanEnergy T = kB * T := by
   have hb : 0 < (T.β : ℝ) := by
     rw [β_toReal]
     exact one_div_pos.mpr (mul_pos kB_pos hT)
@@ -148,25 +151,23 @@ lemma classicalOscillator_meanEnergy {T : Temperature} (hT : 0 < (T : ℝ)) :
       show (1 : ℝ) / 1 + 1 = 1 + 1 by norm_num, Gamma_add_one one_ne_zero, Gamma_one, mul_one,
       mul_one]
   rw [meanEnergy_eq_ratio_of_integrals]
-  change (∫ E in Set.Ioi (0 : ℝ), E * exp (-T.β * E)) /
-    (∫ E in Set.Ioi (0 : ℝ), exp (-T.β * E)) = _
+  change (∫ E in Set.Ioi (0 : ℝ), E * exp (-T.β * E)) / (∫ E in Set.Ioi (0 : ℝ), exp (-T.β * E)) = _
   rw [hnum, hden, β_toReal]
   field_simp
 
 /-- The quantized mean energy lies strictly below the classical one, `kB T`. -/
-lemma quantizedOscillator_meanEnergy_lt {ε : ℝ} (hε : 0 < ε) {T : Temperature}
-    (hT : 0 < (T : ℝ)) :
-    (quantizedOscillator ε).meanEnergy T < classicalOscillator.meanEnergy T := by
+lemma quantizedOscillator_meanEnergy_lt {ε : ℝ} (hε : 0 < ε) {T : Temperature} (hT : 0 < (T : ℝ))
+    : (quantizedOscillator ε).meanEnergy T < classicalOscillator.meanEnergy T := by
   have hb : 0 < (T.β : ℝ) * ε := by
     rw [β_toReal]
     exact mul_pos (one_div_pos.mpr (mul_pos kB_pos hT)) hε
-  have he : (T.β : ℝ) * ε < exp (T.β * ε) - 1 := by
-    linarith [add_one_lt_exp hb.ne']
+  have he : (T.β : ℝ) * ε < exp (T.β * ε) - 1 := by linarith [add_one_lt_exp hb.ne']
   rw [quantizedOscillator_meanEnergy hε hT, classicalOscillator_meanEnergy hT,
     div_lt_iff₀ (hb.trans he)]
-  calc ε = kB * T * (T.β * ε) := by
-        rw [β_toReal]
-        field_simp [kB_pos.ne', hT.ne']
+  calc
+    ε = kB * T * (T.β * ε) := by
+      rw [β_toReal]
+      field_simp [kB_pos.ne', hT.ne']
     _ < kB * T * (exp (T.β * ε) - 1) := mul_lt_mul_of_pos_left he (mul_pos kB_pos hT)
 
 /-!
@@ -176,14 +177,14 @@ lemma quantizedOscillator_meanEnergy_lt {ε : ℝ} (hε : 0 < ε) {T : Temperatu
 -/
 
 /-- Planck's law is `2 ν² / c²` times the mean energy of the oscillator of spacing `h ν`. -/
-lemma spectralRadiance_eq_meanEnergy (B : BlackBody) (c : SpeedOfLight) {ν : Frequency}
-    (hν : 0 < ν.val) (hT : 0 < (B.T : ℝ)) :
-    B.spectralRadiance c ν =
-      2 * (ν.val : ℝ) ^ 2 / (c : ℝ) ^ 2
+lemma spectralRadiance_eq_meanEnergy
+    (B : BlackBody) (c : SpeedOfLight) {ν : Frequency} (hν : 0 < ν.val) (hT : 0 < (B.T : ℝ))
+    : B.spectralRadiance c ν
+      = 2 * (ν.val : ℝ) ^ 2 / (c : ℝ) ^ 2
         * (quantizedOscillator (h * (ν.val : ℝ))).meanEnergy B.T := by
   have hνr : 0 < (ν.val : ℝ) := NNReal.coe_pos.mpr hν
-  rw [quantizedOscillator_meanEnergy (mul_pos h_pos hνr) hT, spectralRadiance,
-    ite_eq_left hν, β_toReal, one_div_mul_eq_div]
+  rw [quantizedOscillator_meanEnergy (mul_pos h_pos hνr) hT, spectralRadiance, ite_eq_left hν,
+    β_toReal, one_div_mul_eq_div]
   have hc := (pow_pos c.val_pos 2).ne'
   have he : exp (h * (ν.val : ℝ) / (kB * B.T)) - 1 ≠ 0 :=
     (sub_pos.mpr (one_lt_exp_iff.mpr (div_pos (mul_pos h_pos hνr) (mul_pos kB_pos hT)))).ne'
@@ -194,18 +195,20 @@ noncomputable def rayleighJeans (B : BlackBody) (c : SpeedOfLight) (ν : Frequen
   2 * (ν.val : ℝ) ^ 2 * kB * B.T / (c : ℝ) ^ 2
 
 /-- The Rayleigh–Jeans law is `2 ν² / c²` times the mean energy of the classical oscillator. -/
-lemma rayleighJeans_eq_meanEnergy (B : BlackBody) (c : SpeedOfLight) (ν : Frequency)
-    (hT : 0 < (B.T : ℝ)) :
-    B.rayleighJeans c ν
+lemma rayleighJeans_eq_meanEnergy
+    (B : BlackBody) (c : SpeedOfLight) (ν : Frequency) (hT : 0 < (B.T : ℝ))
+    : B.rayleighJeans c ν
       = 2 * (ν.val : ℝ) ^ 2 / (c : ℝ) ^ 2 * classicalOscillator.meanEnergy B.T := by
   rw [classicalOscillator_meanEnergy hT, rayleighJeans]
   ring
 
-/-- Planck's law lies strictly below the Rayleigh–Jeans law at every positive frequency and
-every positive temperature. -/
-lemma spectralRadiance_lt_rayleighJeans (B : BlackBody) (c : SpeedOfLight) {ν : Frequency}
-    (hν : 0 < ν.val) (hT : 0 < (B.T : ℝ)) :
-    B.spectralRadiance c ν < B.rayleighJeans c ν := by
+/--
+Planck's law lies strictly below the Rayleigh–Jeans law at every positive frequency and
+every positive temperature.
+-/
+lemma spectralRadiance_lt_rayleighJeans
+    (B : BlackBody) (c : SpeedOfLight) {ν : Frequency} (hν : 0 < ν.val) (hT : 0 < (B.T : ℝ))
+    : B.spectralRadiance c ν < B.rayleighJeans c ν := by
   have hνr : 0 < (ν.val : ℝ) := NNReal.coe_pos.mpr hν
   rw [spectralRadiance_eq_meanEnergy B c hν hT, rayleighJeans_eq_meanEnergy B c ν hT]
   exact mul_lt_mul_of_pos_left (quantizedOscillator_meanEnergy_lt (mul_pos h_pos hνr) hT)

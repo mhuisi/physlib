@@ -83,17 +83,21 @@ TODO "Formalize the conclusion of the Liouville–Arnold theorem (action-angle c
 
 -/
 
-/-- A Liouville integrable system for a Hamiltonian `H` on an open dense domain `U` of the
+/--
+A Liouville integrable system for a Hamiltonian `H` on an open dense domain `U` of the
 `2d`-dimensional phase space `EuclideanSpace ℝ (Fin d) × EuclideanSpace ℝ (Fin d)`, whose points
 are read as `(p, q)`: `d` smooth conserved quantities, one per degree of freedom, that are pairwise
-in involution and functionally independent at every point of `U`. -/
-structure LiouvilleIntegrableOn {d : ℕ}
-    (U : Set (EuclideanSpace ℝ (Fin d) × EuclideanSpace ℝ (Fin d)))
+in involution and functionally independent at every point of `U`.
+-/
+structure LiouvilleIntegrableOn
+    {d : ℕ} (U : Set (EuclideanSpace ℝ (Fin d) × EuclideanSpace ℝ (Fin d)))
     (H : EuclideanSpace ℝ (Fin d) → EuclideanSpace ℝ (Fin d) → ℝ) where
   /-- The domain on which the system is integrable is open. -/
   isOpen : IsOpen U
-  /-- The domain on which the system is integrable is dense, i.e. integrability holds
-  generically. -/
+  /--
+  The domain on which the system is integrable is dense, i.e. integrability holds
+  generically.
+  -/
   dense : Dense U
   /-- The `d` conserved quantities, one per degree of freedom. -/
   f : Fin d → EuclideanSpace ℝ (Fin d) → EuclideanSpace ℝ (Fin d) → ℝ
@@ -103,10 +107,14 @@ structure LiouvilleIntegrableOn {d : ℕ}
   exists_hamiltonian : ∃ i, f i = H
   /-- The conserved quantities pairwise Poisson-commute on `U`, i.e. are in involution. -/
   involutive : ∀ i j, ∀ x ∈ U, poissonBracket (f i) (f j) x.1 x.2 = 0
-  /-- The conserved quantities are functionally independent on `U`: their phase-space gradients
-  (the `p`- and `q`-partials together) are linearly independent. -/
-  independent : ∀ x ∈ U, LinearIndependent ℝ
-    (fun i => (gradient (fun p' => f i p' x.2) x.1, gradient (fun q' => f i x.1 q') x.2))
+  /--
+  The conserved quantities are functionally independent on `U`: their phase-space gradients
+  (the `p`- and `q`-partials together) are linearly independent.
+  -/
+  independent
+    : ∀ x ∈ U,
+      LinearIndependent ℝ
+        (fun i => (gradient (fun p' => f i p' x.2) x.1, gradient (fun q' => f i x.1 q') x.2))
 
 /-!
 
@@ -114,16 +122,18 @@ structure LiouvilleIntegrableOn {d : ℕ}
 
 -/
 
-/-- Each conserved quantity of a Liouville integrable system has zero time derivative along a
-solution of Hamilton's equations for `H` which lies in the domain `U` at time `t`. -/
-lemma LiouvilleIntegrableOn.deriv_comp_eq_zero {d : ℕ}
-    {U : Set (EuclideanSpace ℝ (Fin d) × EuclideanSpace ℝ (Fin d))}
+/--
+Each conserved quantity of a Liouville integrable system has zero time derivative along a
+solution of Hamilton's equations for `H` which lies in the domain `U` at time `t`.
+-/
+lemma LiouvilleIntegrableOn.deriv_comp_eq_zero
+    {d : ℕ} {U : Set (EuclideanSpace ℝ (Fin d) × EuclideanSpace ℝ (Fin d))}
     {H : EuclideanSpace ℝ (Fin d) → EuclideanSpace ℝ (Fin d) → ℝ}
-    (LI : LiouvilleIntegrableOn U H)
-    (p q : Time → EuclideanSpace ℝ (Fin d)) (t : Time) (i : Fin d)
-    (heq : hamiltonEqOp (fun _ => H) p q = 0)
-    (hp : DifferentiableAt ℝ p t) (hq : DifferentiableAt ℝ q t) (hU : (p t, q t) ∈ U) :
-    ∂ₜ (fun t => LI.f i (p t) (q t)) t = 0 := by
+    (LI : LiouvilleIntegrableOn U H) (p q : Time → EuclideanSpace ℝ (Fin d))
+    (t : Time)
+    (i : Fin d) (heq : hamiltonEqOp (fun _ => H) p q = 0) (hp : DifferentiableAt ℝ p t)
+    (hq : DifferentiableAt ℝ q t) (hU : (p t, q t) ∈ U)
+    : ∂ₜ (fun t => LI.f i (p t) (q t)) t = 0 := by
   obtain ⟨i₀, hi₀⟩ := LI.exists_hamiltonian
   have hf : DifferentiableAt ℝ (Function.uncurry (LI.f i)) (p t, q t) :=
     ((LI.contDiffOn i).contDiffAt (LI.isOpen.mem_nhds hU)).differentiableAt (by simp)
@@ -139,16 +149,17 @@ lemma LiouvilleIntegrableOn.deriv_comp_eq_zero {d : ℕ}
 
 -/
 
-/-- A Hamiltonian system with one degree of freedom is Liouville integrable, with the Hamiltonian as
+/--
+A Hamiltonian system with one degree of freedom is Liouville integrable, with the Hamiltonian as
 its single conserved quantity, on any open dense domain on which the Hamiltonian is smooth and has
-non-vanishing phase-space gradient. -/
+non-vanishing phase-space gradient.
+-/
 def LiouvilleIntegrableOn.oneDegreeOfFreedom
     {U : Set (EuclideanSpace ℝ (Fin 1) × EuclideanSpace ℝ (Fin 1))}
     {H : EuclideanSpace ℝ (Fin 1) → EuclideanSpace ℝ (Fin 1) → ℝ}
     (hU : IsOpen U) (hdense : Dense U) (hH : ContDiffOn ℝ ∞ (Function.uncurry H) U)
-    (hgrad : ∀ x ∈ U,
-      (gradient (fun p' => H p' x.2) x.1, gradient (fun q' => H x.1 q') x.2) ≠ 0) :
-    LiouvilleIntegrableOn U H where
+    (hgrad : ∀ x ∈ U, (gradient (fun p' => H p' x.2) x.1, gradient (fun q' => H x.1 q') x.2) ≠ 0)
+    : LiouvilleIntegrableOn U H where
   isOpen := hU
   dense := hdense
   f := fun _ => H

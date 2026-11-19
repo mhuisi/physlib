@@ -33,8 +33,10 @@ open StandardModel
 
 -/
 
-/-- The configuration space of the two Higgs doublet model.
-  In otherwords, the underlying vector space associated with the model. -/
+/--
+The configuration space of the two Higgs doublet model.
+In otherwords, the underlying vector space associated with the model.
+-/
 structure TwoHiggsDoublet where
   /-- The first Higgs doublet. -/
   Φ1 : HiggsVec
@@ -46,8 +48,8 @@ namespace TwoHiggsDoublet
 open InnerProductSpace
 
 @[ext]
-lemma ext_of_fst_snd {H1 H2 : TwoHiggsDoublet}
-    (h1 : H1.Φ1 = H2.Φ1) (h2 : H1.Φ2 = H2.Φ2) : H1 = H2 := by
+lemma ext_of_fst_snd {H1 H2 : TwoHiggsDoublet} (h1 : H1.Φ1 = H2.Φ1) (h2 : H1.Φ2 = H2.Φ2)
+    : H1 = H2 := by
   cases H1
   congr
 /-!
@@ -57,22 +59,23 @@ lemma ext_of_fst_snd {H1 H2 : TwoHiggsDoublet}
 -/
 
 noncomputable instance : SMul StandardModel.GaugeGroupI TwoHiggsDoublet where
-  smul g H :=
-    { Φ1 := StandardModel.HiggsVec.repGaugeGroupI g H.Φ1
-      Φ2 := StandardModel.HiggsVec.repGaugeGroupI g H.Φ2 }
+  smul g H := {
+    Φ1 := StandardModel.HiggsVec.repGaugeGroupI g H.Φ1
+    Φ2 := StandardModel.HiggsVec.repGaugeGroupI g H.Φ2
+  }
 
 @[simp]
-lemma gaugeGroupI_smul_fst (g : StandardModel.GaugeGroupI) (H : TwoHiggsDoublet) :
-    (g • H).Φ1 = StandardModel.HiggsVec.repGaugeGroupI g H.Φ1 := rfl
+lemma gaugeGroupI_smul_fst (g : StandardModel.GaugeGroupI) (H : TwoHiggsDoublet)
+    : (g • H).Φ1 = StandardModel.HiggsVec.repGaugeGroupI g H.Φ1 :=
+  rfl
 
 @[simp]
-lemma gaugeGroupI_smul_snd (g : StandardModel.GaugeGroupI) (H : TwoHiggsDoublet) :
-    (g • H).Φ2 = StandardModel.HiggsVec.repGaugeGroupI g H.Φ2 := rfl
+lemma gaugeGroupI_smul_snd (g : StandardModel.GaugeGroupI) (H : TwoHiggsDoublet)
+    : (g • H).Φ2 = StandardModel.HiggsVec.repGaugeGroupI g H.Φ2 :=
+  rfl
 
 noncomputable instance : MulAction StandardModel.GaugeGroupI TwoHiggsDoublet where
-  one_smul H := by
-    ext <;> simp
-  mul_smul g1 g2 H := by
-    ext <;> simp [Module.End.mul_apply]
+  one_smul H := by ext <;> simp
+  mul_smul g1 g2 H := by ext <;> simp [Module.End.mul_apply]
 
 end TwoHiggsDoublet

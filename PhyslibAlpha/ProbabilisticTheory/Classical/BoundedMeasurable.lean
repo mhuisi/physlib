@@ -60,16 +60,17 @@ instance : OrderUnitSpace (BoundedMeasurable Ω) where
   one_nonneg := le_def.2 fun _ => by simp
   exists_nsmul_one_le f := by
     obtain ⟨C, hC⟩ := f.exists_bound
-    exact ⟨⌈C⌉₊, le_def.2 fun x => by
-      simpa using (le_abs_self _).trans ((hC x).trans (Nat.le_ceil C))⟩
+    exact
+      ⟨⌈C⌉₊, le_def.2 fun x => by simpa using (le_abs_self _).trans ((hC x).trans (Nat.le_ceil C))⟩
 
 instance : ArchimedeanOrderUnitSpace (BoundedMeasurable Ω) where
-  le_zero_of_forall_pos_smul_one_le f h := le_def.2 fun x =>
-    le_of_forall_pos_le_add fun ε hε => by simpa using le_def.1 (h ε hε) x
+  le_zero_of_forall_pos_smul_one_le f h :=
+    le_def.2 fun x => le_of_forall_pos_le_add fun ε hε => by simpa using le_def.1 (h ε hε) x
 
-instance : OrderUnitLattice (BoundedMeasurable Ω) :=
-  { (inferInstance : ArchimedeanOrderUnitSpace (BoundedMeasurable Ω)),
-    (inferInstance : Lattice (BoundedMeasurable Ω)) with }
+instance : OrderUnitLattice (BoundedMeasurable Ω) := {
+  (inferInstance : ArchimedeanOrderUnitSpace (BoundedMeasurable Ω)),
+  (inferInstance : Lattice (BoundedMeasurable Ω)) with
+}
 
 end BoundedMeasurable
 
@@ -85,12 +86,14 @@ variable {Ω : Type*} [MeasurableSpace Ω]
 -/
 
 /-- The effect testing whether the outcome lies in `s`. -/
-noncomputable def indicatorEffect (s : Set Ω) (hs : MeasurableSet s) :
-    Effect (BoundedMeasurable Ω) :=
+noncomputable def indicatorEffect (s : Set Ω) (hs : MeasurableSet s)
+    : Effect (BoundedMeasurable Ω) :=
   ⟨indicator s hs, indicator_nonneg s hs, indicator_le_one s hs⟩
 
-@[simp] lemma coe_indicatorEffect (s : Set Ω) (hs : MeasurableSet s) :
-    (indicatorEffect s hs : BoundedMeasurable Ω) = indicator s hs := rfl
+@[simp]
+lemma coe_indicatorEffect (s : Set Ω) (hs : MeasurableSet s)
+    : (indicatorEffect s hs : BoundedMeasurable Ω) = indicator s hs :=
+  rfl
 
 /-- The effect-valued measure of the outcome: the set `A` is the effect `1_A`. -/
 noncomputable def outcomeMeasurement : EffectValuedMeasure Ω (BoundedMeasurable Ω) where
@@ -100,4 +103,3 @@ noncomputable def outcomeMeasurement : EffectValuedMeasure Ω (BoundedMeasurable
   countably_additive' _ hs hd := isLUB_sum_indicator hs hd
 
 end BoundedMeasurable
-

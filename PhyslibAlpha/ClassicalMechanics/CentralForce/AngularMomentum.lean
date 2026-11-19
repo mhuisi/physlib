@@ -75,18 +75,18 @@ noncomputable def angularMomentum (p q : EuclideanSpace ℝ (Fin 3)) : Euclidean
   WithLp.toLp 2 (q.ofLp ⨯₃ p.ofLp)
 
 /-- The x-component of the angular momentum is `q₁ p₂ - q₂ p₁`. -/
-lemma angularMomentum_apply_zero (p q : EuclideanSpace ℝ (Fin 3)) :
-    angularMomentum p q 0 = q 1 * p 2 - q 2 * p 1 := by
+lemma angularMomentum_apply_zero (p q : EuclideanSpace ℝ (Fin 3))
+    : angularMomentum p q 0 = q 1 * p 2 - q 2 * p 1 := by
   simp [angularMomentum, cross_apply]
 
 /-- The y-component of the angular momentum is `q₂ p₀ - q₀ p₂`. -/
-lemma angularMomentum_apply_one (p q : EuclideanSpace ℝ (Fin 3)) :
-    angularMomentum p q 1 = q 2 * p 0 - q 0 * p 2 := by
+lemma angularMomentum_apply_one (p q : EuclideanSpace ℝ (Fin 3))
+    : angularMomentum p q 1 = q 2 * p 0 - q 0 * p 2 := by
   simp [angularMomentum, cross_apply]
 
 /-- The z-component of the angular momentum is `q₀ p₁ - q₁ p₀`. -/
-lemma angularMomentum_apply_two (p q : EuclideanSpace ℝ (Fin 3)) :
-    angularMomentum p q 2 = q 0 * p 1 - q 1 * p 0 := by
+lemma angularMomentum_apply_two (p q : EuclideanSpace ℝ (Fin 3))
+    : angularMomentum p q 2 = q 0 * p 1 - q 1 * p 0 := by
   simp [angularMomentum, cross_apply]
 
 /-!
@@ -95,26 +95,29 @@ lemma angularMomentum_apply_two (p q : EuclideanSpace ℝ (Fin 3)) :
 
 -/
 
-/-- The squared magnitude `L² = ‖q × p‖²` of the angular momentum, as a function on phase
-space. -/
+/--
+The squared magnitude `L² = ‖q × p‖²` of the angular momentum, as a function on phase
+space.
+-/
 noncomputable def angularMomentumSq (p q : EuclideanSpace ℝ (Fin 3)) : ℝ :=
   ‖angularMomentum p q‖ ^ 2
 
 /-- The component `L_z` of the angular momentum along the z-axis, as a function on phase space. -/
-noncomputable def angularMomentumZ (p q : EuclideanSpace ℝ (Fin 3)) : ℝ :=
-  angularMomentum p q 2
+noncomputable def angularMomentumZ (p q : EuclideanSpace ℝ (Fin 3)) : ℝ := angularMomentum p q 2
 
 /-- The squared magnitude of the angular momentum is the sum of the squares of its components. -/
-lemma angularMomentumSq_eq_sum (p q : EuclideanSpace ℝ (Fin 3)) :
-    angularMomentumSq p q =
-      angularMomentum p q 0 ^ 2 + angularMomentum p q 1 ^ 2 + angularMomentum p q 2 ^ 2 := by
+lemma angularMomentumSq_eq_sum (p q : EuclideanSpace ℝ (Fin 3))
+    : angularMomentumSq p q
+      = angularMomentum p q 0 ^ 2 + angularMomentum p q 1 ^ 2 + angularMomentum p q 2 ^ 2 := by
   rw [angularMomentumSq, EuclideanSpace.norm_sq_eq, Fin.sum_univ_three]
   simp only [Real.norm_eq_abs, sq_abs]
 
-/-- Lagrange's identity: the squared magnitude of the angular momentum `q × p` is
-`⟪q, q⟫ ⟪p, p⟫ - ⟪q, p⟫²`. -/
-lemma angularMomentumSq_eq (p q : EuclideanSpace ℝ (Fin 3)) :
-    angularMomentumSq p q = ⟪q, q⟫_ℝ * ⟪p, p⟫_ℝ - ⟪q, p⟫_ℝ ^ 2 := by
+/--
+Lagrange's identity: the squared magnitude of the angular momentum `q × p` is
+`⟪q, q⟫ ⟪p, p⟫ - ⟪q, p⟫²`.
+-/
+lemma angularMomentumSq_eq (p q : EuclideanSpace ℝ (Fin 3))
+    : angularMomentumSq p q = ⟪q, q⟫_ℝ * ⟪p, p⟫_ℝ - ⟪q, p⟫_ℝ ^ 2 := by
   rw [angularMomentumSq_eq_sum, angularMomentum_apply_zero, angularMomentum_apply_one,
     angularMomentum_apply_two]
   simp only [PiLp.inner_apply, Fin.sum_univ_three, RCLike.inner_apply, conj_trivial]
@@ -128,9 +131,10 @@ lemma angularMomentumSq_eq (p q : EuclideanSpace ℝ (Fin 3)) :
 
 /-- The squared magnitude of the angular momentum is a smooth function on phase space. -/
 lemma contDiff_angularMomentumSq : ContDiff ℝ ∞ (Function.uncurry angularMomentumSq) := by
-  have h : Function.uncurry angularMomentumSq =
-      fun x : EuclideanSpace ℝ (Fin 3) × EuclideanSpace ℝ (Fin 3) =>
-        ⟪x.2, x.2⟫_ℝ * ⟪x.1, x.1⟫_ℝ - ⟪x.2, x.1⟫_ℝ ^ 2 :=
+  have h
+      : Function.uncurry angularMomentumSq
+        = fun x : EuclideanSpace ℝ (Fin 3) × EuclideanSpace ℝ (Fin 3) =>
+          ⟪x.2, x.2⟫_ℝ * ⟪x.1, x.1⟫_ℝ - ⟪x.2, x.1⟫_ℝ ^ 2 :=
     funext fun x => angularMomentumSq_eq x.1 x.2
   rw [h]
   exact ((contDiff_snd.inner ℝ contDiff_snd).mul (contDiff_fst.inner ℝ contDiff_fst)).sub
@@ -138,9 +142,10 @@ lemma contDiff_angularMomentumSq : ContDiff ℝ ∞ (Function.uncurry angularMom
 
 /-- The z-component of the angular momentum is a smooth function on phase space. -/
 lemma contDiff_angularMomentumZ : ContDiff ℝ ∞ (Function.uncurry angularMomentumZ) := by
-  have h : Function.uncurry angularMomentumZ =
-      fun x : EuclideanSpace ℝ (Fin 3) × EuclideanSpace ℝ (Fin 3) =>
-        x.2 0 * x.1 1 - x.2 1 * x.1 0 :=
+  have h
+      : Function.uncurry angularMomentumZ
+        = fun x : EuclideanSpace ℝ (Fin 3) × EuclideanSpace ℝ (Fin 3) =>
+          x.2 0 * x.1 1 - x.2 1 * x.1 0 :=
     funext fun x => angularMomentum_apply_two x.1 x.2
   rw [h]
   fun_prop
@@ -152,8 +157,9 @@ lemma contDiff_angularMomentumZ : ContDiff ℝ ∞ (Function.uncurry angularMome
 -/
 
 /-- The momentum gradient of `L²` is `2 ⟪q, q⟫ p - 2 ⟪q, p⟫ q`. -/
-lemma hasGradientAt_angularMomentumSq_momentum (p q : EuclideanSpace ℝ (Fin 3)) :
-    HasGradientAt (fun p' => angularMomentumSq p' q)
+lemma hasGradientAt_angularMomentumSq_momentum (p q : EuclideanSpace ℝ (Fin 3))
+    : HasGradientAt
+      (fun p' => angularMomentumSq p' q)
       ((2 * ⟪q, q⟫_ℝ) • p - (2 * ⟪q, p⟫_ℝ) • q) p := by
   simp only [angularMomentumSq_eq]
   convert ((hasGradientAt_inner_self p).const_mul ⟪q, q⟫_ℝ).sub
@@ -161,8 +167,9 @@ lemma hasGradientAt_angularMomentumSq_momentum (p q : EuclideanSpace ℝ (Fin 3)
   module
 
 /-- The position gradient of `L²` is `2 ⟪p, p⟫ q - 2 ⟪q, p⟫ p`. -/
-lemma hasGradientAt_angularMomentumSq_position (p q : EuclideanSpace ℝ (Fin 3)) :
-    HasGradientAt (fun q' => angularMomentumSq p q')
+lemma hasGradientAt_angularMomentumSq_position (p q : EuclideanSpace ℝ (Fin 3))
+    : HasGradientAt
+      (fun q' => angularMomentumSq p q')
       ((2 * ⟪p, p⟫_ℝ) • q - (2 * ⟪q, p⟫_ℝ) • p) q := by
   simp only [angularMomentumSq_eq]
   convert ((hasGradientAt_inner_self q).mul (hasGradientAt_const q ⟪p, p⟫_ℝ)).sub
@@ -170,16 +177,17 @@ lemma hasGradientAt_angularMomentumSq_position (p q : EuclideanSpace ℝ (Fin 3)
   module
 
 /-- The momentum gradient of `L_z` is `q₀ e₁ - q₁ e₀`. -/
-lemma hasGradientAt_angularMomentumZ_momentum (p q : EuclideanSpace ℝ (Fin 3)) :
-    HasGradientAt (fun p' => angularMomentumZ p' q)
+lemma hasGradientAt_angularMomentumZ_momentum (p q : EuclideanSpace ℝ (Fin 3))
+    : HasGradientAt
+      (fun p' => angularMomentumZ p' q)
       (q 0 • EuclideanSpace.single 1 1 - q 1 • EuclideanSpace.single 0 1) p := by
   simp only [angularMomentumZ, angularMomentum_apply_two]
-  exact ((hasGradientAt_coord 1 p).const_mul (q 0)).sub
-    ((hasGradientAt_coord 0 p).const_mul (q 1))
+  exact ((hasGradientAt_coord 1 p).const_mul (q 0)).sub ((hasGradientAt_coord 0 p).const_mul (q 1))
 
 /-- The position gradient of `L_z` is `p₁ e₀ - p₀ e₁`. -/
-lemma hasGradientAt_angularMomentumZ_position (p q : EuclideanSpace ℝ (Fin 3)) :
-    HasGradientAt (fun q' => angularMomentumZ p q')
+lemma hasGradientAt_angularMomentumZ_position (p q : EuclideanSpace ℝ (Fin 3))
+    : HasGradientAt
+      (fun q' => angularMomentumZ p q')
       (p 1 • EuclideanSpace.single 0 1 - p 0 • EuclideanSpace.single 1 1) q := by
   simp only [angularMomentumZ, angularMomentum_apply_two]
   convert ((hasGradientAt_coord 0 q).mul (hasGradientAt_const q (p 1))).sub
@@ -199,8 +207,8 @@ lemma hasGradientAt_angularMomentumZ_position (p q : EuclideanSpace ℝ (Fin 3))
 -/
 
 /-- The squared magnitude of the angular momentum and its z-component are in involution. -/
-lemma poissonBracket_angularMomentumSq_angularMomentumZ (p q : EuclideanSpace ℝ (Fin 3)) :
-    poissonBracket angularMomentumSq angularMomentumZ p q = 0 := by
+lemma poissonBracket_angularMomentumSq_angularMomentumZ (p q : EuclideanSpace ℝ (Fin 3))
+    : poissonBracket angularMomentumSq angularMomentumZ p q = 0 := by
   rw [poissonBracket_eq_of_hasGradientAt (hasGradientAt_angularMomentumSq_momentum p q)
     (hasGradientAt_angularMomentumSq_position p q) (hasGradientAt_angularMomentumZ_momentum p q)
     (hasGradientAt_angularMomentumZ_position p q)]
@@ -218,27 +226,29 @@ vanish. These sufficient conditions apply to the central-force Hamiltonian away 
 
 -/
 
-/-- `L²` Poisson-commutes with any phase-space function whose momentum gradient is parallel to the
-momentum and whose position gradient is parallel to the position. -/
+/--
+`L²` Poisson-commutes with any phase-space function whose momentum gradient is parallel to the
+momentum and whose position gradient is parallel to the position.
+-/
 lemma poissonBracket_angularMomentumSq_eq_zero_of_hasGradientAt
-    {H : EuclideanSpace ℝ (Fin 3) → EuclideanSpace ℝ (Fin 3) → ℝ}
-    {p q : EuclideanSpace ℝ (Fin 3)} {a c : ℝ}
-    (hp : HasGradientAt (fun p' => H p' q) (a • p) p)
-    (hq : HasGradientAt (fun q' => H p q') (c • q) q) :
-    poissonBracket angularMomentumSq H p q = 0 := by
+    {H : EuclideanSpace ℝ (Fin 3) → EuclideanSpace ℝ (Fin 3) → ℝ} {p q : EuclideanSpace ℝ (Fin 3)}
+    {a c : ℝ} (hp : HasGradientAt (fun p' => H p' q) (a • p) p)
+    (hq : HasGradientAt (fun q' => H p q') (c • q) q)
+    : poissonBracket angularMomentumSq H p q = 0 := by
   rw [poissonBracket_eq_of_hasGradientAt (hasGradientAt_angularMomentumSq_momentum p q)
     (hasGradientAt_angularMomentumSq_position p q) hp hq]
   simp only [inner_sub_left, real_inner_smul_left, real_inner_smul_right, real_inner_comm p q]
   ring
 
-/-- `L_z` Poisson-commutes with any phase-space function whose momentum gradient is parallel to
-the momentum and whose position gradient is parallel to the position. -/
+/--
+`L_z` Poisson-commutes with any phase-space function whose momentum gradient is parallel to
+the momentum and whose position gradient is parallel to the position.
+-/
 lemma poissonBracket_angularMomentumZ_eq_zero_of_hasGradientAt
-    {H : EuclideanSpace ℝ (Fin 3) → EuclideanSpace ℝ (Fin 3) → ℝ}
-    {p q : EuclideanSpace ℝ (Fin 3)} {a c : ℝ}
-    (hp : HasGradientAt (fun p' => H p' q) (a • p) p)
-    (hq : HasGradientAt (fun q' => H p q') (c • q) q) :
-    poissonBracket angularMomentumZ H p q = 0 := by
+    {H : EuclideanSpace ℝ (Fin 3) → EuclideanSpace ℝ (Fin 3) → ℝ} {p q : EuclideanSpace ℝ (Fin 3)}
+    {a c : ℝ} (hp : HasGradientAt (fun p' => H p' q) (a • p) p)
+    (hq : HasGradientAt (fun q' => H p q') (c • q) q)
+    : poissonBracket angularMomentumZ H p q = 0 := by
   rw [poissonBracket_eq_of_hasGradientAt (hasGradientAt_angularMomentumZ_momentum p q)
     (hasGradientAt_angularMomentumZ_position p q) hp hq]
   simp only [inner_sub_left, real_inner_smul_left, real_inner_smul_right,
@@ -253,19 +263,23 @@ lemma poissonBracket_angularMomentumZ_eq_zero_of_hasGradientAt
 
 variable (S : CentralForce)
 
-/-- Away from the centre of force, the squared magnitude of the angular momentum Poisson-commutes
-with the Hamiltonian of a central-force system, so is conserved by the motion. -/
-lemma poissonBracket_angularMomentumSq_hamiltonian (p : EuclideanSpace ℝ (Fin 3))
-    {q : EuclideanSpace ℝ (Fin 3)} (hq : q ≠ 0) :
-    poissonBracket angularMomentumSq S.hamiltonian p q = 0 :=
+/--
+Away from the centre of force, the squared magnitude of the angular momentum Poisson-commutes
+with the Hamiltonian of a central-force system, so is conserved by the motion.
+-/
+lemma poissonBracket_angularMomentumSq_hamiltonian
+    (p : EuclideanSpace ℝ (Fin 3)) {q : EuclideanSpace ℝ (Fin 3)} (hq : q ≠ 0)
+    : poissonBracket angularMomentumSq S.hamiltonian p q = 0 :=
   poissonBracket_angularMomentumSq_eq_zero_of_hasGradientAt
     (S.hasGradientAt_hamiltonian_momentum p q) (S.hasGradientAt_hamiltonian_position p hq)
 
-/-- Away from the centre of force, the z-component of the angular momentum Poisson-commutes with
-the Hamiltonian of a central-force system, so is conserved by the motion. -/
-lemma poissonBracket_angularMomentumZ_hamiltonian (p : EuclideanSpace ℝ (Fin 3))
-    {q : EuclideanSpace ℝ (Fin 3)} (hq : q ≠ 0) :
-    poissonBracket angularMomentumZ S.hamiltonian p q = 0 :=
+/--
+Away from the centre of force, the z-component of the angular momentum Poisson-commutes with
+the Hamiltonian of a central-force system, so is conserved by the motion.
+-/
+lemma poissonBracket_angularMomentumZ_hamiltonian
+    (p : EuclideanSpace ℝ (Fin 3)) {q : EuclideanSpace ℝ (Fin 3)} (hq : q ≠ 0)
+    : poissonBracket angularMomentumZ S.hamiltonian p q = 0 :=
   poissonBracket_angularMomentumZ_eq_zero_of_hasGradientAt
     (S.hasGradientAt_hamiltonian_momentum p q) (S.hasGradientAt_hamiltonian_position p hq)
 

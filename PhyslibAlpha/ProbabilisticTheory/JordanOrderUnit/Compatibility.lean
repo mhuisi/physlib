@@ -49,19 +49,20 @@ open scoped JordanAlgebra
 
 /-! ## A. The compatibility predicate -/
 
-/-- `a` and `b` are Jordan-compatible: their multiplication operators commute,
+/--
+`a` and `b` are Jordan-compatible: their multiplication operators commute,
 `L_a \circ L_b = L_b \circ L_a`. The Jordan-intrinsic substitute for "`a` and `b` commute", not
-needing an associative product to state. -/
+needing an associative product to state.
+-/
 def IsJordanCompatible (a b : E) : Prop := Commute (L a) (L b)
 
 lemma isJordanCompatible_self (a : E) : IsJordanCompatible a a := Commute.refl _
 
-lemma isJordanCompatible_comm {a b : E} (h : IsJordanCompatible a b) :
-    IsJordanCompatible b a := h.symm
+lemma isJordanCompatible_comm {a b : E} (h : IsJordanCompatible a b) : IsJordanCompatible b a :=
+  h.symm
 
 /-- `L_1` is the identity. -/
-lemma mulLeft_one_eq_id : (L (1 : E) : E →ₗ[ℝ] E) = LinearMap.id :=
-  LinearMap.ext mulLeft_one_apply
+lemma mulLeft_one_eq_id : (L (1 : E) : E →ₗ[ℝ] E) = LinearMap.id := LinearMap.ext mulLeft_one_apply
 
 /-- The order unit is Jordan-compatible with everything: `L_1 = id` commutes with any operator. -/
 lemma isJordanCompatible_one_left (a : E) : IsJordanCompatible 1 a := by

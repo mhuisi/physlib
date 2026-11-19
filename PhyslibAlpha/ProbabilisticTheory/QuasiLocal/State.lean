@@ -74,12 +74,15 @@ variable {N}
 
 /-- The linear functional on the quasi-local algebra defined by a compatible family. -/
 def LocalStateFamily.lift (ω : LocalStateFamily N) : N.Quasilocal →ₗ[ℂ] ℂ :=
-  DirectLimit.Module.lift ℂ (Finset S) N.A (fun X Y (h : X ≤ Y) => N.incl h)
-    ω.state (fun _X _Y h a => ω.compat h a)
+  DirectLimit.Module.lift ℂ (Finset S) N.A
+    (fun X Y (h : X ≤ Y) => N.incl h)
+    ω.state
+    (fun _X _Y h a => ω.compat h a)
 
 omit [DecidableEq S] in
-lemma LocalStateFamily.lift_of (ω : LocalStateFamily N) (X : Finset S) (a : N.A X) :
-    ω.lift (N.of X a) = ω.state X a := rfl
+lemma LocalStateFamily.lift_of (ω : LocalStateFamily N) (X : Finset S) (a : N.A X)
+    : ω.lift (N.of X a) = ω.state X a :=
+  rfl
 
 /-- **The state of the quasi-local algebra** defined by a compatible family. -/
 def LocalStateFamily.toAlgState (ω : LocalStateFamily N) : AlgState N.Quasilocal where
@@ -98,8 +101,9 @@ def LocalStateFamily.toAlgState (ω : LocalStateFamily N) : AlgState N.Quasiloca
 
 omit [DecidableEq S] in
 /-- The state of a compatible family on a local observable is the local expectation. -/
-lemma LocalStateFamily.toAlgState_of (ω : LocalStateFamily N) (X : Finset S) (a : N.A X) :
-    ω.toAlgState (N.of X a) = ω.state X a := rfl
+lemma LocalStateFamily.toAlgState_of (ω : LocalStateFamily N) (X : Finset S) (a : N.A X)
+    : ω.toAlgState (N.of X a) = ω.state X a :=
+  rfl
 
 end QuasiLocal
 

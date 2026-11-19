@@ -55,8 +55,9 @@ variable {I : ModelWithCorners ℝ E H}
 
 instance : CoeSort (ConfigurationSpace I) (Type _) := ⟨ConfigurationSpace.carrier⟩
 
-attribute [instance] ConfigurationSpace.topologicalSpace ConfigurationSpace.chartedSpace
-  ConfigurationSpace.isManifold ConfigurationSpace.boundarylessManifold
+attribute [instance]
+  ConfigurationSpace.topologicalSpace ConfigurationSpace.chartedSpace ConfigurationSpace.isManifold
+  ConfigurationSpace.boundarylessManifold
 
 TODO "Add a constructor for ConfigurationSpace for a point particle in `d`-dimensions."
 

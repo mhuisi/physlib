@@ -47,22 +47,22 @@ open scoped selfAdjoint
 /-! ## A. Commuting observables -/
 
 /-- Commuting self-adjoint elements are Jordan compatible. -/
-lemma isJordanCompatible_of_commute {a b : selfAdjoint A}
-    (hcomm : (a : A) * (b : A) = (b : A) * (a : A)) :
-    JordanAlgebra.IsJordanCompatible a b := by
+lemma isJordanCompatible_of_commute
+    {a b : selfAdjoint A} (hcomm : (a : A) * (b : A) = (b : A) * (a : A))
+    : JordanAlgebra.IsJordanCompatible a b := by
   apply LinearMap.ext
   intro x
-  change selfAdjoint.jordanMul a (selfAdjoint.jordanMul b x) =
-    selfAdjoint.jordanMul b (selfAdjoint.jordanMul a x)
+  change selfAdjoint.jordanMul a (selfAdjoint.jordanMul b x)
+    = selfAdjoint.jordanMul b (selfAdjoint.jordanMul a x)
   rw [selfAdjoint.jordanMul_jordanMul_right, selfAdjoint.jordanMul_jordanMul_right]
   congr 1
   apply Subtype.ext
   simp only [selfAdjoint.coe_anticommutator]
-  have e1 : (a:A) * ((b:A)*(x:A)) = (b:A) * ((a:A)*(x:A)) := by
+  have e1 : (a : A) * ((b : A) * (x : A)) = (b : A) * ((a : A) * (x : A)) := by
     rw [← mul_assoc, hcomm, mul_assoc]
-  have e2 : (a:A) * ((x:A)*(b:A)) = ((a:A)*(x:A)) * (b:A) := (mul_assoc _ _ _).symm
-  have e3 : ((b:A)*(x:A)) * (a:A) = (b:A) * ((x:A)*(a:A)) := mul_assoc _ _ _
-  have e4 : ((x:A)*(b:A)) * (a:A) = ((x:A)*(a:A)) * (b:A) := by
+  have e2 : (a : A) * ((x : A) * (b : A)) = ((a : A) * (x : A)) * (b : A) := (mul_assoc _ _ _).symm
+  have e3 : ((b : A) * (x : A)) * (a : A) = (b : A) * ((x : A) * (a : A)) := mul_assoc _ _ _
+  have e4 : ((x : A) * (b : A)) * (a : A) = ((x : A) * (a : A)) * (b : A) := by
     rw [mul_assoc, ← hcomm, ← mul_assoc]
   rw [_root_.mul_add, _root_.add_mul, _root_.mul_add, _root_.add_mul, e1, e2, e3, e4]
   abel

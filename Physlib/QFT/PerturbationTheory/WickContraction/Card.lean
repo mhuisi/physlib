@@ -21,43 +21,49 @@ open Physlib.List
 open FieldStatistic
 open Nat
 
-lemma wickContraction_card_eq_sum_zero_none_isSome : Fintype.card (WickContraction n.succ)
-    = Fintype.card {c : WickContraction n.succ // ¬ (c.getDual? 0).isSome} +
-    Fintype.card {c : WickContraction n.succ // (c.getDual? 0).isSome} := by
-  let e2 : WickContraction n.succ ≃ {c : WickContraction n.succ // (c.getDual? 0).isSome} ⊕
-    {c : WickContraction n.succ // ¬ (c.getDual? 0).isSome} := by
+lemma wickContraction_card_eq_sum_zero_none_isSome
+    : Fintype.card (WickContraction n.succ)
+      = Fintype.card {c : WickContraction n.succ // ¬(c.getDual? 0).isSome}
+        + Fintype.card {c : WickContraction n.succ // (c.getDual? 0).isSome} := by
+  let e2
+      : WickContraction n.succ
+        ≃ {c : WickContraction n.succ // (c.getDual? 0).isSome}
+          ⊕ {c : WickContraction n.succ // ¬(c.getDual? 0).isSome} := by
     refine (Equiv.sumCompl _).symm
   rw [Fintype.card_congr e2]
   simp [add_comm]
 
-lemma wickContraction_zero_none_card :
-    Fintype.card {c : WickContraction n.succ // ¬ (c.getDual? 0).isSome} =
-    Fintype.card (WickContraction n) := by
+lemma wickContraction_zero_none_card
+    : Fintype.card {c : WickContraction n.succ // ¬(c.getDual? 0).isSome}
+      = Fintype.card (WickContraction n) := by
   simp only [succ_eq_add_one, Bool.not_eq_true, Option.isSome_eq_false_iff,
     Option.isNone_iff_eq_none]
   symm
   exact Fintype.card_of_bijective (insertAndContractNat_bijective 0)
 
-lemma wickContraction_zero_some_eq_sum :
-    Fintype.card {c : WickContraction n.succ // (c.getDual? 0).isSome} =
-    ∑ i, Fintype.card {c : WickContraction n.succ // (c.getDual? 0).isSome ∧
-      ∀ (h : (c.getDual? 0).isSome), (c.getDual? 0).get h = Fin.succ i} := by
-  let e1 : {c : WickContraction n.succ // (c.getDual? 0).isSome} ≃
-    Σ i, {c : WickContraction n.succ // (c.getDual? 0).isSome ∧
-      ∀ (h : (c.getDual? 0).isSome), (c.getDual? 0).get h = Fin.succ i} := {
-    toFun c := ⟨((c.1.getDual? 0).get c.2).pred (by simp),
-      ⟨c.1, ⟨c.2, by simp⟩⟩⟩
+lemma wickContraction_zero_some_eq_sum
+    : Fintype.card {c : WickContraction n.succ // (c.getDual? 0).isSome}
+      = ∑ i, Fintype.card {c : WickContraction n.succ // (c.getDual? 0).isSome ∧
+          ∀ (h : (c.getDual? 0).isSome), (c.getDual? 0).get h = Fin.succ i} := by
+  let e1
+      : {c : WickContraction n.succ // (c.getDual? 0).isSome}
+        ≃ Σ i,
+          {c : WickContraction n.succ // (c.getDual? 0).isSome
+            ∧ ∀ (h : (c.getDual? 0).isSome), (c.getDual? 0).get h = Fin.succ i} := {
+    toFun c := ⟨((c.1.getDual? 0).get c.2).pred (by simp), ⟨c.1, ⟨c.2, by simp⟩⟩⟩
     invFun c := ⟨c.2, c.2.2.1⟩
     left_inv c := rfl
     right_inv c := by
       ext
       · simp [c.2.2.2]
-      · rfl}
+      · rfl
+  }
   rw [Fintype.card_congr e1]
   simp
 
-lemma finset_succAbove_succ_disjoint (a : Finset (Fin n)) (i : Fin n.succ) :
-    Disjoint ((Finset.map (Fin.succEmb (n + 1))) ((Finset.map i.succAboveEmb) a)) {0, i.succ} := by
+lemma finset_succAbove_succ_disjoint (a : Finset (Fin n)) (i : Fin n.succ)
+    : Disjoint ((Finset.map (Fin.succEmb (n + 1))) ((Finset.map i.succAboveEmb) a))
+      {0, i.succ} := by
   simp only [succ_eq_add_one, Finset.disjoint_insert_right, Finset.mem_map, Fin.succAboveEmb_apply,
     Fin.coe_succEmb, exists_exists_and_eq_and, not_exists, not_and, Finset.disjoint_singleton_right,
     Fin.succ_inj]
@@ -65,15 +71,18 @@ lemma finset_succAbove_succ_disjoint (a : Finset (Fin n)) (i : Fin n.succ) :
   · exact fun x hx => Fin.succ_ne_zero (i.succAbove x)
   · exact fun x hx => Fin.succAbove_ne i x
 
-/-- The Wick contraction in `WickContraction n.succ.succ` formed by a Wick contraction
-  `WickContraction n` by inserting at the `0` and `i.succ` and contracting these two. -/
-def consAddContract (i : Fin n.succ) (c : WickContraction n) :
-    WickContraction n.succ.succ :=
-  ⟨(c.1.map (Finset.mapEmbedding i.succAboveEmb).toEmbedding).map
-    (Finset.mapEmbedding (Fin.succEmb n.succ)).toEmbedding ∪ {{0, i.succ}}, by
+/--
+The Wick contraction in `WickContraction n.succ.succ` formed by a Wick contraction
+`WickContraction n` by inserting at the `0` and `i.succ` and contracting these two.
+-/
+def consAddContract (i : Fin n.succ) (c : WickContraction n) : WickContraction n.succ.succ := ⟨
+  (c.1.map (Finset.mapEmbedding i.succAboveEmb).toEmbedding).map
+      (Finset.mapEmbedding (Fin.succEmb n.succ)).toEmbedding
+    ∪ {{0, i.succ}},
+  by
     intro a
-    simp only [succ_eq_add_one, Finset.mem_union, Finset.mem_map,
-      RelEmbedding.coe_toEmbedding, exists_exists_and_eq_and, Finset.mem_singleton]
+    simp only [succ_eq_add_one, Finset.mem_union, Finset.mem_map, RelEmbedding.coe_toEmbedding,
+      exists_exists_and_eq_and, Finset.mem_singleton]
     intro h
     rcases h with h | h
     · obtain ⟨a, ha, rfl⟩ := h
@@ -84,10 +93,12 @@ def consAddContract (i : Fin n.succ) (c : WickContraction n) :
       rw [@Finset.card_eq_two]
       use 0, i.succ
       simp only [succ_eq_add_one, ne_eq, and_true]
-      exact ne_of_beq_false rfl, by
+      exact ne_of_beq_false rfl,
+  by
     intro a ha b hb
-    simp only [succ_eq_add_one, Finset.mem_union, Finset.mem_map,
-      RelEmbedding.coe_toEmbedding, exists_exists_and_eq_and, Finset.mem_singleton] at ha hb
+    simp only [succ_eq_add_one, Finset.mem_union, Finset.mem_map, RelEmbedding.coe_toEmbedding,
+        exists_exists_and_eq_and, Finset.mem_singleton]
+      at ha hb
     rcases ha with ha | ha <;> rcases hb with hb | hb
     · obtain ⟨a, ha, rfl⟩ := ha
       obtain ⟨b, hb, rfl⟩ := hb
@@ -106,24 +117,25 @@ def consAddContract (i : Fin n.succ) (c : WickContraction n) :
       rw [Finset.mapEmbedding_apply, Finset.mapEmbedding_apply]
       exact Disjoint.symm (finset_succAbove_succ_disjoint b i)
     · subst ha hb
-      simp⟩
+      simp
+⟩
 
 @[simp]
-lemma consAddContract_getDual?_zero (i : Fin n.succ) (c : WickContraction n) :
-    (consAddContract i c).getDual? 0 = some i.succ := by
+lemma consAddContract_getDual?_zero (i : Fin n.succ) (c : WickContraction n)
+    : (consAddContract i c).getDual? 0 = some i.succ := by
   rw [getDual?_eq_some_iff_mem]
   simp [consAddContract]
 
 @[simp]
-lemma consAddContract_getDual?_self_succ (i : Fin n.succ) (c : WickContraction n) :
-    (consAddContract i c).getDual? i.succ = some 0 := by
+lemma consAddContract_getDual?_self_succ (i : Fin n.succ) (c : WickContraction n)
+    : (consAddContract i c).getDual? i.succ = some 0 := by
   rw [getDual?_eq_some_iff_mem]
   simp [consAddContract, Finset.pair_comm]
 
-lemma mem_consAddContract_of_mem_iff (i : Fin n.succ) (c : WickContraction n) (a : Finset (Fin n)) :
-    a ∈ c.1 ↔ (a.map i.succAboveEmb).map (Fin.succEmb n.succ) ∈ (consAddContract i c).1 := by
-  simp only [succ_eq_add_one, consAddContract, Finset.mem_union,
-    Finset.mem_map, RelEmbedding.coe_toEmbedding, exists_exists_and_eq_and, Finset.mem_singleton]
+lemma mem_consAddContract_of_mem_iff (i : Fin n.succ) (c : WickContraction n) (a : Finset (Fin n))
+    : a ∈ c.1 ↔ (a.map i.succAboveEmb).map (Fin.succEmb n.succ) ∈ (consAddContract i c).1 := by
+  simp only [succ_eq_add_one, consAddContract, Finset.mem_union, Finset.mem_map,
+    RelEmbedding.coe_toEmbedding, exists_exists_and_eq_and, Finset.mem_singleton]
   apply Iff.intro
   · intro h
     left
@@ -159,22 +171,26 @@ lemma consAddContract_injective (i : Fin n.succ) : Function.Injective (consAddCo
     rw [← mem_consAddContract_of_mem_iff] at ha'
     exact ha'
 
-lemma consAddContract_surjective_on_zero_contract (i : Fin n.succ)
-    (c : WickContraction n.succ.succ)
-    (h : (c.getDual? 0).isSome) (h2 : (c.getDual? 0).get h = i.succ) :
-    ∃ c', consAddContract i c' = c := by
-  let c' : WickContraction n :=
-      ⟨Finset.filter
-      (fun x => (Finset.map i.succAboveEmb x).map (Fin.succEmb n.succ) ∈ c.1) Finset.univ, by
-    intro a ha
-    simp only [succ_eq_add_one, Finset.mem_filter, Finset.mem_univ, true_and] at ha
-    simpa using c.2.1 _ ha, by
-    intro a ha b hb
-    simp only [Nat.succ_eq_add_one, Finset.mem_filter, Finset.mem_univ, true_and] at ha hb
-    rw [← Finset.disjoint_map i.succAboveEmb, ← (Finset.map_injective i.succAboveEmb).eq_iff]
-    rw [← Finset.disjoint_map (Fin.succEmb n.succ),
-      ← (Finset.map_injective (Fin.succEmb n.succ)).eq_iff]
-    exact c.2.2 _ ha _ hb⟩
+lemma consAddContract_surjective_on_zero_contract
+    (i : Fin n.succ) (c : WickContraction n.succ.succ)
+    (h : (c.getDual? 0).isSome) (h2 : (c.getDual? 0).get h = i.succ)
+    : ∃ c', consAddContract i c' = c := by
+  let c' : WickContraction n := ⟨
+    Finset.filter
+      (fun x => (Finset.map i.succAboveEmb x).map (Fin.succEmb n.succ) ∈ c.1)
+      Finset.univ,
+    by
+      intro a ha
+      simp only [succ_eq_add_one, Finset.mem_filter, Finset.mem_univ, true_and] at ha
+      simpa using c.2.1 _ ha,
+    by
+      intro a ha b hb
+      simp only [Nat.succ_eq_add_one, Finset.mem_filter, Finset.mem_univ, true_and] at ha hb
+      rw [← Finset.disjoint_map i.succAboveEmb, ← (Finset.map_injective i.succAboveEmb).eq_iff]
+      rw [← Finset.disjoint_map (Fin.succEmb n.succ),
+        ← (Finset.map_injective (Fin.succEmb n.succ)).eq_iff]
+      exact c.2.2 _ ha _ hb
+  ⟩
   use c'
   apply Subtype.ext
   ext a
@@ -208,10 +224,11 @@ lemma consAddContract_surjective_on_zero_contract (i : Fin n.succ)
       simp only [c']
       simpa using h
 
-lemma consAddContract_bijection (i : Fin n.succ) :
-    Function.Bijective (fun c => (⟨(consAddContract i c), by simp⟩ :
-    {c : WickContraction n.succ.succ // (c.getDual? 0).isSome ∧
-      ∀ (h : (c.getDual? 0).isSome), (c.getDual? 0).get h = Fin.succ i})) := by
+lemma consAddContract_bijection (i : Fin n.succ)
+    : Function.Bijective (fun c =>
+      (⟨(consAddContract i c), by simp⟩
+        : {c : WickContraction n.succ.succ // (c.getDual? 0).isSome
+          ∧ ∀ (h : (c.getDual? 0).isSome), (c.getDual? 0).get h = Fin.succ i})) := by
   apply And.intro
   · intro c1 c2 h
     simp only [succ_eq_add_one, Subtype.mk.injEq] at h
@@ -221,25 +238,29 @@ lemma consAddContract_bijection (i : Fin n.succ) :
     use c'
     simp [hc]
 
-lemma wickContraction_zero_some_eq_mul :
-    Fintype.card {c : WickContraction n.succ.succ // (c.getDual? 0).isSome} =
-    (n + 1) * Fintype.card (WickContraction n) := by
+lemma wickContraction_zero_some_eq_mul
+    : Fintype.card {c : WickContraction n.succ.succ // (c.getDual? 0).isSome}
+      = (n + 1) * Fintype.card (WickContraction n) := by
   rw [wickContraction_zero_some_eq_sum]
   conv_lhs =>
     enter [2, i]
     rw [← Fintype.card_of_bijective (consAddContract_bijection i)]
   simp
 
-/-- The cardinality of Wick's contractions as a recursive formula.
-  This corresponds to OEIS:A000085. -/
+/--
+The cardinality of Wick's contractions as a recursive formula.
+This corresponds to OEIS:A000085.
+-/
 def cardFun : ℕ → ℕ
   | 0 => 1
   | 1 => 1
   | Nat.succ (Nat.succ n) => cardFun (Nat.succ n) + (n + 1) * cardFun n
 
-/-- The number of Wick contractions in `WickContraction n` is equal to the terms in
-  Online Encyclopedia of Integer Sequences (OEIS) A000085. That is:
-  1, 1, 2, 4, 10, 26, 76, 232, 764, 2620, 9496, ... -/
+/--
+The number of Wick contractions in `WickContraction n` is equal to the terms in
+Online Encyclopedia of Integer Sequences (OEIS) A000085. That is:
+1, 1, 2, 4, 10, 26, 76, 232, 764, 2620, 9496, ...
+-/
 theorem card_eq_cardFun : (n : ℕ) → Fintype.card (WickContraction n) = cardFun n
   | 0 => by decide
   | 1 => by decide

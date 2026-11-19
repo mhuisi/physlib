@@ -70,22 +70,30 @@ variable {d : ℕ} (Q : HarmonicOscillator d) (i j : Fin d)
 
 -/
 
-/-- The lowering (annihilation) operator `aᵢ = (xᵢ/ξᵢ + i ξᵢ pᵢ/ℏ)/√2`, as a continuous linear
-  map on Schwartz maps. -/
+/--
+The lowering (annihilation) operator `aᵢ = (xᵢ/ξᵢ + i ξᵢ pᵢ/ℏ)/√2`, as a continuous linear
+map on Schwartz maps.
+-/
 def loweringCLM : 𝓢(Space d, ℂ) →L[ℂ] 𝓢(Space d, ℂ) :=
   (Real.sqrt 2 : ℂ)⁻¹ • (((Q.ξ i : ℝ) : ℂ)⁻¹ • 𝐱 i + (I * ((Q.ξ i : ℝ) : ℂ) / (ℏ : ℂ)) • 𝐩 i)
 
-/-- The raising (creation) operator `aᵢ† = (xᵢ/ξᵢ - i ξᵢ pᵢ/ℏ)/√2`, as a continuous linear
-  map on Schwartz maps. -/
+/--
+The raising (creation) operator `aᵢ† = (xᵢ/ξᵢ - i ξᵢ pᵢ/ℏ)/√2`, as a continuous linear
+map on Schwartz maps.
+-/
 def raisingCLM : 𝓢(Space d, ℂ) →L[ℂ] 𝓢(Space d, ℂ) :=
   (Real.sqrt 2 : ℂ)⁻¹ • (((Q.ξ i : ℝ) : ℂ)⁻¹ • 𝐱 i - (I * ((Q.ξ i : ℝ) : ℂ) / (ℏ : ℂ)) • 𝐩 i)
 
-lemma loweringCLM_eq : Q.loweringCLM i =
-    (Real.sqrt 2 : ℂ)⁻¹ • (((Q.ξ i : ℝ) : ℂ)⁻¹ • 𝐱 i + (I * ((Q.ξ i : ℝ) : ℂ) / (ℏ : ℂ)) • 𝐩 i) :=
+lemma loweringCLM_eq
+    : Q.loweringCLM i
+      = (Real.sqrt 2 : ℂ)⁻¹
+        • (((Q.ξ i : ℝ) : ℂ)⁻¹ • 𝐱 i + (I * ((Q.ξ i : ℝ) : ℂ) / (ℏ : ℂ)) • 𝐩 i) :=
   rfl
 
-lemma raisingCLM_eq : Q.raisingCLM i =
-    (Real.sqrt 2 : ℂ)⁻¹ • (((Q.ξ i : ℝ) : ℂ)⁻¹ • 𝐱 i - (I * ((Q.ξ i : ℝ) : ℂ) / (ℏ : ℂ)) • 𝐩 i) :=
+lemma raisingCLM_eq
+    : Q.raisingCLM i
+      = (Real.sqrt 2 : ℂ)⁻¹
+        • (((Q.ξ i : ℝ) : ℂ)⁻¹ • 𝐱 i - (I * ((Q.ξ i : ℝ) : ℂ) / (ℏ : ℂ)) • 𝐩 i) :=
   rfl
 
 /-- `(√2)² = 2` as complex numbers. -/
@@ -100,8 +108,8 @@ lemma sqrt_two_sq_ofReal : ((Real.sqrt 2 : ℝ) : ℂ) ^ 2 = 2 := by
 -/
 
 /-- `[aᵢ, aⱼ†] = δᵢⱼ 𝟙`. -/
-lemma lowering_commutation_raising :
-    ⁅Q.loweringCLM i, Q.raisingCLM j⁆ = δ[i,j] • ContinuousLinearMap.id ℂ 𝓢(Space d, ℂ) := by
+lemma lowering_commutation_raising
+    : ⁅Q.loweringCLM i, Q.raisingCLM j⁆ = δ[i,j] • ContinuousLinearMap.id ℂ 𝓢(Space d, ℂ) := by
   simp only [loweringCLM, raisingCLM, lie_smul, smul_lie, add_lie, lie_sub,
     position_commutation_position, momentum_commutation_momentum, position_commutation_momentum,
     ← lie_skew (𝐩 i) (𝐱 j), smul_zero, zero_add, smul_neg, smul_smul, KroneckerDelta.symm j i]
@@ -118,9 +126,9 @@ lemma lowering_commutation_raising :
 
 /-- `[aᵢ, aⱼ] = 0`. -/
 lemma lowering_commutation_lowering : ⁅Q.loweringCLM i, Q.loweringCLM j⁆ = 0 := by
-  simp only [loweringCLM, lie_smul, smul_lie, lie_add, add_lie,
-    position_commutation_position, momentum_commutation_momentum, position_commutation_momentum,
-    ← lie_skew (𝐩 i) (𝐱 j), smul_zero, zero_add, smul_neg, smul_smul, KroneckerDelta.symm j i]
+  simp only [loweringCLM, lie_smul, smul_lie, lie_add, add_lie, position_commutation_position,
+    momentum_commutation_momentum, position_commutation_momentum, ← lie_skew (𝐩 i) (𝐱 j), smul_zero,
+    zero_add, smul_neg, smul_smul, KroneckerDelta.symm j i]
   rcases eq_or_ne i j with rfl | hne
   · ext ψ x
     simp only [eq_one_of_same, one_smul, add_zero, smul_add, smul_neg, add_apply, neg_apply,
@@ -133,9 +141,9 @@ lemma lowering_commutation_lowering : ⁅Q.loweringCLM i, Q.loweringCLM j⁆ = 0
 
 /-- `[aᵢ†, aⱼ†] = 0`. -/
 lemma raising_commutation_raising : ⁅Q.raisingCLM i, Q.raisingCLM j⁆ = 0 := by
-  simp only [raisingCLM, lie_smul, smul_lie, lie_sub, sub_lie,
-    position_commutation_position, momentum_commutation_momentum, position_commutation_momentum,
-    ← lie_skew (𝐩 i) (𝐱 j), smul_zero, zero_sub, smul_neg, smul_smul, KroneckerDelta.symm j i]
+  simp only [raisingCLM, lie_smul, smul_lie, lie_sub, sub_lie, position_commutation_position,
+    momentum_commutation_momentum, position_commutation_momentum, ← lie_skew (𝐩 i) (𝐱 j), smul_zero,
+    zero_sub, smul_neg, smul_smul, KroneckerDelta.symm j i]
   rcases eq_or_ne i j with rfl | hne
   · ext ψ x
     simp only [eq_one_of_same, one_smul, neg_neg, sub_zero, smul_apply, sub_apply, id_apply,
@@ -148,8 +156,8 @@ lemma raising_commutation_raising : ⁅Q.raisingCLM i, Q.raisingCLM j⁆ = 0 := 
   · simp [eq_zero_of_ne hne]
 
 /-- `[aᵢ†, aⱼ] = -δᵢⱼ 𝟙`. -/
-lemma raising_commutation_lowering :
-    ⁅Q.raisingCLM i, Q.loweringCLM j⁆ = -(δ[i,j] • ContinuousLinearMap.id ℂ 𝓢(Space d, ℂ)) := by
+lemma raising_commutation_lowering
+    : ⁅Q.raisingCLM i, Q.loweringCLM j⁆ = -(δ[i,j] • ContinuousLinearMap.id ℂ 𝓢(Space d, ℂ)) := by
   rw [← lie_skew, lowering_commutation_raising, KroneckerDelta.symm j i]
 
 /-!
@@ -159,8 +167,8 @@ lemma raising_commutation_lowering :
 -/
 
 /-- `xᵢ = (ξᵢ/√2) (aᵢ + aᵢ†)`. -/
-lemma position_eq_lowering_add_raising :
-    𝐱 i = (((Q.ξ i : ℝ) : ℂ) / (Real.sqrt 2 : ℂ)) • (Q.loweringCLM i + Q.raisingCLM i) := by
+lemma position_eq_lowering_add_raising
+    : 𝐱 i = (((Q.ξ i : ℝ) : ℂ) / (Real.sqrt 2 : ℂ)) • (Q.loweringCLM i + Q.raisingCLM i) := by
   ext ψ x
   simp [loweringCLM, raisingCLM]
   have hξ := Q.ξ_ofReal_ne_zero i
@@ -170,9 +178,10 @@ lemma position_eq_lowering_add_raising :
   field_simp
 
 /-- `pᵢ = (i ℏ/(√2 ξᵢ)) (aᵢ† - aᵢ)`. -/
-lemma momentum_eq_raising_sub_lowering :
-    𝐩 i = (I * (ℏ : ℂ) / ((Real.sqrt 2 : ℂ) * ((Q.ξ i : ℝ) : ℂ))) •
-      (Q.raisingCLM i - Q.loweringCLM i) := by
+lemma momentum_eq_raising_sub_lowering
+    : 𝐩 i
+      = (I * (ℏ : ℂ) / ((Real.sqrt 2 : ℂ) * ((Q.ξ i : ℝ) : ℂ)))
+        • (Q.raisingCLM i - Q.loweringCLM i) := by
   ext ψ x
   simp [loweringCLM, raisingCLM]
   have hξ := Q.ξ_ofReal_ne_zero i
@@ -197,19 +206,19 @@ def raisingOperator : Q.HS →ₗ.[ℂ] Q.HS where
   domain := SchwartzSubmodule d
   toFun := (schwartzIncl volume).1 ∘ₗ (Q.raisingCLM i).1 ∘ₗ (schwartzEquiv volume).symm.1
 
-lemma loweringOperator_apply (ψ : SchwartzSubmodule d) :
-    Q.loweringOperator i ψ =
-      schwartzEquiv volume (Q.loweringCLM i ((schwartzEquiv volume).symm ψ)) :=
+lemma loweringOperator_apply (ψ : SchwartzSubmodule d)
+    : Q.loweringOperator i ψ
+      = schwartzEquiv volume (Q.loweringCLM i ((schwartzEquiv volume).symm ψ)) :=
   rfl
 
-lemma raisingOperator_apply (ψ : SchwartzSubmodule d) :
-    Q.raisingOperator i ψ =
-      schwartzEquiv volume (Q.raisingCLM i ((schwartzEquiv volume).symm ψ)) :=
+lemma raisingOperator_apply (ψ : SchwartzSubmodule d)
+    : Q.raisingOperator i ψ
+      = schwartzEquiv volume (Q.raisingCLM i ((schwartzEquiv volume).symm ψ)) :=
   rfl
 
 /-- `⟪aᵢ f, g⟫ = ⟪f, aᵢ† g⟫` for Schwartz maps `f`, `g`. -/
-lemma loweringCLM_inner (f g : 𝓢(Space d, ℂ)) :
-    ⟪(schwartzEquiv volume (Q.loweringCLM i f) : Q.HS), schwartzEquiv volume g⟫_ℂ
+lemma loweringCLM_inner (f g : 𝓢(Space d, ℂ))
+    : ⟪(schwartzEquiv volume (Q.loweringCLM i f) : Q.HS), schwartzEquiv volume g⟫_ℂ
       = ⟪(schwartzEquiv volume f : Q.HS), schwartzEquiv volume (Q.raisingCLM i g)⟫_ℂ := by
   simp only [loweringCLM_eq, raisingCLM_eq, map_add, map_smul, map_sub, smul_apply, add_apply,
     sub_apply, Submodule.coe_add, Submodule.coe_smul, Submodule.coe_sub, inner_add_left,
@@ -218,14 +227,14 @@ lemma loweringCLM_inner (f g : 𝓢(Space d, ℂ)) :
   ring
 
 /-- `⟪aᵢ† f, g⟫ = ⟪f, aᵢ g⟫` for Schwartz maps `f`, `g`. -/
-lemma raisingCLM_inner (f g : 𝓢(Space d, ℂ)) :
-    ⟪(schwartzEquiv volume (Q.raisingCLM i f) : Q.HS), schwartzEquiv volume g⟫_ℂ
+lemma raisingCLM_inner (f g : 𝓢(Space d, ℂ))
+    : ⟪(schwartzEquiv volume (Q.raisingCLM i f) : Q.HS), schwartzEquiv volume g⟫_ℂ
       = ⟪(schwartzEquiv volume f : Q.HS), schwartzEquiv volume (Q.loweringCLM i g)⟫_ℂ := by
   rw [← inner_conj_symm, ← Q.loweringCLM_inner i, inner_conj_symm]
 
 /-- The raising operator is the formal adjoint of the lowering operator. -/
-lemma loweringOperator_isFormalAdjoint_raisingOperator :
-    (Q.loweringOperator i).IsFormalAdjoint (Q.raisingOperator i) := by
+lemma loweringOperator_isFormalAdjoint_raisingOperator
+    : (Q.loweringOperator i).IsFormalAdjoint (Q.raisingOperator i) := by
   intro ψ φ
   obtain ⟨f, rfl⟩ := (schwartzEquiv volume).surjective ψ
   obtain ⟨g, rfl⟩ := (schwartzEquiv volume).surjective φ

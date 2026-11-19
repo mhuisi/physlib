@@ -50,16 +50,17 @@ namespace Space
 
 -/
 
-/-- The divergence of a matrix-valued spatial field.
+/--
+The divergence of a matrix-valued spatial field.
 
 For a field `T : Space d → Matrix (Fin d) (Fin d) ℝ`, `matrixDiv T` is the
 vector field whose `i`th component is
 
 `∑ j, ∂[j] (fun x => T x i j) x`.
 -/
-noncomputable def matrixDiv (d : ℕ) (T : Space d → Matrix (Fin d) (Fin d) ℝ) :
-    Space d → EuclideanSpace ℝ (Fin d) := fun x => WithLp.toLp 2 fun i =>
-  div (fun y : Space d => WithLp.toLp 2 fun j => T y i j) x
+noncomputable def matrixDiv (d : ℕ) (T : Space d → Matrix (Fin d) (Fin d) ℝ)
+    : Space d → EuclideanSpace ℝ (Fin d) := fun x =>
+  WithLp.toLp 2 fun i => div (fun y : Space d => WithLp.toLp 2 fun j => T y i j) x
 
 /-!
 
@@ -68,9 +69,8 @@ noncomputable def matrixDiv (d : ℕ) (T : Space d → Matrix (Fin d) (Fin d) �
 -/
 
 @[simp]
-lemma matrixDiv_apply (d : ℕ) (T : Space d → Matrix (Fin d) (Fin d) ℝ)
-    (x : Space d) (i : Fin d) :
-    matrixDiv d T x i = ∑ j, ∂[j] (fun x => T x i j) x := by
+lemma matrixDiv_apply (d : ℕ) (T : Space d → Matrix (Fin d) (Fin d) ℝ) (x : Space d) (i : Fin d)
+    : matrixDiv d T x i = ∑ j, ∂[j] (fun x => T x i j) x := by
   simp [matrixDiv, div]
 
 /-!
@@ -80,8 +80,7 @@ lemma matrixDiv_apply (d : ℕ) (T : Space d → Matrix (Fin d) (Fin d) ℝ)
 -/
 
 @[simp]
-lemma matrixDiv_zero (d : ℕ) :
-    matrixDiv d (0 : Space d → Matrix (Fin d) (Fin d) ℝ) = 0 := by
+lemma matrixDiv_zero (d : ℕ) : matrixDiv d (0 : Space d → Matrix (Fin d) (Fin d) ℝ) = 0 := by
   ext x i
   change (∑ j : Fin d, ∂[j] (fun _ : Space d => (0 : ℝ)) x) = 0
   simp
@@ -93,8 +92,8 @@ lemma matrixDiv_zero (d : ℕ) :
 -/
 
 @[simp]
-lemma matrixDiv_const (d : ℕ) (T : Matrix (Fin d) (Fin d) ℝ) :
-    matrixDiv d (fun _ : Space d => T) = 0 := by
+lemma matrixDiv_const (d : ℕ) (T : Matrix (Fin d) (Fin d) ℝ)
+    : matrixDiv d (fun _ : Space d => T) = 0 := by
   ext x i
   change (∑ j : Fin d, ∂[j] (fun _ : Space d => T i j) x) = 0
   simp
@@ -105,18 +104,18 @@ lemma matrixDiv_const (d : ℕ) (T : Matrix (Fin d) (Fin d) ℝ) :
 
 -/
 
-lemma matrixDiv_add (d : ℕ) (T1 T2 : Space d → Matrix (Fin d) (Fin d) ℝ)
-    (hT1 : Differentiable ℝ T1) (hT2 : Differentiable ℝ T2) :
-    matrixDiv d (T1 + T2) = matrixDiv d T1 + matrixDiv d T2 := by
+lemma matrixDiv_add
+    (d : ℕ) (T1 T2 : Space d → Matrix (Fin d) (Fin d) ℝ)
+    (hT1 : Differentiable ℝ T1) (hT2 : Differentiable ℝ T2)
+    : matrixDiv d (T1 + T2) = matrixDiv d T1 + matrixDiv d T2 := by
   ext x i
-  change (∑ j, ∂[j] (fun x => (T1 x + T2 x) i j) x) =
-    (∑ j, ∂[j] (fun x => T1 x i j) x) +
-      ∑ j, ∂[j] (fun x => T2 x i j) x
+  change (∑ j, ∂[j] (fun x => (T1 x + T2 x) i j) x)
+    = (∑ j, ∂[j] (fun x => T1 x i j) x) + ∑ j, ∂[j] (fun x => T2 x i j) x
   rw [← Finset.sum_add_distrib]
   congr
   funext j
-  change ∂[j] ((fun x => T1 x i j) + fun x => T2 x i j) x =
-    ∂[j] (fun x => T1 x i j) x + ∂[j] (fun x => T2 x i j) x
+  change ∂[j] ((fun x => T1 x i j) + fun x => T2 x i j) x
+    = ∂[j] (fun x => T1 x i j) x + ∂[j] (fun x => T2 x i j) x
   rw [deriv_add]
   · rfl
   · exact differentiable_pi.mp (differentiable_pi.mp hT1 i) j
@@ -128,12 +127,11 @@ lemma matrixDiv_add (d : ℕ) (T1 T2 : Space d → Matrix (Fin d) (Fin d) ℝ)
 
 -/
 
-lemma matrixDiv_smul (d : ℕ) (T : Space d → Matrix (Fin d) (Fin d) ℝ) (k : ℝ)
-    (hT : Differentiable ℝ T) :
-    matrixDiv d (k • T) = k • matrixDiv d T := by
+lemma matrixDiv_smul
+    (d : ℕ) (T : Space d → Matrix (Fin d) (Fin d) ℝ) (k : ℝ) (hT : Differentiable ℝ T)
+    : matrixDiv d (k • T) = k • matrixDiv d T := by
   ext x i
-  change (∑ j, ∂[j] (fun x => (k • T x) i j) x) =
-    k * ∑ j, ∂[j] (fun x => T x i j) x
+  change (∑ j, ∂[j] (fun x => (k • T x) i j) x) = k * ∑ j, ∂[j] (fun x => T x i j) x
   rw [Finset.mul_sum]
   congr
   funext j

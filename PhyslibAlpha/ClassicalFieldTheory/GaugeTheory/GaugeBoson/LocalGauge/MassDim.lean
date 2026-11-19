@@ -46,7 +46,6 @@ set_option linter.unusedSectionVars false
 
 variable {𝔤 : Type} [LieRing 𝔤] [LieAlgebra ℝ 𝔤] [Module.Finite ℝ 𝔤]
 
-
 open TensorProduct
 
 /-!
@@ -58,33 +57,36 @@ open TensorProduct
 namespace GaugeBoson
 
 variable (𝔤) in
-/-- The mass-weight scaling on the jet component space of the gauge bosons: the generator
-  `∂_s A_μ^φ` is scaled by `c ^ (2 + 2 |s|)`, through the derivative-degree scaling
-  `SpaceTimeDerivAlgebraℝ.gradeScale` on the derivative label. -/
-noncomputable def JetComponentSpace.massWeightScale (c : ℝ) :
-    (JetComponentSpace 𝔤) →ₗ[ℝ] (JetComponentSpace 𝔤) :=
+/--
+The mass-weight scaling on the jet component space of the gauge bosons: the generator
+`∂_s A_μ^φ` is scaled by `c ^ (2 + 2 |s|)`, through the derivative-degree scaling
+`SpaceTimeDerivAlgebraℝ.gradeScale` on the derivative label.
+-/
+noncomputable def JetComponentSpace.massWeightScale (c : ℝ)
+    : (JetComponentSpace 𝔤) →ₗ[ℝ] (JetComponentSpace 𝔤) :=
   c ^ 2 • TensorProduct.map (SpaceTimeDerivAlgebraℝ.gradeScale (c ^ 2)).toLinearMap LinearMap.id
 
 omit [Module.Finite ℝ 𝔤] in
-lemma JetComponentSpace.massWeightScale_tmul (c : ℝ) (a : SpaceTimeDerivAlgebraℝ)
-    (φ : Module.Dual ℝ (GaugeBoson 𝔤)) :
-    (JetComponentSpace.massWeightScale 𝔤) c (a ⊗ₜ[ℝ] φ)
-      = c ^ 2 • (SpaceTimeDerivAlgebraℝ.gradeScale (c ^ 2) a ⊗ₜ[ℝ] φ) := rfl
+lemma JetComponentSpace.massWeightScale_tmul
+    (c : ℝ) (a : SpaceTimeDerivAlgebraℝ) (φ : Module.Dual ℝ (GaugeBoson 𝔤))
+    : (JetComponentSpace.massWeightScale 𝔤) c (a ⊗ₜ[ℝ] φ)
+      = c ^ 2 • (SpaceTimeDerivAlgebraℝ.gradeScale (c ^ 2) a ⊗ₜ[ℝ] φ) :=
+  rfl
 
 omit [Module.Finite ℝ 𝔤] in
 /-- **The derivative shift carries mass weight two** on the component space. -/
-lemma JetComponentSpace.massWeightScale_jetDeriv (c : ℝ) (μ : Fin 1 ⊕ Fin 3)
-    (v : (JetComponentSpace 𝔤)) :
-    (JetComponentSpace.massWeightScale 𝔤) c ((JetComponentSpace.jetDeriv 𝔤) μ v)
+lemma JetComponentSpace.massWeightScale_jetDeriv
+    (c : ℝ) (μ : Fin 1 ⊕ Fin 3) (v : (JetComponentSpace 𝔤))
+    : (JetComponentSpace.massWeightScale 𝔤) c ((JetComponentSpace.jetDeriv 𝔤) μ v)
       = c ^ 2 • (JetComponentSpace.jetDeriv 𝔤) μ ((JetComponentSpace.massWeightScale 𝔤) c v) := by
   induction v using TensorProduct.inductionOn with
   | add x y hx hy => simp only [map_add, hx, hy, smul_add]
   | tmul a φ =>
     rw [JetComponentSpace.jetDeriv_tmul, JetComponentSpace.massWeightScale_tmul, map_mul,
-      SpaceTimeDerivAlgebraℝ.basisMultiset_singleton,
-      SpaceTimeDerivAlgebraℝ.gradeScale_ι, ← SpaceTimeDerivAlgebraℝ.basisMultiset_singleton,
-      JetComponentSpace.massWeightScale_tmul, map_smul, JetComponentSpace.jetDeriv_tmul,
-      mul_smul_comm, TensorProduct.smul_tmul', smul_smul, smul_smul, mul_comm (c ^ 2)]
+      SpaceTimeDerivAlgebraℝ.basisMultiset_singleton, SpaceTimeDerivAlgebraℝ.gradeScale_ι,
+      ← SpaceTimeDerivAlgebraℝ.basisMultiset_singleton, JetComponentSpace.massWeightScale_tmul,
+      map_smul, JetComponentSpace.jetDeriv_tmul, mul_smul_comm, TensorProduct.smul_tmul', smul_smul,
+      smul_smul, mul_comm (c ^ 2)]
     rfl
 
 end GaugeBoson
@@ -98,17 +100,19 @@ namespace LocalGaugeFieldAlgebra
 -/
 
 variable (𝔤) in
-/-- **The mass-weight scaling on the gauge-boson jet algebra**: the algebra endomorphism
-  scaling the generator `∂_s A_μ^φ` by `c ^ (2 + 2 |s|)`, the functorial lift of the
-  scaling on the jet component space. -/
-noncomputable def massWeightScale (c : ℝ) :
-    (LocalGaugeFieldAlgebra 𝔤) →ₐ[ℝ] (LocalGaugeFieldAlgebra 𝔤) :=
+/--
+**The mass-weight scaling on the gauge-boson jet algebra**: the algebra endomorphism
+scaling the generator `∂_s A_μ^φ` by `c ^ (2 + 2 |s|)`, the functorial lift of the
+scaling on the jet component space.
+-/
+noncomputable def massWeightScale (c : ℝ)
+    : (LocalGaugeFieldAlgebra 𝔤) →ₐ[ℝ] (LocalGaugeFieldAlgebra 𝔤) :=
   SymmetricAlgebra.map ((GaugeBoson.JetComponentSpace.massWeightScale 𝔤) c)
 
 omit [Module.Finite ℝ 𝔤] in
 @[simp]
-lemma massWeightScale_ι (c : ℝ) (x : (GaugeBoson.JetComponentSpace 𝔤)) :
-    (massWeightScale 𝔤) c (SymmetricAlgebra.ι ℝ _ x)
+lemma massWeightScale_ι (c : ℝ) (x : (GaugeBoson.JetComponentSpace 𝔤))
+    : (massWeightScale 𝔤) c (SymmetricAlgebra.ι ℝ _ x)
       = SymmetricAlgebra.ι ℝ _ ((GaugeBoson.JetComponentSpace.massWeightScale 𝔤) c x) :=
   SymmetricAlgebra.map_apply_ι _ x
 
@@ -121,44 +125,43 @@ lemma massWeightScale_ι (c : ℝ) (x : (GaugeBoson.JetComponentSpace 𝔤)) :
 omit [Module.Finite ℝ 𝔤] in
 /-- **The gauge field carries mass weight two** — mass dimension one. -/
 @[simp]
-lemma massWeightScale_ofA (c : ℝ) (μ : Fin 1 ⊕ Fin 3) (φ : Module.Dual ℝ 𝔤) :
-    (massWeightScale 𝔤) c ((ofA 𝔤) μ φ) = c ^ 2 • (ofA 𝔤) μ φ := by
+lemma massWeightScale_ofA (c : ℝ) (μ : Fin 1 ⊕ Fin 3) (φ : Module.Dual ℝ 𝔤)
+    : (massWeightScale 𝔤) c ((ofA 𝔤) μ φ) = c ^ 2 • (ofA 𝔤) μ φ := by
   rw [ofA_apply, ofComponent_apply, massWeightScale_ι,
     GaugeBoson.JetComponentSpace.massWeightScale_tmul, map_one, map_smul]
 
 omit [Module.Finite ℝ 𝔤] in
 /-- **A total derivative adds mass weight two.** -/
-lemma massWeightScale_jetDeriv (c : ℝ) (μ : Fin 1 ⊕ Fin 3) (x : (LocalGaugeFieldAlgebra 𝔤)) :
-    (massWeightScale 𝔤) c ((jetDeriv 𝔤) μ x) = c ^ 2 • (jetDeriv 𝔤) μ
-      ((massWeightScale 𝔤) c x) := by
+lemma massWeightScale_jetDeriv (c : ℝ) (μ : Fin 1 ⊕ Fin 3) (x : (LocalGaugeFieldAlgebra 𝔤))
+    : (massWeightScale 𝔤) c ((jetDeriv 𝔤) μ x)
+      = c ^ 2 • (jetDeriv 𝔤) μ ((massWeightScale 𝔤) c x) := by
   induction x using SymmetricAlgebra.induction with
-  | algebraMap r => rw [jetDeriv_algebraMap, map_zero, AlgHom.commutes, jetDeriv_algebraMap,
-      smul_zero]
+  | algebraMap r =>
+    rw [jetDeriv_algebraMap, map_zero, AlgHom.commutes, jetDeriv_algebraMap, smul_zero]
   | ι v =>
     rw [jetDeriv_ι, massWeightScale_ι, massWeightScale_ι, jetDeriv_ι, ← map_smul]
     exact congrArg (SymmetricAlgebra.ι ℝ _)
       (GaugeBoson.JetComponentSpace.massWeightScale_jetDeriv c μ v)
   | mul a b ha hb =>
-    simp only [jetDeriv_mul, map_add, map_mul, ha, hb, smul_add, smul_mul_assoc,
-      mul_smul_comm]
+    simp only [jetDeriv_mul, map_add, map_mul, ha, hb, smul_add, smul_mul_assoc, mul_smul_comm]
   | add a b ha hb => simp only [map_add, ha, hb, smul_add]
 
 omit [Module.Finite ℝ 𝔤] in
 /-- **The iterated derivative `∂_s` adds mass weight `2 |s|`.** -/
-lemma massWeightScale_iteratedJetDeriv (c : ℝ) (s : Multiset (Fin 1 ⊕ Fin 3))
-    (x : (LocalGaugeFieldAlgebra 𝔤)) :
-    (massWeightScale 𝔤) c ((iteratedJetDeriv 𝔤) s x)
+lemma massWeightScale_iteratedJetDeriv
+    (c : ℝ) (s : Multiset (Fin 1 ⊕ Fin 3)) (x : (LocalGaugeFieldAlgebra 𝔤))
+    : (massWeightScale 𝔤) c ((iteratedJetDeriv 𝔤) s x)
       = c ^ (2 * Multiset.card s) • (iteratedJetDeriv 𝔤) s ((massWeightScale 𝔤) c x) := by
   induction s using Multiset.induction_on generalizing x with
   | empty => simp
   | cons μ s ih =>
     rw [iteratedJetDeriv_cons, LinearMap.comp_apply, massWeightScale_jetDeriv,
       show (massWeightScale 𝔤) c ((iteratedJetDeriv 𝔤) s x)
-        = c ^ (2 * Multiset.card s) • (iteratedJetDeriv 𝔤) s ((massWeightScale 𝔤) c x) from ih x,
+          = c ^ (2 * Multiset.card s) • (iteratedJetDeriv 𝔤) s ((massWeightScale 𝔤) c x) from
+        ih x,
       map_smul, LinearMap.comp_apply, smul_smul, ← pow_add]
     congr 2
     rw [Multiset.card_cons]
     ring
 
 end LocalGaugeFieldAlgebra
-

@@ -47,8 +47,10 @@ namespace Electromagnetism
 
 -/
 
-/-- Free space consists of the specification of the
-  electric permittivity and the magnetic permeability. -/
+/--
+Free space consists of the specification of the
+electric permittivity and the magnetic permeability.
+-/
 structure FreeSpace where
   /-- The permittivity. -/
   ε₀ : ℝ
@@ -86,12 +88,14 @@ lemma μ₀_ne_zero : 𝓕.μ₀ ≠ 0 := ne_of_gt 𝓕.μ₀_pos
 -/
 
 /-- The speed of light in free space. -/
-noncomputable def c : SpeedOfLight :=
-  ⟨1 / √(𝓕.ε₀ * 𝓕.μ₀), by
+noncomputable def c : SpeedOfLight := ⟨
+  1 / √(𝓕.ε₀ * 𝓕.μ₀),
+  by
     apply div_pos
     · exact zero_lt_one
     · refine Real.sqrt_pos_of_pos ?_
-      apply mul_pos 𝓕.ε₀_pos 𝓕.μ₀_pos⟩
+      apply mul_pos 𝓕.ε₀_pos 𝓕.μ₀_pos
+⟩
 
 lemma c_val : (𝓕.c : ℝ) = 1 / √(𝓕.ε₀ * 𝓕.μ₀) := rfl
 
@@ -103,8 +107,7 @@ lemma c_sq : (𝓕.c : ℝ) ^ 2 = 1 / (𝓕.ε₀ * 𝓕.μ₀) := by
   · positivity
 
 @[simp]
-lemma c_abs : abs (𝓕.c : ℝ) = 𝓕.c := by
-  rw [abs_of_pos (SpeedOfLight.val_pos 𝓕.c)]
+lemma c_abs : abs (𝓕.c : ℝ) = 𝓕.c := by rw [abs_of_pos (SpeedOfLight.val_pos 𝓕.c)]
 
 end FreeSpace
 

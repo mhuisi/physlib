@@ -16,7 +16,7 @@ public meta import Lean.Elab.Command
 namespace Physlib
 open Lean
 
-/-- The information from a `remark ...` command. To be used in a note file-/
+/-- The information from a `remark ...` command. To be used in a note file -/
 structure RemarkInfo where
   /-- The content of the remark. -/
   content : String
@@ -57,11 +57,12 @@ meta def elabRemark : Elab.Command.CommandElab := fun stx =>
       let nameSpace := (← getCurrNamespace)
 
       let noteInfo : RemarkInfo := {
-          content := str,
-          fileName := modName,
-          line := line,
-          name := n.getId,
-          nameSpace := nameSpace}
+        content := str
+        fileName := modName
+        line := line
+        name := n.getId
+        nameSpace := nameSpace
+      }
       modifyEnv fun env => remarkExtension.addEntry env noteInfo
     | none => throwError "Invalid syntax for `note` command"
   | _ => throwError "Invalid syntax for `note` command"

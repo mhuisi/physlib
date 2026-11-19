@@ -48,8 +48,10 @@ open Matrix
 
 -/
 
-/-- The Minkowski matrix over the integers, `diag(1, -1, -1, ...)` in `ℤ`. Its cast to `ℝ` is
-  `minkowskiMatrix`, by `minkowskiMatrixZ.cast_apply`. -/
+/--
+The Minkowski matrix over the integers, `diag(1, -1, -1, ...)` in `ℤ`. Its cast to `ℝ` is
+`minkowskiMatrix`, by `minkowskiMatrixZ.cast_apply`.
+-/
 def minkowskiMatrixZ {d : ℕ} : Matrix (Fin 1 ⊕ Fin d) (Fin 1 ⊕ Fin d) ℤ :=
   diagonal (Sum.elim 1 (-1))
 
@@ -62,8 +64,7 @@ lemma as_diagonal : @minkowskiMatrixZ d = diagonal (Sum.elim 1 (-1)) := rfl
 
 /-- The time-time component of the integer Minkowski matrix is `1`. -/
 @[simp]
-lemma inl_0_inl_0 : @minkowskiMatrixZ d (Sum.inl 0) (Sum.inl 0) = 1 := by
-  simp [minkowskiMatrixZ]
+lemma inl_0_inl_0 : @minkowskiMatrixZ d (Sum.inl 0) (Sum.inl 0) = 1 := by simp [minkowskiMatrixZ]
 
 /-- The space diagonal components of the integer Minkowski matrix are `-1`. -/
 @[simp]
@@ -82,8 +83,8 @@ lemma comm (μ ν : Fin 1 ⊕ Fin d) : @minkowskiMatrixZ d μ ν = minkowskiMatr
   · rw [off_diag_zero h, off_diag_zero h.symm]
 
 /-- The integer Minkowski matrix casts to the Minkowski matrix, entry by entry. -/
-lemma cast_apply (μ ν : Fin 1 ⊕ Fin d) :
-    ((minkowskiMatrixZ μ ν : ℤ) : ℝ) = minkowskiMatrix μ ν := by
+lemma cast_apply (μ ν : Fin 1 ⊕ Fin d)
+    : ((minkowskiMatrixZ μ ν : ℤ) : ℝ) = minkowskiMatrix μ ν := by
   rcases eq_or_ne μ ν with rfl | h
   · match μ with
     | Sum.inl i => rw [Subsingleton.elim i 0]; simp

@@ -41,21 +41,26 @@ open MeasureTheory Set
 
 namespace TauCeti
 
-variable {α β : Type*} [MeasurableSpace α] [TopologicalSpace α]
-  [MeasurableSpace β] [TopologicalSpace β]
+variable
+  {α β : Type*} [MeasurableSpace α] [TopologicalSpace α] [MeasurableSpace β] [TopologicalSpace β]
 
-/-- A measurable map continuous on a measurable set of full measure preserves inner regularity.
-No separation, countability or finiteness assumption is required. -/
-lemma innerRegular_map_of_continuousOn {μ : Measure α} [μ.InnerRegular]
-    {f : α → β} {s : Set α} (hf : Measurable f) (hs : MeasurableSet s)
-    (hcont : ContinuousOn f s) (hmem : ∀ᵐ x ∂μ, x ∈ s) :
-    (Measure.map f μ).InnerRegular := by
+/--
+A measurable map continuous on a measurable set of full measure preserves inner regularity.
+No separation, countability or finiteness assumption is required.
+-/
+lemma innerRegular_map_of_continuousOn
+    {μ : Measure α} [μ.InnerRegular]
+    {f : α → β} {s : Set α}
+    (hf : Measurable f) (hs : MeasurableSet s) (hcont : ContinuousOn f s) (hmem : ∀ᵐ x ∂μ, x ∈ s)
+    : (Measure.map f μ).InnerRegular := by
   have hreg : μ.InnerRegularWRT (fun K ↦ IsCompact K ∧ K ⊆ s) MeasurableSet := by
     intro t ht r hr
     rw [← μ.measure_inter_eq_of_ae hmem, inter_comm] at hr
     obtain ⟨K, hKsub, hK, hrK⟩ := (ht.inter hs).exists_lt_isCompact hr
     exact ⟨K, hKsub.trans inter_subset_left, ⟨hK, hKsub.trans inter_subset_right⟩, hrK⟩
-  exact ⟨hreg.map hf.aemeasurable (fun _ ht ↦ hf ht)
-    (fun _ hK ↦ hK.1.image_of_continuousOn (hcont.mono hK.2)) (fun _ ht ↦ ht)⟩
+  exact ⟨hreg.map hf.aemeasurable
+    (fun _ ht ↦ hf ht)
+    (fun _ hK ↦ hK.1.image_of_continuousOn (hcont.mono hK.2))
+    (fun _ ht ↦ ht)⟩
 
 end TauCeti

@@ -54,19 +54,23 @@ namespace ArchimedeanOrderUnitSpace
 variable {E : Type*} [ArchimedeanOrderUnitSpace E]
 
 /-- Membership in the symmetric order-unit interval is equivalent to the norm bound. -/
-lemma mem_orderUnitBounds_iff {A : E} {r : ℝ} :
-    r ∈ orderUnitBounds A ↔ orderUnitNorm A ≤ r := by
+lemma mem_orderUnitBounds_iff {A : E} {r : ℝ} : r ∈ orderUnitBounds A ↔ orderUnitNorm A ≤ r := by
   rw [orderUnitNorm_le_iff]
   rfl
 
 /-- For the classical order unit on `ℝ`, the order-unit norm is absolute value. -/
 lemma orderUnitNorm_real (x : ℝ) : orderUnitNorm x = |x| := by
   apply le_antisymm
-  · exact orderUnitNorm_le ⟨abs_nonneg x, by simpa [smul_eq_mul] using neg_abs_le x,
-      by simpa [smul_eq_mul] using le_abs_self x⟩
+  · exact orderUnitNorm_le ⟨
+      abs_nonneg x,
+      by simpa [smul_eq_mul] using neg_abs_le x,
+      by simpa [smul_eq_mul] using le_abs_self x
+    ⟩
   · apply abs_le.mpr
-    exact ⟨by simpa [smul_eq_mul] using neg_orderUnitNorm_smul_one_le x,
-      by simpa [smul_eq_mul] using le_orderUnitNorm_smul_one x⟩
+    exact ⟨
+      by simpa [smul_eq_mul] using neg_orderUnitNorm_smul_one_le x,
+      by simpa [smul_eq_mul] using le_orderUnitNorm_smul_one x
+    ⟩
 
 end ArchimedeanOrderUnitSpace
 
@@ -99,8 +103,7 @@ def linearEquiv : E ≃ₗ[ℝ] WithOrderUnitNorm E := LinearEquiv.refl ℝ E
 lemma linearEquiv_apply (x : E) : linearEquiv x = x := rfl
 
 @[simp]
-lemma norm_eq_orderUnitNorm (x : WithOrderUnitNorm E) :
-    ‖x‖ = orderUnitNorm (show E from x) := rfl
+lemma norm_eq_orderUnitNorm (x : WithOrderUnitNorm E) : ‖x‖ = orderUnitNorm (show E from x) := rfl
 
 /-! ## B. The real scalar case -/
 
@@ -112,8 +115,9 @@ noncomputable def realLinearIsometryEquiv : WithOrderUnitNorm ℝ ≃ₗᵢ[ℝ]
     exact (ArchimedeanOrderUnitSpace.orderUnitNorm_real _).symm
 
 @[simp]
-lemma realLinearIsometryEquiv_apply (x : WithOrderUnitNorm ℝ) :
-    realLinearIsometryEquiv x = (show ℝ from x) := rfl
+lemma realLinearIsometryEquiv_apply (x : WithOrderUnitNorm ℝ)
+    : realLinearIsometryEquiv x = (show ℝ from x) :=
+  rfl
 
 /-- The scalar order-unit-norm copy is complete via its canonical isometry to `ℝ`. -/
 noncomputable instance : CompleteSpace (WithOrderUnitNorm ℝ) :=
@@ -129,17 +133,16 @@ namespace UnitalPositiveLinearMap
 variable {E F : Type*} [ArchimedeanOrderUnitSpace E] [ArchimedeanOrderUnitSpace F]
 
 /-- A unital positive map is contractive for the order-unit norms. -/
-lemma orderUnitNorm_map_le (φ : Channel E F) (x : E) :
-    orderUnitNorm (φ x) ≤ orderUnitNorm x := by
+lemma orderUnitNorm_map_le (φ : Channel E F) (x : E) : orderUnitNorm (φ x) ≤ orderUnitNorm x := by
   apply orderUnitNorm_le_iff.mpr
   refine ⟨orderUnitNorm_nonneg x, ?_, ?_⟩
   · calc
-      -(orderUnitNorm x • (1 : F)) = φ (-(orderUnitNorm x • (1 : E))) := by
-        rw [map_neg, map_smul, map_one]
+      -(orderUnitNorm x • (1 : F))
+        = φ (-(orderUnitNorm x • (1 : E))) := by rw [map_neg, map_smul, map_one]
       _ ≤ φ x := φ.monotone' (neg_orderUnitNorm_smul_one_le x)
   · calc
-      φ x ≤ φ (orderUnitNorm x • (1 : E)) :=
-        φ.monotone' (le_orderUnitNorm_smul_one x)
+      φ x
+        ≤ φ (orderUnitNorm x • (1 : E)) := φ.monotone' (le_orderUnitNorm_smul_one x)
       _ = orderUnitNorm x • (1 : F) := by rw [map_smul, map_one]
 
 end UnitalPositiveLinearMap

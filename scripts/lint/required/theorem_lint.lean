@@ -140,14 +140,20 @@ def ErrorKind.title : ErrorKind → String
 
 /-- How to fix the errors of the kind of `kind`. -/
 def ErrorKind.hint : ErrorKind → String
-  | .unknownSection .. => s!"The sections are \
+  | .unknownSection .. =>
+    s!"The sections are \
       {", ".intercalate (libraries.map (s!"`[{·}]`")).toList}."
-  | .beforeFirstSection .. => "List each name under the section `[L]` of its library `L`."
-  | .notAName .. => "Each line is a section `[L]`, a fully qualified name, or a comment starting \
+  | .beforeFirstSection .. =>
+    "List each name under the section `[L]` of its library `L`."
+  | .notAName .. =>
+    "Each line is a section `[L]`, a fully qualified name, or a comment starting \
       with `--`."
-  | .duplicate .. => "Remove the repeated entries."
-  | .noDocString .. => "Add a doc-string `/-- … -/` to each of these theorems."
-  | .notListed .. => "Use `lemma`. Only list a result, under the section of its library, if it \
+  | .duplicate .. =>
+    "Remove the repeated entries."
+  | .noDocString .. =>
+    "Add a doc-string `/-- … -/` to each of these theorems."
+  | .notListed .. =>
+    "Use `lemma`. Only list a result, under the section of its library, if it \
       is a significant result in physics, usually known by name."
   | .writtenWithLemma .. => "Use `theorem`, or remove the name from the theorems file."
   | .notADeclaration .. => "Give the fully qualified name of each result."
@@ -175,18 +181,21 @@ structure LintError where
   kind : ErrorKind
 
 /-- An error of kind `kind` located at the line `line` of the theorems file. -/
-def theoremsFileError (line : Nat) (kind : ErrorKind) : LintError :=
-  ⟨theoremsFile, ⟨line, 0⟩, kind⟩
+def theoremsFileError (line : Nat) (kind : ErrorKind) : LintError := ⟨theoremsFile, ⟨line, 0⟩, kind⟩
 
 /-- The order of errors: by kind, then by file, then by position. -/
 def LintError.lt (e f : LintError) : Bool :=
-  e.kind.rank < f.kind.rank || e.kind.rank == f.kind.rank &&
-    (e.file.toString < f.file.toString || e.file == f.file &&
-      (e.pos.line < f.pos.line || e.pos.line == f.pos.line && e.pos.column < f.pos.column))
+  e.kind.rank < f.kind.rank
+    || e.kind.rank == f.kind.rank
+      && (e.file.toString < f.file.toString
+        || e.file == f.file
+          && (e.pos.line < f.pos.line || e.pos.line == f.pos.line && e.pos.column < f.pos.column))
 
-/-- The report of `errors`, grouped by kind. Each group has a heading with its number of errors,
+/--
+The report of `errors`, grouped by kind. Each group has a heading with its number of errors,
 how to fix them, and the location and details of each error. With `colour`, the headings and
-hints are coloured for a terminal. -/
+hints are coloured for a terminal.
+-/
 def report (errors : Array LintError) (colour : Bool := true) : String := Id.run do
   let paint (code text : String) := if colour then s!"\x1b[{code}m{text}\x1b[0m" else text
   let errors := errors.qsort LintError.lt
@@ -195,7 +204,8 @@ def report (errors : Array LintError) (colour : Bool := true) : String := Id.run
   let mut previous : Option Nat := none
   for e in errors do
     if previous != some e.kind.rank then
-      unless previous.isNone do lines := lines.push ""
+      unless previous.isNone do
+        lines := lines.push ""
       let count := (errors.filter (·.kind.rank == e.kind.rank)).size
       lines := lines.push (paint "1;31" s!"{e.kind.title} ({count})")
       lines := lines.push (paint "33" s!"  {e.kind.hint}")
@@ -209,8 +219,10 @@ def report (errors : Array LintError) (colour : Bool := true) : String := Id.run
 
 -/
 
-/-- The names listed in the theorems file, given as its lines, each with the library whose
-section lists it and its line. -/
+/--
+The names listed in the theorems file, given as its lines, each with the library whose
+section lists it and its line.
+-/
 def parseNames (lines : Array String) : Except LintError (Array (Name × Name × Nat)) := do
   let mut library : Option Name := none
   let mut names := #[]
@@ -252,19 +264,26 @@ structure WrittenTheorem where
 def moduleFile (module : Name) : System.FilePath :=
   (System.mkFilePath (module.components.map Name.toString)).addExtension "lean"
 
-/-- Parses, with Lean's parser in the environment `env`, the declaration modifiers at `pos`
+/--
+Parses, with Lean's parser in the environment `env`, the declaration modifiers at `pos`
 followed by two tokens, and returns these tokens. For a `theorem` or `lemma` declaration they
-are its keyword and its declaration identifier. -/
-def headTokens (env : Environment) (ictx : InputContext) (pos : String.Pos.Raw) :
-    Option (Syntax × Syntax) :=
+are its keyword and its declaration identifier.
+-/
+def headTokens (env : Environment) (ictx : InputContext) (pos : String.Pos.Raw)
+    : Option (Syntax × Syntax) :=
   let p := andthenFn (Command.declModifiers false).fn (andthenFn (tokenFn []) (tokenFn []))
-  let s := p.run ictx { env, options := {} } (getTokenTable env)
-    ((mkParserState ictx.inputString).setPos pos)
-  if s.hasError then none
-  else some (s.stxStack.get! (s.stxStack.size - 2), s.stxStack.back)
+  let s :=
+    p.run ictx { env, options := {} } (getTokenTable env)
+      ((mkParserState ictx.inputString).setPos pos)
+  if s.hasError then
+    none
+  else
+    some (s.stxStack.get! (s.stxStack.size - 2), s.stxStack.back)
 
-/-- Whether the declaration identifier `ident`, written in some namespace, declares the constant
-`name`: `name` is `ident` prefixed by the namespace, or `ident` with `_root_` removed. -/
+/--
+Whether the declaration identifier `ident`, written in some namespace, declares the constant
+`name`: `name` is `ident` prefixed by the namespace, or `ident` with `_root_` removed.
+-/
 def declares (ident name : Name) : Bool :=
   let name := privateToUserName name
   if ident.getRoot == `_root_ then
@@ -273,20 +292,27 @@ def declares (ident name : Name) : Bool :=
     ident.isSuffixOf name
 
 /-- The theorems declared in `module`, written with `theorem` or `lemma`. -/
-def writtenTheorems (env : Environment) (module : Name) (constants : Array ConstantInfo) :
-    CoreM (Array WrittenTheorem) := do
+def writtenTheorems (env : Environment) (module : Name) (constants : Array ConstantInfo)
+    : CoreM (Array WrittenTheorem) := do
   let file := moduleFile module
   let ictx := mkInputContext (← IO.FS.readFile file) file.toString
   let mut result := #[]
   for c in constants do
-    let .thmInfo _ := c | continue
-    let some ranges ← findDeclarationRanges? c.name | continue
+    let .thmInfo _ := c
+      | continue
+    let some ranges ← findDeclarationRanges? c.name
+      | continue
     let start := ictx.fileMap.ofPosition ranges.range.pos
-    let some (keywordStx, ident) := headTokens env ictx start | continue
-    let .atom _ keyword := keywordStx | continue
-    unless keyword == "theorem" || keyword == "lemma" do continue
-    let .ident _ _ ident _ := ident | continue
-    unless declares ident c.name do continue
+    let some (keywordStx, ident) := headTokens env ictx start
+      | continue
+    let .atom _ keyword := keywordStx
+      | continue
+    unless keyword == "theorem" || keyword == "lemma" do
+      continue
+    let .ident _ _ ident _ := ident
+      | continue
+    unless declares ident c.name do
+      continue
     let pos := ictx.fileMap.toPosition (keywordStx.getPos?.getD start)
     let hasDocString := (← findDocString? env c.name).isSome
     result := result.push { name := privateToUserName c.name, file, pos, keyword, hasDocString }
@@ -298,9 +324,11 @@ def writtenTheorems (env : Environment) (module : Name) (constants : Array Const
 
 -/
 
-/-- The errors of the linter for `library`, whose section of the theorems file lists `names`:
+/--
+The errors of the linter for `library`, whose section of the theorems file lists `names`:
 theorems not listed in that section or without a doc-string, and listed names which are not
-theorems. -/
+theorems.
+-/
 def lint (library : Name) (names : Array (Name × Nat)) : CoreM (Array LintError) := do
   let env ← getEnv
   let mut errors := #[]
@@ -313,7 +341,8 @@ def lint (library : Name) (names : Array (Name × Nat)) : CoreM (Array LintError
   -- The theorems of the library and their keywords.
   let mut written : NameMap WrittenTheorem := {}
   for module in env.header.moduleNames, data in env.header.moduleData do
-    unless library.isPrefixOf module do continue
+    unless library.isPrefixOf module do
+      continue
     for thm in ← writtenTheorems env module data.constants do
       written := written.insert thm.name thm
   for (name, thm) in written do
@@ -326,7 +355,8 @@ def lint (library : Name) (names : Array (Name × Nat)) : CoreM (Array LintError
     | _, _ => pure ()
   for (name, line) in listed do
     if written.contains name then continue
-    let kind : ErrorKind := match env.getModuleIdxFor? name with
+    let kind : ErrorKind :=
+      match env.getModuleIdxFor? name with
       | none => .notADeclaration name
       | some idx =>
         let module := env.header.moduleNames[idx]!
@@ -401,8 +431,8 @@ info: Listed results written with `lemma` (1)
   scripts/lint/exemptions/Theorems.txt:3:0  Foo.bar, written with `lemma` at Physlib/Foo.lean:12:0
 -/
 #guard_msgs in
-#eval IO.println
-  (report #[theoremsFileError 3 (.writtenWithLemma `Foo.bar "Physlib/Foo.lean" ⟨12, 0⟩)] false)
+#eval IO.println (report
+  #[theoremsFileError 3 (.writtenWithLemma `Foo.bar "Physlib/Foo.lean" ⟨12, 0⟩)] false)
 
 /--
 info: Listed names which are not declarations (1)
@@ -419,8 +449,8 @@ info: Names listed under the wrong library (1)
     PhyslibAlpha.Foo
 -/
 #guard_msgs (whitespace := lax) in
-#eval IO.println
-  (report #[theoremsFileError 3 (.wrongLibrary `Physlib `Foo.bar `PhyslibAlpha.Foo)] false)
+#eval IO.println (report #[theoremsFileError 3 (.wrongLibrary `Physlib `Foo.bar `PhyslibAlpha.Foo)]
+  false)
 
 /--
 info: Listed names which are not theorems (1)
@@ -443,9 +473,13 @@ Listed names which are not theorems (1)
   scripts/lint/exemptions/Theorems.txt:4:0  D.e
 -/
 #guard_msgs in
-#eval IO.println (report #[⟨"QuantumInfo/C.lean", ⟨1, 0⟩, .noDocString `C.d⟩,
-  ⟨"Physlib/B.lean", ⟨7, 0⟩, .noDocString `B.c⟩, theoremsFileError 4 (.notATheorem `D.e),
-  ⟨"Physlib/A.lean", ⟨3, 2⟩, .noDocString `A.b⟩] false)
+#eval IO.println (report
+  #[
+    ⟨"QuantumInfo/C.lean", ⟨1, 0⟩, .noDocString `C.d⟩,
+    ⟨"Physlib/B.lean", ⟨7, 0⟩, .noDocString `B.c⟩, theoremsFileError 4 (.notATheorem `D.e),
+    ⟨"Physlib/A.lean", ⟨3, 2⟩, .noDocString `A.b⟩
+  ]
+  false)
 
 /-! ### F.2. Parsing the theorems file -/
 
@@ -527,8 +561,10 @@ info: Lines which are not Lean names (1)
 
 /-! ### F.4. Reading the keyword of a declaration -/
 
-/-- The keyword and identifier which `headTokens` reads at the start of `source`, in the
-current environment. -/
+/--
+The keyword and identifier which `headTokens` reads at the start of `source`, in the
+current environment.
+-/
 def headTokensOf (source : String) : CoreM (Option (String × Name)) := do
   let ictx := mkInputContext source "<test>"
   return match headTokens (← getEnv) ictx 0 with
@@ -541,7 +577,8 @@ def headTokensOf (source : String) : CoreM (Option (String × Name)) := do
 
 /-- info: some ("theorem", `bar) -/
 #guard_msgs in
-#eval headTokensOf "/-- A doc-string. -/\n@[simp] private theorem bar : True := trivial"
+#eval headTokensOf "/-- A doc-string. -/\
+  \n@[simp] private theorem bar : True := trivial"
 
 /-- info: some ("theorem", `_root_.bar) -/
 #guard_msgs in
@@ -570,7 +607,8 @@ unsafe def main (args : List String) : IO UInt32 := do
       return 1
   let env ← importModules (loadExts := true) (toLint.map ({ module := · })) {} 0
   let ctx : Core.Context := { fileName := "", options := {}, fileMap := default }
-  let listed ← match parseNames (← IO.FS.lines theoremsFile) with
+  let listed ←
+    match parseNames (← IO.FS.lines theoremsFile) with
     | .ok listed => pure listed
     | .error e => IO.eprintln (report #[e]); return 1
   let linted := ", ".intercalate (toLint.map toString).toList
@@ -578,8 +616,8 @@ unsafe def main (args : List String) : IO UInt32 := do
   -- The errors of all the libraries, reported together so that each kind of error is listed once.
   let mut errors := #[]
   for library in toLint do
-    let names := listed.filterMap fun (lib, name, line) =>
-      if lib == library then some (name, line) else none
+    let names :=
+      listed.filterMap fun (lib, name, line) => if lib == library then some (name, line) else none
     let (libraryErrors, _) ← (lint library names).toIO ctx { env }
     errors := errors ++ libraryErrors
   if errors.isEmpty then

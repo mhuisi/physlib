@@ -22,9 +22,11 @@ open Finset
 
 /-- The finite product of functions of temperate growth is again of temperate growth. -/
 @[to_fun (attr := fun_prop)]
-lemma prod {ι : Type*} {s : Finset ι} {E F : Type*} [NormedAddCommGroup E]
-    [NormedSpace ℝ E] [NormedCommRing F] [NormedAlgebra ℝ F] {f : ι → E → F}
-    (hf : ∀ i ∈ s, HasTemperateGrowth (f i)) : HasTemperateGrowth (∏ i ∈ s, f i) := by
+lemma prod
+    {ι : Type*} {s : Finset ι} {E F : Type*}
+    [NormedAddCommGroup E] [NormedSpace ℝ E] [NormedCommRing F] [NormedAlgebra ℝ F]
+    {f : ι → E → F} (hf : ∀ i ∈ s, HasTemperateGrowth (f i))
+    : HasTemperateGrowth (∏ i ∈ s, f i) := by
   classical
   induction s using Finset.induction_on with
   | empty => exact const _

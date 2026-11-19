@@ -101,10 +101,12 @@ equation of motion are zero.
 
 -/
 
-/-- The constant lift at the angle `0` — the bob hanging at rest at the bottom of its swing —
-  satisfies the equation of motion of the simple pendulum. -/
-lemma equationOfMotion_const_zero :
-    S.EquationOfMotion (fun _ => (0 : EuclideanSpace ℝ (Fin 1))) := by
+/--
+The constant lift at the angle `0` — the bob hanging at rest at the bottom of its swing —
+satisfies the equation of motion of the simple pendulum.
+-/
+lemma equationOfMotion_const_zero
+    : S.EquationOfMotion (fun _ => (0 : EuclideanSpace ℝ (Fin 1))) := by
   intro t
   have h1 : ∂ₜ (fun _ : Time => (0 : EuclideanSpace ℝ (Fin 1))) = fun _ => 0 := by
     funext s
@@ -112,9 +114,11 @@ lemma equationOfMotion_const_zero :
   rw [h1]
   simp [torque_eq]
 
-/-- The hanging equilibrium is a solution of the simple pendulum: the constant lift at the angle
-  `0` is smooth and satisfies the equation of motion. It is the simplest explicit solution of the
-  pendulum. -/
+/--
+The hanging equilibrium is a solution of the simple pendulum: the constant lift at the angle
+`0` is smooth and satisfies the equation of motion. It is the simplest explicit solution of the
+pendulum.
+-/
 lemma isSolution_const_zero : S.IsSolution (fun _ => 0) :=
   ⟨contDiff_const, S.equationOfMotion_const_zero⟩
 
@@ -128,10 +132,12 @@ away from it — is a statement about non-constant solutions, and is not proved 
 
 -/
 
-/-- The constant lift at the angle `π` — the bob balanced directly above the pivot — satisfies
-  the equation of motion of the simple pendulum. -/
-lemma equationOfMotion_const_pi :
-    S.EquationOfMotion (fun _ => EuclideanSpace.single 0 Real.pi) := by
+/--
+The constant lift at the angle `π` — the bob balanced directly above the pivot — satisfies
+the equation of motion of the simple pendulum.
+-/
+lemma equationOfMotion_const_pi
+    : S.EquationOfMotion (fun _ => EuclideanSpace.single 0 Real.pi) := by
   intro t
   have h1 : ∂ₜ (fun _ : Time => EuclideanSpace.single (0 : Fin 1) Real.pi) = fun _ => 0 := by
     funext s
@@ -139,8 +145,10 @@ lemma equationOfMotion_const_pi :
   rw [h1]
   simp [torque_eq]
 
-/-- The inverted equilibrium is a solution of the simple pendulum: the constant lift at the
-  angle `π` is smooth and satisfies the equation of motion. -/
+/--
+The inverted equilibrium is a solution of the simple pendulum: the constant lift at the
+angle `π` is smooth and satisfies the equation of motion.
+-/
 lemma isSolution_const_pi : S.IsSolution (fun _ => EuclideanSpace.single 0 Real.pi) :=
   ⟨contDiff_const, S.equationOfMotion_const_pi⟩
 
@@ -155,20 +163,21 @@ inverted equilibrium, and their copies shifted by whole turns.
 
 -/
 
-/-- A constant lift satisfies the equation of motion of the simple pendulum if and only if the
-  sine of its angle vanishes — classically, the angles straight down and straight up: the
-  constant solutions are exactly the equilibria. -/
-lemma equationOfMotion_const_iff (x : EuclideanSpace ℝ (Fin 1)) :
-    S.EquationOfMotion (fun _ => x) ↔ Real.sin (x 0) = 0 := by
+/--
+A constant lift satisfies the equation of motion of the simple pendulum if and only if the
+sine of its angle vanishes — classically, the angles straight down and straight up: the
+constant solutions are exactly the equilibria.
+-/
+lemma equationOfMotion_const_iff (x : EuclideanSpace ℝ (Fin 1))
+    : S.EquationOfMotion (fun _ => x) ↔ Real.sin (x 0) = 0 := by
   have h1 : ∂ₜ (fun _ : Time => x) = fun _ => 0 := by
     funext s
     simp
-  have he : EuclideanSpace.single (0 : Fin 1) (1 : ℝ) ≠ 0 :=
-    fun h => one_ne_zero ((PiLp.single_eq_zero_iff 2 (0 : Fin 1)).mp h)
+  have he : EuclideanSpace.single (0 : Fin 1) (1 : ℝ) ≠ 0 := fun h =>
+    one_ne_zero ((PiLp.single_eq_zero_iff 2 (0 : Fin 1)).mp h)
   have hc : S.m * S.g * S.ℓ ≠ 0 := (mul_pos (mul_pos S.m_pos S.g_pos) S.ℓ_pos).ne'
   simp only [EquationOfMotion, h1, Time.deriv_const, smul_zero, forall_const]
-  rw [eq_comm, torque_eq, neg_eq_zero, smul_eq_zero, or_iff_left he, mul_eq_zero,
-    or_iff_right hc]
+  rw [eq_comm, torque_eq, neg_eq_zero, smul_eq_zero, or_iff_left he, mul_eq_zero, or_iff_right hc]
 
 /-!
 
@@ -202,9 +211,11 @@ the inverted equilibrium — are not constructed here.
 
 -/
 
-/-- The separatrix energy of the simple pendulum is `2 m g ℓ`, the energy of the inverted
-  equilibrium. It is the threshold separating the two regimes of the motion, libration below it
-  and rotation above it. -/
+/--
+The separatrix energy of the simple pendulum is `2 m g ℓ`, the energy of the inverted
+equilibrium. It is the threshold separating the two regimes of the motion, libration below it
+and rotation above it.
+-/
 def separatrixEnergy : ℝ := 2 * (S.m * S.g * S.ℓ)
 
 /-- The separatrix energy of the simple pendulum, written out. -/
@@ -214,13 +225,15 @@ lemma separatrixEnergy_eq : S.separatrixEnergy = 2 * (S.m * S.g * S.ℓ) := rfl
 lemma separatrixEnergy_pos : 0 < S.separatrixEnergy :=
   mul_pos two_pos (mul_pos (mul_pos S.m_pos S.g_pos) S.ℓ_pos)
 
-/-- The energy of the simple pendulum along the inverted equilibrium is the separatrix energy:
-  the bob balanced at the top has no kinetic energy and the full potential energy `2 m g ℓ`. -/
-lemma energy_const_pi :
-    S.energy (fun _ => EuclideanSpace.single 0 Real.pi) = fun _ => S.separatrixEnergy := by
+/--
+The energy of the simple pendulum along the inverted equilibrium is the separatrix energy:
+the bob balanced at the top has no kinetic energy and the full potential energy `2 m g ℓ`.
+-/
+lemma energy_const_pi
+    : S.energy (fun _ => EuclideanSpace.single 0 Real.pi) = fun _ => S.separatrixEnergy := by
   funext t
-  simp only [energy_eq, kineticEnergy_eq, Time.deriv_const, inner_zero_left, mul_zero,
-    zero_add, potentialEnergy_eq, separatrixEnergy_eq, PiLp.single_apply, reduceIte, Real.cos_pi]
+  simp only [energy_eq, kineticEnergy_eq, Time.deriv_const, inner_zero_left, mul_zero, zero_add,
+    potentialEnergy_eq, separatrixEnergy_eq, PiLp.single_apply, reduceIte, Real.cos_pi]
   ring
 
 /-!
@@ -235,28 +248,32 @@ equation of motion — they hold along every lift of the angle.
 -/
 
 /-- The kinetic energy of the simple pendulum is non-negative along every lift of the angle. -/
-lemma kineticEnergy_nonneg (θ : Time → EuclideanSpace ℝ (Fin 1)) (t : Time) :
-    0 ≤ S.kineticEnergy θ t := by
+lemma kineticEnergy_nonneg (θ : Time → EuclideanSpace ℝ (Fin 1)) (t : Time)
+    : 0 ≤ S.kineticEnergy θ t := by
   simp only [kineticEnergy_eq]
   exact mul_nonneg (mul_nonneg (by norm_num) S.inertia_pos.le) real_inner_self_nonneg
 
-/-- The moment of inertia times the square of the angular speed, `I θ̇²`, is at most twice the
-  total energy, along every lift of the angle. -/
-lemma inertia_mul_inner_deriv_le (θ : Time → EuclideanSpace ℝ (Fin 1)) (t : Time) :
-    S.inertia * ⟪∂ₜ θ t, ∂ₜ θ t⟫_ℝ ≤ 2 * S.energy θ t := by
+/--
+The moment of inertia times the square of the angular speed, `I θ̇²`, is at most twice the
+total energy, along every lift of the angle.
+-/
+lemma inertia_mul_inner_deriv_le (θ : Time → EuclideanSpace ℝ (Fin 1)) (t : Time)
+    : S.inertia * ⟪∂ₜ θ t, ∂ₜ θ t⟫_ℝ ≤ 2 * S.energy θ t := by
   have hV := S.potentialEnergy_nonneg (θ t)
-  have hE : S.energy θ t = (1 / (2 : ℝ)) * S.inertia * ⟪∂ₜ θ t, ∂ₜ θ t⟫_ℝ
-      + S.potentialEnergy (θ t) := by
+  have hE
+      : S.energy θ t
+        = (1 / (2 : ℝ)) * S.inertia * ⟪∂ₜ θ t, ∂ₜ θ t⟫_ℝ + S.potentialEnergy (θ t) := by
     rw [energy_eq, kineticEnergy_eq]
   linarith
 
-/-- The potential energy of the simple pendulum is at most the total energy along every lift of
-  the angle. -/
-lemma potentialEnergy_le_energy (θ : Time → EuclideanSpace ℝ (Fin 1)) (t : Time) :
-    S.potentialEnergy (θ t) ≤ S.energy θ t := by
+/--
+The potential energy of the simple pendulum is at most the total energy along every lift of
+the angle.
+-/
+lemma potentialEnergy_le_energy (θ : Time → EuclideanSpace ℝ (Fin 1)) (t : Time)
+    : S.potentialEnergy (θ t) ≤ S.energy θ t := by
   have hK := S.kineticEnergy_nonneg θ t
-  have hE : S.energy θ t = S.kineticEnergy θ t + S.potentialEnergy (θ t) := by
-    rw [energy_eq]
+  have hE : S.energy θ t = S.kineticEnergy θ t + S.potentialEnergy (θ t) := by rw [energy_eq]
   linarith
 
 /-!
@@ -274,31 +291,40 @@ over the top — though only the non-vanishing is proved here.
 
 -/
 
-/-- Libration: along a smooth lift of the angle satisfying the equation of motion, with energy
-  below the separatrix energy, the cosine of the angle stays strictly above `-1` — the bob
-  never reaches the top of the swing. -/
-lemma neg_one_lt_cos_of_energy_lt (θ : Time → EuclideanSpace ℝ (Fin 1))
-    (hθ : ContDiff ℝ ∞ θ) (h : S.EquationOfMotion θ)
-    (hE : S.energy θ 0 < S.separatrixEnergy) (t : Time) : -1 < Real.cos (θ t 0) := by
+/--
+Libration: along a smooth lift of the angle satisfying the equation of motion, with energy
+below the separatrix energy, the cosine of the angle stays strictly above `-1` — the bob
+never reaches the top of the swing.
+-/
+lemma neg_one_lt_cos_of_energy_lt
+    (θ : Time → EuclideanSpace ℝ (Fin 1))
+    (hθ : ContDiff ℝ ∞ θ) (h : S.EquationOfMotion θ) (hE : S.energy θ 0 < S.separatrixEnergy)
+    (t : Time)
+    : -1 < Real.cos (θ t 0) := by
   have hc : 0 < S.m * S.g * S.ℓ := mul_pos (mul_pos S.m_pos S.g_pos) S.ℓ_pos
   have hV : S.m * S.g * S.ℓ * (1 - Real.cos (θ t 0)) < 2 * (S.m * S.g * S.ℓ) := by
     rw [← S.potentialEnergy_eq (θ t), ← S.separatrixEnergy_eq]
-    calc S.potentialEnergy (θ t) ≤ S.energy θ t := S.potentialEnergy_le_energy θ t
+    calc
+      S.potentialEnergy (θ t)
+        ≤ S.energy θ t := S.potentialEnergy_le_energy θ t
       _ = S.energy θ 0 := S.energy_conservation_of_equationOfMotion' θ hθ h t
       _ < S.separatrixEnergy := hE
   nlinarith [hV, hc]
 
-/-- Rotation: along a smooth lift of the angle satisfying the equation of motion, with energy
-  above the separatrix energy, the angular velocity never vanishes — the bob never halts. -/
-lemma deriv_ne_zero_of_energy_gt (θ : Time → EuclideanSpace ℝ (Fin 1))
-    (hθ : ContDiff ℝ ∞ θ) (h : S.EquationOfMotion θ)
-    (hE : S.separatrixEnergy < S.energy θ 0) (t : Time) : ∂ₜ θ t ≠ 0 := by
+/--
+Rotation: along a smooth lift of the angle satisfying the equation of motion, with energy
+above the separatrix energy, the angular velocity never vanishes — the bob never halts.
+-/
+lemma deriv_ne_zero_of_energy_gt
+    (θ : Time → EuclideanSpace ℝ (Fin 1))
+    (hθ : ContDiff ℝ ∞ θ) (h : S.EquationOfMotion θ) (hE : S.separatrixEnergy < S.energy θ 0)
+    (t : Time)
+    : ∂ₜ θ t ≠ 0 := by
   intro h0
   have hK : S.kineticEnergy θ t = 0 := by
     simp only [kineticEnergy_eq]
     simp [h0]
-  have ht : S.energy θ t = S.kineticEnergy θ t + S.potentialEnergy (θ t) := by
-    rw [energy_eq]
+  have ht : S.energy θ t = S.kineticEnergy θ t + S.potentialEnergy (θ t) := by rw [energy_eq]
   have hle := S.potentialEnergy_le (θ t)
   have hcons := S.energy_conservation_of_equationOfMotion' θ hθ h t
   have hsep : S.separatrixEnergy = 2 * (S.m * S.g * S.ℓ) := S.separatrixEnergy_eq
@@ -315,17 +341,19 @@ B.3 they can occur only at energies not above the separatrix energy.
 
 -/
 
-/-- Turning points: along a smooth lift of the angle satisfying the equation of motion, at an
-  instant where the angular velocity vanishes, the potential energy equals the conserved total
-  energy. -/
-lemma potentialEnergy_eq_energy_of_deriv_eq_zero (θ : Time → EuclideanSpace ℝ (Fin 1))
-    (hθ : ContDiff ℝ ∞ θ) (h : S.EquationOfMotion θ) (t : Time) (h0 : ∂ₜ θ t = 0) :
-    S.potentialEnergy (θ t) = S.energy θ 0 := by
+/--
+Turning points: along a smooth lift of the angle satisfying the equation of motion, at an
+instant where the angular velocity vanishes, the potential energy equals the conserved total
+energy.
+-/
+lemma potentialEnergy_eq_energy_of_deriv_eq_zero
+    (θ : Time → EuclideanSpace ℝ (Fin 1)) (hθ : ContDiff ℝ ∞ θ) (h : S.EquationOfMotion θ)
+    (t : Time) (h0 : ∂ₜ θ t = 0)
+    : S.potentialEnergy (θ t) = S.energy θ 0 := by
   have hK : S.kineticEnergy θ t = 0 := by
     simp only [kineticEnergy_eq]
     simp [h0]
-  have ht : S.energy θ t = S.kineticEnergy θ t + S.potentialEnergy (θ t) := by
-    rw [energy_eq]
+  have ht : S.energy θ t = S.kineticEnergy θ t + S.potentialEnergy (θ t) := by rw [energy_eq]
   have hcons := S.energy_conservation_of_equationOfMotion' θ hθ h t
   linarith
 

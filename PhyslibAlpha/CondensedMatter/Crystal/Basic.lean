@@ -60,8 +60,10 @@ namespace CondensedMatter
 
 universe u v
 
-/-- A perfectly repeating arrangement of sites under the translation group `G`.
-Every site belongs to one of finitely many families of translated copies. -/
+/--
+A perfectly repeating arrangement of sites under the translation group `G`.
+Every site belongs to one of finitely many families of translated copies.
+-/
 structure Crystal (G : Type u) [AddGroup G] where
   /-- The sites of the crystal. -/
   Site : Type v
@@ -83,12 +85,13 @@ gives one site for each cell index `n : G` and label `i : F`.
 -/
 
 /-- The address `⟨n, i⟩` of site `i` in the cell indexed by `n`. -/
-@[ext] structure CellSite (G : Type u) (F : Type v) where
+@[ext]
+structure CellSite (G : Type u) (F : Type v) where
   /-- Translation from the reference cell to this cell. -/
   cell : G
   /-- Which site of the unit cell is being copied. -/
   label : F
-  deriving DecidableEq, Fintype
+deriving DecidableEq, Fintype
 
 /-- Translate a site by changing its cell index and preserving its label. -/
 instance {G F : Type*} [AddGroup G] : AddAction G (CellSite G F) where
@@ -103,17 +106,18 @@ instance {G F : Type*} [AddGroup G] : IsCancelVAdd G (CellSite G F) where
   toIsLeftCancelVAdd := inferInstance
   right_cancel' _ _ _ h := add_right_cancel (congrArg CellSite.cell h)
 
-/-- Construct a crystal by repeating a unit cell containing one site for each label in `F`.
+/--
+Construct a crystal by repeating a unit cell containing one site for each label in `F`.
 The group `G` indexes translated cells. A site of the resulting crystal has address
-`⟨n, i⟩`, where `n : G` specifies its cell and `i : F` identifies the site within that cell. -/
+`⟨n, i⟩`, where `n : G` specifies its cell and `i : F` identifies the site within that cell.
+-/
 @[reducible]
 def ofUnitCell (G : Type u) (F : Type v) [AddGroup G] [Finite F] : Crystal G where
   Site := CellSite G F
   translations := inferInstance
   free := inferInstance
   finiteSiteOrbits := by
-    apply Finite.of_surjective (fun i : F =>
-      Quotient.mk _ (⟨0, i⟩ : CellSite G F))
+    apply Finite.of_surjective (fun i : F => Quotient.mk _ (⟨0, i⟩ : CellSite G F))
     intro q
     induction q using Quotient.inductionOn with
     | _ x =>

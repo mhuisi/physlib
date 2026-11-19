@@ -39,10 +39,12 @@ namespace QuantumMechanics
 
 open Set MeasureTheory
 
-/-- A spinless quantum particle with mass `m > 0` confined to a cuboid in `Space d`.
+/--
+A spinless quantum particle with mass `m > 0` confined to a cuboid in `Space d`.
 
-  The bounds of the well are specified by two functions `lower upper : Fin d → ℝ`
-  satisfying `∀ i, lower i < upper i`. -/
+The bounds of the well are specified by two functions `lower upper : Fin d → ℝ`
+satisfying `∀ i, lower i < upper i`.
+-/
 structure InfiniteSquareWell (d : ℕ) where
   /-- The mass (positive). -/
   m : ℝ

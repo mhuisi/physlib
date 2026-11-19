@@ -101,10 +101,12 @@ space (`Ra < Rc`, so that `χ_a < π / 2`).
 
 -/
 
-/-- Schwarzschild's incompressible fluid sphere: the curvature radius `Rc` of the interior
-  spherical space (`Rc ^ 2 = 3 / (κ ρ₀)`, Schwarzschild (37)), the areal radius `Ra` of the
-  surface (Schwarzschild's `P_o`, (39)) and the constant density `ρ₀`, with `0 < Ra < Rc` and
-  `0 < ρ₀`. -/
+/--
+Schwarzschild's incompressible fluid sphere: the curvature radius `Rc` of the interior
+spherical space (`Rc ^ 2 = 3 / (κ ρ₀)`, Schwarzschild (37)), the areal radius `Ra` of the
+surface (Schwarzschild's `P_o`, (39)) and the constant density `ρ₀`, with `0 < Ra < Rc` and
+`0 < ρ₀`.
+-/
 structure IncompressibleSphere where
   /-- The curvature radius of the interior spherical space. -/
   Rc : ℝ
@@ -131,8 +133,10 @@ variable (S : IncompressibleSphere)
 
 -/
 
-/-- The Schwarzschild radius `α = (κ ρ₀ / 3) P_o ^ 3 = Ra ^ 3 / Rc ^ 2` of the sphere,
-  Schwarzschild (40). -/
+/--
+The Schwarzschild radius `α = (κ ρ₀ / 3) P_o ^ 3 = Ra ^ 3 / Rc ^ 2` of the sphere,
+Schwarzschild (40).
+-/
 def rs : ℝ := S.Ra ^ 3 / S.Rc ^ 2
 
 /-- The polar angle `χ_a` of the surface, `sin χ_a = Ra / Rc`, Schwarzschild (28). -/
@@ -193,10 +197,11 @@ lemma rs_lt_Ra : S.rs < S.Ra := by
 
 -/
 
-/-- The pressure of the fluid at the polar angle `χ`, Schwarzschild (30):
-  `ρ₀ + p = ρ₀ 2 cos χ_a / (3 cos χ_a - cos χ)`. -/
-def pressure (χ : ℝ) : ℝ :=
-  S.ρ₀ * (2 * S.cosChia / (3 * S.cosChia - Real.cos χ)) - S.ρ₀
+/--
+The pressure of the fluid at the polar angle `χ`, Schwarzschild (30):
+`ρ₀ + p = ρ₀ 2 cos χ_a / (3 cos χ_a - cos χ)`.
+-/
+def pressure (χ : ℝ) : ℝ := S.ρ₀ * (2 * S.cosChia / (3 * S.cosChia - Real.cos χ)) - S.ρ₀
 
 /-!
 
@@ -209,13 +214,12 @@ lemma pressure_chia : S.pressure S.chia = 0 := by
   unfold pressure
   rw [← S.cosChia_eq_cos_chia]
   have hc : S.cosChia ≠ 0 := S.cosChia_pos.ne'
-  rw [show 3 * S.cosChia - S.cosChia = 2 * S.cosChia by ring,
-    div_self (mul_ne_zero two_ne_zero hc)]
+  rw [show 3 * S.cosChia - S.cosChia = 2 * S.cosChia by ring, div_self (mul_ne_zero two_ne_zero hc)]
   ring
 
 /-- The pressure at the centre, away from the critical value `cos χ_a = 1 / 3`. -/
-lemma pressure_zero (h : 3 * S.cosChia ≠ 1) :
-    S.pressure 0 = S.ρ₀ * (1 - S.cosChia) / (3 * S.cosChia - 1) := by
+lemma pressure_zero (h : 3 * S.cosChia ≠ 1)
+    : S.pressure 0 = S.ρ₀ * (1 - S.cosChia) / (3 * S.cosChia - 1) := by
   unfold pressure
   rw [Real.cos_zero]
   have h' : 3 * S.cosChia - 1 ≠ 0 := sub_ne_zero.mpr h
@@ -233,10 +237,12 @@ lemma pressure_zero_pos (hsub : 1 / 3 < S.cosChia) : 0 < S.pressure 0 := by
     linarith
   · linarith
 
-/-- The central pressure is positive if and only if `cos χ_a > 1 / 3`. For `cos χ_a < 1 / 3`
-  the formula (30) is negative at the centre; at `cos χ_a = 1 / 3` the division by zero of
-  Lean gives `pressure 0 = - ρ₀`. The divergence of the pressure at the critical value is not
-  a statement of this file. -/
+/--
+The central pressure is positive if and only if `cos χ_a > 1 / 3`. For `cos χ_a < 1 / 3`
+the formula (30) is negative at the centre; at `cos χ_a = 1 / 3` the division by zero of
+Lean gives `pressure 0 = - ρ₀`. The divergence of the pressure at the critical value is not
+a statement of this file.
+-/
 lemma pressure_zero_pos_iff : 0 < S.pressure 0 ↔ 1 / 3 < S.cosChia := by
   constructor
   · intro hp
@@ -248,8 +254,7 @@ lemma pressure_zero_pos_iff : 0 < S.pressure 0 ↔ 1 / 3 < S.cosChia := by
     rw [Real.cos_zero] at hp
     rcases lt_or_eq_of_le hle' with h | h
     · have hd : 3 * S.cosChia - 1 < 0 := by linarith
-      have hq : 2 * S.cosChia / (3 * S.cosChia - 1) < 0 :=
-        div_neg_of_pos_of_neg (by linarith) hd
+      have hq : 2 * S.cosChia / (3 * S.cosChia - 1) < 0 := div_neg_of_pos_of_neg (by linarith) hd
       have := mul_neg_of_pos_of_neg hρ hq
       linarith
     · have hd : 3 * S.cosChia - 1 = 0 := by linarith
@@ -272,8 +277,7 @@ lemma one_third_lt_cosChia_iff_sq : 1 / 3 < S.cosChia ↔ S.Ra ^ 2 < 8 / 9 * S.R
   rw [Real.lt_sqrt (by norm_num : (0 : ℝ) ≤ 1 / 3)]
   have h2 : 0 < S.Rc ^ 2 := pow_pos S.Rc_pos 2
   have hRc := S.Rc_pos.ne'
-  have key : 1 - S.Ra ^ 2 / S.Rc ^ 2 = (S.Rc ^ 2 - S.Ra ^ 2) / S.Rc ^ 2 := by
-    field_simp
+  have key : 1 - S.Ra ^ 2 / S.Rc ^ 2 = (S.Rc ^ 2 - S.Ra ^ 2) / S.Rc ^ 2 := by field_simp
   rw [key, lt_div_iff₀ h2]
   constructor <;> intro h <;> linarith
 
@@ -299,8 +303,10 @@ lemma one_third_lt_cosChia_iff_rs : 1 / 3 < S.cosChia ↔ 9 / 8 * S.rs < S.Ra :=
     have := lt_of_mul_lt_mul_left h1 hRa.le
     linarith
 
-/-- At the critical value `cos χ_a = 1 / 3` the ratio `Ra / Rc = sin χ_a` (Schwarzschild's
-  fall velocity, (42)) equals `√(8 / 9)`. -/
+/--
+At the critical value `cos χ_a = 1 / 3` the ratio `Ra / Rc = sin χ_a` (Schwarzschild's
+fall velocity, (42)) equals `√(8 / 9)`.
+-/
 lemma Ra_div_Rc_of_cosChia_eq (hc : S.cosChia = 1 / 3) : S.Ra / S.Rc = √(8 / 9) := by
   have h1 : (S.Ra / S.Rc) ^ 2 = 8 / 9 := by
     have h2 := S.cosChia_sq
@@ -319,13 +325,16 @@ coefficients are taken up to the sign of the signature.
 
 -/
 
-/-- The interior coefficient `g_tt` in the areal radius `r`, Schwarzschild (35):
-  `(3 / 2 cos χ_a - 1 / 2 √(1 - r ^ 2 / Rc ^ 2)) ^ 2`. -/
-def gttIn (r : ℝ) : ℝ :=
-  (3 / 2 * S.cosChia - 1 / 2 * √(1 - r ^ 2 / S.Rc ^ 2)) ^ 2
+/--
+The interior coefficient `g_tt` in the areal radius `r`, Schwarzschild (35):
+`(3 / 2 cos χ_a - 1 / 2 √(1 - r ^ 2 / Rc ^ 2)) ^ 2`.
+-/
+def gttIn (r : ℝ) : ℝ := (3 / 2 * S.cosChia - 1 / 2 * √(1 - r ^ 2 / S.Rc ^ 2)) ^ 2
 
-/-- The interior coefficient `g_rr` in the areal radius `r`, Schwarzschild (35):
-  `1 / (1 - r ^ 2 / Rc ^ 2)`. -/
+/--
+The interior coefficient `g_rr` in the areal radius `r`, Schwarzschild (35):
+`1 / (1 - r ^ 2 / Rc ^ 2)`.
+-/
 def grrIn (r : ℝ) : ℝ := 1 / (1 - r ^ 2 / S.Rc ^ 2)
 
 /-- The exterior coefficient `g_tt = 1 - α / r`, Schwarzschild (36). -/
@@ -340,22 +349,20 @@ def grrOut (r : ℝ) : ℝ := 1 / (1 - S.rs / r)
 
 -/
 
-lemma one_sub_sin_sq (χ : ℝ) :
-    1 - (S.Rc * Real.sin χ) ^ 2 / S.Rc ^ 2 = Real.cos χ ^ 2 := by
+lemma one_sub_sin_sq (χ : ℝ) : 1 - (S.Rc * Real.sin χ) ^ 2 / S.Rc ^ 2 = Real.cos χ ^ 2 := by
   rw [mul_pow, mul_div_cancel_left₀ _ (pow_ne_zero 2 S.Rc_pos.ne')]
   linarith [Real.sin_sq_add_cos_sq χ]
 
 /-- Schwarzschild (35): in the angle `χ`, `g_tt = ((3 cos χ_a - cos χ) / 2) ^ 2`. -/
-lemma gttIn_Rc_mul_sin {χ : ℝ} (h0 : 0 ≤ χ) (hπ : χ ≤ π / 2) :
-    S.gttIn (S.Rc * Real.sin χ) = ((3 * S.cosChia - Real.cos χ) / 2) ^ 2 := by
+lemma gttIn_Rc_mul_sin {χ : ℝ} (h0 : 0 ≤ χ) (hπ : χ ≤ π / 2)
+    : S.gttIn (S.Rc * Real.sin χ) = ((3 * S.cosChia - Real.cos χ) / 2) ^ 2 := by
   unfold gttIn
-  rw [S.one_sub_sin_sq,
-    Real.sqrt_sq (Real.cos_nonneg_of_mem_Icc ⟨by linarith [Real.pi_pos], hπ⟩)]
+  rw [S.one_sub_sin_sq, Real.sqrt_sq (Real.cos_nonneg_of_mem_Icc ⟨by linarith [Real.pi_pos], hπ⟩)]
   ring
 
 /-- Schwarzschild (35): in the angle `χ`, the coefficient of `dχ ^ 2` is `Rc ^ 2`. -/
-lemma grrIn_Rc_mul_sin {χ : ℝ} (hc : Real.cos χ ≠ 0) :
-    S.grrIn (S.Rc * Real.sin χ) * (S.Rc * Real.cos χ) ^ 2 = S.Rc ^ 2 := by
+lemma grrIn_Rc_mul_sin {χ : ℝ} (hc : Real.cos χ ≠ 0)
+    : S.grrIn (S.Rc * Real.sin χ) * (S.Rc * Real.cos χ) ^ 2 = S.Rc ^ 2 := by
   unfold grrIn
   rw [S.one_sub_sin_sq]
   field_simp
@@ -370,8 +377,7 @@ lemma grrIn_Rc_mul_sin {χ : ℝ} (hc : Real.cos χ ≠ 0) :
 lemma gttIn_Ra : S.gttIn S.Ra = S.gttOut S.Ra := by
   have hca : √(1 - S.Ra ^ 2 / S.Rc ^ 2) = S.cosChia := rfl
   unfold gttIn gttOut rs
-  rw [hca, show (3 / 2 * S.cosChia - 1 / 2 * S.cosChia) ^ 2 = S.cosChia ^ 2 by ring,
-    S.cosChia_sq]
+  rw [hca, show (3 / 2 * S.cosChia - 1 / 2 * S.cosChia) ^ 2 = S.cosChia ^ 2 by ring, S.cosChia_sq]
   have hRa := S.Ra_pos.ne'
   have hRc := S.Rc_pos.ne'
   field_simp
@@ -384,8 +390,10 @@ lemma grrIn_Ra : S.grrIn S.Ra = S.grrOut S.Ra := by
   have hRc := S.Rc_pos.ne'
   field_simp
 
-/-- The exterior form of `g_tt` at the surface determines the Schwarzschild radius: if
-  `g_tt (Ra) = 1 - a / Ra` then `a = α = Ra ^ 3 / Rc ^ 2`, which is Schwarzschild (40). -/
+/--
+The exterior form of `g_tt` at the surface determines the Schwarzschild radius: if
+`g_tt (Ra) = 1 - a / Ra` then `a = α = Ra ^ 3 / Rc ^ 2`, which is Schwarzschild (40).
+-/
 lemma eq_rs_of_gttIn_Ra {a : ℝ} (h : S.gttIn S.Ra = 1 - a / S.Ra) : a = S.rs := by
   have h1 := S.gttIn_Ra
   rw [h] at h1
@@ -411,15 +419,17 @@ lemma gttIn_zero_of_cosChia_eq (hcrit : S.cosChia = 1 / 3) : S.gttIn 0 = 0 := by
 
 -/
 
-lemma hasDerivAt_one_sub_sq_div (Rc r : ℝ) :
-    HasDerivAt (fun x : ℝ => 1 - x ^ 2 / Rc ^ 2) (-(2 * r) / Rc ^ 2) r := by
+lemma hasDerivAt_one_sub_sq_div (Rc r : ℝ)
+    : HasDerivAt (fun x : ℝ => 1 - x ^ 2 / Rc ^ 2) (-(2 * r) / Rc ^ 2) r := by
   have h := ((hasDerivAt_pow 2 r).div_const (Rc ^ 2)).const_sub (1 : ℝ)
   exact h.congr_deriv (by rw [show (2 : ℕ) - 1 = 1 from rfl, pow_one]; push_cast; ring)
 
-lemma hasDerivAt_sqrt_one_sub_sq_div {Rc r : ℝ} (hu : 0 < 1 - r ^ 2 / Rc ^ 2) :
-    HasDerivAt (fun x : ℝ => √(1 - x ^ 2 / Rc ^ 2))
+lemma hasDerivAt_sqrt_one_sub_sq_div {Rc r : ℝ} (hu : 0 < 1 - r ^ 2 / Rc ^ 2)
+    : HasDerivAt
+      (fun x : ℝ => √(1 - x ^ 2 / Rc ^ 2))
       (-r / (Rc ^ 2 * √(1 - r ^ 2 / Rc ^ 2))) r := by
-  have h : HasDerivAt (fun x : ℝ => √(1 - x ^ 2 / Rc ^ 2))
+  have h : HasDerivAt
+      (fun x : ℝ => √(1 - x ^ 2 / Rc ^ 2))
       (1 / (2 * √(1 - r ^ 2 / Rc ^ 2)) * (-(2 * r) / Rc ^ 2)) r :=
     (Real.hasDerivAt_sqrt hu.ne').comp r (hasDerivAt_one_sub_sq_div Rc r)
   have hs : √(1 - r ^ 2 / Rc ^ 2) ≠ 0 := (Real.sqrt_pos.mpr hu).ne'
@@ -441,11 +451,12 @@ lemma gttIn_hasDerivAt : HasDerivAt S.gttIn (S.Ra / S.Rc ^ 2) S.Ra := by
   have h : HasDerivAt
       (fun x : ℝ => (3 / 2 * S.cosChia - 1 / 2 * √(1 - x ^ 2 / S.Rc ^ 2)) ^ 2)
       ((2 : ℕ) * (3 / 2 * S.cosChia - 1 / 2 * √(1 - S.Ra ^ 2 / S.Rc ^ 2)) ^ (2 - 1)
-        * (-(1 / 2 * (-S.Ra / (S.Rc ^ 2 * √(1 - S.Ra ^ 2 / S.Rc ^ 2)))))) S.Ra :=
-    (((hasDerivAt_sqrt_one_sub_sq_div hu).const_mul (1 / 2 : ℝ)).const_sub
-      (3 / 2 * S.cosChia)).pow 2
-  rw [show S.gttIn
-      = fun x : ℝ => (3 / 2 * S.cosChia - 1 / 2 * √(1 - x ^ 2 / S.Rc ^ 2)) ^ 2 from rfl]
+        * (-(1 / 2 * (-S.Ra / (S.Rc ^ 2 * √(1 - S.Ra ^ 2 / S.Rc ^ 2))))))
+      S.Ra :=
+    (((hasDerivAt_sqrt_one_sub_sq_div hu).const_mul (1 / 2 : ℝ)).const_sub (3 / 2 * S.cosChia)).pow
+      2
+  rw [show S.gttIn = fun x : ℝ => (3 / 2 * S.cosChia - 1 / 2 * √(1 - x ^ 2 / S.Rc ^ 2)) ^ 2 from
+    rfl]
   refine h.congr_deriv ?_
   rw [hca, show (2 : ℕ) - 1 = 1 from rfl, pow_one]
   push_cast
@@ -453,8 +464,7 @@ lemma gttIn_hasDerivAt : HasDerivAt S.gttIn (S.Ra / S.Rc ^ 2) S.Ra := by
   ring
 
 /-- The derivative of the interior `g_tt` at `Ra` is `Ra / Rc ^ 2`. -/
-lemma deriv_gttIn_Ra : deriv S.gttIn S.Ra = S.Ra / S.Rc ^ 2 :=
-  S.gttIn_hasDerivAt.deriv
+lemma deriv_gttIn_Ra : deriv S.gttIn S.Ra = S.Ra / S.Rc ^ 2 := S.gttIn_hasDerivAt.deriv
 
 /-- The exterior `g_tt` is differentiable at `Ra` with derivative `α / Ra ^ 2 = Ra / Rc ^ 2`. -/
 lemma gttOut_hasDerivAt : HasDerivAt S.gttOut (S.Ra / S.Rc ^ 2) S.Ra := by
@@ -470,8 +480,7 @@ lemma gttOut_hasDerivAt : HasDerivAt S.gttOut (S.Ra / S.Rc ^ 2) S.Ra := by
   field_simp
 
 /-- The derivative of the exterior `g_tt` at `Ra` is `Ra / Rc ^ 2`. -/
-lemma deriv_gttOut_Ra : deriv S.gttOut S.Ra = S.Ra / S.Rc ^ 2 :=
-  S.gttOut_hasDerivAt.deriv
+lemma deriv_gttOut_Ra : deriv S.gttOut S.Ra = S.Ra / S.Rc ^ 2 := S.gttOut_hasDerivAt.deriv
 
 /-- The derivatives of the two formulas for `g_tt` agree at `r = Ra`. -/
 lemma deriv_gttIn_Ra_eq_deriv_gttOut_Ra : deriv S.gttIn S.Ra = deriv S.gttOut S.Ra := by
@@ -483,15 +492,17 @@ lemma deriv_gttIn_Ra_eq_deriv_gttOut_Ra : deriv S.gttIn S.Ra = deriv S.gttOut S.
 
 -/
 
-/-- The interior `g_rr` is differentiable at `Ra` with derivative
-  `2 Ra / (Rc ^ 2 cos χ_a ^ 4)`. -/
-lemma grrIn_hasDerivAt :
-    HasDerivAt S.grrIn (2 * S.Ra / (S.Rc ^ 2 * S.cosChia ^ 4)) S.Ra := by
+/--
+The interior `g_rr` is differentiable at `Ra` with derivative
+`2 Ra / (Rc ^ 2 cos χ_a ^ 4)`.
+-/
+lemma grrIn_hasDerivAt : HasDerivAt S.grrIn (2 * S.Ra / (S.Rc ^ 2 * S.cosChia ^ 4)) S.Ra := by
   have hu : 1 - S.Ra ^ 2 / S.Rc ^ 2 ≠ 0 := S.one_sub_sq_div_sq_pos.ne'
   have hf : S.grrIn = fun x : ℝ => (1 - x ^ 2 / S.Rc ^ 2)⁻¹ := by
     funext x
     simp [grrIn]
-  have h : HasDerivAt (fun x : ℝ => (1 - x ^ 2 / S.Rc ^ 2)⁻¹)
+  have h : HasDerivAt
+      (fun x : ℝ => (1 - x ^ 2 / S.Rc ^ 2)⁻¹)
       (-(-(2 * S.Ra) / S.Rc ^ 2) / (1 - S.Ra ^ 2 / S.Rc ^ 2) ^ 2) S.Ra :=
     (hasDerivAt_one_sub_sq_div S.Rc S.Ra).inv hu
   rw [hf]
@@ -504,10 +515,11 @@ lemma grrIn_hasDerivAt :
 lemma deriv_grrIn_Ra : deriv S.grrIn S.Ra = 2 * S.Ra / (S.Rc ^ 2 * S.cosChia ^ 4) :=
   S.grrIn_hasDerivAt.deriv
 
-/-- The exterior `g_rr` is differentiable at `Ra` with derivative
-  `- Ra / (Rc ^ 2 cos χ_a ^ 4)`. -/
-lemma grrOut_hasDerivAt :
-    HasDerivAt S.grrOut (-(S.Ra / (S.Rc ^ 2 * S.cosChia ^ 4))) S.Ra := by
+/--
+The exterior `g_rr` is differentiable at `Ra` with derivative
+`- Ra / (Rc ^ 2 cos χ_a ^ 4)`.
+-/
+lemma grrOut_hasDerivAt : HasDerivAt S.grrOut (-(S.Ra / (S.Rc ^ 2 * S.cosChia ^ 4))) S.Ra := by
   have hRa := S.Ra_pos.ne'
   have hRc := S.Rc_pos.ne'
   have hf : S.grrOut = fun x : ℝ => (1 - S.rs * x⁻¹)⁻¹ := by
@@ -519,7 +531,8 @@ lemma grrOut_hasDerivAt :
       field_simp
     rw [this]
     exact S.one_sub_sq_div_sq_pos.ne'
-  have h : HasDerivAt (fun x : ℝ => (1 - S.rs * x⁻¹)⁻¹)
+  have h : HasDerivAt
+      (fun x : ℝ => (1 - S.rs * x⁻¹)⁻¹)
       (-(-(S.rs * -(S.Ra ^ 2)⁻¹)) / (1 - S.rs * S.Ra⁻¹) ^ 2) S.Ra :=
     (((hasDerivAt_inv hRa).const_mul S.rs).const_sub (1 : ℝ)).inv hv
   rw [hf]
@@ -532,8 +545,10 @@ lemma grrOut_hasDerivAt :
 lemma deriv_grrOut_Ra : deriv S.grrOut S.Ra = -(S.Ra / (S.Rc ^ 2 * S.cosChia ^ 4)) :=
   S.grrOut_hasDerivAt.deriv
 
-/-- The derivatives of the two formulas for `g_rr` differ at `r = Ra`, in the curvature
-  coordinate `r`. -/
+/--
+The derivatives of the two formulas for `g_rr` differ at `r = Ra`, in the curvature
+coordinate `r`.
+-/
 lemma deriv_grrIn_Ra_ne_deriv_grrOut_Ra : deriv S.grrIn S.Ra ≠ deriv S.grrOut S.Ra := by
   rw [S.deriv_grrIn_Ra, S.deriv_grrOut_Ra]
   have hc := S.cosChia_pos
@@ -579,20 +594,19 @@ lemma gttGlue_hasDerivAt : HasDerivAt S.gttGlue (S.Ra / S.Rc ^ 2) S.Ra := by
   rwa [Set.Iic_union_Ici, hasDerivWithinAt_univ] at h
 
 /-- The glued `g_tt` is continuous at `Ra`. -/
-lemma gttGlue_continuousAt : ContinuousAt S.gttGlue S.Ra :=
-  S.gttGlue_hasDerivAt.continuousAt
+lemma gttGlue_continuousAt : ContinuousAt S.gttGlue S.Ra := S.gttGlue_hasDerivAt.continuousAt
 
 /-- The left derivative of the glued `g_rr` at `Ra` (interior formula). -/
-lemma grrGlue_hasDerivWithinAt_Iic :
-    HasDerivWithinAt S.grrGlue (2 * S.Ra / (S.Rc ^ 2 * S.cosChia ^ 4)) (Set.Iic S.Ra) S.Ra := by
+lemma grrGlue_hasDerivWithinAt_Iic
+    : HasDerivWithinAt S.grrGlue (2 * S.Ra / (S.Rc ^ 2 * S.cosChia ^ 4)) (Set.Iic S.Ra) S.Ra := by
   refine S.grrIn_hasDerivAt.hasDerivWithinAt.congr ?_ ?_
   · intro x hx
     simp [grrGlue, Set.mem_Iic.mp hx]
   · simp [grrGlue]
 
 /-- The right derivative of the glued `g_rr` at `Ra` (exterior formula). -/
-lemma grrGlue_hasDerivWithinAt_Ici :
-    HasDerivWithinAt S.grrGlue (-(S.Ra / (S.Rc ^ 2 * S.cosChia ^ 4))) (Set.Ici S.Ra) S.Ra := by
+lemma grrGlue_hasDerivWithinAt_Ici
+    : HasDerivWithinAt S.grrGlue (-(S.Ra / (S.Rc ^ 2 * S.cosChia ^ 4))) (Set.Ici S.Ra) S.Ra := by
   refine S.grrOut_hasDerivAt.hasDerivWithinAt.congr ?_ ?_
   · intro x hx
     rcases eq_or_lt_of_le (Set.mem_Ici.mp hx) with h | h
@@ -603,22 +617,25 @@ lemma grrGlue_hasDerivWithinAt_Ici :
 
 /-- The glued `g_rr` is continuous at `Ra`. -/
 lemma grrGlue_continuousAt : ContinuousAt S.grrGlue S.Ra := by
-  have h := S.grrGlue_hasDerivWithinAt_Iic.continuousWithinAt.union
-    S.grrGlue_hasDerivWithinAt_Ici.continuousWithinAt
+  have h :=
+    S.grrGlue_hasDerivWithinAt_Iic.continuousWithinAt.union
+      S.grrGlue_hasDerivWithinAt_Ici.continuousWithinAt
   rwa [Set.Iic_union_Ici, continuousWithinAt_univ] at h
 
-/-- The glued `g_rr` is not differentiable at `Ra`: its left and right derivatives, unique on
-  `Iic Ra` and `Ici Ra`, differ. -/
+/--
+The glued `g_rr` is not differentiable at `Ra`: its left and right derivatives, unique on
+`Iic Ra` and `Ici Ra`, differ.
+-/
 lemma grrGlue_not_differentiableAt : ¬ DifferentiableAt ℝ S.grrGlue S.Ra := by
   intro hd
   have hdw1 : HasDerivWithinAt S.grrGlue (deriv S.grrGlue S.Ra) (Set.Iic S.Ra) S.Ra :=
     hd.hasDerivAt.hasDerivWithinAt
   have hdw2 : HasDerivWithinAt S.grrGlue (deriv S.grrGlue S.Ra) (Set.Ici S.Ra) S.Ra :=
     hd.hasDerivAt.hasDerivWithinAt
-  have h1 := UniqueDiffWithinAt.eq_deriv _ (uniqueDiffWithinAt_Iic S.Ra)
-    S.grrGlue_hasDerivWithinAt_Iic hdw1
-  have h2 := UniqueDiffWithinAt.eq_deriv _ (uniqueDiffWithinAt_Ici S.Ra)
-    S.grrGlue_hasDerivWithinAt_Ici hdw2
+  have h1 :=
+    UniqueDiffWithinAt.eq_deriv _ (uniqueDiffWithinAt_Iic S.Ra) S.grrGlue_hasDerivWithinAt_Iic hdw1
+  have h2 :=
+    UniqueDiffWithinAt.eq_deriv _ (uniqueDiffWithinAt_Ici S.Ra) S.grrGlue_hasDerivWithinAt_Ici hdw2
   have hc := S.cosChia_pos
   have hRa := S.Ra_pos
   have hD : 0 < S.Rc ^ 2 * S.cosChia ^ 4 := mul_pos (pow_pos S.Rc_pos 2) (pow_pos hc 4)
@@ -638,12 +655,11 @@ itself is not constructed here.
 -/
 
 /-- `dr / dl = 1 / √g_rr` takes the same value at `Ra` from the two formulas. -/
-lemma one_div_sqrt_grrIn_Ra : 1 / √(S.grrIn S.Ra) = 1 / √(S.grrOut S.Ra) := by
-  rw [S.grrIn_Ra]
+lemma one_div_sqrt_grrIn_Ra : 1 / √(S.grrIn S.Ra) = 1 / √(S.grrOut S.Ra) := by rw [S.grrIn_Ra]
 
 /-- `d g_tt / dl = g_tt' / √g_rr` takes the same value at `Ra` from the two formulas. -/
-lemma deriv_gttIn_div_sqrt_grrIn_Ra :
-    deriv S.gttIn S.Ra / √(S.grrIn S.Ra) = deriv S.gttOut S.Ra / √(S.grrOut S.Ra) := by
+lemma deriv_gttIn_div_sqrt_grrIn_Ra
+    : deriv S.gttIn S.Ra / √(S.grrIn S.Ra) = deriv S.gttOut S.Ra / √(S.grrOut S.Ra) := by
   rw [S.deriv_gttIn_Ra_eq_deriv_gttOut_Ra, S.grrIn_Ra]
 
 /-!
@@ -655,18 +671,24 @@ The sphere with `Rc = 1`, `Ra = 3 / 5` and `ρ₀ = 1`: `cos χ_a = 4 / 5`, `α 
 
 -/
 
-example : (⟨1, 3 / 5, 1, by norm_num, by norm_num, by norm_num, by norm_num⟩ :
-    IncompressibleSphere).cosChia = 4 / 5 := by
+example
+    : (⟨1, 3 / 5, 1, by norm_num, by norm_num, by norm_num, by norm_num⟩
+        : IncompressibleSphere).cosChia
+      = 4 / 5 := by
   show √(1 - (3 / 5 : ℝ) ^ 2 / 1 ^ 2) = 4 / 5
   rw [show (1 : ℝ) - (3 / 5) ^ 2 / 1 ^ 2 = (4 / 5) ^ 2 by norm_num, Real.sqrt_sq (by norm_num)]
 
-example : (⟨1, 3 / 5, 1, by norm_num, by norm_num, by norm_num, by norm_num⟩ :
-    IncompressibleSphere).rs = 27 / 125 := by
+example
+    : (⟨1, 3 / 5, 1, by norm_num, by norm_num, by norm_num, by norm_num⟩ : IncompressibleSphere).rs
+      = 27 / 125 := by
   show (3 / 5 : ℝ) ^ 3 / 1 ^ 2 = 27 / 125
   norm_num
 
-example : 9 / 8 * (⟨1, 3 / 5, 1, by norm_num, by norm_num, by norm_num, by norm_num⟩ :
-    IncompressibleSphere).rs < 3 / 5 := by
+example
+    : 9 / 8
+        * (⟨1, 3 / 5, 1, by norm_num, by norm_num, by norm_num, by norm_num⟩
+          : IncompressibleSphere).rs
+      < 3 / 5 := by
   show 9 / 8 * ((3 / 5 : ℝ) ^ 3 / 1 ^ 2) < 3 / 5
   norm_num
 

@@ -43,8 +43,10 @@ gives the distribution `sphericalCylinderDist`.
 open SchwartzMap NNReal
 noncomputable section
 open Physlib Distribution
-variable (𝕜 : Type) {E F F' : Type} [RCLike 𝕜] [NormedAddCommGroup E] [NormedAddCommGroup F]
-  [NormedAddCommGroup F'] [NormedSpace ℝ E] [NormedSpace ℝ F]
+variable
+  (𝕜 : Type)
+  {E F F' : Type} [RCLike 𝕜] [NormedAddCommGroup E] [NormedAddCommGroup F] [NormedAddCommGroup F']
+  [NormedSpace ℝ E] [NormedSpace ℝ F]
 
 namespace Space
 
@@ -60,8 +62,9 @@ open MeasureTheory Real
 def sphericalCylinder : Metric.sphere (0 : Space 2) 1 × ℝ → Space 3 := fun x =>
   (slice 2).symm (x.2, sphericalShell 2 x.1)
 
-lemma sphericalCylinder_eq :
-    sphericalCylinder = (slice 2).symm ∘ (fun x => (x.2, sphericalShell 2 x.1)) := rfl
+lemma sphericalCylinder_eq
+    : sphericalCylinder = (slice 2).symm ∘ (fun x => (x.2, sphericalShell 2 x.1)) :=
+  rfl
 
 lemma sphericalCylinder_injective : Function.Injective sphericalCylinder := by
   intro x y h
@@ -79,8 +82,8 @@ lemma sphericalCylinder_measurableEmbedding : MeasurableEmbedding sphericalCylin
   Continuous.measurableEmbedding sphericalCylinder_continuous sphericalCylinder_injective
 
 @[simp]
-lemma norm_sphericalCylinder (x : Metric.sphere (0 : Space 2) 1 × ℝ) :
-    ‖sphericalCylinder x‖ = √(‖x.2‖ ^ 2 + 1) := by
+lemma norm_sphericalCylinder (x : Metric.sphere (0 : Space 2) 1 × ℝ)
+    : ‖sphericalCylinder x‖ = √(‖x.2‖ ^ 2 + 1) := by
   rw [sphericalCylinder, norm_slice_symm_eq, norm_sphericalShell]
   norm_num
 
@@ -95,17 +98,16 @@ def sphericalCylinderMeasure : Measure (Space 3) :=
   MeasureTheory.Measure.map sphericalCylinder
     ((MeasureTheory.Measure.toSphere volume).prod (volume (α := ℝ)))
 
-instance sphericalCylinderMeasure_hasTemperateGrowth :
-    sphericalCylinderMeasure.HasTemperateGrowth := by
+instance sphericalCylinderMeasure_hasTemperateGrowth
+    : sphericalCylinderMeasure.HasTemperateGrowth := by
   rw [sphericalCylinderMeasure]
   refine { exists_integrable := ?_ }
-  obtain ⟨n, hn⟩ := MeasureTheory.Measure.HasTemperateGrowth.exists_integrable
-    (μ := volume (α := ℝ))
+  obtain ⟨n, hn⟩ :=
+    MeasureTheory.Measure.HasTemperateGrowth.exists_integrable (μ := volume (α := ℝ))
   use n
   rw [MeasurableEmbedding.integrable_map_iff sphericalCylinder_measurableEmbedding]
   change Integrable
-    (fun x : Metric.sphere (0 : Space 2) 1 × ℝ =>
-      (1 + ‖sphericalCylinder x‖) ^ (-(n : ℝ)))
+    (fun x : Metric.sphere (0 : Space 2) 1 × ℝ => (1 + ‖sphericalCylinder x‖) ^ (-(n : ℝ)))
     ((MeasureTheory.Measure.toSphere volume).prod (volume (α := ℝ)))
   apply Integrable.mono' (hn.comp_snd (MeasureTheory.Measure.toSphere volume))
   · apply AEMeasurable.aestronglyMeasurable
@@ -131,17 +133,16 @@ instance sphericalCylinderMeasure_sFinite : SFinite sphericalCylinderMeasure := 
 -/
 
 /-- The distribution on `Space 3` corresponding to integration over a spherical cylinder. -/
-def sphericalCylinderDist : (Space 3) →d[ℝ] ℝ :=
-  SchwartzMap.integralCLM ℝ sphericalCylinderMeasure
+def sphericalCylinderDist : (Space 3) →d[ℝ] ℝ := SchwartzMap.integralCLM ℝ sphericalCylinderMeasure
 
-lemma sphericalCylinderDist_apply_eq_integral_sphericalCylinderMeasure (f : 𝓢(Space 3, ℝ)) :
-    sphericalCylinderDist f = ∫ x, f x ∂sphericalCylinderMeasure := by
+lemma sphericalCylinderDist_apply_eq_integral_sphericalCylinderMeasure (f : 𝓢(Space 3, ℝ))
+    : sphericalCylinderDist f = ∫ x, f x ∂sphericalCylinderMeasure := by
   rw [sphericalCylinderDist, SchwartzMap.integralCLM_apply]
 
-lemma sphericalCylinderDist_apply_eq_integral_sphere_volume (f : 𝓢(Space 3, ℝ)) :
-    sphericalCylinderDist f =
-    ∫ x, f (sphericalCylinder x)
-      ∂((MeasureTheory.Measure.toSphere volume).prod (volume (α := ℝ))) := by
+lemma sphericalCylinderDist_apply_eq_integral_sphere_volume (f : 𝓢(Space 3, ℝ))
+    : sphericalCylinderDist f
+      = ∫ x, f (sphericalCylinder x)
+          ∂((MeasureTheory.Measure.toSphere volume).prod (volume (α := ℝ))) := by
   rw [sphericalCylinderDist_apply_eq_integral_sphericalCylinderMeasure, sphericalCylinderMeasure,
     MeasurableEmbedding.integral_map sphericalCylinder_measurableEmbedding]
 

@@ -43,15 +43,20 @@ namespace ProbabilisticTheory
 
 /-! ## A. The compatibility class -/
 
-/-- A coherent unital Jordan algebra with an order unit and positive squares. Bundling the
+/--
+A coherent unital Jordan algebra with an order unit and positive squares. Bundling the
 data-bearing algebra and order-unit parents together prevents incompatible additions, scalar
-actions, orders, or units from being selected downstream. -/
-class IsJordanOrderUnit (E : Type*) extends NonAssocCommRing E, OrderUnitSpace E,
-    SMulCommClass ℝ E E, IsScalarTower ℝ E E, IsCommJordan E where
+actions, orders, or units from being selected downstream.
+-/
+class IsJordanOrderUnit (E : Type*)
+    extends NonAssocCommRing E, OrderUnitSpace E, SMulCommClass ℝ E E, IsScalarTower ℝ E E,
+      IsCommJordan E where
   /-- Every Jordan square is a possible measurement outcome. -/
   mul_self_nonneg : ∀ a : E, 0 ≤ a * a
-  /-- The algebra product and the distinguished order unit satisfy the complement-square
-  expansion. This records the compatibility between the two data-bearing parent structures. -/
+  /--
+  The algebra product and the distinguished order unit satisfy the complement-square
+  expansion. This records the compatibility between the two data-bearing parent structures.
+  -/
   one_sub_mul_one_sub : ∀ a : E, (1 - a) * (1 - a) = 1 - a - a + a * a
   /-- Multiplication by an order-unit complement has the expected algebraic expansion. -/
   mul_one_sub : ∀ a : E, a * (1 - a) = a - a * a

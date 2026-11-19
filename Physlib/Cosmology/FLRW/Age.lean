@@ -46,11 +46,12 @@ namespace Cosmology.FLRW.FriedmannEquation
 
 -/
 
-/-- The age of the universe `t₀ = H₀⁻¹ ∫₀¹ dx / (x E(x))` for a reduced Hubble function `E`:
-  the time elapsed since `a = 0`, obtained by integrating `dt = da / (a H)` with
-  `H = H₀ E(a / a₀)` (interval integral; no convergence is asserted here). -/
-noncomputable def age (H₀ : ℝ) (E : ℝ → ℝ) : ℝ :=
-  (1 / H₀) * ∫ x in (0 : ℝ)..1, 1 / (x * E x)
+/--
+The age of the universe `t₀ = H₀⁻¹ ∫₀¹ dx / (x E(x))` for a reduced Hubble function `E`:
+the time elapsed since `a = 0`, obtained by integrating `dt = da / (a H)` with
+`H = H₀ E(a / a₀)` (interval integral; no convergence is asserted here).
+-/
+noncomputable def age (H₀ : ℝ) (E : ℝ → ℝ) : ℝ := (1 / H₀) * ∫ x in (0 : ℝ)..1, 1 / (x * E x)
 
 /-- The age is proportional to `1 / H₀`. -/
 lemma age_eq (H₀ : ℝ) (E : ℝ → ℝ) : age H₀ E = (1 / H₀) * age 1 E := by

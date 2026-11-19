@@ -77,14 +77,16 @@ structure Interaction where
 
 variable {Ω}
 
-/-- **The Hamiltonian of a finite box**: the sum of the lifts to the box of the terms of the
-interaction supported inside it. -/
+/--
+**The Hamiltonian of a finite box**: the sum of the lifts to the box of the terms of the
+interaction supported inside it.
+-/
 def Interaction.hamiltonian (I : Interaction Ω) (Λ : Finset S) : Alg Ω Λ :=
   ∑ X : Λ.powerset, inclMat (Finset.mem_powerset.1 X.2) (I.Φ X)
 
 omit [∀ s, Fintype (Ω s)] in
-lemma Interaction.hamiltonian_isHermitian (I : Interaction Ω) (Λ : Finset S) :
-    (I.hamiltonian Λ).IsHermitian := by
+lemma Interaction.hamiltonian_isHermitian (I : Interaction Ω) (Λ : Finset S)
+    : (I.hamiltonian Λ).IsHermitian := by
   rw [Matrix.IsHermitian, hamiltonian, Matrix.conjTranspose_sum]
   refine Finset.sum_congr rfl fun X _ => ?_
   rw [← inclMat_conjTranspose, (I.isHermitian X).eq]
@@ -93,26 +95,30 @@ lemma Interaction.hamiltonian_isHermitian (I : Interaction Ω) (Λ : Finset S) :
 
 open scoped Matrix.Norms.Operator in
 /-- The lift `M ↦ M ⊗ 1` commutes with the exponential. -/
-lemma inclMat_exp {X Y : Finset S} (h : X ≤ Y) (a : Alg Ω X) :
-    inclMat h (NormedSpace.exp a) = NormedSpace.exp (inclMat h a) :=
+lemma inclMat_exp {X Y : Finset S} (h : X ≤ Y) (a : Alg Ω X)
+    : inclMat h (NormedSpace.exp a) = NormedSpace.exp (inclMat h a) :=
   NormedSpace.map_exp (inclStarAlg h)
     (LinearMap.continuous_of_finiteDimensional (inclStarAlg h).toAlgHom.toLinearMap) a
 
 /-- **The lift of a Gibbs weight is the Gibbs weight of the lift.** -/
-lemma inclMat_gibbsWeight {X Y : Finset S} (h : X ≤ Y) (a : Alg Ω X) :
-    inclMat h (gibbsWeight a) = gibbsWeight (inclMat h a) := by
+lemma inclMat_gibbsWeight {X Y : Finset S} (h : X ≤ Y) (a : Alg Ω X)
+    : inclMat h (gibbsWeight a) = gibbsWeight (inclMat h a) := by
   rw [gibbsWeight, gibbsWeight, inclMat_exp]
   congr 1
   exact map_neg (inclStarAlg h) a
 
 /-! ## C. Charges and the ensembles of a box -/
 
-/-- A charge: a real number attached to each value of the configuration space of each site, such
-as the occupation number of a mode. -/
+/--
+A charge: a real number attached to each value of the configuration space of each site, such
+as the occupation number of a mode.
+-/
 abbrev Charge (Ω : S → Type*) := ∀ s, Ω s → ℝ
 
-/-- **The total charge of a box**: the diagonal operator with the value `∑_{x ∈ Λ} q_x(c_x)` on
-the configuration `c`. -/
+/--
+**The total charge of a box**: the diagonal operator with the value `∑_{x ∈ Λ} q_x(c_x)` on
+the configuration `c`.
+-/
 def chargeOp (q : Charge Ω) (Λ : Finset S) : Alg Ω Λ :=
   Matrix.diagonal fun c => ((∑ x : Λ, q x.1 (c x) : ℝ) : ℂ)
 
@@ -126,30 +132,35 @@ lemma chargeOp_isHermitian (q : Charge Ω) (Λ : Finset S) : (chargeOp q Λ).IsH
 variable [∀ s, Nonempty (Ω s)]
 
 /-- **The canonical ensemble of a box** at inverse temperature `β`. -/
-def Interaction.canonicalState (I : Interaction Ω) (β : ℝ) (Λ : Finset S) :
-    AlgState (Alg Ω Λ) :=
+def Interaction.canonicalState (I : Interaction Ω) (β : ℝ) (Λ : Finset S) : AlgState (Alg Ω Λ) :=
   QuasiLocal.canonicalState β (I.hamiltonian Λ) (I.hamiltonian_isHermitian Λ)
 
-/-- **The grand canonical ensemble of a box** at inverse temperature `β` and chemical potential
-`μ` for the charge `q`. -/
-def Interaction.grandCanonicalState (I : Interaction Ω) (q : Charge Ω) (β μ : ℝ)
-    (Λ : Finset S) : AlgState (Alg Ω Λ) :=
-  QuasiLocal.grandCanonicalState β μ (I.hamiltonian Λ) (chargeOp q Λ)
-    (I.hamiltonian_isHermitian Λ) (chargeOp_isHermitian q Λ)
+/--
+**The grand canonical ensemble of a box** at inverse temperature `β` and chemical potential
+`μ` for the charge `q`.
+-/
+def Interaction.grandCanonicalState (I : Interaction Ω) (q : Charge Ω) (β μ : ℝ) (Λ : Finset S)
+    : AlgState (Alg Ω Λ) :=
+  QuasiLocal.grandCanonicalState β μ (I.hamiltonian Λ) (chargeOp q Λ) (I.hamiltonian_isHermitian Λ)
+    (chargeOp_isHermitian q Λ)
 
-/-- The interaction conserves the charge: the Hamiltonian of every box commutes with its
-total charge. -/
+/--
+The interaction conserves the charge: the Hamiltonian of every box commutes with its
+total charge.
+-/
 def Interaction.Conserves (I : Interaction Ω) (q : Charge Ω) : Prop :=
   ∀ Λ : Finset S, Commute (I.hamiltonian Λ) (chargeOp q Λ)
 
 omit [∀ s, Nonempty (Ω s)] in
-/-- **For a conserved charge the grand canonical weight of a box is its canonical weight times a
-fugacity.** -/
-lemma Interaction.grandCanonicalWeight_of_conserves (I : Interaction Ω) {q : Charge Ω}
-    (hq : I.Conserves q) (β μ : ℝ) (Λ : Finset S) :
-    gibbsWeight (grandCanonicalOp β μ (I.hamiltonian Λ) (chargeOp q Λ)) =
-      gibbsWeight ((β : ℂ) • I.hamiltonian Λ) *
-        NormedSpace.exp (((β * μ : ℝ) : ℂ) • chargeOp q Λ) :=
+/--
+**For a conserved charge the grand canonical weight of a box is its canonical weight times a
+fugacity.**
+-/
+lemma Interaction.grandCanonicalWeight_of_conserves
+    (I : Interaction Ω) {q : Charge Ω} (hq : I.Conserves q) (β μ : ℝ) (Λ : Finset S)
+    : gibbsWeight (grandCanonicalOp β μ (I.hamiltonian Λ) (chargeOp q Λ))
+      = gibbsWeight ((β : ℂ) • I.hamiltonian Λ)
+        * NormedSpace.exp (((β * μ : ℝ) : ℂ) • chargeOp q Λ) :=
   grandCanonicalWeight_of_commute β μ (hq Λ)
 
 end QuasiLocal

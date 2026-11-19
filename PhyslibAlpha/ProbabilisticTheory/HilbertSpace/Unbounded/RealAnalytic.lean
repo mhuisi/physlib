@@ -60,19 +60,17 @@ structure DefectIndexCertificate (T : H →ₗ.[ℂ] H) where
   plus : T.defectNumber Complex.I = 0
   minus : T.defectNumber (-Complex.I) = 0
 
-lemma DefectIndexCertificate.essentiallySelfAdjoint
-    {T : H →ₗ.[ℂ] H} (C : DefectIndexCertificate T) :
-    T.IsEssentiallySelfAdjoint :=
+lemma DefectIndexCertificate.essentiallySelfAdjoint {T : H →ₗ.[ℂ] H} (C : DefectIndexCertificate T)
+    : T.IsEssentiallySelfAdjoint :=
   C.symmetric.isEssentiallySelfAdjoint_of_defectNumber_eq_zero C.dense C.plus C.minus
 
-lemma DefectIndexCertificate.closure_isSelfAdjoint
-    {T : H →ₗ.[ℂ] H} (C : DefectIndexCertificate T) :
-    IsSelfAdjoint T.closure :=
+lemma DefectIndexCertificate.closure_isSelfAdjoint {T : H →ₗ.[ℂ] H} (C : DefectIndexCertificate T)
+    : IsSelfAdjoint T.closure :=
   C.essentiallySelfAdjoint
 
 /-- A self-adjoint operator is automatically an essentially self-adjoint core for itself. -/
-lemma ofSelfAdjoint_isEssentiallySelfAdjoint
-    {T : H →ₗ.[ℂ] H} (hT : IsSelfAdjoint T) : T.IsEssentiallySelfAdjoint :=
+lemma ofSelfAdjoint_isEssentiallySelfAdjoint {T : H →ₗ.[ℂ] H} (hT : IsSelfAdjoint T)
+    : T.IsEssentiallySelfAdjoint :=
   LinearPMap.IsSelfAdjoint.isEssentiallySelfAdjoint hT
 
 /-! ## B. Essential self-adjointness from a Hilbert basis of eigenvectors
@@ -93,31 +91,34 @@ open scoped ENNReal Topology
 
 variable {ι : Type*}
 
-/-- **Essential self-adjointness from a Hilbert basis of eigenvectors.** If `T`'s domain is exactly
+/--
+**Essential self-adjointness from a Hilbert basis of eigenvectors.** If `T`'s domain is exactly
 the (algebraic) span of a Hilbert basis `e`, and each basis vector `e i` is an eigenvector of `T`
-with *real* eigenvalue `lam i`, then `T` is essentially self-adjoint. -/
+with *real* eigenvalue `lam i`, then `T` is essentially self-adjoint.
+-/
 lemma isEssentiallySelfAdjoint_of_hilbertBasis_eigenvectors
     (e : HilbertBasis ι ℂ H) (T : H →ₗ.[ℂ] H) (lam : ι → ℝ)
     (hdom : T.domain = Submodule.span ℂ (Set.range e))
-    (heig : ∀ i, T ⟨e i, hdom ▸ Submodule.subset_span ⟨i, rfl⟩⟩ = (lam i : ℂ) • e i) :
-    T.IsEssentiallySelfAdjoint := by
+    (heig : ∀ i, T ⟨e i, hdom ▸ Submodule.subset_span ⟨i, rfl⟩⟩ = (lam i : ℂ) • e i)
+    : T.IsEssentiallySelfAdjoint := by
   classical
   have hmem : ∀ i, e i ∈ T.domain := fun i ↦ hdom ▸ Submodule.subset_span ⟨i, rfl⟩
   set v : ι → T.domain := fun i ↦ (⟨e i, hmem i⟩ : T.domain) with hv_def
   set w : ι → H := fun i ↦ (lam i : ℂ) • e i with hw_def
   -- `Finsupp.linearCombination` computes `T` on finite eigenbasis combinations.
-  have hcomp : (T.domain.subtype : T.domain →ₗ[ℂ] H) ∘ v = (⇑e) := by
-    funext i; simp [hv_def]
+  have hcomp : (T.domain.subtype : T.domain →ₗ[ℂ] H) ∘ v = (⇑e) := by funext i; simp [hv_def]
   have hcomp2 : (T.toFun : T.domain →ₗ[ℂ] H) ∘ v = w := by
     funext i; simp only [Function.comp_apply, hv_def]; exact heig i
-  have hv_coe : ∀ l : ι →₀ ℂ,
-      ((Finsupp.linearCombination ℂ v l : T.domain) : H) = Finsupp.linearCombination ℂ (⇑e) l := by
+  have hv_coe
+      : ∀ l : ι →₀ ℂ,
+        ((Finsupp.linearCombination ℂ v l : T.domain) : H)
+          = Finsupp.linearCombination ℂ (⇑e) l := by
     intro l
     have h := Finsupp.apply_linearCombination ℂ T.domain.subtype v l
     rw [hcomp] at h
     exact h
-  have hTapply : ∀ l : ι →₀ ℂ,
-      T (Finsupp.linearCombination ℂ v l) = Finsupp.linearCombination ℂ w l := by
+  have hTapply
+      : ∀ l : ι →₀ ℂ, T (Finsupp.linearCombination ℂ v l) = Finsupp.linearCombination ℂ w l := by
     intro l
     rw [← toFun_eq_coe]
     have h := Finsupp.apply_linearCombination ℂ T.toFun v l
@@ -136,14 +137,13 @@ lemma isEssentiallySelfAdjoint_of_hilbertBasis_eigenvectors
     obtain ⟨l, hl⟩ := hspan x
     have hlH : (x : H) = Finsupp.linearCombination ℂ (⇑e) l := by rw [← hv_coe l, hl]
     have hTx : T x = Finsupp.linearCombination ℂ w l := hl ▸ hTapply l
-    have hTx' : Finsupp.linearCombination ℂ w l
-        = ∑ i ∈ l.support, (l i * (lam i : ℂ)) • e i := by
+    have hTx' : Finsupp.linearCombination ℂ w l = ∑ i ∈ l.support, (l i * (lam i : ℂ)) • e i := by
       rw [Finsupp.linearCombination_apply, Finsupp.sum]
       exact Finset.sum_congr rfl fun i _ ↦ by rw [hw_def, smul_smul]
     have hlH' : Finsupp.linearCombination ℂ (⇑e) l = ∑ i ∈ l.support, l i • e i := by
       rw [Finsupp.linearCombination_apply, Finsupp.sum]
-    rw [hTx, hlH, hTx', hlH', e.orthonormal.inner_sum (fun i ↦ l i * (lam i : ℂ)) (fun i ↦ l i)
-      l.support, map_sum]
+    rw [hTx, hlH, hTx', hlH',
+      e.orthonormal.inner_sum (fun i ↦ l i * (lam i : ℂ)) (fun i ↦ l i) l.support, map_sum]
     refine Finset.sum_congr rfl fun i _ ↦ ?_
     simp only [map_mul, Complex.conj_conj, Complex.conj_ofReal]
     ring
@@ -161,7 +161,9 @@ lemma isEssentiallySelfAdjoint_of_hilbertBasis_eigenvectors
       have h2 : ((r : ℂ) - ζ).im = -ζ.im := by simp
       rw [normSq_apply, h1, h2]
       nlinarith [sq_nonneg r, normSq_apply ζ, hsq, hre]
-    calc (1 : ℝ) = Real.sqrt 1 := (Real.sqrt_one).symm
+    calc
+      (1 : ℝ)
+        = Real.sqrt 1 := (Real.sqrt_one).symm
       _ ≤ Real.sqrt (normSq ((r : ℂ) - ζ)) := Real.sqrt_le_sqrt hns
       _ = ‖(r : ℂ) - ζ‖ := (Complex.norm_def _).symm
   have hne : ∀ {ζ : ℂ}, ζ.re = 0 → normSq ζ = 1 → ∀ i, (lam i : ℂ) - ζ ≠ 0 := by
@@ -170,8 +172,9 @@ lemma isEssentiallySelfAdjoint_of_hilbertBasis_eigenvectors
     rw [h, norm_zero] at this
     linarith
   -- The core surjectivity fact: `(T.closure - ζ • 1).range = ⊤` for `ζ = ± I`.
-  have hrange : ∀ {ζ : ℂ}, ζ.re = 0 → normSq ζ = 1 →
-      (T.closure - ζ • (1 : H →ₗ.[ℂ] H)).toFun.range = ⊤ := by
+  have hrange
+      : ∀ {ζ : ℂ},
+        ζ.re = 0 → normSq ζ = 1 → (T.closure - ζ • (1 : H →ₗ.[ℂ] H)).toFun.range = ⊤ := by
     intro ζ hre hsq
     rw [LinearMap.range_eq_top]
     intro y
@@ -185,8 +188,10 @@ lemma isEssentiallySelfAdjoint_of_hilbertBasis_eigenvectors
       rw [hg_def, Complex.norm_div]
       exact div_le_self (norm_nonneg _) (hbound hre hsq (lam i))
     have hg_summable : Summable fun i ↦ ‖g i‖ ^ 2 :=
-      Summable.of_nonneg_of_le (fun i ↦ sq_nonneg _)
-        (fun i ↦ pow_le_pow_left₀ (norm_nonneg _) (hg_le i) 2) hc_summable
+      Summable.of_nonneg_of_le
+        (fun i ↦ sq_nonneg _)
+        (fun i ↦ pow_le_pow_left₀ (norm_nonneg _) (hg_le i) 2)
+        hc_summable
     have hg_mem : Memℓp g 2 := by
       apply memℓp_gen
       have hp2 : (2 : ℝ≥0∞).toReal = 2 := by norm_num
@@ -201,14 +206,13 @@ lemma isEssentiallySelfAdjoint_of_hilbertBasis_eigenvectors
       ring_nf at hdiv
       linear_combination hdiv
     -- Each single eigenbasis term already lies in `T`'s graph.
-    have hmem_graph_single :
-        ∀ i, ((g i • e i : H), (c i • e i + ζ • (g i • e i) : H)) ∈ T.graph := by
+    have hmem_graph_single
+        : ∀ i, ((g i • e i : H), (c i • e i + ζ • (g i • e i) : H)) ∈ T.graph := by
       intro i
       have hTvi : T (v i) = (lam i : ℂ) • e i := heig i
       have hTe : T (g i • v i) = c i • e i + ζ • (g i • e i) := by
         rw [LinearPMap.map_smul, hTvi, smul_smul, hterm i, add_smul, smul_smul]
-      have hco : ((g i • v i : T.domain) : H) = g i • e i := by
-        rw [SetLike.val_smul, hv_def]
+      have hco : ((g i • v i : T.domain) : H) = g i • e i := by rw [SetLike.val_smul, hv_def]
       simpa [hco, hTe] using T.mem_graph (g i • v i)
     have hu := hz_sum.prodMk (hy_sum.add (hz_sum.const_smul ζ))
     have hgraph_closure : (z, y + ζ • z) ∈ T.graph.topologicalClosure := by
@@ -217,8 +221,7 @@ lemma isEssentiallySelfAdjoint_of_hilbertBasis_eigenvectors
       exact Submodule.sum_mem _ fun i _ ↦ hmem_graph_single i
     rw [hTclosable.graph_closure_eq_closure_graph] at hgraph_closure
     have hzdom : z ∈ T.closure.domain := mem_domain_of_mem_graph hgraph_closure
-    have hTz : T.closure ⟨z, hzdom⟩ = y + ζ • z :=
-      ((image_iff hzdom).mpr hgraph_closure).symm
+    have hTz : T.closure ⟨z, hzdom⟩ = y + ζ • z := ((image_iff hzdom).mpr hgraph_closure).symm
     have hzdom' : z ∈ (T.closure - ζ • (1 : H →ₗ.[ℂ] H)).domain := by
       rw [LinearPMap.sub_domain, LinearPMap.smul_domain, LinearPMap.one_domain, inf_top_eq]
       exact hzdom
@@ -227,7 +230,7 @@ lemma isEssentiallySelfAdjoint_of_hilbertBasis_eigenvectors
     rw [LinearPMap.sub_apply, LinearPMap.smul_apply]
     have h1 : (1 : H →ₗ.[ℂ] H) ⟨z, (Submodule.mem_inf.mp hzdom').2⟩ = z := rfl
     rw [h1, show T.closure ⟨z, (Submodule.mem_inf.mp hzdom').1⟩ = T.closure ⟨z, hzdom⟩ from rfl,
-        hTz]
+      hTz]
     abel
   refine hTclosure_sym.isSelfAdjoint_of_range_eq_top hTclosure_dense ?_ ?_
   · have hI : T.closure + I • (1 : H →ₗ.[ℂ] H) = T.closure - (-I) • (1 : H →ₗ.[ℂ] H) :=

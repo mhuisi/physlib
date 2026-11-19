@@ -74,18 +74,20 @@ def koopmanIsometry (g : Γ) : Lp E 2 μ →ₗᵢ[ℂ] Lp E 2 μ :=
   Lp.compMeasurePreservingₗᵢ ℂ (T g⁻¹) (hT g⁻¹)
 
 omit hT [InnerProductSpace ℂ E] [CompleteSpace E] in
-lemma compMeasurePreserving_congr {f f' : X → X} (hf : MeasurePreserving f μ μ)
-    (hf' : MeasurePreserving f' μ μ) (e : f = f') (g : Lp E 2 μ) :
-    Lp.compMeasurePreserving f hf g = Lp.compMeasurePreserving f' hf' g := by
+lemma compMeasurePreserving_congr
+    {f f' : X → X} (hf : MeasurePreserving f μ μ) (hf' : MeasurePreserving f' μ μ) (e : f = f')
+    (g : Lp E 2 μ)
+    : Lp.compMeasurePreserving f hf g = Lp.compMeasurePreserving f' hf' g := by
   subst e; rfl
 
 omit [CompleteSpace E] in
-lemma koopmanIsometry_apply (g : Γ) (f : Lp E 2 μ) :
-    koopmanIsometry μ T hT g f = Lp.compMeasurePreserving (T g⁻¹) (hT g⁻¹) f := rfl
+lemma koopmanIsometry_apply (g : Γ) (f : Lp E 2 μ)
+    : koopmanIsometry μ T hT g f = Lp.compMeasurePreserving (T g⁻¹) (hT g⁻¹) f :=
+  rfl
 
 omit [CompleteSpace E] in
-lemma koopmanIsometry_mul (g h : Γ) (f : Lp E 2 μ) :
-    koopmanIsometry μ T hT (g * h) f = koopmanIsometry μ T hT g (koopmanIsometry μ T hT h f) := by
+lemma koopmanIsometry_mul (g h : Γ) (f : Lp E 2 μ)
+    : koopmanIsometry μ T hT (g * h) f = koopmanIsometry μ T hT g (koopmanIsometry μ T hT h f) := by
   have hfun : (T (g * h)⁻¹ : X → X) = (T h⁻¹ : X → X) ∘ (T g⁻¹ : X → X) := by
     funext x
     rw [mul_inv_rev, map_mul]
@@ -96,8 +98,7 @@ lemma koopmanIsometry_mul (g h : Γ) (f : Lp E 2 μ) :
 
 omit [CompleteSpace E] in
 lemma koopmanIsometry_one (f : Lp E 2 μ) : koopmanIsometry μ T hT 1 f = f := by
-  have hfun : (T (1 : Γ)⁻¹ : X → X) = id := by
-    funext x; simp
+  have hfun : (T (1 : Γ)⁻¹ : X → X) = id := by funext x; simp
   have := Lp.compMeasurePreserving_id_apply (E := E) (p := 2) (μb := μ) f
   rw [koopmanIsometry_apply]
   exact (compMeasurePreserving_congr μ _ (MeasurePreserving.id μ) hfun f).trans this
@@ -106,14 +107,15 @@ lemma koopmanIsometry_one (f : Lp E 2 μ) : koopmanIsometry μ T hT 1 f = f := b
 
 /-- The Koopman operator as a linear isometric equivalence. -/
 def koopmanEquiv (g : Γ) : Lp E 2 μ ≃ₗᵢ[ℂ] Lp E 2 μ where
-  toLinearEquiv := LinearEquiv.ofLinearMap (koopmanIsometry μ T hT g).toLinearMap
-    (koopmanIsometry μ T hT g⁻¹).toLinearMap
-    (LinearMap.ext fun f => by
-      change koopmanIsometry μ T hT g (koopmanIsometry μ T hT g⁻¹ f) = f
-      rw [← koopmanIsometry_mul, mul_inv_cancel, koopmanIsometry_one])
-    (LinearMap.ext fun f => by
-      change koopmanIsometry μ T hT g⁻¹ (koopmanIsometry μ T hT g f) = f
-      rw [← koopmanIsometry_mul, inv_mul_cancel, koopmanIsometry_one])
+  toLinearEquiv :=
+    LinearEquiv.ofLinearMap (koopmanIsometry μ T hT g).toLinearMap
+      (koopmanIsometry μ T hT g⁻¹).toLinearMap
+      (LinearMap.ext fun f => by
+        change koopmanIsometry μ T hT g (koopmanIsometry μ T hT g⁻¹ f) = f
+        rw [← koopmanIsometry_mul, mul_inv_cancel, koopmanIsometry_one])
+      (LinearMap.ext fun f => by
+        change koopmanIsometry μ T hT g⁻¹ (koopmanIsometry μ T hT g f) = f
+        rw [← koopmanIsometry_mul, inv_mul_cancel, koopmanIsometry_one])
   norm_map' := (koopmanIsometry μ T hT g).norm_map
 
 omit [CompleteSpace E] in
@@ -121,28 +123,33 @@ lemma koopmanEquiv_one : koopmanEquiv (E := E) μ T hT 1 = 1 :=
   LinearIsometryEquiv.ext fun f => koopmanIsometry_one μ T hT f
 
 omit [CompleteSpace E] in
-lemma koopmanEquiv_mul (g h : Γ) :
-    koopmanEquiv (E := E) μ T hT (g * h) =
-      koopmanEquiv (E := E) μ T hT g * koopmanEquiv (E := E) μ T hT h :=
+lemma koopmanEquiv_mul (g h : Γ)
+    : koopmanEquiv (E := E) μ T hT (g * h)
+      = koopmanEquiv (E := E) μ T hT g * koopmanEquiv (E := E) μ T hT h :=
   LinearIsometryEquiv.ext fun f => koopmanIsometry_mul μ T hT g h f
 
-/-- **The Koopman representation**: a group acting on a measure space by measure-preserving
-bijections acts unitarily on `L²(μ)` by `(U_g f)(x) = f(g⁻¹ x)`. -/
+/--
+**The Koopman representation**: a group acting on a measure space by measure-preserving
+bijections acts unitarily on `L²(μ)` by `(U_g f)(x) = f(g⁻¹ x)`.
+-/
 def koopman : Γ →* unitary (Lp E 2 μ →L[ℂ] Lp E 2 μ) where
   toFun g := Unitary.linearIsometryEquiv.symm (koopmanEquiv μ T hT g)
   map_one' := by rw [koopmanEquiv_one, map_one]
   map_mul' g h := by rw [koopmanEquiv_mul, map_mul]
 
 /-- The Koopman operator acts by composition with the inverse of the group action. -/
-lemma koopman_apply (g : Γ) (f : Lp E 2 μ) :
-    ((koopman μ T hT g : unitary (Lp E 2 μ →L[ℂ] Lp E 2 μ)) : Lp E 2 μ →L[ℂ] Lp E 2 μ) f =
-      Lp.compMeasurePreserving (T g⁻¹) (hT g⁻¹) f := rfl
+lemma koopman_apply (g : Γ) (f : Lp E 2 μ)
+    : ((koopman μ T hT g : unitary (Lp E 2 μ →L[ℂ] Lp E 2 μ)) : Lp E 2 μ →L[ℂ] Lp E 2 μ) f
+      = Lp.compMeasurePreserving (T g⁻¹) (hT g⁻¹) f :=
+  rfl
 
-/-- **The correlation function of an observable**: the matrix coefficient of the Koopman
-representation is the covariance `∫ ⟨f(x), f(g⁻¹ x)⟩ dμ(x)` of `f` with its translate. -/
-lemma inner_koopman (g : Γ) (f : Lp E 2 μ) :
-    ⟪f, ((koopman μ T hT g : unitary (Lp E 2 μ →L[ℂ] Lp E 2 μ)) : Lp E 2 μ →L[ℂ] Lp E 2 μ) f⟫_ℂ =
-      ∫ x, ⟪f x, f (T g⁻¹ x)⟫_ℂ ∂μ := by
+/--
+**The correlation function of an observable**: the matrix coefficient of the Koopman
+representation is the covariance `∫ ⟨f(x), f(g⁻¹ x)⟩ dμ(x)` of `f` with its translate.
+-/
+lemma inner_koopman (g : Γ) (f : Lp E 2 μ)
+    : ⟪f, ((koopman μ T hT g : unitary (Lp E 2 μ →L[ℂ] Lp E 2 μ)) : Lp E 2 μ →L[ℂ] Lp E 2 μ) f⟫_ℂ
+      = ∫ x, ⟪f x, f (T g⁻¹ x)⟫_ℂ ∂μ := by
   rw [koopman_apply, L2.inner_def]
   refine integral_congr_ae ?_
   filter_upwards [Lp.coeFn_compMeasurePreserving f (hT g⁻¹)] with x hx
@@ -159,21 +166,25 @@ variable {G : Type*} [AddCommGroup G]
 variable {X : Type*} [MeasurableSpace X] (μ : Measure X)
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℂ E] [CompleteSpace E]
 variable (T : Multiplicative G →* Equiv.Perm X) (hT : ∀ g, MeasurePreserving (T g) μ μ)
-variable [TopologicalSpace G] [DiscreteTopology G] [Countable G]
+variable
+  [TopologicalSpace G] [DiscreteTopology G] [Countable G]
   [MeasurableSpace (PontryaginDual (Multiplicative G))]
   [BorelSpace (PontryaginDual (Multiplicative G))]
 
 include hT in
-/-- **Invariant observables of a classical system have zero momentum**: the spectral projection of
+/--
+**Invariant observables of a classical system have zero momentum**: the spectral projection of
 the trivial character of the Koopman representation projects onto the translation-invariant
-functions in `L²(μ)`.   -/
-lemma range_projection_one_koopman :
-    LinearMap.range (projection (koopman (E := E) μ T hT)
-        {(1 : PontryaginDual (Multiplicative G))} : Lp E 2 μ →L[ℂ] Lp E 2 μ).toLinearMap =
-      ProbabilisticTheory.Representation.sector (toEnd (koopman (E := E) μ T hT)) (fun _ =>
-        (1 : ℂ)) := by
-  simpa using range_projection_singleton (koopman (E := E) μ T hT) (1 : PontryaginDual
-    (Multiplicative G))
+functions in `L²(μ)`.
+-/
+lemma range_projection_one_koopman
+    : LinearMap.range
+        (projection (koopman (E := E) μ T hT) {(1 : PontryaginDual (Multiplicative G))}
+          : Lp E 2 μ →L[ℂ] Lp E 2 μ).toLinearMap
+      = ProbabilisticTheory.Representation.sector (toEnd (koopman (E := E) μ T hT))
+        (fun _ => (1 : ℂ)) := by
+  simpa using
+    range_projection_singleton (koopman (E := E) μ T hT) (1 : PontryaginDual (Multiplicative G))
 
 end Invariants
 

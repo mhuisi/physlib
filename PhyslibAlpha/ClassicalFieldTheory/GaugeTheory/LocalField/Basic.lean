@@ -103,8 +103,11 @@ open TensorProduct
 
 namespace GaugeFieldData
 
-variable {G₀ : Type} [Group G₀] {𝔤 : Type} [LieRing 𝔤] [LieAlgebra ℝ 𝔤] [Module.Finite ℝ 𝔤]
-  {GJ : Type} [Group GJ] {𝔤J : Type} [LieRing 𝔤J] [LieAlgebra ℝ 𝔤J]
+variable
+  {G₀ : Type} [Group G₀]
+  {𝔤 : Type} [LieRing 𝔤] [LieAlgebra ℝ 𝔤] [Module.Finite ℝ 𝔤]
+  {GJ : Type} [Group GJ]
+  {𝔤J : Type} [LieRing 𝔤J] [LieAlgebra ℝ 𝔤J]
   {jets : LocalGaugeData G₀ 𝔤 GJ 𝔤J} (T : GaugeFieldData jets)
 
 /-!
@@ -113,15 +116,17 @@ variable {G₀ : Type} [Group G₀] {𝔤 : Type} [LieRing 𝔤] [LieAlgebra ℝ
 
 -/
 
-/-- The local field algebra `J(T)` of a gauge-field datum, in which the local expressions
-  of the theory, such as Lagrangian terms, currents and field strengths, live before any of
-  them is selected. It is the exterior algebra of the fermionic generators tensored with
-  the symmetric algebra of the bosonic generators, tensored with the complexified symmetric
-  algebra of the connection generators.
+/--
+The local field algebra `J(T)` of a gauge-field datum, in which the local expressions
+of the theory, such as Lagrangian terms, currents and field strengths, live before any of
+them is selected. It is the exterior algebra of the fermionic generators tensored with
+the symmetric algebra of the bosonic generators, tensored with the complexified symmetric
+algebra of the connection generators.
 
-  All the fermionic species share one exterior algebra, so their generators anticommute
-  across species and not only within one. The factor order matches
-  `StandardModel.JetAlgebra`. -/
+All the fermionic species share one exterior algebra, so their generators anticommute
+across species and not only within one. The factor order matches
+`StandardModel.JetAlgebra`.
+-/
 abbrev LocalFieldAlgebra : Type :=
   (ExteriorAlgebra ℂ T.FermionGenerators ⊗[ℂ] SymmetricAlgebra ℂ T.BosonGenerators) ⊗[ℂ]
     (ℂ ⊗[ℝ] SymmetricAlgebra ℝ (GaugeBoson.JetComponentSpace 𝔤))
@@ -133,68 +138,75 @@ abbrev LocalFieldAlgebra : Type :=
 -/
 
 /-- The inclusion of the fermionic factor. -/
-noncomputable def includeFermion :
-    ExteriorAlgebra ℂ T.FermionGenerators →ₐ[ℂ] T.LocalFieldAlgebra :=
+noncomputable def includeFermion
+    : ExteriorAlgebra ℂ T.FermionGenerators →ₐ[ℂ] T.LocalFieldAlgebra :=
   (Algebra.TensorProduct.includeLeft (R := ℂ) (S := ℂ)
       (B := ℂ ⊗[ℝ] SymmetricAlgebra ℝ (GaugeBoson.JetComponentSpace 𝔤))).comp
     Algebra.TensorProduct.includeLeft
 
 /-- The inclusion of the bosonic factor. -/
-noncomputable def includeBoson :
-    SymmetricAlgebra ℂ T.BosonGenerators →ₐ[ℂ] T.LocalFieldAlgebra :=
+noncomputable def includeBoson : SymmetricAlgebra ℂ T.BosonGenerators →ₐ[ℂ] T.LocalFieldAlgebra :=
   (Algebra.TensorProduct.includeLeft (R := ℂ) (S := ℂ)
       (B := ℂ ⊗[ℝ] SymmetricAlgebra ℝ (GaugeBoson.JetComponentSpace 𝔤))).comp
     Algebra.TensorProduct.includeRight
 
 /-- The inclusion of the complexified connection factor. -/
-noncomputable def includeConnection :
-    (ℂ ⊗[ℝ] SymmetricAlgebra ℝ (GaugeBoson.JetComponentSpace 𝔤)) →ₐ[ℂ]
-      T.LocalFieldAlgebra :=
+noncomputable def includeConnection
+    : (ℂ ⊗[ℝ] SymmetricAlgebra ℝ (GaugeBoson.JetComponentSpace 𝔤)) →ₐ[ℂ]
+        T.LocalFieldAlgebra :=
   Algebra.TensorProduct.includeRight
 
-/-- The matter factor of the local field algebra, on which the two matter inclusions
-  land. -/
+/--
+The matter factor of the local field algebra, on which the two matter inclusions
+land.
+-/
 abbrev MatterAlgebra : Type :=
   ExteriorAlgebra ℂ T.FermionGenerators ⊗[ℂ] SymmetricAlgebra ℂ T.BosonGenerators
 
 variable {T}
 
-/-- The unit of the matter factor is the tensor of the two units. It is recorded here, at
-  an abstract datum, because unfolding it at a concrete one has to see through the
-  symmetric algebra's ring congruence, which is not exposed, and is prohibitively slow. -/
-lemma one_matterAlgebra :
-    (1 : T.MatterAlgebra)
+/--
+The unit of the matter factor is the tensor of the two units. It is recorded here, at
+an abstract datum, because unfolding it at a concrete one has to see through the
+symmetric algebra's ring congruence, which is not exposed, and is prohibitively slow.
+-/
+lemma one_matterAlgebra
+    : (1 : T.MatterAlgebra)
       = (1 : ExteriorAlgebra ℂ T.FermionGenerators) ⊗ₜ[ℂ]
         (1 : SymmetricAlgebra ℂ T.BosonGenerators) :=
   Algebra.TensorProduct.one_def
 
-/-- The fermionic inclusion, written out as a pure tensor with units in the other two
-  factors. Recorded at an abstract datum for the same reason. -/
-lemma includeFermion_apply (a : ExteriorAlgebra ℂ T.FermionGenerators) :
-    T.includeFermion a
+/--
+The fermionic inclusion, written out as a pure tensor with units in the other two
+factors. Recorded at an abstract datum for the same reason.
+-/
+lemma includeFermion_apply (a : ExteriorAlgebra ℂ T.FermionGenerators)
+    : T.includeFermion a
       = ((a ⊗ₜ[ℂ] (1 : SymmetricAlgebra ℂ T.BosonGenerators))
-          ⊗ₜ[ℂ] (1 : ℂ ⊗[ℝ] SymmetricAlgebra ℝ (GaugeBoson.JetComponentSpace 𝔤)) :
-        T.LocalFieldAlgebra) := rfl
+          ⊗ₜ[ℂ] (1 : ℂ ⊗[ℝ] SymmetricAlgebra ℝ (GaugeBoson.JetComponentSpace 𝔤))
+        : T.LocalFieldAlgebra) :=
+  rfl
 
 /-- The bosonic inclusion, written out as a pure tensor. -/
-lemma includeBoson_apply (b : SymmetricAlgebra ℂ T.BosonGenerators) :
-    T.includeBoson b
+lemma includeBoson_apply (b : SymmetricAlgebra ℂ T.BosonGenerators)
+    : T.includeBoson b
       = (((1 : ExteriorAlgebra ℂ T.FermionGenerators) ⊗ₜ[ℂ] b)
-          ⊗ₜ[ℂ] (1 : ℂ ⊗[ℝ] SymmetricAlgebra ℝ (GaugeBoson.JetComponentSpace 𝔤)) :
-        T.LocalFieldAlgebra) := rfl
+          ⊗ₜ[ℂ] (1 : ℂ ⊗[ℝ] SymmetricAlgebra ℝ (GaugeBoson.JetComponentSpace 𝔤))
+        : T.LocalFieldAlgebra) :=
+  rfl
 
 /-- The connection inclusion, written out as a pure tensor. -/
-lemma includeConnection_apply
-    (c : ℂ ⊗[ℝ] SymmetricAlgebra ℝ (GaugeBoson.JetComponentSpace 𝔤)) :
-    T.includeConnection c
-      = ((1 : T.MatterAlgebra) ⊗ₜ[ℂ] c : T.LocalFieldAlgebra) :=
+lemma includeConnection_apply (c : ℂ ⊗[ℝ] SymmetricAlgebra ℝ (GaugeBoson.JetComponentSpace 𝔤))
+    : T.includeConnection c = ((1 : T.MatterAlgebra) ⊗ₜ[ℂ] c : T.LocalFieldAlgebra) :=
   Algebra.TensorProduct.includeRight_apply c
 
 variable (T)
 
-/-- All the fermionic generators of the datum at once, the whole fermionic generator space
-  inside the algebra. Fermi statistics is a condition on this map, not on the species maps
-  separately. -/
+/--
+All the fermionic generators of the datum at once, the whole fermionic generator space
+inside the algebra. Fermi statistics is a condition on this map, not on the species maps
+separately.
+-/
 noncomputable def ιFermionTotal : T.FermionGenerators →ₗ[ℂ] T.LocalFieldAlgebra :=
   (T.includeFermion).toLinearMap ∘ₗ ExteriorAlgebra.ι ℂ
 
@@ -202,50 +214,56 @@ noncomputable def ιFermionTotal : T.FermionGenerators →ₗ[ℂ] T.LocalFieldA
 noncomputable def ιBosonTotal : T.BosonGenerators →ₗ[ℂ] T.LocalFieldAlgebra :=
   (T.includeBoson).toLinearMap ∘ₗ SymmetricAlgebra.ι ℂ T.BosonGenerators
 
-/-- The connection generators inside the local field algebra. They are only real-linear,
-  the connection generator space being a real vector space, complexified inside the
-  algebra. -/
-noncomputable def ιConnection :
-    GaugeBoson.JetComponentSpace 𝔤 →ₗ[ℝ] T.LocalFieldAlgebra :=
-  ((T.includeConnection).restrictScalars ℝ).toLinearMap ∘ₗ
-    (Algebra.TensorProduct.includeRight (R := ℝ) (A := ℂ)
-      (B := SymmetricAlgebra ℝ (GaugeBoson.JetComponentSpace 𝔤))).toLinearMap ∘ₗ
-    SymmetricAlgebra.ι ℝ (GaugeBoson.JetComponentSpace 𝔤)
+/--
+The connection generators inside the local field algebra. They are only real-linear,
+the connection generator space being a real vector space, complexified inside the
+algebra.
+-/
+noncomputable def ιConnection : GaugeBoson.JetComponentSpace 𝔤 →ₗ[ℝ] T.LocalFieldAlgebra :=
+  ((T.includeConnection).restrictScalars ℝ).toLinearMap
+    ∘ₗ (Algebra.TensorProduct.includeRight (R := ℝ) (A := ℂ)
+      (B := SymmetricAlgebra ℝ (GaugeBoson.JetComponentSpace 𝔤))).toLinearMap
+    ∘ₗ SymmetricAlgebra.ι ℝ (GaugeBoson.JetComponentSpace 𝔤)
 
 /-- The generators of one fermionic species inside the local field algebra. -/
-noncomputable def ιFermion (i : T.FermionSpecies) :
-    JetComponentSpace (T.fermion i) →ₗ[ℂ] T.LocalFieldAlgebra :=
+noncomputable def ιFermion (i : T.FermionSpecies)
+    : JetComponentSpace (T.fermion i) →ₗ[ℂ] T.LocalFieldAlgebra :=
   T.ιFermionTotal ∘ₗ T.inclFermion i
 
 /-- The generators of one bosonic species inside the local field algebra. -/
-noncomputable def ιBoson (j : T.BosonSpecies) :
-    JetComponentSpace (T.boson j) →ₗ[ℂ] T.LocalFieldAlgebra :=
+noncomputable def ιBoson (j : T.BosonSpecies)
+    : JetComponentSpace (T.boson j) →ₗ[ℂ] T.LocalFieldAlgebra :=
   T.ιBosonTotal ∘ₗ T.inclBoson j
 
 variable {T}
 
-lemma ιFermionTotal_apply (v : T.FermionGenerators) :
-    T.ιFermionTotal v
+lemma ιFermionTotal_apply (v : T.FermionGenerators)
+    : T.ιFermionTotal v
       = (ExteriorAlgebra.ι ℂ v ⊗ₜ[ℂ] (1 : SymmetricAlgebra ℂ T.BosonGenerators))
-          ⊗ₜ[ℂ] (1 : ℂ ⊗[ℝ] SymmetricAlgebra ℝ (GaugeBoson.JetComponentSpace 𝔤)) := rfl
+          ⊗ₜ[ℂ] (1 : ℂ ⊗[ℝ] SymmetricAlgebra ℝ (GaugeBoson.JetComponentSpace 𝔤)) :=
+  rfl
 
-lemma ιBosonTotal_apply (v : T.BosonGenerators) :
-    T.ιBosonTotal v
+lemma ιBosonTotal_apply (v : T.BosonGenerators)
+    : T.ιBosonTotal v
       = ((1 : ExteriorAlgebra ℂ T.FermionGenerators) ⊗ₜ[ℂ]
             SymmetricAlgebra.ι ℂ T.BosonGenerators v)
-          ⊗ₜ[ℂ] (1 : ℂ ⊗[ℝ] SymmetricAlgebra ℝ (GaugeBoson.JetComponentSpace 𝔤)) := rfl
+          ⊗ₜ[ℂ] (1 : ℂ ⊗[ℝ] SymmetricAlgebra ℝ (GaugeBoson.JetComponentSpace 𝔤)) :=
+  rfl
 
-lemma ιConnection_apply (v : GaugeBoson.JetComponentSpace 𝔤) :
-    T.ιConnection v
+lemma ιConnection_apply (v : GaugeBoson.JetComponentSpace 𝔤)
+    : T.ιConnection v
       = (1 : ExteriorAlgebra ℂ T.FermionGenerators ⊗[ℂ] SymmetricAlgebra ℂ T.BosonGenerators)
           ⊗ₜ[ℂ] ((1 : ℂ) ⊗ₜ[ℝ]
-            SymmetricAlgebra.ι ℝ (GaugeBoson.JetComponentSpace 𝔤) v) := rfl
+            SymmetricAlgebra.ι ℝ (GaugeBoson.JetComponentSpace 𝔤) v) :=
+  rfl
 
-lemma ιFermion_apply (i : T.FermionSpecies) (x : JetComponentSpace (T.fermion i)) :
-    T.ιFermion i x = T.ιFermionTotal (T.inclFermion i x) := rfl
+lemma ιFermion_apply (i : T.FermionSpecies) (x : JetComponentSpace (T.fermion i))
+    : T.ιFermion i x = T.ιFermionTotal (T.inclFermion i x) :=
+  rfl
 
-lemma ιBoson_apply (j : T.BosonSpecies) (y : JetComponentSpace (T.boson j)) :
-    T.ιBoson j y = T.ιBosonTotal (T.inclBoson j y) := rfl
+lemma ιBoson_apply (j : T.BosonSpecies) (y : JetComponentSpace (T.boson j))
+    : T.ιBoson j y = T.ιBosonTotal (T.inclBoson j y) :=
+  rfl
 
 /-!
 
@@ -258,98 +276,111 @@ read one species at a time.
 
 -/
 
-/-- A fermionic generator squares to zero. This is Fermi statistics, in the form that
-  implies anticommutation across the whole fermionic generator space by polarization. -/
+/--
+A fermionic generator squares to zero. This is Fermi statistics, in the form that
+implies anticommutation across the whole fermionic generator space by polarization.
+-/
 @[simp]
-lemma ιFermionTotal_mul_self (v : T.FermionGenerators) :
-    T.ιFermionTotal v * T.ιFermionTotal v = 0 := by
+lemma ιFermionTotal_mul_self (v : T.FermionGenerators)
+    : T.ιFermionTotal v * T.ιFermionTotal v = 0 := by
   simp [ιFermionTotal_apply, Algebra.TensorProduct.tmul_mul_tmul]
 
-/-- Two fermionic generators anticommute, including generators of two different species,
-  which share the one exterior algebra. This is not an extra relation, being
-  `ιFermionTotal_mul_self` polarized. -/
-lemma ιFermionTotal_mul_swap (v w : T.FermionGenerators) :
-    T.ιFermionTotal v * T.ιFermionTotal w = -(T.ιFermionTotal w * T.ιFermionTotal v) := by
-  have h : ExteriorAlgebra.ι ℂ v * ExteriorAlgebra.ι ℂ w
-      = -(ExteriorAlgebra.ι ℂ w * ExteriorAlgebra.ι (R := ℂ) v) :=
+/--
+Two fermionic generators anticommute, including generators of two different species,
+which share the one exterior algebra. This is not an extra relation, being
+`ιFermionTotal_mul_self` polarized.
+-/
+lemma ιFermionTotal_mul_swap (v w : T.FermionGenerators)
+    : T.ιFermionTotal v * T.ιFermionTotal w = -(T.ιFermionTotal w * T.ιFermionTotal v) := by
+  have h
+      : ExteriorAlgebra.ι ℂ v * ExteriorAlgebra.ι ℂ w
+        = -(ExteriorAlgebra.ι ℂ w * ExteriorAlgebra.ι (R := ℂ) v) :=
     eq_neg_of_add_eq_zero_left (ExteriorAlgebra.ι_add_mul_swap (R := ℂ) v w)
   simp [ιFermionTotal_apply, Algebra.TensorProduct.tmul_mul_tmul, h, TensorProduct.neg_tmul]
 
 /-- Two bosonic generators commute. -/
-lemma ιBosonTotal_commute (v w : T.BosonGenerators) :
-    Commute (T.ιBosonTotal v) (T.ιBosonTotal w) := by
+lemma ιBosonTotal_commute (v w : T.BosonGenerators)
+    : Commute (T.ιBosonTotal v) (T.ιBosonTotal w) := by
   simp [Commute, SemiconjBy, ιBosonTotal_apply, Algebra.TensorProduct.tmul_mul_tmul, mul_comm]
 
 /-- Two connection generators commute. -/
-lemma ιConnection_commute (v w : GaugeBoson.JetComponentSpace 𝔤) :
-    Commute (T.ιConnection v) (T.ιConnection w) := by
-  simp [Commute, SemiconjBy, ιConnection_apply, Algebra.TensorProduct.tmul_mul_tmul,
-    mul_comm]
+lemma ιConnection_commute (v w : GaugeBoson.JetComponentSpace 𝔤)
+    : Commute (T.ιConnection v) (T.ιConnection w) := by
+  simp [Commute, SemiconjBy, ιConnection_apply, Algebra.TensorProduct.tmul_mul_tmul, mul_comm]
 
 /-- A bosonic generator commutes with a connection generator. -/
-lemma ιBosonTotal_commute_ιConnection (v : T.BosonGenerators)
-    (w : GaugeBoson.JetComponentSpace 𝔤) :
-    Commute (T.ιBosonTotal v) (T.ιConnection w) := by
+lemma ιBosonTotal_commute_ιConnection (v : T.BosonGenerators) (w : GaugeBoson.JetComponentSpace 𝔤)
+    : Commute (T.ιBosonTotal v) (T.ιConnection w) := by
   simp [Commute, SemiconjBy, ιBosonTotal_apply, ιConnection_apply,
     Algebra.TensorProduct.tmul_mul_tmul, mul_comm]
 
 /-- A bosonic generator commutes with a fermionic generator, bosons being even. -/
-lemma ιBosonTotal_commute_ιFermionTotal (v : T.BosonGenerators) (w : T.FermionGenerators) :
-    Commute (T.ιBosonTotal v) (T.ιFermionTotal w) := by
+lemma ιBosonTotal_commute_ιFermionTotal (v : T.BosonGenerators) (w : T.FermionGenerators)
+    : Commute (T.ιBosonTotal v) (T.ιFermionTotal w) := by
   simp [Commute, SemiconjBy, ιBosonTotal_apply, ιFermionTotal_apply,
     Algebra.TensorProduct.tmul_mul_tmul, mul_comm]
 
-/-- A connection generator commutes with a fermionic generator, the connection being
-  even. -/
-lemma ιConnection_commute_ιFermionTotal (v : GaugeBoson.JetComponentSpace 𝔤)
-    (w : T.FermionGenerators) : Commute (T.ιConnection v) (T.ιFermionTotal w) := by
+/--
+A connection generator commutes with a fermionic generator, the connection being
+even.
+-/
+lemma ιConnection_commute_ιFermionTotal
+    (v : GaugeBoson.JetComponentSpace 𝔤) (w : T.FermionGenerators)
+    : Commute (T.ιConnection v) (T.ιFermionTotal w) := by
   simp [Commute, SemiconjBy, ιConnection_apply, ιFermionTotal_apply,
     Algebra.TensorProduct.tmul_mul_tmul, mul_comm]
 
-/-- The connection factor is central: its elements commute with the whole algebra, the
-  factor being commutative and tensored in as the right factor. -/
+/--
+The connection factor is central: its elements commute with the whole algebra, the
+factor being commutative and tensored in as the right factor.
+-/
 lemma includeConnection_commute
-    (c : ℂ ⊗[ℝ] SymmetricAlgebra ℝ (GaugeBoson.JetComponentSpace 𝔤)) (x : T.LocalFieldAlgebra) :
-    Commute (T.includeConnection c) x :=
+    (c : ℂ ⊗[ℝ] SymmetricAlgebra ℝ (GaugeBoson.JetComponentSpace 𝔤)) (x : T.LocalFieldAlgebra)
+    : Commute (T.includeConnection c) x :=
   (Algebra.TensorProduct.includeRight_mul_comm c x).symm
 
 /-- A fermionic generator of a species squares to zero. -/
 @[simp]
-lemma ιFermion_mul_self (i : T.FermionSpecies) (x : JetComponentSpace (T.fermion i)) :
-    T.ιFermion i x * T.ιFermion i x = 0 :=
+lemma ιFermion_mul_self (i : T.FermionSpecies) (x : JetComponentSpace (T.fermion i))
+    : T.ιFermion i x * T.ιFermion i x = 0 :=
   ιFermionTotal_mul_self (T.inclFermion i x)
 
-/-- The generators of two fermionic species of the datum anticommute. The species enter
-  one exterior algebra through different summands of the fermionic generator space, so this
-  is ordinary exterior anticommutation and not an extra relation; it is what separate
-  exterior algebras joined by an ordinary tensor product would lose. -/
-lemma ιFermion_mul_swap (i j : T.FermionSpecies) (x : JetComponentSpace (T.fermion i))
-    (y : JetComponentSpace (T.fermion j)) :
-    T.ιFermion i x * T.ιFermion j y = -(T.ιFermion j y * T.ιFermion i x) :=
+/--
+The generators of two fermionic species of the datum anticommute. The species enter
+one exterior algebra through different summands of the fermionic generator space, so this
+is ordinary exterior anticommutation and not an extra relation; it is what separate
+exterior algebras joined by an ordinary tensor product would lose.
+-/
+lemma ιFermion_mul_swap
+    (i j : T.FermionSpecies)
+    (x : JetComponentSpace (T.fermion i)) (y : JetComponentSpace (T.fermion j))
+    : T.ιFermion i x * T.ιFermion j y = -(T.ιFermion j y * T.ιFermion i x) :=
   ιFermionTotal_mul_swap (T.inclFermion i x) (T.inclFermion j y)
 
 /-- Bosonic generators commute, across species as well as within one. -/
-lemma ιBoson_commute (i j : T.BosonSpecies) (x : JetComponentSpace (T.boson i))
-    (y : JetComponentSpace (T.boson j)) :
-    Commute (T.ιBoson i x) (T.ιBoson j y) :=
+lemma ιBoson_commute
+    (i j : T.BosonSpecies) (x : JetComponentSpace (T.boson i)) (y : JetComponentSpace (T.boson j))
+    : Commute (T.ιBoson i x) (T.ιBoson j y) :=
   ιBosonTotal_commute (T.inclBoson i x) (T.inclBoson j y)
 
 /-- A bosonic generator commutes with a fermionic one, bosons being even. -/
-lemma ιBoson_commute_ιFermion (j : T.BosonSpecies) (i : T.FermionSpecies)
-    (y : JetComponentSpace (T.boson j)) (x : JetComponentSpace (T.fermion i)) :
-    Commute (T.ιBoson j y) (T.ιFermion i x) :=
+lemma ιBoson_commute_ιFermion
+    (j : T.BosonSpecies) (i : T.FermionSpecies)
+    (y : JetComponentSpace (T.boson j)) (x : JetComponentSpace (T.fermion i))
+    : Commute (T.ιBoson j y) (T.ιFermion i x) :=
   ιBosonTotal_commute_ιFermionTotal (T.inclBoson j y) (T.inclFermion i x)
 
 /-- A bosonic generator commutes with a connection generator. -/
-lemma ιBoson_commute_ιConnection (j : T.BosonSpecies)
-    (y : JetComponentSpace (T.boson j)) (v : GaugeBoson.JetComponentSpace 𝔤) :
-    Commute (T.ιBoson j y) (T.ιConnection v) :=
+lemma ιBoson_commute_ιConnection
+    (j : T.BosonSpecies) (y : JetComponentSpace (T.boson j)) (v : GaugeBoson.JetComponentSpace 𝔤)
+    : Commute (T.ιBoson j y) (T.ιConnection v) :=
   ιBosonTotal_commute_ιConnection (T.inclBoson j y) v
 
 /-- A connection generator commutes with a fermionic one, the connection being even. -/
-lemma ιConnection_commute_ιFermion (v : GaugeBoson.JetComponentSpace 𝔤)
-    (i : T.FermionSpecies) (x : JetComponentSpace (T.fermion i)) :
-    Commute (T.ιConnection v) (T.ιFermion i x) :=
+lemma ιConnection_commute_ιFermion
+    (v : GaugeBoson.JetComponentSpace 𝔤)
+    (i : T.FermionSpecies) (x : JetComponentSpace (T.fermion i))
+    : Commute (T.ιConnection v) (T.ιFermion i x) :=
   ιConnection_commute_ιFermionTotal v (T.inclFermion i x)
 
 variable (T)
@@ -364,34 +395,39 @@ variable (T)
 noncomputable def generators : Set T.LocalFieldAlgebra :=
   Set.range T.ιFermionTotal ∪ Set.range T.ιBosonTotal ∪ Set.range T.ιConnection
 
-/-- The matter factor `Λ_ℂ E_f(T) ⊗[ℂ] Sym_ℂ E_b(T)` is generated by the images of the
-  fermionic and bosonic generators. -/
-lemma adjoin_matter_generators_eq_top :
-    Algebra.adjoin ℂ
+/--
+The matter factor `Λ_ℂ E_f(T) ⊗[ℂ] Sym_ℂ E_b(T)` is generated by the images of the
+fermionic and bosonic generators.
+-/
+lemma adjoin_matter_generators_eq_top
+    : Algebra.adjoin ℂ
         (Set.range (fun v : T.FermionGenerators =>
             ExteriorAlgebra.ι ℂ v ⊗ₜ[ℂ] (1 : SymmetricAlgebra ℂ T.BosonGenerators))
           ∪ Set.range (fun v : T.BosonGenerators =>
             (1 : ExteriorAlgebra ℂ T.FermionGenerators) ⊗ₜ[ℂ]
-              SymmetricAlgebra.ι ℂ T.BosonGenerators v)) = ⊤ := by
+              SymmetricAlgebra.ι ℂ T.BosonGenerators v))
+      = ⊤ := by
   refine Algebra.TensorProduct.eq_top_of_tmul_one_of_one_tmul (fun a => ?_) (fun b => ?_)
   · exact Algebra.range_le_of_adjoin_eq_top CliffordAlgebra.adjoin_range_ι
       (Algebra.TensorProduct.includeLeft (R := ℂ) (S := ℂ)
         (B := SymmetricAlgebra ℂ T.BosonGenerators))
       (by rintro _ ⟨v, rfl⟩; exact Algebra.subset_adjoin (Or.inl ⟨v, rfl⟩)) ⟨a, rfl⟩
   · exact Algebra.range_le_of_adjoin_eq_top SymmetricAlgebra.adjoin_range_ι
-      (Algebra.TensorProduct.includeRight (R := ℂ)
-        (A := ExteriorAlgebra ℂ T.FermionGenerators))
+      (Algebra.TensorProduct.includeRight (R := ℂ) (A := ExteriorAlgebra ℂ T.FermionGenerators))
       (by rintro _ ⟨v, rfl⟩; exact Algebra.subset_adjoin (Or.inr ⟨v, rfl⟩)) ⟨b, rfl⟩
 
-/-- The local field algebra is generated by its three families of generators. Every
-  element is a polynomial in the fermionic, bosonic and connection symbols; this is the
-  algebraic form of "every local expression is a polynomial in the fields and their
-  derivatives", and it is what forces uniqueness in the universal property. -/
+/--
+The local field algebra is generated by its three families of generators. Every
+element is a polynomial in the fermionic, bosonic and connection symbols; this is the
+algebraic form of "every local expression is a polynomial in the fields and their
+derivatives", and it is what forces uniqueness in the universal property.
+-/
 lemma adjoin_generators_eq_top : Algebra.adjoin ℂ T.generators = ⊤ := by
   refine Algebra.TensorProduct.eq_top_of_tmul_one_of_one_tmul (fun m => ?_) (fun y => ?_)
   · refine Algebra.range_le_of_adjoin_eq_top (adjoin_matter_generators_eq_top T)
       (Algebra.TensorProduct.includeLeft (R := ℂ) (S := ℂ)
-        (B := ℂ ⊗[ℝ] SymmetricAlgebra ℝ (GaugeBoson.JetComponentSpace 𝔤))) ?_ ⟨m, rfl⟩
+        (B := ℂ ⊗[ℝ] SymmetricAlgebra ℝ (GaugeBoson.JetComponentSpace 𝔤)))
+      ?_ ⟨m, rfl⟩
     rintro _ (⟨v, rfl⟩ | ⟨v, rfl⟩)
     · exact Algebra.subset_adjoin (Or.inl (Or.inl ⟨v, rfl⟩))
     · exact Algebra.subset_adjoin (Or.inl (Or.inr ⟨v, rfl⟩))
@@ -400,40 +436,53 @@ lemma adjoin_generators_eq_top : Algebra.adjoin ℂ T.generators = ⊤ := by
         (Set.range (SymmetricAlgebra.ι ℝ (GaugeBoson.JetComponentSpace 𝔤)))
         SymmetricAlgebra.adjoin_range_ι)
       (Algebra.TensorProduct.includeRight (R := ℂ)
-        (A := ExteriorAlgebra ℂ T.FermionGenerators ⊗[ℂ]
-          SymmetricAlgebra ℂ T.BosonGenerators)) ?_ ⟨y, rfl⟩
+        (A :=
+          ExteriorAlgebra ℂ T.FermionGenerators ⊗[ℂ]
+            SymmetricAlgebra ℂ T.BosonGenerators))
+      ?_ ⟨y, rfl⟩
     rintro _ ⟨_, ⟨v, rfl⟩, rfl⟩
     exact Algebra.subset_adjoin (Or.inr ⟨v, rfl⟩)
 
-/-- Two algebra maps out of the local field algebra agreeing on the whole of the three
-  generator spaces are equal. The target is not assumed commutative, so this cannot be
-  deduced from `SymmetricAlgebra.algHom_ext`; it comes from generation. -/
-lemma algHom_ext_generators {B : Type*} [Semiring B] [Algebra ℂ B]
-    {Φ Ψ : T.LocalFieldAlgebra →ₐ[ℂ] B}
-    (hf : ∀ v, Φ (T.ιFermionTotal v) = Ψ (T.ιFermionTotal v))
+/--
+Two algebra maps out of the local field algebra agreeing on the whole of the three
+generator spaces are equal. The target is not assumed commutative, so this cannot be
+deduced from `SymmetricAlgebra.algHom_ext`; it comes from generation.
+-/
+lemma algHom_ext_generators
+    {B : Type*} [Semiring B] [Algebra ℂ B]
+    {Φ Ψ : T.LocalFieldAlgebra →ₐ[ℂ] B} (hf : ∀ v, Φ (T.ιFermionTotal v) = Ψ (T.ιFermionTotal v))
     (hb : ∀ v, Φ (T.ιBosonTotal v) = Ψ (T.ιBosonTotal v))
-    (ha : ∀ v, Φ (T.ιConnection v) = Ψ (T.ιConnection v)) : Φ = Ψ :=
+    (ha : ∀ v, Φ (T.ιConnection v) = Ψ (T.ιConnection v))
+    : Φ = Ψ :=
   AlgHom.ext_of_adjoin_eq_top (adjoin_generators_eq_top T) (by
     rintro _ ((⟨v, rfl⟩ | ⟨v, rfl⟩) | ⟨v, rfl⟩)
     exacts [hf v, hb v, ha v])
 
 variable {T}
 
-/-- Two algebra maps out of `J(T)` are equal as soon as they agree on the generators of
-  every species and on the connection generators. A linear map out of the fermionic
-  generator space is determined by its restrictions to the species, so the species-wise
-  hypotheses already give the hypotheses of `algHom_ext_generators`. -/
-lemma algHom_ext {B : Type*} [Semiring B] [Algebra ℂ B] {Φ Ψ : T.LocalFieldAlgebra →ₐ[ℂ] B}
-    (hf : ∀ i x, Φ (T.ιFermion i x) = Ψ (T.ιFermion i x))
+/--
+Two algebra maps out of `J(T)` are equal as soon as they agree on the generators of
+every species and on the connection generators. A linear map out of the fermionic
+generator space is determined by its restrictions to the species, so the species-wise
+hypotheses already give the hypotheses of `algHom_ext_generators`.
+-/
+lemma algHom_ext
+    {B : Type*} [Semiring B] [Algebra ℂ B]
+    {Φ Ψ : T.LocalFieldAlgebra →ₐ[ℂ] B} (hf : ∀ i x, Φ (T.ιFermion i x) = Ψ (T.ιFermion i x))
     (hb : ∀ j y, Φ (T.ιBoson j y) = Ψ (T.ιBoson j y))
-    (ha : ∀ v, Φ (T.ιConnection v) = Ψ (T.ιConnection v)) : Φ = Ψ :=
+    (ha : ∀ v, Φ (T.ιConnection v) = Ψ (T.ιConnection v))
+    : Φ = Ψ :=
   algHom_ext_generators T
-    (fun v => LinearMap.congr_fun (fermionGenerators_hom_ext
-      (F := Φ.toLinearMap ∘ₗ T.ιFermionTotal)
-      (F' := Ψ.toLinearMap ∘ₗ T.ιFermionTotal) hf) v)
-    (fun v => LinearMap.congr_fun (bosonGenerators_hom_ext
-      (F := Φ.toLinearMap ∘ₗ T.ιBosonTotal)
-      (F' := Ψ.toLinearMap ∘ₗ T.ιBosonTotal) hb) v)
+    (fun v =>
+      LinearMap.congr_fun
+        (fermionGenerators_hom_ext (F := Φ.toLinearMap ∘ₗ T.ιFermionTotal)
+          (F' := Ψ.toLinearMap ∘ₗ T.ιFermionTotal) hf)
+        v)
+    (fun v =>
+      LinearMap.congr_fun
+        (bosonGenerators_hom_ext (F := Φ.toLinearMap ∘ₗ T.ιBosonTotal)
+          (F' := Ψ.toLinearMap ∘ₗ T.ιBosonTotal) hb)
+        v)
     ha
 
 variable (T)
@@ -444,26 +493,30 @@ variable (T)
 
 -/
 
-/-- A compatible assignment of the generators of the local field algebra of a datum in a
-  complex algebra `B`, given by one linear map per fermionic species, one per bosonic
-  species and one real-linear map on the connection generators, subject to exactly the
-  relations of section A.2. The algebra `B` is not assumed commutative, and the commutation
-  conditions are imposed only between the assigned images, not between an image and an
-  arbitrary element of `B`.
+/--
+A compatible assignment of the generators of the local field algebra of a datum in a
+complex algebra `B`, given by one linear map per fermionic species, one per bosonic
+species and one real-linear map on the connection generators, subject to exactly the
+relations of section A.2. The algebra `B` is not assumed commutative, and the commutation
+conditions are imposed only between the assigned images, not between an image and an
+arbitrary element of `B`.
 
-  `fermion_mul_swap` is not redundant. The square-zero condition the algebra imposes is on
-  the whole fermionic generator space, and by `DirectSum.mul_self_iff_lof` that condition is
-  equivalent to `fermion_mul_self` together with `fermion_mul_swap`; species-wise
-  square-zero alone leaves the cross terms of `(x + y) * (x + y)` for `x` and `y` in
-  different species. -/
+`fermion_mul_swap` is not redundant. The square-zero condition the algebra imposes is on
+the whole fermionic generator space, and by `DirectSum.mul_self_iff_lof` that condition is
+equivalent to `fermion_mul_self` together with `fermion_mul_swap`; species-wise
+square-zero alone leaves the cross terms of `(x + y) * (x + y)` for `x` and `y` in
+different species.
+-/
 @[ext]
 structure Assignment (B : Type*) [Ring B] [Algebra ℂ B] where
   /-- The images of the generators of each fermionic species. -/
   fermion : ∀ i, JetComponentSpace (T.fermion i) →ₗ[ℂ] B
   /-- The images of the generators of each bosonic species. -/
   boson : ∀ j, JetComponentSpace (T.boson j) →ₗ[ℂ] B
-  /-- The images of the connection generators; only real-linear, as the connection
-    generator space is real. -/
+  /--
+  The images of the connection generators; only real-linear, as the connection
+  generator space is real.
+  -/
   connection : GaugeBoson.JetComponentSpace 𝔤 →ₗ[ℝ] B
   /-- Fermi statistics within a species. -/
   fermion_mul_self : ∀ i x, fermion i x * fermion i x = 0
@@ -482,15 +535,16 @@ structure Assignment (B : Type*) [Ring B] [Algebra ℂ B] where
 
 variable {T}
 
-/-- Species-wise square-zero is not square-zero. The condition the local field algebra
-  imposes on the assembled fermionic map is equivalent to the two fields
-  `Assignment.fermion_mul_self` and `Assignment.fermion_mul_swap` together; the second is
-  vacuous only for a family with at most one species. -/
-lemma assemble_mul_self_iff {B : Type*} [Ring B] [Algebra ℂ B]
-    (f : ∀ i, JetComponentSpace (T.fermion i) →ₗ[ℂ] B) :
-    (∀ v, T.assembleFermion f v * T.assembleFermion f v = 0)
-      ↔ ((∀ i x, f i x * f i x = 0) ∧
-        ∀ i j x y, f i x * f j y = -(f j y * f i x)) := by
+/--
+Species-wise square-zero is not square-zero. The condition the local field algebra
+imposes on the assembled fermionic map is equivalent to the two fields
+`Assignment.fermion_mul_self` and `Assignment.fermion_mul_swap` together; the second is
+vacuous only for a family with at most one species.
+-/
+lemma assemble_mul_self_iff
+    {B : Type*} [Ring B] [Algebra ℂ B] (f : ∀ i, JetComponentSpace (T.fermion i) →ₗ[ℂ] B)
+    : (∀ v, T.assembleFermion f v * T.assembleFermion f v = 0)
+      ↔ ((∀ i x, f i x * f i x = 0) ∧ ∀ i j x y, f i x * f j y = -(f j y * f i x)) := by
   have h := DirectSum.mul_self_iff_lof (F := DirectSum.toModule ℂ T.FermionSpecies B f)
   simp only [DirectSum.toModule_lof] at h
   exact h
@@ -511,65 +565,72 @@ the role of the generators.
 -/
 
 /-- The images of all the fermionic generators at once, assembled from the species. -/
-def fermionTotal : T.FermionGenerators →ₗ[ℂ] B :=
-  T.assembleFermion d.fermion
+def fermionTotal : T.FermionGenerators →ₗ[ℂ] B := T.assembleFermion d.fermion
 
 /-- The images of all the bosonic generators at once. -/
-def bosonTotal : T.BosonGenerators →ₗ[ℂ] B :=
-  T.assembleBoson d.boson
+def bosonTotal : T.BosonGenerators →ₗ[ℂ] B := T.assembleBoson d.boson
 
 @[simp]
-lemma fermionTotal_inclFermion (i : T.FermionSpecies)
-    (x : JetComponentSpace (T.fermion i)) :
-    d.fermionTotal (T.inclFermion i x) = d.fermion i x :=
+lemma fermionTotal_inclFermion (i : T.FermionSpecies) (x : JetComponentSpace (T.fermion i))
+    : d.fermionTotal (T.inclFermion i x) = d.fermion i x :=
   assembleFermion_inclFermion d.fermion i x
 
 @[simp]
-lemma bosonTotal_inclBoson (j : T.BosonSpecies) (y : JetComponentSpace (T.boson j)) :
-    d.bosonTotal (T.inclBoson j y) = d.boson j y :=
+lemma bosonTotal_inclBoson (j : T.BosonSpecies) (y : JetComponentSpace (T.boson j))
+    : d.bosonTotal (T.inclBoson j y) = d.boson j y :=
   assembleBoson_inclBoson d.boson j y
 
-/-- The assembled fermionic images square to zero, which is more than the species-wise
-  condition and needs the cross-species anticommutation as well. -/
-lemma fermionTotal_mul_self (v : T.FermionGenerators) :
-    d.fermionTotal v * d.fermionTotal v = 0 :=
+/--
+The assembled fermionic images square to zero, which is more than the species-wise
+condition and needs the cross-species anticommutation as well.
+-/
+lemma fermionTotal_mul_self (v : T.FermionGenerators) : d.fermionTotal v * d.fermionTotal v = 0 :=
   (assemble_mul_self_iff d.fermion).2 ⟨d.fermion_mul_self, d.fermion_mul_swap⟩ v
 
-/-- The images of two fermionic generators anticommute. Only `fermion_mul_self` and
-  `fermion_mul_swap` are assumed, and only species by species; because their conjunction is
-  square-zero on the whole generator space, polarization yields the relation for arbitrary
-  vectors, sums across species included. -/
-lemma fermionTotal_mul_swap (v w : T.FermionGenerators) :
-    d.fermionTotal v * d.fermionTotal w = -(d.fermionTotal w * d.fermionTotal v) :=
+/--
+The images of two fermionic generators anticommute. Only `fermion_mul_self` and
+`fermion_mul_swap` are assumed, and only species by species; because their conjunction is
+square-zero on the whole generator space, polarization yields the relation for arbitrary
+vectors, sums across species included.
+-/
+lemma fermionTotal_mul_swap (v w : T.FermionGenerators)
+    : d.fermionTotal v * d.fermionTotal w = -(d.fermionTotal w * d.fermionTotal v) :=
   d.fermionTotal.mul_swap_of_mul_self d.fermionTotal_mul_self v w
 
 /-- The assembled bosonic images commute pairwise. -/
-lemma bosonTotal_commute (v w : T.BosonGenerators) :
-    Commute (d.bosonTotal v) (d.bosonTotal w) :=
-  DirectSum.commute_of_lof (fun i j x y => by
-    show Commute (d.bosonTotal (T.inclBoson i x)) (d.bosonTotal (T.inclBoson j y))
-    simpa using d.boson_commute i j x y) v w
+lemma bosonTotal_commute (v w : T.BosonGenerators) : Commute (d.bosonTotal v) (d.bosonTotal w) :=
+  DirectSum.commute_of_lof
+    (fun i j x y => by
+      show Commute (d.bosonTotal (T.inclBoson i x)) (d.bosonTotal (T.inclBoson j y))
+      simpa using d.boson_commute i j x y)
+    v w
 
 /-- The assembled bosonic images commute with the connection images. -/
-lemma bosonTotal_commute_connection (v : T.BosonGenerators)
-    (w : GaugeBoson.JetComponentSpace 𝔤) : Commute (d.bosonTotal v) (d.connection w) :=
-  DirectSum.commute_of_lof_left (fun j y => by
-    show Commute (d.bosonTotal (T.inclBoson j y)) (d.connection w)
-    simpa using d.boson_commute_connection j y w) v
+lemma bosonTotal_commute_connection (v : T.BosonGenerators) (w : GaugeBoson.JetComponentSpace 𝔤)
+    : Commute (d.bosonTotal v) (d.connection w) :=
+  DirectSum.commute_of_lof_left
+    (fun j y => by
+      show Commute (d.bosonTotal (T.inclBoson j y)) (d.connection w)
+      simpa using d.boson_commute_connection j y w)
+    v
 
 /-- The assembled bosonic images commute with the assembled fermionic images. -/
-lemma bosonTotal_commute_fermionTotal (v : T.BosonGenerators) (w : T.FermionGenerators) :
-    Commute (d.bosonTotal v) (d.fermionTotal w) :=
-  DirectSum.commute_of_lof (fun j i y x => by
-    show Commute (d.bosonTotal (T.inclBoson j y)) (d.fermionTotal (T.inclFermion i x))
-    simpa using d.boson_commute_fermion j i y x) v w
+lemma bosonTotal_commute_fermionTotal (v : T.BosonGenerators) (w : T.FermionGenerators)
+    : Commute (d.bosonTotal v) (d.fermionTotal w) :=
+  DirectSum.commute_of_lof
+    (fun j i y x => by
+      show Commute (d.bosonTotal (T.inclBoson j y)) (d.fermionTotal (T.inclFermion i x))
+      simpa using d.boson_commute_fermion j i y x)
+    v w
 
 /-- The connection images commute with the assembled fermionic images. -/
-lemma connection_commute_fermionTotal (v : GaugeBoson.JetComponentSpace 𝔤)
-    (w : T.FermionGenerators) : Commute (d.connection v) (d.fermionTotal w) :=
-  (DirectSum.commute_of_lof_left (fun i x => by
-    show Commute (d.fermionTotal (T.inclFermion i x)) (d.connection v)
-    simpa using (d.connection_commute_fermion v i x).symm) w).symm
+lemma connection_commute_fermionTotal (v : GaugeBoson.JetComponentSpace 𝔤) (w : T.FermionGenerators)
+    : Commute (d.connection v) (d.fermionTotal w) :=
+  (DirectSum.commute_of_lof_left
+    (fun i x => by
+      show Commute (d.fermionTotal (T.inclFermion i x)) (d.connection v)
+      simpa using (d.connection_commute_fermion v i x).symm)
+    w).symm
 
 /-!
 
@@ -580,9 +641,11 @@ lemma connection_commute_fermionTotal (v : GaugeBoson.JetComponentSpace 𝔤)
 /-- The even generator images, the bosonic and connection images together. -/
 def evenGenerators : Set B := Set.range d.bosonTotal ∪ Set.range d.connection
 
-/-- The commutative subalgebra of `B` generated by the even images. The bosonic and
-  connection assignments are lifted into it, because `SymmetricAlgebra.lift` requires a
-  commutative target while `B` itself need not be commutative. -/
+/--
+The commutative subalgebra of `B` generated by the even images. The bosonic and
+connection assignments are lifted into it, because `SymmetricAlgebra.lift` requires a
+commutative target while `B` itself need not be commutative.
+-/
 def evenSubalgebra : Subalgebra ℂ B := Algebra.adjoin ℂ d.evenGenerators
 
 instance : IsMulCommutative d.evenSubalgebra := by
@@ -601,10 +664,11 @@ def bosonGenerator : T.BosonGenerators →ₗ[ℂ] d.evenSubalgebra where
   map_add' v w := Subtype.ext (by simp)
   map_smul' c v := Subtype.ext (by simp)
 
-/-- The connection assignment, corestricted to the commutative subalgebra of even
-  images. -/
-noncomputable def connectionGenerator :
-    GaugeBoson.JetComponentSpace 𝔤 →ₗ[ℝ] d.evenSubalgebra where
+/--
+The connection assignment, corestricted to the commutative subalgebra of even
+images.
+-/
+noncomputable def connectionGenerator : GaugeBoson.JetComponentSpace 𝔤 →ₗ[ℝ] d.evenSubalgebra where
   toFun v := ⟨d.connection v, Algebra.subset_adjoin (Or.inr ⟨v, rfl⟩)⟩
   map_add' v w := Subtype.ext (by simp)
   map_smul' c v := Subtype.ext (by simp)
@@ -615,50 +679,54 @@ noncomputable def connectionGenerator :
 
 -/
 
-/-- The algebra map out of the fermionic factor, the exterior lift of the assembled
-  fermionic images, which already accepts an associative, possibly noncommutative,
-  target. -/
+/--
+The algebra map out of the fermionic factor, the exterior lift of the assembled
+fermionic images, which already accepts an associative, possibly noncommutative,
+target.
+-/
 noncomputable def fermionHom : ExteriorAlgebra ℂ T.FermionGenerators →ₐ[ℂ] B :=
   ExteriorAlgebra.lift ℂ ⟨d.fermionTotal, d.fermionTotal_mul_self⟩
 
-/-- The algebra map out of the bosonic factor, the symmetric lift into the commutative
-  subalgebra of even images, followed by its inclusion. -/
+/--
+The algebra map out of the bosonic factor, the symmetric lift into the commutative
+subalgebra of even images, followed by its inclusion.
+-/
 noncomputable def bosonHom : SymmetricAlgebra ℂ T.BosonGenerators →ₐ[ℂ] B :=
   d.evenSubalgebra.val.comp (SymmetricAlgebra.lift d.bosonGenerator)
 
 /-- The real algebra map out of the real connection factor. -/
-noncomputable def connectionHomReal :
-    SymmetricAlgebra ℝ (GaugeBoson.JetComponentSpace 𝔤) →ₐ[ℝ] B :=
-  (d.evenSubalgebra.val.restrictScalars ℝ).comp
-    (SymmetricAlgebra.lift d.connectionGenerator)
+noncomputable def connectionHomReal : SymmetricAlgebra ℝ (GaugeBoson.JetComponentSpace 𝔤) →ₐ[ℝ] B :=
+  (d.evenSubalgebra.val.restrictScalars ℝ).comp (SymmetricAlgebra.lift d.connectionGenerator)
 
-/-- The algebra map out of the complexified connection factor, obtained from
-  `connectionHomReal` by the universal property of extension of scalars, which, unlike the
-  symmetric lift, accepts a noncommutative target. -/
-noncomputable def connectionHom :
-    (ℂ ⊗[ℝ] SymmetricAlgebra ℝ (GaugeBoson.JetComponentSpace 𝔤)) →ₐ[ℂ] B :=
+/--
+The algebra map out of the complexified connection factor, obtained from
+`connectionHomReal` by the universal property of extension of scalars, which, unlike the
+symmetric lift, accepts a noncommutative target.
+-/
+noncomputable def connectionHom
+    : (ℂ ⊗[ℝ] SymmetricAlgebra ℝ (GaugeBoson.JetComponentSpace 𝔤)) →ₐ[ℂ] B :=
   AlgHom.liftEquiv ℝ ℂ _ B d.connectionHomReal
 
 @[simp]
-lemma fermionHom_ι (v : T.FermionGenerators) :
-    d.fermionHom (ExteriorAlgebra.ι ℂ v) = d.fermionTotal v := by
+lemma fermionHom_ι (v : T.FermionGenerators)
+    : d.fermionHom (ExteriorAlgebra.ι ℂ v) = d.fermionTotal v := by
   simp [fermionHom]
 
 @[simp]
-lemma bosonHom_ι (v : T.BosonGenerators) :
-    d.bosonHom (SymmetricAlgebra.ι ℂ T.BosonGenerators v) = d.bosonTotal v := by
+lemma bosonHom_ι (v : T.BosonGenerators)
+    : d.bosonHom (SymmetricAlgebra.ι ℂ T.BosonGenerators v) = d.bosonTotal v := by
   simp [bosonHom, bosonGenerator]
 
 @[simp]
-lemma connectionHomReal_ι (v : GaugeBoson.JetComponentSpace 𝔤) :
-    d.connectionHomReal (SymmetricAlgebra.ι ℝ (GaugeBoson.JetComponentSpace 𝔤) v)
+lemma connectionHomReal_ι (v : GaugeBoson.JetComponentSpace 𝔤)
+    : d.connectionHomReal (SymmetricAlgebra.ι ℝ (GaugeBoson.JetComponentSpace 𝔤) v)
       = d.connection v := by
   simp [connectionHomReal, connectionGenerator]
 
 @[simp]
-lemma connectionHom_tmul (z : ℂ)
-    (p : SymmetricAlgebra ℝ (GaugeBoson.JetComponentSpace 𝔤)) :
-    d.connectionHom (z ⊗ₜ[ℝ] p) = z • d.connectionHomReal p := rfl
+lemma connectionHom_tmul (z : ℂ) (p : SymmetricAlgebra ℝ (GaugeBoson.JetComponentSpace 𝔤))
+    : d.connectionHom (z ⊗ₜ[ℝ] p) = z • d.connectionHomReal p :=
+  rfl
 
 /-!
 
@@ -669,19 +737,19 @@ hypotheses supply only on generators. `Algebra.commute_of_adjoin_eq_top` propaga
 
 -/
 
-lemma fermionHom_commute_bosonHom (x : ExteriorAlgebra ℂ T.FermionGenerators)
-    (y : SymmetricAlgebra ℂ T.BosonGenerators) :
-    Commute (d.fermionHom x) (d.bosonHom y) := by
+lemma fermionHom_commute_bosonHom
+    (x : ExteriorAlgebra ℂ T.FermionGenerators) (y : SymmetricAlgebra ℂ T.BosonGenerators)
+    : Commute (d.fermionHom x) (d.bosonHom y) := by
   refine Algebra.commute_of_adjoin_eq_top CliffordAlgebra.adjoin_range_ι d.fermionHom ?_ x
   rintro _ ⟨v, rfl⟩
-  refine (Algebra.commute_of_adjoin_eq_top SymmetricAlgebra.adjoin_range_ι
-    d.bosonHom ?_ y).symm
+  refine (Algebra.commute_of_adjoin_eq_top SymmetricAlgebra.adjoin_range_ι d.bosonHom ?_ y).symm
   rintro _ ⟨w, rfl⟩
   simpa using d.bosonTotal_commute_fermionTotal w v
 
-lemma fermionHom_commute_connectionHom (x : ExteriorAlgebra ℂ T.FermionGenerators)
-    (y : ℂ ⊗[ℝ] SymmetricAlgebra ℝ (GaugeBoson.JetComponentSpace 𝔤)) :
-    Commute (d.fermionHom x) (d.connectionHom y) := by
+lemma fermionHom_commute_connectionHom
+    (x : ExteriorAlgebra ℂ T.FermionGenerators)
+    (y : ℂ ⊗[ℝ] SymmetricAlgebra ℝ (GaugeBoson.JetComponentSpace 𝔤))
+    : Commute (d.fermionHom x) (d.connectionHom y) := by
   refine Algebra.commute_of_adjoin_eq_top CliffordAlgebra.adjoin_range_ι d.fermionHom ?_ x
   rintro _ ⟨v, rfl⟩
   induction y using TensorProduct.inductionOn with
@@ -689,14 +757,15 @@ lemma fermionHom_commute_connectionHom (x : ExteriorAlgebra ℂ T.FermionGenerat
   | tmul z p =>
     rw [connectionHom_tmul]
     refine Commute.smul_right ?_ z
-    refine (Algebra.commute_of_adjoin_eq_top SymmetricAlgebra.adjoin_range_ι
-      d.connectionHomReal ?_ p).symm
+    refine (Algebra.commute_of_adjoin_eq_top SymmetricAlgebra.adjoin_range_ι d.connectionHomReal ?_
+      p).symm
     rintro _ ⟨w, rfl⟩
     simpa using d.connection_commute_fermionTotal w v
 
-lemma bosonHom_commute_connectionHom (x : SymmetricAlgebra ℂ T.BosonGenerators)
-    (y : ℂ ⊗[ℝ] SymmetricAlgebra ℝ (GaugeBoson.JetComponentSpace 𝔤)) :
-    Commute (d.bosonHom x) (d.connectionHom y) := by
+lemma bosonHom_commute_connectionHom
+    (x : SymmetricAlgebra ℂ T.BosonGenerators)
+    (y : ℂ ⊗[ℝ] SymmetricAlgebra ℝ (GaugeBoson.JetComponentSpace 𝔤))
+    : Commute (d.bosonHom x) (d.connectionHom y) := by
   refine Algebra.commute_of_adjoin_eq_top SymmetricAlgebra.adjoin_range_ι d.bosonHom ?_ x
   rintro _ ⟨v, rfl⟩
   induction y using TensorProduct.inductionOn with
@@ -704,8 +773,8 @@ lemma bosonHom_commute_connectionHom (x : SymmetricAlgebra ℂ T.BosonGenerators
   | tmul z p =>
     rw [connectionHom_tmul]
     refine Commute.smul_right ?_ z
-    refine (Algebra.commute_of_adjoin_eq_top SymmetricAlgebra.adjoin_range_ι
-      d.connectionHomReal ?_ p).symm
+    refine (Algebra.commute_of_adjoin_eq_top SymmetricAlgebra.adjoin_range_ι d.connectionHomReal ?_
+      p).symm
     rintro _ ⟨w, rfl⟩
     simpa using (d.bosonTotal_commute_connection v w).symm
 
@@ -722,50 +791,50 @@ lemma bosonHom_commute_connectionHom (x : SymmetricAlgebra ℂ T.BosonGenerators
 -/
 
 /-- The algebra map out of the matter factor `Λ_ℂ E_f(T) ⊗[ℂ] Sym_ℂ E_b(T)`. -/
-noncomputable def matterHom :
-    (ExteriorAlgebra ℂ T.FermionGenerators ⊗[ℂ] SymmetricAlgebra ℂ T.BosonGenerators) →ₐ[ℂ]
-      B :=
+noncomputable def matterHom
+    : (ExteriorAlgebra ℂ T.FermionGenerators ⊗[ℂ] SymmetricAlgebra ℂ T.BosonGenerators) →ₐ[ℂ]
+        B :=
   Algebra.TensorProduct.lift d.fermionHom d.bosonHom d.fermionHom_commute_bosonHom
 
 lemma matterHom_commute_connectionHom
     (x : ExteriorAlgebra ℂ T.FermionGenerators ⊗[ℂ] SymmetricAlgebra ℂ T.BosonGenerators)
-    (y : ℂ ⊗[ℝ] SymmetricAlgebra ℝ (GaugeBoson.JetComponentSpace 𝔤)) :
-    Commute (d.matterHom x) (d.connectionHom y) := by
+    (y : ℂ ⊗[ℝ] SymmetricAlgebra ℝ (GaugeBoson.JetComponentSpace 𝔤))
+    : Commute (d.matterHom x) (d.connectionHom y) := by
   induction x using TensorProduct.inductionOn with
   | add u w hu hw => rw [map_add]; exact hu.add_left hw
   | tmul a b =>
     rw [matterHom, Algebra.TensorProduct.lift_tmul]
-    exact (d.fermionHom_commute_connectionHom a y).mul_left
-      (d.bosonHom_commute_connectionHom b y)
+    exact (d.fermionHom_commute_connectionHom a y).mul_left (d.bosonHom_commute_connectionHom b y)
 
-/-- The realization arrow of the datum: the algebra homomorphism `J(T) →ₐ[ℂ] B` induced by
-  a compatible assignment. -/
+/--
+The realization arrow of the datum: the algebra homomorphism `J(T) →ₐ[ℂ] B` induced by
+a compatible assignment.
+-/
 noncomputable def lift : T.LocalFieldAlgebra →ₐ[ℂ] B :=
   Algebra.TensorProduct.lift d.matterHom d.connectionHom d.matterHom_commute_connectionHom
 
 @[simp]
-lemma lift_ιFermionTotal (v : T.FermionGenerators) :
-    d.lift (T.ιFermionTotal v) = d.fermionTotal v := by
+lemma lift_ιFermionTotal (v : T.FermionGenerators)
+    : d.lift (T.ιFermionTotal v) = d.fermionTotal v := by
   simp [lift, ιFermionTotal_apply, matterHom]
 
 @[simp]
-lemma lift_ιBosonTotal (v : T.BosonGenerators) :
-    d.lift (T.ιBosonTotal v) = d.bosonTotal v := by
+lemma lift_ιBosonTotal (v : T.BosonGenerators) : d.lift (T.ιBosonTotal v) = d.bosonTotal v := by
   simp [lift, ιBosonTotal_apply, matterHom]
 
 @[simp]
-lemma lift_ιConnection (v : GaugeBoson.JetComponentSpace 𝔤) :
-    d.lift (T.ιConnection v) = d.connection v := by
+lemma lift_ιConnection (v : GaugeBoson.JetComponentSpace 𝔤)
+    : d.lift (T.ιConnection v) = d.connection v := by
   simp [lift, ιConnection_apply, matterHom]
 
 @[simp]
-lemma lift_ιFermion (i : T.FermionSpecies) (x : JetComponentSpace (T.fermion i)) :
-    d.lift (T.ιFermion i x) = d.fermion i x := by
+lemma lift_ιFermion (i : T.FermionSpecies) (x : JetComponentSpace (T.fermion i))
+    : d.lift (T.ιFermion i x) = d.fermion i x := by
   rw [ιFermion_apply, d.lift_ιFermionTotal, d.fermionTotal_inclFermion]
 
 @[simp]
-lemma lift_ιBoson (j : T.BosonSpecies) (y : JetComponentSpace (T.boson j)) :
-    d.lift (T.ιBoson j y) = d.boson j y := by
+lemma lift_ιBoson (j : T.BosonSpecies) (y : JetComponentSpace (T.boson j))
+    : d.lift (T.ιBoson j y) = d.boson j y := by
   rw [ιBoson_apply, d.lift_ιBosonTotal, d.bosonTotal_inclBoson]
 
 /-!
@@ -774,20 +843,26 @@ lemma lift_ιBoson (j : T.BosonSpecies) (y : JetComponentSpace (T.boson j)) :
 
 -/
 
-/-- The mapping-out universal property of the local field algebra of a datum. A compatible
-  assignment of the generators of every species, and of the connection, in an arbitrary, in
-  particular noncommutative, complex algebra `B` extends to one and only one complex algebra
-  homomorphism `J(T) →ₐ[ℂ] B`. Injectivity is neither claimed nor wanted, since a
-  realization may identify local expressions. -/
-lemma existsUnique_algHom :
-    ∃! Φ : T.LocalFieldAlgebra →ₐ[ℂ] B,
-      (∀ i x, Φ (T.ιFermion i x) = d.fermion i x) ∧
-        (∀ j y, Φ (T.ιBoson j y) = d.boson j y) ∧
-          (∀ v, Φ (T.ιConnection v) = d.connection v) :=
-  ⟨d.lift, ⟨d.lift_ιFermion, d.lift_ιBoson, d.lift_ιConnection⟩, fun _ hΦ =>
-    algHom_ext (fun i x => (hΦ.1 i x).trans (d.lift_ιFermion i x).symm)
+/--
+The mapping-out universal property of the local field algebra of a datum. A compatible
+assignment of the generators of every species, and of the connection, in an arbitrary, in
+particular noncommutative, complex algebra `B` extends to one and only one complex algebra
+homomorphism `J(T) →ₐ[ℂ] B`. Injectivity is neither claimed nor wanted, since a
+realization may identify local expressions.
+-/
+lemma existsUnique_algHom
+    : ∃! Φ : T.LocalFieldAlgebra →ₐ[ℂ] B,
+        (∀ i x, Φ (T.ιFermion i x) = d.fermion i x) ∧
+          (∀ j y, Φ (T.ιBoson j y) = d.boson j y) ∧
+            (∀ v, Φ (T.ιConnection v) = d.connection v) := ⟨
+  d.lift,
+  ⟨d.lift_ιFermion, d.lift_ιBoson, d.lift_ιConnection⟩,
+  fun _ hΦ =>
+    algHom_ext
+      (fun i x => (hΦ.1 i x).trans (d.lift_ιFermion i x).symm)
       (fun j y => (hΦ.2.1 j y).trans (d.lift_ιBoson j y).symm)
-      (fun v => (hΦ.2.2 v).trans (d.lift_ιConnection v).symm)⟩
+      (fun v => (hΦ.2.2 v).trans (d.lift_ιConnection v).symm)
+⟩
 
 /-!
 
@@ -795,10 +870,11 @@ lemma existsUnique_algHom :
 
 -/
 
-/-- The compatible assignment obtained by pushing one forward along an algebra map, every
-  relation being preserved by an algebra homomorphism. -/
-noncomputable def comp {C : Type*} [Ring C] [Algebra ℂ C] (φ : B →ₐ[ℂ] C) :
-    T.Assignment C where
+/--
+The compatible assignment obtained by pushing one forward along an algebra map, every
+relation being preserved by an algebra homomorphism.
+-/
+noncomputable def comp {C : Type*} [Ring C] [Algebra ℂ C] (φ : B →ₐ[ℂ] C) : T.Assignment C where
   fermion i := φ.toLinearMap ∘ₗ d.fermion i
   boson j := φ.toLinearMap ∘ₗ d.boson j
   connection := (φ.restrictScalars ℝ).toLinearMap ∘ₗ d.connection
@@ -814,8 +890,10 @@ end Assignment
 
 variable (T)
 
-/-- The tautological assignment, with the generators of the local field algebra assigned to
-  themselves. Its relations are those of section A.2. -/
+/--
+The tautological assignment, with the generators of the local field algebra assigned to
+themselves. Its relations are those of section A.2.
+-/
 noncomputable def canonicalAssignment : T.Assignment T.LocalFieldAlgebra where
   fermion := T.ιFermion
   boson := T.ιBoson
@@ -828,11 +906,13 @@ noncomputable def canonicalAssignment : T.Assignment T.LocalFieldAlgebra where
   boson_commute_fermion := ιBoson_commute_ιFermion
   connection_commute_fermion := ιConnection_commute_ιFermion
 
-/-- Compatible assignments in `B` are the same thing as algebra maps into `B`. This is the
-  universal property as an equivalence of types rather than a linear equivalence, neither
-  side being a module in a way the other respects. -/
-noncomputable def liftEquiv (B : Type*) [Ring B] [Algebra ℂ B] :
-    T.Assignment B ≃ (T.LocalFieldAlgebra →ₐ[ℂ] B) where
+/--
+Compatible assignments in `B` are the same thing as algebra maps into `B`. This is the
+universal property as an equivalence of types rather than a linear equivalence, neither
+side being a module in a way the other respects.
+-/
+noncomputable def liftEquiv (B : Type*) [Ring B] [Algebra ℂ B]
+    : T.Assignment B ≃ (T.LocalFieldAlgebra →ₐ[ℂ] B) where
   toFun d := d.lift
   invFun Φ := (canonicalAssignment T).comp Φ
   left_inv d :=
@@ -856,11 +936,13 @@ namespace Assignment
 
 variable {B : Type*} [Ring B] [Algebra ℂ B] (d : T.Assignment B)
 
-/-- The range of the induced map is the complex subalgebra generated by the images of the
-  species and of the connection. No injectivity is claimed or required, since a realization
-  of a field theory may identify local expressions. -/
-lemma range_lift :
-    d.lift.range
+/--
+The range of the induced map is the complex subalgebra generated by the images of the
+species and of the connection. No injectivity is claimed or required, since a realization
+of a field theory may identify local expressions.
+-/
+lemma range_lift
+    : d.lift.range
       = Algebra.adjoin ℂ
         ((⋃ i, Set.range (d.fermion i)) ∪ (⋃ j, Set.range (d.boson j))
           ∪ Set.range d.connection) := by

@@ -59,11 +59,13 @@ namespace Local
 
 -/
 
-/-- Coordinate data `u^a_I` for `k`-th order jet points.
+/--
+Coordinate data `u^a_I` for `k`-th order jet points.
 
 For each derivative index `I`, these are the scalar components of the corresponding
 `EuclideanSpace ℝ (Fin m)` fiber coordinate. We keep this componentwise form because the
-local Euler-Lagrange formulas are indexed by both `I` and `a`. -/
+local Euler-Lagrange formulas are indexed by both `I` and `a`.
+-/
 abbrev JetCoordinates (d m k : ℕ) := DerivativeIndex d k → Fin m → ℝ
 
 /-!
@@ -71,8 +73,10 @@ abbrev JetCoordinates (d m k : ℕ) := DerivativeIndex d k → Fin m → ℝ
 
 -/
 
-/-- The coordinate-level points of the locally trivialized `k`-jet bundle for fields
-`Space d → EuclideanSpace ℝ (Fin m)`. -/
+/--
+The coordinate-level points of the locally trivialized `k`-jet bundle for fields
+`Space d → EuclideanSpace ℝ (Fin m)`.
+-/
 structure JetPoint (d m k : ℕ) where
   /-- The base point of the jet point. -/
   base : Space d
@@ -87,18 +91,15 @@ variable {d m k : ℕ}
 def coord (J : JetPoint d m k) (I : DerivativeIndex d k) (a : Fin m) : ℝ := J.fiber I a
 
 /-- The zero-th order value encoded by a jet point. -/
-def value (J : JetPoint d m k) : EuclideanSpace ℝ (Fin m) :=
-  WithLp.toLp 2 fun a => J.coord 0 a
+def value (J : JetPoint d m k) : EuclideanSpace ℝ (Fin m) := WithLp.toLp 2 fun a => J.coord 0 a
 
 @[simp]
-lemma value_apply (J : JetPoint d m k) (a : Fin m) :
-    J.value a = J.coord 0 a := by
-  simp [value]
+lemma value_apply (J : JetPoint d m k) (a : Fin m) : J.value a = J.coord 0 a := by simp [value]
 
 @[ext]
-lemma ext (J K : JetPoint d m k) (hbase : J.base = K.base)
-    (hcoord : ∀ I a, J.coord I a = K.coord I a) :
-    J = K := by
+lemma ext
+    (J K : JetPoint d m k) (hbase : J.base = K.base) (hcoord : ∀ I a, J.coord I a = K.coord I a)
+    : J = K := by
   cases J with
   | mk x u =>
     cases K with
@@ -118,29 +119,32 @@ def ofBaseCoordinates (x : Space d) (u : JetCoordinates d m k) : JetPoint d m k 
 def toBaseCoordinates (J : JetPoint d m k) : Space d × JetCoordinates d m k := (J.base, J.fiber)
 
 @[simp]
-lemma ofBaseCoordinates_base (x : Space d) (u : JetCoordinates d m k) :
-    (ofBaseCoordinates x u).base = x := rfl
+lemma ofBaseCoordinates_base (x : Space d) (u : JetCoordinates d m k)
+    : (ofBaseCoordinates x u).base = x :=
+  rfl
 
 @[simp]
-lemma ofBaseCoordinates_fiber (x : Space d) (u : JetCoordinates d m k) :
-    (ofBaseCoordinates x u).fiber = u := rfl
+lemma ofBaseCoordinates_fiber (x : Space d) (u : JetCoordinates d m k)
+    : (ofBaseCoordinates x u).fiber = u :=
+  rfl
 
 @[simp]
-lemma ofBaseCoordinates_coord (x : Space d) (u : JetCoordinates d m k)
-    (I : DerivativeIndex d k) (a : Fin m) :
-    (ofBaseCoordinates x u).coord I a = u I a := rfl
+lemma ofBaseCoordinates_coord
+    (x : Space d) (u : JetCoordinates d m k) (I : DerivativeIndex d k) (a : Fin m)
+    : (ofBaseCoordinates x u).coord I a = u I a :=
+  rfl
 
 @[simp]
-lemma ofBaseCoordinates_base_fiber (J : JetPoint d m k) :
-    ofBaseCoordinates J.base J.fiber = J := by
+lemma ofBaseCoordinates_base_fiber (J : JetPoint d m k) : ofBaseCoordinates J.base J.fiber = J := by
   apply JetPoint.ext
   · rfl
   · intro I a
     rfl
 
 @[simp]
-lemma toBaseCoordinates_ofBaseCoordinates (x : Space d) (u : JetCoordinates d m k) :
-    (ofBaseCoordinates x u).toBaseCoordinates = (x, u) := rfl
+lemma toBaseCoordinates_ofBaseCoordinates (x : Space d) (u : JetCoordinates d m k)
+    : (ofBaseCoordinates x u).toBaseCoordinates = (x, u) :=
+  rfl
 
 end JetPoint
 
@@ -150,50 +154,52 @@ end JetPoint
 -/
 
 /-- The jet-coordinate function determined by a field `g`. -/
-noncomputable def jetCoordinatesAt (k : ℕ) (g : Space d → EuclideanSpace ℝ (Fin m))
-    (x : Space d) :
-    JetCoordinates d m k :=
-  fun I a => ∂^[I.1] (fun y => (g y) a) x
+noncomputable def jetCoordinatesAt (k : ℕ) (g : Space d → EuclideanSpace ℝ (Fin m)) (x : Space d)
+    : JetCoordinates d m k := fun I a =>
+  ∂^[I.1] (fun y => (g y) a) x
 
 /-- The coordinate-level `k`-jet point of a field `f` at the point `x`. -/
-noncomputable def jetAt (k : ℕ) (f : Space d → EuclideanSpace ℝ (Fin m)) (x : Space d) :
-    JetPoint d m k where
+noncomputable def jetAt (k : ℕ) (f : Space d → EuclideanSpace ℝ (Fin m)) (x : Space d)
+    : JetPoint d m k where
   base := x
   fiber := jetCoordinatesAt k f x
 
 @[simp]
-lemma jetAt_base (k : ℕ) (f : Space d → EuclideanSpace ℝ (Fin m)) (x : Space d) :
-    (jetAt k f x).base = x := rfl
+lemma jetAt_base (k : ℕ) (f : Space d → EuclideanSpace ℝ (Fin m)) (x : Space d)
+    : (jetAt k f x).base = x :=
+  rfl
 
 @[simp]
-lemma jetAt_value (k : ℕ) (f : Space d → EuclideanSpace ℝ (Fin m)) (x : Space d) :
-    (jetAt k f x).value = f x := by
+lemma jetAt_value (k : ℕ) (f : Space d → EuclideanSpace ℝ (Fin m)) (x : Space d)
+    : (jetAt k f x).value = f x := by
   ext a
   simp [JetPoint.value, JetPoint.coord, jetAt, jetCoordinatesAt, Space.iteratedDeriv_zero]
 
 @[simp]
-lemma jetAt_coord (k : ℕ) (f : Space d → EuclideanSpace ℝ (Fin m)) (x : Space d)
-    (I : DerivativeIndex d k) (a : Fin m) :
-    (jetAt k f x).coord I a = ∂^[I.1] (fun y => (f y) a) x := rfl
+lemma jetAt_coord
+    (k : ℕ)
+    (f : Space d → EuclideanSpace ℝ (Fin m)) (x : Space d) (I : DerivativeIndex d k) (a : Fin m)
+    : (jetAt k f x).coord I a = ∂^[I.1] (fun y => (f y) a) x :=
+  rfl
 
-lemma jetAt_coord_zero (k : ℕ) (f : Space d → EuclideanSpace ℝ (Fin m)) (x : Space d)
-    (a : Fin m) :
-    (jetAt k f x).coord 0 a = (f x) a := by
+lemma jetAt_coord_zero (k : ℕ) (f : Space d → EuclideanSpace ℝ (Fin m)) (x : Space d) (a : Fin m)
+    : (jetAt k f x).coord 0 a = (f x) a := by
   simp [jetAt_coord]
 
 @[simp]
-lemma jetCoordinatesAt_eq (k : ℕ) (g : Space d → EuclideanSpace ℝ (Fin m)) (x : Space d)
-    (I : DerivativeIndex d k) (a : Fin m) :
-    jetCoordinatesAt k g x I a = ∂^[I.1] (fun y => (g y) a) x := rfl
+lemma jetCoordinatesAt_eq
+    (k : ℕ)
+    (g : Space d → EuclideanSpace ℝ (Fin m)) (x : Space d) (I : DerivativeIndex d k) (a : Fin m)
+    : jetCoordinatesAt k g x I a = ∂^[I.1] (fun y => (g y) a) x :=
+  rfl
 
-lemma jetCoordinatesAt_zero (k : ℕ) (g : Space d → EuclideanSpace ℝ (Fin m))
-    (x : Space d) (a : Fin m) :
-    jetCoordinatesAt k g x 0 a = (g x) a := by
+lemma jetCoordinatesAt_zero
+    (k : ℕ) (g : Space d → EuclideanSpace ℝ (Fin m)) (x : Space d) (a : Fin m)
+    : jetCoordinatesAt k g x 0 a = (g x) a := by
   simp [jetCoordinatesAt]
 
-lemma jetAt_eq_ofBaseCoordinates (k : ℕ) (f : Space d → EuclideanSpace ℝ (Fin m))
-    (x : Space d) :
-    jetAt k f x = JetPoint.ofBaseCoordinates x (jetCoordinatesAt k f x) := by
+lemma jetAt_eq_ofBaseCoordinates (k : ℕ) (f : Space d → EuclideanSpace ℝ (Fin m)) (x : Space d)
+    : jetAt k f x = JetPoint.ofBaseCoordinates x (jetCoordinatesAt k f x) := by
   apply JetPoint.ext
   · rfl
   · intro I a

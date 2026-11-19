@@ -67,15 +67,15 @@ lemma cubeRootOfUnity_isPrimitiveRoot : IsPrimitiveRoot cubeRootOfUnity 3 := by
   simpa [cubeRootOfUnity] using h
 
 /-- `ω` cubes to one. -/
-@[simp] lemma cubeRootOfUnity_pow_three : cubeRootOfUnity ^ 3 = 1 :=
+@[simp]
+lemma cubeRootOfUnity_pow_three : cubeRootOfUnity ^ 3 = 1 :=
   cubeRootOfUnity_isPrimitiveRoot.pow_eq_one
 
 /-- `ω` is nonzero, being a value of the complex exponential. -/
 lemma cubeRootOfUnity_ne_zero : cubeRootOfUnity ≠ 0 := Complex.exp_ne_zero _
 
 /-- Powers of `ω` only see the exponent modulo three. -/
-lemma cubeRootOfUnity_pow_mod (m : ℕ) :
-    cubeRootOfUnity ^ (m % 3) = cubeRootOfUnity ^ m := by
+lemma cubeRootOfUnity_pow_mod (m : ℕ) : cubeRootOfUnity ^ (m % 3) = cubeRootOfUnity ^ m := by
   conv_rhs => rw [← Nat.div_add_mod m 3]
   rw [pow_add, pow_mul, cubeRootOfUnity_pow_three, one_pow, one_mul]
 

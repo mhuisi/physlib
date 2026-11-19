@@ -25,46 +25,48 @@ open MSSMCharges
 open MSSMACCs
 open BigOperators
 
-/-- $Y_3$ is the charge which is hypercharge in all families, but with the third
-family of the opposite sign. -/
-def Y₃AsCharge : MSSMACC.Charges := toSpecies.symm
-  ⟨fun s => fun i =>
-    match s, i with
-    | 0, 0 => 1
-    | 0, 1 => 1
-    | 0, 2 => - 1
-    | 1, 0 => -4
-    | 1, 1 => -4
-    | 1, 2 => 4
-    | 2, 0 => 2
-    | 2, 1 => 2
-    | 2, 2 => - 2
-    | 3, 0 => -3
-    | 3, 1 => -3
-    | 3, 2 => 3
-    | 4, 0 => 6
-    | 4, 1 => 6
-    | 4, 2 => - 6
-    | 5, 0 => 0
-    | 5, 1 => 0
-    | 5, 2 => 0,
-  fun s =>
-    match s with
-    | 0 => -3
-    | 1 => 3⟩
+/--
+$Y_3$ is the charge which is hypercharge in all families, but with the third
+family of the opposite sign.
+-/
+def Y₃AsCharge : MSSMACC.Charges :=
+  toSpecies.symm ⟨
+    fun s => fun i =>
+      match s, i with
+      | 0, 0 => 1
+      | 0, 1 => 1
+      | 0, 2 => -1
+      | 1, 0 => -4
+      | 1, 1 => -4
+      | 1, 2 => 4
+      | 2, 0 => 2
+      | 2, 1 => 2
+      | 2, 2 => -2
+      | 3, 0 => -3
+      | 3, 1 => -3
+      | 3, 2 => 3
+      | 4, 0 => 6
+      | 4, 1 => 6
+      | 4, 2 => -6
+      | 5, 0 => 0
+      | 5, 1 => 0
+      | 5, 2 => 0,
+    fun s =>
+      match s with
+      | 0 => -3
+      | 1 => 3
+  ⟩
 
 /-- $Y_3$ as a solution. -/
 def Y₃ : MSSMACC.Sols :=
-  MSSMACC.AnomalyFreeMk Y₃AsCharge
+  MSSMACC.AnomalyFreeMk Y₃AsCharge (by with_unfolding_all rfl) (by with_unfolding_all rfl)
     (by with_unfolding_all rfl) (by with_unfolding_all rfl) (by with_unfolding_all rfl)
-    (by with_unfolding_all rfl) (by with_unfolding_all rfl) (by with_unfolding_all rfl)
+    (by with_unfolding_all rfl)
 
-lemma Y₃_val : Y₃.val = Y₃AsCharge := by
-  rfl
+lemma Y₃_val : Y₃.val = Y₃AsCharge := by rfl
 
 set_option backward.isDefEq.respectTransparency false in
-lemma doublePoint_Y₃_Y₃ (R : MSSMACC.LinSols) :
-    cubeTriLin Y₃.val Y₃.val R.val = 0 := by
+lemma doublePoint_Y₃_Y₃ (R : MSSMACC.LinSols) : cubeTriLin Y₃.val Y₃.val R.val = 0 := by
   simp only [cubeTriLin, TriLinearSymm.mk₃_toFun_apply_apply, cubeTriLinToFun]
   rw [sum_MSSMSpecies_numberCharges_eq_expand]
   rw [Y₃_val]
@@ -78,8 +80,8 @@ lemma doublePoint_Y₃_Y₃ (R : MSSMACC.LinSols) :
   have h3 := hLin ⟨3, by simp⟩
   simp only [accYY, LinearMap.coe_mk, AddHom.coe_mk] at h3
   rw [sum_MSSMSpecies_numberCharges_eq_expand] at h3
-  simp only [Fin.isValue, toSMSpecies_apply, Nat.reduceMul, Hd_apply, Fin.reduceFinMk,
-    Hu_apply] at h3
+  simp only [Fin.isValue, toSMSpecies_apply, Nat.reduceMul, Hd_apply, Fin.reduceFinMk, Hu_apply]
+    at h3
   linear_combination (norm := ring_nf) 6 * h3
 
 end MSSMACC

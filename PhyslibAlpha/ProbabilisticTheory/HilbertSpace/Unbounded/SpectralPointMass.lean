@@ -66,8 +66,10 @@ section Bisect
 
 variable (μ : WOTSpectralMeasure ℝ H)
 
-/-- One bisection step: split `[p.1, p.2]` at its midpoint and keep the left half if it has measure
-`1`, otherwise the right half. -/
+/--
+One bisection step: split `[p.1, p.2]` at its midpoint and keep the left half if it has measure
+`1`, otherwise the right half.
+-/
 noncomputable def bisectStep (p : ℝ × ℝ) : ℝ × ℝ :=
   let m := (p.1 + p.2) / 2
   if μ (Icc p.1 m) = 1 then (p.1, m) else (m, p.2)
@@ -77,13 +79,12 @@ noncomputable def bisect (a b : ℝ) : ℕ → ℝ × ℝ
   | 0 => (a, b)
   | n + 1 => bisectStep μ (bisect a b n)
 
-lemma bisectStep_fst_le_snd {p : ℝ × ℝ} (h : p.1 ≤ p.2) :
-    (bisectStep μ p).1 ≤ (bisectStep μ p).2 := by
+lemma bisectStep_fst_le_snd {p : ℝ × ℝ} (h : p.1 ≤ p.2)
+    : (bisectStep μ p).1 ≤ (bisectStep μ p).2 := by
   simp only [bisectStep]
   split <;> dsimp <;> linarith
 
-lemma bisectStep_sub (p : ℝ × ℝ) :
-    (bisectStep μ p).2 - (bisectStep μ p).1 = (p.2 - p.1) / 2 := by
+lemma bisectStep_sub (p : ℝ × ℝ) : (bisectStep μ p).2 - (bisectStep μ p).1 = (p.2 - p.1) / 2 := by
   simp only [bisectStep]
   split <;> dsimp <;> ring
 
@@ -93,41 +94,42 @@ lemma bisectStep_fst_le {p : ℝ × ℝ} (h : p.1 ≤ p.2) : p.1 ≤ (bisectStep
 lemma bisectStep_snd_le {p : ℝ × ℝ} (h : p.1 ≤ p.2) : (bisectStep μ p).2 ≤ p.2 := by
   simp only [bisectStep]; split <;> dsimp <;> linarith
 
-lemma bisectStep_subset {p : ℝ × ℝ} (h : p.1 ≤ p.2) :
-    Icc (bisectStep μ p).1 (bisectStep μ p).2 ⊆ Icc p.1 p.2 :=
+lemma bisectStep_subset {p : ℝ × ℝ} (h : p.1 ≤ p.2)
+    : Icc (bisectStep μ p).1 (bisectStep μ p).2 ⊆ Icc p.1 p.2 :=
   Icc_subset_Icc (bisectStep_fst_le μ h) (bisectStep_snd_le μ h)
 
-lemma bisect_fst_le_snd {a b : ℝ} (hab : a ≤ b) :
-    ∀ n, (bisect μ a b n).1 ≤ (bisect μ a b n).2
+lemma bisect_fst_le_snd {a b : ℝ} (hab : a ≤ b) : ∀ n, (bisect μ a b n).1 ≤ (bisect μ a b n).2
   | 0 => hab
   | n + 1 => bisectStep_fst_le_snd μ (bisect_fst_le_snd hab n)
 
-lemma bisect_sub (a b : ℝ) :
-    ∀ n, (bisect μ a b n).2 - (bisect μ a b n).1 = (b - a) / 2 ^ n
+lemma bisect_sub (a b : ℝ) : ∀ n, (bisect μ a b n).2 - (bisect μ a b n).1 = (b - a) / 2 ^ n
   | 0 => by simp [bisect]
   | n + 1 => by
-      show (bisectStep μ (bisect μ a b n)).2 - (bisectStep μ (bisect μ a b n)).1 = _
-      rw [bisectStep_sub, bisect_sub a b n]
-      ring
+    show (bisectStep μ (bisect μ a b n)).2 - (bisectStep μ (bisect μ a b n)).1 = _
+    rw [bisectStep_sub, bisect_sub a b n]
+    ring
 
-lemma bisect_fst_mono {a b : ℝ} (hab : a ≤ b) (n : ℕ) :
-    (bisect μ a b n).1 ≤ (bisect μ a b (n + 1)).1 :=
+lemma bisect_fst_mono {a b : ℝ} (hab : a ≤ b) (n : ℕ)
+    : (bisect μ a b n).1 ≤ (bisect μ a b (n + 1)).1 :=
   bisectStep_fst_le μ (bisect_fst_le_snd μ hab n)
 
-lemma bisect_snd_mono {a b : ℝ} (hab : a ≤ b) (n : ℕ) :
-    (bisect μ a b (n + 1)).2 ≤ (bisect μ a b n).2 :=
+lemma bisect_snd_mono {a b : ℝ} (hab : a ≤ b) (n : ℕ)
+    : (bisect μ a b (n + 1)).2 ≤ (bisect μ a b n).2 :=
   bisectStep_snd_le μ (bisect_fst_le_snd μ hab n)
 
-lemma bisect_subset {a b : ℝ} (hab : a ≤ b) (n : ℕ) :
-    Icc (bisect μ a b (n + 1)).1 (bisect μ a b (n + 1)).2 ⊆
-      Icc (bisect μ a b n).1 (bisect μ a b n).2 :=
+lemma bisect_subset {a b : ℝ} (hab : a ≤ b) (n : ℕ)
+    : Icc (bisect μ a b (n + 1)).1 (bisect μ a b (n + 1)).2
+      ⊆ Icc (bisect μ a b n).1 (bisect μ a b n).2 :=
   bisectStep_subset μ (bisect_fst_le_snd μ hab n)
 
-/-- If the whole interval has measure `1`, the bisected interval does too: whichever half
-`bisectStep` keeps is forced to have measure `1` by additivity across the (disjoint) split. -/
-lemma bisectStep_measure_one (h01 : ∀ E : Set ℝ, MeasurableSet E → μ E = 0 ∨ μ E = 1)
-    {p : ℝ × ℝ} (h : p.1 ≤ p.2) (hμ : μ (Icc p.1 p.2) = 1) :
-    μ (Icc (bisectStep μ p).1 (bisectStep μ p).2) = 1 := by
+/--
+If the whole interval has measure `1`, the bisected interval does too: whichever half
+`bisectStep` keeps is forced to have measure `1` by additivity across the (disjoint) split.
+-/
+lemma bisectStep_measure_one
+    (h01 : ∀ E : Set ℝ, MeasurableSet E → μ E = 0 ∨ μ E = 1)
+    {p : ℝ × ℝ} (h : p.1 ≤ p.2) (hμ : μ (Icc p.1 p.2) = 1)
+    : μ (Icc (bisectStep μ p).1 (bisectStep μ p).2) = 1 := by
   simp only [bisectStep]
   set m := (p.1 + p.2) / 2 with hm_def
   have hm1 : p.1 ≤ m := by rw [hm_def]; linarith
@@ -153,19 +155,23 @@ lemma bisectStep_measure_one (h01 : ∀ E : Set ℝ, MeasurableSet E → μ E = 
     rw [heq, one_mul] at hmul
     exact hmul
 
-lemma bisect_measure_one (h01 : ∀ E : Set ℝ, MeasurableSet E → μ E = 0 ∨ μ E = 1)
-    {a b : ℝ} (hab : a ≤ b) (hμ : μ (Icc a b) = 1) :
-    ∀ n, μ (Icc (bisect μ a b n).1 (bisect μ a b n).2) = 1
+lemma bisect_measure_one
+    (h01 : ∀ E : Set ℝ, MeasurableSet E → μ E = 0 ∨ μ E = 1)
+    {a b : ℝ} (hab : a ≤ b) (hμ : μ (Icc a b) = 1)
+    : ∀ n, μ (Icc (bisect μ a b n).1 (bisect μ a b n).2) = 1
   | 0 => by simpa [bisect] using hμ
   | n + 1 =>
-      bisectStep_measure_one μ h01 (bisect_fst_le_snd μ hab n) (bisect_measure_one h01 hab hμ n)
+    bisectStep_measure_one μ h01 (bisect_fst_le_snd μ hab n) (bisect_measure_one h01 hab hμ n)
 
 /-- The half discarded at each bisection step has measure `0`. -/
 lemma bisect_diff_measure_zero
     (h01 : ∀ E : Set ℝ, MeasurableSet E → μ E = 0 ∨ μ E = 1)
-    {a b : ℝ} (hab : a ≤ b) (hμ : μ (Icc a b) = 1) (n : ℕ) :
-    μ (Icc (bisect μ a b n).1 (bisect μ a b n).2 \
-        Icc (bisect μ a b (n + 1)).1 (bisect μ a b (n + 1)).2) = 0 := by
+    {a b : ℝ} (hab : a ≤ b) (hμ : μ (Icc a b) = 1)
+    (n : ℕ)
+    : μ
+        (Icc (bisect μ a b n).1 (bisect μ a b n).2
+          \ Icc (bisect μ a b (n + 1)).1 (bisect μ a b (n + 1)).2)
+      = 0 := by
   rw [μ.toVectorMeasure.of_sdiff measurableSet_Icc measurableSet_Icc (bisect_subset μ hab n),
     bisect_measure_one μ h01 hab hμ (n + 1), bisect_measure_one μ h01 hab hμ n, sub_self]
 
@@ -193,87 +199,84 @@ lemma bisectSnd_le_start (hab : a ≤ b) (n : ℕ) : (bisect μ a b n).2 ≤ b :
 lemma bisectFst_ge_start (hab : a ≤ b) (n : ℕ) : a ≤ (bisect μ a b n).1 :=
   (by simp [bisect] : a = (bisect μ a b 0).1) ▸ bisectFst_mono μ hab (Nat.zero_le n)
 
-lemma bddAbove_bisectFst (hab : a ≤ b) :
-    BddAbove (Set.range (fun n => (bisect μ a b n).1)) :=
+lemma bddAbove_bisectFst (hab : a ≤ b) : BddAbove (Set.range (fun n => (bisect μ a b n).1)) :=
   ⟨b, by rintro _ ⟨n, rfl⟩; exact (bisect_fst_le_snd μ hab n).trans (bisectSnd_le_start μ hab n)⟩
 
-lemma bddBelow_bisectSnd (hab : a ≤ b) :
-    BddBelow (Set.range (fun n => (bisect μ a b n).2)) :=
+lemma bddBelow_bisectSnd (hab : a ≤ b) : BddBelow (Set.range (fun n => (bisect μ a b n).2)) :=
   ⟨a, by rintro _ ⟨n, rfl⟩; exact (bisectFst_ge_start μ hab n).trans (bisect_fst_le_snd μ hab n)⟩
 
 /-- The limit point of the bisection. -/
 noncomputable def bisectPoint (_hab : a ≤ b) : ℝ := ⨆ n, (bisect μ a b n).1
 
-lemma tendsto_bisectFst (hab : a ≤ b) :
-    Tendsto (fun n => (bisect μ a b n).1) atTop (𝓝 (bisectPoint μ hab)) :=
+lemma tendsto_bisectFst (hab : a ≤ b)
+    : Tendsto (fun n => (bisect μ a b n).1) atTop (𝓝 (bisectPoint μ hab)) :=
   tendsto_atTop_ciSup (bisectFst_mono μ hab) (bddAbove_bisectFst μ hab)
 
-lemma tendsto_bisectSub (a b : ℝ) :
-    Tendsto (fun n => (bisect μ a b n).2 - (bisect μ a b n).1) atTop (𝓝 0) := by
-  have heq : (fun n => (bisect μ a b n).2 - (bisect μ a b n).1) =
-      (fun n : ℕ => (b - a) / 2 ^ n) := funext (bisect_sub μ a b)
+lemma tendsto_bisectSub (a b : ℝ)
+    : Tendsto (fun n => (bisect μ a b n).2 - (bisect μ a b n).1) atTop (𝓝 0) := by
+  have heq : (fun n => (bisect μ a b n).2 - (bisect μ a b n).1) = (fun n : ℕ => (b - a) / 2 ^ n) :=
+    funext (bisect_sub μ a b)
   rw [heq]
-  simpa using tendsto_const_nhds.div_atTop
-    (tendsto_pow_atTop_atTop_of_one_lt (by norm_num : (1 : ℝ) < 2))
+  simpa using
+    tendsto_const_nhds.div_atTop (tendsto_pow_atTop_atTop_of_one_lt (by norm_num : (1 : ℝ) < 2))
 
-lemma tendsto_bisectSnd (hab : a ≤ b) :
-    Tendsto (fun n => (bisect μ a b n).2) atTop (𝓝 (bisectPoint μ hab)) := by
+lemma tendsto_bisectSnd (hab : a ≤ b)
+    : Tendsto (fun n => (bisect μ a b n).2) atTop (𝓝 (bisectPoint μ hab)) := by
   have h := (tendsto_bisectSub μ a b).add (tendsto_bisectFst μ hab)
   simp only [zero_add] at h
   refine h.congr (fun n => ?_)
   ring
 
-lemma bisectFst_le_bisectPoint (hab : a ≤ b) (n : ℕ) :
-    (bisect μ a b n).1 ≤ bisectPoint μ hab :=
+lemma bisectFst_le_bisectPoint (hab : a ≤ b) (n : ℕ) : (bisect μ a b n).1 ≤ bisectPoint μ hab :=
   le_ciSup (bddAbove_bisectFst μ hab) n
 
-lemma bisectPoint_le_bisectSnd (hab : a ≤ b) (n : ℕ) :
-    bisectPoint μ hab ≤ (bisect μ a b n).2 := by
+lemma bisectPoint_le_bisectSnd (hab : a ≤ b) (n : ℕ) : bisectPoint μ hab ≤ (bisect μ a b n).2 := by
   have hanti := bisectSnd_anti μ hab
   have hlim := tendsto_bisectSnd μ hab
   exact le_of_tendsto hlim (Filter.eventually_atTop.mpr ⟨n, fun m hm => hanti hm⟩)
 
 /-- The bisection intervals shrink to exactly the bisection point. -/
-lemma iInter_bisectIcc (hab : a ≤ b) :
-    ⋂ n, Icc (bisect μ a b n).1 (bisect μ a b n).2 = {bisectPoint μ hab} := by
+lemma iInter_bisectIcc (hab : a ≤ b)
+    : ⋂ n, Icc (bisect μ a b n).1 (bisect μ a b n).2 = {bisectPoint μ hab} := by
   ext x
   simp only [Set.mem_iInter, Set.mem_Icc, Set.mem_singleton_iff]
   constructor
   · intro hx
     have h1 : bisectPoint μ hab ≤ x :=
-      le_of_tendsto (tendsto_bisectFst μ hab)
-        (Filter.Eventually.of_forall (fun n => (hx n).1))
+      le_of_tendsto (tendsto_bisectFst μ hab) (Filter.Eventually.of_forall (fun n => (hx n).1))
     have h2 : x ≤ bisectPoint μ hab :=
-      ge_of_tendsto (tendsto_bisectSnd μ hab)
-        (Filter.Eventually.of_forall (fun n => (hx n).2))
+      ge_of_tendsto (tendsto_bisectSnd μ hab) (Filter.Eventually.of_forall (fun n => (hx n).2))
     linarith
   · rintro rfl
     exact fun n => ⟨bisectFst_le_bisectPoint μ hab n, bisectPoint_le_bisectSnd μ hab n⟩
 
-/-- **The bisection point carries the full measure.** Since every bisection interval has measure
+/--
+**The bisection point carries the full measure.** Since every bisection interval has measure
 `1` and the intervals shrink to exactly `{bisectPoint}`, continuity from above (`Mathlib`'s
-`tendsto_vectorMeasure_iInter_atTop_nat`) forces `μ {bisectPoint} = 1`. -/
+`tendsto_vectorMeasure_iInter_atTop_nat`) forces `μ {bisectPoint} = 1`.
+-/
 lemma measure_singleton_bisectPoint
-    (h01 : ∀ E : Set ℝ, MeasurableSet E → μ E = 0 ∨ μ E = 1) (hab : a ≤ b)
-    (hμ : μ (Icc a b) = 1) :
-    μ {bisectPoint μ hab} = 1 := by
+    (h01 : ∀ E : Set ℝ, MeasurableSet E → μ E = 0 ∨ μ E = 1) (hab : a ≤ b) (hμ : μ (Icc a b) = 1)
+    : μ {bisectPoint μ hab} = 1 := by
   have hanti : Antitone (fun n => Icc (bisect μ a b n).1 (bisect μ a b n).2) :=
     antitone_nat_of_succ_le (fun n => bisect_subset μ hab n)
-  have hmeas : ∀ n, MeasurableSet (Icc (bisect μ a b n).1 (bisect μ a b n).2) :=
-    fun _ => measurableSet_Icc
+  have hmeas : ∀ n, MeasurableSet (Icc (bisect μ a b n).1 (bisect μ a b n).2) := fun _ =>
+    measurableSet_Icc
   have htendsto := μ.toVectorMeasure.tendsto_vectorMeasure_iInter_atTop_nat hanti hmeas
   rw [iInter_bisectIcc μ hab] at htendsto
-  have hconst : (fun n => μ (Icc (bisect μ a b n).1 (bisect μ a b n).2)) =
-      fun _ : ℕ => (1 : H →WOT[ℂ] H) := funext (bisect_measure_one μ h01 hab hμ)
+  have hconst
+      : (fun n => μ (Icc (bisect μ a b n).1 (bisect μ a b n).2)) = fun _ : ℕ => (1 : H →WOT[ℂ] H) :=
+    funext (bisect_measure_one μ h01 hab hμ)
   rw [hconst] at htendsto
   exact tendsto_nhds_unique htendsto tendsto_const_nhds
 
-/-- **A `{0, 1}`-valued measure with bounded support is a point mass**: every measurable set
-avoiding some point `r` has measure `0`. -/
+/--
+**A `{0, 1}`-valued measure with bounded support is a point mass**: every measurable set
+avoiding some point `r` has measure `0`.
+-/
 lemma exists_forall_notMem_measure_eq_zero
-    (h01 : ∀ E : Set ℝ, MeasurableSet E → μ E = 0 ∨ μ E = 1) (hab : a ≤ b)
-    (hμ : μ (Icc a b) = 1) :
-    ∃ r : ℝ, μ {r} = 1 ∧ ∀ E : Set ℝ, MeasurableSet E → r ∉ E → μ E = 0 := by
+    (h01 : ∀ E : Set ℝ, MeasurableSet E → μ E = 0 ∨ μ E = 1) (hab : a ≤ b) (hμ : μ (Icc a b) = 1)
+    : ∃ r : ℝ, μ {r} = 1 ∧ ∀ E : Set ℝ, MeasurableSet E → r ∉ E → μ E = 0 := by
   refine ⟨bisectPoint μ hab, measure_singleton_bisectPoint μ h01 hab hμ, fun E hE hrE => ?_⟩
   have hinter : E ∩ {bisectPoint μ hab} = (∅ : Set ℝ) := by
     rw [Set.inter_singleton_eq_empty]; exact hrE
@@ -299,16 +302,19 @@ variable {H : Type*} [NormedAddCommGroup H] [InnerProductSpace ℂ H] [CompleteS
 
 open scoped InnerProductSpace
 
-/-- **Schur's-lemma capstone.** If every Borel spectral projection of a bounded self-adjoint
+/--
+**Schur's-lemma capstone.** If every Borel spectral projection of a bounded self-adjoint
 operator `S` is trivial (`0` or `1`), `S` is a scalar multiple of the identity — without ever
 separately identifying `spectrum ℝ S`. Combined with irreducibility forcing every spectral
-projection to be `0` or `1`, this finishes Schur's lemma for a Weyl-family representation. -/
+projection to be `0` or `1`, this finishes Schur's lemma for a Weyl-family representation.
+-/
 lemma eq_smul_one_of_forall_spectralMeasure_eq_zero_or_one
     (S : H →L[ℂ] H) (hSA : IsSelfAdjoint S)
-    (h01 : ∀ E : Set ℝ, MeasurableSet E →
-      boundedSelfAdjointSpectralMeasure S hSA E = 0 ∨
-        boundedSelfAdjointSpectralMeasure S hSA E = 1) :
-    ∃ c : ℂ, S = c • (1 : H →L[ℂ] H) := by
+    (h01 : ∀ E : Set ℝ,
+      MeasurableSet E
+        → boundedSelfAdjointSpectralMeasure S hSA E = 0
+          ∨ boundedSelfAdjointSpectralMeasure S hSA E = 1)
+    : ∃ c : ℂ, S = c • (1 : H →L[ℂ] H) := by
   set μ := boundedSelfAdjointSpectralMeasure S hSA with hμ_def
   obtain ⟨C, hC⟩ := exists_boundedSelfAdjointSpectralSupport S hSA
   have hCicc : μ (Icc (-C) C) = 1 := by
@@ -316,8 +322,9 @@ lemma eq_smul_one_of_forall_spectralMeasure_eq_zero_or_one
     have heq := μ.toVectorMeasure.of_compl (measurableSet_Icc (a := -C) (b := C))
     rw [hcompl, μ.univ] at heq
     exact (sub_eq_zero.mp heq.symm).symm
-  obtain ⟨r, hr1, hr0⟩ := WOTSpectralMeasure.exists_forall_notMem_measure_eq_zero μ h01
-    (a := -C) (b := C) (by linarith [hC.1]) hCicc
+  obtain ⟨r, hr1, hr0⟩ :=
+    WOTSpectralMeasure.exists_forall_notMem_measure_eq_zero μ h01 (a := -C) (b := C)
+      (by linarith [hC.1]) hCicc
   refine ⟨(r : ℂ), ?_⟩
   have hSx : ∀ x : H, S x = (r : ℂ) • x := by
     intro x
@@ -340,20 +347,20 @@ lemma eq_smul_one_of_forall_spectralMeasure_eq_zero_or_one
           zero_apply]
         exact hν0 _ (hF.inter (measurableSet_singleton r).compl) (fun h => h.2 rfl)
       have hvar0 : ν.variation {r}ᶜ = 0 := by
-        have hveq := MeasureTheory.VectorMeasure.variation_restrict
-          (μ := ν) (measurableSet_singleton r).compl
+        have hveq :=
+          MeasureTheory.VectorMeasure.variation_restrict (μ := ν) (measurableSet_singleton r).compl
         rw [hrestr0, MeasureTheory.VectorMeasure.variation_zero] at hveq
         have h2 := congrArg (fun m : MeasureTheory.Measure ℝ => m Set.univ) hveq.symm
         simpa [MeasureTheory.Measure.restrict_apply' (measurableSet_singleton r).compl] using h2
       have hae : ({r} : Set ℝ) =ᵐ[ν.variation] (Set.univ : Set ℝ) := by
         rw [Filter.eventuallyEqSet_iff, MeasureTheory.ae_iff]
-        have hset : {z : ℝ | ¬(z ∈ ({r} : Set ℝ) ↔ z ∈ (Set.univ : Set ℝ))} = {r}ᶜ := by
-          ext z; simp
+        have hset : {z : ℝ | ¬(z ∈ ({r} : Set ℝ) ↔ z ∈ (Set.univ : Set ℝ))} = {r}ᶜ := by ext z; simp
         rw [hset]
         exact hvar0
-      have hcongr := MeasureTheory.VectorMeasure.setIntegral_congr_set
-        (B := ContinuousLinearMap.lsmul ℝ ℂ) (f := fun z : ℝ => (z : ℂ)) (μ := ν)
-        (measurableSet_singleton r) MeasurableSet.univ hae
+      have hcongr :=
+        MeasureTheory.VectorMeasure.setIntegral_congr_set (B := ContinuousLinearMap.lsmul ℝ ℂ)
+          (f := fun z : ℝ => (z : ℂ))
+          (μ := ν) (measurableSet_singleton r) MeasurableSet.univ hae
       unfold WOTSpectralMeasure.complexWeakIntegral
       rw [← MeasureTheory.VectorMeasure.setIntegral_univ, ← hcongr,
         MeasureTheory.VectorMeasure.integral_singleton]

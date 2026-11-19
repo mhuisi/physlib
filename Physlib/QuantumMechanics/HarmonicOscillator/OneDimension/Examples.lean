@@ -45,26 +45,24 @@ noncomputable def Q : HarmonicOscillator where
 -- Commenting out the checks to reduce noise in the output
 -- #check Q.schrodingerOperator_eigenfunction 0
 
-/-- The explicit pointwise form of the time-independent Schrödinger equation
-for the ground state `n = 0`. -/
-example :
-    ∀ x, Q.schrodingerOperator (Q.eigenfunction 0) x =
-      (Q.eigenValue 0) * Q.eigenfunction 0 x :=
+/--
+The explicit pointwise form of the time-independent Schrödinger equation
+for the ground state `n = 0`.
+-/
+example
+    : ∀ x, Q.schrodingerOperator (Q.eigenfunction 0) x = (Q.eigenValue 0) * Q.eigenfunction 0 x :=
   Q.schrodingerOperator_eigenfunction 0
 
 /-- The explicit formula for the ground-state energy for `Q`. -/
-example :
-    Q.eigenValue 0 = ((0 : ℝ) + 1 / 2) * ℏ * Q.ω := by
+example : Q.eigenValue 0 = ((0 : ℝ) + 1 / 2) * ℏ * Q.ω := by
   simp [QuantumMechanics.OneDimension.HarmonicOscillator.eigenValue]
 
 /-- Explicit formula for the ground-state wavefunction for `Q`. -/
-example :
-    Q.eigenfunction 0 =
-        fun x : ℝ =>
-          (1 / √(√Real.pi * Q.ξ)) * Complex.exp (- x^2 / (2 * Q.ξ^2)) := by
-    -- This is exactly eigenfunction_zero specialized to our Q.
-    simpa using
-      (QuantumMechanics.OneDimension.HarmonicOscillator.eigenfunction_zero (Q := Q))
+example
+    : Q.eigenfunction 0
+      = fun x : ℝ => (1 / √(√Real.pi * Q.ξ)) * Complex.exp (- x ^ 2 / (2 * Q.ξ ^ 2)) := by
+  -- This is exactly eigenfunction_zero specialized to our Q.
+  simpa using (QuantumMechanics.OneDimension.HarmonicOscillator.eigenfunction_zero (Q := Q))
 
 end Examples
 end HarmonicOscillator

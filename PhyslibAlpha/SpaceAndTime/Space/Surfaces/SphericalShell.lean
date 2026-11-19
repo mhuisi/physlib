@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Joseph Tooby-Smith
 -/
 module
+
 public import Physlib.SpaceAndTime.Space.ConstantSliceDist
 public import Physlib.SpaceAndTime.Space.Norm.Basic
 public import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
@@ -42,8 +43,10 @@ function to its integral against a mass, charge or current distribution on the s
 open SchwartzMap NNReal
 noncomputable section
 open Physlib Distribution
-variable (𝕜 : Type) {E F F' : Type} [RCLike 𝕜] [NormedAddCommGroup E] [NormedAddCommGroup F]
-  [NormedAddCommGroup F'] [NormedSpace ℝ E] [NormedSpace ℝ F]
+variable
+  (𝕜 : Type)
+  {E F F' : Type} [RCLike 𝕜] [NormedAddCommGroup E] [NormedAddCommGroup F] [NormedAddCommGroup F']
+  [NormedSpace ℝ E] [NormedSpace ℝ F]
 
 namespace Space
 
@@ -71,8 +74,8 @@ lemma sphericalShell_measurableEmbedding (d : ℕ) : MeasurableEmbedding (spheri
   · exact sphericalShell_injective d
 
 @[simp]
-lemma norm_sphericalShell (d : ℕ) (x : Metric.sphere (0 : Space d) 1) :
-    ‖sphericalShell d x‖ = 1 := by
+lemma norm_sphericalShell (d : ℕ) (x : Metric.sphere (0 : Space d) 1)
+    : ‖sphericalShell d x‖ = 1 := by
   simp [sphericalShell, Metric.sphere]
 
 /-!
@@ -85,8 +88,8 @@ lemma norm_sphericalShell (d : ℕ) (x : Metric.sphere (0 : Space d) 1) :
 def sphericalShellMeasure (d : ℕ) : Measure (Space d) :=
   MeasureTheory.Measure.map (sphericalShell d) (MeasureTheory.Measure.toSphere volume)
 
-instance sphericalShellMeasure_hasTemperateGrowth (d : ℕ) :
-    (sphericalShellMeasure d).HasTemperateGrowth := by
+instance sphericalShellMeasure_hasTemperateGrowth (d : ℕ)
+    : (sphericalShellMeasure d).HasTemperateGrowth := by
   rw [sphericalShellMeasure]
   refine { exists_integrable := ?_ }
   use 0
@@ -98,22 +101,23 @@ instance sphericalShellMeasure_hasTemperateGrowth (d : ℕ) :
 
 -/
 
-/-- The distribution associated with a spherical shell.
-  One can roughly think of this distribution as the distribution which
-  takes test functions `f (r)` to `∫ d³r f(r) ρ(r)` where `ρ(r)` is the
-  mass, charge or current etc. distribution. -/
-def sphericalShellDist (d : ℕ) : (Space d) →d[ℝ] ℝ  :=
+/--
+The distribution associated with a spherical shell.
+One can roughly think of this distribution as the distribution which
+takes test functions `f (r)` to `∫ d³r f(r) ρ(r)` where `ρ(r)` is the
+mass, charge or current etc. distribution.
+-/
+def sphericalShellDist (d : ℕ) : (Space d) →d[ℝ] ℝ :=
   SchwartzMap.integralCLM ℝ (sphericalShellMeasure d)
 
-
-lemma sphericalShellDist_apply_eq_integral_sphericalShellMeasure (d : ℕ) (f : 𝓢(Space d, ℝ)) :
-    sphericalShellDist d f = ∫ x, f x ∂sphericalShellMeasure d := by
+lemma sphericalShellDist_apply_eq_integral_sphericalShellMeasure (d : ℕ) (f : 𝓢(Space d, ℝ))
+    : sphericalShellDist d f = ∫ x, f x ∂sphericalShellMeasure d := by
   rw [sphericalShellDist, SchwartzMap.integralCLM_apply]
 
-lemma sphericalShellDist_apply_eq_integral_sphere_volume (d : ℕ) (f : 𝓢(Space d, ℝ)) :
-    sphericalShellDist d f =
-    ∫ x, f (sphericalShell d x) ∂(MeasureTheory.Measure.toSphere volume) := by
+lemma sphericalShellDist_apply_eq_integral_sphere_volume (d : ℕ) (f : 𝓢(Space d, ℝ))
+    : sphericalShellDist d f
+      = ∫ x, f (sphericalShell d x) ∂(MeasureTheory.Measure.toSphere volume) := by
   rw [sphericalShellDist_apply_eq_integral_sphericalShellMeasure, sphericalShellMeasure,
-   MeasurableEmbedding.integral_map (sphericalShell_measurableEmbedding d)]
+    MeasurableEmbedding.integral_map (sphericalShell_measurableEmbedding d)]
 
 end Space

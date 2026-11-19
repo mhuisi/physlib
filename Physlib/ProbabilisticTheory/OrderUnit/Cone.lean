@@ -46,8 +46,7 @@ open scoped NNReal
 -/
 
 /-- The positive pointed cone of an ordered real module. -/
-abbrev PosCone (E : Type*) [OrderedVectorSpace E] : PointedCone ℝ E :=
-  PointedCone.positive ℝ E
+abbrev PosCone (E : Type*) [OrderedVectorSpace E] : PointedCone ℝ E := PointedCone.positive ℝ E
 
 namespace PosCone
 

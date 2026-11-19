@@ -65,19 +65,15 @@ relations of the Pauli matrices.
 
 -/
 
-lemma pauliMatrix_mul_smul_add_swap (μ ν : Fin 1 ⊕ Fin 3) :
-    σ μ * (η ν ν • σ ν) + σ ν * (η μ μ • σ μ) =
-      (2 * η μ ν) • (1 : Matrix (Fin 2) (Fin 2) ℂ) := by
-  fin_cases μ <;> fin_cases ν <;>
-    simp [PauliMatrix.pauliMatrix_mul_self, two_smul,
-      PauliMatrix.pauliMatrix_inl_zero_eq_one]
+lemma pauliMatrix_mul_smul_add_swap (μ ν : Fin 1 ⊕ Fin 3)
+    : σ μ * (η ν ν • σ ν) + σ ν * (η μ μ • σ μ) = (2 * η μ ν) • (1 : Matrix (Fin 2) (Fin 2) ℂ) := by
+  fin_cases μ <;> fin_cases ν
+    <;> simp [PauliMatrix.pauliMatrix_mul_self, two_smul, PauliMatrix.pauliMatrix_inl_zero_eq_one]
 
-lemma smul_pauliMatrix_mul_add_swap (μ ν : Fin 1 ⊕ Fin 3) :
-    (η μ μ • σ μ) * σ ν + (η ν ν • σ ν) * σ μ =
-      (2 * η μ ν) • (1 : Matrix (Fin 2) (Fin 2) ℂ) := by
-  fin_cases μ <;> fin_cases ν <;>
-    simp [PauliMatrix.pauliMatrix_mul_self, two_smul,
-      PauliMatrix.pauliMatrix_inl_zero_eq_one]
+lemma smul_pauliMatrix_mul_add_swap (μ ν : Fin 1 ⊕ Fin 3)
+    : (η μ μ • σ μ) * σ ν + (η ν ν • σ ν) * σ μ = (2 * η μ ν) • (1 : Matrix (Fin 2) (Fin 2) ℂ) := by
+  fin_cases μ <;> fin_cases ν
+    <;> simp [PauliMatrix.pauliMatrix_mul_self, two_smul, PauliMatrix.pauliMatrix_inl_zero_eq_one]
 
 /-!
 
@@ -85,17 +81,19 @@ lemma smul_pauliMatrix_mul_add_swap (μ ν : Fin 1 ⊕ Fin 3) :
 
 -/
 
-/-- **The Clifford algebra relation** of the Dirac γ matrices:
-  `γ^μ γ^ν + γ^ν γ^μ = 2 η^{μν} 1`.  This is the algebraic identity that
-  makes the Dirac operator a square root of the wave operator, and hence the
-  Dirac equation relativistic. -/
-lemma gammaMatrix_mul_add_swap (μ ν : Fin 1 ⊕ Fin 3) :
-    gammaMatrix μ * gammaMatrix ν + gammaMatrix ν * gammaMatrix μ =
-      (2 * η μ ν) • (1 : Matrix (Fin 2 ⊕ Fin 2) (Fin 2 ⊕ Fin 2) ℂ) := by
-  rw [gammaMatrix, gammaMatrix, Matrix.fromBlocks_multiply,
-    Matrix.fromBlocks_multiply, Matrix.fromBlocks_add,
-    show ((2 * η μ ν) • (1 : Matrix (Fin 2 ⊕ Fin 2) (Fin 2 ⊕ Fin 2) ℂ)) =
-      Matrix.fromBlocks ((2 * η μ ν) • 1) 0 0 ((2 * η μ ν) • 1) by
+/--
+**The Clifford algebra relation** of the Dirac γ matrices:
+`γ^μ γ^ν + γ^ν γ^μ = 2 η^{μν} 1`.  This is the algebraic identity that
+makes the Dirac operator a square root of the wave operator, and hence the
+Dirac equation relativistic.
+-/
+lemma gammaMatrix_mul_add_swap (μ ν : Fin 1 ⊕ Fin 3)
+    : gammaMatrix μ * gammaMatrix ν + gammaMatrix ν * gammaMatrix μ
+      = (2 * η μ ν) • (1 : Matrix (Fin 2 ⊕ Fin 2) (Fin 2 ⊕ Fin 2) ℂ) := by
+  rw [gammaMatrix, gammaMatrix, Matrix.fromBlocks_multiply, Matrix.fromBlocks_multiply,
+    Matrix.fromBlocks_add,
+    show ((2 * η μ ν) • (1 : Matrix (Fin 2 ⊕ Fin 2) (Fin 2 ⊕ Fin 2) ℂ))
+        = Matrix.fromBlocks ((2 * η μ ν) • 1) 0 0 ((2 * η μ ν) • 1) by
       rw [← Matrix.fromBlocks_one, Matrix.fromBlocks_smul, smul_zero]]
   congr 1
   · simpa using pauliMatrix_mul_smul_add_swap μ ν
@@ -104,18 +102,17 @@ lemma gammaMatrix_mul_add_swap (μ ν : Fin 1 ⊕ Fin 3) :
   · simpa using smul_pauliMatrix_mul_add_swap μ ν
 
 /-- The square of a γ matrix: `(γ^μ)² = η^{μμ} 1` (no sum). -/
-lemma gammaMatrix_sq (μ : Fin 1 ⊕ Fin 3) :
-    gammaMatrix μ * gammaMatrix μ =
-      (η μ μ) • (1 : Matrix (Fin 2 ⊕ Fin 2) (Fin 2 ⊕ Fin 2) ℂ) := by
+lemma gammaMatrix_sq (μ : Fin 1 ⊕ Fin 3)
+    : gammaMatrix μ * gammaMatrix μ = (η μ μ) • (1 : Matrix (Fin 2 ⊕ Fin 2) (Fin 2 ⊕ Fin 2) ℂ) := by
   rw [gammaMatrix, Matrix.fromBlocks_multiply,
-    show ((η μ μ) • (1 : Matrix (Fin 2 ⊕ Fin 2) (Fin 2 ⊕ Fin 2) ℂ)) =
-      Matrix.fromBlocks ((η μ μ) • 1) 0 0 ((η μ μ) • 1) by
+    show ((η μ μ) • (1 : Matrix (Fin 2 ⊕ Fin 2) (Fin 2 ⊕ Fin 2) ℂ))
+        = Matrix.fromBlocks ((η μ μ) • 1) 0 0 ((η μ μ) • 1) by
       rw [← Matrix.fromBlocks_one, Matrix.fromBlocks_smul, smul_zero]]
   congr 1 <;> simp [PauliMatrix.pauliMatrix_mul_self]
 
 /-- The γ matrices of distinct indices anticommute. -/
-lemma gammaMatrix_anticommute {μ ν : Fin 1 ⊕ Fin 3} (h : μ ≠ ν) :
-    gammaMatrix μ * gammaMatrix ν = -(gammaMatrix ν * gammaMatrix μ) := by
+lemma gammaMatrix_anticommute {μ ν : Fin 1 ⊕ Fin 3} (h : μ ≠ ν)
+    : gammaMatrix μ * gammaMatrix ν = -(gammaMatrix ν * gammaMatrix μ) := by
   have hc := gammaMatrix_mul_add_swap μ ν
   rw [off_diag_zero h] at hc
   simp only [mul_zero, zero_smul] at hc
@@ -128,40 +125,34 @@ lemma gammaMatrix_anticommute {μ ν : Fin 1 ⊕ Fin 3} (h : μ ≠ ν) :
 -/
 
 /-- `γ⁰` in the chiral representation is the block off-diagonal identity. -/
-lemma gammaMatrix_inl_zero :
-    gammaMatrix (Sum.inl 0) = Matrix.fromBlocks 0 1 1 0 := by
+lemma gammaMatrix_inl_zero : gammaMatrix (Sum.inl 0) = Matrix.fromBlocks 0 1 1 0 := by
   rw [gammaMatrix]
   simp [PauliMatrix.pauliMatrix_inl_zero_eq_one]
 
 /-- The contraction matrices of the kinetic term are `γ⁰ γ^μ`. -/
-lemma kineticGamma_eq_gammaMatrix_mul (μ : Fin 1 ⊕ Fin 3) :
-    kineticGamma μ = gammaMatrix (Sum.inl 0) * gammaMatrix μ := by
+lemma kineticGamma_eq_gammaMatrix_mul (μ : Fin 1 ⊕ Fin 3)
+    : kineticGamma μ = gammaMatrix (Sum.inl 0) * gammaMatrix μ := by
   rw [kineticGamma, gammaMatrix, gammaMatrix, Matrix.fromBlocks_multiply]
   simp [PauliMatrix.pauliMatrix_inl_zero_eq_one]
 
-/-- The contraction matrices `γ⁰ γ^μ` of the kinetic term are self-adjoint;
-  this is what makes the Dirac kinetic term hermitian up to a total
-  derivative. -/
-lemma kineticGamma_conjTranspose (μ : Fin 1 ⊕ Fin 3) :
-    (kineticGamma μ)ᴴ = kineticGamma μ := by
-  fin_cases μ <;>
-    simp [kineticGamma, Matrix.fromBlocks_conjTranspose,
-      PauliMatrix.pauliMatrix_selfAdjoint]
+/--
+The contraction matrices `γ⁰ γ^μ` of the kinetic term are self-adjoint;
+this is what makes the Dirac kinetic term hermitian up to a total
+derivative.
+-/
+lemma kineticGamma_conjTranspose (μ : Fin 1 ⊕ Fin 3) : (kineticGamma μ)ᴴ = kineticGamma μ := by
+  fin_cases μ
+    <;> simp [kineticGamma, Matrix.fromBlocks_conjTranspose, PauliMatrix.pauliMatrix_selfAdjoint]
 
 /-- `γ⁰` is self-adjoint. -/
-lemma gammaMatrix_zero_conjTranspose :
-    (gammaMatrix (Sum.inl 0))ᴴ = gammaMatrix (Sum.inl 0) := by
-  simp [gammaMatrix, Matrix.fromBlocks_conjTranspose,
-    PauliMatrix.pauliMatrix_inl_zero_eq_one]
+lemma gammaMatrix_zero_conjTranspose : (gammaMatrix (Sum.inl 0))ᴴ = gammaMatrix (Sum.inl 0) := by
+  simp [gammaMatrix, Matrix.fromBlocks_conjTranspose, PauliMatrix.pauliMatrix_inl_zero_eq_one]
 
 /-- The hermiticity relation of the γ matrices, `(γ^μ)† = γ⁰ γ^μ γ⁰`. -/
-lemma gammaMatrix_conjTranspose (μ : Fin 1 ⊕ Fin 3) :
-    (gammaMatrix μ)ᴴ =
-      gammaMatrix (Sum.inl 0) * gammaMatrix μ * gammaMatrix (Sum.inl 0) := by
-  fin_cases μ <;>
-    simp [gammaMatrix, Matrix.fromBlocks_conjTranspose,
-      Matrix.fromBlocks_multiply, PauliMatrix.pauliMatrix_selfAdjoint,
-      PauliMatrix.pauliMatrix_inl_zero_eq_one]
+lemma gammaMatrix_conjTranspose (μ : Fin 1 ⊕ Fin 3)
+    : (gammaMatrix μ)ᴴ = gammaMatrix (Sum.inl 0) * gammaMatrix μ * gammaMatrix (Sum.inl 0) := by
+  fin_cases μ <;> simp [gammaMatrix, Matrix.fromBlocks_conjTranspose, Matrix.fromBlocks_multiply,
+    PauliMatrix.pauliMatrix_selfAdjoint, PauliMatrix.pauliMatrix_inl_zero_eq_one]
 
 end JetAlgebra
 

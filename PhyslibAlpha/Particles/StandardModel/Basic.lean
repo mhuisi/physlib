@@ -65,8 +65,10 @@ namespace Model
 /-- The gauge group `SU(3) × SU(2) × U(1)`, as a list of factors. -/
 abbrev gauge : List FactorSpec := [.SU 3, .SU 2, .U1]
 
-/-- The local gauge data of the Standard Model gauge group: jets of `SU(3) × SU(2) × U(1)`
-  gauge transformations with their Lie algebra of jets. -/
+/--
+The local gauge data of the Standard Model gauge group: jets of `SU(3) × SU(2) × U(1)`
+gauge transformations with their Lie algebra of jets.
+-/
 noncomputable abbrev gaugeData := ofFactors gauge
 
 /-- The factors of the gauge group, as what the rows are charged under. -/
@@ -113,7 +115,7 @@ inductive Fields
   | e
   /-- The Higgs. -/
   | H
-  deriving DecidableEq, Repr
+deriving DecidableEq, Repr
 
 instance : Fintype Fields := ⟨{.q, .l, .u, .d, .e, .H}, fun x => by cases x <;> decide⟩
 
@@ -123,8 +125,10 @@ instance : Fintype Fields := ⟨{.q, .l, .u, .d, .e, .H}, fun x => by cases x <;
 
 -/
 
-/-- **The Standard Model table**: each field with its number of generations, three for the
-  fermions and one for the Higgs. -/
+/--
+**The Standard Model table**: each field with its number of generations, three for the
+fermions and one for the Higgs.
+-/
 def table : FieldData factors Fields
   | .q => (3, quarkDoublet)
   | .l => (3, leptonDoublet)
@@ -133,8 +137,10 @@ def table : FieldData factors Fields
   | .e => (3, leptonSinglet)
   | .H => (1, higgs)
 
-/-- **The field content of the Standard Model**: the fifteen fermionic species (five fields
-  in three generations) and the Higgs, as matter fields of `gaugeData`. -/
+/--
+**The field content of the Standard Model**: the fifteen fermionic species (five fields
+in three generations) and the Higgs, as matter fields of `gaugeData`.
+-/
 noncomputable def fieldData : GaugeFieldData gaugeData := table.toGaugeFieldData
 
 /-- The Standard Model has fifteen fermionic species. -/

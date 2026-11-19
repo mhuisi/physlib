@@ -41,8 +41,10 @@ namespace ThermodynamicCauchyFlow
 
 -/
 
-/-- A thermodynamic flow is isentropic when the entropy is materially conserved along the
-underlying fluid velocity field. -/
+/--
+A thermodynamic flow is isentropic when the entropy is materially conserved along the
+underlying fluid velocity field.
+-/
 def IsIsentropic (d : ℕ) (flow : ThermodynamicCauchyFlow d) : Prop :=
   ∀ t x, FluidFlow.materialDerivative d flow.toFluidFlow flow.entropy t x = 0
 

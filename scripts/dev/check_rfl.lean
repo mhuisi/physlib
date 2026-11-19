@@ -32,8 +32,10 @@ def name? (t : TacticInfo) : Option Name :=
   | Syntax.node _ n _ => some n
   | _ => none
 
-/-- Decide whether a tactic is "substantive",
-or is merely a tactic combinator (e.g. `by`, `;`, multiline tactics, parenthesized tactics). -/
+/--
+Decide whether a tactic is "substantive",
+or is merely a tactic combinator (e.g. `by`, `;`, multiline tactics, parenthesized tactics).
+-/
 def isSubstantive (t : TacticInfo) : Bool :=
   match t.name? with
   | none => false
@@ -57,37 +59,40 @@ def visitTacticInfo (file : FilePath) (ci : ContextInfo) (ti : TacticInfo) : Met
   let stx := ti.stx
   match stx.getHeadInfo? with
   | .some (.synthetic ..) =>
-     -- Not actual concrete syntax the user wrote. Ignore.
+    -- Not actual concrete syntax the user wrote. Ignore.
     return ()
-  | _ =>  pure ()
-  let some sp := stx.getPos? | return ()
+  | _ => pure ()
+  let some sp := stx.getPos?
+    | return ()
   let startPosition := ci.fileMap.toPosition sp
-  let some ep := stx.getTailPos? | return ()
+  let some ep := stx.getTailPos?
+    | return ()
   let s := Substring.mk ci.fileMap.source sp ep
   for g in ti.goalsBefore do
     (← IO.getStdout).flush
     let mctx := ti.mctxBefore
-    --let doprint : MetaM _ := Meta.ppGoal g
-    --let x ← doprint.run' (s := { mctx := mctx })
-    let dotac := Term.TermElabM.run (ctx := {declName? := ci.parentDecl?})
-              <| Tactic.run g (Tactic.evalTactic  (← `(tactic| rfl)))
+    -- let doprint : MetaM _ := Meta.ppGoal g
+    -- let x ← doprint.run' (s := { mctx := mctx })
+    let dotac :=
+      Term.TermElabM.run (ctx := { declName? := ci.parentDecl? }) <|
+        Tactic.run g (Tactic.evalTactic (← `(tactic| rfl)))
     try
       let ((mvars, _tstate), _mstate) ← dotac.run {} { mctx := mctx }
-      if mvars.length == 0 ∧ s.toString ≠ "rfl"
-      then
+      if mvars.length == 0 ∧ s.toString ≠ "rfl" then
         println! "./{file}:{startPosition.line}"
       pure ()
     catch _e =>
       pure ()
     pure ()
 
-
-/- See conversation here: https://leanprover.zulipchat.com/#narrow/stream/270676-lean4/topic/Memory.20increase.20in.20loops.2E -/
+/-
+See conversation here: https://leanprover.zulipchat.com/#narrow/stream/270676-lean4/topic/Memory.20increase.20in.20loops.2E
+-/
 unsafe def processAllFiles : IO Unit := do
   let files ← allFilePaths
-  let tasks := files.map fun f =>
-    ((IO.asTask $ IO.Process.run
-    {cmd := "lake", args := #["exe", "check_rfl", f.toString]}), f)
+  let tasks :=
+    files.map fun f =>
+      ((IO.asTask $ IO.Process.run { cmd := "lake", args := #["exe", "check_rfl", f.toString] }), f)
   (tasks.toList.indexesValues (fun _ => true)).forM fun (n, (t, path)) => do
     println! "{n} of {tasks.toList.length}: {path}"
     let tn ← IO.wait (← t)

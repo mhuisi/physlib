@@ -65,8 +65,9 @@ namespace ProbabilisticTheory
 
 namespace Representation
 
-variable {G K V W X : Type*} [Monoid G] [CommRing K]
-  [AddCommGroup V] [Module K V] [AddCommGroup W] [Module K W] [AddCommGroup X] [Module K X]
+variable
+  {G K V W X : Type*} [Monoid G] [CommRing K] [AddCommGroup V] [Module K V] [AddCommGroup W]
+  [Module K W] [AddCommGroup X] [Module K X]
 
 /-!
 
@@ -81,28 +82,30 @@ def sector (β : G →* Module.End K V) (χ : G → K) : Submodule K V where
   zero_mem' g := by simp
   smul_mem' c v hv g := by rw [map_smul, hv g, smul_comm]
 
-lemma mem_sector {β : G →* Module.End K V} {χ : G → K} {v : V} :
-    v ∈ sector β χ ↔ ∀ g, β g v = χ g • v := Iff.rfl
+lemma mem_sector {β : G →* Module.End K V} {χ : G → K} {v : V}
+    : v ∈ sector β χ ↔ ∀ g, β g v = χ g • v :=
+  Iff.rfl
 
-/-- The submodule `span {β g v - χ g • v}` whose quotient is the momentum fiber. It is the
-"coboundary" submodule of the twisted action. -/
+/--
+The submodule `span {β g v - χ g • v}` whose quotient is the momentum fiber. It is the
+"coboundary" submodule of the twisted action.
+-/
 def cobound (β : G →* Module.End K V) (χ : G → K) : Submodule K V :=
   Submodule.span K {w | ∃ g v, w = β g v - χ g • v}
 
-lemma sub_smul_mem_cobound (β : G →* Module.End K V) (χ : G → K) (g : G) (v : V) :
-    β g v - χ g • v ∈ cobound β χ :=
+lemma sub_smul_mem_cobound (β : G →* Module.End K V) (χ : G → K) (g : G) (v : V)
+    : β g v - χ g • v ∈ cobound β χ :=
   Submodule.subset_span ⟨g, v, rfl⟩
 
 /-- The momentum fiber of the character `χ`: `V` modulo the vectors `β g v - χ g • v`. -/
 abbrev Fiber (β : G →* Module.End K V) (χ : G → K) : Type _ := V ⧸ cobound β χ
 
 /-- The canonical projection `V → V(χ)`. -/
-def Fiber.mk (β : G →* Module.End K V) (χ : G → K) : V →ₗ[K] Fiber β χ :=
-  (cobound β χ).mkQ
+def Fiber.mk (β : G →* Module.End K V) (χ : G → K) : V →ₗ[K] Fiber β χ := (cobound β χ).mkQ
 
 /-- In the fiber, `g` acts as the scalar `χ g`. -/
-lemma Fiber.mk_action (β : G →* Module.End K V) (χ : G → K) (g : G) (v : V) :
-    Fiber.mk β χ (β g v) = χ g • Fiber.mk β χ v := by
+lemma Fiber.mk_action (β : G →* Module.End K V) (χ : G → K) (g : G) (v : V)
+    : Fiber.mk β χ (β g v) = χ g • Fiber.mk β χ v := by
   rw [← map_smul, ← sub_eq_zero, ← map_sub]
   exact (Submodule.Quotient.mk_eq_zero _).2 (sub_smul_mem_cobound β χ g v)
 
@@ -113,48 +116,52 @@ lemma Fiber.mk_action (β : G →* Module.End K V) (χ : G → K) (g : G) (v : V
 -/
 
 /-- A linear map intertwining two actions of the same monoid. -/
-def IsEquivariant (β : G →* Module.End K V) (β' : G →* Module.End K W)
-    (T : V →ₗ[K] W) : Prop :=
+def IsEquivariant (β : G →* Module.End K V) (β' : G →* Module.End K W) (T : V →ₗ[K] W) : Prop :=
   ∀ g v, T (β g v) = β' g (T v)
 
-variable {β : G →* Module.End K V} {β' : G →* Module.End K W} {β'' : G →* Module.End K X}
-  {T : V →ₗ[K] W} {S : W →ₗ[K] X} {χ : G → K}
+variable
+  {β : G →* Module.End K V} {β' : G →* Module.End K W} {β'' : G →* Module.End K X} {T : V →ₗ[K] W}
+  {S : W →ₗ[K] X} {χ : G → K}
 
 /-- Every equivariant linear map preserves each momentum sector. -/
-lemma IsEquivariant.mapsTo_sector (hT : IsEquivariant β β' T) {v : V}
-    (hv : v ∈ sector β χ) : T v ∈ sector β' χ := fun g => by
+lemma IsEquivariant.mapsTo_sector (hT : IsEquivariant β β' T) {v : V} (hv : v ∈ sector β χ)
+    : T v ∈ sector β' χ := fun g => by
   rw [← hT, hv g, map_smul]
 
 /-- The restriction of an equivariant map to a momentum sector. -/
-def IsEquivariant.sectorMap (hT : IsEquivariant β β' T) (χ : G → K) :
-    sector β χ →ₗ[K] sector β' χ :=
+def IsEquivariant.sectorMap (hT : IsEquivariant β β' T) (χ : G → K)
+    : sector β χ →ₗ[K] sector β' χ :=
   T.restrict fun _ hv => hT.mapsTo_sector hv
 
 @[simp]
-lemma IsEquivariant.coe_sectorMap (hT : IsEquivariant β β' T) (v : sector β χ) :
-    (hT.sectorMap χ v : W) = T v := rfl
+lemma IsEquivariant.coe_sectorMap (hT : IsEquivariant β β' T) (v : sector β χ)
+    : (hT.sectorMap χ v : W) = T v :=
+  rfl
 
-/-- An equivariant map sends the span defining the fiber of `V` into the span defining the fiber
-of `W`. -/
-lemma IsEquivariant.cobound_le_comap (hT : IsEquivariant β β' T) (χ : G → K) :
-    cobound β χ ≤ (cobound β' χ).comap T := by
+/--
+An equivariant map sends the span defining the fiber of `V` into the span defining the fiber
+of `W`.
+-/
+lemma IsEquivariant.cobound_le_comap (hT : IsEquivariant β β' T) (χ : G → K)
+    : cobound β χ ≤ (cobound β' χ).comap T := by
   refine Submodule.span_le.2 ?_
   rintro _ ⟨g, v, rfl⟩
   have : T (β g v - χ g • v) = β' g (T v) - χ g • T v := by rw [map_sub, map_smul, hT]
   simpa [this] using sub_smul_mem_cobound β' χ g (T v)
 
 /-- Every equivariant linear map induces a well-defined linear map on each momentum fiber. -/
-def IsEquivariant.fiberMap (hT : IsEquivariant β β' T) (χ : G → K) :
-    Fiber β χ →ₗ[K] Fiber β' χ :=
+def IsEquivariant.fiberMap (hT : IsEquivariant β β' T) (χ : G → K) : Fiber β χ →ₗ[K] Fiber β' χ :=
   Submodule.mapQ _ _ T (hT.cobound_le_comap χ)
 
 @[simp]
-lemma IsEquivariant.fiberMap_mk (hT : IsEquivariant β β' T) (χ : G → K) (v : V) :
-    hT.fiberMap χ (Fiber.mk β χ v) = Fiber.mk β' χ (T v) := rfl
+lemma IsEquivariant.fiberMap_mk (hT : IsEquivariant β β' T) (χ : G → K) (v : V)
+    : hT.fiberMap χ (Fiber.mk β χ v) = Fiber.mk β' χ (T v) :=
+  rfl
 
 /-- The fiber map is the unique map making the square with the projections commute. -/
-lemma IsEquivariant.fiberMap_comp_mk (hT : IsEquivariant β β' T) (χ : G → K) :
-    (hT.fiberMap χ).comp (Fiber.mk β χ) = (Fiber.mk β' χ).comp T := rfl
+lemma IsEquivariant.fiberMap_comp_mk (hT : IsEquivariant β β' T) (χ : G → K)
+    : (hT.fiberMap χ).comp (Fiber.mk β χ) = (Fiber.mk β' χ).comp T :=
+  rfl
 
 /-!
 
@@ -162,27 +169,28 @@ lemma IsEquivariant.fiberMap_comp_mk (hT : IsEquivariant β β' T) (χ : G → K
 
 -/
 
-lemma isEquivariant_id (β : G →* Module.End K V) : IsEquivariant β β LinearMap.id :=
-  fun _ _ => rfl
+lemma isEquivariant_id (β : G →* Module.End K V) : IsEquivariant β β LinearMap.id := fun _ _ => rfl
 
-lemma IsEquivariant.comp (hS : IsEquivariant β' β'' S) (hT : IsEquivariant β β' T) :
-    IsEquivariant β β'' (S ∘ₗ T) := fun g v => by
+lemma IsEquivariant.comp (hS : IsEquivariant β' β'' S) (hT : IsEquivariant β β' T)
+    : IsEquivariant β β'' (S ∘ₗ T) := fun g v => by
   simp [hT g v, hS g (T v)]
 
-lemma fiberMap_id (χ : G → K) :
-    (isEquivariant_id β).fiberMap χ = LinearMap.id := by
+lemma fiberMap_id (χ : G → K) : (isEquivariant_id β).fiberMap χ = LinearMap.id := by ext v; rfl
+
+lemma IsEquivariant.fiberMap_comp
+    (hS : IsEquivariant β' β'' S) (hT : IsEquivariant β β' T) (χ : G → K)
+    : (hS.comp hT).fiberMap χ = (hS.fiberMap χ) ∘ₗ (hT.fiberMap χ) := by
   ext v; rfl
 
-lemma IsEquivariant.fiberMap_comp (hS : IsEquivariant β' β'' S) (hT : IsEquivariant β β' T)
-    (χ : G → K) :
-    (hS.comp hT).fiberMap χ = (hS.fiberMap χ) ∘ₗ (hT.fiberMap χ) := by
-  ext v; rfl
-
-/-- Equivariant maps commute with the dynamics they generate: if `D` is an equivariant
+/--
+Equivariant maps commute with the dynamics they generate: if `D` is an equivariant
 endomorphism, it preserves every sector and descends to every fiber. This is the form used for
-translation-invariant evolution. -/
-lemma IsEquivariant.mapsTo_sector_self {D : V →ₗ[K] V} (hD : IsEquivariant β β D) {v : V}
-    (hv : v ∈ sector β χ) : D v ∈ sector β χ := hD.mapsTo_sector hv
+translation-invariant evolution.
+-/
+lemma IsEquivariant.mapsTo_sector_self
+    {D : V →ₗ[K] V} (hD : IsEquivariant β β D) {v : V} (hv : v ∈ sector β χ)
+    : D v ∈ sector β χ :=
+  hD.mapsTo_sector hv
 
 /-!
 
@@ -191,14 +199,13 @@ lemma IsEquivariant.mapsTo_sector_self {D : V →ₗ[K] V} (hD : IsEquivariant �
 -/
 
 /-- The canonical map from the sector of `χ` to the fiber of `χ`. -/
-def sectorToFiber (β : G →* Module.End K V) (χ : G → K) :
-    sector β χ →ₗ[K] Fiber β χ :=
+def sectorToFiber (β : G →* Module.End K V) (χ : G → K) : sector β χ →ₗ[K] Fiber β χ :=
   (Fiber.mk β χ).comp (sector β χ).subtype
 
 /-- The canonical map from sector to fiber is natural for equivariant maps. -/
-lemma IsEquivariant.fiberMap_comp_sectorToFiber (hT : IsEquivariant β β' T) (χ : G → K) :
-    (hT.fiberMap χ).comp (sectorToFiber β χ)
-      = (sectorToFiber β' χ).comp (hT.sectorMap χ) := rfl
+lemma IsEquivariant.fiberMap_comp_sectorToFiber (hT : IsEquivariant β β' T) (χ : G → K)
+    : (hT.fiberMap χ).comp (sectorToFiber β χ) = (sectorToFiber β' χ).comp (hT.sectorMap χ) :=
+  rfl
 
 end Representation
 

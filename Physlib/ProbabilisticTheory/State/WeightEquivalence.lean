@@ -75,22 +75,21 @@ namespace UnitalPositiveLinearMap
 
 -/
 
-/-- The weight induced by a state: `ENNReal.ofReal` applied to the state's values on the positive
-cone, where they are automatically nonnegative. -/
+/--
+The weight induced by a state: `ENNReal.ofReal` applied to the state's values on the positive
+cone, where they are automatically nonnegative.
+-/
 noncomputable def toWeight (s : 𝓢[ℝ, E]) : Weight E where
   toFun A := ENNReal.ofReal (s (A : E))
-  map_add' A B := by
-    simp [ENNReal.ofReal_add (map_nonneg s A.2) (map_nonneg s B.2)]
-  map_smul' c A := by
-    simp [ENNReal.smul_def, ENNReal.ofReal_mul c.coe_nonneg]
+  map_add' A B := by simp [ENNReal.ofReal_add (map_nonneg s A.2) (map_nonneg s B.2)]
+  map_smul' c A := by simp [ENNReal.smul_def, ENNReal.ofReal_mul c.coe_nonneg]
 
 @[simp]
 lemma toWeight_apply (s : 𝓢[ℝ, E]) (A : PosCone E) : s.toWeight A = ENNReal.ofReal (s (A : E)) :=
   rfl
 
 /-- The weight induced by a state agrees with the state itself on the positive cone. -/
-lemma toReal_toWeight_apply (s : 𝓢[ℝ, E]) (A : PosCone E) :
-    (s.toWeight A).toReal = s (A : E) := by
+lemma toReal_toWeight_apply (s : 𝓢[ℝ, E]) (A : PosCone E) : (s.toWeight A).toReal = s (A : E) := by
   rw [toWeight_apply, ENNReal.toReal_ofReal (map_nonneg s A.2)]
 
 /-- The weight induced by a state is finite and normalized. -/
@@ -115,8 +114,9 @@ noncomputable def stateEquiv : {w : Weight E // w.IsState} ≃ 𝓢[ℝ, E] wher
   left_inv w := by
     ext A
     simp [w.2.finite A]
-  right_inv s := DFunLike.ext _ _ fun A => by
-    obtain ⟨P, Q, rfl⟩ := PosCone.exists_sub A
-    simp only [map_sub, IsState.toState_apply, UnitalPositiveLinearMap.toReal_toWeight_apply]
+  right_inv s :=
+    DFunLike.ext _ _ fun A => by
+      obtain ⟨P, Q, rfl⟩ := PosCone.exists_sub A
+      simp only [map_sub, IsState.toState_apply, UnitalPositiveLinearMap.toReal_toWeight_apply]
 
 end Weight

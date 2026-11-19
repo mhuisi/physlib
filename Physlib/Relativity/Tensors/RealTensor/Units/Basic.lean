@@ -46,28 +46,31 @@ open TensorSpecies Tensor
 -/
 
 set_option backward.isDefEq.respectTransparency false in
-/-- In the standard contravariant and covariant bases, either real Lorentz unit tensor has
-Kronecker-delta components. -/
-lemma unitTensor_repr_apply {d : ℕ} (c : Color)
-    (φ : ComponentIdx (S := realLorentzTensor d) ![(realLorentzTensor d).τ c, c]) :
-    (Tensor.basis _).repr (unitTensor (S := realLorentzTensor d) c) φ =
-      if φ 0 = φ 1 then 1 else 0 := by
+/--
+In the standard contravariant and covariant bases, either real Lorentz unit tensor has
+Kronecker-delta components.
+-/
+lemma unitTensor_repr_apply
+    {d : ℕ}
+    (c : Color) (φ : ComponentIdx (S := realLorentzTensor d) ![(realLorentzTensor d).τ c, c])
+    : (Tensor.basis _).repr (unitTensor (S := realLorentzTensor d) c) φ
+      = if φ 0 = φ 1 then 1 else 0 := by
   cases c with
   | up =>
-      rw [unitTensor_basis_repr,
-        show ((realLorentzTensor d).unit Color.up) (1 : ℝ) = Lorentz.ContrMod.unitVal d from
-          Lorentz.ContrMod.unit_apply_one]
-      rw [Lorentz.ContrMod.unitVal_expand_tmul]
-      simp only [map_sum, Finsupp.coe_finsetSum, Finset.sum_apply,
-        Basis.tensorProduct_repr_tmul_apply, Basis.repr_self, Finsupp.single_apply, smul_eq_mul]
-      rw [Finset.sum_eq_single (φ 0)] <;> aesop
+    rw [unitTensor_basis_repr,
+      show ((realLorentzTensor d).unit Color.up) (1 : ℝ) = Lorentz.ContrMod.unitVal d from
+        Lorentz.ContrMod.unit_apply_one]
+    rw [Lorentz.ContrMod.unitVal_expand_tmul]
+    simp only [map_sum, Finsupp.coe_finsetSum, Finset.sum_apply,
+      Basis.tensorProduct_repr_tmul_apply, Basis.repr_self, Finsupp.single_apply, smul_eq_mul]
+    rw [Finset.sum_eq_single (φ 0)] <;> aesop
   | down =>
-      rw [unitTensor_basis_repr,
-        show ((realLorentzTensor d).unit Color.down) (1 : ℝ) = Lorentz.CoMod.unitVal d from
-          Lorentz.CoMod.unit_apply_one]
-      rw [Lorentz.CoMod.unitVal_expand_tmul]
-      simp only [map_sum, Finsupp.coe_finsetSum, Finset.sum_apply,
-        Basis.tensorProduct_repr_tmul_apply, Basis.repr_self, Finsupp.single_apply, smul_eq_mul]
-      rw [Finset.sum_eq_single (φ 0)] <;> aesop
+    rw [unitTensor_basis_repr,
+      show ((realLorentzTensor d).unit Color.down) (1 : ℝ) = Lorentz.CoMod.unitVal d from
+        Lorentz.CoMod.unit_apply_one]
+    rw [Lorentz.CoMod.unitVal_expand_tmul]
+    simp only [map_sum, Finsupp.coe_finsetSum, Finset.sum_apply,
+      Basis.tensorProduct_repr_tmul_apply, Basis.repr_self, Finsupp.single_apply, smul_eq_mul]
+    rw [Finset.sum_eq_single (φ 0)] <;> aesop
 
 end realLorentzTensor

@@ -39,10 +39,11 @@ diagonal action of a single group; this is the external product.
 -/
 
 /-- The componentwise representation of a product group on a product space. -/
-noncomputable def Representation.prodMap {k G₁ G₂ V₁ V₂ : Type*} [CommSemiring k]
-    [Monoid G₁] [Monoid G₂] [AddCommMonoid V₁] [Module k V₁] [AddCommMonoid V₂] [Module k V₂]
-    (ρ₁ : Representation k G₁ V₁) (ρ₂ : Representation k G₂ V₂) :
-    Representation k (G₁ × G₂) (V₁ × V₂) where
+noncomputable def Representation.prodMap
+    {k G₁ G₂ V₁ V₂ : Type*} [CommSemiring k] [Monoid G₁] [Monoid G₂] [AddCommMonoid V₁]
+    [Module k V₁] [AddCommMonoid V₂] [Module k V₂]
+    (ρ₁ : Representation k G₁ V₁) (ρ₂ : Representation k G₂ V₂)
+    : Representation k (G₁ × G₂) (V₁ × V₂) where
   toFun p := (ρ₁ p.1).prodMap (ρ₂ p.2)
   map_one' := by
     refine LinearMap.ext fun v => ?_
@@ -52,7 +53,9 @@ noncomputable def Representation.prodMap {k G₁ G₂ V₁ V₂ : Type*} [CommSe
     simp [Module.End.mul_apply]
 
 @[simp]
-lemma Representation.prodMap_apply {k G₁ G₂ V₁ V₂ : Type*} [CommSemiring k]
-    [Monoid G₁] [Monoid G₂] [AddCommMonoid V₁] [Module k V₁] [AddCommMonoid V₂] [Module k V₂]
-    (ρ₁ : Representation k G₁ V₁) (ρ₂ : Representation k G₂ V₂) (p : G₁ × G₂) (v : V₁ × V₂) :
-    Representation.prodMap ρ₁ ρ₂ p v = (ρ₁ p.1 v.1, ρ₂ p.2 v.2) := rfl
+lemma Representation.prodMap_apply
+    {k G₁ G₂ V₁ V₂ : Type*} [CommSemiring k] [Monoid G₁] [Monoid G₂] [AddCommMonoid V₁]
+    [Module k V₁] [AddCommMonoid V₂] [Module k V₂]
+    (ρ₁ : Representation k G₁ V₁) (ρ₂ : Representation k G₂ V₂) (p : G₁ × G₂) (v : V₁ × V₂)
+    : Representation.prodMap ρ₁ ρ₂ p v = (ρ₁ p.1 v.1, ρ₂ p.2 v.2) :=
+  rfl

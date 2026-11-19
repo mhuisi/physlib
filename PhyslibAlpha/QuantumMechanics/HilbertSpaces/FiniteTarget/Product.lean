@@ -55,13 +55,13 @@ variable {α β : Type*} [Fintype α] [DecidableEq α] [Fintype β] [DecidableEq
 -/
 
 /-- The amplitude `⟨a|A|a'⟩` of an operator is the `a` component of `A |a'⟩`. -/
-lemma val_apply_basisFun (A : 𝓗[α] →ₗ[ℂ] 𝓗[α]) (a a' : α) :
-    (A (basisFun α a')).val a = ⟪basisFun α a, A (basisFun α a')⟫_ℂ := by
+lemma val_apply_basisFun (A : 𝓗[α] →ₗ[ℂ] 𝓗[α]) (a a' : α)
+    : (A (basisFun α a')).val a = ⟪basisFun α a, A (basisFun α a')⟫_ℂ := by
   rw [inner_eq_val, basisFun_apply a, EuclideanSpace.inner_single_left, map_one, one_mul]
 
 /-- An operator in components: `(A ψ) a = ∑ a', ⟨a|A|a'⟩ ψ a'`. -/
-lemma val_apply (A : 𝓗[α] →ₗ[ℂ] 𝓗[α]) (ψ : 𝓗[α]) (a : α) :
-    (A ψ).val a = ∑ a', (A (basisFun α a')).val a * ψ.val a' := by
+lemma val_apply (A : 𝓗[α] →ₗ[ℂ] 𝓗[α]) (ψ : 𝓗[α]) (a : α)
+    : (A ψ).val a = ∑ a', (A (basisFun α a')).val a * ψ.val a' := by
   conv_lhs => rw [← (basisFun α).sum_repr ψ]
   simp only [map_sum, map_smul]
   change (linearEquivEuclidean (∑ a', _)) a = _
@@ -96,11 +96,13 @@ noncomputable def onSnd (B : 𝓗[β] →ₗ[ℂ] 𝓗[β]) : 𝓗[α × β] →
     ext p
     simp [Finset.mul_sum, mul_left_comm]
 
-lemma onFst_val (A : 𝓗[α] →ₗ[ℂ] 𝓗[α]) (Ψ : 𝓗[α × β]) (p : α × β) :
-    (onFst A Ψ).val p = ∑ a, (A (basisFun α a)).val p.1 * Ψ.val (a, p.2) := rfl
+lemma onFst_val (A : 𝓗[α] →ₗ[ℂ] 𝓗[α]) (Ψ : 𝓗[α × β]) (p : α × β)
+    : (onFst A Ψ).val p = ∑ a, (A (basisFun α a)).val p.1 * Ψ.val (a, p.2) :=
+  rfl
 
-lemma onSnd_val (B : 𝓗[β] →ₗ[ℂ] 𝓗[β]) (Ψ : 𝓗[α × β]) (p : α × β) :
-    (onSnd B Ψ).val p = ∑ b, (B (basisFun β b)).val p.2 * Ψ.val (p.1, b) := rfl
+lemma onSnd_val (B : 𝓗[β] →ₗ[ℂ] 𝓗[β]) (Ψ : 𝓗[α × β]) (p : α × β)
+    : (onSnd B Ψ).val p = ∑ b, (B (basisFun β b)).val p.2 * Ψ.val (p.1, b) :=
+  rfl
 
 /-!
 
@@ -109,8 +111,7 @@ lemma onSnd_val (B : 𝓗[β] →ₗ[ℂ] 𝓗[β]) (Ψ : 𝓗[α × β]) (p : �
 -/
 
 /-- Acting twice on the first coordinate composes the operators. -/
-lemma onFst_comp (A A' : 𝓗[α] →ₗ[ℂ] 𝓗[α]) :
-    onFst (β := β) (A ∘ₗ A') = onFst A ∘ₗ onFst A' := by
+lemma onFst_comp (A A' : 𝓗[α] →ₗ[ℂ] 𝓗[α]) : onFst (β := β) (A ∘ₗ A') = onFst A ∘ₗ onFst A' := by
   ext Ψ p
   simp only [LinearMap.comp_apply, onFst_val]
   simp only [val_apply A (A' _), Finset.sum_mul, Finset.mul_sum]
@@ -118,8 +119,7 @@ lemma onFst_comp (A A' : 𝓗[α] →ₗ[ℂ] 𝓗[α]) :
   exact Finset.sum_congr rfl fun _ _ => Finset.sum_congr rfl fun _ _ => by ring
 
 /-- Acting twice on the second coordinate composes the operators. -/
-lemma onSnd_comp (B B' : 𝓗[β] →ₗ[ℂ] 𝓗[β]) :
-    onSnd (α := α) (B ∘ₗ B') = onSnd B ∘ₗ onSnd B' := by
+lemma onSnd_comp (B B' : 𝓗[β] →ₗ[ℂ] 𝓗[β]) : onSnd (α := α) (B ∘ₗ B') = onSnd B ∘ₗ onSnd B' := by
   ext Ψ p
   simp only [LinearMap.comp_apply, onSnd_val]
   simp only [val_apply B (B' _), Finset.sum_mul, Finset.mul_sum]
@@ -127,8 +127,8 @@ lemma onSnd_comp (B B' : 𝓗[β] →ₗ[ℂ] 𝓗[β]) :
   exact Finset.sum_congr rfl fun _ _ => Finset.sum_congr rfl fun _ _ => by ring
 
 /-- Operators on different coordinates commute. -/
-lemma onFst_comp_onSnd (A : 𝓗[α] →ₗ[ℂ] 𝓗[α]) (B : 𝓗[β] →ₗ[ℂ] 𝓗[β]) :
-    onFst A ∘ₗ onSnd B = onSnd B ∘ₗ onFst A := by
+lemma onFst_comp_onSnd (A : 𝓗[α] →ₗ[ℂ] 𝓗[α]) (B : 𝓗[β] →ₗ[ℂ] 𝓗[β])
+    : onFst A ∘ₗ onSnd B = onSnd B ∘ₗ onFst A := by
   ext Ψ p
   simp only [LinearMap.comp_apply, onFst_val, onSnd_val, Finset.mul_sum]
   rw [Finset.sum_comm]
@@ -141,39 +141,40 @@ lemma onFst_comp_onSnd (A : 𝓗[α] →ₗ[ℂ] 𝓗[α]) (B : 𝓗[β] →ₗ[
 -/
 
 /-- The inner product of `𝓗[α × β]` in components. -/
-lemma inner_eq_sum (Ψ Φ : 𝓗[α × β]) :
-    ⟪Ψ, Φ⟫_ℂ = ∑ p, (starRingEnd ℂ) (Ψ.val p) * Φ.val p := by
+lemma inner_eq_sum (Ψ Φ : 𝓗[α × β]) : ⟪Ψ, Φ⟫_ℂ = ∑ p, (starRingEnd ℂ) (Ψ.val p) * Φ.val p := by
   rw [inner_eq_val, PiLp.inner_apply]
   exact Finset.sum_congr rfl fun p _ => by rw [RCLike.inner_apply, mul_comm]
 
 /-- Hermitian amplitudes: `conj ⟨a'|A|a⟩ = ⟨a|A|a'⟩`. -/
-lemma conj_val_apply_basisFun {A : 𝓗[α] →ₗ[ℂ] 𝓗[α]} (hA : A.IsSymmetric) (a a' : α) :
-    (starRingEnd ℂ) ((A (basisFun α a)).val a') = (A (basisFun α a')).val a := by
+lemma conj_val_apply_basisFun {A : 𝓗[α] →ₗ[ℂ] 𝓗[α]} (hA : A.IsSymmetric) (a a' : α)
+    : (starRingEnd ℂ) ((A (basisFun α a)).val a') = (A (basisFun α a')).val a := by
   rw [val_apply_basisFun, val_apply_basisFun, inner_conj_symm, hA]
 
 /-- A hermitian operator on the first coordinate is hermitian. -/
-lemma onFst_isSymmetric {A : 𝓗[α] →ₗ[ℂ] 𝓗[α]} (hA : A.IsSymmetric) :
-    (onFst (β := β) A).IsSymmetric := fun Ψ Φ => by
+lemma onFst_isSymmetric {A : 𝓗[α] →ₗ[ℂ] 𝓗[α]} (hA : A.IsSymmetric)
+    : (onFst (β := β) A).IsSymmetric := fun Ψ Φ => by
   simp only [inner_eq_sum, onFst_val, map_sum, map_mul, Finset.sum_mul, Finset.mul_sum,
     Fintype.sum_prod_type]
   conv_lhs => rw [Finset.sum_comm]
   conv_rhs => rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun b _ => ?_
   conv_lhs => rw [Finset.sum_comm]
-  exact Finset.sum_congr rfl fun a _ => Finset.sum_congr rfl fun a' _ => by
-    rw [conj_val_apply_basisFun hA]
-    ring
+  exact Finset.sum_congr rfl fun a _ =>
+    Finset.sum_congr rfl fun a' _ => by
+      rw [conj_val_apply_basisFun hA]
+      ring
 
 /-- A hermitian operator on the second coordinate is hermitian. -/
-lemma onSnd_isSymmetric {B : 𝓗[β] →ₗ[ℂ] 𝓗[β]} (hB : B.IsSymmetric) :
-    (onSnd (α := α) B).IsSymmetric := fun Ψ Φ => by
+lemma onSnd_isSymmetric {B : 𝓗[β] →ₗ[ℂ] 𝓗[β]} (hB : B.IsSymmetric)
+    : (onSnd (α := α) B).IsSymmetric := fun Ψ Φ => by
   simp only [inner_eq_sum, onSnd_val, map_sum, map_mul, Finset.sum_mul, Finset.mul_sum,
     Fintype.sum_prod_type]
   refine Finset.sum_congr rfl fun a _ => ?_
   conv_lhs => rw [Finset.sum_comm]
-  exact Finset.sum_congr rfl fun b _ => Finset.sum_congr rfl fun b' _ => by
-    rw [conj_val_apply_basisFun hB]
-    ring
+  exact Finset.sum_congr rfl fun b _ =>
+    Finset.sum_congr rfl fun b' _ => by
+      rw [conj_val_apply_basisFun hB]
+      ring
 
 end FiniteHilbertSpace
 

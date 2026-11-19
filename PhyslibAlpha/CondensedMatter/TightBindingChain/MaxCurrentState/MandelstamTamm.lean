@@ -49,25 +49,25 @@ variable (T : TightBindingChain)
 -/
 
 /-- In the maximal current state the Mandelstam–Tamm ratio is `1 / C²`. -/
-lemma mandelstamTammRatio_maxCurrentState :
-    T.mandelstamTammRatio T.maxCurrentVectorState = 1 / T.uncertaintyRatio ^ 2 := by
+lemma mandelstamTammRatio_maxCurrentState
+    : T.mandelstamTammRatio T.maxCurrentVectorState = 1 / T.uncertaintyRatio ^ 2 := by
   rw [mandelstamTammRatio, expectation_current_maxCurrentState, uncertaintyRatio, div_pow,
     Real.sq_sqrt (mul_nonneg (variance_nonneg _ _) (variance_nonneg _ _)), sq_abs, one_div_div]
   ring
 
 /-- Mandelstam–Tamm and Cramér–Rao are attained in the maximal current state iff `N = 2, 3`. -/
-lemma mandelstamTammRatio_maxCurrentState_eq_one_iff (ht : T.t ≠ 0) (hN : 2 ≤ T.N) :
-    T.mandelstamTammRatio T.maxCurrentVectorState = 1 ↔ T.N = 2 ∨ T.N = 3 := by
+lemma mandelstamTammRatio_maxCurrentState_eq_one_iff (ht : T.t ≠ 0) (hN : 2 ≤ T.N)
+    : T.mandelstamTammRatio T.maxCurrentVectorState = 1 ↔ T.N = 2 ∨ T.N = 3 := by
   rw [mandelstamTammRatio_maxCurrentState, one_div, inv_eq_one,
     pow_eq_one_iff_of_nonneg (by unfold uncertaintyRatio; positivity) two_ne_zero,
     uncertaintyRatio_eq_one_iff T ht hN]
 
 /-- From four sites on, the maximal current state misses Mandelstam–Tamm and Cramér–Rao. -/
-lemma mandelstamTammRatio_maxCurrentState_lt_one (ht : T.t ≠ 0) (hN : 4 ≤ T.N) :
-    T.mandelstamTammRatio T.maxCurrentVectorState < 1 :=
+lemma mandelstamTammRatio_maxCurrentState_lt_one (ht : T.t ≠ 0) (hN : 4 ≤ T.N)
+    : T.mandelstamTammRatio T.maxCurrentVectorState < 1 :=
   (T.mandelstamTammRatio_le_one _).lt_of_ne fun h => by
-    rcases (T.mandelstamTammRatio_maxCurrentState_eq_one_iff ht (by omega)).mp h with h | h <;>
-      omega
+    rcases (T.mandelstamTammRatio_maxCurrentState_eq_one_iff ht (by omega)).mp h with h | h
+      <;> omega
 
 end TightBindingChain
 end CondensedMatter

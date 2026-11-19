@@ -58,8 +58,10 @@ namespace UnitalPositiveLinearMap
 
 variable {E F : Type*} [OrderUnitSpace E] [OrderUnitSpace F]
 
-/-- The state on `E` that evaluates an observable by first sending it through a channel `f` and
-then evaluating the state `ω` on the result. -/
+/--
+The state on `E` that evaluates an observable by first sending it through a channel `f` and
+then evaluating the state `ω` on the result.
+-/
 def comap (f : E →ₚ₁[ℝ] F) (ω : 𝓢[ℝ, F]) : 𝓢[ℝ, E] where
   toPositiveLinearMap := ω.toPositiveLinearMap.comp f.toPositiveLinearMap
   map_one' := (congrArg ω f.map_one').trans ω.map_one'

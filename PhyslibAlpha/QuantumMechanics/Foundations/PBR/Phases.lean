@@ -56,10 +56,10 @@ namespace QuantumMechanics.PBR
 -/
 
 /-- For `0 < c` and `0 < s`, some number of copies `n` gives `2 cⁿ ≤ (c + s)ⁿ`. -/
-lemma exists_two_mul_pow_le {c s : ℝ} (hc : 0 < c) (hs : 0 < s) :
-    ∃ n : ℕ, 2 * c ^ n ≤ (c + s) ^ n := by
-  obtain ⟨n, hn⟩ := pow_unbounded_of_one_lt (2 : ℝ)
-    ((one_lt_div hc).mpr (by linarith) : 1 < (c + s) / c)
+lemma exists_two_mul_pow_le {c s : ℝ} (hc : 0 < c) (hs : 0 < s)
+    : ∃ n : ℕ, 2 * c ^ n ≤ (c + s) ^ n := by
+  obtain ⟨n, hn⟩ :=
+    pow_unbounded_of_one_lt (2 : ℝ) ((one_lt_div hc).mpr (by linarith) : 1 < (c + s) / c)
   rw [div_pow, lt_div_iff₀ (pow_pos hc n)] at hn
   exact ⟨n, hn.le⟩
 
@@ -70,29 +70,31 @@ lemma exists_two_mul_pow_le {c s : ℝ} (hc : 0 < c) (hs : 0 < s) :
 
 -/
 
-/-- If `0 ≤ s ≤ c` and `2 cⁿ ≤ (c + s)ⁿ`, some angle `α` gives
-`‖(c + e^{iα} s)ⁿ - cⁿ‖ = cⁿ` (intermediate value theorem on `[0, π]`). -/
-lemma exists_norm_pow_sub_pow_eq {c s : ℝ} {n : ℕ} (hs : 0 ≤ s) (hsc : s ≤ c)
-    (hn : 2 * c ^ n ≤ (c + s) ^ n) :
-    ∃ α : ℝ, ‖((c : ℂ) + Complex.exp (α * Complex.I) * s) ^ n - (c : ℂ) ^ n‖ = c ^ n := by
+/--
+If `0 ≤ s ≤ c` and `2 cⁿ ≤ (c + s)ⁿ`, some angle `α` gives
+`‖(c + e^{iα} s)ⁿ - cⁿ‖ = cⁿ` (intermediate value theorem on `[0, π]`).
+-/
+lemma exists_norm_pow_sub_pow_eq
+    {c s : ℝ} {n : ℕ} (hs : 0 ≤ s) (hsc : s ≤ c) (hn : 2 * c ^ n ≤ (c + s) ^ n)
+    : ∃ α : ℝ, ‖((c : ℂ) + Complex.exp (α * Complex.I) * s) ^ n - (c : ℂ) ^ n‖ = c ^ n := by
   have hc : 0 ≤ c := hs.trans hsc
   have hf : ContinuousOn
       (fun α : ℝ => ‖((c : ℂ) + Complex.exp (α * Complex.I) * s) ^ n - (c : ℂ) ^ n‖)
       (Set.Icc 0 Real.pi) := by
     fun_prop
-  have h0 : c ^ n ≤
-      ‖((c : ℂ) + Complex.exp ((0 : ℝ) * Complex.I) * s) ^ n - (c : ℂ) ^ n‖ := by
-    have h : ((c : ℂ) + Complex.exp ((0 : ℝ) * Complex.I) * s) ^ n - (c : ℂ) ^ n =
-        (((c + s) ^ n - c ^ n : ℝ) : ℂ) := by
+  have h0 : c ^ n ≤ ‖((c : ℂ) + Complex.exp ((0 : ℝ) * Complex.I) * s) ^ n - (c : ℂ) ^ n‖ := by
+    have h
+        : ((c : ℂ) + Complex.exp ((0 : ℝ) * Complex.I) * s) ^ n - (c : ℂ) ^ n
+          = (((c + s) ^ n - c ^ n : ℝ) : ℂ) := by
       rw [Complex.ofReal_zero, zero_mul, Complex.exp_zero]
       push_cast
       ring
     rw [h, Complex.norm_real, Real.norm_eq_abs]
     exact (by linarith : c ^ n ≤ (c + s) ^ n - c ^ n).trans (le_abs_self _)
-  have hπ : ‖((c : ℂ) + Complex.exp (Real.pi * Complex.I) * s) ^ n - (c : ℂ) ^ n‖ ≤
-      c ^ n := by
-    have h : ((c : ℂ) + Complex.exp (Real.pi * Complex.I) * s) ^ n - (c : ℂ) ^ n =
-        (((c - s) ^ n - c ^ n : ℝ) : ℂ) := by
+  have hπ : ‖((c : ℂ) + Complex.exp (Real.pi * Complex.I) * s) ^ n - (c : ℂ) ^ n‖ ≤ c ^ n := by
+    have h
+        : ((c : ℂ) + Complex.exp (Real.pi * Complex.I) * s) ^ n - (c : ℂ) ^ n
+          = (((c - s) ^ n - c ^ n : ℝ) : ℂ) := by
       rw [Complex.exp_pi_mul_I]
       push_cast
       ring
@@ -109,18 +111,20 @@ lemma exists_norm_pow_sub_pow_eq {c s : ℝ} {n : ℕ} (hs : 0 ≤ s) (hsc : s �
 
 -/
 
-/-- The phase product `∏ i, ![1, e] (z i)` times the amplitude product `∏ i, ![c, s] (z i)` is
-the amplitude product `∏ i, ![c, e * s] (z i)`. -/
-lemma prod_phase_mul_prod_amp {n : ℕ} (e c s : ℂ) (z : Fin n → Fin 2) :
-    (∏ i, ![1, e] (z i)) * ∏ i, ![c, s] (z i) = ∏ i, ![c, e * s] (z i) := by
+/--
+The phase product `∏ i, ![1, e] (z i)` times the amplitude product `∏ i, ![c, s] (z i)` is
+the amplitude product `∏ i, ![c, e * s] (z i)`.
+-/
+lemma prod_phase_mul_prod_amp {n : ℕ} (e c s : ℂ) (z : Fin n → Fin 2)
+    : (∏ i, ![1, e] (z i)) * ∏ i, ![c, s] (z i) = ∏ i, ![c, e * s] (z i) := by
   rw [← Finset.prod_mul_distrib]
   refine Finset.prod_congr rfl fun i _ => ?_
   generalize z i = k
   fin_cases k <;> simp
 
 /-- The phase product `∏ i, ![1, e] (z i)` has unit norm when `e` does. -/
-lemma norm_prod_phase {n : ℕ} {e : ℂ} (he : ‖e‖ = 1) (z : Fin n → Fin 2) :
-    ‖∏ i, ![1, e] (z i)‖ = 1 := by
+lemma norm_prod_phase {n : ℕ} {e : ℂ} (he : ‖e‖ = 1) (z : Fin n → Fin 2)
+    : ‖∏ i, ![1, e] (z i)‖ = 1 := by
   rw [norm_prod]
   refine Finset.prod_eq_one fun i _ => ?_
   generalize z i = k
@@ -131,14 +135,22 @@ lemma norm_prod_phase {n : ℕ} {e : ℂ} (he : ‖e‖ = 1) (z : Fin n → Fin 
 
 -/
 
-/-- The phases `ω 0 = -((c + e s)ⁿ - cⁿ) / cⁿ` and `ω z = ∏ i, ![1, e] (z i)` for `z ≠ 0`
-cancel the amplitude products. -/
-lemma sum_phases_mul_amp {n : ℕ} (c s e : ℂ) (hc : c ^ n ≠ 0) :
-    ∑ z : Fin n → Fin 2, (if z = 0 then -(((c + e * s) ^ n - c ^ n) / c ^ n)
-      else ∏ i, ![1, e] (z i)) * ∏ i, ![c, s] (z i) = 0 := by
-  have key : ∀ z : Fin n → Fin 2, (if z = 0 then -(((c + e * s) ^ n - c ^ n) / c ^ n)
-      else ∏ i, ![1, e] (z i)) * ∏ i, ![c, s] (z i) =
-      ∏ i, ![c, e * s] (z i) - if z = 0 then (c + e * s) ^ n else 0 := by
+/--
+The phases `ω 0 = -((c + e s)ⁿ - cⁿ) / cⁿ` and `ω z = ∏ i, ![1, e] (z i)` for `z ≠ 0`
+cancel the amplitude products.
+-/
+lemma sum_phases_mul_amp {n : ℕ} (c s e : ℂ) (hc : c ^ n ≠ 0)
+    : ∑ z : Fin n → Fin 2, (if z = 0 then -(((c + e * s) ^ n - c ^ n) / c ^ n)
+        else ∏ i, ![1, e] (z i)) * ∏ i, ![c, s] (z i)
+      = 0 := by
+  have key
+      : ∀ z : Fin n → Fin 2,
+        (if z = 0 then
+           -(((c + e * s) ^ n - c ^ n) / c ^ n)
+         else
+           ∏ i, ![1, e] (z i))
+            * ∏ i, ![c, s] (z i)
+          = ∏ i, ![c, e * s] (z i) - if z = 0 then (c + e * s) ^ n else 0 := by
     intro z
     split_ifs with h
     · subst h
@@ -151,18 +163,25 @@ lemma sum_phases_mul_amp {n : ℕ} (c s e : ℂ) (hc : c ^ n ≠ 0) :
     Fin.sum_univ_two]
   simp
 
-/-- Unit-modulus phases `ω z` with `∑ z, ω z * ∏ i, ![c, s] (z i) = 0`, for `0 ≤ s ≤ c`,
-`0 < c` and `2 cⁿ ≤ (c + s)ⁿ`. -/
-lemma exists_phases {c s : ℝ} {n : ℕ} (hc : 0 < c) (hs : 0 ≤ s) (hsc : s ≤ c)
-    (hn : 2 * c ^ n ≤ (c + s) ^ n) :
-    ∃ ω : (Fin n → Fin 2) → ℂ,
+/--
+Unit-modulus phases `ω z` with `∑ z, ω z * ∏ i, ![c, s] (z i) = 0`, for `0 ≤ s ≤ c`,
+`0 < c` and `2 cⁿ ≤ (c + s)ⁿ`.
+-/
+lemma exists_phases
+    {c s : ℝ} {n : ℕ} (hc : 0 < c) (hs : 0 ≤ s) (hsc : s ≤ c) (hn : 2 * c ^ n ≤ (c + s) ^ n)
+    : ∃ ω : (Fin n → Fin 2) → ℂ,
       (∀ z, ‖ω z‖ = 1) ∧ ∑ z, ω z * ∏ i, ![(c : ℂ), (s : ℂ)] (z i) = 0 := by
   obtain ⟨α, hα⟩ := exists_norm_pow_sub_pow_eq hs hsc hn
   have hcn : (c : ℂ) ^ n ≠ 0 := pow_ne_zero _ (Complex.ofReal_ne_zero.mpr hc.ne')
-  refine ⟨fun z => if z = 0 then
-      -((((c : ℂ) + Complex.exp (α * Complex.I) * s) ^ n - (c : ℂ) ^ n) / (c : ℂ) ^ n)
-      else ∏ i, ![1, Complex.exp (α * Complex.I)] (z i),
-    fun z => ?_, sum_phases_mul_amp _ _ _ hcn⟩
+  refine ⟨
+    fun z =>
+      if z = 0 then
+        -((((c : ℂ) + Complex.exp (α * Complex.I) * s) ^ n - (c : ℂ) ^ n) / (c : ℂ) ^ n)
+      else
+        ∏ i, ![1, Complex.exp (α * Complex.I)] (z i),
+    fun z => ?_,
+    sum_phases_mul_amp _ _ _ hcn
+  ⟩
   dsimp only
   split_ifs
   · rw [norm_neg, norm_div, hα, norm_pow, Complex.norm_real, Real.norm_of_nonneg hc.le,

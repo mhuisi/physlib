@@ -58,10 +58,11 @@ namespace ProbabilisticTheory
 
 /-! ### A.1. Definition -/
 
-/-- A reversible transformation between observable spaces: a linear bijection that preserves and
-reflects the order and preserves the order unit. Both it and its inverse are channels. -/
-structure Reversible (E F : Type*) [OrderUnitSpace E] [OrderUnitSpace F]
-    extends E ≃ₗ[ℝ] F where
+/--
+A reversible transformation between observable spaces: a linear bijection that preserves and
+reflects the order and preserves the order unit. Both it and its inverse are channels.
+-/
+structure Reversible (E F : Type*) [OrderUnitSpace E] [OrderUnitSpace F] extends E ≃ₗ[ℝ] F where
   /-- The equivalence preserves and reflects the order. -/
   map_le_map_iff' : ∀ {x y : E}, toLinearEquiv x ≤ toLinearEquiv y ↔ x ≤ y
   /-- The order unit is preserved. -/
@@ -100,22 +101,25 @@ def symm (e : Reversible E F) : Reversible F E where
 /-- Composition of reversible transformations, applying `e₁` before `e₂`. -/
 def trans (e₁ : Reversible E F) (e₂ : Reversible F H) : Reversible E H where
   toLinearEquiv := e₁.toLinearEquiv.trans e₂.toLinearEquiv
-  map_le_map_iff' {x y} :=
-    (e₂.map_le_map_iff' (x := e₁ x) (y := e₁ y)).trans e₁.map_le_map_iff'
+  map_le_map_iff' {x y} := (e₂.map_le_map_iff' (x := e₁ x) (y := e₁ y)).trans e₁.map_le_map_iff'
   map_one' := by
     change e₂ (e₁ 1) = 1
     rw [show e₁ 1 = 1 from e₁.map_one', show e₂ 1 = 1 from e₂.map_one']
 
-@[simp] lemma refl_apply (x : E) : refl E x = x := rfl
+@[simp]
+lemma refl_apply (x : E) : refl E x = x := rfl
 
-@[simp] lemma symm_apply_apply (e : Reversible E F) (x : E) : e.symm (e x) = x :=
+@[simp]
+lemma symm_apply_apply (e : Reversible E F) (x : E) : e.symm (e x) = x :=
   e.toLinearEquiv.symm_apply_apply x
 
-@[simp] lemma apply_symm_apply (e : Reversible E F) (y : F) : e (e.symm y) = y :=
+@[simp]
+lemma apply_symm_apply (e : Reversible E F) (y : F) : e (e.symm y) = y :=
   e.toLinearEquiv.apply_symm_apply y
 
-@[simp] lemma trans_apply (e₁ : Reversible E F) (e₂ : Reversible F H) (x : E) :
-    e₁.trans e₂ x = e₂ (e₁ x) := rfl
+@[simp]
+lemma trans_apply (e₁ : Reversible E F) (e₂ : Reversible F H) (x : E) : e₁.trans e₂ x = e₂ (e₁ x) :=
+  rfl
 
 /-- Reversible transformations of a single space form a group under composition. -/
 instance automorphismGroup : Group (Reversible E E) where
@@ -127,11 +131,14 @@ instance automorphismGroup : Group (Reversible E E) where
   mul_one _ := by ext; rfl
   inv_mul_cancel f := by ext x; exact f.symm_apply_apply x
 
-@[simp] lemma mul_apply (f g : Reversible E E) (x : E) : (f * g) x = f (g x) := rfl
+@[simp]
+lemma mul_apply (f g : Reversible E E) (x : E) : (f * g) x = f (g x) := rfl
 
-@[simp] lemma one_apply (x : E) : (1 : Reversible E E) x = x := rfl
+@[simp]
+lemma one_apply (x : E) : (1 : Reversible E E) x = x := rfl
 
-@[simp] lemma inv_apply (f : Reversible E E) (x : E) : f⁻¹ x = f.symm x := rfl
+@[simp]
+lemma inv_apply (f : Reversible E E) (x : E) : f⁻¹ x = f.symm x := rfl
 
 /-! ### A.3. As channels -/
 
@@ -140,7 +147,8 @@ def toChannel (e : Reversible E F) : E →ₚ₁[ℝ] F :=
   .ofLinearMap e.toLinearEquiv.toLinearMap
     (by intro x hx; simpa using (e.map_le_map_iff' (x := 0) (y := x)).2 hx) e.map_one'
 
-@[simp] lemma toChannel_apply (e : Reversible E F) (x : E) : e.toChannel x = e x := rfl
+@[simp]
+lemma toChannel_apply (e : Reversible E F) (x : E) : e.toChannel x = e x := rfl
 
 /-- Regarding reversible transformations as channels is a homomorphism of monoids. -/
 def toChannelHom : Reversible E E →* (E →ₚ₁[ℝ] E) where
@@ -148,7 +156,8 @@ def toChannelHom : Reversible E E →* (E →ₚ₁[ℝ] E) where
   map_one' := rfl
   map_mul' _ _ := rfl
 
-@[simp] lemma toChannelHom_apply (e : Reversible E E) (x : E) : toChannelHom e x = e x := rfl
+@[simp]
+lemma toChannelHom_apply (e : Reversible E E) (x : E) : toChannelHom e x = e x := rfl
 
 /-! ## B. Action on states -/
 
@@ -158,8 +167,7 @@ instance instMulActionState : MulAction (Reversible E E) (𝓢[ℝ, E]) where
   one_smul _ := by ext; rfl
   mul_smul _ _ _ := by ext; rfl
 
-lemma smul_state_apply (φ : Reversible E E) (ω : 𝓢[ℝ, E]) (x : E) :
-    (φ • ω) x = ω (φ.symm x) := rfl
+lemma smul_state_apply (φ : Reversible E E) (ω : 𝓢[ℝ, E]) (x : E) : (φ • ω) x = ω (φ.symm x) := rfl
 
 /-! ## C. Transport of group actions -/
 
@@ -183,7 +191,8 @@ end Reversible
 /-! ## D. Invariant states -/
 
 /-- A state is invariant if it is fixed by every transformation of the group action. -/
-def IsInvariant {G E : Type*} [Group G] [OrderUnitSpace E] (ρ : G →* Reversible E E)
-    (ω : 𝓢[ℝ, E]) : Prop := ∀ g, ρ g • ω = ω
+def IsInvariant {G E : Type*} [Group G] [OrderUnitSpace E] (ρ : G →* Reversible E E) (ω : 𝓢[ℝ, E])
+    : Prop :=
+  ∀ g, ρ g • ω = ω
 
 end ProbabilisticTheory

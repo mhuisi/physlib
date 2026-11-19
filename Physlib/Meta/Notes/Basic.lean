@@ -27,7 +27,7 @@ Other results relating to notes are in other files.
 namespace Physlib
 open Lean
 
-/-- The information from a `note ...` command. To be used in a note file-/
+/-- The information from a `note ...` command. To be used in a note file -/
 structure NoteInfo where
   /-- The content of the note. -/
   content : String
@@ -63,7 +63,6 @@ meta def elabNote : Lean.Elab.Command.CommandElab := fun stx =>
       let modName := env.mainModule
       let noteInfo : NoteInfo := { content := str, fileName := modName, line := line }
       modifyEnv fun env => noteExtension.addEntry env noteInfo
-
     | none => throwError "Invalid syntax for `note` command"
   | _ => throwError "Invalid syntax for `note` command"
 
@@ -87,8 +86,7 @@ meta initialize noteAttribute : Unit ←
     name := `note_attr
     descr := "Note attribute"
     applicationTime := AttributeApplicationTime.afterCompilation
-    add := fun declName _ _ => do
-      modifyEnv fun env => noteDeclExtension.addEntry env declName
+    add := fun declName _ _ => do modifyEnv fun env => noteDeclExtension.addEntry env declName
   }
 
 /-- Environment extension to store `note_attr_informal`. -/

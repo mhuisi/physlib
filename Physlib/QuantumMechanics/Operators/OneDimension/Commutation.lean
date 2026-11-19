@@ -31,10 +31,10 @@ open SchwartzMap
 
 -/
 
-lemma positionOperatorSchwartz_commutation_momentumOperatorSchwartz
-    (ψ : 𝓢(ℝ, ℂ)) : positionOperatorSchwartz (momentumOperatorSchwartz ψ)
-    - momentumOperatorSchwartz (positionOperatorSchwartz ψ)
-    = (Complex.I * ℏ) • ψ := by
+lemma positionOperatorSchwartz_commutation_momentumOperatorSchwartz (ψ : 𝓢(ℝ, ℂ))
+    : positionOperatorSchwartz (momentumOperatorSchwartz ψ)
+        - momentumOperatorSchwartz (positionOperatorSchwartz ψ)
+      = (Complex.I * ℏ) • ψ := by
   ext x
   simp [momentumOperatorSchwartz_apply, positionOperatorSchwartz_apply,
     positionOperatorSchwartz_apply_fun]
@@ -44,16 +44,14 @@ lemma positionOperatorSchwartz_commutation_momentumOperatorSchwartz
   · exact Complex.ofRealCLM.differentiableAt
   · exact ψ.differentiableAt
 
-lemma positionOperatorSchwartz_momentumOperatorSchwartz_eq (ψ : 𝓢(ℝ, ℂ)) :
-    positionOperatorSchwartz (momentumOperatorSchwartz ψ)
-    = momentumOperatorSchwartz (positionOperatorSchwartz ψ)
-    + (Complex.I * ℏ) • ψ :=
+lemma positionOperatorSchwartz_momentumOperatorSchwartz_eq (ψ : 𝓢(ℝ, ℂ))
+    : positionOperatorSchwartz (momentumOperatorSchwartz ψ)
+      = momentumOperatorSchwartz (positionOperatorSchwartz ψ) + (Complex.I * ℏ) • ψ :=
   sub_eq_iff_eq_add'.mp (positionOperatorSchwartz_commutation_momentumOperatorSchwartz ψ)
 
-lemma momentumOperatorSchwartz_positionOperatorSchwartz_eq (ψ : 𝓢(ℝ, ℂ)) :
-    momentumOperatorSchwartz (positionOperatorSchwartz ψ)
-    = positionOperatorSchwartz (momentumOperatorSchwartz ψ)
-    - (Complex.I * ℏ) • ψ := by
+lemma momentumOperatorSchwartz_positionOperatorSchwartz_eq (ψ : 𝓢(ℝ, ℂ))
+    : momentumOperatorSchwartz (positionOperatorSchwartz ψ)
+      = positionOperatorSchwartz (momentumOperatorSchwartz ψ) - (Complex.I * ℏ) • ψ := by
   simp [← positionOperatorSchwartz_commutation_momentumOperatorSchwartz ψ]
 
 end

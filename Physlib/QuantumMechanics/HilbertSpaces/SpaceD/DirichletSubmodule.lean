@@ -56,17 +56,19 @@ def DirichletSchwartzMap : Submodule ℂ 𝓢(Space d, ℂ) where
   zero_mem' := by simp
   smul_mem' := by simp_all
 
-/-- The submodule of the Hilbert space on `Ω` consisting of the equivalence classes
-  of Schwartz maps which vanish on `frontier Ω`. -/
+/--
+The submodule of the Hilbert space on `Ω` consisting of the equivalence classes
+of Schwartz maps which vanish on `frontier Ω`.
+-/
 abbrev DirichletSubmoduleOn : Submodule ℂ (SpaceDHilbertSpaceOn Ω μ) :=
   (DirichletSchwartzMap Ω).map (subspaceProjection Ω μ ∘L schwartzIncl μ).toLinearMap
 
 namespace DirichletSubmoduleOn
 
 variable {Ω μ} in
-lemma mem_iff {ψ : SpaceDHilbertSpaceOn Ω μ} :
-    ψ ∈ DirichletSubmoduleOn Ω μ ↔
-      ∃ f : DirichletSchwartzMap Ω, subspaceProjection Ω μ (schwartzIncl μ f) = ψ := by
+lemma mem_iff {ψ : SpaceDHilbertSpaceOn Ω μ}
+    : ψ ∈ DirichletSubmoduleOn Ω μ
+      ↔ ∃ f : DirichletSchwartzMap Ω, subspaceProjection Ω μ (schwartzIncl μ f) = ψ := by
   simp
 
 /-!

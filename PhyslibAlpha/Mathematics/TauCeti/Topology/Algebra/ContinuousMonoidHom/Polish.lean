@@ -41,12 +41,14 @@ public section
 
 namespace TauCeti
 
-/-- Continuous homomorphisms from a second-countable locally compact monoid to a Polish
-topological monoid form a Polish space in the compact-open topology. -/
-instance _root_.ContinuousMonoidHom.instPolishSpace {A B : Type*}
-    [Monoid A] [TopologicalSpace A] [LocallyCompactSpace A] [SecondCountableTopology A]
-    [Monoid B] [TopologicalSpace B] [ContinuousMul B] [PolishSpace B] :
-    PolishSpace (A →ₜ* B) := by
+/--
+Continuous homomorphisms from a second-countable locally compact monoid to a Polish
+topological monoid form a Polish space in the compact-open topology.
+-/
+instance _root_.ContinuousMonoidHom.instPolishSpace
+    {A B : Type*} [Monoid A] [TopologicalSpace A] [LocallyCompactSpace A]
+    [SecondCountableTopology A] [Monoid B] [TopologicalSpace B] [ContinuousMul B] [PolishSpace B]
+    : PolishSpace (A →ₜ* B) := by
   let := TopologicalSpace.upgradeIsCompletelyMetrizable B
   have : PolishSpace C(A, B) := inferInstance
   exact (ContinuousMonoidHom.isClosedEmbedding_toContinuousMap A B).polishSpace

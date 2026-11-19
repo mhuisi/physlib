@@ -67,10 +67,12 @@ open scoped TensorProduct
 
 namespace TensorSpecies
 
-variable {k : Type} [CommRing k] {C : Type} {G : Type} [Group G]
-    {V : C → Type} [∀ c, AddCommGroup (V c)] [∀ c, Module k (V c)]
-    {basisIdx : C → Type} [∀ c, Fintype (basisIdx c)] [∀ c, DecidableEq (basisIdx c)]
-    {rep : (c : C) → Representation k G (V c)} {b : (c : C) → Basis (basisIdx c) k (V c)}
+variable
+  {k : Type} [CommRing k]
+  {C : Type} {G : Type} [Group G]
+  {V : C → Type} [∀ c, AddCommGroup (V c)] [∀ c, Module k (V c)]
+  {basisIdx : C → Type} [∀ c, Fintype (basisIdx c)] [∀ c, DecidableEq (basisIdx c)]
+  {rep : (c : C) → Representation k G (V c)} {b : (c : C) → Basis (basisIdx c) k (V c)}
 
 /-!
 
@@ -78,18 +80,25 @@ variable {k : Type} [CommRing k] {C : Type} {G : Type} [Group G]
 
 -/
 
-/-- A matching `e` of the basis labels at `S.τ c` with those at `c` satisfies the δ law:
-  contracting a basis vector at `c` with one at `S.τ c` gives `1` if `e` matches their labels and
-  `0` otherwise. -/
-def IsContrDualMatching (S : TensorSpecies k C G V basisIdx rep b) (c : C)
-    (e : basisIdx (S.τ c) ≃ basisIdx c) : Prop :=
+/--
+A matching `e` of the basis labels at `S.τ c` with those at `c` satisfies the δ law:
+contracting a basis vector at `c` with one at `S.τ c` gives `1` if `e` matches their labels and
+`0` otherwise.
+-/
+def IsContrDualMatching
+    (S : TensorSpecies k C G V basisIdx rep b) (c : C) (e : basisIdx (S.τ c) ≃ basisIdx c)
+    : Prop :=
   ∀ x₁ x₂, S.contr c (b c x₁ ⊗ₜ[k] b (S.τ c) x₂) = if x₁ = e x₂ then 1 else 0
 
-/-- Over a nontrivial ring the δ law determines the matching: the label matched with `x₂` is the
-  one whose basis vector pairs with `b (S.τ c) x₂` to `1`. -/
-lemma IsContrDualMatching.unique [Nontrivial k] {S : TensorSpecies k C G V basisIdx rep b}
-    {c : C} {e e' : basisIdx (S.τ c) ≃ basisIdx c}
-    (he : IsContrDualMatching S c e) (he' : IsContrDualMatching S c e') : e = e' := by
+/--
+Over a nontrivial ring the δ law determines the matching: the label matched with `x₂` is the
+one whose basis vector pairs with `b (S.τ c) x₂` to `1`.
+-/
+lemma IsContrDualMatching.unique
+    [Nontrivial k]
+    {S : TensorSpecies k C G V basisIdx rep b} {c : C} {e e' : basisIdx (S.τ c) ≃ basisIdx c}
+    (he : IsContrDualMatching S c e) (he' : IsContrDualMatching S c e')
+    : e = e' := by
   ext x₂
   have h := (he (e x₂) x₂).symm.trans (he' (e x₂) x₂)
   by_contra hne
@@ -101,11 +110,15 @@ lemma IsContrDualMatching.unique [Nontrivial k] {S : TensorSpecies k C G V basis
 
 -/
 
-/-- A tensor species whose basis at `S.τ c` is dual to its basis at `c` under the pairing
-  `S.contr c`: for every color some matching of the labels satisfies the δ law. -/
+/--
+A tensor species whose basis at `S.τ c` is dual to its basis at `c` under the pairing
+`S.contr c`: for every color some matching of the labels satisfies the δ law.
+-/
 class HasContrDualBases (S : TensorSpecies k C G V basisIdx rep b) : Prop where
-  /-- At every color, some matching of the labels at `S.τ c` with those at `c` satisfies the δ
-    law. -/
+  /--
+  At every color, some matching of the labels at `S.τ c` with those at `c` satisfies the δ
+  law.
+  -/
   exists_matching : ∀ c, ∃ e, IsContrDualMatching S c e
 
 namespace HasContrDualBases
@@ -119,33 +132,39 @@ variable {S : TensorSpecies k C G V basisIdx rep b} [HasContrDualBases S]
 -/
 
 variable (S) in
-/-- A matching of the basis labels at `S.τ c` with those at `c` satisfying the δ law, chosen by
-  `Classical.choose`. Over a nontrivial ring it is the only one
-  (`contrDualIdxEquiv_eq_of_isContrDualMatching`). -/
+/--
+A matching of the basis labels at `S.τ c` with those at `c` satisfying the δ law, chosen by
+`Classical.choose`. Over a nontrivial ring it is the only one
+(`contrDualIdxEquiv_eq_of_isContrDualMatching`).
+-/
 noncomputable def contrDualIdxEquiv (c : C) : basisIdx (S.τ c) ≃ basisIdx c :=
   Classical.choose (exists_matching (S := S) c)
 
 /-- The δ law for `contrDualIdxEquiv`. -/
-lemma contr_basis_eq_ite (c : C) (x₁ : basisIdx c) (x₂ : basisIdx (S.τ c)) :
-    S.contr c (b c x₁ ⊗ₜ[k] b (S.τ c) x₂) =
-      if x₁ = contrDualIdxEquiv S c x₂ then 1 else 0 :=
+lemma contr_basis_eq_ite (c : C) (x₁ : basisIdx c) (x₂ : basisIdx (S.τ c))
+    : S.contr c (b c x₁ ⊗ₜ[k] b (S.τ c) x₂) = if x₁ = contrDualIdxEquiv S c x₂ then 1 else 0 :=
   Classical.choose_spec (exists_matching (S := S) c) x₁ x₂
 
-/-- Any matching satisfying the δ law is `contrDualIdxEquiv`. This is how a concrete species
-  identifies its matching. -/
-lemma contrDualIdxEquiv_eq_of_isContrDualMatching [Nontrivial k] {c : C}
-    {e : basisIdx (S.τ c) ≃ basisIdx c} (he : IsContrDualMatching S c e) :
-    contrDualIdxEquiv S c = e :=
+/--
+Any matching satisfying the δ law is `contrDualIdxEquiv`. This is how a concrete species
+identifies its matching.
+-/
+lemma contrDualIdxEquiv_eq_of_isContrDualMatching
+    [Nontrivial k] {c : C} {e : basisIdx (S.τ c) ≃ basisIdx c} (he : IsContrDualMatching S c e)
+    : contrDualIdxEquiv S c = e :=
   IsContrDualMatching.unique (contr_basis_eq_ite c) he
 
-/-- The equivalence between labels of dual indices: a label at `c1` carried across the variance
-  dual by `contrDualIdxEquiv`, then along `h`. -/
+/--
+The equivalence between labels of dual indices: a label at `c1` carried across the variance
+dual by `contrDualIdxEquiv`, then along `h`.
+-/
 noncomputable def dualIdxEquiv {c1 c2 : C} (h : S.τ c1 = c2) : basisIdx c1 ≃ basisIdx c2 :=
   (contrDualIdxEquiv S c1).symm.trans (basisIdxCongr h)
 
 @[simp]
-lemma dualIdxEquiv_apply {c1 c2 : C} (h : S.τ c1 = c2) (x : basisIdx c1) :
-    dualIdxEquiv h x = basisIdxCongr h ((contrDualIdxEquiv S c1).symm x) := rfl
+lemma dualIdxEquiv_apply {c1 c2 : C} (h : S.τ c1 = c2) (x : basisIdx c1)
+    : dualIdxEquiv h x = basisIdxCongr h ((contrDualIdxEquiv S c1).symm x) :=
+  rfl
 
 /-!
 
@@ -153,12 +172,14 @@ lemma dualIdxEquiv_apply {c1 c2 : C} (h : S.τ c1 = c2) (x : basisIdx c1) :
 
 -/
 
-/-- The matching at `S.τ c` is the inverse of the one at `c`, once `S.τ (S.τ c)` is identified
-  with `c` by `S.τ_τ_apply`. The inverse matching satisfies the δ law at `S.τ c` by
-  `contr_tmul_symm`, so uniqueness identifies the two. -/
-lemma contrDualIdxEquiv_tau [Nontrivial k] (c : C) (x : basisIdx (S.τ (S.τ c))) :
-    contrDualIdxEquiv S (S.τ c) x =
-      (contrDualIdxEquiv S c).symm (basisIdxCongr (S.τ_τ_apply c) x) := by
+/--
+The matching at `S.τ c` is the inverse of the one at `c`, once `S.τ (S.τ c)` is identified
+with `c` by `S.τ_τ_apply`. The inverse matching satisfies the δ law at `S.τ c` by
+`contr_tmul_symm`, so uniqueness identifies the two.
+-/
+lemma contrDualIdxEquiv_tau [Nontrivial k] (c : C) (x : basisIdx (S.τ (S.τ c)))
+    : contrDualIdxEquiv S (S.τ c) x
+      = (contrDualIdxEquiv S c).symm (basisIdxCongr (S.τ_τ_apply c) x) := by
   suffices h : IsContrDualMatching S (S.τ c)
       ((basisIdxCongr (S.τ_τ_apply c)).trans (contrDualIdxEquiv S c).symm) by
     rw [contrDualIdxEquiv_eq_of_isContrDualMatching h]
@@ -166,13 +187,14 @@ lemma contrDualIdxEquiv_tau [Nontrivial k] (c : C) (x : basisIdx (S.τ (S.τ c))
   intro y x
   have key := S.contr_tmul_symm c (b c (basisIdxCongr (S.τ_τ_apply c) x)) (b (S.τ c) y)
   rw [equivCast_basis (S.τ_τ_apply c).symm, basisIdxCongr_apply_apply, basisIdxCongr_rfl,
-    contr_basis_eq_ite] at key
+      contr_basis_eq_ite]
+    at key
   rw [← key, Equiv.trans_apply]
   exact if_congr (by rw [Equiv.eq_symm_apply, eq_comm]) rfl rfl
 
 /-- The inverse of `dualIdxEquiv` from `c1` to `c2` is `dualIdxEquiv` from `c2` to `c1`. -/
-lemma dualIdxEquiv_symm [Nontrivial k] {c1 c2 : C} (h : S.τ c1 = c2) (h' : S.τ c2 = c1) :
-    (dualIdxEquiv h).symm = dualIdxEquiv h' := by
+lemma dualIdxEquiv_symm [Nontrivial k] {c1 c2 : C} (h : S.τ c1 = c2) (h' : S.τ c2 = c1)
+    : (dualIdxEquiv h).symm = dualIdxEquiv h' := by
   subst h
   ext x
   rw [Equiv.symm_apply_eq, dualIdxEquiv_apply, dualIdxEquiv_apply, basisIdxCongr_rfl,
@@ -184,12 +206,15 @@ lemma dualIdxEquiv_symm [Nontrivial k] {c1 c2 : C} (h : S.τ c1 = c2) (h' : S.τ
 
 -/
 
-/-- The functional `v ↦ S.contr c (v ⊗ₜ b (S.τ c) x)` is the element of `(b c).dualBasis` at the
-  label matched with `x`. -/
-lemma contr_tmul_basis_eq_dualBasis (c : C) (x : basisIdx (S.τ c)) (v : V c) :
-    S.contr c (v ⊗ₜ[k] b (S.τ c) x) = (b c).dualBasis (contrDualIdxEquiv S c x) v := by
-  have h : (S.contr c).toLinearMap ∘ₗ (TensorProduct.mk k (V c) (V (S.τ c))).flip (b (S.τ c) x) =
-      (b c).dualBasis (contrDualIdxEquiv S c x) := by
+/--
+The functional `v ↦ S.contr c (v ⊗ₜ b (S.τ c) x)` is the element of `(b c).dualBasis` at the
+label matched with `x`.
+-/
+lemma contr_tmul_basis_eq_dualBasis (c : C) (x : basisIdx (S.τ c)) (v : V c)
+    : S.contr c (v ⊗ₜ[k] b (S.τ c) x) = (b c).dualBasis (contrDualIdxEquiv S c x) v := by
+  have h
+      : (S.contr c).toLinearMap ∘ₗ (TensorProduct.mk k (V c) (V (S.τ c))).flip (b (S.τ c) x)
+        = (b c).dualBasis (contrDualIdxEquiv S c x) := by
     refine (b c).ext fun j => ?_
     simp [contr_basis_eq_ite, Finsupp.single_apply]
   exact LinearMap.congr_fun h v

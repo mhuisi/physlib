@@ -70,10 +70,11 @@ lemma l1_single (j : Fin d) : l1 (Pi.single j (1 : ℤ) : Fin d → ℤ) = 1 := 
   · exact fun h => absurd (Finset.mem_univ _) h
 
 /-- The bonded displacements of the hypercubic lattice are the vectors `±e_j`. -/
-lemma hypercubic_bonded_iff_exists (r : Fin d → ℤ) :
-    (hypercubicGraph d).Bonded () () r ↔ ∃ j, r = Pi.single j 1 ∨ r = -Pi.single j 1 := by
-  change (⟨0, ()⟩ ≠ (⟨r, ()⟩ : CellSite (Fin d → ℤ) Unit) ∧ ∃ b ∈ hypercubicBonds d,
-    b.Links ⟨0, ()⟩ ⟨r, ()⟩ ∨ b.Links ⟨r, ()⟩ ⟨0, ()⟩) ↔ _
+lemma hypercubic_bonded_iff_exists (r : Fin d → ℤ)
+    : (hypercubicGraph d).Bonded () () r ↔ ∃ j, r = Pi.single j 1 ∨ r = - Pi.single j 1 := by
+  change (⟨0, ()⟩ ≠ (⟨r, ()⟩ : CellSite (Fin d → ℤ) Unit)
+      ∧ ∃ b ∈ hypercubicBonds d, b.Links ⟨0, ()⟩ ⟨r, ()⟩ ∨ b.Links ⟨r, ()⟩ ⟨0, ()⟩)
+    ↔ _
   simp only [hypercubicBonds, List.mem_ofFn, Bond.Links, true_and, ne_eq, CellSite.mk.injEq,
     and_true, zero_add]
   constructor
@@ -91,10 +92,11 @@ lemma hypercubic_bonded_iff_exists (r : Fin d → ℤ) :
         simp at this
       · rw [h]; simp
 
-/-- **Two sites of the hypercubic lattice are bonded exactly when their cells differ by a vector
-whose coordinates have absolute values summing to one.** -/
-lemma hypercubic_bonded_iff (r : Fin d → ℤ) :
-    (hypercubicGraph d).Bonded () () r ↔ l1 r = 1 := by
+/--
+**Two sites of the hypercubic lattice are bonded exactly when their cells differ by a vector
+whose coordinates have absolute values summing to one.**
+-/
+lemma hypercubic_bonded_iff (r : Fin d → ℤ) : (hypercubicGraph d).Bonded () () r ↔ l1 r = 1 := by
   rw [hypercubic_bonded_iff_exists]
   constructor
   · rintro ⟨j, h | h⟩ <;> subst h <;> simp [l1_neg, l1_single]
@@ -112,15 +114,20 @@ lemma hypercubic_bonded_iff (r : Fin d → ℤ) :
         have := Finset.add_sum_erase Finset.univ (fun i' => |r i'|) (Finset.mem_univ j)
         unfold l1 at h
         linarith
-      have := (Finset.sum_eq_zero_iff_of_nonneg (fun i' _ => hnn i')).1 h2 i
-        (Finset.mem_erase.2 ⟨hij, Finset.mem_univ _⟩)
+      have :=
+        (Finset.sum_eq_zero_iff_of_nonneg (fun i' _ => hnn i')).1 h2 i
+          (Finset.mem_erase.2 ⟨hij, Finset.mem_univ _⟩)
       exact abs_eq_zero.1 this
     refine ⟨j, ?_⟩
     rcases abs_eq (zero_le_one) |>.1 hj1 with h1 | h1
-    · left; ext i; by_cases hi : i = j
+    · left
+      ext i
+      by_cases hi : i = j
       · subst hi; simp [h1]
       · simp [hrest i hi, hi]
-    · right; ext i; by_cases hi : i = j
+    · right
+      ext i
+      by_cases hi : i = j
       · subst hi; simp [h1]
       · simp [hrest i hi, hi]
 
@@ -138,8 +145,10 @@ lemma signOf_ne_zero (b : Bool) : signOf b ≠ 0 := by cases b <;> simp [signOf]
 lemma signOf_injective : Function.Injective signOf := by
   intro a b h; cases a <;> cases b <;> simp_all [signOf]
 
-/-- The lattice automorphism that permutes the axes by `π` and multiplies the `i`-th coordinate
-by the sign `ε i`. -/
+/--
+The lattice automorphism that permutes the axes by `π` and multiplies the `i`-th coordinate
+by the sign `ε i`.
+-/
 def signedPerm (π : Equiv.Perm (Fin d)) (ε : Fin d → Bool) : (Fin d → ℤ) ≃+ (Fin d → ℤ) where
   toFun r i := signOf (ε i) * r (π.symm i)
   invFun r i := signOf (ε (π i)) * r (π i)
@@ -155,29 +164,32 @@ def signedPerm (π : Equiv.Perm (Fin d)) (ε : Fin d → Bool) : (Fin d → ℤ)
     funext i
     simp [mul_add]
 
-lemma signedPerm_apply (π : Equiv.Perm (Fin d)) (ε : Fin d → Bool) (r : Fin d → ℤ) (i : Fin d) :
-    signedPerm π ε r i = signOf (ε i) * r (π.symm i) := rfl
+lemma signedPerm_apply (π : Equiv.Perm (Fin d)) (ε : Fin d → Bool) (r : Fin d → ℤ) (i : Fin d)
+    : signedPerm π ε r i = signOf (ε i) * r (π.symm i) :=
+  rfl
 
 /-- A signed permutation preserves the sum of the absolute values of the coordinates. -/
-lemma l1_signedPerm (π : Equiv.Perm (Fin d)) (ε : Fin d → Bool) (r : Fin d → ℤ) :
-    l1 (signedPerm π ε r) = l1 r := by
+lemma l1_signedPerm (π : Equiv.Perm (Fin d)) (ε : Fin d → Bool) (r : Fin d → ℤ)
+    : l1 (signedPerm π ε r) = l1 r := by
   unfold l1
   simp only [signedPerm_apply, abs_mul, abs_signOf, one_mul]
   exact Equiv.sum_comp π.symm (fun i => |r i|)
 
-lemma signedPerm_single (π : Equiv.Perm (Fin d)) (ε : Fin d → Bool) (j : Fin d) :
-    signedPerm π ε (Pi.single j 1) = Pi.single (π j) (signOf (ε (π j))) := by
+lemma signedPerm_single (π : Equiv.Perm (Fin d)) (ε : Fin d → Bool) (j : Fin d)
+    : signedPerm π ε (Pi.single j 1) = Pi.single (π j) (signOf (ε (π j))) := by
   funext i
   by_cases hi : i = π j
   · subst hi; simp [signedPerm_apply]
   · have : π.symm i ≠ j := fun h => hi (by rw [← h]; simp)
     simp [signedPerm_apply, hi, this]
 
-lemma signedPerm_injective :
-    Function.Injective fun p : Equiv.Perm (Fin d) × (Fin d → Bool) => signedPerm p.1 p.2 := by
+lemma signedPerm_injective
+    : Function.Injective fun p : Equiv.Perm (Fin d) × (Fin d → Bool) => signedPerm p.1 p.2 := by
   rintro ⟨π, ε⟩ ⟨π', ε'⟩ h
-  have h1 : ∀ j, (Pi.single (π j) (signOf (ε (π j))) : Fin d → ℤ) =
-      Pi.single (π' j) (signOf (ε' (π' j))) := fun j => by
+  have h1
+      : ∀ j,
+        (Pi.single (π j) (signOf (ε (π j))) : Fin d → ℤ)
+          = Pi.single (π' j) (signOf (ε' (π' j))) := fun j => by
     rw [← signedPerm_single, ← signedPerm_single]
     exact congrArg (fun A : (Fin d → ℤ) ≃+ (Fin d → ℤ) => A (Pi.single j 1)) h
   have hπ : ∀ j, π j = π' j := by
@@ -196,21 +208,25 @@ lemma signedPerm_injective :
 /-! ## C. The point group -/
 
 /-- **A signed permutation preserves the bonds of the hypercubic lattice.** -/
-lemma signedPerm_mem_pointStabilizer (π : Equiv.Perm (Fin d)) (ε : Fin d → Bool) :
-    Multiplicative.ofAdd (signedPerm π ε) ∈ (hypercubicGraph d).pointStabilizer := by
+lemma signedPerm_mem_pointStabilizer (π : Equiv.Perm (Fin d)) (ε : Fin d → Bool)
+    : Multiplicative.ofAdd (signedPerm π ε) ∈ (hypercubicGraph d).pointStabilizer := by
   intro r
   change (hypercubicGraph d).Bonded () () (signedPerm π ε r) ↔ _
   rw [hypercubic_bonded_iff, hypercubic_bonded_iff, l1_signedPerm]
 
-/-- **The lattice automorphisms preserving the bonds of the hypercubic lattice are exactly the
-signed permutations.** -/
-lemma mem_pointStabilizer_hypercubic_iff (A : Multiplicative (AddAut (Fin d → ℤ))) :
-    A ∈ (hypercubicGraph d).pointStabilizer ↔
-      ∃ (π : Equiv.Perm (Fin d)) (ε : Fin d → Bool), Multiplicative.toAdd A = signedPerm π ε := by
+/--
+**The lattice automorphisms preserving the bonds of the hypercubic lattice are exactly the
+signed permutations.**
+-/
+lemma mem_pointStabilizer_hypercubic_iff (A : Multiplicative (AddAut (Fin d → ℤ)))
+    : A ∈ (hypercubicGraph d).pointStabilizer
+      ↔ ∃ (π : Equiv.Perm (Fin d)) (ε : Fin d → Bool), Multiplicative.toAdd A = signedPerm π ε := by
   constructor
   · intro hA
-    have hbond : ∀ j, ∃ (k : Fin d) (b : Bool),
-        (Multiplicative.toAdd A : AddAut (Fin d → ℤ)) (Pi.single j 1) = Pi.single k (signOf b) := by
+    have hbond
+        : ∀ j, ∃ (k : Fin d) (b : Bool),
+          (Multiplicative.toAdd A : AddAut (Fin d → ℤ)) (Pi.single j 1)
+            = Pi.single k (signOf b) := by
       intro j
       have h1 : (hypercubicGraph d).Bonded () ()
           ((Multiplicative.toAdd A : AddAut (Fin d → ℤ)) (Pi.single j 1)) :=
@@ -219,7 +235,8 @@ lemma mem_pointStabilizer_hypercubic_iff (A : Multiplicative (AddAut (Fin d → 
       · exact ⟨k, true, by simpa [signOf] using h⟩
       · refine ⟨k, false, ?_⟩
         rw [h]
-        ext i; by_cases hi : i = k <;> simp [signOf, hi]
+        ext i
+        by_cases hi : i = k <;> simp [signOf, hi]
     choose f ε' hf using hbond
     have hinj : Function.Injective f := by
       intro j j' hjj
@@ -227,10 +244,12 @@ lemma mem_pointStabilizer_hypercubic_iff (A : Multiplicative (AddAut (Fin d → 
       have e2 := hf j'
       rw [← hjj] at e2
       have : (Multiplicative.toAdd A : AddAut (Fin d → ℤ))
-          (signOf (ε' j') • Pi.single j 1 : Fin d → ℤ) =
-          (Multiplicative.toAdd A : AddAut (Fin d → ℤ)) (signOf (ε' j) • Pi.single j' 1) := by
+            (signOf (ε' j') • Pi.single j 1 : Fin d → ℤ)
+          = (Multiplicative.toAdd A : AddAut (Fin d → ℤ)) (signOf (ε' j) • Pi.single j' 1) := by
         rw [map_zsmul, map_zsmul, e1, e2]
-        ext i; by_cases hi : i = f j <;> simp [hi]; ring
+        ext i
+        by_cases hi : i = f j <;> simp [hi]
+        ring
       have h3 := congrFun ((Multiplicative.toAdd A : AddAut (Fin d → ℤ)).injective this) j
       by_contra hne
       simp [hne, signOf_ne_zero] at h3
@@ -250,20 +269,24 @@ lemma mem_pointStabilizer_hypercubic_iff (A : Multiplicative (AddAut (Fin d → 
     rw [show A = Multiplicative.ofAdd (signedPerm π ε) from by rw [← h]; rfl]
     exact signedPerm_mem_pointStabilizer π ε
 
-/-- **The point group of the hypercubic lattice is the group of signed permutations of the
-axes**: it is in bijection with the pairs of a permutation and a choice of signs. -/
-noncomputable def pointStabilizerEquivSignedPerm :
-    (Equiv.Perm (Fin d) × (Fin d → Bool)) ≃ (hypercubicGraph d).pointStabilizer :=
-  Equiv.ofBijective (fun p => ⟨Multiplicative.ofAdd (signedPerm p.1 p.2),
-    signedPerm_mem_pointStabilizer p.1 p.2⟩)
-    ⟨fun p q h => signedPerm_injective (congrArg (fun x => Multiplicative.toAdd x.1) h),
+/--
+**The point group of the hypercubic lattice is the group of signed permutations of the
+axes**: it is in bijection with the pairs of a permutation and a choice of signs.
+-/
+noncomputable def pointStabilizerEquivSignedPerm
+    : (Equiv.Perm (Fin d) × (Fin d → Bool)) ≃ (hypercubicGraph d).pointStabilizer :=
+  Equiv.ofBijective
+    (fun p => ⟨Multiplicative.ofAdd (signedPerm p.1 p.2), signedPerm_mem_pointStabilizer p.1 p.2⟩)
+    ⟨
+      fun p q h => signedPerm_injective (congrArg (fun x => Multiplicative.toAdd x.1) h),
       fun ⟨A, hA⟩ => by
         obtain ⟨π, ε, h⟩ := (mem_pointStabilizer_hypercubic_iff A).1 hA
-        exact ⟨(π, ε), Subtype.ext (by simp [← h])⟩⟩
+        exact ⟨(π, ε), Subtype.ext (by simp [← h])⟩
+    ⟩
 
 /-- **The point group of the hypercubic lattice in `d` dimensions has order `2 ^ d * d !`.** -/
-lemma card_pointGroup_hypercubic (d : ℕ) :
-    Nat.card (hypercubicGraph d).pointGroup = 2 ^ d * d.factorial := by
+lemma card_pointGroup_hypercubic (d : ℕ)
+    : Nat.card (hypercubicGraph d).pointGroup = 2 ^ d * d.factorial := by
   rw [Nat.card_congr (pointGroupEquiv (hypercubicGraph d)).toEquiv,
     ← Nat.card_congr (pointStabilizerEquivSignedPerm (d := d)), Nat.card_eq_fintype_card,
     Fintype.card_prod, Fintype.card_perm, Fintype.card_fun, Fintype.card_bool, Fintype.card_fin]

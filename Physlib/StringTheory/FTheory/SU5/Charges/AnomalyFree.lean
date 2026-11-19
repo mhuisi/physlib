@@ -61,8 +61,10 @@ open Physlib
 -/
 
 variable {𝓩 : Type}
-/-- The condition on a collection of charges `c` that it extends to an anomaly free `Quanta`.
-  That anomaly free `Quanta` is not tracked by this proposition. -/
+/--
+The condition on a collection of charges `c` that it extends to an anomaly free `Quanta`.
+That anomaly free `Quanta` is not tracked by this proposition.
+-/
 def IsAnomalyFree [DecidableEq 𝓩] [CommRing 𝓩] (c : ChargeSpectrum 𝓩) : Prop :=
   ∃ x ∈ Quanta.liftCharge c, x.LinearAnomalyCancellation
 
@@ -83,18 +85,22 @@ instance [DecidableEq 𝓩] [CommRing 𝓩] {c : ChargeSpectrum 𝓩} : Decidabl
 
 section map
 
-variable {𝓩 𝓩1 : Type} [DecidableEq 𝓩1] [DecidableEq 𝓩][CommRing 𝓩1] [CommRing 𝓩]
+variable {𝓩 𝓩1 : Type} [DecidableEq 𝓩1] [DecidableEq 𝓩] [CommRing 𝓩1] [CommRing 𝓩]
 
-lemma isAnomalyFree_map (f : 𝓩 →+* 𝓩1) {c : ChargeSpectrum 𝓩}
-    (h : IsAnomalyFree c) : IsAnomalyFree (c.map (f.toAddMonoidHom)) := by
+lemma isAnomalyFree_map (f : 𝓩 →+* 𝓩1) {c : ChargeSpectrum 𝓩} (h : IsAnomalyFree c)
+    : IsAnomalyFree (c.map (f.toAddMonoidHom)) := by
   obtain ⟨⟨qHd, qHu, F5, F10⟩, h1, h2⟩ := h
-  let QM : Quanta 𝓩1 := ⟨Option.map f qHd, Option.map f qHu, F5.map fun y => (f y.1, y.2),
-    F10.map fun y => (f y.1, y.2)⟩
+  let QM : Quanta 𝓩1 := ⟨
+    Option.map f qHd,
+    Option.map f qHu,
+    F5.map fun y => (f y.1, y.2),
+    F10.map fun y => (f y.1, y.2)
+  ⟩
   refine ⟨QM.reduce, ?_, ?_⟩
   · simp [Quanta.mem_liftCharge_iff, Quanta.reduce, QM] at ⊢ h1
-    refine ⟨?_, ?_, FiveQuanta.map_liftCharge _ _ _ h1.2.2.1,
-      TenQuanta.map_liftCharge _ _ _ h1.2.2.2⟩ <;>
-      simp [ChargeSpectrum.map, h1]
+    refine
+        ⟨?_, ?_, FiveQuanta.map_liftCharge _ _ _ h1.2.2.1, TenQuanta.map_liftCharge _ _ _ h1.2.2.2⟩
+      <;> simp [ChargeSpectrum.map, h1]
   · rw [Quanta.LinearAnomalyCancellation] at h2
     simp [QM, ← map_add, h2, Quanta.reduce, Quanta.LinearAnomalyCancellation,
       FiveQuanta.anomalyCoefficient_of_reduce, TenQuanta.anomalyCoefficient_of_reduce]
@@ -109,18 +115,22 @@ end map
 
 set_option maxRecDepth 2000 in
 /-- The viable charges which are anomaly free. -/
-lemma viable_anomalyFree (I : CodimensionOneConfig) :
-    (viableCharges I).filter IsAnomalyFree =
-    (match I with
-    | .same => {⟨some 2, some (-2), {-3, -1}, {-1}⟩,
-      ⟨some 2, some (-2), {-1, 1}, {-1}⟩,
-      ⟨some (-2), some 2, {-1, 1}, {1}⟩,
-      ⟨some (-2), some 2, {1, 3}, {1}⟩}
-    | .nearestNeighbor => {⟨some (-4), some (-14), {6, 11}, {-7}⟩,
-      ⟨some 6, some (-14), {-9, 1}, {-7}⟩,
-      ⟨some 6, some (-14), {1, 11}, {-7}⟩,
-      ⟨some (-14), some 6, {1, 11}, {3}⟩}
-    | .nextToNearestNeighbor => {⟨some 2, some 12, {-13, -8}, {6}⟩}) := by
+lemma viable_anomalyFree (I : CodimensionOneConfig)
+    : (viableCharges I).filter IsAnomalyFree
+      = (match I with
+        | .same => {
+          ⟨some 2, some (-2), {-3, -1}, {-1}⟩,
+          ⟨some 2, some (-2), {-1, 1}, {-1}⟩,
+          ⟨some (-2), some 2, {-1, 1}, {1}⟩,
+          ⟨some (-2), some 2, {1, 3}, {1}⟩
+        }
+        | .nearestNeighbor => {
+          ⟨some (-4), some (-14), {6, 11}, {-7}⟩,
+          ⟨some 6, some (-14), {-9, 1}, {-7}⟩,
+          ⟨some 6, some (-14), {1, 11}, {-7}⟩,
+          ⟨some (-14), some 6, {1, 11}, {3}⟩
+        }
+        | .nextToNearestNeighbor => {⟨some 2, some 12, {-13, -8}, {6}⟩}) := by
   revert I
   decide
 

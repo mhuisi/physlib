@@ -76,8 +76,10 @@ representation and `0` otherwise.
 
 -/
 
-/-- The R-Parity of a field, landing on `1` if it is in the non-trivial representation
-  and `0` otherwise. -/
+/--
+The R-Parity of a field, landing on `1` if it is in the non-trivial representation
+and `0` otherwise.
+-/
 def FieldLabel.RParity : FieldLabel → Fin 2
   | fiveBarHu => 0
   | fiveHu => 0

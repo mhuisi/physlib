@@ -44,8 +44,10 @@ namespace ProbabilisticTheory
 
 /-! ## A. Classical systems -/
 
-/-- A system is **classical** when every state decomposes uniquely into pure states: its state
-space is a Choquet simplex, i.e. any two positive functionals have a least upper bound. -/
+/--
+A system is **classical** when every state decomposes uniquely into pure states: its state
+space is a Choquet simplex, i.e. any two positive functionals have a least upper bound.
+-/
 abbrev IsClassical (E : Type*) [OrderUnitSpace E] : Prop := HasLatticeDualCone E
 
 /-- A system whose observables form a lattice is classical. -/

@@ -60,30 +60,35 @@ namespace UnitalPositiveLinearMap
 variable {ω : 𝓢[ℂ, A]}
 variable {G : Type*} [AddCommGroup G] [TopologicalSpace G] [DiscreteTopology G]
 variable {α : Multiplicative G →* (A ≃⋆ₐ[ℂ] A)} (hα : ∀ g a, ω (α g a) = ω a)
-variable [MeasurableSpace (PontryaginDual (Multiplicative G))]
+variable
+  [MeasurableSpace (PontryaginDual (Multiplicative G))]
   [BorelSpace (PontryaginDual (Multiplicative G))]
 
 /-! ## A. The momentum distribution of a local excitation -/
 
-/-- The momentum distribution of the excitation `π(a) Ω` created by the observable `a` from the
+/--
+The momentum distribution of the excitation `π(a) Ω` created by the observable `a` from the
 invariant state: the distribution of the vector `π(a) Ω` over the characters of the symmetry
-group. -/
+group.
+-/
 def gnsStructureFactor (a : A) : Measure (PontryaginDual (Multiplicative G)) :=
   vectorMeasure (gnsUnitaryRep hα) (ω.gnsRep a ω.gnsCyclicVector)
 
 instance (a : A) : IsFiniteMeasure (gnsStructureFactor hα a) :=
   inferInstanceAs (IsFiniteMeasure (vectorMeasure (gnsUnitaryRep hα) _))
 
-/-- **The Fourier transform of the momentum distribution is the correlation function**:
-`∫ χ(g) dμ_a(χ) = ω(a⋆ α_g(a))`. -/
-lemma integral_gnsStructureFactor (a : A) (g : Multiplicative G) :
-    ∫ χ, ((χ g : Circle) : ℂ) ∂gnsStructureFactor hα a = ω (star a * α g a) := by
+/--
+**The Fourier transform of the momentum distribution is the correlation function**:
+`∫ χ(g) dμ_a(χ) = ω(a⋆ α_g(a))`.
+-/
+lemma integral_gnsStructureFactor (a : A) (g : Multiplicative G)
+    : ∫ χ, ((χ g : Circle) : ℂ) ∂gnsStructureFactor hα a = ω (star a * α g a) := by
   rw [gnsStructureFactor, ← inner_eq_integral_vectorMeasure]
   exact inner_gnsRep_cyclicVector_gnsUnitary hα g a
 
 /-- The total momentum weight of the excitation `π(a) Ω` is `ω(a⋆ a)`. -/
-lemma gnsStructureFactor_univ (a : A) :
-    (gnsStructureFactor hα a).real Set.univ = (ω (star a * a)).re := by
+lemma gnsStructureFactor_univ (a : A)
+    : (gnsStructureFactor hα a).real Set.univ = (ω (star a * a)).re := by
   have h := integral_gnsStructureFactor hα a 1
   simp only [map_one, Circle.coe_one, integral_const] at h
   have h2 := congrArg Complex.re h
@@ -94,10 +99,12 @@ lemma gnsStructureFactor_univ (a : A) :
 omit [DiscreteTopology G] in
 omit [BorelSpace (PontryaginDual (Multiplicative G))] in
 omit [MeasurableSpace (PontryaginDual (Multiplicative G))] in
-/-- The cyclic vector of an invariant state has momentum zero: its spectral measure is carried
-by the trivial character. -/
-lemma gnsCyclicVector_mem_sector :
-    ω.gnsCyclicVector ∈ ProbabilisticTheory.Representation.sector (toEnd (gnsUnitaryRep hα))
+/--
+The cyclic vector of an invariant state has momentum zero: its spectral measure is carried
+by the trivial character.
+-/
+lemma gnsCyclicVector_mem_sector
+    : ω.gnsCyclicVector ∈ ProbabilisticTheory.Representation.sector (toEnd (gnsUnitaryRep hα))
       (fun g => (((1 : PontryaginDual (Multiplicative G)) g : Circle) : ℂ)) := by
   intro g
   rw [toEnd_apply]
@@ -105,11 +112,13 @@ lemma gnsCyclicVector_mem_sector :
   have h := gnsUnitary_cyclicVector hα g
   simpa using h
 
-/-- **The vacuum has momentum zero.** For a countable symmetry group the spectral projection of
-the trivial character fixes the cyclic vector. -/
-lemma projection_one_gnsCyclicVector [Countable G] :
-    projection (gnsUnitaryRep hα) {(1 : PontryaginDual (Multiplicative G))} ω.gnsCyclicVector =
-      ω.gnsCyclicVector :=
+/--
+**The vacuum has momentum zero.** For a countable symmetry group the spectral projection of
+the trivial character fixes the cyclic vector.
+-/
+lemma projection_one_gnsCyclicVector [Countable G]
+    : projection (gnsUnitaryRep hα) {(1 : PontryaginDual (Multiplicative G))} ω.gnsCyclicVector
+      = ω.gnsCyclicVector :=
   projection_singleton_eq_self_of_mem_sector _ 1 (gnsCyclicVector_mem_sector hα)
 
 end UnitalPositiveLinearMap

@@ -91,8 +91,10 @@ As a function of the real time `τ`, the motion leaving the apex at the instant 
 
 -/
 
-/-- The delayed quartic `τ ↦ max (τ - T) 0 ⁴ / 144`: zero up to the instant `T`, and
-  `(τ - T)⁴ / 144` afterwards. -/
+/--
+The delayed quartic `τ ↦ max (τ - T) 0 ⁴ / 144`: zero up to the instant `T`, and
+`(τ - T)⁴ / 144` afterwards.
+-/
 noncomputable def delayedQuartic (T τ : ℝ) : ℝ := max (τ - T) 0 ^ 4 / 144
 
 /-- The delayed quartic, written out. -/
@@ -114,8 +116,10 @@ lemma delayedQuartic_pos (T : ℝ) {τ : ℝ} (h : T < τ) : 0 < delayedQuartic 
   have := sub_pos.mpr h
   positivity
 
-/-- The square root of the delayed quartic is `max (τ - T) 0 ² / 12`, which is its second
-  derivative: this is the equation of motion `r̈ = √r` of the dome along it. -/
+/--
+The square root of the delayed quartic is `max (τ - T) 0 ² / 12`, which is its second
+derivative: this is the equation of motion `r̈ = √r` of the dome along it.
+-/
 lemma sqrt_delayedQuartic (T τ : ℝ) : √(delayedQuartic T τ) = max (τ - T) 0 ^ 2 / 12 := by
   rw [delayedQuartic_eq, show max (τ - T) 0 ^ 4 / 144 = (max (τ - T) 0 ^ 2 / 12) ^ 2 by ring,
     Real.sqrt_sq (by positivity)]
@@ -127,20 +131,19 @@ lemma sqrt_delayedQuartic (T τ : ℝ) : √(delayedQuartic T τ) = max (τ - T)
 -/
 
 /-- The derivative of the delayed quartic is `max (τ - T) 0 ³ / 36`. -/
-lemma hasDerivAt_delayedQuartic (T τ : ℝ) :
-    HasDerivAt (delayedQuartic T) (max (τ - T) 0 ^ 3 / 36) τ := by
+lemma hasDerivAt_delayedQuartic (T τ : ℝ)
+    : HasDerivAt (delayedQuartic T) (max (τ - T) 0 ^ 3 / 36) τ := by
   refine ((hasDerivAt_max_sub_pow T 2 τ).div_const 144).congr_deriv ?_
   push_cast
   ring
 
 /-- The derivative of the delayed quartic, as a function. -/
-lemma deriv_delayedQuartic (T : ℝ) :
-    deriv (delayedQuartic T) = fun τ => max (τ - T) 0 ^ 3 / 36 :=
+lemma deriv_delayedQuartic (T : ℝ) : deriv (delayedQuartic T) = fun τ => max (τ - T) 0 ^ 3 / 36 :=
   funext fun τ => (hasDerivAt_delayedQuartic T τ).deriv
 
 /-- The second derivative of the delayed quartic is `max (τ - T) 0 ² / 12`. -/
-lemma hasDerivAt_deriv_delayedQuartic (T τ : ℝ) :
-    HasDerivAt (deriv (delayedQuartic T)) (max (τ - T) 0 ^ 2 / 12) τ := by
+lemma hasDerivAt_deriv_delayedQuartic (T τ : ℝ)
+    : HasDerivAt (deriv (delayedQuartic T)) (max (τ - T) 0 ^ 2 / 12) τ := by
   rw [deriv_delayedQuartic]
   refine ((hasDerivAt_max_sub_pow T 1 τ).div_const 36).congr_deriv ?_
   push_cast
@@ -166,13 +169,17 @@ unit vector of the arc-length coordinate.
 
 -/
 
-/-- The motion of the particle on the dome leaving the apex at the instant `T`: at rest at the
-  apex up to `T`, and at arc length `(t - T)⁴ / 144` from the apex afterwards. -/
+/--
+The motion of the particle on the dome leaving the apex at the instant `T`: at rest at the
+apex up to `T`, and at arc length `(t - T)⁴ / 144` from the apex afterwards.
+-/
 noncomputable def solution (T : ℝ) : Time → EuclideanSpace ℝ (Fin 1) := fun t =>
   delayedQuartic T t.val • EuclideanSpace.single 0 1
 
-/-- The arc length along the motion leaving the apex at the instant `T` is the delayed
-  quartic. -/
+/--
+The arc length along the motion leaving the apex at the instant `T` is the delayed
+quartic.
+-/
 lemma solution_apply (T : ℝ) (t : Time) : solution T t 0 = delayedQuartic T t.val := by
   simp [solution]
 
@@ -201,28 +208,31 @@ lemma solution_contDiff (T : ℝ) : ContDiff ℝ 2 (solution T) := by
   unfold solution
   fun_prop
 
-/-- The velocity along the motion leaving the apex at the instant `T` is
-  `max (t - T) 0 ³ / 36`. -/
-lemma deriv_solution (T : ℝ) :
-    ∂ₜ (solution T) = fun t => (max (t.val - T) 0 ^ 3 / 36) • EuclideanSpace.single 0 1 := by
+/--
+The velocity along the motion leaving the apex at the instant `T` is
+`max (t - T) 0 ³ / 36`.
+-/
+lemma deriv_solution (T : ℝ)
+    : ∂ₜ (solution T) = fun t => (max (t.val - T) 0 ^ 3 / 36) • EuclideanSpace.single 0 1 := by
   funext t
   unfold solution
   exact Time.deriv_comp_toRealCLE_of_hasDerivAt
-    (fun τ : ℝ => delayedQuartic T τ • EuclideanSpace.single (0 : Fin 1) (1 : ℝ)) t _
-    ((hasDerivAt_delayedQuartic T t.val).smul_const _)
+    (fun τ : ℝ => delayedQuartic T τ • EuclideanSpace.single (0 : Fin 1) (1 : ℝ))
+    t _ ((hasDerivAt_delayedQuartic T t.val).smul_const _)
 
-/-- The acceleration along the motion leaving the apex at the instant `T` is
-  `max (t - T) 0 ² / 12`. -/
-lemma deriv_deriv_solution (T : ℝ) :
-    ∂ₜ (∂ₜ (solution T)) =
-      fun t => (max (t.val - T) 0 ^ 2 / 12) • EuclideanSpace.single 0 1 := by
+/--
+The acceleration along the motion leaving the apex at the instant `T` is
+`max (t - T) 0 ² / 12`.
+-/
+lemma deriv_deriv_solution (T : ℝ)
+    : ∂ₜ (∂ₜ (solution T)) = fun t => (max (t.val - T) 0 ^ 2 / 12) • EuclideanSpace.single 0 1 := by
   funext t
   rw [deriv_solution]
   have h := hasDerivAt_deriv_delayedQuartic T t.val
   rw [deriv_delayedQuartic] at h
   exact Time.deriv_comp_toRealCLE_of_hasDerivAt
-    (fun τ : ℝ => (max (τ - T) 0 ^ 3 / 36) • EuclideanSpace.single (0 : Fin 1) (1 : ℝ)) t _
-    (h.smul_const _)
+    (fun τ : ℝ => (max (τ - T) 0 ^ 3 / 36) • EuclideanSpace.single (0 : Fin 1) (1 : ℝ))
+    t _ (h.smul_const _)
 
 /-- The motion leaving the apex at the instant `T ≥ 0` starts from rest. -/
 lemma deriv_solution_zero {T : ℝ} (hT : 0 ≤ T) : ∂ₜ (solution T) 0 = 0 := by
@@ -235,8 +245,10 @@ lemma deriv_solution_zero {T : ℝ} (hT : 0 ≤ T) : ∂ₜ (solution T) 0 = 0 :
 
 -/
 
-/-- The motion leaving the apex at the instant `T` satisfies the equation of motion of the
-  dome: its acceleration `max (t - T) 0 ² / 12` is the square root of its arc length. -/
+/--
+The motion leaving the apex at the instant `T` satisfies the equation of motion of the
+dome: its acceleration `max (t - T) 0 ² / 12` is the square root of its arc length.
+-/
 lemma solution_equationOfMotion (T : ℝ) : S.EquationOfMotion (solution T) := by
   rw [equationOfMotion_iff_scalar]
   intro t
@@ -244,10 +256,11 @@ lemma solution_equationOfMotion (T : ℝ) : S.EquationOfMotion (solution T) := b
   simp
 
 /-- The motion leaving the apex at the instant `T` is a solution of the dome. -/
-lemma solution_isSolution (T : ℝ) : S.IsSolution (solution T) :=
-  ⟨(solution_contDiff T).differentiable (by simp),
-    Time.deriv_differentiable_of_contDiff_two _ (solution_contDiff T),
-    S.solution_equationOfMotion T⟩
+lemma solution_isSolution (T : ℝ) : S.IsSolution (solution T) := ⟨
+  (solution_contDiff T).differentiable (by simp),
+  Time.deriv_differentiable_of_contDiff_two _ (solution_contDiff T),
+  S.solution_equationOfMotion T
+⟩
 
 /-!
 
@@ -255,8 +268,10 @@ lemma solution_isSolution (T : ℝ) : S.IsSolution (solution T) :=
 
 -/
 
-/-- Motions leaving the apex at distinct instants are distinct: at the later instant one is
-  still at the apex and the other is not. -/
+/--
+Motions leaving the apex at distinct instants are distinct: at the later instant one is
+still at the apex and the other is not.
+-/
 lemma solution_ne_of_lt {T T' : ℝ} (h : T < T') : solution T ≠ solution T' := by
   intro heq
   have h1 := solution_apply_pos T (t := (T' : Time)) (by rw [Time.realCast_val]; exact h)
@@ -308,38 +323,57 @@ pendulum fails for the dome, whose force violates the Picard–Lindelöf hypothe
 
 -/
 
-/-- Failure of uniqueness for the Norton dome: there are two distinct solutions of the
-  dome with the same initial position and the same initial velocity. The witnesses are the
-  motion staying at the apex and the motion leaving it at the instant `0`. -/
-lemma exists_isSolution_ne :
-    ∃ x y : Time → EuclideanSpace ℝ (Fin 1), S.IsSolution x ∧ S.IsSolution y ∧
-      x 0 = y 0 ∧ ∂ₜ x 0 = ∂ₜ y 0 ∧ x ≠ y :=
-  ⟨0, solution 0, S.rest_isSolution, S.solution_isSolution 0, by simp [solution_zero le_rfl],
-    by rw [deriv_solution_zero le_rfl]; exact Time.deriv_const 0,
-    (solution_ne_zero 0).symm⟩
+/--
+Failure of uniqueness for the Norton dome: there are two distinct solutions of the
+dome with the same initial position and the same initial velocity. The witnesses are the
+motion staying at the apex and the motion leaving it at the instant `0`.
+-/
+lemma exists_isSolution_ne
+    : ∃ x y : Time → EuclideanSpace ℝ (Fin 1),
+      S.IsSolution x ∧ S.IsSolution y ∧ x 0 = y 0 ∧ ∂ₜ x 0 = ∂ₜ y 0 ∧ x ≠ y := ⟨
+  0,
+  solution 0,
+  S.rest_isSolution,
+  S.solution_isSolution 0,
+  by simp [solution_zero le_rfl],
+  by rw [deriv_solution_zero le_rfl]; exact Time.deriv_const 0,
+  (solution_ne_zero 0).symm
+⟩
 
-/-- The solutions of the Norton dome are not determined by their initial position and
-  velocity: the uniqueness property that the simple pendulum has,
-  `SimplePendulum.IsSolution.eq_of_initial`, fails for the dome. -/
-lemma not_isSolution_unique :
-    ¬ ∀ x y : Time → EuclideanSpace ℝ (Fin 1), S.IsSolution x → S.IsSolution y →
-      x 0 = y 0 → ∂ₜ x 0 = ∂ₜ y 0 → x = y := by
+/--
+The solutions of the Norton dome are not determined by their initial position and
+velocity: the uniqueness property that the simple pendulum has,
+`SimplePendulum.IsSolution.eq_of_initial`, fails for the dome.
+-/
+lemma not_isSolution_unique
+    : ¬ ∀ x y : Time → EuclideanSpace ℝ (Fin 1),
+      S.IsSolution x → S.IsSolution y → x 0 = y 0 → ∂ₜ x 0 = ∂ₜ y 0 → x = y := by
   intro h
   obtain ⟨x, y, hx, hy, h0, hv, hne⟩ := S.exists_isSolution_ne
   exact hne (h x y hx hy h0 hv)
 
-/-- For every instant `T ≥ 0` there is a solution of the dome starting from rest at the apex
-  which is at the apex up to `T` and off it afterwards: the motions from rest at the apex form
-  a one-parameter family. -/
-lemma exists_isSolution_of_nonneg {T : ℝ} (hT : 0 ≤ T) :
-    ∃ r : Time → EuclideanSpace ℝ (Fin 1), S.IsSolution r ∧ r 0 = 0 ∧ ∂ₜ r 0 = 0 ∧
-      (∀ t : Time, t.val ≤ T → r t = 0) ∧ (∀ t : Time, T < t.val → 0 < r t 0) :=
-  ⟨solution T, S.solution_isSolution T, solution_zero hT, deriv_solution_zero hT,
-    fun _ ht => solution_of_le T ht, fun _ ht => solution_apply_pos T ht⟩
+/--
+For every instant `T ≥ 0` there is a solution of the dome starting from rest at the apex
+which is at the apex up to `T` and off it afterwards: the motions from rest at the apex form
+a one-parameter family.
+-/
+lemma exists_isSolution_of_nonneg {T : ℝ} (hT : 0 ≤ T)
+    : ∃ r : Time → EuclideanSpace ℝ (Fin 1),
+      S.IsSolution r ∧ r 0 = 0 ∧ ∂ₜ r 0 = 0 ∧ (∀ t : Time, t.val ≤ T → r t = 0)
+        ∧ (∀ t : Time, T < t.val → 0 < r t 0) := ⟨
+  solution T,
+  S.solution_isSolution T,
+  solution_zero hT,
+  deriv_solution_zero hT,
+  fun _ ht => solution_of_le T ht,
+  fun _ ht => solution_apply_pos T ht
+⟩
 
-/-- Every motion leaving the apex has zero energy: before the instant `T` it is at rest at the
-  apex, and the energy is conserved. Energy conservation therefore does not single out the
-  motion staying at the apex. -/
+/--
+Every motion leaving the apex has zero energy: before the instant `T` it is at rest at the
+apex, and the energy is conserved. Energy conservation therefore does not single out the
+motion staying at the apex.
+-/
 lemma energy_solution (T : ℝ) (t : Time) : S.energy (solution T) t = 0 := by
   have hs : ((T - 1 : ℝ) : Time).val ≤ T := by rw [Time.realCast_val]; linarith
   rw [(S.solution_isSolution T).energy_eq t,
@@ -357,60 +391,75 @@ this is impossible; for the dome it is the non-uniqueness read backwards.
 
 -/
 
-/-- The second derivative is unchanged by the reversal of time, for a curve whose position and
-  velocity are differentiable. This is `Time.deriv_deriv_comp_neg` with its `C²` hypothesis
-  weakened to the regularity of a solution. -/
-lemma deriv_deriv_comp_neg_of_differentiable {M : Type} [NormedAddCommGroup M]
-    [NormedSpace ℝ M] (f : Time → M) (hf : Differentiable ℝ f) (hf' : Differentiable ℝ (∂ₜ f))
-    (t : Time) : ∂ₜ (∂ₜ (fun s => f (-s))) t = ∂ₜ (∂ₜ f) (-t) := by
+/--
+The second derivative is unchanged by the reversal of time, for a curve whose position and
+velocity are differentiable. This is `Time.deriv_deriv_comp_neg` with its `C²` hypothesis
+weakened to the regularity of a solution.
+-/
+lemma deriv_deriv_comp_neg_of_differentiable
+    {M : Type} [NormedAddCommGroup M] [NormedSpace ℝ M]
+    (f : Time → M) (hf : Differentiable ℝ f) (hf' : Differentiable ℝ (∂ₜ f))
+    (t : Time)
+    : ∂ₜ (∂ₜ (fun s => f (-s))) t = ∂ₜ (∂ₜ f) (-t) := by
   rw [← neg_neg (∂ₜ (∂ₜ f) (-t)), ← Time.deriv_comp_neg _ _ (hf' _), ← Time.deriv_neg]
   congr
   ext
   exact Time.deriv_comp_neg f _ (hf _)
 
-/-- The time reversal of a twice differentiable curve satisfying the equation of motion of the
-  dome satisfies it too: the equation has no velocity term. -/
-lemma equationOfMotion_comp_neg {r : Time → EuclideanSpace ℝ (Fin 1)} (hr : Differentiable ℝ r)
-    (hr' : Differentiable ℝ (∂ₜ r)) (h : S.EquationOfMotion r) :
-    S.EquationOfMotion (fun t => r (-t)) := by
+/--
+The time reversal of a twice differentiable curve satisfying the equation of motion of the
+dome satisfies it too: the equation has no velocity term.
+-/
+lemma equationOfMotion_comp_neg
+    {r : Time → EuclideanSpace ℝ (Fin 1)}
+    (hr : Differentiable ℝ r) (hr' : Differentiable ℝ (∂ₜ r)) (h : S.EquationOfMotion r)
+    : S.EquationOfMotion (fun t => r (-t)) := by
   intro t
   rw [deriv_deriv_comp_neg_of_differentiable r hr hr' t]
   exact h (-t)
 
 /-- The time reversal of a solution of the dome is a solution. -/
-lemma IsSolution.comp_neg {S : NortonDome} {r : Time → EuclideanSpace ℝ (Fin 1)}
-    (h : S.IsSolution r) : S.IsSolution (fun t => r (-t)) := by
+lemma IsSolution.comp_neg
+    {S : NortonDome} {r : Time → EuclideanSpace ℝ (Fin 1)} (h : S.IsSolution r)
+    : S.IsSolution (fun t => r (-t)) := by
   have hneg : Differentiable ℝ (fun t : Time => -t) := by fun_prop
-  refine ⟨h.differentiable.comp hneg, ?_,
-    S.equationOfMotion_comp_neg h.differentiable h.deriv_differentiable h.equationOfMotion⟩
-  have hv : ∂ₜ (fun t => r (-t)) = fun t => -∂ₜ r (-t) :=
+  refine ⟨
+    h.differentiable.comp hneg,
+    ?_,
+    S.equationOfMotion_comp_neg h.differentiable h.deriv_differentiable h.equationOfMotion
+  ⟩
+  have hv : ∂ₜ (fun t => r (-t)) = fun t => - ∂ₜ r (-t) :=
     funext fun t => Time.deriv_comp_neg r t (h.differentiable _)
   rw [hv]
   exact (h.deriv_differentiable.comp hneg).neg
 
-/-- The motion of the particle on the dome arriving at the apex at the instant `-T`: the time
-  reversal of the motion leaving the apex at the instant `T`. -/
+/--
+The motion of the particle on the dome arriving at the apex at the instant `-T`: the time
+reversal of the motion leaving the apex at the instant `T`.
+-/
 noncomputable def arrival (T : ℝ) : Time → EuclideanSpace ℝ (Fin 1) := fun t => solution T (-t)
 
 /-- The motion arriving at the apex at the instant `-T` is a solution of the dome. -/
-lemma arrival_isSolution (T : ℝ) : S.IsSolution (arrival T) :=
-  (S.solution_isSolution T).comp_neg
+lemma arrival_isSolution (T : ℝ) : S.IsSolution (arrival T) := (S.solution_isSolution T).comp_neg
 
-/-- The motion arriving at the apex at the instant `-T` is off the apex before that
-  instant. -/
+/--
+The motion arriving at the apex at the instant `-T` is off the apex before that
+instant.
+-/
 lemma arrival_apply_pos (T : ℝ) {t : Time} (h : t.val < -T) : 0 < arrival T t 0 :=
   solution_apply_pos T (by rw [Time.neg_val]; linarith)
 
-/-- The motion arriving at the apex at the instant `-T` is at the apex from that instant on:
-  it reaches the apex in finite time and stays there. -/
+/--
+The motion arriving at the apex at the instant `-T` is at the apex from that instant on:
+it reaches the apex in finite time and stays there.
+-/
 lemma arrival_of_le (T : ℝ) {t : Time} (h : -T ≤ t.val) : arrival T t = 0 :=
   solution_of_le T (by rw [Time.neg_val]; linarith)
 
 /-- The motion arriving at the apex at the instant `-T` arrives with zero velocity. -/
 lemma deriv_arrival_of_le (T : ℝ) {t : Time} (h : -T ≤ t.val) : ∂ₜ (arrival T) t = 0 := by
   unfold arrival
-  rw [Time.deriv_comp_neg _ _ ((solution_contDiff T).differentiable (by simp) _),
-    deriv_solution]
+  rw [Time.deriv_comp_neg _ _ ((solution_contDiff T).differentiable (by simp) _), deriv_solution]
   have h' : max ((-t).val - T) 0 = 0 := max_eq_right (by rw [Time.neg_val]; linarith)
   simp only [h']
   simp

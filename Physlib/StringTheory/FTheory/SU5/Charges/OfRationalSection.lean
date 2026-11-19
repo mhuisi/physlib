@@ -69,17 +69,25 @@ namespace SU5
 
 -/
 
-/-- The distinct codimension one configurations of the
-  zero-section (`σ₀`) relativity to the additional rational section (`σ₁`s). -/
+/--
+The distinct codimension one configurations of the
+zero-section (`σ₀`) relativity to the additional rational section (`σ₁`s).
+-/
 inductive CodimensionOneConfig
-  /-- `σ₀` and `σ₁` intersect the same `ℙ¹` of the `I₅` Kodaira fiber.
-    This is sometimes denoted `I₅^{(01)}` -/
+  /--
+  `σ₀` and `σ₁` intersect the same `ℙ¹` of the `I₅` Kodaira fiber.
+  This is sometimes denoted `I₅^{(01)}`
+  -/
   | same : CodimensionOneConfig
-  /-- `σ₀` and `σ₁` intersect the nearest neighbor `ℙ¹`s of the `I₅` Kodaira fiber.
-    This is sometimes denoted `I₅^{(0|1)}` -/
+  /--
+  `σ₀` and `σ₁` intersect the nearest neighbor `ℙ¹`s of the `I₅` Kodaira fiber.
+  This is sometimes denoted `I₅^{(0|1)}`
+  -/
   | nearestNeighbor : CodimensionOneConfig
-  /-- `σ₀` and `σ₁` intersect the next to nearest neighbor `ℙ¹`s of the `I₅` Kodaira fiber.
-    This is sometimes denoted `I₅^{(0||1)}` -/
+  /--
+  `σ₀` and `σ₁` intersect the next to nearest neighbor `ℙ¹`s of the `I₅` Kodaira fiber.
+  This is sometimes denoted `I₅^{(0||1)}`
+  -/
   | nextToNearestNeighbor : CodimensionOneConfig
 deriving DecidableEq
 
@@ -107,8 +115,10 @@ instance : Fintype CodimensionOneConfig where
 
 -/
 
-/-- The allowed `U(1)`-charges of matter in the 5-bar representation of `SU(5)`
-  given a `CodimensionOneConfig`. -/
+/--
+The allowed `U(1)`-charges of matter in the 5-bar representation of `SU(5)`
+given a `CodimensionOneConfig`.
+-/
 def allowedBarFiveCharges : CodimensionOneConfig → Finset ℤ
   | same => {-3, -2, -1, 0, 1, 2, 3}
   | nearestNeighbor => {-14, -9, -4, 1, 6, 11}
@@ -120,8 +130,10 @@ def allowedBarFiveCharges : CodimensionOneConfig → Finset ℤ
 
 -/
 
-/-- The allowed `U(1)`-charges of matter in the 10d representation of `SU(5)`
-  given a `CodimensionOneConfig`. -/
+/--
+The allowed `U(1)`-charges of matter in the 10d representation of `SU(5)`
+given a `CodimensionOneConfig`.
+-/
 def allowedTenCharges : CodimensionOneConfig → Finset ℤ
   | same => {-3, -2, -1, 0, 1, 2, 3}
   | nearestNeighbor => {-12, -7, -2, 3, 8, 13}

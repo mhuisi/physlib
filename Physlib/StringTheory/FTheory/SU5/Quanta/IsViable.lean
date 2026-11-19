@@ -76,20 +76,27 @@ open PotentialTerm ChargeSpectrum
 
 -/
 
-/-- For a given `I : CodimensionOneConfig` the condition on a `Quanta` for it to be
-  phenomenologically viable. -/
+/--
+For a given `I : CodimensionOneConfig` the condition on a `Quanta` for it to be
+phenomenologically viable.
+-/
 structure IsViable (x : Quanta) : Prop where
   /-- There is a `Hd`, `Hu`, 5-bar matter and 10d matter. -/
   has_all_charges : x.toCharges.IsComplete
   /-- The charges do not lead to any phenomenologically constraining terms. -/
-  not_pheno_constrained : ¬ x.toCharges.IsPhenoConstrained
-  /-- The charges are such that dangerous couplings in the super potential are not
-    regenerated with the Yukawa terms. -/
+  not_pheno_constrained : ¬x.toCharges.IsPhenoConstrained
+  /--
+  The charges are such that dangerous couplings in the super potential are not
+  regenerated with the Yukawa terms.
+  -/
   not_regenerate_dangerous_couplings : ¬ x.toCharges.YukawaGeneratesDangerousAtLevel 1
-  /-- The charges are such that they are allowed by a configuration of sections on the
-    co-dimension 1 fiber. -/
-  charges_allowed_by_section_config :
-    (∃ I : CodimensionOneConfig, x.toCharges ∈ ofFinset I.allowedBarFiveCharges I.allowedTenCharges)
+  /--
+  The charges are such that they are allowed by a configuration of sections on the
+  co-dimension 1 fiber.
+  -/
+  charges_allowed_by_section_config
+    : (∃ I : CodimensionOneConfig,
+      x.toCharges ∈ ofFinset I.allowedBarFiveCharges I.allowedTenCharges)
   /-- Within the 5-bar matter, there is at most one entry for each charge. -/
   no_duplicate_five_bar_charges : x.F.toCharges.Nodup
   /-- Within the 10d matter, there is at most one entry for each charge. -/
@@ -98,31 +105,30 @@ structure IsViable (x : Quanta) : Prop where
   allows_top_yukawa : AllowsTerm x.toCharges topYukawa
   /-- The fluxes of the 5-bar matter fields do not lead to any exotic chiral particles. -/
   no_exotics_from_five_bar : x.F.toFluxesFive.NoExotics
-  /-- There are 5-bar matter fields where both fluxes are zero (these are not
-    being counted here). -/
+  /--
+  There are 5-bar matter fields where both fluxes are zero (these are not
+  being counted here).
+  -/
   no_five_bar_zero_fluxes : x.F.toFluxesFive.HasNoZero
   /-- The fluxes of the 10d matter fields do not lead to any exotic chiral particles. -/
   no_exotics_from_ten : x.T.toFluxesTen.NoExotics
-  /-- There are 10d matter fields where both fluxes are zero (these are not
-    being counted here). -/
+  /--
+  There are 10d matter fields where both fluxes are zero (these are not
+  being counted here).
+  -/
   no_ten_zero_fluxes : x.T.toFluxesTen.HasNoZero
   /-- The quanta satisfy the linear anomaly cancellation conditions. -/
   linear_anomalies : x.LinearAnomalyCancellation
 
-lemma isViable_iff_def (x : Quanta) : IsViable x ↔
-    x.toCharges.IsComplete ∧
-    ¬ x.toCharges.IsPhenoConstrained ∧
-    ¬ x.toCharges.YukawaGeneratesDangerousAtLevel 1 ∧
-    (∃ I : CodimensionOneConfig, x.toCharges ∈
-      ofFinset I.allowedBarFiveCharges I.allowedTenCharges) ∧
-    x.F.toCharges.Nodup ∧
-    x.T.toCharges.Nodup ∧
-    x.toCharges.AllowsTerm topYukawa ∧
-    x.F.toFluxesFive.NoExotics ∧
-    x.F.toFluxesFive.HasNoZero ∧
-    x.T.toFluxesTen.NoExotics ∧
-    x.T.toFluxesTen.HasNoZero ∧
-    x.LinearAnomalyCancellation := by
+lemma isViable_iff_def (x : Quanta)
+    : IsViable x
+      ↔ x.toCharges.IsComplete ∧ ¬x.toCharges.IsPhenoConstrained
+        ∧ ¬ x.toCharges.YukawaGeneratesDangerousAtLevel 1
+        ∧ (∃ I : CodimensionOneConfig,
+          x.toCharges ∈ ofFinset I.allowedBarFiveCharges I.allowedTenCharges)
+        ∧ x.F.toCharges.Nodup ∧ x.T.toCharges.Nodup ∧ x.toCharges.AllowsTerm topYukawa
+        ∧ x.F.toFluxesFive.NoExotics ∧ x.F.toFluxesFive.HasNoZero ∧ x.T.toFluxesTen.NoExotics
+        ∧ x.T.toFluxesTen.HasNoZero ∧ x.LinearAnomalyCancellation := by
   refine ⟨fun ⟨a, b, c, d, e, f, g, h, i, j, k, l⟩ => ⟨a, b, c, d, e, f, g, h, i, j, k, l⟩, ?_⟩
   exact fun ⟨a, b, c, d, e, f, g, h, i, j, k, l⟩ => ⟨a, b, c, d, e, f, g, h, i, j, k, l⟩
 
@@ -132,19 +138,15 @@ lemma isViable_iff_def (x : Quanta) : IsViable x ↔
 
 -/
 
-lemma isViable_iff_charges_mem_viableCharges (x : Quanta) :
-    IsViable x ↔
-        /- 1. Conditions just on the charges. -/
-        (∃ I, x.toCharges ∈ viableCharges I) ∧
-        x.F.toCharges.Nodup ∧
-        x.T.toCharges.Nodup ∧
+lemma isViable_iff_charges_mem_viableCharges (x : Quanta)
+    : IsViable x
+      /- 1. Conditions just on the charges. -/
+      ↔ (∃ I, x.toCharges ∈ viableCharges I) ∧ x.F.toCharges.Nodup ∧ x.T.toCharges.Nodup
         /- 2. Conditions just on the fluxes -/
-        x.F.toFluxesFive.NoExotics ∧
-        x.F.toFluxesFive.HasNoZero ∧
-        x.T.toFluxesTen.NoExotics ∧
-        x.T.toFluxesTen.HasNoZero ∧
+        ∧ x.F.toFluxesFive.NoExotics ∧ x.F.toFluxesFive.HasNoZero ∧ x.T.toFluxesTen.NoExotics
+        ∧ x.T.toFluxesTen.HasNoZero
         /- 3. Conditions on the fluxes and the charges. -/
-        x.LinearAnomalyCancellation := by
+        ∧ x.LinearAnomalyCancellation := by
   simp only [isViable_iff_def, mem_viableCharges_iff']
   aesop
 
@@ -154,10 +156,10 @@ lemma isViable_iff_charges_mem_viableCharges (x : Quanta) :
 
 -/
 
-lemma isViable_iff_charges_mem_viableCharges_mem_liftCharges (x : Quanta) :
-    IsViable x ↔ (∃ I, x.toCharges ∈ viableCharges I) ∧
-      x ∈ Quanta.liftCharge x.toCharges ∧
-      x.LinearAnomalyCancellation := by
+lemma isViable_iff_charges_mem_viableCharges_mem_liftCharges (x : Quanta)
+    : IsViable x
+      ↔ (∃ I, x.toCharges ∈ viableCharges I) ∧ x ∈ Quanta.liftCharge x.toCharges
+        ∧ x.LinearAnomalyCancellation := by
   simp [Quanta.mem_liftCharge_iff, toCharges_qHd, toCharges_qHu]
   rw [FiveQuanta.mem_liftCharge_iff, TenQuanta.mem_liftCharge_iff,
     isViable_iff_charges_mem_viableCharges, ← FluxesFive.noExotics_iff_mem_elemsNoExotics,
@@ -170,10 +172,10 @@ lemma isViable_iff_charges_mem_viableCharges_mem_liftCharges (x : Quanta) :
 
 -/
 
-lemma isViable_iff_filter (x : Quanta) :
-    IsViable x ↔ (∃ I, x.toCharges ∈ (viableCharges I).filter IsAnomalyFree) ∧
-      x ∈ Quanta.liftCharge x.toCharges
-      ∧ x.LinearAnomalyCancellation := by
+lemma isViable_iff_filter (x : Quanta)
+    : IsViable x
+      ↔ (∃ I, x.toCharges ∈ (viableCharges I).filter IsAnomalyFree)
+        ∧ x ∈ Quanta.liftCharge x.toCharges ∧ x.LinearAnomalyCancellation := by
   simp [isViable_iff_charges_mem_viableCharges_mem_liftCharges, IsAnomalyFree]
   aesop
 
@@ -192,8 +194,8 @@ We find all the viable quanta. This can be evaluated with
 -/
 
 /-- Given a `CodimensionOneConfig` the `Quanta` which satisfy the condition `IsViable`. -/
-def viableElems : Multiset Quanta :=
-  {⟨some 2, some (-2), {(-1, ⟨3, -2⟩), (-3, ⟨0, 2⟩)}, {(-1, ⟨3, 0⟩)}⟩,
+def viableElems : Multiset Quanta := {
+  ⟨some 2, some (-2), {(-1, ⟨3, -2⟩), (-3, ⟨0, 2⟩)}, {(-1, ⟨3, 0⟩)}⟩,
   ⟨some 2, some (-2), {(-1, ⟨3, -2⟩), (-3, ⟨0, 2⟩)}, {(-1, ⟨3, 0⟩)}⟩,
   ⟨some 2, some (-2), {(-1, ⟨2, -2⟩), (-3, ⟨1, 2⟩)}, {(-1, ⟨3, 0⟩)}⟩,
   ⟨some 2, some (-2), {(-1, ⟨2, -2⟩), (-3, ⟨1, 2⟩)}, {(-1, ⟨3, 0⟩)}⟩,
@@ -228,7 +230,8 @@ def viableElems : Multiset Quanta :=
   ⟨some 2, some 12, {(-13, ⟨3, -2⟩), (-8, ⟨0, 2⟩)}, {(6, ⟨3, 0⟩)}⟩,
   ⟨some 2, some 12, {(-13, ⟨3, -2⟩), (-8, ⟨0, 2⟩)}, {(6, ⟨3, 0⟩)}⟩,
   ⟨some 2, some 12, {(-13, ⟨2, -2⟩), (-8, ⟨1, 2⟩)}, {(6, ⟨3, 0⟩)}⟩,
-  ⟨some 2, some 12, {(-13, ⟨2, -2⟩), (-8, ⟨1, 2⟩)}, {(6, ⟨3, 0⟩)}⟩}
+  ⟨some 2, some 12, {(-13, ⟨2, -2⟩), (-8, ⟨1, 2⟩)}, {(6, ⟨3, 0⟩)}⟩
+}
 
 /-!
 
@@ -236,8 +239,7 @@ def viableElems : Multiset Quanta :=
 
 -/
 
-lemma isViable_of_mem_viableElems (x : Quanta) (h : x ∈ viableElems) :
-    IsViable x := by
+lemma isViable_of_mem_viableElems (x : Quanta) (h : x ∈ viableElems) : IsViable x := by
   rw [isViable_iff_charges_mem_viableCharges_mem_liftCharges]
   revert x
   decide
@@ -248,8 +250,7 @@ lemma isViable_of_mem_viableElems (x : Quanta) (h : x ∈ viableElems) :
 
 -/
 
-lemma isViable_iff_mem_viableElems (x : Quanta) :
-    x.IsViable ↔ x ∈ viableElems := by
+lemma isViable_iff_mem_viableElems (x : Quanta) : x.IsViable ↔ x ∈ viableElems := by
   constructor
   · intro h
     rw [isViable_iff_filter] at h
@@ -269,11 +270,12 @@ lemma isViable_iff_mem_viableElems (x : Quanta) :
 
 -/
 
-/-- Every viable Quanta regenerates a dangerous coupling at two insertions of the Yukawa
-  singlets. -/
-lemma yukawaSingletsRegenerateDangerousInsertion_two_of_isViable
-    (x : Quanta) (h : IsViable x) :
-    (toCharges x).YukawaGeneratesDangerousAtLevel 2 := by
+/--
+Every viable Quanta regenerates a dangerous coupling at two insertions of the Yukawa
+singlets.
+-/
+lemma yukawaSingletsRegenerateDangerousInsertion_two_of_isViable (x : Quanta) (h : IsViable x)
+    : (toCharges x).YukawaGeneratesDangerousAtLevel 2 := by
   rw [isViable_iff_mem_viableElems] at h
   revert x
   decide
@@ -284,14 +286,18 @@ lemma yukawaSingletsRegenerateDangerousInsertion_two_of_isViable
 
 -/
 
-lemma quarticAnomalyCancellation_iff_mem_of_isViable (x : Quanta) (h : IsViable x) :
-    x.QuarticAnomalyCancellation ↔ x ∈
-    ({⟨some 2, some (-2), {(-1, ⟨1, 2⟩), (1, ⟨2, -2⟩)}, {(-1, ⟨3, 0⟩)}⟩,
-    ⟨some 2, some (-2), {(-1, ⟨0, 2⟩), (1, ⟨3, -2⟩)}, {(-1, ⟨3, 0⟩)}⟩,
-    ⟨some (-2), some 2, {(-1, ⟨2, -2⟩), (1, ⟨1, 2⟩)}, {(1, ⟨3, 0⟩)}⟩,
-    ⟨some (-2), some 2, {(-1, ⟨3, -2⟩), (1, ⟨0, 2⟩)}, {(1, ⟨3, 0⟩)}⟩,
-    ⟨some 6, some (-14), {(-9, ⟨1, 2⟩), (1, ⟨2, -2⟩)}, {(-7, ⟨3, 0⟩)}⟩,
-    ⟨some 6, some (-14), {(-9, ⟨0, 2⟩), (1, ⟨3, -2⟩)}, {(-7, ⟨3, 0⟩)}⟩} : Finset Quanta) := by
+lemma quarticAnomalyCancellation_iff_mem_of_isViable (x : Quanta) (h : IsViable x)
+    : x.QuarticAnomalyCancellation
+      ↔ x
+        ∈ ({
+            ⟨some 2, some (-2), {(-1, ⟨1, 2⟩), (1, ⟨2, -2⟩)}, {(-1, ⟨3, 0⟩)}⟩,
+            ⟨some 2, some (-2), {(-1, ⟨0, 2⟩), (1, ⟨3, -2⟩)}, {(-1, ⟨3, 0⟩)}⟩,
+            ⟨some (-2), some 2, {(-1, ⟨2, -2⟩), (1, ⟨1, 2⟩)}, {(1, ⟨3, 0⟩)}⟩,
+            ⟨some (-2), some 2, {(-1, ⟨3, -2⟩), (1, ⟨0, 2⟩)}, {(1, ⟨3, 0⟩)}⟩,
+            ⟨some 6, some (-14), {(-9, ⟨1, 2⟩), (1, ⟨2, -2⟩)}, {(-7, ⟨3, 0⟩)}⟩,
+            ⟨some 6, some (-14), {(-9, ⟨0, 2⟩), (1, ⟨3, -2⟩)}, {(-7, ⟨3, 0⟩)}⟩
+          }
+          : Finset Quanta) := by
   rw [isViable_iff_mem_viableElems] at h
   revert x
   decide
@@ -302,10 +308,10 @@ lemma quarticAnomalyCancellation_iff_mem_of_isViable (x : Quanta) (h : IsViable 
 
 -/
 
-lemma map_to_Z2_of_isViable (x : Quanta ℤ) (h : IsViable x) :
-    x.toCharges.map (Int.castAddHom (ZMod 2)) ∈
-    ({⟨some 0, some 0, {1}, {1}⟩, ⟨some 0, some 0, {0,1}, {1}⟩, ⟨some 0, some 0, {0,1}, {0}⟩} :
-    Finset (ChargeSpectrum (ZMod 2))) := by
+lemma map_to_Z2_of_isViable (x : Quanta ℤ) (h : IsViable x)
+    : x.toCharges.map (Int.castAddHom (ZMod 2))
+      ∈ ({⟨some 0, some 0, {1}, {1}⟩, ⟨some 0, some 0, {0, 1}, {1}⟩, ⟨some 0, some 0, {0, 1}, {0}⟩}
+        : Finset (ChargeSpectrum (ZMod 2))) := by
   rw [isViable_iff_mem_viableElems] at h
   revert x
   decide

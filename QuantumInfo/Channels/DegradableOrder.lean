@@ -37,26 +37,27 @@ DecidableEq, the argument is also a Sigma to bring this along.
 section
 
 @[reducible]
-def DegradablePreorder (dIn : Type*) [Fintype dIn] [DecidableEq dIn] : Preorder
-    (Σ dOut : (Σ t, Fintype t × DecidableEq t), let _ := dOut.snd.1; CPTPMap dIn dOut.fst) where
+def DegradablePreorder (dIn : Type*) [Fintype dIn] [DecidableEq dIn]
+    : Preorder
+      (Σ dOut : (Σ t, Fintype t × DecidableEq t), let _ := dOut.snd.1; CPTPMap dIn dOut.fst) where
   le Λ₁ Λ₂ :=
-    let _ := Λ₁.fst.snd.1;
-    let _ := Λ₂.fst.snd.1;
-    let _ := Λ₂.fst.snd.2;
-    Λ₂.snd.IsDegradableTo Λ₁.snd;
+    let _ := Λ₁.fst.snd.1
+    let _ := Λ₂.fst.snd.1
+    let _ := Λ₂.fst.snd.2
+    Λ₂.snd.IsDegradableTo Λ₁.snd
   le_refl Λ :=
-    let _ := Λ.fst.snd.1;
-    let _ := Λ.fst.snd.2;
+    let _ := Λ.fst.snd.1
+    let _ := Λ.fst.snd.2
     ⟨CPTPMap.id, CPTPMap.compose_id Λ.snd⟩
   le_trans Λ₁ Λ₂ Λ₃ h₁₂ h₂₃ := by
-    let _ := Λ₁.fst.snd.1;
-    let _ := Λ₁.fst.snd.2;
-    let _ := Λ₂.fst.snd.1;
-    let _ := Λ₂.fst.snd.2;
-    let _ := Λ₃.fst.snd.1;
-    let _ := Λ₃.fst.snd.2;
-    obtain ⟨D₁₂, hD₁₂⟩ := h₁₂;
-    obtain ⟨D₂₃, hD₂₃⟩ := h₂₃;
+    let _ := Λ₁.fst.snd.1
+    let _ := Λ₁.fst.snd.2
+    let _ := Λ₂.fst.snd.1
+    let _ := Λ₂.fst.snd.2
+    let _ := Λ₃.fst.snd.1
+    let _ := Λ₃.fst.snd.2
+    obtain ⟨D₁₂, hD₁₂⟩ := h₁₂
+    obtain ⟨D₂₃, hD₂₃⟩ := h₂₃
     use D₁₂.compose D₂₃
     rwa [CPTPMap.compose_assoc, hD₂₃]
 

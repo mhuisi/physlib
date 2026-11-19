@@ -78,8 +78,10 @@ namespace Time
 instance : NatCast Time where
   natCast n := ⟨n⟩
 
-/-- The casting of a natural number to an element of `Time`. This corresponds to a choice of
-(1) zero point in time, and (2) a choice of metric on time (defining `1`). -/
+/--
+The casting of a natural number to an element of `Time`. This corresponds to a choice of
+(1) zero point in time, and (2) a choice of metric on time (defining `1`).
+-/
 instance {n : ℕ} : OfNat Time n where
   ofNat := ⟨n⟩
 
@@ -149,16 +151,14 @@ lemma default_eq_zero : default = 0 := rfl
 instance : LE Time where
   le t1 t2 := t1.val ≤ t2.val
 
-lemma le_def (t1 t2 : Time) :
-    t1 ≤ t2 ↔ t1.val ≤ t2.val := Iff.rfl
+lemma le_def (t1 t2 : Time) : t1 ≤ t2 ↔ t1.val ≤ t2.val := Iff.rfl
 
 instance : PartialOrder Time where
   le_refl t := by simp [le_def]
   le_trans t1 t2 t3 := by simp [le_def]; exact le_trans
   le_antisymm t1 t2 h1 h2 := by simp_all [le_def]; ext; exact le_antisymm h1 h2
 
-lemma lt_def (t1 t2 : Time) :
-    t1 < t2 ↔ t1.val < t2.val := by simp only [lt_iff_le_not_ge, le_def]
+lemma lt_def (t1 t2 : Time) : t1 < t2 ↔ t1.val < t2.val := by simp only [lt_iff_le_not_ge, le_def]
 
 /-!
 
@@ -170,8 +170,7 @@ instance : Add Time where
   add t1 t2 := ⟨t1.val + t2.val⟩
 
 @[simp]
-lemma add_val (t1 t2 : Time) :
-    (t1 + t2).val = t1.val + t2.val := rfl
+lemma add_val (t1 t2 : Time) : (t1 + t2).val = t1.val + t2.val := rfl
 
 /-!
 
@@ -183,8 +182,7 @@ instance : Neg Time where
   neg t := ⟨-t.val⟩
 
 @[simp]
-lemma neg_val (t : Time) :
-    (-t).val = -t.val := rfl
+lemma neg_val (t : Time) : (-t).val = -t.val := rfl
 
 /-!
 
@@ -196,8 +194,7 @@ instance : Sub Time where
   sub t1 t2 := ⟨t1.val - t2.val⟩
 
 @[simp]
-lemma sub_val (t1 t2 : Time) :
-    (t1 - t2).val = t1.val - t2.val := rfl
+lemma sub_val (t1 t2 : Time) : (t1 - t2).val = t1.val - t2.val := rfl
 
 /-!
 
@@ -209,8 +206,7 @@ instance : SMul ℝ Time where
   smul k t := ⟨k * t.val⟩
 
 @[simp]
-lemma smul_real_val (k : ℝ) (t : Time) :
-    (k • t).val = k * t.val := rfl
+lemma smul_real_val (k : ℝ) (t : Time) : (k • t).val = k * t.val := rfl
 
 /-!
 
@@ -246,14 +242,11 @@ instance : Module ℝ Time where
 instance : Norm Time where
   norm t := ‖t.val‖
 
-lemma norm_eq_val (t : Time) :
-    ‖t‖ = ‖t.val‖ := rfl
+lemma norm_eq_val (t : Time) : ‖t‖ = ‖t.val‖ := rfl
 
-lemma dist_eq_val (t1 t2 : Time) :
-    dist t1 t2 = ‖t1.val - t2.val‖ := rfl
+lemma dist_eq_val (t1 t2 : Time) : dist t1 t2 = ‖t1.val - t2.val‖ := rfl
 
-lemma dist_eq_real_dist (t1 t2 : Time) :
-    dist t1 t2 = dist t1.val t2.val := by rfl
+lemma dist_eq_real_dist (t1 t2 : Time) : dist t1 t2 = dist t1.val t2.val := by rfl
 
 instance : SeminormedAddCommGroup Time where
   dist_eq t1 t2 := by
@@ -282,8 +275,7 @@ instance : Inner ℝ Time where
   inner t1 t2 := t1.val * t2.val
 
 @[simp]
-lemma inner_def (t1 t2 : Time) :
-    ⟪t1, t2⟫_ℝ = t1.val * t2.val := rfl
+lemma inner_def (t1 t2 : Time) : ⟪t1, t2⟫_ℝ = t1.val * t2.val := rfl
 
 noncomputable instance : InnerProductSpace ℝ Time where
   norm_sq_eq_re_inner := by intros; simp [norm]; ring
@@ -351,8 +343,7 @@ noncomputable def basis : OrthonormalBasis (Fin 1) ℝ Time where
   }
 
 @[simp]
-lemma basis_apply_eq_one (i : Fin 1) :
-    basis i = 1 := by
+lemma basis_apply_eq_one (i : Fin 1) : basis i = 1 := by
   fin_cases i
   simp [basis]
   rfl
@@ -367,8 +358,8 @@ lemma finRank_eq_one : Module.finrank ℝ Time = 1 :=
 
 instance : FiniteDimensional ℝ Time := Module.finite_of_rank_eq_one rank_eq_one
 
-lemma volume_eq_basis_addHaar :
-    (volume (α := Time)) = basis.toBasis.addHaar := basis.addHaar_eq_volume.symm
+lemma volume_eq_basis_addHaar : (volume (α := Time)) = basis.toBasis.addHaar :=
+  basis.addHaar_eq_volume.symm
 
 /-!
 
@@ -377,21 +368,18 @@ lemma volume_eq_basis_addHaar :
 -/
 
 /-- The continuous linear map from `Time` to `ℝ`. -/
-noncomputable def toRealCLM : Time →L[ℝ] ℝ := LinearMap.toContinuousLinearMap
-  {
-  toFun := Time.val
-  map_add' := by simp
-  map_smul' := by simp }
+noncomputable def toRealCLM : Time →L[ℝ] ℝ :=
+  LinearMap.toContinuousLinearMap { toFun := Time.val, map_add' := by simp, map_smul' := by simp }
 
 /-- The continuous linear equivalence from `Time` to `ℝ`. -/
-noncomputable def toRealCLE : Time ≃L[ℝ] ℝ := LinearEquiv.toContinuousLinearEquiv
-  {
-  toFun := Time.val
-  invFun := fun x => ⟨x⟩
-  left_inv x := by rfl
-  right_inv x := by rfl
-  map_add' := by simp
-  map_smul' := by simp
+noncomputable def toRealCLE : Time ≃L[ℝ] ℝ :=
+  LinearEquiv.toContinuousLinearEquiv {
+    toFun := Time.val
+    invFun := fun x => ⟨x⟩
+    left_inv x := by rfl
+    right_inv x := by rfl
+    map_add' := by simp
+    map_smul' := by simp
   }
 
 /-- The linear isometry equivalence from `Time` to `ℝ`. -/
@@ -406,8 +394,7 @@ noncomputable def toRealLIE : Time ≃ₗᵢ[ℝ] ℝ where
     simp
     rfl
 
-lemma eq_one_smul (t : Time) :
-    t = t.val • 1 := Time.ext (by simp)
+lemma eq_one_smul (t : Time) : t = t.val • 1 := Time.ext (by simp)
 
 @[fun_prop]
 lemma val_measurable : Measurable Time.val := toRealCLE.continuous.measurable

@@ -40,14 +40,18 @@ namespace Representation
 
 -/
 
-/-- The components of a dual representation on a dual basis: if `ρ g⁻¹` has
-  matrix `M` in the basis `b` (columns indexing the argument), then `ρ.dual g`
-  acts on the dual basis by the rows of `M`. -/
-lemma dual_apply_dualBasis {k G V ι : Type*} [CommRing k]
-    [Group G] [AddCommGroup V] [Module k V] [Fintype ι] [DecidableEq ι]
-    (ρ : Representation k G V) (b : Module.Basis ι k V) (g : G) (i : ι)
-    (M : Matrix ι ι k) (hM : ∀ j, ρ g⁻¹ (b j) = ∑ l, M l j • b l) :
-    ρ.dual g (b.dualBasis i) = ∑ j, M i j • b.dualBasis j := by
+/--
+The components of a dual representation on a dual basis: if `ρ g⁻¹` has
+matrix `M` in the basis `b` (columns indexing the argument), then `ρ.dual g`
+acts on the dual basis by the rows of `M`.
+-/
+lemma dual_apply_dualBasis
+    {k G V ι : Type*}
+    [CommRing k] [Group G] [AddCommGroup V] [Module k V] [Fintype ι] [DecidableEq ι]
+    (ρ : Representation k G V) (b : Module.Basis ι k V) (g : G)
+    (i : ι)
+    (M : Matrix ι ι k) (hM : ∀ j, ρ g⁻¹ (b j) = ∑ l, M l j • b l)
+    : ρ.dual g (b.dualBasis i) = ∑ j, M i j • b.dualBasis j := by
   refine b.ext fun j => ?_
   rw [Representation.dual_apply, Module.Dual.transpose_apply, LinearMap.comp_apply, hM]
   simp [Finsupp.single_apply, Finset.sum_ite_eq, Finset.sum_ite_eq']

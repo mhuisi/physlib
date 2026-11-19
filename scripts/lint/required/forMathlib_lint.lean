@@ -57,8 +57,10 @@ def libraryImports : IO (Array (Name × Array Name)) := do
       result := result.push (moduleNameOfPath path, libImports)
   return result
 
-/-- The pairs `(m, i)` of a module `m` in `ForMathlib` importing a module `i` of `libraryDirs`
-  which is not in `ForMathlib`. -/
+/--
+The pairs `(m, i)` of a module `m` in `ForMathlib` importing a module `i` of `libraryDirs`
+which is not in `ForMathlib`.
+-/
 def outsideImports (graph : Array (Name × Array Name)) : Array (Name × Name) := Id.run do
   let mut result := #[]
   for (m, imps) in graph.filter (isForMathlib ·.1) do
@@ -66,11 +68,12 @@ def outsideImports (graph : Array (Name × Array Name)) : Array (Name × Name) :
       result := result.push (m, i)
   return result
 
-/-- The modules in `ForMathlib` which are not imported, directly or through other modules in
-  `ForMathlib`, by any module outside of `ForMathlib`. -/
+/--
+The modules in `ForMathlib` which are not imported, directly or through other modules in
+`ForMathlib`, by any module outside of `ForMathlib`.
+-/
 def unusedModules (graph : Array (Name × Array Name)) : Array Name := Id.run do
-  let importsOf : NameMap (Array Name) :=
-    graph.foldl (fun acc (m, imps) => acc.insert m imps) {}
+  let importsOf : NameMap (Array Name) := graph.foldl (fun acc (m, imps) => acc.insert m imps) {}
   -- The modules in `ForMathlib` imported directly from outside of `ForMathlib`.
   let mut todo : Array Name := #[]
   for (_, imps) in graph.filter (! isForMathlib ·.1) do

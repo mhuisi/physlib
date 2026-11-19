@@ -22,7 +22,8 @@ variable
   {X} [NormedAddCommGroup X] [NormedSpace ℝ X] [MeasureSpace X]
   {U} [NormedAddCommGroup U] [NormedSpace ℝ U] [InnerProductSpace' ℝ U]
 
-/-- Function `grad` is variational gradient of functional `S` at point `u`.
+/--
+Function `grad` is variational gradient of functional `S` at point `u`.
 
 This formalizes the notion of variational gradient `δS/δu` of a functional `S` at a point `u`.
 
@@ -64,28 +65,31 @@ HasVarGradientAt
 inductive HasVarGradientAt (F : (X → U) → (X → ℝ)) (grad : X → U) (u : X → U) : Prop
   | intro (F') (hF' : HasVarAdjDerivAt F F' u) (hgrad : grad = F' (fun _ => 1))
 
-lemma HasVarGradientAt.add (F F' : (X → U) → (X → ℝ))
-    {grad grad' : X → U} {u : X → U} [OpensMeasurableSpace X]
-    [IsFiniteMeasureOnCompacts (@volume X _)]
-    (h : HasVarGradientAt F grad u) (h' : HasVarGradientAt F' grad' u) :
-    HasVarGradientAt (F + F') (grad + grad') u := by
-  obtain ⟨F1,hF1,eq1⟩ := h
-  obtain ⟨F2,hF2,eq2⟩ := h'
+lemma HasVarGradientAt.add
+    (F F' : (X → U) → (X → ℝ))
+    {grad grad' : X → U} {u : X → U}
+    [OpensMeasurableSpace X] [IsFiniteMeasureOnCompacts (@volume X _)]
+    (h : HasVarGradientAt F grad u) (h' : HasVarGradientAt F' grad' u)
+    : HasVarGradientAt (F + F') (grad + grad') u := by
+  obtain ⟨F1, hF1, eq1⟩ := h
+  obtain ⟨F2, hF2, eq2⟩ := h'
   apply HasVarGradientAt.intro (F1 + F2)
   · apply hF1.add (V := ℝ)
     exact hF2
   · simp
     rw [eq1, eq2]
 
-lemma HasVarGradientAt.sum {ι : Type} [Fintype ι] (F : ι → (X → U) → (X → ℝ))
-    {grad : ι → X → U} {u : X → U} (hu : ContDiff ℝ ∞ u) [OpensMeasurableSpace X]
-    [IsFiniteMeasureOnCompacts (@volume X _)]
-    (h : ∀ i, HasVarGradientAt (F i) (grad i) u) :
-    HasVarGradientAt (fun v x => ∑ i, F i v x) (∑ i, grad i) u := by
+lemma HasVarGradientAt.sum
+    {ι : Type} [Fintype ι]
+    (F : ι → (X → U) → (X → ℝ))
+    {grad : ι → X → U} {u : X → U} (hu : ContDiff ℝ ∞ u)
+    [OpensMeasurableSpace X] [IsFiniteMeasureOnCompacts (@volume X _)]
+    (h : ∀ i, HasVarGradientAt (F i) (grad i) u)
+    : HasVarGradientAt (fun v x => ∑ i, F i v x) (∑ i, grad i) u := by
   let P (ι : Type) [Fintype ι] : Prop :=
     ∀ (F : ι → (X → U) → (X → ℝ)), ∀ (F' : ι → X → U), ∀ u, ∀ (hu : ContDiff ℝ ∞ u),
-    ∀ (hF : ∀ i, HasVarGradientAt (F i) (F' i) u),
-    HasVarGradientAt (fun φ x => ∑ i, F i φ x) (∑ i, F' i) u
+      ∀ (hF : ∀ i, HasVarGradientAt (F i) (F' i) u),
+        HasVarGradientAt (fun φ x => ∑ i, F i φ x) (∑ i, F' i) u
   have hp : P ι := by
     apply Fintype.induction_empty_option
     · intro ι ι' inst e hp F F' u hu ih
@@ -108,18 +112,16 @@ lemma HasVarGradientAt.sum {ι : Type} [Fintype ι] (F : ι → (X → U) → (X
       exact hp (fun i_1 => F (some i_1)) (fun i_1 => F' (some i_1)) u hu fun i_1 => ih (some i_1)
   exact hp F grad u hu h
 
-lemma HasVarGradientAt.neg {F : (X → U) → (X → ℝ)}
-    {grad : X → U} {u : X → U}
-    (h : HasVarGradientAt F grad u) :
-    HasVarGradientAt (-F) (-grad) u := by
-  obtain ⟨F',hF',eq⟩ := h
+lemma HasVarGradientAt.neg
+    {F : (X → U) → (X → ℝ)} {grad : X → U} {u : X → U} (h : HasVarGradientAt F grad u)
+    : HasVarGradientAt (-F) (-grad) u := by
+  obtain ⟨F', hF', eq⟩ := h
   apply HasVarGradientAt.intro (-F')
   · apply hF'.neg (V := ℝ)
   · simp
     rw [eq]
 
 open Classical in
-
 /--
 The variational gradient of a function `F : (X → U) → (X → ℝ)` evaluated
 at a function `u : X → U`.
@@ -139,8 +141,7 @@ noncomputable def varGradient (F : (X → U) → (X → ℝ)) (u : X → U) : X 
     0
 
 @[inherit_doc varGradient]
-macro "δ" u:term ", " "∫ " x:term ", " b:term : term =>
-  `(varGradient (fun $u $x => $b))
+macro "δ" u:term ", " "∫ " x:term ", " b:term : term => `(varGradient (fun $u $x => $b))
 
 @[inherit_doc varGradient]
 macro "δ" "(" u:term " := " u':term ")" ", " "∫ " x:term ", " b:term : term =>
@@ -149,23 +150,22 @@ macro "δ" "(" u:term " := " u':term ")" ", " "∫ " x:term ", " b:term : term =
 namespace HasVarGradientAt
 
 variable
-    {X : Type*} [NormedAddCommGroup X] [InnerProductSpace ℝ X]
-    [FiniteDimensional ℝ X] [MeasureSpace X] [OpensMeasurableSpace X]
-    [IsFiniteMeasureOnCompacts (@volume X _)] [(@volume X _).IsOpenPosMeasure]
+  {X : Type*} [NormedAddCommGroup X] [InnerProductSpace ℝ X] [FiniteDimensional ℝ X]
+  [MeasureSpace X] [OpensMeasurableSpace X] [IsFiniteMeasureOnCompacts (@volume X _)]
+  [(@volume X _).IsOpenPosMeasure]
 
 lemma unique
     {S' : (X → U) → (X → ℝ)} {grad grad' : X → U} {u : X → U}
-    (h : HasVarGradientAt S' grad u) (h' : HasVarGradientAt S' grad' u) :
-    grad = grad' := by
-  obtain ⟨F,hF,eq⟩ := h
-  obtain ⟨G,hG,eq'⟩ := h'
-  rw[eq,eq',hF.unique hG (fun _ => 1) (by fun_prop)]
+    (h : HasVarGradientAt S' grad u) (h' : HasVarGradientAt S' grad' u)
+    : grad = grad' := by
+  obtain ⟨F, hF, eq⟩ := h
+  obtain ⟨G, hG, eq'⟩ := h'
+  rw [eq, eq', hF.unique hG (fun _ => 1) (by fun_prop)]
 
 open Classical in
 protected lemma varGradient
-    (F : (X → U) → (X → ℝ)) (grad : X → U) (u : X → U)
-    (hF : HasVarGradientAt F grad u) :
-    varGradient F u = grad := by
-  have h := Exists.intro grad hF (p:= fun grad' => HasVarGradientAt F grad' u)
-  unfold varGradient;
-  simp[h, hF.unique h.choose_spec]
+    (F : (X → U) → (X → ℝ)) (grad : X → U) (u : X → U) (hF : HasVarGradientAt F grad u)
+    : varGradient F u = grad := by
+  have h := Exists.intro grad hF (p := fun grad' => HasVarGradientAt F grad' u)
+  unfold varGradient
+  simp [h, hF.unique h.choose_spec]

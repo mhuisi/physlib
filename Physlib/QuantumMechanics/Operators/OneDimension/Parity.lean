@@ -31,8 +31,10 @@ open MeasureTheory SchwartzMap
 
 -/
 
-/-- The parity operator is defined as linear map from `ℝ → ℂ` to itself, such that
-  `ψ` is taken to `fun x => ψ (-x)`. -/
+/--
+The parity operator is defined as linear map from `ℝ → ℂ` to itself, such that
+`ψ` is taken to `fun x => ψ (-x)`.
+-/
 def parityOperator : (ℝ → ℂ) →ₗ[ℂ] (ℝ → ℂ) where
   toFun ψ := fun x => ψ (-x)
   map_add' ψ1 ψ2 := by
@@ -48,10 +50,12 @@ def parityOperator : (ℝ → ℂ) →ₗ[ℂ] (ℝ → ℂ) where
 
 -/
 
-/-- The parity operator on the Schwartz maps is defined as the linear map from
-  `𝓢(ℝ, ℂ)` to itself, such that `ψ` is taken to `fun x => ψ (-x)`. -/
+/--
+The parity operator on the Schwartz maps is defined as the linear map from
+`𝓢(ℝ, ℂ)` to itself, such that `ψ` is taken to `fun x => ψ (-x)`.
+-/
 def parityOperatorSchwartz : 𝓢(ℝ, ℂ) →L[ℂ] 𝓢(ℝ, ℂ) := by
-  refine (SchwartzMap.compCLM ℂ (g := (fun x => - x : ℝ → ℝ)) ⟨?_, ?_⟩ ?_)
+  refine (SchwartzMap.compCLM ℂ (g := (fun x => -x : ℝ → ℝ)) ⟨?_, ?_⟩ ?_)
   · fun_prop
   · intro n
     simp only [Real.norm_eq_abs]
@@ -86,8 +90,8 @@ def parityOperatorUnbounded : UnboundedOperator schwartzIncl schwartzIncl_inject
   UnboundedOperator.ofSelfCLM parityOperatorSchwartz
 
 @[simp]
-lemma parityOperatorSchwartz_parityOperatorSchwartz (ψ : 𝓢(ℝ, ℂ)) :
-    parityOperatorSchwartz (parityOperatorSchwartz ψ) = ψ := by
+lemma parityOperatorSchwartz_parityOperatorSchwartz (ψ : 𝓢(ℝ, ℂ))
+    : parityOperatorSchwartz (parityOperatorSchwartz ψ) = ψ := by
   ext x
   show ψ (- - x) = ψ x
   rw [neg_neg]
@@ -100,13 +104,11 @@ lemma parityOperatorSchwartz_parityOperatorSchwartz (ψ : 𝓢(ℝ, ℂ)) :
 
 open InnerProductSpace
 
-lemma parityOperatorUnbounded_isSymmetric :
-    parityOperatorUnbounded.IsSymmetric := by
+lemma parityOperatorUnbounded_isSymmetric : parityOperatorUnbounded.IsSymmetric := by
   intro ψ1 ψ2
   dsimp [parityOperatorUnbounded]
   rw [schwartzIncl_inner, schwartzIncl_inner]
-  let f (x : ℝ) :=
-    (starRingEnd ℂ) ((ψ1) (-x)) * (ψ2) x
+  let f (x : ℝ) := (starRingEnd ℂ) ((ψ1) (-x)) * (ψ2) x
   change ∫ (x : ℝ), f x = _
   trans ∫ (x : ℝ), f (- x)
   · exact Eq.symm (integral_neg_eq_self f volume)

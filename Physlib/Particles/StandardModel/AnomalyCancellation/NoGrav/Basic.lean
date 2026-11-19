@@ -57,44 +57,59 @@ lemma SU3Sol (S : (SMNoGrav n).LinSols) : accSU3 S.val = 0 := by
 /-- The charges in `(SMNoGrav n).Sols` satisfy the cubic anomaly-equation. -/
 lemma cubeSol (S : (SMNoGrav n).Sols) : accCube S.val = 0 := S.cubicSol
 
-/-- An element of `charges` which satisfies the linear ACCs
-  gives us a element of `AnomalyFreeLinear`. -/
-def chargeToLinear (S : (SMNoGrav n).Charges) (hSU2 : accSU2 S = 0) (hSU3 : accSU3 S = 0) :
-    (SMNoGrav n).LinSols :=
-  ⟨S, by
+/--
+An element of `charges` which satisfies the linear ACCs
+gives us a element of `AnomalyFreeLinear`.
+-/
+def chargeToLinear (S : (SMNoGrav n).Charges) (hSU2 : accSU2 S = 0) (hSU3 : accSU3 S = 0)
+    : (SMNoGrav n).LinSols := ⟨
+  S,
+  by
     intro i
     match i with
     | ⟨0, _⟩ => exact hSU2
-    | ⟨1, _⟩ => exact hSU3⟩
+    | ⟨1, _⟩ => exact hSU3
+⟩
 
-/-- An element of `AnomalyFreeLinear` which satisfies the quadratic ACCs
-  gives us a element of `AnomalyFreeQuad`. -/
-def linearToQuad (S : (SMNoGrav n).LinSols) : (SMNoGrav n).QuadSols :=
-  ⟨S, by
+/--
+An element of `AnomalyFreeLinear` which satisfies the quadratic ACCs
+gives us a element of `AnomalyFreeQuad`.
+-/
+def linearToQuad (S : (SMNoGrav n).LinSols) : (SMNoGrav n).QuadSols := ⟨
+  S,
+  by
     intro i
-    exact Fin.elim0 i⟩
+    exact Fin.elim0 i
+⟩
 
-/-- An element of `AnomalyFreeQuad` which satisfies the quadratic ACCs
-  gives us a element of `AnomalyFree`. -/
-def quadToAF (S : (SMNoGrav n).QuadSols) (hc : accCube S.val = 0) :
-    (SMNoGrav n).Sols := ⟨S, hc⟩
+/--
+An element of `AnomalyFreeQuad` which satisfies the quadratic ACCs
+gives us a element of `AnomalyFree`.
+-/
+def quadToAF (S : (SMNoGrav n).QuadSols) (hc : accCube S.val = 0) : (SMNoGrav n).Sols := ⟨S, hc⟩
 
-/-- An element of `charges` which satisfies the linear and quadratic ACCs
-  gives us a element of `AnomalyFreeQuad`. -/
-def chargeToQuad (S : (SMNoGrav n).Charges) (hSU2 : accSU2 S = 0) (hSU3 : accSU3 S = 0) :
-    (SMNoGrav n).QuadSols :=
+/--
+An element of `charges` which satisfies the linear and quadratic ACCs
+gives us a element of `AnomalyFreeQuad`.
+-/
+def chargeToQuad (S : (SMNoGrav n).Charges) (hSU2 : accSU2 S = 0) (hSU3 : accSU3 S = 0)
+    : (SMNoGrav n).QuadSols :=
   linearToQuad $ chargeToLinear S hSU2 hSU3
 
-/-- An element of `charges` which satisfies the linear, quadratic and cubic ACCs
-  gives us a element of `AnomalyFree`. -/
-def chargeToAF (S : (SMNoGrav n).Charges) (hSU2 : accSU2 S = 0) (hSU3 : accSU3 S = 0)
-    (hc : accCube S = 0) : (SMNoGrav n).Sols :=
+/--
+An element of `charges` which satisfies the linear, quadratic and cubic ACCs
+gives us a element of `AnomalyFree`.
+-/
+def chargeToAF
+    (S : (SMNoGrav n).Charges) (hSU2 : accSU2 S = 0) (hSU3 : accSU3 S = 0) (hc : accCube S = 0)
+    : (SMNoGrav n).Sols :=
   quadToAF (chargeToQuad S hSU2 hSU3) hc
 
-/-- An element of `AnomalyFreeLinear` which satisfies the quadratic and cubic ACCs
-  gives us a element of `AnomalyFree`. -/
-def linearToAF (S : (SMNoGrav n).LinSols)
-    (hc : accCube S.val = 0) : (SMNoGrav n).Sols :=
+/--
+An element of `AnomalyFreeLinear` which satisfies the quadratic and cubic ACCs
+gives us a element of `AnomalyFree`.
+-/
+def linearToAF (S : (SMNoGrav n).LinSols) (hc : accCube S.val = 0) : (SMNoGrav n).Sols :=
   quadToAF (linearToQuad S) hc
 
 end SMNoGrav

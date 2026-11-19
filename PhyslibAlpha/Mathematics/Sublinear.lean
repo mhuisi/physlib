@@ -40,7 +40,9 @@ Hahn–Banach theorem gives a linear functional below it that agrees with it the
 
 -/
 
-variable {V : Type*} [AddCommGroup V] [Module ℝ V] {N : V → ℝ}
+variable
+  {V : Type*} [AddCommGroup V] [Module ℝ V]
+  {N : V → ℝ}
   (N_hom : ∀ c : ℝ, 0 < c → ∀ x, N (c • x) = c * N x) (N_add : ∀ x y, N (x + y) ≤ N x + N y)
 
 include N_hom in
@@ -63,14 +65,19 @@ lemma smul_le_of_sublinear (c : ℝ) (x : V) : c * N x ≤ N (c • x) := by
 
 include N_hom N_add in
 /-- **Hahn–Banach**: a sublinear functional has a linear minorant attaining it at `x`. -/
-lemma exists_linearMap_le_eq_of_sublinear (x : V) :
-    ∃ g : V →ₗ[ℝ] ℝ, (∀ y, g y ≤ N y) ∧ g x = N x := by
+lemma exists_linearMap_le_eq_of_sublinear (x : V)
+    : ∃ g : V →ₗ[ℝ] ℝ, (∀ y, g y ≤ N y) ∧ g x = N x := by
   have H : ∀ c : ℝ, c • x = 0 → (RingHom.id ℝ) c • N x = 0 := fun c hc => by
     rcases smul_eq_zero.1 hc with rfl | rfl <;> simp [map_zero_of_sublinear N_hom]
-  obtain ⟨g, hg, hgN⟩ := exists_extension_of_le_sublinear (LinearPMap.mkSpanSingleton' x (N x) H)
-    N N_hom N_add fun ⟨z, hz⟩ => by
-      obtain ⟨c, rfl⟩ := Submodule.mem_span_singleton.1 hz
-      rw [LinearPMap.mkSpanSingleton'_apply]
-      exact smul_le_of_sublinear N_hom N_add c x
-  exact ⟨g, hgN, (hg ⟨x, Submodule.mem_span_singleton_self x⟩).trans
-    (LinearPMap.mkSpanSingleton'_apply_self _ _ _ _)⟩
+  obtain ⟨g, hg, hgN⟩ :=
+    exists_extension_of_le_sublinear (LinearPMap.mkSpanSingleton' x (N x) H) N N_hom N_add
+      fun ⟨z, hz⟩ => by
+        obtain ⟨c, rfl⟩ := Submodule.mem_span_singleton.1 hz
+        rw [LinearPMap.mkSpanSingleton'_apply]
+        exact smul_le_of_sublinear N_hom N_add c x
+  exact ⟨
+    g,
+    hgN,
+    (hg ⟨x, Submodule.mem_span_singleton_self x⟩).trans
+      (LinearPMap.mkSpanSingleton'_apply_self _ _ _ _)
+  ⟩

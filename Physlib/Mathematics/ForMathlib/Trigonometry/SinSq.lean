@@ -57,9 +57,11 @@ lemma sin_sq_lt_one {x : ℝ} (h : |x| < π / 2) : sin x ^ 2 < 1 := by
   rw [← sub_pos, ← cos_sq']
   exact pow_pos (cos_pos_of_mem_Ioo ⟨by linarith, h₂⟩) 2
 
-/-- The half-angle form of `sin_sq_lt_one`: `sin (θ / 2) ^ 2 < 1` for `|θ| < π`. For the pendulum
+/--
+The half-angle form of `sin_sq_lt_one`: `sin (θ / 2) ^ 2 < 1` for `|θ| < π`. For the pendulum
 this says that the parameter `sin² (θ₀ / 2)` of the period formula lies in the domain of
-`completeEllipticK` for every libration amplitude `|θ₀| < π`. -/
+`completeEllipticK` for every libration amplitude `|θ₀| < π`.
+-/
 lemma sin_half_sq_lt_one {θ : ℝ} (h : |θ| < π) : sin (θ / 2) ^ 2 < 1 := by
   refine sin_sq_lt_one ?_
   rw [abs_div, abs_two]

@@ -65,14 +65,16 @@ section IsPosDef
 
 variable {R M : Type*} [CommSemiring R] [AddCommMonoid M] [Module R M] {I₁ : R →+* R}
 
-/-- A sesquilinear form `B` is **positive-definite** if it is symmetric and `0 < B x x` for every
-nonzero `x`. -/
+/--
+A sesquilinear form `B` is **positive-definite** if it is symmetric and `0 < B x x` for every
+nonzero `x`.
+-/
 structure IsPosDef [LT R] (B : M →ₛₗ[I₁] M →ₗ[R] R) : Prop extends isSymm : B.IsSymm where
   /-- `B` is strictly positive on nonzero vectors. -/
   pos : ∀ x, x ≠ 0 → 0 < B x x
 
-lemma isPosDef_def [LT R] {B : M →ₛₗ[I₁] M →ₗ[R] R} :
-    B.IsPosDef ↔ B.IsSymm ∧ ∀ x, x ≠ 0 → 0 < B x x :=
+lemma isPosDef_def [LT R] {B : M →ₛₗ[I₁] M →ₗ[R] R}
+    : B.IsPosDef ↔ B.IsSymm ∧ ∀ x, x ≠ 0 → 0 < B x x :=
   ⟨fun h ↦ ⟨h.isSymm, h.pos⟩, fun ⟨h₁, h₂⟩ ↦ ⟨h₁, h₂⟩⟩
 
 /-!
@@ -89,9 +91,10 @@ lemma IsPosDef.isPosSemidef (hB : B.IsPosDef) : B.IsPosSemidef where
   isNonneg := ⟨fun x ↦ (eq_or_ne x 0).elim (fun h ↦ by simp [h]) fun hx ↦ (hB.pos x hx).le⟩
 
 /-- A positive-definite form is nondegenerate: a nonzero `x` is not orthogonal to itself. -/
-lemma IsPosDef.nondegenerate (hB : B.IsPosDef) : B.Nondegenerate :=
-  ⟨fun x hx ↦ by_contra fun h ↦ (hB.pos x h).ne' (hx x),
-    fun y hy ↦ by_contra fun h ↦ (hB.pos y h).ne' (hy y)⟩
+lemma IsPosDef.nondegenerate (hB : B.IsPosDef) : B.Nondegenerate := ⟨
+  fun x hx ↦ by_contra fun h ↦ (hB.pos x h).ne' (hx x),
+  fun y hy ↦ by_contra fun h ↦ (hB.pos y h).ne' (hy y)
+⟩
 
 end IsPosDef
 
@@ -103,8 +106,10 @@ end IsPosDef
 
 section toMatrix
 
-variable {R M n : Type*} [CommRing R] [StarRing R] [PartialOrder R] [AddCommMonoid M]
-  [Module R M] [Fintype n] [DecidableEq n] {B : M →ₗ⋆[R] M →ₗ[R] R}
+variable
+  {R M n : Type*} [CommRing R] [StarRing R] [PartialOrder R] [AddCommMonoid M] [Module R M]
+  [Fintype n] [DecidableEq n]
+  {B : M →ₗ⋆[R] M →ₗ[R] R}
 
 /-- A sesquilinear form is positive-definite exactly when its matrix in a basis is. -/
 lemma isPosDef_iff_posDef_toMatrix (b : Basis n R M) : B.IsPosDef ↔ (toMatrix₂ b b B).PosDef := by

@@ -27,9 +27,7 @@ for the given initial conditions.
 * Landau and Lifshitz, Mechanics, Section 32. [ref: landau_mechanics]
 -/
 
-@[expose] public
-
-noncomputable section
+@[expose] public noncomputable section
 
 namespace ClassicalMechanics.HarmonicOscillator
 
@@ -46,23 +44,25 @@ We show that the trajectories are the unique solutions to the equation of motion
 for the given initial conditions.
 
 -/
-/-- The trajectories to the equation of motion for a given set of initial conditions
-  are unique.
+/--
+The trajectories to the equation of motion for a given set of initial conditions
+are unique.
 
-  Given any smooth `x` satisfying the equation of motion with the same initial
-  position and velocity, the difference `y = x - IC.trajectory S` also solves the
-  equation of motion with zero initial conditions; energy conservation then forces
-  its energy, and hence `y`, to vanish identically, so `x = IC.trajectory S`. -/
-lemma trajectories_unique (IC : InitialConditions) (x : Time → EuclideanSpace ℝ (Fin 1))
-    (hx : ContDiff ℝ ∞ x) :
-    S.EquationOfMotion x ∧ x 0 = IC.x₀ ∧ ∂ₜ x 0 = IC.v₀ →
-    x = IC.trajectory S := by
+Given any smooth `x` satisfying the equation of motion with the same initial
+position and velocity, the difference `y = x - IC.trajectory S` also solves the
+equation of motion with zero initial conditions; energy conservation then forces
+its energy, and hence `y`, to vanish identically, so `x = IC.trajectory S`.
+-/
+lemma trajectories_unique
+    (IC : InitialConditions) (x : Time → EuclideanSpace ℝ (Fin 1)) (hx : ContDiff ℝ ∞ x)
+    : S.EquationOfMotion x ∧ x 0 = IC.x₀ ∧ ∂ₜ x 0 = IC.v₀ → x = IC.trajectory S := by
   rintro ⟨hEOM, hx0, hv0⟩
   have hTraj : ContDiff ℝ ∞ (IC.trajectory S) := by fun_prop
   -- Time-derivative of a difference of differentiable functions, used below on `x - traj`.
-  have dsub : ∀ f g : Time → EuclideanSpace ℝ (Fin 1),
-      Differentiable ℝ f → Differentiable ℝ g →
-      ∂ₜ (fun t => f t - g t) = fun t => ∂ₜ f t - ∂ₜ g t := by
+  have dsub
+      : ∀ f g : Time → EuclideanSpace ℝ (Fin 1),
+        Differentiable ℝ f → Differentiable ℝ g
+          → ∂ₜ (fun t => f t - g t) = fun t => ∂ₜ f t - ∂ₜ g t := by
     intro f g hf hg
     funext t
     simp only [Time.deriv_eq, fderiv_fun_sub (hf t) (hg t), sub_apply]
@@ -77,8 +77,9 @@ lemma trajectories_unique (IC : InitialConditions) (x : Time → EuclideanSpace 
     exact dsub _ _ (deriv_differentiable_of_contDiff _ hx)
       (deriv_differentiable_of_contDiff _ hTraj)
   have hNewt_x := (S.equationOfMotion_iff_newtons_2nd_law x hx).1 hEOM
-  have hNewt_traj := (S.equationOfMotion_iff_newtons_2nd_law (IC.trajectory S) hTraj).1
-    (trajectory_equationOfMotion S IC)
+  have hNewt_traj :=
+    (S.equationOfMotion_iff_newtons_2nd_law (IC.trajectory S) hTraj).1
+      (trajectory_equationOfMotion S IC)
   have hEOM_y : S.EquationOfMotion y :=
     (S.equationOfMotion_iff_newtons_2nd_law y hyContDiff).2 fun t => by
       rw [hy_deriv2]

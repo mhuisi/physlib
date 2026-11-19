@@ -60,13 +60,14 @@ namespace PhyslibAlpha.Sl2
 
 variable {m n : ℕ}
 
-/-- `(j₁ j₂ J; m₁ m₂ -M) = (j₂ J j₁; m₂ -M m₁)` in the parameters of
+/--
+`(j₁ j₂ J; m₁ m₂ -M) = (j₂ J j₁; m₂ -M m₁)` in the parameters of
 `ClebschGordanCoefficients`: the new triple is `(n, m + n - 2k)` with `k' = n - k`, `l' = m - α`,
-`α' = β` and `β' = m + n - 2k - l`. -/
-lemma wigner3j_cycle {k l α β : ℕ} (hkm : k ≤ m) (hkn : k ≤ n) (hl : l ≤ m + n - 2 * k)
-    (hα : α ≤ m) (hβ : β ≤ n) :
-    wigner3j m n k l α β =
-      wigner3j n (m + n - 2 * k) (n - k) (m - α) β (m + n - 2 * k - l) := by
+`α' = β` and `β' = m + n - 2k - l`.
+-/
+lemma wigner3j_cycle
+    {k l α β : ℕ} (hkm : k ≤ m) (hkn : k ≤ n) (hl : l ≤ m + n - 2 * k) (hα : α ≤ m) (hβ : β ≤ n)
+    : wigner3j m n k l α β = wigner3j n (m + n - 2 * k) (n - k) (m - α) β (m + n - 2 * k - l) := by
   by_cases h : α + β = k + l
   · rw [wigner3j, wigner3j, ite_eq_left h,
       ite_eq_left (show β + (m + n - 2 * k - l) = n - k + (m - α) by omega),
@@ -83,17 +84,22 @@ lemma wigner3j_cycle {k l α β : ℕ} (hkm : k ≤ m) (hkn : k ≤ n) (hl : l �
 
 -/
 
-/-- **Sum rule for multipole transitions.** With `j₁ = m/2 = J_i`, `j₂ = n/2 = λ`,
+/--
+**Sum rule for multipole transitions.** With `j₁ = m/2 = J_i`, `j₂ = n/2 = λ`,
 `J = (m + n)/2 - k = J_f` and `m₁ = j₁ - α = M_i`,
-`Σ_{μ M_f} ⟨J_i M_i λ μ | J_f M_f⟩² = (2J_f + 1) / (2J_i + 1)`. -/
-lemma sum_sq_cgCoefficient_initial (hmn : 0 < m + n) {k α : ℕ} (hkm : k ≤ m) (hkn : k ≤ n)
-    (hα : α ≤ m) :
-    ∑ b ∈ Finset.range (n + 1), ∑ l ∈ Finset.range (m + n - 2 * k + 1),
-      cgCoefficient m n k l α b ^ 2 = ((m + n - 2 * k + 1 : ℕ) : ℝ) / ((m + 1 : ℕ) : ℝ) := by
-  have hterm : ∀ b ∈ Finset.range (n + 1), ∀ l ∈ Finset.range (m + n - 2 * k + 1),
-      cgCoefficient m n k l α b ^ 2 = ((m + n - 2 * k + 1 : ℕ) : ℝ) *
-        (wigner3j n (m + n - 2 * k) (n - k) (m - α) b (m + n - 2 * k - l) *
-          wigner3j n (m + n - 2 * k) (n - k) (m - α) b (m + n - 2 * k - l)) := by
+`Σ_{μ M_f} ⟨J_i M_i λ μ | J_f M_f⟩² = (2J_f + 1) / (2J_i + 1)`.
+-/
+lemma sum_sq_cgCoefficient_initial
+    (hmn : 0 < m + n) {k α : ℕ} (hkm : k ≤ m) (hkn : k ≤ n) (hα : α ≤ m)
+    : ∑ b ∈ Finset.range (n + 1), ∑ l ∈ Finset.range (m + n - 2 * k + 1),
+        cgCoefficient m n k l α b ^ 2
+      = ((m + n - 2 * k + 1 : ℕ) : ℝ) / ((m + 1 : ℕ) : ℝ) := by
+  have hterm
+      : ∀ b ∈ Finset.range (n + 1), ∀ l ∈ Finset.range (m + n - 2 * k + 1),
+        cgCoefficient m n k l α b ^ 2
+          = ((m + n - 2 * k + 1 : ℕ) : ℝ)
+            * (wigner3j n (m + n - 2 * k) (n - k) (m - α) b (m + n - 2 * k - l)
+              * wigner3j n (m + n - 2 * k) (n - k) (m - α) b (m + n - 2 * k - l)) := by
     intro b hb l hl
     have hb' := Nat.lt_succ_iff.mp (Finset.mem_range.mp hb)
     have hl' := Nat.lt_succ_iff.mp (Finset.mem_range.mp hl)
@@ -105,21 +111,27 @@ lemma sum_sq_cgCoefficient_initial (hmn : 0 < m + n) {k α : ℕ} (hkm : k ≤ m
       (wigner3j n (m + n - 2 * k) (n - k) (m - α) b (m + n - 2 * k - l)) ^ 2) * hs +
       (((m + n - 2 * k + 1 : ℕ) : ℝ) *
         (wigner3j n (m + n - 2 * k) (n - k) (m - α) b (m + n - 2 * k - l)) ^ 2) * hsq
-  have hrefl : ∀ b, ∑ l ∈ Finset.range (m + n - 2 * k + 1),
-      wigner3j n (m + n - 2 * k) (n - k) (m - α) b (m + n - 2 * k - l) *
-        wigner3j n (m + n - 2 * k) (n - k) (m - α) b (m + n - 2 * k - l) =
-      ∑ l ∈ Finset.range (m + n - 2 * k + 1),
-        wigner3j n (m + n - 2 * k) (n - k) (m - α) b l *
-          wigner3j n (m + n - 2 * k) (n - k) (m - α) b l := fun b => by
-    refine Eq.trans ?_ (Finset.sum_range_reflect (fun l => wigner3j n (m + n - 2 * k) (n - k)
-      (m - α) b l * wigner3j n (m + n - 2 * k) (n - k) (m - α) b l) (m + n - 2 * k + 1))
+  have hrefl
+      : ∀ b,
+        ∑ l ∈ Finset.range (m + n - 2 * k + 1),
+            wigner3j n (m + n - 2 * k) (n - k) (m - α) b (m + n - 2 * k - l) *
+              wigner3j n (m + n - 2 * k) (n - k) (m - α) b (m + n - 2 * k - l)
+          = ∑ l ∈ Finset.range (m + n - 2 * k + 1),
+              wigner3j n (m + n - 2 * k) (n - k) (m - α) b l *
+                wigner3j n (m + n - 2 * k) (n - k) (m - α) b l := fun b => by
+    refine Eq.trans ?_
+      (Finset.sum_range_reflect
+        (fun l =>
+          wigner3j n (m + n - 2 * k) (n - k) (m - α) b l
+            * wigner3j n (m + n - 2 * k) (n - k) (m - α) b l)
+        (m + n - 2 * k + 1))
     exact Finset.sum_congr rfl fun l _ => by
       rw [show m + n - 2 * k + 1 - 1 - l = m + n - 2 * k - l by omega]
-  have horth := sum_wigner3j_mul_wigner3j (m := n) (n := m + n - 2 * k) (k := n - k)
-    (k' := n - k) (l := m - α) (l' := m - α) (by omega) (Nat.sub_le n k) (by omega)
-    (Nat.sub_le n k) (by omega) (by omega) (by omega)
-  rw [ite_eq_left ⟨rfl, rfl⟩, show n + (m + n - 2 * k) - 2 * (n - k) + 1 = m + 1 by omega]
-    at horth
+  have horth :=
+    sum_wigner3j_mul_wigner3j (m := n) (n := m + n - 2 * k) (k := n - k) (k' := n - k) (l := m - α)
+      (l' := m - α) (by omega) (Nat.sub_le n k) (by omega) (Nat.sub_le n k) (by omega) (by omega)
+      (by omega)
+  rw [ite_eq_left ⟨rfl, rfl⟩, show n + (m + n - 2 * k) - 2 * (n - k) + 1 = m + 1 by omega] at horth
   rw [Finset.sum_congr rfl fun b hb => Finset.sum_congr rfl (hterm b hb)]
   simp only [← Finset.mul_sum, hrefl]
   rw [horth]

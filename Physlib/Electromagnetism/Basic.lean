@@ -75,10 +75,10 @@ variable (𝓔 : EMSystem)
 open SpaceTime
 
 /-- The speed of light. -/
-noncomputable def c : ℝ := 1/(√(𝓔.μ₀ * 𝓔.ε₀))
+noncomputable def c : ℝ := 1 / (√(𝓔.μ₀ * 𝓔.ε₀))
 
 /-- Coulomb's constant. -/
-noncomputable def coulombConstant : ℝ := 1/(4 * Real.pi * 𝓔.ε₀)
+noncomputable def coulombConstant : ℝ := 1 / (4 * Real.pi * 𝓔.ε₀)
 
 end EMSystem
 

@@ -93,12 +93,11 @@ lemma cayley_norm (x : ℝ) : ‖cayley x‖ = 1 := by
     ring
   nlinarith [norm_nonneg (cayley x)]
 
-lemma cayley_cayleyInverse {z : ℂ} (hz : ‖z‖ = 1) (hz1 : z ≠ 1) :
-    cayley (cayleyInverse z) = z := by
+lemma cayley_cayleyInverse {z : ℂ} (hz : ‖z‖ = 1) (hz1 : z ≠ 1) : cayley (cayleyInverse z) = z := by
   have hnorm : z.re ^ 2 + z.im ^ 2 = 1 := by
     calc
-      z.re ^ 2 + z.im ^ 2 = Complex.normSq z := by
-        simp [Complex.normSq_apply, pow_two]
+      z.re ^ 2 + z.im ^ 2
+        = Complex.normSq z := by simp [Complex.normSq_apply, pow_two]
       _ = ‖z‖ ^ 2 := (Complex.sq_norm z).symm
       _ = 1 := by rw [hz]; norm_num
   have hden : 1 - z.re ≠ 0 := by
@@ -110,10 +109,8 @@ lemma cayley_cayleyInverse {z : ℂ} (hz : ‖z‖ = 1) (hz1 : z ≠ 1) :
   rw [Complex.ext_iff]
   simp only [cayleyInverse, ite_eq_right hz1]
   rw [cayley_re, cayley_im]
-  have hx : (-(z.im) / (1 - z.re)) ^ 2 + 1 ≠ 0 := by
-    positivity
-  have hrel : z.im ^ 2 + (1 - z.re) ^ 2 = 2 * (1 - z.re) := by
-    nlinarith [hnorm]
+  have hx : (-(z.im) / (1 - z.re)) ^ 2 + 1 ≠ 0 := by positivity
+  have hrel : z.im ^ 2 + (1 - z.re) ^ 2 = 2 * (1 - z.re) := by nlinarith [hnorm]
   constructor
   · field_simp [hden]
     nlinarith [hrel]
@@ -137,17 +134,15 @@ variable {H : Type*} [NormedAddCommGroup H] [InnerProductSpace ℂ H] [CompleteS
 /-! ## B. The Cayley transform of a partial operator -/
 
 /-- The Cayley transform before forgetting that it is bounded. -/
-def cayleyPMap (T : H →ₗ.[ℂ] H) : H →ₗ.[ℂ] H :=
-  (T - Complex.I • 1) * (T + Complex.I • 1).inverse
+def cayleyPMap (T : H →ₗ.[ℂ] H) : H →ₗ.[ℂ] H := (T - Complex.I • 1) * (T + Complex.I • 1).inverse
 
-lemma cayleyPMap_domain_top {T : H →ₗ.[ℂ] H} (hT : IsSelfAdjoint T) :
-    (cayleyPMap T).domain = ⊤ := by
-  have hres := LinearPMap.IsSelfAdjoint.mem_resolventSet_of_im_ne_zero hT
-    (z := -Complex.I) (by norm_num)
+lemma cayleyPMap_domain_top {T : H →ₗ.[ℂ] H} (hT : IsSelfAdjoint T)
+    : (cayleyPMap T).domain = ⊤ := by
+  have hres :=
+    LinearPMap.IsSelfAdjoint.mem_resolventSet_of_im_ne_zero hT (z := -Complex.I) (by norm_num)
   have heq : T - (-Complex.I) • 1 = T + Complex.I • 1 := by
     exact LinearPMap.ext rfl fun x hf hg => by
-      simp [LinearPMap.sub_apply, LinearPMap.add_apply, LinearPMap.smul_apply,
-        neg_smul]
+      simp [LinearPMap.sub_apply, LinearPMap.add_apply, LinearPMap.smul_apply, neg_smul]
   have hker' : (T - (-Complex.I) • 1).toFun.ker = ⊥ := hres.1
   have hrange' : (T - (-Complex.I) • 1).toFun.range = ⊤ := hres.2.1
   have hker : (T + Complex.I • 1).toFun.ker = ⊥ := by
@@ -156,35 +151,31 @@ lemma cayleyPMap_domain_top {T : H →ₗ.[ℂ] H} (hT : IsSelfAdjoint T) :
   have hrange : (T + Complex.I • 1).toFun.range = ⊤ := by
     rw [heq] at hrange'
     exact hrange'
-  have hplusdom : (T + Complex.I • 1).domain = T.domain := by
-    simp [LinearPMap.add_domain]
-  have hinvdom : (T + Complex.I • 1).inverse.domain = ⊤ := by
-    rw [LinearPMap.inverse_domain, hrange]
+  have hplusdom : (T + Complex.I • 1).domain = T.domain := by simp [LinearPMap.add_domain]
+  have hinvdom : (T + Complex.I • 1).inverse.domain = ⊤ := by rw [LinearPMap.inverse_domain, hrange]
   rw [cayleyPMap, LinearPMap.mul_def, LinearPMap.compRestricted_domain]
   apply le_antisymm le_top
   intro x hx
-  let xi : (T + Complex.I • 1).inverse.domain :=
-    ⟨x, by rw [hinvdom]; exact Submodule.mem_top⟩
-  have hv' : (T + Complex.I • 1).inverse xi ∈
-      (T + Complex.I • 1).domain := by
+  let xi : (T + Complex.I • 1).inverse.domain := ⟨x, by rw [hinvdom]; exact Submodule.mem_top⟩
+  have hv' : (T + Complex.I • 1).inverse xi ∈ (T + Complex.I • 1).domain := by
     rw [← LinearPMap.inverse_range (LinearPMap.toFun_ker_eq_bot_iff.mp hker)]
     exact LinearMap.mem_range_self _ xi
   have hv : (T + Complex.I • 1).inverse xi ∈ T.domain := hplusdom ▸ hv'
-  have hxi' : xi ∈
-      Submodule.comap (T + Complex.I • 1).inverse.toFun
-        (T - Complex.I • 1).domain := by
+  have hxi'
+      : xi ∈ Submodule.comap (T + Complex.I • 1).inverse.toFun (T - Complex.I • 1).domain := by
     change (T + Complex.I • 1).inverse xi ∈ (T - Complex.I • 1).domain
     simpa [LinearPMap.sub_domain] using hv
   refine ⟨xi, hxi', ?_⟩
   rfl
 
 /-- Turn a continuous partial linear map with full domain into a bounded operator on `H`. -/
-def topDomainToContinuousLinearMap (A : H →ₗ.[ℂ] H) (hdom : A.domain = ⊤)
-    (hc : Continuous A.toFun) : H →L[ℂ] H := by
-  let i : H →ₗ[ℂ] A.domain :=
-    { toFun := fun x => ⟨x, hdom ▸ Submodule.mem_top⟩
-      map_add' := by intros; rfl
-      map_smul' := by intros; rfl }
+def topDomainToContinuousLinearMap (A : H →ₗ.[ℂ] H) (hdom : A.domain = ⊤) (hc : Continuous A.toFun)
+    : H →L[ℂ] H := by
+  let i : H →ₗ[ℂ] A.domain := {
+    toFun := fun x => ⟨x, hdom ▸ Submodule.mem_top⟩
+    map_add' := by intros; rfl
+    map_smul' := by intros; rfl
+  }
   let L : H →ₗ[ℂ] H := A.toFun.comp i
   have hL : Continuous L := by
     dsimp [L]
@@ -194,34 +185,31 @@ def topDomainToContinuousLinearMap (A : H →ₗ.[ℂ] H) (hdom : A.domain = ⊤
   exact ⟨L, hL⟩
 
 omit [CompleteSpace H] in
-lemma topDomainToContinuousLinearMap_apply (A : H →ₗ.[ℂ] H) (hdom : A.domain = ⊤)
-    (hc : Continuous A.toFun) (x : H) :
-    topDomainToContinuousLinearMap A hdom hc x = A ⟨x, hdom ▸ Submodule.mem_top⟩ := by
+lemma topDomainToContinuousLinearMap_apply
+    (A : H →ₗ.[ℂ] H) (hdom : A.domain = ⊤) (hc : Continuous A.toFun) (x : H)
+    : topDomainToContinuousLinearMap A hdom hc x = A ⟨x, hdom ▸ Submodule.mem_top⟩ := by
   rfl
 
-lemma cayleyPMap_eq_one_sub {T : H →ₗ.[ℂ] H} (hT : IsSelfAdjoint T) :
-    cayleyPMap T = 1 - (2 * Complex.I) • (T + Complex.I • 1).inverse := by
-  have hres := LinearPMap.IsSelfAdjoint.mem_resolventSet_of_im_ne_zero hT
-    (z := -Complex.I) (by norm_num)
+lemma cayleyPMap_eq_one_sub {T : H →ₗ.[ℂ] H} (hT : IsSelfAdjoint T)
+    : cayleyPMap T = 1 - (2 * Complex.I) • (T + Complex.I • 1).inverse := by
+  have hres :=
+    LinearPMap.IsSelfAdjoint.mem_resolventSet_of_im_ne_zero hT (z := -Complex.I) (by norm_num)
   have heq : T - (-Complex.I) • 1 = T + Complex.I • 1 := by
     exact LinearPMap.ext rfl fun x hf hg => by
-      simp [LinearPMap.sub_apply, LinearPMap.add_apply, LinearPMap.smul_apply,
-        neg_smul]
+      simp [LinearPMap.sub_apply, LinearPMap.add_apply, LinearPMap.smul_apply, neg_smul]
   have hker : (T + Complex.I • 1).toFun.ker = ⊥ := by
     rw [← heq]
     exact hres.1
   have hrange : (T + Complex.I • 1).toFun.range = ⊤ := by
     rw [← heq]
     exact hres.2.1
-  have hinvdom : (T + Complex.I • 1).inverse.domain = ⊤ := by
-    rw [LinearPMap.inverse_domain, hrange]
+  have hinvdom : (T + Complex.I • 1).inverse.domain = ⊤ := by rw [LinearPMap.inverse_domain, hrange]
   have hdom := cayleyPMap_domain_top hT
   have hdom' : (1 - (2 * Complex.I) • (T + Complex.I • 1).inverse).domain = ⊤ := by
     simp [LinearPMap.sub_domain, hinvdom]
   apply LinearPMap.ext (hdom.trans hdom'.symm)
   intro x hx hx'
-  let xi : (T + Complex.I • 1).inverse.domain :=
-    ⟨x, by rw [hinvdom]; exact Submodule.mem_top⟩
+  let xi : (T + Complex.I • 1).inverse.domain := ⟨x, by rw [hinvdom]; exact Submodule.mem_top⟩
   have hxi : (T + Complex.I • 1).inverse xi ∈ (T + Complex.I • 1).domain := by
     rw [← LinearPMap.inverse_range (LinearPMap.toFun_ker_eq_bot_iff.mp hker)]
     exact LinearMap.mem_range_self _ xi
@@ -234,80 +222,71 @@ lemma cayleyPMap_eq_one_sub {T : H →ₗ.[ℂ] H} (hT : IsSelfAdjoint T) :
     exact hx₀
   have hinv₀ : (T + Complex.I • 1).inverse xi = x₀ :=
     LinearPMap.inverse_apply_eq (LinearPMap.toFun_ker_eq_bot_iff.mp hker) hxy
-  have hinv : (T + Complex.I • 1)
-      ⟨(T + Complex.I • 1).inverse xi, hxi⟩ = x := by
-    have heq : (⟨(T + Complex.I • 1).inverse xi, hxi⟩ :
-        (T + Complex.I • 1).domain) = x₀ := Subtype.ext hinv₀
+  have hinv : (T + Complex.I • 1) ⟨(T + Complex.I • 1).inverse xi, hxi⟩ = x := by
+    have heq : (⟨(T + Complex.I • 1).inverse xi, hxi⟩ : (T + Complex.I • 1).domain) = x₀ :=
+      Subtype.ext hinv₀
     rw [heq]
     exact hx₀
-  let y : (T + Complex.I • 1).domain :=
-    ⟨(T + Complex.I • 1).inverse xi, hxi⟩
+  let y : (T + Complex.I • 1).domain := ⟨(T + Complex.I • 1).inverse xi, hxi⟩
   have hy : (T + Complex.I • 1) y = x := hinv
   change (T - Complex.I • 1) y = x - (2 * Complex.I) • (y : H)
   rw [← hy]
   simp [LinearPMap.sub_apply, LinearPMap.add_apply, LinearPMap.smul_apply]
   module
 
-lemma cayleyPMap_eq_one_sub_minus {T : H →ₗ.[ℂ] H} (hT : IsSelfAdjoint T) :
-    cayleyPMap T = 1 - (2 * Complex.I) • (T - (-Complex.I) • 1).inverse := by
+lemma cayleyPMap_eq_one_sub_minus {T : H →ₗ.[ℂ] H} (hT : IsSelfAdjoint T)
+    : cayleyPMap T = 1 - (2 * Complex.I) • (T - (-Complex.I) • 1).inverse := by
   have heq : T - (-Complex.I) • 1 = T + Complex.I • 1 := by
     exact LinearPMap.ext rfl fun x hf hg => by
-      simp [LinearPMap.sub_apply, LinearPMap.add_apply, LinearPMap.smul_apply,
-        neg_smul]
+      simp [LinearPMap.sub_apply, LinearPMap.add_apply, LinearPMap.smul_apply, neg_smul]
   have heq' := congrArg LinearPMap.inverse heq
   rw [cayleyPMap_eq_one_sub hT, ← heq']
 
 /-! ## C. The bounded, unitary Cayley transform -/
 
 /-- The bounded operator represented by the Cayley transform of a self-adjoint `LinearPMap`. -/
-noncomputable def cayleyContinuousLinearMap (T : H →ₗ.[ℂ] H) (hT : IsSelfAdjoint T) :
-    H →L[ℂ] H := by
-  have hres := LinearPMap.IsSelfAdjoint.mem_resolventSet_of_im_ne_zero hT
-    (z := -Complex.I) (by norm_num)
+noncomputable def cayleyContinuousLinearMap (T : H →ₗ.[ℂ] H) (hT : IsSelfAdjoint T)
+    : H →L[ℂ] H := by
+  have hres :=
+    LinearPMap.IsSelfAdjoint.mem_resolventSet_of_im_ne_zero hT (z := -Complex.I) (by norm_num)
   have hinvdom : (T - (-Complex.I) • 1).inverse.domain = ⊤ := by
     rw [LinearPMap.inverse_domain, hres.2.1]
-  exact 1 - (2 * Complex.I) •
-    topDomainToContinuousLinearMap (T - (-Complex.I) • 1).inverse hinvdom hres.2.2
+  exact 1
+    - (2 * Complex.I)
+      • topDomainToContinuousLinearMap (T - (-Complex.I) • 1).inverse hinvdom hres.2.2
 
 /-- A bounded operator, viewed as an everywhere-defined `LinearPMap`. -/
 def continuousLinearMapToPMap (L : H →L[ℂ] H) : H →ₗ.[ℂ] H :=
   ⟨⊤, L.toLinearMap.comp Submodule.topEquiv.toLinearMap⟩
 
-lemma cayleyPMap_eq_continuousLinearMapToPMap {T : H →ₗ.[ℂ] H}
-    (hT : IsSelfAdjoint T) :
-    cayleyPMap T = continuousLinearMapToPMap (cayleyContinuousLinearMap T hT) := by
-  have hres := LinearPMap.IsSelfAdjoint.mem_resolventSet_of_im_ne_zero hT
-    (z := -Complex.I) (by norm_num)
+lemma cayleyPMap_eq_continuousLinearMapToPMap {T : H →ₗ.[ℂ] H} (hT : IsSelfAdjoint T)
+    : cayleyPMap T = continuousLinearMapToPMap (cayleyContinuousLinearMap T hT) := by
+  have hres :=
+    LinearPMap.IsSelfAdjoint.mem_resolventSet_of_im_ne_zero hT (z := -Complex.I) (by norm_num)
   have heq : T - (-Complex.I) • 1 = T + Complex.I • 1 := by
     exact LinearPMap.ext rfl fun x hf hg => by
-      simp [LinearPMap.sub_apply, LinearPMap.add_apply, LinearPMap.smul_apply,
-        neg_smul]
+      simp [LinearPMap.sub_apply, LinearPMap.add_apply, LinearPMap.smul_apply, neg_smul]
   calc
-    cayleyPMap T = 1 - (2 * Complex.I) • (T - (-Complex.I) • 1).inverse :=
-      cayleyPMap_eq_one_sub_minus hT
+    cayleyPMap T
+      = 1 - (2 * Complex.I) • (T - (-Complex.I) • 1).inverse := cayleyPMap_eq_one_sub_minus hT
     _ = continuousLinearMapToPMap (cayleyContinuousLinearMap T hT) := by
       have hinvdom : (T - (-Complex.I) • 1).inverse.domain = ⊤ := by
         rw [LinearPMap.inverse_domain]
         exact hres.2.1
-      have hdom : (1 - (2 * Complex.I) •
-          (T - (-Complex.I) • 1).inverse).domain = ⊤ := by
+      have hdom : (1 - (2 * Complex.I) • (T - (-Complex.I) • 1).inverse).domain = ⊤ := by
         simp [LinearPMap.sub_domain, hinvdom]
-      have hdom' : (continuousLinearMapToPMap
-          (cayleyContinuousLinearMap T hT)).domain = ⊤ := rfl
+      have hdom' : (continuousLinearMapToPMap (cayleyContinuousLinearMap T hT)).domain = ⊤ := rfl
       apply LinearPMap.ext (hdom.trans hdom'.symm)
       intro x hx hx'
       simp only [LinearPMap.sub_apply, LinearPMap.smul_apply, continuousLinearMapToPMap]
       simp [cayleyContinuousLinearMap,
-        topDomainToContinuousLinearMap_apply (T - (-Complex.I) • 1).inverse
-          hinvdom hres.2.2 x]
+        topDomainToContinuousLinearMap_apply (T - (-Complex.I) • 1).inverse hinvdom hres.2.2 x]
 
-lemma cayleyContinuousLinearMap_norm_shift {T : H →ₗ.[ℂ] H}
-    (hT : IsSelfAdjoint T) (y : T.domain) :
-    ‖T y - Complex.I • (y : H)‖ = ‖T y + Complex.I • (y : H)‖ := by
+lemma cayleyContinuousLinearMap_norm_shift {T : H →ₗ.[ℂ] H} (hT : IsSelfAdjoint T) (y : T.domain)
+    : ‖T y - Complex.I • (y : H)‖ = ‖T y + Complex.I • (y : H)‖ := by
   have hsym : T.IsSymmetric := LinearPMap.IsSelfAdjoint.isSymmetric hT
   have hreal : (⟪T y, (y : H)⟫_ℂ).im = 0 := by
-    exact Complex.conj_eq_iff_im.mp
-      ((LinearPMap.isSymmetric_iff_inner_map_self_real).mp hsym y)
+    exact Complex.conj_eq_iff_im.mp ((LinearPMap.isSymmetric_iff_inner_map_self_real).mp hsym y)
   have hsub := norm_sub_sq (𝕜 := ℂ) (T y) (Complex.I • (y : H))
   have hadd := norm_add_sq (𝕜 := ℂ) (T y) (Complex.I • (y : H))
   have hinner : (⟪T y, Complex.I • (y : H)⟫_ℂ).re = 0 := by
@@ -316,41 +295,35 @@ lemma cayleyContinuousLinearMap_norm_shift {T : H →ₗ.[ℂ] H}
   have hnorm : ‖Complex.I • (y : H)‖ ^ 2 = ‖(y : H)‖ ^ 2 := by
     rw [norm_smul]
     simp
-  have hsquares : ‖T y - Complex.I • (y : H)‖ ^ 2 =
-      ‖T y + Complex.I • (y : H)‖ ^ 2 := by
+  have hsquares : ‖T y - Complex.I • (y : H)‖ ^ 2 = ‖T y + Complex.I • (y : H)‖ ^ 2 := by
     rw [hsub, hadd]
     rw [show RCLike.re ⟪T y, Complex.I • (y : H)⟫_ℂ = 0 from hinner, hnorm]
     ring
   exact (sq_eq_sq₀ (norm_nonneg _) (norm_nonneg _)).mp hsquares
 
-lemma cayleyContinuousLinearMap_apply_of_mem_range {T : H →ₗ.[ℂ] H}
-    (hT : IsSelfAdjoint T) (y : (T + Complex.I • 1).domain) (x : H)
-    (hy : (T + Complex.I • 1) y = x) :
-    cayleyContinuousLinearMap T hT x = (T - Complex.I • 1) y := by
-  have hres := LinearPMap.IsSelfAdjoint.mem_resolventSet_of_im_ne_zero hT
-    (z := -Complex.I) (by norm_num)
+lemma cayleyContinuousLinearMap_apply_of_mem_range
+    {T : H →ₗ.[ℂ] H} (hT : IsSelfAdjoint T) (y : (T + Complex.I • 1).domain)
+    (x : H) (hy : (T + Complex.I • 1) y = x)
+    : cayleyContinuousLinearMap T hT x = (T - Complex.I • 1) y := by
+  have hres :=
+    LinearPMap.IsSelfAdjoint.mem_resolventSet_of_im_ne_zero hT (z := -Complex.I) (by norm_num)
   have heq : T - (-Complex.I) • 1 = T + Complex.I • 1 := by
     exact LinearPMap.ext rfl fun x hf hg => by
-      simp [LinearPMap.sub_apply, LinearPMap.add_apply, LinearPMap.smul_apply,
-        neg_smul]
-  have hres' := LinearPMap.IsSelfAdjoint.mem_resolventSet_of_im_ne_zero hT
-    (z := Complex.I) (by norm_num)
+      simp [LinearPMap.sub_apply, LinearPMap.add_apply, LinearPMap.smul_apply, neg_smul]
+  have hres' :=
+    LinearPMap.IsSelfAdjoint.mem_resolventSet_of_im_ne_zero hT (z := Complex.I) (by norm_num)
   have hker' : (T - Complex.I • 1).toFun.ker = ⊥ := hres'.1
-  have hminusdom : (T - (-Complex.I) • 1).domain = T.domain := by
-    simp [LinearPMap.sub_domain]
-  have hplusdom : (T + Complex.I • 1).domain = T.domain := by
-    simp [LinearPMap.add_domain]
+  have hminusdom : (T - (-Complex.I) • 1).domain = T.domain := by simp [LinearPMap.sub_domain]
+  have hplusdom : (T + Complex.I • 1).domain = T.domain := by simp [LinearPMap.add_domain]
   have hyT : (y : H) ∈ T.domain := by
     rw [← hplusdom]
     exact y.property
   have hym : (y : H) ∈ (T - (-Complex.I) • 1).domain := by
     rw [hminusdom]
     exact hyT
-  let hyminus : (T - (-Complex.I) • 1).domain :=
-    ⟨(y : H), hym⟩
+  let hyminus : (T - (-Complex.I) • 1).domain := ⟨(y : H), hym⟩
   have hyminus_eq : (T - (-Complex.I) • 1) hyminus = x := by
-    have hyt : (⟨(hyminus : H), hminusdom ▸ hyminus.property⟩ : T.domain) =
-        ⟨(y : H), hyT⟩ := by
+    have hyt : (⟨(hyminus : H), hminusdom ▸ hyminus.property⟩ : T.domain) = ⟨(y : H), hyT⟩ := by
       apply Subtype.ext
       change (y : H) = (y : H)
       rfl
@@ -361,8 +334,7 @@ lemma cayleyContinuousLinearMap_apply_of_mem_range {T : H →ₗ.[ℂ] H}
     rw [LinearPMap.inverse_domain]
     rw [hres.2.1]
     exact Submodule.mem_top
-  have hminus_inv : (T - (-Complex.I) • 1).inverse
-      ⟨x, hxinv⟩ = hyminus := by
+  have hminus_inv : (T - (-Complex.I) • 1).inverse ⟨x, hxinv⟩ = hyminus := by
     exact LinearPMap.inverse_apply_eq (LinearPMap.toFun_ker_eq_bot_iff.mp hres.1) hyminus_eq
   have hc : Continuous (T - (-Complex.I) • 1).inverse.toFun := hres.2.2
   simp only [cayleyContinuousLinearMap, sub_apply, smul_apply]
@@ -377,48 +349,45 @@ lemma cayleyContinuousLinearMap_apply_of_mem_range {T : H →ₗ.[ℂ] H}
   simp [LinearPMap.sub_apply, LinearPMap.add_apply, LinearPMap.smul_apply]
   module
 
-lemma cayleyContinuousLinearMap_norm_map {T : H →ₗ.[ℂ] H}
-    (hT : IsSelfAdjoint T) (x : H) :
-    ‖cayleyContinuousLinearMap T hT x‖ = ‖x‖ := by
-  obtain ⟨y, hy⟩ := LinearPMap.IsSelfAdjoint.sub_smul_surjective hT
-    (z := -Complex.I) (by norm_num) x
-  have hplusdom : (T + Complex.I • 1).domain = T.domain := by
-    simp [LinearPMap.add_domain]
-  let yp : (T + Complex.I • 1).domain :=
-    ⟨(y : H), by rw [hplusdom]; exact (show (y : H) ∈ T.domain from by
-      simpa [LinearPMap.sub_domain] using y.property)⟩
+lemma cayleyContinuousLinearMap_norm_map {T : H →ₗ.[ℂ] H} (hT : IsSelfAdjoint T) (x : H)
+    : ‖cayleyContinuousLinearMap T hT x‖ = ‖x‖ := by
+  obtain ⟨y, hy⟩ :=
+    LinearPMap.IsSelfAdjoint.sub_smul_surjective hT (z := -Complex.I) (by norm_num) x
+  have hplusdom : (T + Complex.I • 1).domain = T.domain := by simp [LinearPMap.add_domain]
+  let yp : (T + Complex.I • 1).domain := ⟨
+    (y : H),
+    by
+      rw [hplusdom]
+      exact (show (y : H) ∈ T.domain from by simpa [LinearPMap.sub_domain] using y.property)
+  ⟩
   have hyp : (T + Complex.I • 1) yp = x := by
     simpa [LinearPMap.sub_apply, LinearPMap.add_apply, LinearPMap.smul_apply] using hy
   rw [cayleyContinuousLinearMap_apply_of_mem_range hT yp x hyp]
   rw [← hyp]
   have hypp : (yp : H) ∈ (T + Complex.I • 1).domain := yp.property
   let yT : T.domain := ⟨(yp : H), hplusdom ▸ hypp⟩
-  have hcoey : (yp : H) = (yT : H) := by
-    dsimp [yp, yT]
+  have hcoey : (yp : H) = (yT : H) := by dsimp [yp, yT]
   have hshift := cayleyContinuousLinearMap_norm_shift hT yT
-  convert hshift using 1 <;>
-    simp [LinearPMap.sub_apply, LinearPMap.add_apply, LinearPMap.smul_apply, hcoey]
+  convert hshift using 1
+    <;> simp [LinearPMap.sub_apply, LinearPMap.add_apply, LinearPMap.smul_apply, hcoey]
 
-lemma cayleyContinuousLinearMap_isometry {T : H →ₗ.[ℂ] H}
-    (hT : IsSelfAdjoint T) : Isometry (cayleyContinuousLinearMap T hT) := by
+lemma cayleyContinuousLinearMap_isometry {T : H →ₗ.[ℂ] H} (hT : IsSelfAdjoint T)
+    : Isometry (cayleyContinuousLinearMap T hT) := by
   intro x y
-  have hdist : dist (cayleyContinuousLinearMap T hT x)
-      (cayleyContinuousLinearMap T hT y) = dist x y := by
+  have hdist
+      : dist (cayleyContinuousLinearMap T hT x) (cayleyContinuousLinearMap T hT y) = dist x y := by
     simpa [dist_eq_norm, map_sub] using cayleyContinuousLinearMap_norm_map hT (x - y)
   rw [edist_dist, hdist, edist_dist]
 
-lemma cayleyContinuousLinearMap_surjective {T : H →ₗ.[ℂ] H}
-    (hT : IsSelfAdjoint T) : Function.Surjective (cayleyContinuousLinearMap T hT) := by
+lemma cayleyContinuousLinearMap_surjective {T : H →ₗ.[ℂ] H} (hT : IsSelfAdjoint T)
+    : Function.Surjective (cayleyContinuousLinearMap T hT) := by
   intro x
-  obtain ⟨y, hy⟩ := LinearPMap.IsSelfAdjoint.sub_smul_surjective hT
-    (z := Complex.I) (by norm_num) x
-  have hminusdom : (T - Complex.I • 1).domain = T.domain := by
-    simp [LinearPMap.sub_domain]
+  obtain ⟨y, hy⟩ := LinearPMap.IsSelfAdjoint.sub_smul_surjective hT (z := Complex.I) (by norm_num) x
+  have hminusdom : (T - Complex.I • 1).domain = T.domain := by simp [LinearPMap.sub_domain]
   have hym : (y : H) ∈ T.domain := by
     have h := y.property
     exact hminusdom ▸ h
-  have hplusdom : (T + Complex.I • 1).domain = T.domain := by
-    simp [LinearPMap.add_domain]
+  have hplusdom : (T + Complex.I • 1).domain = T.domain := by simp [LinearPMap.add_domain]
   have hypmem : (y : H) ∈ (T + Complex.I • 1).domain := by
     rw [hplusdom]
     exact hym
@@ -435,8 +404,8 @@ noncomputable def cayleyUnitary (T : H →ₗ.[ℂ] H) (hT : IsSelfAdjoint T) : 
     (cayleyContinuousLinearMap_surjective hT)
 
 @[simp]
-lemma cayleyUnitary_apply (T : H →ₗ.[ℂ] H) (hT : IsSelfAdjoint T) (x : H) :
-    cayleyUnitary T hT x = cayleyContinuousLinearMap T hT x := by
+lemma cayleyUnitary_apply (T : H →ₗ.[ℂ] H) (hT : IsSelfAdjoint T) (x : H)
+    : cayleyUnitary T hT x = cayleyContinuousLinearMap T hT x := by
   rfl
 
 end QuantumMechanics

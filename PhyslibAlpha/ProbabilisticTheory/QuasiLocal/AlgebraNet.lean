@@ -61,8 +61,10 @@ namespace QuasiLocal
 
 /-! ## A. Nets of algebras -/
 
-/-- A net of unital complex `*`-algebras over the finite regions of a set of sites: the algebra of
-each region, and the inclusion of the algebra of a region in that of a larger region. -/
+/--
+A net of unital complex `*`-algebras over the finite regions of a set of sites: the algebra of
+each region, and the inclusion of the algebra of a region in that of a larger region.
+-/
 structure AlgebraNet (S : Type*) where
   /-- The algebra of observables of a finite region. -/
   A : Finset S → Type*
@@ -75,11 +77,11 @@ structure AlgebraNet (S : Type*) where
   /-- The inclusion of a region in itself is the identity. -/
   incl_refl : ∀ (X : Finset S) (a : A X), incl (le_refl X) a = a
   /-- Inclusions compose. -/
-  incl_trans : ∀ {X Y Z : Finset S} (h₁ : X ≤ Y) (h₂ : Y ≤ Z) (a : A X),
-    incl (h₁.trans h₂) a = incl h₂ (incl h₁ a)
+  incl_trans
+    : ∀ {X Y Z : Finset S} (h₁ : X ≤ Y) (h₂ : Y ≤ Z) (a : A X),
+      incl (h₁.trans h₂) a = incl h₂ (incl h₁ a)
 
-attribute [instance] AlgebraNet.ring AlgebraNet.algebra AlgebraNet.starRing
-  AlgebraNet.starModule
+attribute [instance] AlgebraNet.ring AlgebraNet.algebra AlgebraNet.starRing AlgebraNet.starModule
 
 namespace AlgebraNet
 
@@ -93,16 +95,20 @@ instance : DirectedSystem N.A (fun X Y (h : X ≤ Y) => N.incl h) where
 
 variable [DecidableEq S]
 
-/-- **The quasi-local algebra** of a net: the direct limit of the algebras of the finite
-regions. -/
+/--
+**The quasi-local algebra** of a net: the direct limit of the algebras of the finite
+regions.
+-/
 abbrev Quasilocal : Type _ := DirectLimit N.A (fun X Y (h : X ≤ Y) => N.incl h)
 
 noncomputable example : Ring N.Quasilocal := inferInstance
 noncomputable example : Algebra ℂ N.Quasilocal := inferInstance
 noncomputable example : StarRing N.Quasilocal := inferInstance
 
-/-- The embedding of the algebra of a region in the quasi-local algebra, as a unital
-`*`-homomorphism. -/
+/--
+The embedding of the algebra of a region in the quasi-local algebra, as a unital
+`*`-homomorphism.
+-/
 noncomputable def of (X : Finset S) : N.A X →⋆ₐ[ℂ] N.Quasilocal where
   toAlgHom := DirectLimit.Algebra.of N.A (fun X Y (h : X ≤ Y) => N.incl h) X
   map_star' a := (DirectLimit.star_def (f := fun X Y (h : X ≤ Y) => N.incl h) X a).symm
@@ -115,29 +121,40 @@ lemma of_incl {X Y : Finset S} (h : X ≤ Y) (a : N.A X) : N.of Y (N.incl h a) =
 omit [DecidableEq S] in
 /-- Every element of the quasi-local algebra is an observable of some finite region. -/
 lemma exists_of (x : N.Quasilocal) : ∃ (X : Finset S) (a : N.A X), N.of X a = x := by
-  induction x using DirectLimit.induction with | _ X a => exact ⟨X, a, rfl⟩
+  induction x using DirectLimit.induction with
+  | _ X a => exact ⟨X, a, rfl⟩
 
-/-- A map of the quasi-local algebra induced by maps of the local algebras that move regions: a
+/--
+A map of the quasi-local algebra induced by maps of the local algebras that move regions: a
 monotone map `ρ` of regions and, for each region `X`, a unital `*`-homomorphism of its algebra
-into that of `ρ X`, natural with respect to the inclusions. -/
-noncomputable def moveHom (ρ : Finset S → Finset S) (hρ : Monotone ρ)
-    (φ : ∀ X, N.A X →⋆ₐ[ℂ] N.A (ρ X))
-    (hφ : ∀ {X Y : Finset S} (h : X ≤ Y) (a : N.A X), φ Y (N.incl h a) = N.incl (hρ h) (φ X a)) :
-    N.Quasilocal →⋆ₐ[ℂ] N.Quasilocal where
-  toAlgHom := DirectLimit.Algebra.lift N.A (fun X Y (h : X ≤ Y) => N.incl h) N.Quasilocal
-    (fun X => (N.of (ρ X)).toAlgHom.comp (φ X).toAlgHom) (fun X Y h a => by
-      change N.of (ρ Y) (φ Y (N.incl h a)) = N.of (ρ X) (φ X a)
-      rw [hφ h a, N.of_incl (hρ h)])
+into that of `ρ X`, natural with respect to the inclusions.
+-/
+noncomputable def moveHom
+    (ρ : Finset S → Finset S) (hρ : Monotone ρ) (φ : ∀ X, N.A X →⋆ₐ[ℂ] N.A (ρ X))
+    (hφ : ∀ {X Y : Finset S} (h : X ≤ Y) (a : N.A X), φ Y (N.incl h a) = N.incl (hρ h) (φ X a))
+    : N.Quasilocal →⋆ₐ[ℂ] N.Quasilocal where
+  toAlgHom :=
+    DirectLimit.Algebra.lift N.A
+      (fun X Y (h : X ≤ Y) => N.incl h)
+      N.Quasilocal
+      (fun X => (N.of (ρ X)).toAlgHom.comp (φ X).toAlgHom)
+      (fun X Y h a => by
+        change N.of (ρ Y) (φ Y (N.incl h a)) = N.of (ρ X) (φ X a)
+        rw [hφ h a, N.of_incl (hρ h)])
   map_star' x := by
-    induction x using DirectLimit.induction with | _ X a =>
-    rw [DirectLimit.star_def (f := fun X Y (h : X ≤ Y) => N.incl h) X a]
-    change N.of (ρ X) (φ X (star a)) = star (N.of (ρ X) (φ X a))
-    rw [map_star, map_star]
+    induction x using DirectLimit.induction with
+    | _ X a =>
+      rw [DirectLimit.star_def (f := fun X Y (h : X ≤ Y) => N.incl h) X a]
+      change N.of (ρ X) (φ X (star a)) = star (N.of (ρ X) (φ X a))
+      rw [map_star, map_star]
 
 omit [DecidableEq S] in
-lemma moveHom_of (ρ : Finset S → Finset S) (hρ : Monotone ρ) (φ : ∀ X, N.A X →⋆ₐ[ℂ] N.A (ρ X))
+lemma moveHom_of
+    (ρ : Finset S → Finset S) (hρ : Monotone ρ) (φ : ∀ X, N.A X →⋆ₐ[ℂ] N.A (ρ X))
     (hφ : ∀ {X Y : Finset S} (h : X ≤ Y) (a : N.A X), φ Y (N.incl h a) = N.incl (hρ h) (φ X a))
-    (X : Finset S) (a : N.A X) : N.moveHom ρ hρ φ hφ (N.of X a) = N.of (ρ X) (φ X a) := rfl
+    (X : Finset S) (a : N.A X)
+    : N.moveHom ρ hρ φ hφ (N.of X a) = N.of (ρ X) (φ X a) :=
+  rfl
 
 end AlgebraNet
 

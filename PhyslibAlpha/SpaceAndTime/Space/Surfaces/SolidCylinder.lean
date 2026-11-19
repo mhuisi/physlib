@@ -48,8 +48,10 @@ and is replaced by a statement that the solid cylinder has positive ambient volu
 open SchwartzMap NNReal
 noncomputable section
 open Physlib Distribution
-variable (𝕜 : Type) {E F F' : Type} [RCLike 𝕜] [NormedAddCommGroup E] [NormedAddCommGroup F]
-  [NormedAddCommGroup F'] [NormedSpace ℝ E] [NormedSpace ℝ F]
+variable
+  (𝕜 : Type)
+  {E F F' : Type} [RCLike 𝕜] [NormedAddCommGroup E] [NormedAddCommGroup F] [NormedAddCommGroup F']
+  [NormedSpace ℝ E] [NormedSpace ℝ F]
 
 namespace Space
 
@@ -61,13 +63,13 @@ open MeasureTheory Real
 
 -/
 
-/-- The map embedding a cross-sectional disk extruded along the axis into `Space 3`. The disk is
-  cut out by the solid-cylinder measure, which is supported on the closed unit disk. -/
-def solidCylinder : Space 2 × ℝ → Space 3 := fun x =>
-  (slice 2).symm (x.2, x.1)
+/--
+The map embedding a cross-sectional disk extruded along the axis into `Space 3`. The disk is
+cut out by the solid-cylinder measure, which is supported on the closed unit disk.
+-/
+def solidCylinder : Space 2 × ℝ → Space 3 := fun x => (slice 2).symm (x.2, x.1)
 
-lemma solidCylinder_eq :
-    solidCylinder = (slice 2).symm ∘ (fun x : Space 2 × ℝ => (x.2, x.1)) := rfl
+lemma solidCylinder_eq : solidCylinder = (slice 2).symm ∘ (fun x : Space 2 × ℝ => (x.2, x.1)) := rfl
 
 lemma solidCylinder_injective : Function.Injective solidCylinder := by
   intro x y h
@@ -84,8 +86,7 @@ lemma solidCylinder_measurableEmbedding : MeasurableEmbedding solidCylinder :=
   Continuous.measurableEmbedding solidCylinder_continuous solidCylinder_injective
 
 @[simp]
-lemma norm_solidCylinder (x : Space 2 × ℝ) :
-    ‖solidCylinder x‖ = √(‖x.2‖ ^ 2 + ‖x.1‖ ^ 2) := by
+lemma norm_solidCylinder (x : Space 2 × ℝ) : ‖solidCylinder x‖ = √(‖x.2‖ ^ 2 + ‖x.1‖ ^ 2) := by
   rw [solidCylinder, norm_slice_symm_eq]
 
 /-!
@@ -94,18 +95,19 @@ lemma norm_solidCylinder (x : Space 2 × ℝ) :
 
 -/
 
-/-- The measure on `Space 3` corresponding to integration over a solid cylinder, i.e. the
-  pushforward of the product of the solid-sphere (closed unit disk) measure on `Space 2` with the
-  line measure along the axis. -/
+/--
+The measure on `Space 3` corresponding to integration over a solid cylinder, i.e. the
+pushforward of the product of the solid-sphere (closed unit disk) measure on `Space 2` with the
+line measure along the axis.
+-/
 def solidCylinderMeasure : Measure (Space 3) :=
   MeasureTheory.Measure.map solidCylinder ((solidSphereMeasure 2).prod (volume (α := ℝ)))
 
-instance solidCylinderMeasure_hasTemperateGrowth :
-    solidCylinderMeasure.HasTemperateGrowth := by
+instance solidCylinderMeasure_hasTemperateGrowth : solidCylinderMeasure.HasTemperateGrowth := by
   rw [solidCylinderMeasure]
   refine { exists_integrable := ?_ }
-  obtain ⟨n, hn⟩ := MeasureTheory.Measure.HasTemperateGrowth.exists_integrable
-    (μ := volume (α := ℝ))
+  obtain ⟨n, hn⟩ :=
+    MeasureTheory.Measure.HasTemperateGrowth.exists_integrable (μ := volume (α := ℝ))
   use n
   rw [MeasurableEmbedding.integrable_map_iff solidCylinder_measurableEmbedding]
   change Integrable
@@ -135,19 +137,20 @@ instance solidCylinderMeasure_sFinite : SFinite solidCylinderMeasure := by
 
 -/
 
-/-- The distribution on `Space 3` corresponding to integration over a solid cylinder.
-  One can roughly think of this distribution as taking a test function `f` to its integral against
-  a mass, charge or current density spread over a solid cylinder. -/
-def solidCylinderDist : (Space 3) →d[ℝ] ℝ :=
-  SchwartzMap.integralCLM ℝ solidCylinderMeasure
+/--
+The distribution on `Space 3` corresponding to integration over a solid cylinder.
+One can roughly think of this distribution as taking a test function `f` to its integral against
+a mass, charge or current density spread over a solid cylinder.
+-/
+def solidCylinderDist : (Space 3) →d[ℝ] ℝ := SchwartzMap.integralCLM ℝ solidCylinderMeasure
 
-lemma solidCylinderDist_apply_eq_integral_solidCylinderMeasure (f : 𝓢(Space 3, ℝ)) :
-    solidCylinderDist f = ∫ x, f x ∂solidCylinderMeasure := by
+lemma solidCylinderDist_apply_eq_integral_solidCylinderMeasure (f : 𝓢(Space 3, ℝ))
+    : solidCylinderDist f = ∫ x, f x ∂solidCylinderMeasure := by
   rw [solidCylinderDist, SchwartzMap.integralCLM_apply]
 
-lemma solidCylinderDist_apply_eq_integral_disk_volume (f : 𝓢(Space 3, ℝ)) :
-    solidCylinderDist f =
-    ∫ x, f (solidCylinder x) ∂((solidSphereMeasure 2).prod (volume (α := ℝ))) := by
+lemma solidCylinderDist_apply_eq_integral_disk_volume (f : 𝓢(Space 3, ℝ))
+    : solidCylinderDist f
+      = ∫ x, f (solidCylinder x) ∂((solidSphereMeasure 2).prod (volume (α := ℝ))) := by
   rw [solidCylinderDist_apply_eq_integral_solidCylinderMeasure, solidCylinderMeasure,
     MeasurableEmbedding.integral_map solidCylinder_measurableEmbedding]
 
@@ -158,8 +161,9 @@ lemma solidCylinderDist_apply_eq_integral_disk_volume (f : 𝓢(Space 3, ℝ)) :
 -/
 
 lemma solidCylinderMeasure_univ_pos : 0 < solidCylinderMeasure Set.univ := by
-  rw [solidCylinderMeasure, Measure.map_apply solidCylinder_measurableEmbedding.measurable
-    MeasurableSet.univ, Set.preimage_univ, ← Set.univ_prod_univ, Measure.prod_prod]
+  rw [solidCylinderMeasure,
+    Measure.map_apply solidCylinder_measurableEmbedding.measurable MeasurableSet.univ,
+    Set.preimage_univ, ← Set.univ_prod_univ, Measure.prod_prod]
   refine ENNReal.mul_pos (solidSphereMeasure_univ_pos 2).ne' ?_
   simp
 

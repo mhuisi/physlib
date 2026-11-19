@@ -27,20 +27,26 @@ namespace WickAlgebra
 
 open FieldStatistic
 
-/-- For a field specification `𝓕`, and `φ` and `ψ` elements of `𝓕.FieldOp`, the element of
-  `𝓕.WickAlgebra`, `timeContract φ ψ` is defined to be `𝓣(φψ) - 𝓝(φψ)`. -/
+/--
+For a field specification `𝓕`, and `φ` and `ψ` elements of `𝓕.FieldOp`, the element of
+`𝓕.WickAlgebra`, `timeContract φ ψ` is defined to be `𝓣(φψ) - 𝓝(φψ)`.
+-/
 def timeContract (φ ψ : 𝓕.FieldOp) : 𝓕.WickAlgebra :=
-    𝓣(ofFieldOp φ * ofFieldOp ψ) - 𝓝(ofFieldOp φ * ofFieldOp ψ)
+  𝓣(ofFieldOp φ * ofFieldOp ψ) - 𝓝(ofFieldOp φ * ofFieldOp ψ)
 
-lemma timeContract_eq_smul (φ ψ : 𝓕.FieldOp) : timeContract φ ψ =
-    𝓣(ofFieldOp φ * ofFieldOp ψ) + (-1 : ℂ) • 𝓝(ofFieldOp φ * ofFieldOp ψ) := by rfl
+lemma timeContract_eq_smul (φ ψ : 𝓕.FieldOp)
+    : timeContract φ ψ
+      = 𝓣(ofFieldOp φ * ofFieldOp ψ) + (-1 : ℂ) • 𝓝(ofFieldOp φ * ofFieldOp ψ) := by
+  rfl
 
-/-- For a field specification `𝓕`, and `φ` and `ψ` elements of `𝓕.FieldOp`, if
-  `φ` and `ψ` are time-ordered then
+/--
+For a field specification `𝓕`, and `φ` and `ψ` elements of `𝓕.FieldOp`, if
+`φ` and `ψ` are time-ordered then
 
-  `timeContract φ ψ = [anPart φ, ofFieldOp ψ]ₛ`. -/
-lemma timeContract_of_timeOrderRel (φ ψ : 𝓕.FieldOp) (h : timeOrderRel φ ψ) :
-    timeContract φ ψ = [anPart φ, ofFieldOp ψ]ₛ := by
+`timeContract φ ψ = [anPart φ, ofFieldOp ψ]ₛ`.
+-/
+lemma timeContract_of_timeOrderRel (φ ψ : 𝓕.FieldOp) (h : timeOrderRel φ ψ)
+    : timeContract φ ψ = [anPart φ, ofFieldOp ψ]ₛ := by
   conv_rhs =>
     rw [ofFieldOp_eq_crPart_add_anPart]
     rw [map_add, superCommute_anPart_anPart, superCommute_anPart_crPart]
@@ -51,8 +57,8 @@ lemma timeContract_of_timeOrderRel (φ ψ : 𝓕.FieldOp) (h : timeOrderRel φ �
   simp only [mul_add, add_mul]
   abel_nf
 
-lemma timeContract_of_not_timeOrderRel (φ ψ : 𝓕.FieldOp) (h : ¬ timeOrderRel φ ψ) :
-    timeContract φ ψ = 𝓢(𝓕 |>ₛ φ, 𝓕 |>ₛ ψ) • timeContract ψ φ := by
+lemma timeContract_of_not_timeOrderRel (φ ψ : 𝓕.FieldOp) (h : ¬ timeOrderRel φ ψ)
+    : timeContract φ ψ = 𝓢(𝓕 |>ₛ φ, 𝓕 |>ₛ ψ) • timeContract ψ φ := by
   rw [timeContract_eq_smul]
   rw [normalOrder_ofFieldOp_ofFieldOp_swap]
   rw [timeOrder_ofFieldOp_ofFieldOp_not_ordered_eq_timeOrder h]
@@ -60,30 +66,37 @@ lemma timeContract_of_not_timeOrderRel (φ ψ : 𝓕.FieldOp) (h : ¬ timeOrderR
   simp only [smul_add]
   rw [smul_smul, smul_smul, mul_comm]
 
-/-- For a field specification `𝓕`, and `φ` and `ψ` elements of `𝓕.FieldOp`, if
-  `φ` and `ψ` are not time-ordered then
+/--
+For a field specification `𝓕`, and `φ` and `ψ` elements of `𝓕.FieldOp`, if
+`φ` and `ψ` are not time-ordered then
 
-  `timeContract φ ψ = 𝓢(𝓕 |>ₛ φ, 𝓕 |>ₛ ψ) • [anPart ψ, ofFieldOp φ]ₛ`. -/
-lemma timeContract_of_not_timeOrderRel_expand (φ ψ : 𝓕.FieldOp) (h : ¬ timeOrderRel φ ψ) :
-    timeContract φ ψ = 𝓢(𝓕 |>ₛ φ, 𝓕 |>ₛ ψ) • [anPart ψ, ofFieldOp φ]ₛ := by
+`timeContract φ ψ = 𝓢(𝓕 |>ₛ φ, 𝓕 |>ₛ ψ) • [anPart ψ, ofFieldOp φ]ₛ`.
+-/
+lemma timeContract_of_not_timeOrderRel_expand (φ ψ : 𝓕.FieldOp) (h : ¬ timeOrderRel φ ψ)
+    : timeContract φ ψ = 𝓢(𝓕 |>ₛ φ, 𝓕 |>ₛ ψ) • [anPart ψ, ofFieldOp φ]ₛ := by
   rw [timeContract_of_not_timeOrderRel _ _ h]
   rw [timeContract_of_timeOrderRel _ _ _]
   have h1 := Std.Total.total (r := 𝓕.timeOrderRel) φ ψ
   simp_all
 
-lemma timeContract_eq_superCommute (φ ψ : 𝓕.FieldOp) :
-    timeContract φ ψ = if timeOrderRel φ ψ then [anPart φ, ofFieldOp ψ]ₛ
-    else 𝓢(𝓕 |>ₛ φ, 𝓕 |>ₛ ψ) • [anPart ψ, ofFieldOp φ]ₛ := by
+lemma timeContract_eq_superCommute (φ ψ : 𝓕.FieldOp)
+    : timeContract φ ψ
+      = if timeOrderRel φ ψ then
+          [anPart φ, ofFieldOp ψ]ₛ
+        else
+          𝓢(𝓕 |>ₛ φ, 𝓕 |>ₛ ψ) • [anPart ψ, ofFieldOp φ]ₛ := by
   split_ifs
   · rename_i h
     rw [timeContract_of_timeOrderRel _ _ h]
   · rename_i h
     rw [timeContract_of_not_timeOrderRel_expand _ _ h]
 
-/-- For a field specification `𝓕`, and `φ` and `ψ` elements of `𝓕.FieldOp`, then
-  `timeContract φ ψ` is in the center of `𝓕.WickAlgebra`. -/
-lemma timeContract_mem_center (φ ψ : 𝓕.FieldOp) :
-    timeContract φ ψ ∈ Subalgebra.center ℂ 𝓕.WickAlgebra := by
+/--
+For a field specification `𝓕`, and `φ` and `ψ` elements of `𝓕.FieldOp`, then
+`timeContract φ ψ` is in the center of `𝓕.WickAlgebra`.
+-/
+lemma timeContract_mem_center (φ ψ : 𝓕.FieldOp)
+    : timeContract φ ψ ∈ Subalgebra.center ℂ 𝓕.WickAlgebra := by
   by_cases h : timeOrderRel φ ψ
   · rw [timeContract_of_timeOrderRel _ _ h]
     exact superCommute_anPart_ofFieldOp_mem_center φ ψ
@@ -94,8 +107,8 @@ lemma timeContract_mem_center (φ ψ : 𝓕.FieldOp) :
     have h1 := Std.Total.total (r := 𝓕.timeOrderRel) φ ψ
     simp_all
 
-lemma timeContract_zero_of_diff_grade (φ ψ : 𝓕.FieldOp) (h : (𝓕 |>ₛ φ) ≠ (𝓕 |>ₛ ψ)) :
-    timeContract φ ψ = 0 := by
+lemma timeContract_zero_of_diff_grade (φ ψ : 𝓕.FieldOp) (h : (𝓕 |>ₛ φ) ≠ (𝓕 |>ₛ ψ))
+    : timeContract φ ψ = 0 := by
   by_cases h1 : timeOrderRel φ ψ
   · rw [timeContract_of_timeOrderRel _ _ h1]
     rw [superCommute_anPart_ofFieldOpF_diff_grade_zero]
@@ -108,8 +121,7 @@ lemma timeContract_zero_of_diff_grade (φ ψ : 𝓕.FieldOp) (h : (𝓕 |>ₛ φ
     have ht := Std.Total.total (r := 𝓕.timeOrderRel) φ ψ
     simp_all
 
-lemma normalOrder_timeContract (φ ψ : 𝓕.FieldOp) :
-    𝓝(timeContract φ ψ) = 0 := by
+lemma normalOrder_timeContract (φ ψ : 𝓕.FieldOp) : 𝓝(timeContract φ ψ) = 0 := by
   by_cases h : timeOrderRel φ ψ
   · rw [timeContract_of_timeOrderRel _ _ h]
     simp
@@ -121,19 +133,18 @@ lemma normalOrder_timeContract (φ ψ : 𝓕.FieldOp) :
     rw [timeContract_of_timeOrderRel _ _ h1]
     simp
 
-lemma timeOrder_timeContract_eq_time_mid {φ ψ : 𝓕.FieldOp}
-    (h1 : timeOrderRel φ ψ) (h2 : timeOrderRel ψ φ) (a b : 𝓕.WickAlgebra) :
-    𝓣(a * timeContract φ ψ * b) = timeContract φ ψ * 𝓣(a * b) := by
+lemma timeOrder_timeContract_eq_time_mid
+    {φ ψ : 𝓕.FieldOp} (h1 : timeOrderRel φ ψ) (h2 : timeOrderRel ψ φ) (a b : 𝓕.WickAlgebra)
+    : 𝓣(a * timeContract φ ψ * b) = timeContract φ ψ * 𝓣(a * b) := by
   rw [timeContract_of_timeOrderRel _ _ h1]
   rw [ofFieldOp_eq_sum]
   simp only [map_sum, Finset.mul_sum, Finset.sum_mul]
   congr
   funext x
   match φ with
-  | .inAsymp φ =>
-    simp
+  | .inAsymp φ => simp
   | .position φ =>
-    simp only [anPart_position,]
+    simp only [anPart_position]
     apply timeOrder_superCommute_eq_time_mid _ _
     simp only [crAnTimeOrderRel, h1]
     simp [crAnTimeOrderRel, h2]
@@ -143,17 +154,16 @@ lemma timeOrder_timeContract_eq_time_mid {φ ψ : 𝓕.FieldOp}
     simp only [crAnTimeOrderRel, h1]
     simp [crAnTimeOrderRel, h2]
 
-lemma timeOrder_timeContract_eq_time_left {φ ψ : 𝓕.FieldOp}
-    (h1 : timeOrderRel φ ψ) (h2 : timeOrderRel ψ φ) (b : 𝓕.WickAlgebra) :
-    𝓣(timeContract φ ψ * b) = timeContract φ ψ * 𝓣(b) := by
+lemma timeOrder_timeContract_eq_time_left
+    {φ ψ : 𝓕.FieldOp} (h1 : timeOrderRel φ ψ) (h2 : timeOrderRel ψ φ) (b : 𝓕.WickAlgebra)
+    : 𝓣(timeContract φ ψ * b) = timeContract φ ψ * 𝓣(b) := by
   trans 𝓣(1 * timeContract φ ψ * b)
   simp only [one_mul]
   rw [timeOrder_timeContract_eq_time_mid h1 h2]
   simp
 
-lemma timeOrder_timeContract_ne_time {φ ψ : 𝓕.FieldOp}
-    (h1 : ¬ (timeOrderRel φ ψ ∧ timeOrderRel ψ φ)) :
-    𝓣(timeContract φ ψ) = 0 := by
+lemma timeOrder_timeContract_ne_time {φ ψ : 𝓕.FieldOp} (h1 : ¬(timeOrderRel φ ψ ∧ timeOrderRel ψ φ))
+    : 𝓣(timeContract φ ψ) = 0 := by
   by_cases h2 : timeOrderRel φ ψ
   · simp_all only [true_and]
     rw [timeContract_of_timeOrderRel _ _ h2]
@@ -162,8 +172,7 @@ lemma timeOrder_timeContract_ne_time {φ ψ : 𝓕.FieldOp}
     apply Finset.sum_eq_zero
     intro x hx
     match φ with
-    | .inAsymp φ =>
-      simp
+    | .inAsymp φ => simp
     | .position φ =>
       simp only [anPart_position]
       apply timeOrder_superCommute_ne_time
@@ -180,8 +189,7 @@ lemma timeOrder_timeContract_ne_time {φ ψ : 𝓕.FieldOp}
     apply Finset.sum_eq_zero
     intro x hx
     match ψ with
-    | .inAsymp ψ =>
-      simp
+    | .inAsymp ψ => simp
     | .position ψ =>
       simp only [anPart_position]
       apply timeOrder_superCommute_ne_time
@@ -191,25 +199,29 @@ lemma timeOrder_timeContract_ne_time {φ ψ : 𝓕.FieldOp}
       apply timeOrder_superCommute_ne_time
       simp_all [crAnTimeOrderRel]
 
-/-- The time contraction of an incoming asymptotic field with
-  another incoming asymptotic field is zero.
+/--
+The time contraction of an incoming asymptotic field with
+another incoming asymptotic field is zero.
 
-  This prevents Feynman diagrams where incoming vertices are
-  connected to incoming vertices. -/
-lemma timeContract_inAsymp_inAsymp (φ ψ : ((f : Field 𝓕) × AsymptoticLabel 𝓕 f) × Momentum) :
-    timeContract (.inAsymp φ) (.inAsymp ψ) = 0 := by
+This prevents Feynman diagrams where incoming vertices are
+connected to incoming vertices.
+-/
+lemma timeContract_inAsymp_inAsymp (φ ψ : ((f : Field 𝓕) × AsymptoticLabel 𝓕 f) × Momentum)
+    : timeContract (.inAsymp φ) (.inAsymp ψ) = 0 := by
   rw [timeContract_eq_superCommute]
   simp
 
-/-- The time contraction of an outgoing asymptotic field with
-  another outgoing asymptotic field is zero.
+/--
+The time contraction of an outgoing asymptotic field with
+another outgoing asymptotic field is zero.
 
-  This prevents Feynman diagrams where outgoing vertices are
-  connected to outgoing vertices. -/
-lemma timeContract_outAsymp_outAsymp (φ ψ : ((f : Field 𝓕) × AsymptoticLabel 𝓕 f) × Momentum) :
-    timeContract (.outAsymp φ) (.outAsymp ψ) = 0 := by
+This prevents Feynman diagrams where outgoing vertices are
+connected to outgoing vertices.
+-/
+lemma timeContract_outAsymp_outAsymp (φ ψ : ((f : Field 𝓕) × AsymptoticLabel 𝓕 f) × Momentum)
+    : timeContract (.outAsymp φ) (.outAsymp ψ) = 0 := by
   rw [timeContract_eq_superCommute, ← anPart_outAsymp_eq_ofFieldOp, ← anPart_outAsymp_eq_ofFieldOp]
-  simp [- anPart_outAsymp]
+  simp [-anPart_outAsymp]
 
 end WickAlgebra
 

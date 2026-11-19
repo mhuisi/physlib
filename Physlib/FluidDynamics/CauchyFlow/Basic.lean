@@ -50,12 +50,14 @@ namespace FluidDynamics
 
 -/
 
-/-- A fluid flow equipped with Cauchy stress and specific body-force fields.
+/--
+A fluid flow equipped with Cauchy stress and specific body-force fields.
 
 These are the additional independent fields needed to state a local momentum balance. The Cauchy
 stress represents contact forces, and the specific body force represents volumetric force per unit
 mass. Pressure and viscosity enter through stress laws rather than as redundant fields of
-`CauchyFlow` itself. -/
+`CauchyFlow` itself.
+-/
 structure CauchyFlow (d : ℕ) extends FluidFlow d where
   /-- The Cauchy stress tensor field. -/
   stress : StressTensor d

@@ -51,31 +51,37 @@ open ProbabilisticTheory UnitalPositiveLinearMap
 
 variable (Tx Ty Tz : TightBindingChain)
 
-/-- The volumetric quantum of the cube `Nx × Ny × Nz`: the product of the dimensional quanta of
+/--
+The volumetric quantum of the cube `Nx × Ny × Nz`: the product of the dimensional quanta of
 its axes, each axis carrying its own `C` (`uncertaintyRatio_alongX`, `uncertaintyRatio_alongY`,
-`uncertaintyRatio_alongZ`). -/
+`uncertaintyRatio_alongZ`).
+-/
 noncomputable def volQuantum : ℝ := Tx.dimQuantum * Ty.dimQuantum * Tz.dimQuantum
 
 variable {Tx Ty Tz}
 
 /-- The volumetric quantum vanishes iff some axis has `2` or `3` sites. -/
-lemma volQuantum_eq_zero_iff (hx : Tx.t ≠ 0) (hy : Ty.t ≠ 0) (hz : Tz.t ≠ 0)
-    (hNx : 2 ≤ Tx.N) (hNy : 2 ≤ Ty.N) (hNz : 2 ≤ Tz.N) :
-    volQuantum Tx Ty Tz = 0 ↔
-      (Tx.N = 2 ∨ Tx.N = 3) ∨ (Ty.N = 2 ∨ Ty.N = 3) ∨ (Tz.N = 2 ∨ Tz.N = 3) := by
+lemma volQuantum_eq_zero_iff
+    (hx : Tx.t ≠ 0) (hy : Ty.t ≠ 0) (hz : Tz.t ≠ 0) (hNx : 2 ≤ Tx.N) (hNy : 2 ≤ Ty.N)
+    (hNz : 2 ≤ Tz.N)
+    : volQuantum Tx Ty Tz = 0
+      ↔ (Tx.N = 2 ∨ Tx.N = 3) ∨ (Ty.N = 2 ∨ Ty.N = 3) ∨ (Tz.N = 2 ∨ Tz.N = 3) := by
   rw [volQuantum, mul_eq_zero, mul_eq_zero, Tx.dimQuantum_eq_zero_iff hx hNx,
     Ty.dimQuantum_eq_zero_iff hy hNy, Tz.dimQuantum_eq_zero_iff hz hNz, or_assoc]
 
 /-- From `4 × 4 × 4` on, the volumetric quantum is positive. -/
-lemma volQuantum_pos (hx : Tx.t ≠ 0) (hy : Ty.t ≠ 0) (hz : Tz.t ≠ 0)
-    (hNx : 4 ≤ Tx.N) (hNy : 4 ≤ Ty.N) (hNz : 4 ≤ Tz.N) : 0 < volQuantum Tx Ty Tz :=
-  mul_pos (mul_pos (Tx.dimQuantum_pos hx hNx) (Ty.dimQuantum_pos hy hNy))
-    (Tz.dimQuantum_pos hz hNz)
+lemma volQuantum_pos
+    (hx : Tx.t ≠ 0) (hy : Ty.t ≠ 0) (hz : Tz.t ≠ 0) (hNx : 4 ≤ Tx.N) (hNy : 4 ≤ Ty.N)
+    (hNz : 4 ≤ Tz.N)
+    : 0 < volQuantum Tx Ty Tz :=
+  mul_pos (mul_pos (Tx.dimQuantum_pos hx hNx) (Ty.dimQuantum_pos hy hNy)) (Tz.dimQuantum_pos hz hNz)
 
 /-- From `4 × 4 × 4` on, the volumetric quantum grows strictly along `x`. -/
-lemma volQuantum_lt_volQuantum_x {Tx' : TightBindingChain} (hx : Tx.t ≠ 0) (hx' : Tx'.t ≠ 0)
-    (hy : Ty.t ≠ 0) (hz : Tz.t ≠ 0) (hNx : 4 ≤ Tx.N) (hNy : 4 ≤ Ty.N) (hNz : 4 ≤ Tz.N)
-    (h : Tx.N < Tx'.N) : volQuantum Tx Ty Tz < volQuantum Tx' Ty Tz := by
+lemma volQuantum_lt_volQuantum_x
+    {Tx' : TightBindingChain}
+    (hx : Tx.t ≠ 0) (hx' : Tx'.t ≠ 0) (hy : Ty.t ≠ 0) (hz : Tz.t ≠ 0) (hNx : 4 ≤ Tx.N)
+    (hNy : 4 ≤ Ty.N) (hNz : 4 ≤ Tz.N) (h : Tx.N < Tx'.N)
+    : volQuantum Tx Ty Tz < volQuantum Tx' Ty Tz := by
   have := Ty.dimQuantum_pos hy hNy
   have := Tz.dimQuantum_pos hz hNz
   unfold volQuantum
@@ -83,9 +89,11 @@ lemma volQuantum_lt_volQuantum_x {Tx' : TightBindingChain} (hx : Tx.t ≠ 0) (hx
   exact dimQuantum_lt_dimQuantum hx hx' hNx h
 
 /-- From `4 × 4 × 4` on, the volumetric quantum grows strictly along `y`. -/
-lemma volQuantum_lt_volQuantum_y {Ty' : TightBindingChain} (hx : Tx.t ≠ 0) (hy : Ty.t ≠ 0)
-    (hy' : Ty'.t ≠ 0) (hz : Tz.t ≠ 0) (hNx : 4 ≤ Tx.N) (hNy : 4 ≤ Ty.N) (hNz : 4 ≤ Tz.N)
-    (h : Ty.N < Ty'.N) : volQuantum Tx Ty Tz < volQuantum Tx Ty' Tz := by
+lemma volQuantum_lt_volQuantum_y
+    {Ty' : TightBindingChain}
+    (hx : Tx.t ≠ 0) (hy : Ty.t ≠ 0) (hy' : Ty'.t ≠ 0) (hz : Tz.t ≠ 0) (hNx : 4 ≤ Tx.N)
+    (hNy : 4 ≤ Ty.N) (hNz : 4 ≤ Tz.N) (h : Ty.N < Ty'.N)
+    : volQuantum Tx Ty Tz < volQuantum Tx Ty' Tz := by
   have := Tx.dimQuantum_pos hx hNx
   have := Tz.dimQuantum_pos hz hNz
   unfold volQuantum
@@ -93,9 +101,11 @@ lemma volQuantum_lt_volQuantum_y {Ty' : TightBindingChain} (hx : Tx.t ≠ 0) (hy
   exact dimQuantum_lt_dimQuantum hy hy' hNy h
 
 /-- From `4 × 4 × 4` on, the volumetric quantum grows strictly along `z`. -/
-lemma volQuantum_lt_volQuantum_z {Tz' : TightBindingChain} (hx : Tx.t ≠ 0) (hy : Ty.t ≠ 0)
-    (hz : Tz.t ≠ 0) (hz' : Tz'.t ≠ 0) (hNx : 4 ≤ Tx.N) (hNy : 4 ≤ Ty.N) (hNz : 4 ≤ Tz.N)
-    (h : Tz.N < Tz'.N) : volQuantum Tx Ty Tz < volQuantum Tx Ty Tz' := by
+lemma volQuantum_lt_volQuantum_z
+    {Tz' : TightBindingChain}
+    (hx : Tx.t ≠ 0) (hy : Ty.t ≠ 0) (hz : Tz.t ≠ 0) (hz' : Tz'.t ≠ 0) (hNx : 4 ≤ Tx.N)
+    (hNy : 4 ≤ Ty.N) (hNz : 4 ≤ Tz.N) (h : Tz.N < Tz'.N)
+    : volQuantum Tx Ty Tz < volQuantum Tx Ty Tz' := by
   have := Tx.dimQuantum_pos hx hNx
   have := Ty.dimQuantum_pos hy hNy
   unfold volQuantum
@@ -103,9 +113,10 @@ lemma volQuantum_lt_volQuantum_z {Tz' : TightBindingChain} (hx : Tx.t ≠ 0) (hy
   exact dimQuantum_lt_dimQuantum hz hz' hNz h
 
 /-- From `4 × 4 × 4` on, the volumetric quantum stays below `(√(π² / 3 - 2) - 1)³`. -/
-lemma volQuantum_lt (hx : Tx.t ≠ 0) (hy : Ty.t ≠ 0) (hz : Tz.t ≠ 0)
-    (hNx : 4 ≤ Tx.N) (hNy : 4 ≤ Ty.N) (hNz : 4 ≤ Tz.N) :
-    volQuantum Tx Ty Tz < (√(Real.pi ^ 2 / 3 - 2) - 1) ^ 3 := by
+lemma volQuantum_lt
+    (hx : Tx.t ≠ 0) (hy : Ty.t ≠ 0) (hz : Tz.t ≠ 0) (hNx : 4 ≤ Tx.N) (hNy : 4 ≤ Ty.N)
+    (hNz : 4 ≤ Tz.N)
+    : volQuantum Tx Ty Tz < (√(Real.pi ^ 2 / 3 - 2) - 1) ^ 3 := by
   have := Tx.dimQuantum_pos hx hNx
   have := Ty.dimQuantum_pos hy hNy
   have := Tz.dimQuantum_pos hz hNz

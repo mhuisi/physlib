@@ -78,31 +78,20 @@ lemma neg_fst (H : TwoHiggsDoublet) : (-H).Φ1 = -H.Φ1 := rfl
 lemma neg_snd (H : TwoHiggsDoublet) : (-H).Φ2 = -H.Φ2 := rfl
 
 instance : AddCommGroup TwoHiggsDoublet where
-  add_assoc H1 H2 H3 := by
-    ext <;> simp [add_assoc]
-  zero_add H := by
-    ext <;> simp
-  add_zero H := by
-    ext <;> simp
+  add_assoc H1 H2 H3 := by ext <;> simp [add_assoc]
+  zero_add H := by ext <;> simp
+  add_zero H := by ext <;> simp
   nsmul := nsmulRec
-  add_comm H1 H2 := by
-    ext <;> simp [add_comm]
+  add_comm H1 H2 := by ext <;> simp [add_comm]
   zsmul := zsmulRec
-  neg_add_cancel H := by
-    ext <;> simp [neg_add_cancel]
+  neg_add_cancel H := by ext <;> simp [neg_add_cancel]
 
 instance : Module ℂ TwoHiggsDoublet where
-  smul_add c H1 H2 := by
-    ext <;> simp [smul_add]
-  add_smul c1 c2 H := by
-    ext <;> simp [add_smul]
-  one_smul H := by
-    ext <;> simp [one_smul]
-  mul_smul c1 c2 H := by
-    ext <;> simp [mul_smul]
-  smul_zero c := by
-    ext <;> simp [smul_zero]
-  zero_smul H := by
-    ext <;> simp [zero_smul]
+  smul_add c H1 H2 := by ext <;> simp [smul_add]
+  add_smul c1 c2 H := by ext <;> simp [add_smul]
+  one_smul H := by ext <;> simp [one_smul]
+  mul_smul c1 c2 H := by ext <;> simp [mul_smul]
+  smul_zero c := by ext <;> simp [smul_zero]
+  zero_smul H := by ext <;> simp [zero_smul]
 
 end TwoHiggsDoublet

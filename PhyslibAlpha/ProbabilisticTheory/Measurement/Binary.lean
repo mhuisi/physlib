@@ -42,10 +42,11 @@ variable {E : Type*} [OrderUnitSpace E]
 
 /-! ## A. Binary measurements -/
 
-/-- The effect of each outcome of the binary measurement of `e`: `e` for `true`, its complement
-for `false`. -/
-def binaryAtom (e : Effect E) (b : Bool) : Effect E :=
-  if b then e else complement e
+/--
+The effect of each outcome of the binary measurement of `e`: `e` for `true`, its complement
+for `false`.
+-/
+def binaryAtom (e : Effect E) (b : Bool) : Effect E := if b then e else complement e
 
 lemma sum_binaryAtom (e : Effect E) : ∑ b, (binaryAtom e b : E) = 1 := by
   simp [binaryAtom, complement]
@@ -57,13 +58,13 @@ noncomputable def binaryMeasurement (e : Effect F) : Measurement Bool F :=
   Measurement.ofAtoms (binaryAtom e) (sum_binaryAtom e)
 
 @[simp]
-lemma binaryMeasurement_true (e : Effect F) (h : MeasurableSet {true}) :
-    binaryMeasurement e {true} h = e :=
+lemma binaryMeasurement_true (e : Effect F) (h : MeasurableSet {true})
+    : binaryMeasurement e {true} h = e :=
   Subtype.ext (Measurement.coe_ofAtoms_singleton _ _ _ h)
 
 @[simp]
-lemma binaryMeasurement_false (e : Effect F) (h : MeasurableSet {false}) :
-    binaryMeasurement e {false} h = complement e :=
+lemma binaryMeasurement_false (e : Effect F) (h : MeasurableSet {false})
+    : binaryMeasurement e {false} h = complement e :=
   Subtype.ext (Measurement.coe_ofAtoms_singleton _ _ _ h)
 
 end Effect

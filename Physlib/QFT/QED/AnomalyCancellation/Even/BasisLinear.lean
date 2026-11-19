@@ -110,18 +110,24 @@ We have `2 * n.succ` charges, which we split up in the following ways:
 
 -/
 
-/-- The inclusion of `Fin n.succ` into `Fin (n.succ + n.succ)` via the first `n.succ`,
-  casted into `Fin (2 * n.succ)`. -/
+/--
+The inclusion of `Fin n.succ` into `Fin (n.succ + n.succ)` via the first `n.succ`,
+casted into `Fin (2 * n.succ)`.
+-/
 def evenFst (j : Fin n.succ) : Fin (2 * n.succ) :=
   Fin.cast (split_equal n.succ) (Fin.castAdd n.succ j)
 
-/-- The inclusion of `Fin n.succ` into `Fin (n.succ + n.succ)` via the second `n.succ`,
-  casted into `Fin (2 * n.succ)`. -/
+/--
+The inclusion of `Fin n.succ` into `Fin (n.succ + n.succ)` via the second `n.succ`,
+casted into `Fin (2 * n.succ)`.
+-/
 def evenSnd (j : Fin n.succ) : Fin (2 * n.succ) :=
   Fin.cast (split_equal n.succ) (Fin.natAdd n.succ j)
 
-lemma ext_even (S T : Fin (2 * n.succ) → ℚ) (h1 : ∀ i, S (evenFst i) = T (evenFst i))
-    (h2 : ∀ i, S (evenSnd i) = T (evenSnd i)) : S = T := by
+lemma ext_even
+    (S T : Fin (2 * n.succ) → ℚ)
+    (h1 : ∀ i, S (evenFst i) = T (evenFst i)) (h2 : ∀ i, S (evenSnd i) = T (evenSnd i))
+    : S = T := by
   funext i
   by_cases hi : i.val < n.succ
   · exact h1 ⟨i, hi⟩
@@ -130,8 +136,8 @@ lemma ext_even (S T : Fin (2 * n.succ) → ℚ) (h1 : ∀ i, S (evenFst i) = T (
       omega
     exact h3 ▸ h2 _
 
-lemma sum_even (S : Fin (2 * n.succ) → ℚ) :
-    ∑ i, S i = ∑ i : Fin n.succ, ((S ∘ evenFst) i + (S ∘ evenSnd) i) := by
+lemma sum_even (S : Fin (2 * n.succ) → ℚ)
+    : ∑ i, S i = ∑ i : Fin n.succ, ((S ∘ evenFst) i + (S ∘ evenSnd) i) := by
   rw [← Equiv.sum_comp (Fin.castOrderIso (split_equal n.succ)).toEquiv S, Fin.sum_univ_add,
     Finset.sum_add_distrib]
   rfl
@@ -142,30 +148,38 @@ lemma sum_even (S : Fin (2 * n.succ) → ℚ) :
 
 -/
 
-lemma n_cond₂ (n : ℕ) : 1 + ((n + n) + 1) = 2 * n.succ := by
-  linarith
+lemma n_cond₂ (n : ℕ) : 1 + ((n + n) + 1) = 2 * n.succ := by linarith
 
-/-- The inclusion of `Fin n` into `Fin (1 + (n + n + 1))` via the first `n`,
-  casted into `Fin (2 * n.succ)`. -/
-def evenShiftFst (j : Fin n) : Fin (2 * n.succ) := Fin.cast (n_cond₂ n)
-  (Fin.natAdd 1 (Fin.castAdd 1 (Fin.castAdd n j)))
+/--
+The inclusion of `Fin n` into `Fin (1 + (n + n + 1))` via the first `n`,
+casted into `Fin (2 * n.succ)`.
+-/
+def evenShiftFst (j : Fin n) : Fin (2 * n.succ) :=
+  Fin.cast (n_cond₂ n) (Fin.natAdd 1 (Fin.castAdd 1 (Fin.castAdd n j)))
 
-/-- The inclusion of `Fin n` into `Fin (1 + (n + n + 1))` via the second `n`,
-  casted into `Fin (2 * n.succ)`. -/
-def evenShiftSnd (j : Fin n) : Fin (2 * n.succ) := Fin.cast (n_cond₂ n)
-  (Fin.natAdd 1 (Fin.castAdd 1 (Fin.natAdd n j)))
+/--
+The inclusion of `Fin n` into `Fin (1 + (n + n + 1))` via the second `n`,
+casted into `Fin (2 * n.succ)`.
+-/
+def evenShiftSnd (j : Fin n) : Fin (2 * n.succ) :=
+  Fin.cast (n_cond₂ n) (Fin.natAdd 1 (Fin.castAdd 1 (Fin.natAdd n j)))
 
-/-- The element of `Fin (1 + (n + n + 1))` corresponding to the first `1`,
-  casted into `Fin (2 * n.succ)`. -/
+/--
+The element of `Fin (1 + (n + n + 1))` corresponding to the first `1`,
+casted into `Fin (2 * n.succ)`.
+-/
 def evenShiftZero : Fin (2 * n.succ) := (Fin.cast (n_cond₂ n) (Fin.castAdd ((n + n) + 1) 0))
 
-/-- The element of `Fin (1 + (n + n + 1))` corresponding to the second `1`,
-  casted into `Fin (2 * n.succ)`. -/
+/--
+The element of `Fin (1 + (n + n + 1))` corresponding to the second `1`,
+casted into `Fin (2 * n.succ)`.
+-/
 def evenShiftLast : Fin (2 * n.succ) := (Fin.cast (n_cond₂ n) (Fin.natAdd 1 (Fin.natAdd (n + n) 0)))
 
-lemma sum_evenShift (S : Fin (2 * n.succ) → ℚ) :
-    ∑ i, S i = S evenShiftZero + S evenShiftLast +
-    ∑ i : Fin n, ((S ∘ evenShiftFst) i + (S ∘ evenShiftSnd) i) := by
+lemma sum_evenShift (S : Fin (2 * n.succ) → ℚ)
+    : ∑ i, S i
+      = S evenShiftZero + S evenShiftLast
+        + ∑ i : Fin n, ((S ∘ evenShiftFst) i + (S ∘ evenShiftSnd) i) := by
   have h1 : ∑ i, S i = ∑ i : Fin (1 + ((n + n) + 1)), S (Fin.cast (n_cond₂ n) i) := by
     rw [Finset.sum_equiv (Fin.castOrderIso (n_cond₂ n)).symm.toEquiv]
     · intro i
@@ -183,7 +197,7 @@ lemma sum_evenShift (S : Fin (2 * n.succ) → ℚ) :
 -/
 lemma evenShiftZero_eq_evenFst_zero : @evenShiftZero n = evenFst 0 := rfl
 
-lemma evenShiftLast_eq_evenSnd_last: @evenShiftLast n = evenSnd (Fin.last n) := by
+lemma evenShiftLast_eq_evenSnd_last : @evenShiftLast n = evenSnd (Fin.last n) := by
   rw [Fin.ext_iff]
   simp only [succ_eq_add_one, evenShiftLast, Fin.isValue, Fin.val_cast, Fin.val_natAdd,
     Fin.val_eq_zero, add_zero, evenSnd, Fin.natAdd_last, Fin.val_last]
@@ -215,15 +229,13 @@ namespace Unshifted
 
 set_option backward.isDefEq.respectTransparency false in
 /-- The unshifted part of the basis as charges. -/
-def basisAsCharges (j : Fin n.succ) : (PureU1 (2 * n.succ)).Charges :=
-  fun i =>
+def basisAsCharges (j : Fin n.succ) : (PureU1 (2 * n.succ)).Charges := fun i =>
   if i = evenFst j then
     1
+  else if i = evenSnd j then
+    -1
   else
-    if i = evenSnd j then
-      - 1
-    else
-      0
+    0
 
 /-!
 
@@ -236,8 +248,7 @@ lemma basis_on_evenFst_self (j : Fin n.succ) : basisAsCharges j (evenFst j) = 1 
   simp [basisAsCharges]
 
 set_option backward.isDefEq.respectTransparency false in
-lemma basis_on_evenFst_other {k j : Fin n.succ} (h : k ≠ j) :
-    basisAsCharges k (evenFst j) = 0 := by
+lemma basis_on_evenFst_other {k j : Fin n.succ} (h : k ≠ j) : basisAsCharges k (evenFst j) = 0 := by
   simp only [basisAsCharges, succ_eq_add_one, evenFst, evenSnd]
   split
   · rename_i h1
@@ -255,13 +266,14 @@ lemma basis_on_evenFst_other {k j : Fin n.succ} (h : k ≠ j) :
     · rfl
 
 set_option backward.isDefEq.respectTransparency false in
-lemma basis_on_other {k : Fin n.succ} {j : Fin (2 * n.succ)} (h1 : j ≠ evenFst k)
-    (h2 : j ≠ evenSnd k) : basisAsCharges k j = 0 := by
+lemma basis_on_other
+    {k : Fin n.succ} {j : Fin (2 * n.succ)} (h1 : j ≠ evenFst k) (h2 : j ≠ evenSnd k)
+    : basisAsCharges k j = 0 := by
   simp only [basisAsCharges, ite_eq_right h1, ite_eq_right h2]
 
 set_option backward.isDefEq.respectTransparency false in
-lemma basis_evenSnd_eq_neg_evenFst (j i : Fin n.succ) :
-    basisAsCharges j (evenSnd i) = - basisAsCharges j (evenFst i) := by
+lemma basis_evenSnd_eq_neg_evenFst (j i : Fin n.succ)
+    : basisAsCharges j (evenSnd i) = - basisAsCharges j (evenFst i) := by
   simp only [basisAsCharges, succ_eq_add_one, evenSnd, evenFst]
   split <;> split
   any_goals split
@@ -278,7 +290,7 @@ lemma basis_evenSnd_eq_neg_evenFst (j i : Fin n.succ) :
     simp_all
   all_goals omega
 
-lemma basis_on_evenSnd_self (j : Fin n.succ) : basisAsCharges j (evenSnd j) = - 1 := by
+lemma basis_on_evenSnd_self (j : Fin n.succ) : basisAsCharges j (evenSnd j) = -1 := by
   rw [basis_evenSnd_eq_neg_evenFst, basis_on_evenFst_self]
 
 lemma basis_on_evenSnd_other {k j : Fin n.succ} (h : k ≠ j) : basisAsCharges k (evenSnd j) = 0 := by
@@ -300,8 +312,7 @@ lemma basis_linearACC (j : Fin n.succ) : (accGrav (2 * n.succ)) (basisAsCharges 
 
 -/
 set_option backward.isDefEq.respectTransparency false in
-lemma basis_accCube (j : Fin n.succ) :
-    accCube (2 * n.succ) (basisAsCharges j) = 0 := by
+lemma basis_accCube (j : Fin n.succ) : accCube (2 * n.succ) (basisAsCharges j) = 0 := by
   rw [accCube_explicit, sum_even]
   refine Finset.sum_eq_zero fun i _ => ?_
   simp only [succ_eq_add_one, Function.comp_apply, basis_evenSnd_eq_neg_evenFst]
@@ -315,11 +326,13 @@ lemma basis_accCube (j : Fin n.succ) :
 
 /-- The unshifted part of the basis as `LinSols`. -/
 @[simps!]
-def basis (j : Fin n.succ) : (PureU1 (2 * n.succ)).LinSols :=
-  ⟨basisAsCharges j, by
+def basis (j : Fin n.succ) : (PureU1 (2 * n.succ)).LinSols := ⟨
+  basisAsCharges j,
+  by
     intro i
     match i with
-    | ⟨0, _⟩ => exact basis_linearACC j⟩
+    | ⟨0, _⟩ => exact basis_linearACC j
+⟩
 
 /-!
 
@@ -336,16 +349,16 @@ def planeCharges (f : Fin n.succ → ℚ) : (PureU1 (2 * n.succ)).Charges := ∑
 
 -/
 
-lemma planeCharges_evenFst (f : Fin n.succ → ℚ) (j : Fin n.succ) :
-    planeCharges f (evenFst j) = f j := by
+lemma planeCharges_evenFst (f : Fin n.succ → ℚ) (j : Fin n.succ)
+    : planeCharges f (evenFst j) = f j := by
   rw [planeCharges, sum_of_charges]
   simp only [succ_eq_add_one, HSMul.hSMul, SMul.smul]
   rw [Fintype.sum_eq_single j]
   · simp [basis_on_evenFst_self]
   · exact fun k hkj => mul_eq_zero_of_right (f k) (basis_on_evenFst_other hkj)
 
-lemma planeCharges_evenSnd (f : Fin n.succ → ℚ) (j : Fin n.succ) :
-    planeCharges f (evenSnd j) = - f j := by
+lemma planeCharges_evenSnd (f : Fin n.succ → ℚ) (j : Fin n.succ)
+    : planeCharges f (evenSnd j) = - f j := by
   rw [planeCharges, sum_of_charges]
   simp only [succ_eq_add_one, HSMul.hSMul, SMul.smul]
   rw [Fintype.sum_eq_single j]
@@ -353,8 +366,8 @@ lemma planeCharges_evenSnd (f : Fin n.succ → ℚ) (j : Fin n.succ) :
   · exact fun k hkj => mul_eq_zero_of_right (f k) (basis_on_evenSnd_other hkj)
 
 set_option backward.isDefEq.respectTransparency false in
-lemma planeCharges_evenSnd_evenFst (f : Fin n.succ → ℚ) :
-    planeCharges f ∘ evenSnd = - planeCharges f ∘ evenFst := by
+lemma planeCharges_evenSnd_evenFst (f : Fin n.succ → ℚ)
+    : planeCharges f ∘ evenSnd = - planeCharges f ∘ evenFst := by
   funext j
   simp [planeCharges_evenFst, planeCharges_evenSnd]
 
@@ -365,8 +378,8 @@ lemma planeCharges_evenSnd_evenFst (f : Fin n.succ → ℚ) :
 -/
 
 set_option backward.isDefEq.respectTransparency false in
-lemma planeCharges_linearACC (f : Fin n.succ → ℚ) :
-    (accGrav (2 * n.succ)) (planeCharges f) = 0 := by
+lemma planeCharges_linearACC (f : Fin n.succ → ℚ)
+    : (accGrav (2 * n.succ)) (planeCharges f) = 0 := by
   simp [accGrav, sum_even, planeCharges_evenSnd, planeCharges_evenFst]
 
 set_option backward.isDefEq.respectTransparency false in
@@ -419,8 +432,8 @@ lemma basis_linear_independent : LinearIndependent ℚ (@basis n) := by
 
 -/
 
-lemma vectorLikeEven_in_span (S : (PureU1 (2 * n.succ)).LinSols)
-    (hS : VectorLikeEven S.val) : ∃ (M : (FamilyPermutations (2 * n.succ)).group),
+lemma vectorLikeEven_in_span (S : (PureU1 (2 * n.succ)).LinSols) (hS : VectorLikeEven S.val)
+    : ∃ (M : (FamilyPermutations (2 * n.succ)).group),
       (FamilyPermutations (2 * n.succ)).linSolRep M S ∈ Submodule.span ℚ (Set.range basis) := by
   use (Tuple.sort S.val).symm
   change sortAFL S ∈ Submodule.span ℚ (Set.range basis)
@@ -444,8 +457,6 @@ lemma vectorLikeEven_in_span (S : (PureU1 (2 * n.succ)).LinSols)
     rw [h]
     rfl
 
-
-
 end Unshifted
 
 /-!
@@ -458,15 +469,13 @@ namespace Shifted
 
 set_option backward.isDefEq.respectTransparency false in
 /-- The shifted part of the basis as charges. -/
-def basisAsCharges (j : Fin n) : (PureU1 (2 * n.succ)).Charges :=
-  fun i =>
+def basisAsCharges (j : Fin n) : (PureU1 (2 * n.succ)).Charges := fun i =>
   if i = evenShiftFst j then
     1
+  else if i = evenShiftSnd j then
+    -1
   else
-    if i = evenShiftSnd j then
-      - 1
-    else
-      0
+    0
 /-!
 
 ### C.2. Components of the vectors
@@ -478,21 +487,22 @@ lemma basis_on_evenShiftFst_self (j : Fin n) : basisAsCharges j (evenShiftFst j)
   simp [basisAsCharges]
 
 set_option backward.isDefEq.respectTransparency false in
-lemma basis_on_other {k : Fin n} {j : Fin (2 * n.succ)} (h1 : j ≠ evenShiftFst k)
-    (h2 : j ≠ evenShiftSnd k) : basisAsCharges k j = 0 := by
+lemma basis_on_other
+    {k : Fin n} {j : Fin (2 * n.succ)} (h1 : j ≠ evenShiftFst k) (h2 : j ≠ evenShiftSnd k)
+    : basisAsCharges k j = 0 := by
   simp only [basisAsCharges, ite_eq_right h1, ite_eq_right h2]
 
-lemma basis_on_evenShiftFst_other {k j : Fin n} (h : k ≠ j) :
-    basisAsCharges k (evenShiftFst j) = 0 := by
+lemma basis_on_evenShiftFst_other {k j : Fin n} (h : k ≠ j)
+    : basisAsCharges k (evenShiftFst j) = 0 := by
   rw [ne_eq, Fin.ext_iff] at h
-  refine basis_on_other ?_ ?_ <;>
-    simp only [ne_eq, Fin.ext_iff, evenShiftFst, evenShiftSnd, Fin.val_cast, Fin.val_castAdd,
-      Fin.val_natAdd] <;>
-    omega
+  refine basis_on_other ?_ ?_
+    <;> simp only [ne_eq, Fin.ext_iff, evenShiftFst, evenShiftSnd, Fin.val_cast, Fin.val_castAdd,
+      Fin.val_natAdd]
+    <;> omega
 
 set_option backward.isDefEq.respectTransparency false in
-lemma basis_evenShiftSnd_eq_neg_evenShiftFst (j i : Fin n) :
-    basisAsCharges j (evenShiftSnd i) = - basisAsCharges j (evenShiftFst i) := by
+lemma basis_evenShiftSnd_eq_neg_evenShiftFst (j i : Fin n)
+    : basisAsCharges j (evenShiftSnd i) = - basisAsCharges j (evenShiftFst i) := by
   simp only [basisAsCharges, succ_eq_add_one, evenShiftSnd, evenShiftFst]
   split <;> split
   any_goals split
@@ -509,28 +519,27 @@ lemma basis_evenShiftSnd_eq_neg_evenShiftFst (j i : Fin n) :
     rename_i h3
     rw [Fin.ext_iff] at h3
     simp_all only [Fin.val_natAdd, Fin.val_castAdd, Fin.val_addNat, not_true_eq_false]
-  all_goals
-    omega
+  all_goals omega
 
-lemma basis_on_evenShiftSnd_self (j : Fin n) : basisAsCharges j (evenShiftSnd j) = - 1 := by
+lemma basis_on_evenShiftSnd_self (j : Fin n) : basisAsCharges j (evenShiftSnd j) = -1 := by
   rw [basis_evenShiftSnd_eq_neg_evenShiftFst, basis_on_evenShiftFst_self]
 
-lemma basis_on_evenShiftSnd_other {k j : Fin n} (h : k ≠ j) :
-    basisAsCharges k (evenShiftSnd j) = 0 := by
+lemma basis_on_evenShiftSnd_other {k j : Fin n} (h : k ≠ j)
+    : basisAsCharges k (evenShiftSnd j) = 0 := by
   rw [basis_evenShiftSnd_eq_neg_evenShiftFst, basis_on_evenShiftFst_other h]
   rfl
 
 lemma basis_on_evenShiftZero (j : Fin n) : basisAsCharges j evenShiftZero = 0 := by
-  refine basis_on_other ?_ ?_ <;>
-    simp only [ne_eq, Fin.ext_iff, evenShiftZero, evenShiftFst, evenShiftSnd, Fin.val_cast,
-      Fin.val_castAdd, Fin.val_natAdd, Fin.val_eq_zero] <;>
-    omega
+  refine basis_on_other ?_ ?_
+    <;> simp only [ne_eq, Fin.ext_iff, evenShiftZero, evenShiftFst, evenShiftSnd, Fin.val_cast,
+      Fin.val_castAdd, Fin.val_natAdd, Fin.val_eq_zero]
+    <;> omega
 
 lemma basis_on_evenShiftLast (j : Fin n) : basisAsCharges j evenShiftLast = 0 := by
-  refine basis_on_other ?_ ?_ <;>
-    simp only [ne_eq, Fin.ext_iff, evenShiftLast, evenShiftFst, evenShiftSnd, Fin.val_cast,
-      Fin.val_castAdd, Fin.val_natAdd, Fin.val_eq_zero, add_zero] <;>
-    omega
+  refine basis_on_other ?_ ?_
+    <;> simp only [ne_eq, Fin.ext_iff, evenShiftLast, evenShiftFst, evenShiftSnd, Fin.val_cast,
+      Fin.val_castAdd, Fin.val_natAdd, Fin.val_eq_zero, add_zero]
+    <;> omega
 
 /-!
 
@@ -550,8 +559,7 @@ lemma basis_linearACC (j : Fin n) : (accGrav (2 * n.succ)) (basisAsCharges j) = 
 -/
 
 set_option backward.isDefEq.respectTransparency false in
-lemma basis_accCube (j : Fin n) :
-    accCube (2 * n.succ) (basisAsCharges j) = 0 := by
+lemma basis_accCube (j : Fin n) : accCube (2 * n.succ) (basisAsCharges j) = 0 := by
   rw [accCube_explicit, sum_evenShift]
   rw [basis_on_evenShiftLast, basis_on_evenShiftZero]
   simp only [ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, zero_pow, add_zero, Function.comp_apply,
@@ -568,11 +576,13 @@ lemma basis_accCube (j : Fin n) :
 
 /-- The shifted part of the basis as `LinSols`. -/
 @[simps!]
-def basis (j : Fin n) : (PureU1 (2 * n.succ)).LinSols :=
-  ⟨basisAsCharges j, by
+def basis (j : Fin n) : (PureU1 (2 * n.succ)).LinSols := ⟨
+  basisAsCharges j,
+  by
     intro i
     match i with
-    | ⟨0, _⟩ => exact basis_linearACC j⟩
+    | ⟨0, _⟩ => exact basis_linearACC j
+⟩
 
 /-!
 
@@ -589,16 +599,16 @@ def planeCharges (f : Fin n → ℚ) : (PureU1 (2 * n.succ)).Charges := ∑ i, f
 
 -/
 
-lemma planeCharges_evenShiftFst (f : Fin n → ℚ) (j : Fin n) :
-    planeCharges f (evenShiftFst j) = f j := by
+lemma planeCharges_evenShiftFst (f : Fin n → ℚ) (j : Fin n)
+    : planeCharges f (evenShiftFst j) = f j := by
   rw [planeCharges, sum_of_charges]
   simp only [HSMul.hSMul, SMul.smul]
   rw [Fintype.sum_eq_single j]
   · simp [basis_on_evenShiftFst_self]
   · exact fun k hkj => mul_eq_zero_of_right (f k) (basis_on_evenShiftFst_other hkj)
 
-lemma planeCharges_evenShiftSnd (f : Fin n → ℚ) (j : Fin n) :
-    planeCharges f (evenShiftSnd j) = - f j := by
+lemma planeCharges_evenShiftSnd (f : Fin n → ℚ) (j : Fin n)
+    : planeCharges f (evenShiftSnd j) = - f j := by
   rw [planeCharges, sum_of_charges]
   simp only [HSMul.hSMul, SMul.smul]
   rw [Fintype.sum_eq_single j]
@@ -643,8 +653,8 @@ lemma planeCharges_zero (f : Fin n → ℚ) (h : planeCharges f = 0) : ∀ i, f 
 
 -/
 
-lemma planeCharges_in_span (f : Fin n → ℚ) :
-    planeCharges f ∈ Submodule.span ℚ (Set.range basisAsCharges) := by
+lemma planeCharges_in_span (f : Fin n → ℚ)
+    : planeCharges f ∈ Submodule.span ℚ (Set.range basisAsCharges) := by
   exact (Submodule.mem_span_range_iff_exists_fun ℚ).mpr ⟨f, rfl⟩
 
 /-!
@@ -681,9 +691,9 @@ lemma basis_linear_independent : LinearIndependent ℚ (@basis n) := by
 
 -/
 
-lemma smul_basisAsCharges_in_span (S : (PureU1 (2 * n.succ)).LinSols) (j : Fin n) :
-    (S.val (evenShiftSnd j) - S.val (evenShiftFst j)) • basisAsCharges j ∈
-    Submodule.span ℚ (Set.range basisAsCharges) := by
+lemma smul_basisAsCharges_in_span (S : (PureU1 (2 * n.succ)).LinSols) (j : Fin n)
+    : (S.val (evenShiftSnd j) - S.val (evenShiftFst j)) • basisAsCharges j
+      ∈ Submodule.span ℚ (Set.range basisAsCharges) := by
   exact Submodule.smul_mem _ _ (Submodule.subset_span ⟨j, rfl⟩)
 
 /-!
@@ -693,12 +703,17 @@ lemma smul_basisAsCharges_in_span (S : (PureU1 (2 * n.succ)).LinSols) (j : Fin n
 -/
 
 set_option backward.isDefEq.respectTransparency false in
-/-- Swapping the elements evenShiftFst j and evenShiftSnd j is equivalent to
-  adding a vector basisAsCharges j. -/
-lemma swap_as_add {S S' : (PureU1 (2 * n.succ)).LinSols} (j : Fin n)
-    (hS : ((FamilyPermutations (2 * n.succ)).linSolRep
-    (Equiv.swap (evenShiftFst j) (evenShiftSnd j))) S = S') :
-    S'.val = S.val + (S.val (evenShiftSnd j) - S.val (evenShiftFst j)) • basisAsCharges j := by
+/--
+Swapping the elements evenShiftFst j and evenShiftSnd j is equivalent to
+adding a vector basisAsCharges j.
+-/
+lemma swap_as_add
+    {S S' : (PureU1 (2 * n.succ)).LinSols} (j : Fin n)
+    (hS
+      : ((FamilyPermutations (2 * n.succ)).linSolRep (Equiv.swap (evenShiftFst j) (evenShiftSnd j)))
+          S
+        = S')
+    : S'.val = S.val + (S.val (evenShiftSnd j) - S.val (evenShiftFst j)) • basisAsCharges j := by
   funext i
   rw [← hS, FamilyPermutations_anomalyFreeLinear_apply]
   by_cases hi : i = evenShiftFst j
@@ -707,10 +722,9 @@ lemma swap_as_add {S S' : (PureU1 (2 * n.succ)).LinSols} (j : Fin n)
   · by_cases hi2 : i = evenShiftSnd j
     · simp [HSMul.hSMul, hi2, basis_on_evenShiftSnd_self, Equiv.swap_apply_right]
     · simp only [succ_eq_add_one, Equiv.invFun_as_coe, HSMul.hSMul,
-      ACCSystemCharges.chargesAddCommMonoid_add, ACCSystemCharges.chargesModule_smul]
+        ACCSystemCharges.chargesAddCommMonoid_add, ACCSystemCharges.chargesModule_smul]
       rw [basis_on_other hi hi2]
       aesop
-
 
 end Shifted
 
@@ -721,10 +735,10 @@ end Shifted
 -/
 
 set_option backward.isDefEq.respectTransparency false in
-lemma unshifted_unshifted_shifted_accCube (g : Fin n.succ → ℚ) (j : Fin n) :
-    accCubeTriLinSymm (Unshifted.planeCharges g) (Unshifted.planeCharges g)
-      (Shifted.basisAsCharges j)
-    = g (j.succ) ^ 2 - g (j.castSucc) ^ 2 := by
+lemma unshifted_unshifted_shifted_accCube (g : Fin n.succ → ℚ) (j : Fin n)
+    : accCubeTriLinSymm (Unshifted.planeCharges g) (Unshifted.planeCharges g)
+        (Shifted.basisAsCharges j)
+      = g (j.succ) ^ 2 - g (j.castSucc) ^ 2 := by
   simp only [succ_eq_add_one, accCubeTriLinSymm, TriLinearSymm.mk₃_toFun_apply_apply]
   refine (sum_evenShift _).trans ?_
   rw [Shifted.basis_on_evenShiftZero, Shifted.basis_on_evenShiftLast]
@@ -739,9 +753,10 @@ lemma unshifted_unshifted_shifted_accCube (g : Fin n.succ → ℚ) (j : Fin n) :
     simp only [mul_zero, add_zero]
 
 set_option backward.isDefEq.respectTransparency false in
-lemma shifted_shifted_unshifted_accCube (g : Fin n → ℚ) (j : Fin n.succ) :
-    accCubeTriLinSymm (Shifted.planeCharges g) (Shifted.planeCharges g) (Unshifted.basisAsCharges j)
-    = (Shifted.planeCharges g (evenFst j))^2 - (Shifted.planeCharges g (evenSnd j))^2 := by
+lemma shifted_shifted_unshifted_accCube (g : Fin n → ℚ) (j : Fin n.succ)
+    : accCubeTriLinSymm (Shifted.planeCharges g) (Shifted.planeCharges g)
+        (Unshifted.basisAsCharges j)
+      = (Shifted.planeCharges g (evenFst j)) ^ 2 - (Shifted.planeCharges g (evenSnd j)) ^ 2 := by
   simp only [succ_eq_add_one, accCubeTriLinSymm, TriLinearSymm.mk₃_toFun_apply_apply]
   refine (sum_even _).trans ?_
   simp only [Function.comp_apply]
@@ -786,16 +801,16 @@ def Pa (f : Fin n.succ → ℚ) (g : Fin n → ℚ) : (PureU1 (2 * n.succ)).Char
 -/
 
 set_option backward.isDefEq.respectTransparency false in
-lemma Pa_evenShiftFst (f : Fin n.succ → ℚ) (g : Fin n → ℚ) (j : Fin n) :
-    Pa f g (evenShiftFst j) = f j.succ + g j := by
+lemma Pa_evenShiftFst (f : Fin n.succ → ℚ) (g : Fin n → ℚ) (j : Fin n)
+    : Pa f g (evenShiftFst j) = f j.succ + g j := by
   rw [Pa]
   simp only [ACCSystemCharges.chargesAddCommMonoid_add]
   rw [Shifted.planeCharges_evenShiftFst, evenShiftFst_eq_evenFst_succ,
     Unshifted.planeCharges_evenFst]
 
 set_option backward.isDefEq.respectTransparency false in
-lemma Pa_evenShiftSnd (f : Fin n.succ → ℚ) (g : Fin n → ℚ) (j : Fin n) :
-    Pa f g (evenShiftSnd j) = - f j.castSucc - g j := by
+lemma Pa_evenShiftSnd (f : Fin n.succ → ℚ) (g : Fin n → ℚ) (j : Fin n)
+    : Pa f g (evenShiftSnd j) = - f j.castSucc - g j := by
   rw [Pa]
   simp only [ACCSystemCharges.chargesAddCommMonoid_add]
   rw [Shifted.planeCharges_evenShiftSnd, evenShiftSnd_eq_evenSnd_castSucc,
@@ -810,8 +825,8 @@ lemma Pa_evenShitZero (f : Fin n.succ → ℚ) (g : Fin n → ℚ) : Pa f g (eve
     Unshifted.planeCharges_evenFst, add_zero]
 
 set_option backward.isDefEq.respectTransparency false in
-lemma Pa_evenShiftLast (f : Fin n.succ → ℚ) (g : Fin n → ℚ) :
-    Pa f g (evenShiftLast) = - f (Fin.last n) := by
+lemma Pa_evenShiftLast (f : Fin n.succ → ℚ) (g : Fin n → ℚ)
+    : Pa f g (evenShiftLast) = - f (Fin.last n) := by
   rw [Pa]
   simp only [ACCSystemCharges.chargesAddCommMonoid_add]
   rw [Shifted.planeCharges_evenShiftLast, evenShiftLast_eq_evenSnd_last,
@@ -823,8 +838,7 @@ lemma Pa_evenShiftLast (f : Fin n.succ → ℚ) (g : Fin n → ℚ) :
 
 -/
 
-lemma Pa_zero (f : Fin n.succ → ℚ) (g : Fin n → ℚ) (h : Pa f g = 0) :
-    ∀ i, f i = 0 := by
+lemma Pa_zero (f : Fin n.succ → ℚ) (g : Fin n → ℚ) (h : Pa f g = 0) : ∀ i, f i = 0 := by
   have h₃ := Pa_evenShitZero f g
   rw [h] at h₃
   change 0 = f 0 at h₃
@@ -846,8 +860,7 @@ lemma Pa_zero (f : Fin n.succ → ℚ) (g : Fin n → ℚ) (h : Pa f g = 0) :
     exact right_eq_add.mp h1
   exact hinduc i.val i.prop
 
-lemma Pa_zero! (f : Fin n.succ → ℚ) (g : Fin n → ℚ) (h : Pa f g = 0) :
-    ∀ i, g i = 0 := by
+lemma Pa_zero! (f : Fin n.succ → ℚ) (g : Fin n → ℚ) (h : Pa f g = 0) : ∀ i, g i = 0 := by
   have hf := Pa_zero f g h
   rw [Pa, Unshifted.planeCharges] at h
   simp only [succ_eq_add_one, hf, zero_smul, sum_const_zero, zero_add] at h
@@ -859,11 +872,10 @@ lemma Pa_zero! (f : Fin n.succ → ℚ) (g : Fin n → ℚ) (h : Pa f g = 0) :
 
 -/
 /-- A point in the span of the whole basis. -/
-def Pa' (f : (Fin n.succ) ⊕ (Fin n) → ℚ) : (PureU1 (2 * n.succ)).LinSols :=
-    ∑ i, f i • basisa i
+def Pa' (f : (Fin n.succ) ⊕ (Fin n) → ℚ) : (PureU1 (2 * n.succ)).LinSols := ∑ i, f i • basisa i
 
-lemma Pa'_P'_P!' (f : (Fin n.succ) ⊕ (Fin n) → ℚ) :
-    Pa' f = Unshifted.planeLinSols (f ∘ Sum.inl) + Shifted.planeLinSols (f ∘ Sum.inr) := by
+lemma Pa'_P'_P!' (f : (Fin n.succ) ⊕ (Fin n) → ℚ)
+    : Pa' f = Unshifted.planeLinSols (f ∘ Sum.inl) + Shifted.planeLinSols (f ∘ Sum.inr) := by
   exact Fintype.sum_sum_type _
 
 /-!
@@ -879,7 +891,8 @@ lemma basisa_linear_independent : LinearIndependent ℚ (@basisa n) := by
   have h1 : (Pa' f).val = 0 := congrArg _ h
   rw [Pa'_P'_P!'] at h1
   simp only [ACCSystemLinear.linSolsAddCommMonoid_add_val, Unshifted.planeLinSols_val,
-    Shifted.planeLinSols_val] at h1
+      Shifted.planeLinSols_val]
+    at h1
   have hf := Pa_zero (f ∘ Sum.inl) (f ∘ Sum.inr) h1
   have hg := Pa_zero! (f ∘ Sum.inl) (f ∘ Sum.inr) h1
   rintro (i | i)
@@ -904,8 +917,8 @@ lemma Pa'_eq (f f' : (Fin n.succ) ⊕ (Fin n) → ℚ) : Pa' f = Pa' f' ↔ f = 
     linarith [h2 i]
   · rw [h]
 
-lemma Pa'_elim_eq_iff (g g' : Fin n.succ → ℚ) (f f' : Fin n → ℚ) :
-    Pa' (Sum.elim g f) = Pa' (Sum.elim g' f') ↔ Pa g f = Pa g' f' := by
+lemma Pa'_elim_eq_iff (g g' : Fin n.succ → ℚ) (f f' : Fin n → ℚ)
+    : Pa' (Sum.elim g f) = Pa' (Sum.elim g' f') ↔ Pa g f = Pa g' f' := by
   refine Iff.intro (fun h => ?_) (fun h => ?_)
   · rw [Pa'_eq, Sum.elim_eq_iff] at h
     rw [h.left, h.right]
@@ -915,8 +928,7 @@ lemma Pa'_elim_eq_iff (g g' : Fin n.succ → ℚ) (f f' : Fin n → ℚ) :
       Unshifted.planeLinSols_val, Shifted.planeLinSols_val]
     exact h
 
-lemma Pa_eq (g g' : Fin n.succ → ℚ) (f f' : Fin n → ℚ) :
-    Pa g f = Pa g' f' ↔ g = g' ∧ f = f' := by
+lemma Pa_eq (g g' : Fin n.succ → ℚ) (f f' : Fin n → ℚ) : Pa g f = Pa g' f' ↔ g = g' ∧ f = f' := by
   rw [← Pa'_elim_eq_iff, ← Sum.elim_eq_iff]
   exact Pa'_eq _ _
 
@@ -926,8 +938,8 @@ lemma Pa_eq (g g' : Fin n.succ → ℚ) (f f' : Fin n → ℚ) :
 
 -/
 
-lemma basisa_card : Fintype.card ((Fin n.succ) ⊕ (Fin n)) =
-    Module.finrank ℚ (PureU1 (2 * n.succ)).LinSols := by
+lemma basisa_card
+    : Fintype.card ((Fin n.succ) ⊕ (Fin n)) = Module.finrank ℚ (PureU1 (2 * n.succ)).LinSols := by
   erw [BasisLinear.finrank_AnomalyFreeLinear]
   simp only [Fintype.card_sum, Fintype.card_fin, mul_eq]
   exact split_odd n
@@ -939,8 +951,7 @@ lemma basisa_card : Fintype.card ((Fin n.succ) ⊕ (Fin n)) =
 -/
 
 /-- The basis formed out of our `basisa` vectors. -/
-noncomputable def basisaAsBasis :
-    Basis (Fin (succ n) ⊕ Fin n) ℚ (PureU1 (2 * succ n)).LinSols :=
+noncomputable def basisaAsBasis : Basis (Fin (succ n) ⊕ Fin n) ℚ (PureU1 (2 * succ n)).LinSols :=
   basisOfLinearIndependentOfCardEqFinrank (@basisa_linear_independent n) basisa_card
 
 /-!
@@ -949,13 +960,14 @@ noncomputable def basisaAsBasis :
 
 -/
 
-lemma span_basis (S : (PureU1 (2 * n.succ)).LinSols) :
-    ∃ (g : Fin n.succ → ℚ) (f : Fin n → ℚ),
+lemma span_basis (S : (PureU1 (2 * n.succ)).LinSols)
+    : ∃ (g : Fin n.succ → ℚ) (f : Fin n → ℚ),
       S.val = Unshifted.planeCharges g + Shifted.planeCharges f := by
   have h := (Submodule.mem_span_range_iff_exists_fun ℚ).mp (Basis.mem_span basisaAsBasis S)
   obtain ⟨f, hf⟩ := h
   simp only [succ_eq_add_one, basisaAsBasis, coe_basisOfLinearIndependentOfCardEqFinrank,
-    Fintype.sum_sum_type] at hf
+      Fintype.sum_sum_type]
+    at hf
   change Unshifted.planeLinSols _ + Shifted.planeLinSols _ = S at hf
   use f ∘ Sum.inl
   use f ∘ Sum.inr
@@ -969,16 +981,23 @@ lemma span_basis (S : (PureU1 (2 * n.succ)).LinSols) :
 ### F.1. Relation under permutations
 
 -/
-lemma span_basis_swap! {S : (PureU1 (2 * n.succ)).LinSols} (j : Fin n)
-    (hS : ((FamilyPermutations (2 * n.succ)).linSolRep
-    (Equiv.swap (evenShiftFst j) (evenShiftSnd j))) S = S') (g : Fin n.succ → ℚ) (f : Fin n → ℚ)
-    (h : S.val = Unshifted.planeCharges g + Shifted.planeCharges f) :
-    ∃ (g' : Fin n.succ → ℚ) (f' : Fin n → ℚ),
-      S'.val = Unshifted.planeCharges g' + Shifted.planeCharges f' ∧
-      Shifted.planeCharges f' = Shifted.planeCharges f +
-      (S.val (evenShiftSnd j) - S.val (evenShiftFst j)) • Shifted.basisAsCharges j ∧ g' = g := by
-  let X := Shifted.planeCharges f +
-    (S.val (evenShiftSnd j) - S.val (evenShiftFst j)) • Shifted.basisAsCharges j
+lemma span_basis_swap!
+    {S : (PureU1 (2 * n.succ)).LinSols} (j : Fin n)
+    (hS
+      : ((FamilyPermutations (2 * n.succ)).linSolRep (Equiv.swap (evenShiftFst j) (evenShiftSnd j)))
+          S
+        = S')
+    (g : Fin n.succ → ℚ) (f : Fin n → ℚ)
+    (h : S.val = Unshifted.planeCharges g + Shifted.planeCharges f)
+    : ∃ (g' : Fin n.succ → ℚ) (f' : Fin n → ℚ),
+      S'.val = Unshifted.planeCharges g' + Shifted.planeCharges f'
+        ∧ Shifted.planeCharges f'
+          = Shifted.planeCharges f
+            + (S.val (evenShiftSnd j) - S.val (evenShiftFst j)) • Shifted.basisAsCharges j
+        ∧ g' = g := by
+  let X :=
+    Shifted.planeCharges f
+      + (S.val (evenShiftSnd j) - S.val (evenShiftFst j)) • Shifted.basisAsCharges j
   have hX : X ∈ Submodule.span ℚ (Set.range (Shifted.basisAsCharges)) := by
     apply Submodule.add_mem
     exact (Shifted.planeCharges_in_span f)

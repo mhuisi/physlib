@@ -76,29 +76,40 @@ namespace UnitalPositiveLinearMap
 
 variable {E}
 
-/-- The state `ω` decomposes into pure states: some regular probability measure on the pure states
-represents it. -/
+/--
+The state `ω` decomposes into pure states: some regular probability measure on the pure states
+represents it.
+-/
 def HasPureDecomposition (ω : 𝓢[ℝ, E]) : Prop :=
-  Choquet.HasBoundaryDecomposition (fun f (φ : 𝓢[ℝ, E]) => φ f)
-    (fun φ : PureState E => toState φ.1) ω
+  Choquet.HasBoundaryDecomposition
+    (fun f (φ : 𝓢[ℝ, E]) => φ f)
+    (fun φ : PureState E => toState φ.1)
+    ω
 
-/-- The state `ω` decomposes uniquely into pure states: exactly one regular probability measure on
-the pure states represents it. -/
+/--
+The state `ω` decomposes uniquely into pure states: exactly one regular probability measure on
+the pure states represents it.
+-/
 def HasUniquePureDecomposition (ω : 𝓢[ℝ, E]) : Prop :=
-  Choquet.HasUniqueBoundaryDecomposition (fun f (φ : 𝓢[ℝ, E]) => φ f)
-    (fun φ : PureState E => toState φ.1) ω
+  Choquet.HasUniqueBoundaryDecomposition
+    (fun f (φ : 𝓢[ℝ, E]) => φ f)
+    (fun φ : PureState E => toState φ.1)
+    ω
 
 end UnitalPositiveLinearMap
 
-/-- The state space of `E` is a simplex: every state is a unique mixture of pure states, given by
+/--
+The state space of `E` is a simplex: every state is a unique mixture of pure states, given by
 a regular probability measure on the pure states. In finite dimension this is the convex hull of
-affinely independent pure states, every state having unique barycentric coordinates. -/
+affinely independent pure states, every state having unique barycentric coordinates.
+-/
 def IsSimplexStateSpace : Prop :=
-  Choquet.IsSimplexRepresentation (fun f (φ : 𝓢[ℝ, E]) => φ f)
-    (fun φ : PureState E => toState φ.1)
+  Choquet.IsSimplexRepresentation (fun f (φ : 𝓢[ℝ, E]) => φ f) (fun φ : PureState E => toState φ.1)
 
-/-- The state space of `E` is a Bauer simplex: a simplex whose pure states form a closed, hence
-compact, set. -/
+/--
+The state space of `E` is a Bauer simplex: a simplex whose pure states form a closed, hence
+compact, set.
+-/
 def IsBauerSimplexStateSpace : Prop :=
   IsSimplexStateSpace E ∧ IsClosed {ω : stateSpace E | (toState ω).IsPure}
 
@@ -114,44 +125,58 @@ variable {E : Type*} [ArchimedeanOrderUnitSpace E]
 
 namespace PureState
 
-lemma integrable (μ : Measure (PureState E)) [IsFiniteMeasure μ] (f : E) :
-    Integrable (fun ω : PureState E => toState ω.1 f) μ :=
+lemma integrable (μ : Measure (PureState E)) [IsFiniteMeasure μ] (f : E)
+    : Integrable (fun ω : PureState E => toState ω.1 f) μ :=
   .of_bound (evalPure f).continuous.aestronglyMeasurable (ArchimedeanOrderUnitSpace.orderUnitNorm f)
     (.of_forall fun _ => UnitalPositiveLinearMap.abs_apply_le_orderUnitNorm _ f)
 
 /-- Integration of the observables against a finite measure on the pure states. -/
 noncomputable def toPositive (μ : Measure (PureState E)) [IsFiniteMeasure μ] : E →ₚ[ℝ] ℝ :=
-  .mk₀ ⟨⟨fun f => ∫ ω, toState ω.1 f ∂μ, fun f g => by
-      simp only [map_add]
-      exact integral_add (integrable μ f) (integrable μ g)⟩, fun c f => by
-      simp only [map_smul, smul_eq_mul, RingHom.id_apply]
-      exact integral_const_mul c _⟩
+  .mk₀
+    ⟨
+      ⟨
+        fun f => ∫ ω, toState ω.1 f ∂μ,
+        fun f g => by
+          simp only [map_add]
+          exact integral_add (integrable μ f) (integrable μ g)
+      ⟩,
+      fun c f => by
+        simp only [map_smul, smul_eq_mul, RingHom.id_apply]
+        exact integral_const_mul c _
+    ⟩
     fun _ hf => integral_nonneg fun _ => map_nonneg _ hf
 
-@[simp] lemma toPositive_apply (μ : Measure (PureState E)) [IsFiniteMeasure μ] (f : E) :
-    toPositive μ f = ∫ ω, toState ω.1 f ∂μ := rfl
+@[simp]
+lemma toPositive_apply (μ : Measure (PureState E)) [IsFiniteMeasure μ] (f : E)
+    : toPositive μ f = ∫ ω, toState ω.1 f ∂μ :=
+  rfl
 
-lemma toPositive_add (μ ν : Measure (PureState E)) [IsFiniteMeasure μ] [IsFiniteMeasure ν] :
-    toPositive (μ + ν) = toPositive μ + toPositive ν :=
+lemma toPositive_add (μ ν : Measure (PureState E)) [IsFiniteMeasure μ] [IsFiniteMeasure ν]
+    : toPositive (μ + ν) = toPositive μ + toPositive ν :=
   PositiveLinearMap.ext fun f => integral_add_measure (integrable μ f) (integrable ν f)
 
-lemma toPositive_mono {μ ν : Measure (PureState E)} [IsFiniteMeasure μ] [IsFiniteMeasure ν]
-    (h : μ ≤ ν) : toPositive μ ≤ toPositive ν := fun f hf =>
+lemma toPositive_mono
+    {μ ν : Measure (PureState E)} [IsFiniteMeasure μ] [IsFiniteMeasure ν] (h : μ ≤ ν)
+    : toPositive μ ≤ toPositive ν := fun f hf =>
   integral_mono_measure h (.of_forall fun _ => map_nonneg _ hf) (integrable ν f)
 
-lemma toPositive_one (μ : Measure (PureState E)) [IsFiniteMeasure μ] :
-    toPositive μ 1 = μ.real Set.univ := by
+lemma toPositive_one (μ : Measure (PureState E)) [IsFiniteMeasure μ]
+    : toPositive μ 1 = μ.real Set.univ := by
   simp
 
-lemma measure_univ_eq_of_toPositive_eq {μ ν : Measure (PureState E)} [IsFiniteMeasure μ]
-    [IsFiniteMeasure ν] (hμν : toPositive μ = toPositive ν) : μ Set.univ = ν Set.univ := by
+lemma measure_univ_eq_of_toPositive_eq
+    {μ ν : Measure (PureState E)} [IsFiniteMeasure μ] [IsFiniteMeasure ν]
+    (hμν : toPositive μ = toPositive ν)
+    : μ Set.univ = ν Set.univ := by
   have := congrArg (· 1) hμν
   simp only [toPositive_one, measureReal_def] at this
   exact (ENNReal.toReal_eq_toReal_iff' (measure_ne_top _ _) (measure_ne_top _ _)).1 this
 
-lemma toPositive_smul_eq {μ ν : Measure (PureState E)} [IsFiniteMeasure μ] [IsFiniteMeasure ν]
+lemma toPositive_smul_eq
+    {μ ν : Measure (PureState E)} [IsFiniteMeasure μ] [IsFiniteMeasure ν]
     {c : ℝ≥0∞} [IsFiniteMeasure (c • μ)] [IsFiniteMeasure (c • ν)]
-    (hμν : toPositive μ = toPositive ν) : toPositive (c • μ) = toPositive (c • ν) :=
+    (hμν : toPositive μ = toPositive ν)
+    : toPositive (c • μ) = toPositive (c • ν) :=
   PositiveLinearMap.ext fun f => by
     have hf := congrArg (· f) hμν
     simp only [toPositive_apply] at hf
@@ -170,10 +195,12 @@ section Simplex
 variable (h : IsSimplexStateSpace E)
 include h
 
-/-- Every positive functional is integration against a finite regular measure on the pure
-states. -/
-lemma exists_toPositive_eq (α : E →ₚ[ℝ] ℝ) :
-    ∃ (μ : Measure (PureState E)) (_ : IsFiniteMeasure μ), μ.Regular ∧ toPositive μ = α := by
+/--
+Every positive functional is integration against a finite regular measure on the pure
+states.
+-/
+lemma exists_toPositive_eq (α : E →ₚ[ℝ] ℝ)
+    : ∃ (μ : Measure (PureState E)) (_ : IsFiniteMeasure μ), μ.Regular ∧ toPositive μ = α := by
   rcases (map_nonneg α OrderUnitSpace.one_nonneg).eq_or_lt with h0 | h0
   · refine ⟨0, inferInstance, inferInstance, PositiveLinearMap.ext fun f => ?_⟩
     simpa using (UnitalPositiveLinearMap.apply_eq_zero_of_apply_one_eq_zero h0.symm f).symm
@@ -186,21 +213,26 @@ lemma exists_toPositive_eq (α : E →ₚ[ℝ] ℝ) :
   rw [UnitalPositiveLinearMap.normalize_apply, mul_inv_cancel_left₀ h0.ne']
 
 /-- Regular probability measures on the pure states with the same integrals are equal. -/
-lemma eq_of_toPositive_eq_of_isProbabilityMeasure {μ ν : Measure (PureState E)} [μ.Regular]
-    [ν.Regular] [IsProbabilityMeasure μ] [IsProbabilityMeasure ν]
-    (hμν : toPositive μ = toPositive ν) : μ = ν := by
+lemma eq_of_toPositive_eq_of_isProbabilityMeasure
+    {μ ν : Measure (PureState E)}
+    [μ.Regular] [ν.Regular] [IsProbabilityMeasure μ] [IsProbabilityMeasure ν]
+    (hμν : toPositive μ = toPositive ν)
+    : μ = ν := by
   have hpos : 0 < toPositive μ 1 := by simp
   obtain ⟨_, -, huniq⟩ := h (UnitalPositiveLinearMap.normalize (toPositive μ) hpos)
-  have hrep (κ : Measure (PureState E)) [IsProbabilityMeasure κ] (hκ : toPositive κ = toPositive μ)
-      (f : E) :
-      ∫ ω, toState ω.1 f ∂κ = UnitalPositiveLinearMap.normalize (toPositive μ) hpos f := by
+  have hrep
+      (κ : Measure (PureState E)) [IsProbabilityMeasure κ]
+      (hκ : toPositive κ = toPositive μ) (f : E)
+      : ∫ ω, toState ω.1 f ∂κ = UnitalPositiveLinearMap.normalize (toPositive μ) hpos f := by
     simp [← hκ]
   exact (huniq μ ⟨inferInstance, inferInstance, hrep μ rfl⟩).trans
     (huniq ν ⟨inferInstance, inferInstance, hrep ν hμν.symm⟩).symm
 
 /-- Finite regular measures on the pure states with the same integrals are equal. -/
-lemma eq_of_toPositive_eq {μ ν : Measure (PureState E)} [μ.Regular] [ν.Regular]
-    [IsFiniteMeasure μ] [IsFiniteMeasure ν] (hμν : toPositive μ = toPositive ν) : μ = ν := by
+lemma eq_of_toPositive_eq
+    {μ ν : Measure (PureState E)} [μ.Regular] [ν.Regular] [IsFiniteMeasure μ] [IsFiniteMeasure ν]
+    (hμν : toPositive μ = toPositive ν)
+    : μ = ν := by
   have hmass := measure_univ_eq_of_toPositive_eq hμν
   rcases eq_or_ne (μ Set.univ) 0 with h0 | h0
   · rw [Measure.measure_univ_eq_zero.1 h0, Measure.measure_univ_eq_zero.1 (hmass.symm.trans h0)]
@@ -216,8 +248,10 @@ lemma eq_of_toPositive_eq {μ ν : Measure (PureState E)} [μ.Regular] [ν.Regul
   simpa only [smul_smul, ENNReal.inv_mul_cancel hc0 hc, one_smul] using congrArg (c⁻¹ • ·) e
 
 /-- Unique decomposition makes the order on positive functionals that of measures. -/
-lemma le_of_toPositive_le {μ θ : Measure (PureState E)} [μ.Regular] [θ.Regular]
-    [IsFiniteMeasure μ] [IsFiniteMeasure θ] (hle : toPositive μ ≤ toPositive θ) : μ ≤ θ := by
+lemma le_of_toPositive_le
+    {μ θ : Measure (PureState E)} [μ.Regular] [θ.Regular] [IsFiniteMeasure μ] [IsFiniteMeasure θ]
+    (hle : toPositive μ ≤ toPositive θ)
+    : μ ≤ θ := by
   obtain ⟨ρ, hρf, hρ, hρθ⟩ := exists_toPositive_eq h (PositiveLinearMap.subOfLE _ _ hle)
   have := hρ
   rw [← eq_of_toPositive_eq h (μ := μ + ρ) (ν := θ)

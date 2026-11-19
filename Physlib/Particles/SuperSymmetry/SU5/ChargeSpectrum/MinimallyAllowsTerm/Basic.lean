@@ -73,8 +73,10 @@ it allows the term.
 We prove properties of charge spectra which minimally allow potential terms.
 
 -/
-/-- A charge spectrum `x : ChargeSpectrum 𝓩` is said to minimally allow
-  the potential term `T` if it allows `T` and no strict subset of it allows `T`. -/
+/--
+A charge spectrum `x : ChargeSpectrum 𝓩` is said to minimally allow
+the potential term `T` if it allows `T` and no strict subset of it allows `T`.
+-/
 def MinimallyAllowsTerm (x : ChargeSpectrum 𝓩) (T : PotentialTerm) : Prop :=
   ∀ y ∈ x.powerset, y = x ↔ y.AllowsTerm T
 
@@ -110,8 +112,8 @@ If a charge spectrum `x` has a subset which minimally allows a term `T`, then `x
 
 -/
 
-lemma allowsTerm_of_has_minimallyAllowsTerm_subset
-    (hx : ∃ y ∈ powerset x, y.MinimallyAllowsTerm T) : x.AllowsTerm T := by
+lemma allowsTerm_of_has_minimallyAllowsTerm_subset (hx : ∃ y ∈ powerset x, y.MinimallyAllowsTerm T)
+    : x.AllowsTerm T := by
   obtain ⟨y, hy⟩ := hx
   simp only [mem_powerset_iff_subset] at hy
   apply allowsTerm_mono hy.1
@@ -126,8 +128,8 @@ own powerset which allows `T` is itself.
 
 -/
 
-lemma minimallyAllowsTerm_iff_powerset_filter_eq :
-    x.MinimallyAllowsTerm T ↔ x.powerset.filter (fun y => y.AllowsTerm T) = {x} := by
+lemma minimallyAllowsTerm_iff_powerset_filter_eq
+    : x.MinimallyAllowsTerm T ↔ x.powerset.filter (fun y => y.AllowsTerm T) = {x} := by
   constructor
   · intro h
     ext y
@@ -162,8 +164,8 @@ the number of members of its powerset which allow `T` is one.
 
 -/
 
-lemma minimallyAllowsTerm_iff_powerset_countP_eq_one :
-    x.MinimallyAllowsTerm T ↔ x.powerset.val.countP (fun y => y.AllowsTerm T) = 1 := by
+lemma minimallyAllowsTerm_iff_powerset_countP_eq_one
+    : x.MinimallyAllowsTerm T ↔ x.powerset.val.countP (fun y => y.AllowsTerm T) = 1 := by
   rw [minimallyAllowsTerm_iff_powerset_filter_eq]
   constructor
   · intro h
@@ -178,8 +180,7 @@ lemma minimallyAllowsTerm_iff_powerset_countP_eq_one :
       exact Eq.symm (Multiset.countP_eq_card_filter (fun y => y.AllowsTerm T) x.powerset.val)
     rw [Multiset.card_eq_one] at h1
     obtain ⟨a, ha⟩ := h1
-    have haMem : a ∈ Multiset.filter (fun y => y.AllowsTerm T) x.powerset.val := by
-      simp [ha]
+    have haMem : a ∈ Multiset.filter (fun y => y.AllowsTerm T) x.powerset.val := by simp [ha]
     simp at haMem
     have hxMem : x ∈ Multiset.filter (fun y => y.AllowsTerm T) x.powerset.val := by
       simpa using allowsTerm_mono haMem.1 haMem.2
@@ -196,8 +197,8 @@ If a charge spectrum `x` allows a term `T`, then it has a subset which minimally
 
 -/
 
-lemma subset_minimallyAllowsTerm_of_allowsTerm
-    (hx : x.AllowsTerm T) : ∃ y ∈ powerset x, y.MinimallyAllowsTerm T := by
+lemma subset_minimallyAllowsTerm_of_allowsTerm (hx : x.AllowsTerm T)
+    : ∃ y ∈ powerset x, y.MinimallyAllowsTerm T := by
   have hPresent : (x.powerset.filter (fun y => y.AllowsTerm T)) ≠ ∅ := by
     rw [← @Finset.nonempty_iff_ne_empty]
     use x
@@ -223,10 +224,11 @@ which minimally allows the term.
 
 -/
 
-lemma allowsTerm_iff_subset_minimallyAllowsTerm :
-    x.AllowsTerm T ↔ ∃ y ∈ powerset x, y.MinimallyAllowsTerm T :=
-  ⟨fun h => subset_minimallyAllowsTerm_of_allowsTerm h, fun h =>
-    allowsTerm_of_has_minimallyAllowsTerm_subset h⟩
+lemma allowsTerm_iff_subset_minimallyAllowsTerm
+    : x.AllowsTerm T ↔ ∃ y ∈ powerset x, y.MinimallyAllowsTerm T := ⟨
+  fun h => subset_minimallyAllowsTerm_of_allowsTerm h,
+  fun h => allowsTerm_of_has_minimallyAllowsTerm_subset h
+⟩
 
 /-!
 
@@ -237,12 +239,10 @@ degree of `T`.
 
 -/
 
-lemma card_le_degree_of_minimallyAllowsTerm (h : x.MinimallyAllowsTerm T) :
-    x.card ≤ T.degree := by
-  obtain ⟨y, y_mem_power, y_card,y_present⟩ :=
+lemma card_le_degree_of_minimallyAllowsTerm (h : x.MinimallyAllowsTerm T) : x.card ≤ T.degree := by
+  obtain ⟨y, y_mem_power, y_card, y_present⟩ :=
     subset_card_le_degree_allowsTerm_of_allowsTerm (allowsTerm_of_minimallyAllowsTerm h)
-  have hy : y ∈ x.powerset.filter (fun y => y.AllowsTerm T) := by
-    simp_all
+  have hy : y ∈ x.powerset.filter (fun y => y.AllowsTerm T) := by simp_all
   rw [minimallyAllowsTerm_iff_powerset_filter_eq] at h
   rw [h] at hy
   simp at hy
@@ -267,13 +267,12 @@ We show that any charge spectrum which minimally allows a term `T` is of the for
 
 -/
 
-lemma eq_allowsTermForm_of_minimallyAllowsTerm (h1 : x.MinimallyAllowsTerm T) :
-    ∃ a b c, x = allowsTermForm a b c T := by
-  obtain ⟨a, b, c, h2, h3⟩ := allowsTermForm_subset_allowsTerm_of_allowsTerm
-    (allowsTerm_of_minimallyAllowsTerm h1)
+lemma eq_allowsTermForm_of_minimallyAllowsTerm (h1 : x.MinimallyAllowsTerm T)
+    : ∃ a b c, x = allowsTermForm a b c T := by
+  obtain ⟨a, b, c, h2, h3⟩ :=
+    allowsTermForm_subset_allowsTerm_of_allowsTerm (allowsTerm_of_minimallyAllowsTerm h1)
   use a, b, c
-  have hy : allowsTermForm a b c T ∈ x.powerset.filter (fun y => y.AllowsTerm T) := by
-    simp_all
+  have hy : allowsTermForm a b c T ∈ x.powerset.filter (fun y => y.AllowsTerm T) := by simp_all
   rw [minimallyAllowsTerm_iff_powerset_filter_eq] at h1
   rw [h1] at hy
   simp at hy
@@ -288,9 +287,8 @@ We show that charge spectra of the form `allowsTermForm a b c T` minimally allow
 
 -/
 open PotentialTerm in
-lemma allowsTermForm_minimallyAllowsTerm {a b c : 𝓩} {T : PotentialTerm}
-    (hT : T ≠ W1 ∧ T ≠ W2) :
-    MinimallyAllowsTerm (allowsTermForm a b c T) T := by
+lemma allowsTermForm_minimallyAllowsTerm {a b c : 𝓩} {T : PotentialTerm} (hT : T ≠ W1 ∧ T ≠ W2)
+    : MinimallyAllowsTerm (allowsTermForm a b c T) T := by
   simp [MinimallyAllowsTerm]
   intro y hy
   constructor

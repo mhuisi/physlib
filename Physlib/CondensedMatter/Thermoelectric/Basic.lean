@@ -97,11 +97,15 @@ compensation points.
 
 -/
 
-/-- A thermoelectric material in the linear-response regime, characterized by
-its four transport coefficients. -/
+/--
+A thermoelectric material in the linear-response regime, characterized by
+its four transport coefficients.
+-/
 structure ThermoelectricMaterial where
-  /-- The Seebeck coefficient `S`: the voltage developed per unit temperature
-  difference. Its sign records the dominant carrier type. -/
+  /--
+  The Seebeck coefficient `S`: the voltage developed per unit temperature
+  difference. Its sign records the dominant carrier type.
+  -/
   S : ℝ
   /-- The electrical conductivity `σ`. -/
   σ : ℝ
@@ -125,8 +129,7 @@ namespace ThermoelectricMaterial
 def powerFactor (M : ThermoelectricMaterial) : ℝ := M.σ * M.S ^ 2
 
 /-- The power factor is positive when the Seebeck coefficient is nonzero. -/
-lemma powerFactor_pos {M : ThermoelectricMaterial} (hS : M.S ≠ 0) :
-    0 < M.powerFactor := by
+lemma powerFactor_pos {M : ThermoelectricMaterial} (hS : M.S ≠ 0) : 0 < M.powerFactor := by
   unfold powerFactor
   -- `positivity` does not look through the projection, so name the field.
   have hσ := M.σ_pos
@@ -138,13 +141,14 @@ lemma powerFactor_pos {M : ThermoelectricMaterial} (hS : M.S ≠ 0) :
 
 -/
 
-/-- The total thermal conductivity `κl + κe` of a material, the sum of the
-lattice (phonon) and electronic contributions. -/
+/--
+The total thermal conductivity `κl + κe` of a material, the sum of the
+lattice (phonon) and electronic contributions.
+-/
 def totalThermalConductivity (M : ThermoelectricMaterial) : ℝ := M.κl + M.κe
 
 /-- The total thermal conductivity is positive. -/
-lemma totalThermalConductivity_pos (M : ThermoelectricMaterial) :
-    0 < M.totalThermalConductivity :=
+lemma totalThermalConductivity_pos (M : ThermoelectricMaterial) : 0 < M.totalThermalConductivity :=
   add_pos_of_pos_of_nonneg M.κl_pos M.κe_nonneg
 
 /-!
@@ -153,8 +157,10 @@ lemma totalThermalConductivity_pos (M : ThermoelectricMaterial) :
 
 -/
 
-/-- The dimensionless thermoelectric figure of merit
-`zT = PF · T / (κl + κe)` of a material at absolute temperature `T`. -/
+/--
+The dimensionless thermoelectric figure of merit
+`zT = PF · T / (κl + κe)` of a material at absolute temperature `T`.
+-/
 def figureOfMerit (M : ThermoelectricMaterial) (T : ℝ) : ℝ :=
   M.powerFactor * T / M.totalThermalConductivity
 
@@ -164,10 +170,12 @@ def figureOfMerit (M : ThermoelectricMaterial) (T : ℝ) : ℝ :=
 
 -/
 
-/-- The figure of merit in its standard flat form
-`zT = σ S² T / (κl + κe)`. -/
-lemma figureOfMerit_eq (M : ThermoelectricMaterial) (T : ℝ) :
-    M.figureOfMerit T = M.σ * M.S ^ 2 * T / (M.κl + M.κe) := by
+/--
+The figure of merit in its standard flat form
+`zT = σ S² T / (κl + κe)`.
+-/
+lemma figureOfMerit_eq (M : ThermoelectricMaterial) (T : ℝ)
+    : M.figureOfMerit T = M.σ * M.S ^ 2 * T / (M.κl + M.κe) := by
   unfold figureOfMerit powerFactor totalThermalConductivity
   ring
 
@@ -177,11 +185,12 @@ lemma figureOfMerit_eq (M : ThermoelectricMaterial) (T : ℝ) :
 
 -/
 
-/-- The figure of merit is positive at positive temperature when the Seebeck
-coefficient is nonzero. -/
-lemma figureOfMerit_pos {M : ThermoelectricMaterial} {T : ℝ}
-    (hS : M.S ≠ 0) (hT : 0 < T) :
-    0 < M.figureOfMerit T :=
+/--
+The figure of merit is positive at positive temperature when the Seebeck
+coefficient is nonzero.
+-/
+lemma figureOfMerit_pos {M : ThermoelectricMaterial} {T : ℝ} (hS : M.S ≠ 0) (hT : 0 < T)
+    : 0 < M.figureOfMerit T :=
   div_pos (mul_pos (powerFactor_pos hS) hT) M.totalThermalConductivity_pos
 
 /-!
@@ -190,16 +199,18 @@ lemma figureOfMerit_pos {M : ThermoelectricMaterial} {T : ℝ}
 
 -/
 
-/-- Lowering the lattice thermal conductivity raises the figure of merit: if
+/--
+Lowering the lattice thermal conductivity raises the figure of merit: if
 `M.κl ≤ κl'` then the material with lattice conductivity `κl'` (all other
 coefficients equal) has the smaller `zT`. This is the phonon-glass
 electron-crystal design principle: scatter phonons without degrading
 electronic transport. Note the hypotheses: no condition on the Seebeck
 coefficient is needed, since monotonicity only requires the numerator
-`σ S² T` to be nonnegative. -/
-lemma figureOfMerit_le_of_le (M : ThermoelectricMaterial) {κl' T : ℝ}
-    (hpos : 0 < κl') (h : M.κl ≤ κl') (hT : 0 ≤ T) :
-    figureOfMerit { M with κl := κl', κl_pos := hpos } T ≤ M.figureOfMerit T := by
+`σ S² T` to be nonnegative.
+-/
+lemma figureOfMerit_le_of_le
+    (M : ThermoelectricMaterial) {κl' T : ℝ} (hpos : 0 < κl') (h : M.κl ≤ κl') (hT : 0 ≤ T)
+    : figureOfMerit { M with κl := κl', κl_pos := hpos } T ≤ M.figureOfMerit T := by
   unfold figureOfMerit powerFactor totalThermalConductivity
   have hnum : (0 : ℝ) ≤ M.σ * M.S ^ 2 * T := by
     have hσ := M.σ_pos

@@ -50,8 +50,10 @@ structure PseudoInfo where
   /-- Name of result. -/
   name : Name
 
-/-- An environment extension containing the information of declarations
-  which carry the `pseudo` attribute. -/
+/--
+An environment extension containing the information of declarations
+which carry the `pseudo` attribute.
+-/
 initialize pseudoExtension : SimplePersistentEnvExtension PseudoInfo (Array PseudoInfo) ←
   registerSimplePersistentEnvExtension {
     name := `pseudoExtension
@@ -60,8 +62,7 @@ initialize pseudoExtension : SimplePersistentEnvExtension PseudoInfo (Array Pseu
   }
 
 /-- Adds an entry to `pseudoExtension`. -/
-def addPseudofulEntry {m : Type → Type} [MonadEnv m]
-    (declName : Name) : m Unit :=
+def addPseudofulEntry {m : Type → Type} [MonadEnv m] (declName : Name) : m Unit :=
   modifyEnv (pseudoExtension.addEntry · ⟨declName⟩)
 
 /-!
@@ -70,28 +71,32 @@ def addPseudofulEntry {m : Type → Type} [MonadEnv m]
 
 -/
 
-/-- The `pseudo` attribute allows declarations to contain the `Lean.ofReduceBool` axiom.
-  In converse, a declaration with the `pseudo` attribute must contain the
-  `Lean.ofReduceBool` axiom. -/
+/--
+The `pseudo` attribute allows declarations to contain the `Lean.ofReduceBool` axiom.
+In converse, a declaration with the `pseudo` attribute must contain the
+`Lean.ofReduceBool` axiom.
+-/
 syntax (name := Pseudo_attr) "pseudo" : attr
 
 /-- Registration of the `pseudo` attribute. -/
-initialize Lean.registerBuiltinAttribute {
-  name := `Pseudo_attr
-  descr := "The `pseudo` attribute allows declarations to contain the `Lean.ofReduceBool` axiom.
-    In converse, a declaration with the `pseudo` attribute must contain the
-    `Lean.ofReduceBool` axiom."
-  add := fun decl stx _attrKind => do
-    let pos := stx.getPos?
-    -- match pos with
-    -- | some pos => do
+initialize
+  Lean.registerBuiltinAttribute {
+    name := `Pseudo_attr
+    descr :=
+      "The `pseudo` attribute allows declarations to contain the `Lean.ofReduceBool` axiom.\
+        \n    In converse, a declaration with the `pseudo` attribute must contain the\
+        \n    `Lean.ofReduceBool` axiom."
+    add := fun decl stx _attrKind => do
+      let pos := stx.getPos?
+      -- match pos with
+      -- | some pos => do
       -- let env ← getEnv
       -- let fileMap ← getFileMap
       -- let filePos := fileMap.toPosition pos
       -- let line := filePos.line
-      --- let modName := env.mainModule
+      -- - let modName := env.mainModule
       -- let nameSpace := (← getCurrNamespace)
       -- let docstring ← Name.getDocString decl
-    addPseudofulEntry decl
-  applicationTime := AttributeApplicationTime.beforeElaboration
-}
+      addPseudofulEntry decl
+    applicationTime := AttributeApplicationTime.beforeElaboration
+  }

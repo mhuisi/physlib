@@ -60,13 +60,16 @@ variable {U : ℝ → H →L[ℂ] H} (hUmul : ∀ s t, U (s + t) = U s * U t)
 -/
 
 include hUmul in
-/-- **The analytic vectors of the candidate generator are dense**: every vector is a limit of
-Gårding vectors. -/
-lemma stoneCandidateGenerator_denseAnalyticVectors (hU0 : U 0 = 1)
-    (hUunit : ∀ t, U t ∈ unitary (H →L[ℂ] H)) (hUcont : ∀ ξ : H, Continuous (fun t : ℝ => U t ξ)) :
-    (Submodule.span ℂ
-      {x : H | (stoneCandidateGenerator (U := U) hUmul).IsAnalyticVector x}).topologicalClosure =
-      (⊤ : Submodule ℂ H) := by
+/--
+**The analytic vectors of the candidate generator are dense**: every vector is a limit of
+Gårding vectors.
+-/
+lemma stoneCandidateGenerator_denseAnalyticVectors
+    (hU0 : U 0 = 1) (hUunit : ∀ t, U t ∈ unitary (H →L[ℂ] H))
+    (hUcont : ∀ ξ : H, Continuous (fun t : ℝ => U t ξ))
+    : (Submodule.span ℂ
+        {x : H | (stoneCandidateGenerator (U := U) hUmul).IsAnalyticVector x}).topologicalClosure
+      = (⊤ : Submodule ℂ H) := by
   rw [Submodule.eq_top_iff']
   intro ψ
   apply Submodule.closure_subset_topologicalClosure_span
@@ -83,11 +86,14 @@ lemma stoneCandidateGenerator_denseAnalyticVectors (hU0 : U 0 = 1)
 -/
 
 include hUmul in
-/-- **Stone's theorem, existence.** The candidate generator of a strongly continuous unitary group
-is essentially self-adjoint. -/
-lemma stoneCandidateGenerator_isEssentiallySelfAdjoint (hU0 : U 0 = 1)
-    (hUunit : ∀ t, U t ∈ unitary (H →L[ℂ] H)) (hUcont : ∀ ξ : H, Continuous (fun t : ℝ => U t ξ)) :
-    (stoneCandidateGenerator (U := U) hUmul).IsEssentiallySelfAdjoint :=
+/--
+**Stone's theorem, existence.** The candidate generator of a strongly continuous unitary group
+is essentially self-adjoint.
+-/
+lemma stoneCandidateGenerator_isEssentiallySelfAdjoint
+    (hU0 : U 0 = 1) (hUunit : ∀ t, U t ∈ unitary (H →L[ℂ] H))
+    (hUcont : ∀ ξ : H, Continuous (fun t : ℝ => U t ξ))
+    : (stoneCandidateGenerator (U := U) hUmul).IsEssentiallySelfAdjoint :=
   LinearPMap.IsSymmetric.isEssentiallySelfAdjoint_of_denseAnalyticVectors
     (stoneCandidateGenerator_isSymmetric (U := U) hU0 hUmul hUunit)
     (stoneCandidateGenerator_denseAnalyticVectors hUmul hU0 hUunit hUcont)

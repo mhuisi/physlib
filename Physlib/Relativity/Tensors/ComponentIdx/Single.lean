@@ -36,11 +36,12 @@ color and the basis indices of that color.
 
 namespace TensorSpecies
 
-variable {k : Type} [CommRing k] {C G : Type} [Group G]
+variable
+  {k : Type} [CommRing k]
+  {C G : Type} [Group G]
   {V : C → Type} [∀ c, AddCommGroup (V c)] [∀ c, Module k (V c)]
   {basisIdx : C → Type} [∀ c, Fintype (basisIdx c)] [∀ c, DecidableEq (basisIdx c)]
-  {rep : (c : C) → Representation k G (V c)}
-  {b : (c : C) → Module.Basis (basisIdx c) k (V c)}
+  {rep : (c : C) → Representation k G (V c)} {b : (c : C) → Module.Basis (basisIdx c) k (V c)}
   {S : TensorSpecies k C G V basisIdx rep b}
 
 namespace Tensor
@@ -51,10 +52,11 @@ namespace Tensor
 
 -/
 
-/-- The equivalence between component indices for a single color and the basis indices
-of that color. -/
-def ComponentIdx.single {c : C} :
-    ComponentIdx (S := S) ![c] ≃ basisIdx c where
+/--
+The equivalence between component indices for a single color and the basis indices
+of that color.
+-/
+def ComponentIdx.single {c : C} : ComponentIdx (S := S) ![c] ≃ basisIdx c where
   toFun b := basisIdxCongr (by simp) (b 0)
   invFun b := fun _ => basisIdxCongr (by simp) b
   left_inv b := by
@@ -67,12 +69,14 @@ def ComponentIdx.single {c : C} :
     rfl
 
 @[simp]
-lemma ComponentIdx.single_apply {c : C} (b : ComponentIdx (S := S) ![c]) :
-    ComponentIdx.single (S := S) b = basisIdxCongr (by simp) (b 0) := rfl
+lemma ComponentIdx.single_apply {c : C} (b : ComponentIdx (S := S) ![c])
+    : ComponentIdx.single (S := S) b = basisIdxCongr (by simp) (b 0) :=
+  rfl
 
 @[simp]
-lemma ComponentIdx.single_symm_apply {c : C} (b : basisIdx c) (i : Fin 1) :
-    (ComponentIdx.single (S := S) (c := c)).symm b i = basisIdxCongr (by simp) b := rfl
+lemma ComponentIdx.single_symm_apply {c : C} (b : basisIdx c) (i : Fin 1)
+    : (ComponentIdx.single (S := S) (c := c)).symm b i = basisIdxCongr (by simp) b :=
+  rfl
 
 end Tensor
 

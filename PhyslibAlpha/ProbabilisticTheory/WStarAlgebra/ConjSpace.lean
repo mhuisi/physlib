@@ -58,16 +58,20 @@ namespace ConjSpace
 
 variable {X : Type*}
 
-/-- The identity, viewed as the map from `X` into `ConjSpace X`. Spelled out explicitly (instead
+/--
+The identity, viewed as the map from `X` into `ConjSpace X`. Spelled out explicitly (instead
 of relying on the bare definitional equality `ConjSpace X := X`) to keep instance search from
-having to guess which scalar action a plain type ascription intends. -/
+having to guess which scalar action a plain type ascription intends.
+-/
 def toConj (x : X) : ConjSpace X := x
 
 /-- The identity, viewed as the map from `ConjSpace X` back into `X`. -/
 def ofConj (x : ConjSpace X) : X := x
 
-@[simp] lemma ofConj_toConj (x : X) : ofConj (toConj x) = x := rfl
-@[simp] lemma toConj_ofConj (x : ConjSpace X) : toConj (ofConj x) = x := rfl
+@[simp]
+lemma ofConj_toConj (x : X) : ofConj (toConj x) = x := rfl
+@[simp]
+lemma toConj_ofConj (x : ConjSpace X) : toConj (ofConj x) = x := rfl
 
 /-!
 
@@ -77,22 +81,26 @@ def ofConj (x : ConjSpace X) : X := x
 
 instance instAddCommGroup [AddCommGroup X] : AddCommGroup (ConjSpace X) := ‹AddCommGroup X›
 
-@[simp] lemma ofConj_add [AddCommGroup X] (x y : ConjSpace X) :
-    ofConj (x + y) = ofConj x + ofConj y := rfl
+@[simp]
+lemma ofConj_add [AddCommGroup X] (x y : ConjSpace X) : ofConj (x + y) = ofConj x + ofConj y := rfl
 
-@[simp] lemma ofConj_zero [AddCommGroup X] : ofConj (0 : ConjSpace X) = 0 := rfl
+@[simp]
+lemma ofConj_zero [AddCommGroup X] : ofConj (0 : ConjSpace X) = 0 := rfl
 
-@[simp] lemma toConj_add [AddCommGroup X] (x y : X) :
-    toConj (x + y) = toConj x + toConj y := rfl
+@[simp]
+lemma toConj_add [AddCommGroup X] (x y : X) : toConj (x + y) = toConj x + toConj y := rfl
 
-@[simp] lemma toConj_zero [AddCommGroup X] : toConj (0 : X) = 0 := rfl
+@[simp]
+lemma toConj_zero [AddCommGroup X] : toConj (0 : X) = 0 := rfl
 
-instance instNormedAddCommGroup [NormedAddCommGroup X] :
-    NormedAddCommGroup (ConjSpace X) := ‹NormedAddCommGroup X›
+instance instNormedAddCommGroup [NormedAddCommGroup X] : NormedAddCommGroup (ConjSpace X) :=
+  ‹NormedAddCommGroup X›
 
-@[simp] lemma norm_ofConj [NormedAddCommGroup X] (x : ConjSpace X) : ‖ofConj x‖ = ‖x‖ := rfl
+@[simp]
+lemma norm_ofConj [NormedAddCommGroup X] (x : ConjSpace X) : ‖ofConj x‖ = ‖x‖ := rfl
 
-@[simp] lemma norm_toConj [NormedAddCommGroup X] (x : X) : ‖toConj x‖ = ‖x‖ := rfl
+@[simp]
+lemma norm_toConj [NormedAddCommGroup X] (x : X) : ‖toConj x‖ = ‖x‖ := rfl
 
 /-!
 
@@ -102,16 +110,16 @@ instance instNormedAddCommGroup [NormedAddCommGroup X] :
 
 variable [NormedAddCommGroup X] [NormedSpace ℂ X]
 
-/-- The twisted scalar action: `c • x := (starRingEnd ℂ c) • ofConj x`, moved back into
-`ConjSpace X` via `toConj`. -/
-instance instSMul : SMul ℂ (ConjSpace X) :=
-  ⟨fun c x => toConj ((starRingEnd ℂ c) • ofConj x)⟩
+/--
+The twisted scalar action: `c • x := (starRingEnd ℂ c) • ofConj x`, moved back into
+`ConjSpace X` via `toConj`.
+-/
+instance instSMul : SMul ℂ (ConjSpace X) := ⟨fun c x => toConj ((starRingEnd ℂ c) • ofConj x)⟩
 
-lemma smul_def (c : ℂ) (x : ConjSpace X) :
-    c • x = toConj ((starRingEnd ℂ c) • ofConj x) := rfl
+lemma smul_def (c : ℂ) (x : ConjSpace X) : c • x = toConj ((starRingEnd ℂ c) • ofConj x) := rfl
 
-@[simp] lemma ofConj_smul (c : ℂ) (x : ConjSpace X) :
-    ofConj (c • x) = (starRingEnd ℂ c) • ofConj x := rfl
+@[simp]
+lemma ofConj_smul (c : ℂ) (x : ConjSpace X) : ofConj (c • x) = (starRingEnd ℂ c) • ofConj x := rfl
 
 /-- The conjugate module structure on `ConjSpace X`. -/
 instance instModule : Module ℂ (ConjSpace X) where
@@ -125,8 +133,10 @@ instance instModule : Module ℂ (ConjSpace X) where
   add_smul c d x := by rw [smul_def, smul_def, smul_def]; simp [add_smul]
   zero_smul x := by rw [smul_def]; simp
 
-/-- The norm on `ConjSpace X` is literally `X`'s norm (via `ofConj`), so `norm_smul_le` reduces to
-`‖conj c‖ = ‖c‖` (`Complex.norm_conj`) composed with `X`'s own `norm_smul_le`. -/
+/--
+The norm on `ConjSpace X` is literally `X`'s norm (via `ofConj`), so `norm_smul_le` reduces to
+`‖conj c‖ = ‖c‖` (`Complex.norm_conj`) composed with `X`'s own `norm_smul_le`.
+-/
 instance instNormedSpace : NormedSpace ℂ (ConjSpace X) where
   norm_smul_le c x := by
     show ‖ofConj (c • x)‖ ≤ ‖c‖ * ‖x‖

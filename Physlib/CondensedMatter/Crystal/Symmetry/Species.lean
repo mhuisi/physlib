@@ -70,8 +70,8 @@ def speciesGroup (q : Species C Q) : Subgroup (Symmetry C) where
     rw [← hφ (φ⁻¹ • i), smul_inv_smul]
 
 /-- A symmetry preserves `q` exactly when it sends every label to one of the same species. -/
-lemma mem_speciesGroup_iff {q : Species C Q} {φ : Symmetry C} :
-    φ ∈ speciesGroup q ↔ ∀ i, q (φ • i) = q i := by
+lemma mem_speciesGroup_iff {q : Species C Q} {φ : Symmetry C}
+    : φ ∈ speciesGroup q ↔ ∀ i, q (φ • i) = q i := by
   rfl
 
 /-- Every crystal symmetry preserves a constant species assignment. -/
@@ -86,8 +86,8 @@ lemma ker_labelHom_le_speciesGroup (q : Species C Q) : (labelHom C).ker ≤ spec
   exact congrArg q (Equiv.ext_iff.1 hφ i)
 
 /-- With distinct species on distinct labels, preserving species requires fixing every label. -/
-lemma speciesGroup_eq_ker_labelHom {q : Species C Q} (hq : Function.Injective q) :
-    speciesGroup q = (labelHom C).ker := by
+lemma speciesGroup_eq_ker_labelHom {q : Species C Q} (hq : Function.Injective q)
+    : speciesGroup q = (labelHom C).ker := by
   refine le_antisymm ?_ (ker_labelHom_le_speciesGroup q)
   intro φ hφ
   ext i
@@ -96,16 +96,16 @@ lemma speciesGroup_eq_ker_labelHom {q : Species C Q} (hq : Function.Injective q)
 /-! ## B. Merging species -/
 
 /-- Applying `f` to the species values can only enlarge the species group. -/
-lemma speciesGroup_le_comp (q : Species C Q) {Q' : Type*} (f : Q → Q') :
-    speciesGroup q ≤ speciesGroup (f ∘ q) := by
+lemma speciesGroup_le_comp (q : Species C Q) {Q' : Type*} (f : Q → Q')
+    : speciesGroup q ≤ speciesGroup (f ∘ q) := by
   intro φ h i
   exact congrArg f (h i)
 
 /-! ## C. Shifts and translations -/
 
 /-- Every shift fixes the unit-cell labels and so preserves species. -/
-lemma shift_mem_speciesGroup (q : Species C Q) (b : C.UnitCell → G) :
-    shift C b ∈ speciesGroup q := by
+lemma shift_mem_speciesGroup (q : Species C Q) (b : C.UnitCell → G)
+    : shift C b ∈ speciesGroup q := by
   intro i
   rfl
 

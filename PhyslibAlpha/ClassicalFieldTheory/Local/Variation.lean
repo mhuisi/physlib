@@ -53,10 +53,10 @@ variable {d m : ℕ}
 
 /-- A Euclidean component of an admissible variation is again a test function. -/
 @[fun_prop]
-lemma coord_euclidean (η : AdmissibleVariation d (EuclideanSpace ℝ (Fin m))) (a : Fin m) :
-    IsTestFunction (fun x => (η.toFun x) a) := by
-  exact η.isTestFunction.comp_left (g := fun v : EuclideanSpace ℝ (Fin m) => v a)
-    (by simp) (by fun_prop)
+lemma coord_euclidean (η : AdmissibleVariation d (EuclideanSpace ℝ (Fin m))) (a : Fin m)
+    : IsTestFunction (fun x => (η.toFun x) a) := by
+  exact η.isTestFunction.comp_left (g := fun v : EuclideanSpace ℝ (Fin m) => v a) (by simp) (by
+    fun_prop)
 
 end AdmissibleVariation
 

@@ -69,8 +69,8 @@ def restrict (h : X ≤ Y) (ω : 𝓢[ℝ, A Y]) : 𝓢[ℝ, A X] := comap (N.in
 
 /-- Restriction evaluates an observable through its inclusion into the larger subsystem. -/
 @[simp]
-lemma restrict_apply (h : X ≤ Y) (ω : 𝓢[ℝ, A Y]) (a : A X) :
-    N.restrict h ω a = ω (N.incl h a) := rfl
+lemma restrict_apply (h : X ≤ Y) (ω : 𝓢[ℝ, A Y]) (a : A X) : N.restrict h ω a = ω (N.incl h a) :=
+  rfl
 
 /-- Restriction to the same subsystem is the identity. -/
 @[simp]
@@ -79,8 +79,8 @@ lemma restrict_refl (ω : 𝓢[ℝ, A X]) : N.restrict (le_refl X) ω = ω := by
   exact congrArg ω (N.incl_refl_apply _ a)
 
 /-- Successive restrictions agree with direct restriction. -/
-lemma restrict_restrict (h₁ : X ≤ Y) (h₂ : Y ≤ Z) (h₃ : X ≤ Z) (ω : 𝓢[ℝ, A Z]) :
-    N.restrict h₁ (N.restrict h₂ ω) = N.restrict h₃ ω := by
+lemma restrict_restrict (h₁ : X ≤ Y) (h₂ : Y ≤ Z) (h₃ : X ≤ Z) (ω : 𝓢[ℝ, A Z])
+    : N.restrict h₁ (N.restrict h₂ ω) = N.restrict h₃ ω := by
   ext a
   exact congrArg ω (N.incl_trans_apply h₁ h₂ h₃ a).symm
 
@@ -102,9 +102,10 @@ structure CompatibleStates (N : LocalNet R A) where
   compat : ∀ {X Y : R} (h : X ≤ Y), N.restrict h (state Y) = state X
 
 /-- An observable has the same expectation in every subsystem containing it. -/
-lemma CompatibleStates.compat_apply {N : LocalNet R A} (ω : N.CompatibleStates)
-    {X Y : R} (h : X ≤ Y) (a : A X) :
-    ω.state Y (N.incl h a) = ω.state X a := DFunLike.congr_fun (ω.compat h) a
+lemma CompatibleStates.compat_apply
+    {N : LocalNet R A} (ω : N.CompatibleStates) {X Y : R} (h : X ≤ Y) (a : A X)
+    : ω.state Y (N.incl h a) = ω.state X a :=
+  DFunLike.congr_fun (ω.compat h) a
 
 end LocalNet
 
@@ -131,10 +132,12 @@ noncomputable def lift (σ : N.CompatibleStates) : N.Quasilocal →ₗ[ℝ] ℝ 
   · intro i j hij x
     exact σ.compat_apply hij x
 
-/-- The expectation functional of `LocalNet.CompatibleStates` evaluates a quasilocal observable
-in any subsystem representing it. -/
-lemma lift_apply (σ : N.CompatibleStates) (i : R) (a : A i) :
-    lift σ (toQuasilocal N i a) = σ.state i a := by
+/--
+The expectation functional of `LocalNet.CompatibleStates` evaluates a quasilocal observable
+in any subsystem representing it.
+-/
+lemma lift_apply (σ : N.CompatibleStates) (i : R) (a : A i)
+    : lift σ (toQuasilocal N i a) = σ.state i a := by
   unfold lift toQuasilocal
   exact Module.DirectLimit.lift_of _ _ a
 
@@ -152,17 +155,18 @@ noncomputable def toState (σ : N.CompatibleStates) : 𝓢[ℝ, N.Quasilocal] :=
     exact map_one _
 
 /-- On a quasilocal observable represented in the subsystem `i`, `toState σ` is the state of `i`. -/
-lemma toState_apply (σ : N.CompatibleStates) (i : R) (a : A i) :
-    toState σ (toQuasilocal N i a) = σ.state i a :=
+lemma toState_apply (σ : N.CompatibleStates) (i : R) (a : A i)
+    : toState σ (toQuasilocal N i a) = σ.state i a :=
   lift_apply σ i a
 
 /-- A state of the whole system is the same as `LocalNet.CompatibleStates`. -/
 noncomputable def stateEquiv : 𝓢[ℝ, N.Quasilocal] ≃ N.CompatibleStates where
-  toFun ω :=
-    { state i := comap (toQuasilocalChannel N i) ω
-      compat h := by
-        ext a
-        exact congrArg ω (toQuasilocal_incl h a) }
+  toFun ω := {
+    state i := comap (toQuasilocalChannel N i) ω
+    compat h := by
+      ext a
+      exact congrArg ω (toQuasilocal_incl h a)
+  }
   invFun σ := toState σ
   left_inv ω := by
     ext x

@@ -46,11 +46,13 @@ namespace FluidDynamics
 
 -/
 
-/-- The density and velocity fields of a fluid on `d`-dimensional space.
+/--
+The density and velocity fields of a fluid on `d`-dimensional space.
 
 These fields are the independent data needed for kinematics and mass transport. Quantities such as
 mass flux, momentum density, and material acceleration are derived from them. Dynamic and
-thermodynamic fields are introduced only by extension structures whose statements need them. -/
+thermodynamic fields are introduced only by extension structures whose statements need them.
+-/
 structure FluidFlow (d : ℕ) where
   /-- The mass density field. -/
   rho : MassDensity d

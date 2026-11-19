@@ -81,8 +81,7 @@ This follows directly from the definition.
 
 /-- `ofFieldLabel ∅ F` is empty for any field label `F`. -/
 @[simp]
-lemma ofFieldLabel_empty (F : FieldLabel) :
-    ofFieldLabel (∅ : ChargeSpectrum 𝓩) F = ∅ := by
+lemma ofFieldLabel_empty (F : FieldLabel) : ofFieldLabel (∅ : ChargeSpectrum 𝓩) F = ∅ := by
   cases F <;> rfl
 
 /-!
@@ -96,8 +95,8 @@ then `ofFieldLabel x F ⊆ ofFieldLabel y F`.
 -/
 
 /-- The function `ofFieldLabel` is monotone in the charge spectrum. -/
-lemma ofFieldLabel_mono {x y : ChargeSpectrum 𝓩} (h : x ⊆ y) (F : FieldLabel) :
-    x.ofFieldLabel F ⊆ y.ofFieldLabel F := by
+lemma ofFieldLabel_mono {x y : ChargeSpectrum 𝓩} (h : x ⊆ y) (F : FieldLabel)
+    : x.ofFieldLabel F ⊆ y.ofFieldLabel F := by
   cases F <;> simp_all [ofFieldLabel, subset_def]
 
 /-!
@@ -110,18 +109,18 @@ its negative is a member of the finite set associated with the conjugate field l
 -/
 
 @[simp]
-lemma mem_ofFieldLabel_fiveHd (x : 𝓩) (y : ChargeSpectrum 𝓩) :
-    x ∈ y.ofFieldLabel FieldLabel.fiveHd ↔ -x ∈ y.ofFieldLabel .fiveBarHd := by
+lemma mem_ofFieldLabel_fiveHd (x : 𝓩) (y : ChargeSpectrum 𝓩)
+    : x ∈ y.ofFieldLabel FieldLabel.fiveHd ↔ -x ∈ y.ofFieldLabel .fiveBarHd := by
   simp [ofFieldLabel, Finset.mem_map, neg_eq_iff_eq_neg]
 
 @[simp]
-lemma mem_ofFieldLabel_fiveHu (x : 𝓩) (y : ChargeSpectrum 𝓩) :
-    x ∈ y.ofFieldLabel FieldLabel.fiveHu ↔ -x ∈ y.ofFieldLabel .fiveBarHu := by
+lemma mem_ofFieldLabel_fiveHu (x : 𝓩) (y : ChargeSpectrum 𝓩)
+    : x ∈ y.ofFieldLabel FieldLabel.fiveHu ↔ -x ∈ y.ofFieldLabel .fiveBarHu := by
   simp [ofFieldLabel, Finset.mem_map, neg_eq_iff_eq_neg]
 
 @[simp]
-lemma mem_ofFieldLabel_fiveMatter (x : 𝓩) (y : ChargeSpectrum 𝓩) :
-    x ∈ y.ofFieldLabel FieldLabel.fiveMatter ↔ -x ∈ y.ofFieldLabel .fiveBarMatter := by
+lemma mem_ofFieldLabel_fiveMatter (x : 𝓩) (y : ChargeSpectrum 𝓩)
+    : x ∈ y.ofFieldLabel FieldLabel.fiveMatter ↔ -x ∈ y.ofFieldLabel .fiveBarMatter := by
   simp [ofFieldLabel, Finset.mem_map, neg_eq_iff_eq_neg]
 
 /-!
@@ -136,8 +135,8 @@ direct ways to show that two charge spectra are equal.
 -/
 
 /-- Two charges are equal if they are equal on all field labels. -/
-lemma ext_ofFieldLabel {x y : ChargeSpectrum 𝓩} (h : ∀ F, x.ofFieldLabel F = y.ofFieldLabel F) :
-    x = y := by
+lemma ext_ofFieldLabel {x y : ChargeSpectrum 𝓩} (h : ∀ F, x.ofFieldLabel F = y.ofFieldLabel F)
+    : x = y := by
   exact eq_of_parts (Option.toFinset_inj.mpr (h .fiveBarHd))
     (Option.toFinset_inj.mpr (h .fiveBarHu)) (h .fiveBarMatter) (h .tenMatter)
 

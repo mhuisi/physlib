@@ -53,27 +53,29 @@ structure ReferenceFrame (d : ℕ) where
   /-- The basis used to turn displacement vectors into coordinate components at each time. -/
   basis : Time → Module.Basis (Fin d) ℝ (EuclideanSpace ℝ (Fin d))
 
-/-- Build a reference frame from the trajectories of a collection of reference points.
+/--
+Build a reference frame from the trajectories of a collection of reference points.
 
 At each time, the reference points must form an affine basis: none is redundant, and together they
 span the whole space. One reference point is chosen as the origin, and the displacements from it to
 the remaining points form the coordinate basis. The resulting frame need not be inertial or
-orthonormal. -/
+orthonormal.
+-/
 def ReferenceFrame.fromReferencePoints
     (timeOrigin : Time)
     (referencePoints : Finset (Time → Space d))
     (independence : ∀ t, AffineIndependent ℝ fun point : referencePoints => point.val t)
-    (spans_space : ∀ t, affineSpan ℝ {point.val t | point : referencePoints} = ⊤) :
-    ReferenceFrame d :=
+    (spans_space : ∀ t, affineSpan ℝ {point.val t | point : referencePoints} = ⊤)
+    : ReferenceFrame d :=
   let affineBasis (t : Time) : AffineBasis referencePoints ℝ (Space d) :=
     ⟨fun point => point.val t, independence t, spans_space t⟩
   let reference_points_not_empty := (affineBasis timeOrigin).nonempty
   let origin := Classical.choice reference_points_not_empty
   letI := Fintype.ofFinite {point : referencePoints // point ≠ origin}
   let basis t := (affineBasis t).basisOf origin
-  let other_reference_points_size_eq_dim :
-      Fintype.card {point : referencePoints // point ≠ origin} = d :=
-    by simpa using (Module.finrank_eq_card_basis <| basis timeOrigin).symm
+  let other_reference_points_size_eq_dim
+      : Fintype.card {point : referencePoints // point ≠ origin} = d := by
+    simpa using (Module.finrank_eq_card_basis <| basis timeOrigin).symm
   let basisReindexed t :=
     (basis t).reindex (Fintype.equivFinOfCardEq other_reference_points_size_eq_dim)
   { timeOrigin := timeOrigin, origin := origin, basis := basisReindexed }
@@ -83,8 +85,7 @@ namespace ReferenceFrame
 variable {frame : ReferenceFrame d}
 
 /-- Convert a frame's real-valued time coordinate into an instant in affine time. -/
-def timeEquiv (frame : ReferenceFrame d) : ℝ ≃ᵃ[ℝ] Time :=
-  AffineEquiv.vaddConst ℝ frame.timeOrigin
+def timeEquiv (frame : ReferenceFrame d) : ℝ ≃ᵃ[ℝ] Time := AffineEquiv.vaddConst ℝ frame.timeOrigin
 
 /-!
 ## B. Inertial reference frames
@@ -100,8 +101,7 @@ def IsMetricConserved (frame : ReferenceFrame d) : Prop :=
     inner ℝ (frame.basis t₁ i) (frame.basis t₁ j) = inner ℝ (frame.basis t₂ i) (frame.basis t₂ j)
 
 /-- Whether the frame's coordinate basis is orthonormal at every time. -/
-def Orthonormal (frame : ReferenceFrame d) : Prop :=
-  ∀ t, _root_.Orthonormal ℝ (frame.basis t)
+def Orthonormal (frame : ReferenceFrame d) : Prop := ∀ t, _root_.Orthonormal ℝ (frame.basis t)
 
 /-- An orthonormal frame conserves its coordinate metric. -/
 lemma Orthonormal.isMetricConserved (h : frame.Orthonormal) : frame.IsMetricConserved := by
@@ -113,8 +113,8 @@ instance [h : Fact frame.Orthonormal] : Fact frame.IsMetricConserved := ⟨h.out
 /-- Whether a reference frame is related to its initial grid by uniform translation alone. -/
 structure IsInertial (frame : ReferenceFrame d) : Prop where
   /-- Elapsed time times `velocity` is exactly the origin's displacement. -/
-  origin_moves_uniformly :
-    ∃ velocity, ∀ t₁ t₂, frame.origin t₂ -ᵥ frame.origin t₁ = (t₂ -ᵥ t₁) • velocity
+  origin_moves_uniformly
+    : ∃ velocity, ∀ t₁ t₂, frame.origin t₂ -ᵥ frame.origin t₁ = (t₂ -ᵥ t₁) • velocity
   /-- The coordinate axes neither rotate nor change scale with time. -/
   basis_conserved : ∀ t₁ t₂, frame.basis t₁ = frame.basis t₂
 
@@ -149,24 +149,27 @@ structure Vector (frame : ReferenceFrame d) where
 namespace Vector
 
 /-- Equivalence between frame vectors and coordinate components -/
-def componentEquiv : frame.Vector ≃ (Fin d → ℝ) :=
-  Equiv.mk components mk Eq.refl Eq.refl
+def componentEquiv : frame.Vector ≃ (Fin d → ℝ) := Equiv.mk components mk Eq.refl Eq.refl
 
 instance : AddCommGroup frame.Vector := componentEquiv.addCommGroup
 
-instance : Module ℝ frame.Vector :=
-  AddEquiv.module ℝ { componentEquiv with map_add' _ _ := rfl }
+instance : Module ℝ frame.Vector := AddEquiv.module ℝ { componentEquiv with map_add' _ _ := rfl }
 
 /-- Scalar multiplication by a positive real. -/
 instance : SMul {x : ℝ // 0 < x} frame.Vector where
   smul c x := c.val • x
 
 /-- Linear equivalence between frame vectors and coordinate components. -/
-def componentLinearEquiv : frame.Vector ≃ₗ[ℝ] (Fin d → ℝ) :=
-  {componentEquiv with map_add' _ _ := rfl, map_smul' _ _ := rfl}
+def componentLinearEquiv : frame.Vector ≃ₗ[ℝ] (Fin d → ℝ) := {
+  componentEquiv with
+  map_add' _ _ := rfl
+  map_smul' _ _ := rfl
+}
 
-/-- Equivalence between frame vectors and geometric displacements in space,
-defined by the frame's basis at time coordinate `t`. -/
+/--
+Equivalence between frame vectors and geometric displacements in space,
+defined by the frame's basis at time coordinate `t`.
+-/
 def dispEquiv (t : ℝ) : frame.Vector ≃ₗ[ℝ] EuclideanSpace ℝ (Fin d) :=
   componentLinearEquiv.trans (frame.basis (frame.timeEquiv t)).equivFun.symm
 
@@ -174,16 +177,19 @@ def dispEquiv (t : ℝ) : frame.Vector ≃ₗ[ℝ] EuclideanSpace ℝ (Fin d) :=
 instance : TopologicalSpace frame.Vector := componentEquiv.topologicalSpace
 
 /-- Continuous linear equivalence between frame vectors and coordinate components. -/
-def componentContLinearEquiv (frame : ReferenceFrame d) : frame.Vector ≃L[ℝ] (Fin d → ℝ) :=
-  { componentLinearEquiv with
-    continuous_toFun := continuous_induced_dom
-    continuous_invFun := componentEquiv.homeomorph.continuous_invFun }
+def componentContLinearEquiv (frame : ReferenceFrame d) : frame.Vector ≃L[ℝ] (Fin d → ℝ) := {
+  componentLinearEquiv with
+  continuous_toFun := continuous_induced_dom
+  continuous_invFun := componentEquiv.homeomorph.continuous_invFun
+}
 
 instance : FiniteDimensional ℝ frame.Vector :=
   FiniteDimensional.of_injective componentLinearEquiv.toLinearMap componentEquiv.injective
 
-/-- Continuous equivalence between frame vectors and geometric displacements in space,
-defined by the frame's basis at time coordinate `t`. -/
+/--
+Continuous equivalence between frame vectors and geometric displacements in space,
+defined by the frame's basis at time coordinate `t`.
+-/
 def contDispEquiv (t : ℝ) : frame.Vector ≃L[ℝ] EuclideanSpace ℝ (Fin d) :=
   (componentContLinearEquiv frame).trans
     (frame.basis (frame.timeEquiv t)).equivFun.toContinuousLinearEquiv.symm
@@ -206,8 +212,8 @@ instance [Fact frame.IsMetricConserved] : InnerProductSpace ℝ frame.Vector whe
   smul_left x y r := by rw [map_smul, inner_smul_left]
 
 /-- In an orthonormal frame, the norm is the square root of squared components. -/
-lemma norm_euclidean_if_orthonormal [h : Fact frame.Orthonormal] :
-    ∀ v : frame.Vector, ‖v‖^2 = ∑ i, (v.components i)^2 := by
+lemma norm_euclidean_if_orthonormal [h : Fact frame.Orthonormal]
+    : ∀ v : frame.Vector, ‖v‖ ^ 2 = ∑ i, (v.components i)^2 := by
   intro v
   let basis := (frame.basis (frame.timeEquiv 0)).toOrthonormalBasis (h.out _)
   calc
@@ -216,13 +222,14 @@ lemma norm_euclidean_if_orthonormal [h : Fact frame.Orthonormal] :
     _ = _ := EuclideanSpace.real_norm_sq_eq _
 
 /-- In an orthonormal frame, the inner product is the sum of component products. -/
-lemma inner_euclidean_if_orthonormal [h : Fact frame.Orthonormal] :
-    ∀ v w : frame.Vector, inner ℝ v w = ∑ i, v.components i * w.components i := by
+lemma inner_euclidean_if_orthonormal [h : Fact frame.Orthonormal]
+    : ∀ v w : frame.Vector, inner ℝ v w = ∑ i, v.components i * w.components i := by
   intro v w
   let basis := (frame.basis (frame.timeEquiv 0)).toOrthonormalBasis (h.out _)
   calc
     _ = inner ℝ (basis.repr.symm <| WithLp.toLp 2 v.components)
-        (basis.repr.symm <| WithLp.toLp 2 w.components) := by rfl
+        (basis.repr.symm <| WithLp.toLp 2 w.components) := by
+      rfl
     _ = inner ℝ (WithLp.toLp 2 v.components) _ := by rw [basis.repr.symm.inner_map_map]
     _ = _ := by rw [PiLp.inner_apply]; simp_rw [Real.inner_apply]
 

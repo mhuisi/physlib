@@ -74,10 +74,12 @@ instance : NormedAddTorsor ℝ Time where
 
 instance : ChartedSpace ℝ Time :=
   let chartAt t := (Homeomorph.vaddConst t).symm.toOpenPartialHomeomorph
-  { chartAt,
-    atlas := Set.range chartAt,
-    mem_chart_source := Set.mem_univ,
-    chart_mem_atlas := by simp }
+  {
+    chartAt
+    atlas := Set.range chartAt
+    mem_chart_source := Set.mem_univ
+    chart_mem_atlas := by simp
+  }
 
 instance : IsManifold 𝓘(ℝ, ℝ) ω Time := by
   apply isManifold_of_contDiffOn
@@ -96,16 +98,15 @@ lemma chartAt_symm_apply (t₀ : Time) (τ : ℝ) : (chartAt ℝ t₀).symm τ =
 lemma extChartAt_apply (t₀ t : Time) : extChartAt 𝓘(ℝ, ℝ) t₀ t = t -ᵥ t₀ := rfl
 
 /-- The map `τ ↦ τ +ᵥ t₀` from `ℝ` to `Time` is smooth. -/
-lemma contMDiff_vadd (t₀ : Time) (n : ℕ∞ω) :
-    ContMDiff 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) n (fun τ : ℝ ↦ τ +ᵥ t₀) := by
+lemma contMDiff_vadd (t₀ : Time) (n : ℕ∞ω) : ContMDiff 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) n (fun τ : ℝ ↦ τ +ᵥ t₀) := by
   rw [contMDiff_iff]
   refine ⟨(Homeomorph.vaddConst t₀).continuous, fun x y ↦ ?_⟩
   simp only [extChartAt_model_space_eq_id, Function.comp_def, extChartAt_apply]
   simpa [vadd_vsub_assoc] using (contDiff_id.add contDiff_const).contDiffOn
 
 /-- The map `t ↦ t -ᵥ t₀` from `Time` to `ℝ` is smooth. -/
-lemma contMDiff_vsub (t₀ : Time) (n : ℕ∞ω) :
-    ContMDiff 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) n (fun t : Time ↦ t -ᵥ t₀) := by
+lemma contMDiff_vsub (t₀ : Time) (n : ℕ∞ω)
+    : ContMDiff 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) n (fun t : Time ↦ t -ᵥ t₀) := by
   rw [← contMDiffOn_univ]
   exact (contMDiffOn_chart (x := t₀)).mono (Set.subset_univ _)
 

@@ -26,8 +26,7 @@ open LinearPMap Submodule
 variable
   {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℂ E]
   {F : Type*} [NormedAddCommGroup F] [InnerProductSpace ℂ F]
-  (M : Submodule ℂ (E × F))
-  (f : E × F) (g : F × E)
+  (M : Submodule ℂ (E × F)) (f : E × F) (g : F × E)
 
 /-- The submodule of `WithLp 2 (E × F)` defined by `M`. -/
 def submoduleToLp : Submodule ℂ (WithLp 2 (E × F)) where
@@ -43,8 +42,8 @@ def submoduleToLp : Submodule ℂ (WithLp 2 (E × F)) where
 lemma mem_submodule_iff_mem_submoduleToLp : f ∈ M ↔ (WithLp.toLp 2 f) ∈ submoduleToLp M :=
   Eq.to_iff rfl
 
-lemma submoduleToLp_closure :
-    (submoduleToLp M.topologicalClosure) = (submoduleToLp M).topologicalClosure := by
+lemma submoduleToLp_closure
+    : (submoduleToLp M.topologicalClosure) = (submoduleToLp M).topologicalClosure := by
   rw [Submodule.ext_iff]
   intro x
   rw [← mem_submodule_iff_mem_submoduleToLp]
@@ -60,8 +59,8 @@ lemma submoduleToLp_closure :
     rcases this with ⟨t2, ht2, ht2'⟩
     rcases h t2 ht2 with ⟨w, hw⟩
     use WithLp.toLp 2 w
-    exact ⟨Set.mem_preimage.mp (ht1 (ht2' w hw.1)),
-      (mem_submodule_iff_mem_submoduleToLp M w).mpr hw.2⟩
+    exact
+      ⟨Set.mem_preimage.mp (ht1 (ht2' w hw.1)), (mem_submodule_iff_mem_submoduleToLp M w).mpr hw.2⟩
   · intro h t ht
     apply mem_nhds_iff.mp at ht
     rcases ht with ⟨t1, ht1, ht1', hx⟩
@@ -73,13 +72,13 @@ lemma submoduleToLp_closure :
     use w.ofLp
     exact ⟨Set.mem_preimage.mp (ht1 (ht2' w hw.1)), (mem_toAddSubgroup (submoduleToLp M)).mp hw.2⟩
 
-lemma mem_submodule_closure_iff_mem_submoduleToLp_closure :
-    f ∈ M.topologicalClosure ↔ (WithLp.toLp 2 f) ∈ (submoduleToLp M).topologicalClosure := by
+lemma mem_submodule_closure_iff_mem_submoduleToLp_closure
+    : f ∈ M.topologicalClosure ↔ (WithLp.toLp 2 f) ∈ (submoduleToLp M).topologicalClosure := by
   rw [← submoduleToLp_closure]
   rfl
 
-lemma mem_submodule_adjoint_iff_mem_submoduleToLp_orthogonal :
-    g ∈ M.adjoint ↔ WithLp.toLp 2 (g.2, -g.1) ∈ (submoduleToLp M)ᗮ := by
+lemma mem_submodule_adjoint_iff_mem_submoduleToLp_orthogonal
+    : g ∈ M.adjoint ↔ WithLp.toLp 2 (g.2, -g.1) ∈ (submoduleToLp M)ᗮ := by
   constructor <;> intro h
   · rw [mem_orthogonal]
     intro u hu
@@ -97,8 +96,8 @@ lemma mem_submodule_adjoint_iff_mem_submoduleToLp_orthogonal :
       exact h (WithLp.toLp 2 (a, b)) hab'
     simp [h']
 
-lemma mem_submodule_adjoint_adjoint_iff_mem_submoduleToLp_orthogonal_orthogonal :
-    f ∈ M.adjoint.adjoint ↔ WithLp.toLp 2 f ∈ (submoduleToLp M)ᗮᗮ := by
+lemma mem_submodule_adjoint_adjoint_iff_mem_submoduleToLp_orthogonal_orthogonal
+    : f ∈ M.adjoint.adjoint ↔ WithLp.toLp 2 f ∈ (submoduleToLp M)ᗮᗮ := by
   simp only [mem_adjoint_iff]
   trans ∀ v, (∀ w ∈ submoduleToLp M, inner ℂ w v = 0) → inner ℂ v (WithLp.toLp 2 f) = 0
   · constructor <;> intro h
@@ -118,9 +117,9 @@ lemma mem_submodule_adjoint_adjoint_iff_mem_submoduleToLp_orthogonal_orthogonal 
       simp [hw']
   simp only [← mem_orthogonal]
 
-lemma mem_submodule_closure_adjoint_iff_mem_submoduleToLp_closure_orthogonal :
-    g ∈ M.topologicalClosure.adjoint ↔
-    WithLp.toLp 2 (g.2, -g.1) ∈ (submoduleToLp M).topologicalClosureᗮ := by
+lemma mem_submodule_closure_adjoint_iff_mem_submoduleToLp_closure_orthogonal
+    : g ∈ M.topologicalClosure.adjoint
+      ↔ WithLp.toLp 2 (g.2, -g.1) ∈ (submoduleToLp M).topologicalClosureᗮ := by
   rw [mem_submodule_adjoint_iff_mem_submoduleToLp_orthogonal, submoduleToLp_closure]
 
 end InnerProductSpaceSubmodule

@@ -38,23 +38,30 @@ open Lean Batteries.Tactic.Lint
 
 namespace Physlib
 
-/-- The types of the declarations that `syntax`, `notation` and `macro` commands produce, along
-  with the pretty-printer declarations generated beside them. These hold parser data rather than
-  a mathematical definition, so their names are exempt from the naming convention. -/
-def parserDeclTypes : List Name :=
-  [``Lean.ParserDescr, ``Lean.TrailingParserDescr, ``Lean.Parser.Parser,
-    ``Lean.Parser.TrailingParser, ``Lean.PrettyPrinter.Parenthesizer,
-    ``Lean.PrettyPrinter.Formatter]
+/--
+The types of the declarations that `syntax`, `notation` and `macro` commands produce, along
+with the pretty-printer declarations generated beside them. These hold parser data rather than
+a mathematical definition, so their names are exempt from the naming convention.
+-/
+def parserDeclTypes : List Name := [
+  ``Lean.ParserDescr, ``Lean.TrailingParserDescr, ``Lean.Parser.Parser,
+  ``Lean.Parser.TrailingParser, ``Lean.PrettyPrinter.Parenthesizer,
+  ``Lean.PrettyPrinter.Formatter
+]
 
-/-- The suffix Lean appends to the generated name of an anonymous instance to keep it unique
-  across projects, for example `_physlib` for a declaration of the `Physlib` project. This
-  mirrors `Lean.Elab.Command.NameGen.mkBaseNameWithSuffix`. -/
+/--
+The suffix Lean appends to the generated name of an anonymous instance to keep it unique
+across projects, for example `_physlib` for a declaration of the `Physlib` project. This
+mirrors `Lean.Elab.Command.NameGen.mkBaseNameWithSuffix`.
+-/
 def projectSuffix (env : Environment) (declName : Name) : Option String := do
   let idx ← env.getModuleIdxFor? declName
   return "_" ++ env.header.moduleNames[idx]!.getRoot.toString.decapitalize
 
-/-- Whether the final component of `declName` ends in an underscore followed by a number, the
-  suffix Lean adds when the name it generated for an anonymous instance is already taken. -/
+/--
+Whether the final component of `declName` ends in an underscore followed by a number, the
+suffix Lean adds when the name it generated for an anonymous instance is already taken.
+-/
 def hasNumericSuffix (declName : Name) : Bool :=
   let parts := (declName.components.getLast?.getD .anonymous).toString.splitOn "_"
   1 < parts.length && !parts.getLast!.isEmpty && parts.getLast!.all Char.isDigit
@@ -62,7 +69,8 @@ def hasNumericSuffix (declName : Name) : Bool :=
 /-- Whether the `defsWithUnderscore` linter should pass over `declName`. -/
 def defsWithUnderscoreExempt (declName : Name) : CoreM Bool := do
   let env ← getEnv
-  let some info := env.find? declName | return false
+  let some info := env.find? declName
+    | return false
   if let .const head _ := info.type.getAppFn then
     if head == ``InformalDefinition || head == ``InformalLemma then return true
     if parserDeclTypes.contains head then return true
@@ -70,11 +78,14 @@ def defsWithUnderscoreExempt (declName : Name) : CoreM Bool := do
     if (declName.components.getLast?.getD .anonymous).toString.endsWith suffix then return true
   return hasNumericSuffix declName
 
-/-- `withDefsWithUnderscoreExemptions linter` behaves like `linter` except that it passes over
-  the declarations selected by `defsWithUnderscoreExempt`. -/
-def withDefsWithUnderscoreExemptions (linter : NamedLinter) : NamedLinter :=
-  { linter with
-    test := fun declName => do
-      if ← defsWithUnderscoreExempt declName then return none else linter.test declName }
+/--
+`withDefsWithUnderscoreExemptions linter` behaves like `linter` except that it passes over
+the declarations selected by `defsWithUnderscoreExempt`.
+-/
+def withDefsWithUnderscoreExemptions (linter : NamedLinter) : NamedLinter := {
+  linter with
+  test := fun declName => do
+    if ← defsWithUnderscoreExempt declName then return none else linter.test declName
+}
 
 end Physlib

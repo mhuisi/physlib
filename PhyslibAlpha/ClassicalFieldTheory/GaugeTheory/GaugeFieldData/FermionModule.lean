@@ -62,8 +62,11 @@ open Matrix MatrixGroups TensorProduct
 
 namespace GaugeFieldData
 
-variable {G₀ : Type} [Group G₀] {𝔤 : Type} [LieRing 𝔤] [LieAlgebra ℝ 𝔤] [Module.Finite ℝ 𝔤]
-  {GJ : Type} [Group GJ] {𝔤J : Type} [LieRing 𝔤J] [LieAlgebra ℝ 𝔤J]
+variable
+  {G₀ : Type} [Group G₀]
+  {𝔤 : Type} [LieRing 𝔤] [LieAlgebra ℝ 𝔤] [Module.Finite ℝ 𝔤]
+  {GJ : Type} [Group GJ]
+  {𝔤J : Type} [LieRing 𝔤J] [LieAlgebra ℝ 𝔤J]
   {jets : LocalGaugeData G₀ 𝔤 GJ 𝔤J} (T : GaugeFieldData jets)
 
 /-!
@@ -72,12 +75,14 @@ variable {G₀ : Type} [Group G₀] {𝔤 : Type} [LieRing 𝔤] [LieAlgebra ℝ
 
 -/
 
-/-- **The fermionic module of a gauge theory**: the product, over the fermionic species,
-  of their value spaces. One element of it is a value of the entire fermionic content of
-  the theory — the column of all the fermion fields — as opposed to
-  `GaugeFieldData.FermionGenerators`, which is a space of component *functions* and is
-  infinite-dimensional. Since the species type is finite the product is also their direct
-  sum. -/
+/--
+**The fermionic module of a gauge theory**: the product, over the fermionic species,
+of their value spaces. One element of it is a value of the entire fermionic content of
+the theory — the column of all the fermion fields — as opposed to
+`GaugeFieldData.FermionGenerators`, which is a space of component *functions* and is
+infinite-dimensional. Since the species type is finite the product is also their direct
+sum.
+-/
 abbrev FermionModule : Type := ∀ i, T.FermionValue i
 
 /-!
@@ -87,43 +92,50 @@ abbrev FermionModule : Type := ∀ i, T.FermionValue i
 -/
 
 /-- The component of a fermionic configuration in one species. -/
-abbrev projFermionValue (i : T.FermionSpecies) :
-    T.FermionModule →ₗ[ℂ] T.FermionValue i :=
+abbrev projFermionValue (i : T.FermionSpecies) : T.FermionModule →ₗ[ℂ] T.FermionValue i :=
   LinearMap.proj i
 
-/-- The inclusion of one fermionic species into the fermionic module, extending a value
-  of that species by zero in every other. -/
-abbrev inclFermionValue (i : T.FermionSpecies) :
-    T.FermionValue i →ₗ[ℂ] T.FermionModule :=
+/--
+The inclusion of one fermionic species into the fermionic module, extending a value
+of that species by zero in every other.
+-/
+abbrev inclFermionValue (i : T.FermionSpecies) : T.FermionValue i →ₗ[ℂ] T.FermionModule :=
   LinearMap.single ℂ T.FermionValue i
 
 variable {T}
 
 @[simp]
-lemma projFermionValue_apply (i : T.FermionSpecies) (v : T.FermionModule) :
-    T.projFermionValue i v = v i := rfl
+lemma projFermionValue_apply (i : T.FermionSpecies) (v : T.FermionModule)
+    : T.projFermionValue i v = v i :=
+  rfl
 
-lemma projFermionValue_inclFermionValue_self (i : T.FermionSpecies)
-    (v : T.FermionValue i) : T.projFermionValue i (T.inclFermionValue i v) = v :=
+lemma projFermionValue_inclFermionValue_self (i : T.FermionSpecies) (v : T.FermionValue i)
+    : T.projFermionValue i (T.inclFermionValue i v) = v :=
   Pi.single_eq_same i v
 
-/-- A value of one species has no component in any other species: the inclusions of
-  distinct species have disjoint supports. -/
-lemma projFermionValue_inclFermionValue_of_ne {i j : T.FermionSpecies} (h : i ≠ j)
-    (v : T.FermionValue j) : T.projFermionValue i (T.inclFermionValue j v) = 0 :=
+/--
+A value of one species has no component in any other species: the inclusions of
+distinct species have disjoint supports.
+-/
+lemma projFermionValue_inclFermionValue_of_ne
+    {i j : T.FermionSpecies} (h : i ≠ j) (v : T.FermionValue j)
+    : T.projFermionValue i (T.inclFermionValue j v) = 0 :=
   Pi.single_eq_of_ne h v
 
-/-- **A fermionic configuration is the sum of its species components**. The product over
-  the species is their direct sum, the species type being finite, so nothing is lost in
-  describing the fermionic content of the theory by one module. -/
-lemma sum_inclFermionValue_proj (v : T.FermionModule) :
-    ∑ i, T.inclFermionValue i (v i) = v :=
+/--
+**A fermionic configuration is the sum of its species components**. The product over
+the species is their direct sum, the species type being finite, so nothing is lost in
+describing the fermionic content of the theory by one module.
+-/
+lemma sum_inclFermionValue_proj (v : T.FermionModule) : ∑ i, T.inclFermionValue i (v i) = v :=
   LinearMap.sum_single_apply T.FermionValue v
 
 /-- Two linear maps out of the fermionic module agreeing on every species are equal. -/
-lemma fermionModule_hom_ext {N : Type} [AddCommGroup N] [Module ℂ N]
+lemma fermionModule_hom_ext
+    {N : Type} [AddCommGroup N] [Module ℂ N]
     {F F' : T.FermionModule →ₗ[ℂ] N}
-    (h : ∀ i, F.comp (T.inclFermionValue i) = F'.comp (T.inclFermionValue i)) : F = F' :=
+    (h : ∀ i, F.comp (T.inclFermionValue i) = F'.comp (T.inclFermionValue i))
+    : F = F' :=
   LinearMap.pi_ext' fun i => h i
 
 /-!
@@ -134,11 +146,13 @@ lemma fermionModule_hom_ext {N : Type} [AddCommGroup N] [Module ℂ N]
 
 variable (T)
 
-/-- **The dimension of the fermionic module is the sum of the dimensions of the
-  species**, each species contributing the number of complex components of its
-  multiplet. -/
-lemma finrank_fermionModule :
-    Module.finrank ℂ T.FermionModule = ∑ i, Module.finrank ℂ (T.FermionValue i) :=
+/--
+**The dimension of the fermionic module is the sum of the dimensions of the
+species**, each species contributing the number of complex components of its
+multiplet.
+-/
+lemma finrank_fermionModule
+    : Module.finrank ℂ T.FermionModule = ∑ i, Module.finrank ℂ (T.FermionValue i) :=
   Module.finrank_pi_fintype ℂ
 
 end GaugeFieldData

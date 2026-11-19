@@ -65,14 +65,11 @@ def Physlib.Imports.getUserConsts (imp : Import) : CoreM (Array ConstantInfo) :=
   let consts ← Imports.getConsts imp
   consts.filterM fun c =>
     let name := c.name
-    return !name.isInternal
-      && !isCasesOnRecursor env name
-      && !isRecOnRecursor env name
-      && !isNoConfusion env name
-      && !isBRecOnRecursor env name
-      && !isAuxRecursorWithSuffix env name brecOnSuffix
-      && !isAuxRecursorWithSuffix env name belowSuffix
-      && !isAuxRecursorWithSuffix env name belowSuffix
+    return !name.isInternal && ! isCasesOnRecursor env name && ! isRecOnRecursor env name
+      && ! isNoConfusion env name && ! isBRecOnRecursor env name
+      && ! isAuxRecursorWithSuffix env name brecOnSuffix
+      && ! isAuxRecursorWithSuffix env name belowSuffix
+      && ! isAuxRecursorWithSuffix env name belowSuffix
       /- Removing syntax category declarations. -/
       && name.toString != "TensorTree.indexExprTT.quot"
       && name.toString != "TensorTree.tensorExprTT.quot"
@@ -95,8 +92,7 @@ namespace Lean.Name
 variable {m} [Monad m] [MonadEnv m] [MonadLiftT BaseIO m]
 
 /-- Turns a name into a Lean file. -/
-def toRelativeFilePath (c : Name) : System.FilePath :=
-  System.FilePath.join "." c.toFilePath
+def toRelativeFilePath (c : Name) : System.FilePath := System.FilePath.join "." c.toFilePath
 
 /-- Turns a name, which represents a module, into a link to github. -/
 def toGitHubLink (c : Name) (line : Nat) : String :=
@@ -112,8 +108,7 @@ def lineNumber (c : Name) : m Nat := do
 def fileName (c : Name) : m Name := do
   let env ← getEnv
   match env.getModuleIdxFor? c with
-  | some idx =>
-      pure <| env.header.moduleNames[idx]!
+  | some idx => pure <| env.header.moduleNames[idx]!
   | none => panic! s!"{c} is a declaration without position"
 
 /-- Returns the location of a name. -/
@@ -121,8 +116,8 @@ def location (c : Name) : m String := do
   let env ← getEnv
   match env.getModuleIdxFor? c with
   | some idx =>
-      let modName := env.header.moduleNames[idx]!
-      pure s!"{modName.toRelativeFilePath}:{← c.lineNumber} {c}"
+    let modName := env.header.moduleNames[idx]!
+    pure s!"{modName.toRelativeFilePath}:{← c.lineNumber} {c}"
   | none => panic! s!"{c} is a declaration without position"
 
 /-- Determines if a name has a location. -/
@@ -153,20 +148,22 @@ def getDeclString (name : Name) : CoreM String := do
       let modName := env.header.moduleNames[idx]!
       let fileContent ← IO.FS.readFile modName.toRelativeFilePath
       let fileMap := fileContent.toFileMap
-      return (String.Pos.Raw.extract fileMap.source)
-        (fileMap.ofPosition pos) (fileMap.ofPosition endPos)
+      return (String.Pos.Raw.extract fileMap.source) (fileMap.ofPosition pos)
+        (fileMap.ofPosition endPos)
     | none => return ""
   | none => return ""
 
-/-- Given a name, returns the source code defining that name,
-  starting with the def ... or lemma... etc. -/
+/--
+Given a name, returns the source code defining that name,
+starting with the def ... or lemma... etc.
+-/
 def getDeclStringNoDoc (name : Name) : CoreM String := do
   let declarationString ← getDeclString name
   let headerLine (line : String) : Bool :=
     line.startsWith "def " ∨ line.startsWith "lemma " ∨ line.startsWith "inductive "
-    ∨ line.startsWith "structure " ∨ line.startsWith "theorem "
-    ∨ line.startsWith "instance " ∨ line.startsWith "abbrev " ∨
-    line.startsWith "noncomputable def " ∨ line.startsWith "noncomputable abbrev "
+      ∨ line.startsWith "structure " ∨ line.startsWith "theorem " ∨ line.startsWith "instance "
+      ∨ line.startsWith "abbrev " ∨ line.startsWith "noncomputable def "
+      ∨ line.startsWith "noncomputable abbrev "
   let lines := declarationString.splitOn "\n"
   match lines.findIdx? headerLine with
   | none => panic! s!"{name} has no header line"
@@ -200,15 +197,13 @@ def allDocStrings : CoreM (Array String) := do
 def noDefsNoDocString : CoreM Nat := do
   let imports ← Physlib.allImports
   let x ← imports.mapM Physlib.Imports.getUserConsts
-  x.flatFilterSizeM fun c =>
-    return c.isDef && (← c.name.hasPos) && !(← c.name.hasDocString)
+  x.flatFilterSizeM fun c => return c.isDef && (← c.name.hasPos) && !(← c.name.hasDocString)
 
 /-- Number of definitions without a doc-string. -/
 def noLemmasNoDocString : CoreM Nat := do
   let imports ← Physlib.allImports
   let x ← imports.mapM Physlib.Imports.getUserConsts
-  x.flatFilterSizeM fun c =>
-    return !c.isDef && (← c.name.hasPos) && !(← c.name.hasDocString)
+  x.flatFilterSizeM fun c => return !c.isDef && (← c.name.hasPos) && !(← c.name.hasDocString)
 
 /-- The number of lines in Physlib. -/
 def noLines : IO Nat := do

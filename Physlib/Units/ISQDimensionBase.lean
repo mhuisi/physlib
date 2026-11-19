@@ -37,10 +37,12 @@ PhysLib's default `LTMCTDimensionBase` in two ways:
 
 open Dimension
 
-/-- The seven ISQ base quantities (ISO/IEC 80000-1; VIM 3rd edition). Unlike
-  `LTMCTDimensionBase`, electric current is the electromagnetic base quantity (so
-  charge is derived), and amount of substance and luminous intensity are further
-  base quantities. -/
+/--
+The seven ISQ base quantities (ISO/IEC 80000-1; VIM 3rd edition). Unlike
+`LTMCTDimensionBase`, electric current is the electromagnetic base quantity (so
+charge is derived), and amount of substance and luminous intensity are further
+base quantities.
+-/
 inductive ISQDimensionBase where
   /-- The length base quantity. -/
   | length
@@ -73,28 +75,28 @@ lemma card_eq_seven : Fintype.card ISQDimensionBase = 7 := by decide
 def charge : Dimension ISQDimensionBase := single .current * single .time
 
 /-- The derived charge dimension has electric-current exponent `1`. -/
-lemma charge_exponent_current : charge.exponent .current = 1 := by
-  simp [charge, single_exponent]
+lemma charge_exponent_current : charge.exponent .current = 1 := by simp [charge, single_exponent]
 
 /-- The derived charge dimension has time exponent `1`. -/
-lemma charge_exponent_time : charge.exponent .time = 1 := by
-  simp [charge, single_exponent]
+lemma charge_exponent_time : charge.exponent .time = 1 := by simp [charge, single_exponent]
 
 /-- The derived charge dimension has mass exponent `0`. -/
-lemma charge_exponent_mass : charge.exponent .mass = 0 := by
-  simp [charge, single_exponent]
+lemma charge_exponent_mass : charge.exponent .mass = 0 := by simp [charge, single_exponent]
 
-/-- Amount of substance is an independent base dimension (absent from
-  `LTMCTDimensionBase`). -/
+/--
+Amount of substance is an independent base dimension (absent from
+`LTMCTDimensionBase`).
+-/
 lemma single_amount_ne_one : single (.amount : ISQDimensionBase) ≠ 1 := by
   intro h
   have := congrArg (fun d => Dimension.exponent d .amount) h
   simp [single_exponent] at this
 
-/-- Luminous intensity is an independent base dimension (absent from
-  `LTMCTDimensionBase`). -/
-lemma single_luminousIntensity_ne_one :
-    single (.luminousIntensity : ISQDimensionBase) ≠ 1 := by
+/--
+Luminous intensity is an independent base dimension (absent from
+`LTMCTDimensionBase`).
+-/
+lemma single_luminousIntensity_ne_one : single (.luminousIntensity : ISQDimensionBase) ≠ 1 := by
   intro h
   have := congrArg (fun d => Dimension.exponent d .luminousIntensity) h
   simp [single_exponent] at this

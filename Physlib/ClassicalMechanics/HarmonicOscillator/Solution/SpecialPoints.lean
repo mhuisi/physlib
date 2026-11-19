@@ -44,9 +44,7 @@ References for the classical harmonic oscillator include:
 
 -/
 
-@[expose] public
-
-noncomputable section
+@[expose] public noncomputable section
 
 namespace ClassicalMechanics.HarmonicOscillator
 
@@ -64,22 +62,26 @@ The amplitude-phase normal form was first proved for data already expressed as a
 
 -/
 
-/-- Every trajectory of the harmonic oscillator is a single shifted cosine after converting its
-  initial conditions to amplitude-phase form. -/
-lemma trajectory_eq_cos (IC : InitialConditions) (t : Time) :
-    IC.trajectory S t =
-      EuclideanSpace.single 0 ((AmplitudePhase.fromInitialConditions S IC).A *
-        cos (S.ω * t - (AmplitudePhase.fromInitialConditions S IC).φ)) := by
+/--
+Every trajectory of the harmonic oscillator is a single shifted cosine after converting its
+initial conditions to amplitude-phase form.
+-/
+lemma trajectory_eq_cos (IC : InitialConditions) (t : Time)
+    : IC.trajectory S t
+      = EuclideanSpace.single 0
+        ((AmplitudePhase.fromInitialConditions S IC).A
+          * cos (S.ω * t - (AmplitudePhase.fromInitialConditions S IC).φ)) := by
   conv_lhs =>
     rw [← AmplitudePhase.toInitialConditions_fromInitialConditions S IC]
   exact AmplitudePhase.toInitialConditions_trajectory_eq_cos S
     (AmplitudePhase.fromInitialConditions S IC) t
 
 /-- The velocity of every trajectory is the corresponding shifted sine in amplitude-phase form. -/
-lemma trajectory_velocity_eq_sin (IC : InitialConditions) (t : Time) :
-    ∂ₜ (IC.trajectory S) t =
-      EuclideanSpace.single 0 (-((AmplitudePhase.fromInitialConditions S IC).A * S.ω *
-        sin (S.ω * t.val - (AmplitudePhase.fromInitialConditions S IC).φ))) := by
+lemma trajectory_velocity_eq_sin (IC : InitialConditions) (t : Time)
+    : ∂ₜ (IC.trajectory S) t
+      = EuclideanSpace.single 0
+        (-((AmplitudePhase.fromInitialConditions S IC).A * S.ω
+          * sin (S.ω * t.val - (AmplitudePhase.fromInitialConditions S IC).φ))) := by
   conv_lhs =>
     rw [← AmplitudePhase.toInitialConditions_fromInitialConditions S IC]
   exact AmplitudePhase.toInitialConditions_velocity_eq_sin S
@@ -95,22 +97,22 @@ integer multiple of `π`.
 
 -/
 
-/-- For nonzero amplitude, the velocity vanishes exactly when the sine factor in
-  amplitude-phase form vanishes. -/
-lemma trajectory_velocity_eq_zero_iff_sin_eq_zero (IC : InitialConditions)
-    (hA : (AmplitudePhase.fromInitialConditions S IC).A ≠ 0) (t : Time) :
-    ∂ₜ (IC.trajectory S) t = 0 ↔
-      sin (S.ω * t.val - (AmplitudePhase.fromInitialConditions S IC).φ) = 0 := by
+/--
+For nonzero amplitude, the velocity vanishes exactly when the sine factor in
+amplitude-phase form vanishes.
+-/
+lemma trajectory_velocity_eq_zero_iff_sin_eq_zero
+    (IC : InitialConditions) (hA : (AmplitudePhase.fromInitialConditions S IC).A ≠ 0) (t : Time)
+    : ∂ₜ (IC.trajectory S) t = 0
+      ↔ sin (S.ω * t.val - (AmplitudePhase.fromInitialConditions S IC).φ) = 0 := by
   rw [trajectory_velocity_eq_sin]
   simp [hA, S.ω_ne_zero]
 
 /-- For nonzero amplitude, the velocity is zero exactly at phase times `φ + nπ`. -/
-lemma trajectory_velocity_eq_zero_iff_exists_int (IC : InitialConditions)
-    (hA : (AmplitudePhase.fromInitialConditions S IC).A ≠ 0) (t : Time) :
-    ∂ₜ (IC.trajectory S) t = 0 ↔
-      ∃ n : ℤ,
-        (t : ℝ) =
-          ((AmplitudePhase.fromInitialConditions S IC).φ + n * π) / S.ω := by
+lemma trajectory_velocity_eq_zero_iff_exists_int
+    (IC : InitialConditions) (hA : (AmplitudePhase.fromInitialConditions S IC).A ≠ 0) (t : Time)
+    : ∂ₜ (IC.trajectory S) t = 0
+      ↔ ∃ n : ℤ, (t : ℝ) = ((AmplitudePhase.fromInitialConditions S IC).φ + n * π) / S.ω := by
   rw [trajectory_velocity_eq_zero_iff_sin_eq_zero S IC hA t]
   constructor
   · intro h
@@ -138,10 +140,9 @@ identically zero, so both sides of the equivalence hold at every time.
 -/
 
 /-- The velocity vanishes exactly when the trajectory has norm equal to the amplitude. -/
-lemma trajectory_velocity_eq_zero_iff_norm_eq_amplitude (IC : InitialConditions)
-    (t : Time) :
-    ∂ₜ (IC.trajectory S) t = 0 ↔
-      ‖IC.trajectory S t‖ = (AmplitudePhase.fromInitialConditions S IC).A := by
+lemma trajectory_velocity_eq_zero_iff_norm_eq_amplitude (IC : InitialConditions) (t : Time)
+    : ∂ₜ (IC.trajectory S) t = 0
+      ↔ ‖IC.trajectory S t‖ = (AmplitudePhase.fromInitialConditions S IC).A := by
   by_cases hA : (AmplitudePhase.fromInitialConditions S IC).A = 0
   · rw [trajectory_velocity_eq_sin, trajectory_eq_cos]
     simp [hA]
@@ -154,11 +155,9 @@ lemma trajectory_velocity_eq_zero_iff_norm_eq_amplitude (IC : InitialConditions)
   have hA_pos : 0 < A := lt_of_le_of_ne hA_nonneg (Ne.symm hA')
   constructor
   · intro hsin
-    rcases Real.sin_eq_zero_iff_cos_eq.mp hsin with hcos | hcos <;>
-      simp [hcos, abs_of_pos hA_pos]
+    rcases Real.sin_eq_zero_iff_cos_eq.mp hsin with hcos | hcos <;> simp [hcos, abs_of_pos hA_pos]
   · intro hnorm
-    have hnorm' : |A * cos θ| = A := by
-      simpa using hnorm
+    have hnorm' : |A * cos θ| = A := by simpa using hnorm
     have hcos_abs : |cos θ| = 1 := by
       rw [abs_mul, abs_of_pos hA_pos] at hnorm'
       exact mul_left_cancel₀ hA' (hnorm'.trans (mul_one A).symm)
@@ -175,23 +174,26 @@ of `π / 2`.
 
 -/
 
-/-- For nonzero amplitude, the trajectory passes through zero exactly when the cosine factor in
-  amplitude-phase form vanishes. -/
-lemma trajectory_eq_zero_iff_cos_eq_zero (IC : InitialConditions)
-    (hA : (AmplitudePhase.fromInitialConditions S IC).A ≠ 0) (t : Time) :
-    IC.trajectory S t = 0 ↔
-      cos (S.ω * t.val - (AmplitudePhase.fromInitialConditions S IC).φ) = 0 := by
+/--
+For nonzero amplitude, the trajectory passes through zero exactly when the cosine factor in
+amplitude-phase form vanishes.
+-/
+lemma trajectory_eq_zero_iff_cos_eq_zero
+    (IC : InitialConditions) (hA : (AmplitudePhase.fromInitialConditions S IC).A ≠ 0) (t : Time)
+    : IC.trajectory S t = 0
+      ↔ cos (S.ω * t.val - (AmplitudePhase.fromInitialConditions S IC).φ) = 0 := by
   rw [trajectory_eq_cos]
   simp [hA]
 
-/-- For nonzero amplitude, the trajectory passes through zero exactly at phase times
-  `φ + (2n + 1)π / 2`. -/
-lemma trajectory_eq_zero_iff_exists_int (IC : InitialConditions)
-    (hA : (AmplitudePhase.fromInitialConditions S IC).A ≠ 0) (t : Time) :
-    IC.trajectory S t = 0 ↔
-      ∃ n : ℤ,
-        (t : ℝ) =
-          ((AmplitudePhase.fromInitialConditions S IC).φ + (2 * n + 1) * π / 2) / S.ω := by
+/--
+For nonzero amplitude, the trajectory passes through zero exactly at phase times
+`φ + (2n + 1)π / 2`.
+-/
+lemma trajectory_eq_zero_iff_exists_int
+    (IC : InitialConditions) (hA : (AmplitudePhase.fromInitialConditions S IC).A ≠ 0) (t : Time)
+    : IC.trajectory S t = 0
+      ↔ ∃ n : ℤ,
+        (t : ℝ) = ((AmplitudePhase.fromInitialConditions S IC).φ + (2 * n + 1) * π / 2) / S.ω := by
   rw [trajectory_eq_zero_iff_cos_eq_zero S IC hA t]
   constructor
   · intro h

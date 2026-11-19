@@ -48,34 +48,39 @@ noncomputable section
 namespace TauCeti
 
 /-- The Pontryagin dual of a second-countable locally compact monoid is Polish. -/
-instance instPolishSpacePontryaginDual {A : Type*} [Monoid A] [TopologicalSpace A]
-    [LocallyCompactSpace A] [SecondCountableTopology A] : PolishSpace (PontryaginDual A) :=
+instance instPolishSpacePontryaginDual
+    {A : Type*} [Monoid A] [TopologicalSpace A] [LocallyCompactSpace A] [SecondCountableTopology A]
+    : PolishSpace (PontryaginDual A) :=
   inferInstanceAs (PolishSpace (A →ₜ* Circle))
 
-/-- The unit circle is the Pontryagin dual of `ℤ`: the point `z` corresponds to the character
-`n ↦ zⁿ`, and a character corresponds to its value at `1`. -/
+/--
+The unit circle is the Pontryagin dual of `ℤ`: the point `z` corresponds to the character
+`n ↦ zⁿ`, and a character corresponds to its value at `1`.
+-/
 def circleEquivPontryaginDualInt : Circle ≃ₜ* PontryaginDual (Multiplicative ℤ) where
   toFun z := (⟨zpowersHom Circle z, continuous_of_discreteTopology⟩ : Multiplicative ℤ →ₜ* Circle)
   invFun χ := χ (Multiplicative.ofAdd 1)
   left_inv z := zpow_one z
-  right_inv χ := PontryaginDual.ext fun n ↦
-    DFunLike.congr_fun ((zpowersHom Circle).apply_symm_apply χ.toMonoidHom) n
+  right_inv χ :=
+    PontryaginDual.ext fun n ↦
+      DFunLike.congr_fun ((zpowersHom Circle).apply_symm_apply χ.toMonoidHom) n
   map_mul' z w := PontryaginDual.ext fun n ↦ mul_zpow z w n.toAdd
-  continuous_toFun := ContinuousMonoidHom.continuous_of_continuous_uncurry _ <|
-    continuous_prod_of_discrete_right.mpr fun n ↦ continuous_zpow n.toAdd
+  continuous_toFun :=
+    ContinuousMonoidHom.continuous_of_continuous_uncurry _ <|
+      continuous_prod_of_discrete_right.mpr fun n ↦ continuous_zpow n.toAdd
   continuous_invFun :=
     continuous_eval_const (F := Multiplicative ℤ →ₜ* Circle) (Multiplicative.ofAdd 1)
 
 /-- The character attached to `z` sends `n` to `zⁿ`. -/
 @[simp]
-lemma circleEquivPontryaginDualInt_apply_apply (z : Circle) (n : Multiplicative ℤ) :
-    circleEquivPontryaginDualInt z n = z ^ n.toAdd :=
+lemma circleEquivPontryaginDualInt_apply_apply (z : Circle) (n : Multiplicative ℤ)
+    : circleEquivPontryaginDualInt z n = z ^ n.toAdd :=
   (rfl)
 
 /-- The point of the circle attached to a character of `ℤ` is its value at `1`. -/
 @[simp]
-lemma circleEquivPontryaginDualInt_symm_apply (χ : PontryaginDual (Multiplicative ℤ)) :
-    circleEquivPontryaginDualInt.symm χ = χ (Multiplicative.ofAdd 1) :=
+lemma circleEquivPontryaginDualInt_symm_apply (χ : PontryaginDual (Multiplicative ℤ))
+    : circleEquivPontryaginDualInt.symm χ = χ (Multiplicative.ofAdd 1) :=
   (rfl)
 
 end TauCeti

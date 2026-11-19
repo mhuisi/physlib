@@ -37,8 +37,10 @@ existence of the length unit of meters, and construct all other length units fro
 
 @[expose] public section
 
-/-- The choices of translationally-invariant metrics on the space-manifold.
-  Such a choice corresponds to a choice of units for length. -/
+/--
+The choices of translationally-invariant metrics on the space-manifold.
+Such a choice corresponds to a choice of units for length.
+-/
 structure LengthUnit where
   /-- The underlying scale of the unit. -/
   val : ℝ
@@ -86,22 +88,22 @@ The references for the numerical definitions used below are:
 def meters : LengthUnit := ⟨1, by norm_num⟩
 
 /-- The length unit of femtometers (10⁻¹⁵ of a meter). -/
-noncomputable def femtometers : LengthUnit := scale ((1/10) ^ (15)) meters
+noncomputable def femtometers : LengthUnit := scale ((1 / 10) ^ (15)) meters
 
 /-- The length unit of picometers (10⁻¹² of a meter). -/
-noncomputable def picometers : LengthUnit := scale ((1/10) ^ (12)) meters
+noncomputable def picometers : LengthUnit := scale ((1 / 10) ^ (12)) meters
 
 /-- The length unit of nanometers (10⁻⁹ of a meter). -/
-noncomputable def nanometers : LengthUnit := scale ((1/10) ^ (9)) meters
+noncomputable def nanometers : LengthUnit := scale ((1 / 10) ^ (9)) meters
 
 /-- The length unit of micrometers (10⁻⁶ of a meter). -/
-noncomputable def micrometers : LengthUnit := scale ((1/10) ^ (6)) meters
+noncomputable def micrometers : LengthUnit := scale ((1 / 10) ^ (6)) meters
 
 /-- The length unit of millimeters (10⁻³ of a meter). -/
-noncomputable def millimeters : LengthUnit := scale ((1/10) ^ (3)) meters
+noncomputable def millimeters : LengthUnit := scale ((1 / 10) ^ (3)) meters
 
 /-- The length unit of centimeters (10⁻² of a meter). -/
-noncomputable def centimeters : LengthUnit := scale ((1/10) ^ (2)) meters
+noncomputable def centimeters : LengthUnit := scale ((1 / 10) ^ (2)) meters
 
 /-- The length unit of inch (0.0254 meters). -/
 noncomputable def inches : LengthUnit := scale (0.0254) meters
@@ -140,8 +142,8 @@ noncomputable def astronomicalUnits : LengthUnit := scale (149597870700) meters
 noncomputable def lightYears : LengthUnit := scale (9460730472580800) meters
 
 /-- The length unit of a parsec (648,000/π astronomicalUnits). -/
-noncomputable def parsecs : LengthUnit := scale (648000/Real.pi) astronomicalUnits
-  (by norm_num; exact Real.pi_pos)
+noncomputable def parsecs : LengthUnit :=
+  scale (648000 / Real.pi) astronomicalUnits (by norm_num; exact Real.pi_pos)
 
 /-!
 
@@ -158,10 +160,11 @@ lemma miles_div_yards : miles / yards = (⟨1760, by norm_num⟩ : ℝ≥0) :=
     norm_num
 
 /-- There are exactly 220 yards in a furlong. -/
-lemma furlongs_div_yards : furlongs / yards = (⟨220, by norm_num⟩ : ℝ≥0) := NNReal.eq <| by
-  simp [furlongs, yards]
-  show (201.168 : ℝ) / 0.9144 = ((⟨220, by norm_num⟩ : ℝ≥0) : ℝ)
-  push_cast
-  norm_num
+lemma furlongs_div_yards : furlongs / yards = (⟨220, by norm_num⟩ : ℝ≥0) :=
+  NNReal.eq <| by
+    simp [furlongs, yards]
+    show (201.168 : ℝ) / 0.9144 = ((⟨220, by norm_num⟩ : ℝ≥0) : ℝ)
+    push_cast
+    norm_num
 
 end LengthUnit

@@ -53,31 +53,32 @@ lemma star_scalar [StarRing R] (x : R) : star (scalar n x) = scalar n (star x) :
   rfl
 
 /-- An entrywise map fixing zero sends a scalar matrix to a scalar matrix. -/
-lemma map_scalar {S : Type*} [CommRing S] (f : R → S) (hf : f 0 = 0) (x : R) :
-    (scalar n x).map f = scalar n (f x) := by
+lemma map_scalar {S : Type*} [CommRing S] (f : R → S) (hf : f 0 = 0) (x : R)
+    : (scalar n x).map f = scalar n (f x) := by
   rw [scalar_apply, scalar_apply, diagonal_map hf]
 
 /-- A scalar action passes into a scalar matrix. -/
-lemma scalar_smul {M : Type*} [Monoid M] [DistribMulAction M R] (c : M) (x : R) :
-    scalar n (c • x) = c • scalar n x := by
+lemma scalar_smul {M : Type*} [Monoid M] [DistribMulAction M R] (c : M) (x : R)
+    : scalar n (c • x) = c • scalar n x := by
   rw [scalar_apply, scalar_apply, ← diagonal_smul]
   rfl
 
 /-- Conjugation by a unitary scalar fixes a scalar matrix. -/
-lemma scalar_eq_conj [StarRing R] {u : R} (hu : u * star u = 1) (x : R) :
-    scalar n x = scalar n u * scalar n x * star (scalar n u) := by
+lemma scalar_eq_conj [StarRing R] {u : R} (hu : u * star u = 1) (x : R)
+    : scalar n x = scalar n u * scalar n x * star (scalar n u) := by
   rw [star_scalar, ← map_mul, ← map_mul, mul_comm u, mul_assoc, hu, mul_one]
 
 /-- A self-adjoint element as a scalar matrix, real-linearly. -/
-noncomputable def scalarSelfAdjoint [StarRing R] [Algebra ℝ R] [StarModule ℝ R] :
-    ↥(selfAdjoint R) →ₗ[ℝ] Matrix n n R where
+noncomputable def scalarSelfAdjoint [StarRing R] [Algebra ℝ R] [StarModule ℝ R]
+    : ↥(selfAdjoint R) →ₗ[ℝ] Matrix n n R where
   toFun a := scalar n a.1
   map_add' a b := by rw [AddSubgroup.coe_add, map_add]
   map_smul' r a := by rw [selfAdjoint.val_smul, scalar_smul, RingHom.id_apply]
 
 @[simp]
-lemma scalarSelfAdjoint_apply [StarRing R] [Algebra ℝ R] [StarModule ℝ R]
-    (a : ↥(selfAdjoint R)) : (scalarSelfAdjoint (n := n)) a = scalar n a.1 := rfl
+lemma scalarSelfAdjoint_apply [StarRing R] [Algebra ℝ R] [StarModule ℝ R] (a : ↥(selfAdjoint R))
+    : (scalarSelfAdjoint (n := n)) a = scalar n a.1 :=
+  rfl
 
 /-- A `1 × 1` matrix is the scalar matrix of its entry. -/
 lemma eq_scalar_fin_one (A : Matrix (Fin 1) (Fin 1) R) : A = scalar (Fin 1) (A 0 0) := by

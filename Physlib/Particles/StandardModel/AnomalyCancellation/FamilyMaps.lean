@@ -23,8 +23,8 @@ open BigOperators
 set_option backward.isDefEq.respectTransparency false in
 /-- Given a map of for a generic species, the corresponding map for charges. -/
 @[simps!]
-def chargesMapOfSpeciesMap {n m : ℕ} (f : (SMSpecies n).Charges →ₗ[ℚ] (SMSpecies m).Charges) :
-    (SMCharges n).Charges →ₗ[ℚ] (SMCharges m).Charges where
+def chargesMapOfSpeciesMap {n m : ℕ} (f : (SMSpecies n).Charges →ₗ[ℚ] (SMSpecies m).Charges)
+    : (SMCharges n).Charges →ₗ[ℚ] (SMCharges m).Charges where
   toFun S := toSpeciesEquiv.symm (fun i => (LinearMap.comp f (toSpecies i)) S)
   map_add' S T := by
     rw [charges_eq_toSpecies_eq]
@@ -42,8 +42,8 @@ def chargesMapOfSpeciesMap {n m : ℕ} (f : (SMSpecies n).Charges →ₗ[ℚ] (S
 
 /-- The projection of the `m`-family charges onto the first `n`-family charges for species. -/
 @[simps!]
-def speciesFamilyProj {m n : ℕ} (h : n ≤ m) :
-    (SMSpecies m).Charges →ₗ[ℚ] (SMSpecies n).Charges where
+def speciesFamilyProj {m n : ℕ} (h : n ≤ m)
+    : (SMSpecies m).Charges →ₗ[ℚ] (SMSpecies n).Charges where
   toFun S := S ∘ Fin.castLE h
   map_add' _ _ := rfl
   map_smul' _ _ := rfl
@@ -53,11 +53,12 @@ def familyProjection {m n : ℕ} (h : n ≤ m) : (SMCharges m).Charges →ₗ[�
   chargesMapOfSpeciesMap (speciesFamilyProj h)
 
 set_option backward.isDefEq.respectTransparency false in
-/-- For species, the embedding of the `m`-family charges onto the `n`-family charges, with all
-other charges zero. -/
+/--
+For species, the embedding of the `m`-family charges onto the `n`-family charges, with all
+other charges zero.
+-/
 @[simps!]
-def speciesEmbed (m n : ℕ) :
-    (SMSpecies m).Charges →ₗ[ℚ] (SMSpecies n).Charges where
+def speciesEmbed (m n : ℕ) : (SMSpecies m).Charges →ₗ[ℚ] (SMSpecies n).Charges where
   toFun S := fun i =>
     if hi : i.val < m then
       S ⟨i, hi⟩
@@ -78,22 +79,27 @@ def speciesEmbed (m n : ℕ) :
     · rw [dite_eq_right hi, dite_eq_right hi]
       exact Eq.symm (Rat.mul_zero a)
 
-/-- The embedding of the `m`-family charges onto the `n`-family charges, with all
-other charges zero. -/
+/--
+The embedding of the `m`-family charges onto the `n`-family charges, with all
+other charges zero.
+-/
 def familyEmbedding (m n : ℕ) : (SMCharges m).Charges →ₗ[ℚ] (SMCharges n).Charges :=
   chargesMapOfSpeciesMap (speciesEmbed m n)
 
-/-- For species, the embedding of the `1`-family charges into the `n`-family charges in
-a universal manner. -/
+/--
+For species, the embedding of the `1`-family charges into the `n`-family charges in
+a universal manner.
+-/
 @[simps!]
-def speciesFamilyUniversial (n : ℕ) :
-    (SMSpecies 1).Charges →ₗ[ℚ] (SMSpecies n).Charges where
+def speciesFamilyUniversial (n : ℕ) : (SMSpecies 1).Charges →ₗ[ℚ] (SMSpecies n).Charges where
   toFun S _ := S ⟨0, Nat.zero_lt_succ 0⟩
   map_add' _ _ := rfl
   map_smul' _ _ := rfl
 
-/-- The embedding of the `1`-family charges into the `n`-family charges in
-a universal manner. -/
+/--
+The embedding of the `1`-family charges into the `n`-family charges in
+a universal manner.
+-/
 def familyUniversal (n : ℕ) : (SMCharges 1).Charges →ₗ[ℚ] (SMCharges n).Charges :=
   chargesMapOfSpeciesMap (speciesFamilyUniversial n)
 

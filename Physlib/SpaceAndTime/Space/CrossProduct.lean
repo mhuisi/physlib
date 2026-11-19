@@ -48,9 +48,12 @@ open Time Matrix
 -/
 
 set_option quotPrecheck false in
-/-- Cross product in `EuclideanSpace ℝ (Fin 3)`. Uses `⨯` which is typed using `\X` or
-`\vectorproduct` or `\crossproduct`. -/
-infixl:70 " ⨯ₑ₃ " => fun a b => (WithLp.equiv 2 (Fin 3 → ℝ)).symm
+/--
+Cross product in `EuclideanSpace ℝ (Fin 3)`. Uses `⨯` which is typed using `\X` or
+`\vectorproduct` or `\crossproduct`.
+-/
+infixl:70 " ⨯ₑ₃ " =>
+  fun a b => (WithLp.equiv 2 (Fin 3 → ℝ)).symm
     (WithLp.equiv 2 (Fin 3 → ℝ) a ⨯₃ WithLp.equiv 2 (Fin 3 → ℝ) b)
 
 /-!
@@ -60,16 +63,15 @@ infixl:70 " ⨯ₑ₃ " => fun a b => (WithLp.equiv 2 (Fin 3 → ℝ)).symm
 -/
 
 /-- Cross product and fderiv commute. -/
-lemma fderiv_cross_commute {t : Time} {s : EuclideanSpace ℝ (Fin 3)}
-    {f : Time → EuclideanSpace ℝ (Fin 3)} (hf : Differentiable ℝ f) :
-    s ⨯ₑ₃ (fderiv ℝ (fun t' => f t') t) 1
-    = fderiv ℝ (fun t' => s ⨯ₑ₃ (f t')) t 1 := by
-  have h (i j : Fin 3) : s i * (fderiv ℝ (fun u => f u) t) 1 j -
-      s j * (fderiv ℝ (fun u => f u) t) 1 i
-      = (fderiv ℝ (fun t => s i * f t j - s j * f t i) t) 1:= by
+lemma fderiv_cross_commute
+    {t : Time} {s : EuclideanSpace ℝ (Fin 3)} {f : Time → EuclideanSpace ℝ (Fin 3)}
+    (hf : Differentiable ℝ f)
+    : s ⨯ₑ₃ (fderiv ℝ (fun t' => f t') t) 1 = fderiv ℝ (fun t' => s ⨯ₑ₃ (f t')) t 1 := by
+  have h (i j : Fin 3)
+      : s i * (fderiv ℝ (fun u => f u) t) 1 j - s j * (fderiv ℝ (fun u => f u) t) 1 i
+        = (fderiv ℝ (fun t => s i * f t j - s j * f t i) t) 1 := by
     rw [fderiv_fun_sub, fderiv_const_mul, fderiv_const_mul]
-    · simp only [FunLike.coe_sub, FunLike.coe_smul, Pi.sub_apply,
-        Pi.smul_apply, smul_eq_mul]
+    · simp only [FunLike.coe_sub, FunLike.coe_smul, Pi.sub_apply, Pi.smul_apply, smul_eq_mul]
       rw [Time.fderiv_euclid, Time.fderiv_euclid]
       · intro i
         repeat fun_prop
@@ -80,28 +82,28 @@ lemma fderiv_cross_commute {t : Time} {s : EuclideanSpace ℝ (Fin 3)}
     · fun_prop
   rw [crossProduct]
   ext i
-  fin_cases i <;>
-  · simp [Nat.succ_eq_add_one, Nat.reduceAdd, Fin.isValue, WithLp.equiv_apply,
-      LinearMap.mk₂_apply, Fin.reduceFinMk, WithLp.equiv_symm_apply,
-      PiLp.toLp_apply, cons_val]
-    rw [h]
-    simp only [Fin.isValue]
-    rw [← Time.fderiv_euclid]
-    simp [Fin.isValue, cons_val_zero]
-    apply Time.differentiable_euclid
-    intro i
-    fin_cases i
-    · simp [Fin.zero_eta, Fin.isValue]
-      fun_prop
-    · simp [Fin.isValue]
-      fun_prop
-    · simp [Fin.isValue]
-      fun_prop
+  fin_cases i
+    <;> ·
+      simp [Nat.succ_eq_add_one, Nat.reduceAdd, Fin.isValue, WithLp.equiv_apply,
+        LinearMap.mk₂_apply, Fin.reduceFinMk, WithLp.equiv_symm_apply, PiLp.toLp_apply, cons_val]
+      rw [h]
+      simp only [Fin.isValue]
+      rw [← Time.fderiv_euclid]
+      simp [Fin.isValue, cons_val_zero]
+      apply Time.differentiable_euclid
+      intro i
+      fin_cases i
+      · simp [Fin.zero_eta, Fin.isValue]
+        fun_prop
+      · simp [Fin.isValue]
+        fun_prop
+      · simp [Fin.isValue]
+        fun_prop
 
 /-- Cross product and time derivative commute. -/
-lemma time_deriv_cross_commute {s : EuclideanSpace ℝ (Fin 3)} {f : Time → EuclideanSpace ℝ (Fin 3)}
-    (hf : Differentiable ℝ f) :
-    s ⨯ₑ₃ (∂ₜ (fun t => f t) t) = ∂ₜ (fun t => s ⨯ₑ₃ (f t)) t := by
+lemma time_deriv_cross_commute
+    {s : EuclideanSpace ℝ (Fin 3)} {f : Time → EuclideanSpace ℝ (Fin 3)} (hf : Differentiable ℝ f)
+    : s ⨯ₑ₃ (∂ₜ (fun t => f t) t) = ∂ₜ (fun t => s ⨯ₑ₃ (f t)) t := by
   repeat rw [Time.deriv]
   rw [fderiv_cross_commute]
   fun_prop
@@ -112,20 +114,22 @@ lemma time_deriv_cross_commute {s : EuclideanSpace ℝ (Fin 3)} {f : Time → Eu
 
 -/
 
-lemma inner_cross_self (v w : EuclideanSpace ℝ (Fin 3)) :
-    inner ℝ v (w ⨯ₑ₃ v) = 0 := by
-  cases v using WithLp.rec with | _ v =>
-  cases w using WithLp.rec with | _ w =>
-  simp only [WithLp.equiv_apply, WithLp.equiv_symm_apply]
-  change (crossProduct w) v ⬝ᵥ v = _
-  rw [dotProduct_comm, dot_cross_self]
+lemma inner_cross_self (v w : EuclideanSpace ℝ (Fin 3)) : inner ℝ v (w ⨯ₑ₃ v) = 0 := by
+  cases v using WithLp.rec with
+  | _ v =>
+    cases w using WithLp.rec with
+    | _ w =>
+      simp only [WithLp.equiv_apply, WithLp.equiv_symm_apply]
+      change (crossProduct w) v ⬝ᵥ v = _
+      rw [dotProduct_comm, dot_cross_self]
 
-lemma inner_self_cross (v w : EuclideanSpace ℝ (Fin 3)) :
-    inner ℝ v (v ⨯ₑ₃ w) = 0 := by
-  cases v using WithLp.rec with | _ v =>
-  cases w using WithLp.rec with | _ w =>
-  simp only [WithLp.equiv_apply, WithLp.equiv_symm_apply, PiLp.inner_apply]
-  change (crossProduct v) w ⬝ᵥ v = _
-  rw [dotProduct_comm, dot_self_cross]
+lemma inner_self_cross (v w : EuclideanSpace ℝ (Fin 3)) : inner ℝ v (v ⨯ₑ₃ w) = 0 := by
+  cases v using WithLp.rec with
+  | _ v =>
+    cases w using WithLp.rec with
+    | _ w =>
+      simp only [WithLp.equiv_apply, WithLp.equiv_symm_apply, PiLp.inner_apply]
+      change (crossProduct v) w ⬝ᵥ v = _
+      rw [dotProduct_comm, dot_self_cross]
 
 end Space

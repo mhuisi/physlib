@@ -60,17 +60,21 @@ the data file keeps the `file (names)` form the website already renders.
 
 -/
 
-/-- One entry of the `## Lean References` list: the number it is cited by,
-the Lean file, and the declarations claimed to be in it. -/
+/--
+One entry of the `## Lean References` list: the number it is cited by,
+the Lean file, and the declarations claimed to be in it.
+-/
 structure APIMapReference where
   index : Nat
   file : String
   declarations : List String
 deriving Inhabited
 
-/-- One claim of the content: the prose closed by a run of citations.
+/--
+One claim of the content: the prose closed by a run of citations.
 `citations` are the reference numbers in that run, and `alpha` records whether
-the claim sits in `## Content (Alpha)`. -/
+the claim sits in `## Content (Alpha)`.
+-/
 structure APIMapRequirement where
   description : String := ""
   done : Bool := false
@@ -92,8 +96,7 @@ def APIMapData.doneCount (map : APIMapData) : Nat :=
   (map.requirements.filter (fun requirement => requirement.done)).length
 
 /-- The number of claims of a map. -/
-def APIMapData.totalCount (map : APIMapData) : Nat :=
-  map.requirements.length
+def APIMapData.totalCount (map : APIMapData) : Nat := map.requirements.length
 
 /-- The dotted module context of a map, e.g. `Physlib.SpaceAndTime.Time`. -/
 def APIMapData.moduleContext (map : APIMapData) : String :=
@@ -105,14 +108,18 @@ def APIMapData.githubLink (map : APIMapData) : String :=
   -- the repository-relative API-map path instead of a declaration.
   s!"https://github.com/leanprover-community/physlib/blob/master/{map.path}"
 
-/-- The `file (names)` form of a requirement's location, built from the
-entries it cites, or `N/A` when it cites none. -/
+/--
+The `file (names)` form of a requirement's location, built from the
+entries it cites, or `N/A` when it cites none.
+-/
 def APIMapData.locationOf (map : APIMapData) (requirement : APIMapRequirement) : String :=
-  let groups := requirement.citations.filterMap (fun index =>
-    (map.declarations.find? (fun reference => reference.index == index)).map
-      (fun reference =>
-        if reference.declarations.isEmpty then reference.file
-        else reference.file ++ " (" ++ String.intercalate ", " reference.declarations ++ ")"))
+  let groups :=
+    requirement.citations.filterMap (fun index =>
+      (map.declarations.find? (fun reference => reference.index == index)).map (fun reference =>
+        if reference.declarations.isEmpty then
+          reference.file
+        else
+          reference.file ++ " (" ++ String.intercalate ", " reference.declarations ++ ")"))
   if groups.isEmpty then "N/A" else String.intercalate "; " groups
 
 /-!
@@ -124,8 +131,10 @@ def APIMapData.locationOf (map : APIMapData) (requirement : APIMapRequirement) :
 /-- `value` with leading and trailing whitespace removed. -/
 def trim (value : String) : String := value.trimAscii.toString
 
-/-- The text between the first pair of `delimiter`s, and the remainder after
-the closing one. -/
+/--
+The text between the first pair of `delimiter`s, and the remainder after
+the closing one.
+-/
 private def spanBetween (value : String) (delimiter : String) : Option (String × String) := do
   let afterOpen ← (value.splitOn delimiter)[1]?
   let rest := String.intercalate delimiter ((value.splitOn delimiter).drop 2)
@@ -137,22 +146,27 @@ partial def backtickedSpans (value : String) : List String :=
   | some (span, rest) => trim span :: backtickedSpans rest
   | none => []
 
-/-- A piece of content prose: plain text, or one citation `[n, m]` or
-`[TODO]`. -/
+/--
+A piece of content prose: plain text, or one citation `[n, m]` or
+`[TODO]`.
+-/
 inductive ProseToken
   | text (value : String)
   | cite (numbers : List Nat) (todo : Bool)
 
 /-- Reads the inside of a pair of square brackets as a citation, if it is one. -/
 def citationOf (inner : String) : Option ProseToken :=
-  if inner == "TODO" then some (.cite [] true)
+  if inner == "TODO" then
+    some (.cite [] true)
   else
     let parts := (inner.splitOn ",").map trim
     let numbers := parts.filterMap String.toNat?
     if numbers.length == parts.length then some (.cite numbers false) else none
 
-/-- Splits a paragraph into text and citations. Square brackets that are not
-citations, such as the text of a markdown link, stay in the text. -/
+/--
+Splits a paragraph into text and citations. Square brackets that are not
+citations, such as the text of a markdown link, stay in the text.
+-/
 def tokenize (paragraph : String) : List ProseToken :=
   match paragraph.splitOn "[" with
   | [] => []
@@ -176,18 +190,26 @@ def removeLiterature (paragraph : String) : String :=
         if (trim inner).toNat?.isSome then String.intercalate "}" after else "{" ++ part
       | _ => "{" ++ part))
 
-/-- Removes the literature citations `{n}` from a paragraph, together with the
-space a citation leaves before a following full stop or comma. -/
+/--
+Removes the literature citations `{n}` from a paragraph, together with the
+space a citation leaves before a following full stop or comma.
+-/
 def stripLiterature (paragraph : String) : String :=
   ((removeLiterature paragraph).replace " ." ".").replace " ," ","
 
-/-- The claims of a content paragraph. Each run of adjacent citations closes a
+/--
+The claims of a content paragraph. Each run of adjacent citations closes a
 claim, whose description is the prose since the previous run; a run is done
 unless it contains `[TODO]`. Prose after the last run cites nothing and is
-not a claim. -/
+not a claim.
+-/
 def claimsOf (alpha : Bool) (paragraph : String) : List APIMapRequirement := Id.run do
-  let close (prose : String) (numbers : List Nat) (todo : Bool) : APIMapRequirement :=
-    { description := trim prose, done := !todo, citations := numbers, alpha := alpha }
+  let close (prose : String) (numbers : List Nat) (todo : Bool) : APIMapRequirement := {
+    description := trim prose
+    done := !todo
+    citations := numbers
+    alpha := alpha
+  }
   let mut claims : List APIMapRequirement := []
   let mut prose := ""
   let mut run : Option (List Nat × Bool) := none
@@ -198,7 +220,8 @@ def claimsOf (alpha : Bool) (paragraph : String) : List APIMapRequirement := Id.
         claims := claims ++ [close prose numbers todo]
         prose := value
         run := none
-    | .text value, none => prose := prose ++ value
+    | .text value, none =>
+      prose := prose ++ value
     | .cite numbers todo, some (earlier, wasTodo) =>
       run := some (earlier ++ numbers, wasTodo || todo)
     | .cite numbers todo, none => run := some (numbers, todo)
@@ -209,15 +232,18 @@ def claimsOf (alpha : Bool) (paragraph : String) : List APIMapRequirement := Id.
 /-- Reads a `## Lean References` entry, `n. File.lean — `a`, `b``. -/
 def declarationEntry (line : String) : Option APIMapReference := do
   let trimmed := trim line
-  let (number, rest) ← match trimmed.splitOn ". " with
+  let (number, rest) ←
+    match trimmed.splitOn ". " with
     | number :: rest => pure (number, String.intercalate ". " rest)
     | [] => none
   let index ← (trim number).toNat?
   match rest.splitOn " — " with
   | [] => none
   | file :: names =>
-    /- An entry wrapped immediately after its dash leaves the dash on the
-    file; its declarations arrive on the continuation line. -/
+    /-
+    An entry wrapped immediately after its dash leaves the dash on the
+    file; its declarations arrive on the continuation line.
+    -/
     let file := trim file
     let file := if file.endsWith "—" then trim (file.dropEnd 1).toString else file
     let declarations := backtickedSpans (String.intercalate " — " names)
@@ -243,8 +269,10 @@ def sectionOf (heading : String) : Section :=
   | "References" => .literature
   | _ => .unknown
 
-/-- Reads one `API-map.md`. The parser is line-based and graceful: fields it
-cannot read are left at their defaults instead of raising errors. -/
+/--
+Reads one `API-map.md`. The parser is line-based and graceful: fields it
+cannot read are left at their defaults instead of raising errors.
+-/
 def parseAPIMap (path : System.FilePath) : IO APIMapData := do
   let lines := (← IO.FS.readFile path).splitOn "\n"
   let mut map : APIMapData := { path }
@@ -254,8 +282,10 @@ def parseAPIMap (path : System.FilePath) : IO APIMapData := do
   let mut contentParagraphs : List (Bool × String) := []
   for line in lines ++ [""] do
     let trimmed := trim line
-    /- A blank line, a heading, or the end of the file closes the paragraph
-    under construction. -/
+    /-
+    A blank line, a heading, or the end of the file closes the paragraph
+    under construction.
+    -/
     if trimmed == "" || trimmed.startsWith "#" then
       if !paragraph.isEmpty then
         let text := String.intercalate " " paragraph.reverse
@@ -276,19 +306,24 @@ def parseAPIMap (path : System.FilePath) : IO APIMapData := do
       match current with
       | .abstract | .content _ => paragraph := trimmed :: paragraph
       | .references =>
-        /- A long entry may be wrapped over several lines; a line that does not
-        open a new numbered entry continues the previous one. -/
+        /-
+        A long entry may be wrapped over several lines; a line that does not
+        open a new numbered entry continues the previous one.
+        -/
         match declarationEntry trimmed, map.declarations.reverse with
-        | some reference, _ =>
-          map := { map with declarations := map.declarations ++ [reference] }
+        | some reference, _ => map := { map with declarations := map.declarations ++ [reference] }
         | none, last :: earlier =>
-          let continued := { last with
-            declarations := last.declarations ++ backtickedSpans trimmed }
+          let continued := {
+            last with
+            declarations := last.declarations ++ backtickedSpans trimmed
+          }
           map := { map with declarations := earlier.reverse ++ [continued] }
         | none, [] => pure ()
       | .literature =>
-        /- As for the Lean references, a line that does not open a new numbered
-        entry continues the previous one. -/
+        /-
+        As for the Lean references, a line that does not open a new numbered
+        entry continues the previous one.
+        -/
         match trimmed.splitOn ". ", map.references.reverse with
         | number :: rest, _ =>
           if (trim number).toNat?.isSome then
@@ -297,9 +332,11 @@ def parseAPIMap (path : System.FilePath) : IO APIMapData := do
             map := { map with references := earlier.reverse ++ [last ++ " " ++ trimmed] }
         | [], _ => pure ()
       | .preamble | .unknown => pure ()
-  map := { map with
+  map := {
+    map with
     overview := String.intercalate "\n\n" abstractParagraphs
-    requirements := contentParagraphs.flatMap (fun (alpha, text) => claimsOf alpha text) }
+    requirements := contentParagraphs.flatMap (fun (alpha, text) => claimsOf alpha text)
+  }
   return map
 
 /-- The paths of every `API-map.md` under `directory`. -/
@@ -324,62 +361,66 @@ def yamlQuote (value : String) : String :=
 
 /-- A key with a list of quoted strings, or `[]` when empty. -/
 def yamlStringList (key : String) (indent : String) (items : List String) : String :=
-  if items.isEmpty then s!"{indent}{key}: []"
-  else s!"{indent}{key}:" ++
-    String.join (items.map (fun item => s!"\n{indent}  - {yamlQuote item}"))
+  if items.isEmpty then
+    s!"{indent}{key}: []"
+  else
+    s!"{indent}{key}:" ++ String.join (items.map (fun item => s!"\n{indent}  - {yamlQuote item}"))
 
-/-- A key with a quoted scalar, or a `|` block when the value is multi-line.
-Block content is indented two spaces past `indent`. -/
+/--
+A key with a quoted scalar, or a `|` block when the value is multi-line.
+Block content is indented two spaces past `indent`.
+-/
 def yamlScalarOrBlock (key : String) (indent : String) (value : String) : String :=
   let valueLines := value.splitOn "\n"
-  if valueLines.length ≤ 1 then s!"{indent}{key}: {yamlQuote value}"
-  else s!"{indent}{key}: |" ++
-    String.join (valueLines.map (fun valueLine =>
+  if valueLines.length ≤ 1 then
+    s!"{indent}{key}: {yamlQuote value}"
+  else
+    s!"{indent}{key}: |" ++ String.join (valueLines.map (fun valueLine =>
       if valueLine == "" then "\n" else s!"\n{indent}  {valueLine}"))
 
 /-- A Lean reference as a YAML list item. -/
 def APIMapReference.toYAML (reference : APIMapReference) : String :=
-  s!"      - index: {reference.index}\n" ++
-  s!"        file: {yamlQuote reference.file}\n" ++
-  yamlStringList "declarations" "        " reference.declarations
+  s!"      - index: {reference.index}\n" ++ s!"        file: {yamlQuote reference.file}\n"
+    ++ yamlStringList "declarations" "        " reference.declarations
 
 /-- A claim of a map as a YAML list item, with its location. -/
 def APIMapData.requirementYAML (map : APIMapData) (requirement : APIMapRequirement) : String :=
-  yamlScalarOrBlock "- description" "      " requirement.description ++ "\n" ++
-  s!"        done: {requirement.done}\n" ++
-  s!"        location: {yamlQuote (map.locationOf requirement)}\n" ++
-  s!"        citations: [{String.intercalate ", " (requirement.citations.map toString)}]\n" ++
-  s!"        alpha: {requirement.alpha}"
+  yamlScalarOrBlock "- description" "      " requirement.description ++ "\n"
+    ++ s!"        done: {requirement.done}\n"
+    ++ s!"        location: {yamlQuote (map.locationOf requirement)}\n"
+    ++ s!"        citations: [{String.intercalate ", " (requirement.citations.map toString)}]\n"
+    ++ s!"        alpha: {requirement.alpha}"
 
 /-- A map as a YAML list item. -/
 def APIMapData.toYAML (map : APIMapData) : String :=
   let requirementsPart :=
-    if map.requirements.isEmpty then "    requirements: []"
-    else "    requirements:\n" ++
-      String.intercalate "\n" (map.requirements.map (map.requirementYAML ·))
+    if map.requirements.isEmpty then
+      "    requirements: []"
+    else
+      "    requirements:\n"
+        ++ String.intercalate "\n" (map.requirements.map (map.requirementYAML ·))
   let declarationsPart :=
-    if map.declarations.isEmpty then "    leanDeclarations: []"
-    else "    leanDeclarations:\n" ++
-      String.intercalate "\n" (map.declarations.map APIMapReference.toYAML)
-  s!"  - path: {yamlQuote map.path.toString}\n" ++
-  s!"    module: {yamlQuote map.moduleContext}\n" ++
-  s!"    githubLink: {yamlQuote map.githubLink}\n" ++
-  s!"    title: {yamlQuote map.title}\n" ++
-  s!"    alpha: {map.alpha}\n" ++
-  yamlStringList "references" "    " map.references ++ "\n" ++
-  s!"    done: {map.doneCount}\n" ++
-  s!"    total: {map.totalCount}\n" ++
-  yamlScalarOrBlock "overview" "    " map.overview ++ "\n" ++
-  requirementsPart ++ "\n" ++
-  declarationsPart
+    if map.declarations.isEmpty then
+      "    leanDeclarations: []"
+    else
+      "    leanDeclarations:\n"
+        ++ String.intercalate "\n" (map.declarations.map APIMapReference.toYAML)
+  s!"  - path: {yamlQuote map.path.toString}\n" ++ s!"    module: {yamlQuote map.moduleContext}\n"
+    ++ s!"    githubLink: {yamlQuote map.githubLink}\n" ++ s!"    title: {yamlQuote map.title}\n"
+    ++ s!"    alpha: {map.alpha}\n" ++ yamlStringList "references" "    " map.references ++ "\n"
+    ++ s!"    done: {map.doneCount}\n" ++ s!"    total: {map.totalCount}\n"
+    ++ yamlScalarOrBlock "overview" "    " map.overview ++ "\n" ++ requirementsPart ++ "\n"
+    ++ declarationsPart
 
 /-- The YAML data file for all the maps: the totals, then each map. -/
 def indexYAML (maps : List APIMapData) : String :=
   let done := maps.foldl (fun count map => count + map.doneCount) 0
   let total := maps.foldl (fun count map => count + map.totalCount) 0
-  s!"Total:\n  maps: {maps.length}\n  requirements: {total}\n  done: {done}\n" ++
-  "APIMap:\n\n" ++
-  String.intercalate "\n\n" (maps.map APIMapData.toYAML) ++ "\n"
+  s!"Total:\
+      \n  maps: {maps.length}\
+      \n  requirements: {total}\
+      \n  done: {done}\n"
+    ++ "APIMap:\n\n" ++ String.intercalate "\n\n" (maps.map APIMapData.toYAML) ++ "\n"
 
 /-!
 

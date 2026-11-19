@@ -63,8 +63,10 @@ namespace QuantumMechanics
 
 open Complex Constants Real SchwartzMap MeasureTheory SpaceDHilbertSpace
 
-/-- A Pöschl-Teller system is specified by the particle mass `m`, the width parameter `κ`,
-  and family number `N` (all positive). --/
+/--
+A Pöschl-Teller system is specified by the particle mass `m`, the width parameter `κ`,
+and family number `N` (all positive). -
+-/
 structure PoschlTeller where
   /-- mass of the particle -/
   m : ℝ
@@ -88,12 +90,14 @@ variable (Q : PoschlTeller)
 ### A.1. Definition and depth
 -/
 
-/-- The Pöschl-Teller potential is `-(ℏ^2 * κ^2 * N * (N + 1)) / (2 * m * (cosh (κ * x)) ^ 2)`. --/
+/-- The Pöschl-Teller potential is `-(ℏ^2 * κ^2 * N * (N + 1)) / (2 * m * (cosh (κ * x)) ^ 2)`. - -/
 def potential (x : Space 1) : ℝ :=
-  -(ℏ^2 * Q.κ^2 * Q.N * (Q.N + 1)) / (2 * Q.m * Real.cosh (Q.κ * x 0) ^ 2)
+  -(ℏ ^ 2 * Q.κ ^ 2 * Q.N * (Q.N + 1)) / (2 * Q.m * Real.cosh (Q.κ * x 0) ^ 2)
 
-/-- The depth `ℏ^2 * κ^2 * N * (N + 1) / (2 * m)` of the potential well, so that
-`potential x = -depth / cosh (κ * x) ^ 2`. -/
+/--
+The depth `ℏ^2 * κ^2 * N * (N + 1) / (2 * m)` of the potential well, so that
+`potential x = -depth / cosh (κ * x) ^ 2`.
+-/
 def depth : ℝ := ℏ ^ 2 * Q.κ ^ 2 * Q.N * (Q.N + 1) / (2 * Q.m)
 
 /-- The depth of the well is positive. -/
@@ -112,8 +116,8 @@ lemma potential_eq (x : Space 1) : Q.potential x = -Q.depth / Real.cosh (Q.κ * 
   field_simp [(Real.cosh_pos _).ne']
 
 /-- The potential in terms of `tanh`, `potential x = -depth * (1 - tanh (κ * x) ^ 2)`. -/
-lemma potential_eq_tanh (x : Space 1) :
-    Q.potential x = -Q.depth * (1 - Real.tanh (Q.κ * x 0) ^ 2) := by
+lemma potential_eq_tanh (x : Space 1)
+    : Q.potential x = -Q.depth * (1 - Real.tanh (Q.κ * x 0) ^ 2) := by
   rw [Q.potential_eq, Real.tanh_eq_sinh_div_cosh, div_pow, Real.sinh_sq]
   field_simp [(Real.cosh_pos _).ne']
   ring
@@ -147,13 +151,12 @@ lemma potential_neg_eq (x : Space 1) : Q.potential (-x) = Q.potential x := by
 -/
 
 /-- The function `tanh (κ * x)` on `Space 1` has temperate growth. -/
-lemma tanh_hasTemperateGrowth :
-    (fun x : Space 1 => Real.tanh (Q.κ * x 0)).HasTemperateGrowth :=
+lemma tanh_hasTemperateGrowth : (fun x : Space 1 => Real.tanh (Q.κ * x 0)).HasTemperateGrowth :=
   (tanh_const_mul_hasTemperateGrowth Q.κ).comp (Space.eval_hasTemperateGrowth 0)
 
 /-- The complexified function `ofReal ∘ tanh (κ * x)` has temperate growth. -/
-lemma ofReal_comp_tanh_hasTemperateGrowth :
-    (ofReal ∘ fun x : Space 1 => Real.tanh (Q.κ * x 0)).HasTemperateGrowth :=
+lemma ofReal_comp_tanh_hasTemperateGrowth
+    : (ofReal ∘ fun x : Space 1 => Real.tanh (Q.κ * x 0)).HasTemperateGrowth :=
   Complex.ofRealCLM.hasTemperateGrowth.comp Q.tanh_hasTemperateGrowth
 
 /-- The potential has temperate growth. -/
@@ -168,15 +171,16 @@ lemma ofReal_comp_potential_hasTemperateGrowth : (ofReal ∘ Q.potential).HasTem
   Complex.ofRealCLM.hasTemperateGrowth.comp Q.potential_hasTemperateGrowth
 
 /-- The potential is continuous. -/
-lemma potential_continuous : Continuous Q.potential :=
-  Q.potential_hasTemperateGrowth.1.continuous
+lemma potential_continuous : Continuous Q.potential := Q.potential_hasTemperateGrowth.1.continuous
 
 /-!
 ## B. As a quantum system
 -/
 
-/-- The Pöschl-Teller system as a `SpaceDQuantumSystem` of dimension `1`. Its kinetic, potential
-  and Hamiltonian operators are those of `SpaceDQuantumSystem`. -/
+/--
+The Pöschl-Teller system as a `SpaceDQuantumSystem` of dimension `1`. Its kinetic, potential
+and Hamiltonian operators are those of `SpaceDQuantumSystem`.
+-/
 abbrev toSpaceDQuantumSystem : SpaceDQuantumSystem 1 := ⟨Q.m, Q.m_pos, Q.potential⟩
 
 lemma toSpaceDQuantumSystem_m : Q.toSpaceDQuantumSystem.m = Q.m := rfl
@@ -196,32 +200,32 @@ abbrev HS (_ : PoschlTeller) : Type _ := SpaceDHilbertSpace 1
 -/
 
 /-- In dimension one the kinetic operator is `(2m)⁻¹ 𝐩 0 ∘ 𝐩 0`. -/
-lemma toSpaceDQuantumSystem_kineticCLM_apply (ψ : 𝓢(Space 1, ℂ)) :
-    Q.toSpaceDQuantumSystem.kineticCLM ψ = (2 * Q.m)⁻¹ • momentumCLM 0 (momentumCLM 0 ψ) := by
+lemma toSpaceDQuantumSystem_kineticCLM_apply (ψ : 𝓢(Space 1, ℂ))
+    : Q.toSpaceDQuantumSystem.kineticCLM ψ = (2 * Q.m)⁻¹ • momentumCLM 0 (momentumCLM 0 ψ) := by
   simp [SpaceDQuantumSystem.kineticCLM, dotProduct, ContinuousLinearMap.mul_def]
 
 /-- The potential operator acts by pointwise multiplication by the potential. -/
-lemma toSpaceDQuantumSystem_potentialCLM_apply (ψ : 𝓢(Space 1, ℂ)) (x : Space 1) :
-    Q.toSpaceDQuantumSystem.potentialCLM ψ x = Q.potential x • ψ x :=
+lemma toSpaceDQuantumSystem_potentialCLM_apply (ψ : 𝓢(Space 1, ℂ)) (x : Space 1)
+    : Q.toSpaceDQuantumSystem.potentialCLM ψ x = Q.potential x • ψ x :=
   SpaceDQuantumSystem.potentialCLM_apply_apply (Q := Q.toSpaceDQuantumSystem)
     Q.potential_hasTemperateGrowth ψ x
 
 /-- The potential operator is self-adjoint. -/
-lemma toSpaceDQuantumSystem_potentialOperator_isSelfAdjoint :
-    IsSelfAdjoint Q.toSpaceDQuantumSystem.potentialOperator :=
+lemma toSpaceDQuantumSystem_potentialOperator_isSelfAdjoint
+    : IsSelfAdjoint Q.toSpaceDQuantumSystem.potentialOperator :=
   SpaceDQuantumSystem.potentialOperator_isSelfAdjoint (Q := Q.toSpaceDQuantumSystem)
     Q.potential_continuous.aestronglyMeasurable
 
 /-- Schwartz functions lie in the domain of the potential operator. -/
-lemma toSpaceDQuantumSystem_potentialOperator_domain_ge :
-    SchwartzSubmodule 1 ≤ Q.toSpaceDQuantumSystem.potentialOperator.domain :=
+lemma toSpaceDQuantumSystem_potentialOperator_domain_ge
+    : SchwartzSubmodule 1 ≤ Q.toSpaceDQuantumSystem.potentialOperator.domain :=
   SpaceDQuantumSystem.potentialOperator_domain_ge (Q := Q.toSpaceDQuantumSystem)
     Q.potential_hasTemperateGrowth
 
 /-- The pointwise action of the Hamiltonian on a Schwartz function. -/
-lemma toSpaceDQuantumSystem_hamiltonianCLM_apply (ψ : 𝓢(Space 1, ℂ)) (x : Space 1) :
-    Q.toSpaceDQuantumSystem.hamiltonianCLM ψ x =
-      (2 * Q.m)⁻¹ • momentumCLM 0 (momentumCLM 0 ψ) x + Q.potential x • ψ x := by
+lemma toSpaceDQuantumSystem_hamiltonianCLM_apply (ψ : 𝓢(Space 1, ℂ)) (x : Space 1)
+    : Q.toSpaceDQuantumSystem.hamiltonianCLM ψ x
+      = (2 * Q.m)⁻¹ • momentumCLM 0 (momentumCLM 0 ψ) x + Q.potential x • ψ x := by
   rw [SpaceDQuantumSystem.hamiltonianCLM_eq, _root_.add_apply, _root_.add_apply,
     Q.toSpaceDQuantumSystem_kineticCLM_apply, Q.toSpaceDQuantumSystem_potentialCLM_apply]
   rfl
@@ -239,8 +243,8 @@ def tanhCLM : 𝓢(Space 1, ℂ) →L[ℂ] 𝓢(Space 1, ℂ) :=
   smulLeftCLM ℂ (ofReal ∘ fun x => tanh (Q.κ * x 0))
 
 /-- Multiplication by `tanh (κ * x)` acts pointwise. -/
-lemma tanhCLM_apply (ψ : 𝓢(Space 1, ℂ)) (x : Space 1) :
-    Q.tanhCLM ψ x = Real.tanh (Q.κ * x 0) • ψ x := by
+lemma tanhCLM_apply (ψ : 𝓢(Space 1, ℂ)) (x : Space 1)
+    : Q.tanhCLM ψ x = Real.tanh (Q.κ * x 0) • ψ x := by
   rw [tanhCLM, smulLeftCLM_apply_apply Q.ofReal_comp_tanh_hasTemperateGrowth]
   simp [Function.comp]
 
@@ -253,22 +257,24 @@ def annihilationCLM : 𝓢(Space 1, ℂ) →L[ℂ] 𝓢(Space 1, ℂ) :=
   (1 / sqrt (2 * Q.m)) • momentumCLM 0 + (-I * ℏ * Q.κ / sqrt (2 * Q.m)) • Q.tanhCLM
 
 /-- The pointwise action of the creation operator. -/
-lemma creationCLM_apply (ψ : 𝓢(Space 1, ℂ)) (x : Space 1) :
-    Q.creationCLM ψ x = (1 / √(2 * Q.m)) • momentumCLM 0 ψ x
-      + (I * ℏ * Q.κ / √(2 * Q.m)) * (Real.tanh (Q.κ * x 0) • ψ x) := by
+lemma creationCLM_apply (ψ : 𝓢(Space 1, ℂ)) (x : Space 1)
+    : Q.creationCLM ψ x
+      = (1 / √(2 * Q.m)) • momentumCLM 0 ψ x
+        + (I * ℏ * Q.κ / √(2 * Q.m)) * (Real.tanh (Q.κ * x 0) • ψ x) := by
   simp only [creationCLM, _root_.add_apply, _root_.smul_apply, Q.tanhCLM_apply]
   ring_nf
 
 /-- The pointwise action of the annihilation operator. -/
-lemma annihilationCLM_apply (ψ : 𝓢(Space 1, ℂ)) (x : Space 1) :
-    Q.annihilationCLM ψ x = (1 / √(2 * Q.m)) • momentumCLM 0 ψ x
-      + (-I * ℏ * Q.κ / √(2 * Q.m)) * (Real.tanh (Q.κ * x 0) • ψ x) := by
+lemma annihilationCLM_apply (ψ : 𝓢(Space 1, ℂ)) (x : Space 1)
+    : Q.annihilationCLM ψ x
+      = (1 / √(2 * Q.m)) • momentumCLM 0 ψ x
+        + (-I * ℏ * Q.κ / √(2 * Q.m)) * (Real.tanh (Q.κ * x 0) • ψ x) := by
   simp only [annihilationCLM, _root_.add_apply, _root_.smul_apply, Q.tanhCLM_apply]
   ring_nf
 
 /-- The sum of the ladder operators is `(2 / √(2m)) 𝐩`. -/
-lemma creationCLM_add_annihilationCLM :
-    Q.creationCLM + Q.annihilationCLM = (2 / √(2 * Q.m)) • momentumCLM 0 := by
+lemma creationCLM_add_annihilationCLM
+    : Q.creationCLM + Q.annihilationCLM = (2 / √(2 * Q.m)) • momentumCLM 0 := by
   ext ψ x
   simp only [creationCLM, annihilationCLM, _root_.add_apply, _root_.smul_apply, Q.tanhCLM_apply]
   simp only [Nat.ofNat_nonneg, sqrt_mul, one_div, mul_inv_rev, Fin.isValue, momentumCLM_apply,
@@ -277,11 +283,11 @@ lemma creationCLM_add_annihilationCLM :
   ring_nf
 
 /-- The difference of the ladder operators is `(2 i ℏ κ / √(2m)) tanh (κ X)`. -/
-lemma creationCLM_sub_annihilationCLM :
-    Q.creationCLM - Q.annihilationCLM = (2 * I * ℏ * Q.κ / √(2 * Q.m)) • Q.tanhCLM := by
+lemma creationCLM_sub_annihilationCLM
+    : Q.creationCLM - Q.annihilationCLM = (2 * I * ℏ * Q.κ / √(2 * Q.m)) • Q.tanhCLM := by
   ext ψ x
-  simp only [creationCLM, annihilationCLM, _root_.add_apply, _root_.sub_apply,
-    _root_.smul_apply, Q.tanhCLM_apply]
+  simp only [creationCLM, annihilationCLM, _root_.add_apply, _root_.sub_apply, _root_.smul_apply,
+    Q.tanhCLM_apply]
   ring_nf
 
 /-!

@@ -70,8 +70,10 @@ variable (Ω : S → Type*) [∀ s, Fintype (Ω s)] [∀ s, DecidableEq (Ω s)]
 
 -/
 
-/-- The configurations of a region: a value of the local configuration space at each of its
-sites. -/
+/--
+The configurations of a region: a value of the local configuration space at each of its
+sites.
+-/
 abbrev Cfg (X : Finset S) : Type _ := (x : ↥X) → Ω x.1
 
 variable {Ω}
@@ -86,25 +88,25 @@ instance {X Y : Finset S} (h : X ≤ Y) (c c' : Cfg Ω Y) : Decidable (Agree h c
   unfold Agree; infer_instance
 
 /-- Replace the values of `c` inside the subregion `X` by those of `a`. -/
-def glue {X Y : Finset S} (_h : X ≤ Y) (c : Cfg Ω Y) (a : Cfg Ω X) : Cfg Ω Y :=
-  fun y => if hy : y.1 ∈ X then a ⟨y.1, hy⟩ else c y
+def glue {X Y : Finset S} (_h : X ≤ Y) (c : Cfg Ω Y) (a : Cfg Ω X) : Cfg Ω Y := fun y =>
+  if hy : y.1 ∈ X then a ⟨y.1, hy⟩ else c y
 
 omit [∀ s, Fintype (Ω s)] in
 omit [∀ s, DecidableEq (Ω s)] in
-lemma restr_glue {X Y : Finset S} (h : X ≤ Y) (c : Cfg Ω Y) (a : Cfg Ω X) :
-    restr h (glue h c a) = a := by
+lemma restr_glue {X Y : Finset S} (h : X ≤ Y) (c : Cfg Ω Y) (a : Cfg Ω X)
+    : restr h (glue h c a) = a := by
   funext x; simp [glue, x.2]
 
 omit [∀ s, Fintype (Ω s)] in
 omit [∀ s, DecidableEq (Ω s)] in
-lemma agree_glue {X Y : Finset S} (h : X ≤ Y) (c : Cfg Ω Y) (a : Cfg Ω X) :
-    Agree h c (glue h c a) := by
+lemma agree_glue {X Y : Finset S} (h : X ≤ Y) (c : Cfg Ω Y) (a : Cfg Ω X)
+    : Agree h c (glue h c a) := by
   intro y hy; simp [glue, hy]
 
 omit [∀ s, Fintype (Ω s)] in
 omit [∀ s, DecidableEq (Ω s)] in
-lemma agree_iff_glue {X Y : Finset S} (h : X ≤ Y) {c c' : Cfg Ω Y} :
-    Agree h c c' ↔ glue h c (restr h c') = c' := by
+lemma agree_iff_glue {X Y : Finset S} (h : X ≤ Y) {c c' : Cfg Ω Y}
+    : Agree h c c' ↔ glue h c (restr h c') = c' := by
   constructor
   · intro hc
     funext y
@@ -112,7 +114,8 @@ lemma agree_iff_glue {X Y : Finset S} (h : X ≤ Y) {c c' : Cfg Ω Y} :
     · simp [glue, hy]
     · simp [glue, hy, hc y hy]
   · intro hc y hy
-    rw [← hc]; simp [glue, hy]
+    rw [← hc]
+    simp [glue, hy]
 
 omit [DecidableEq S] in
 omit [∀ s, Fintype (Ω s)] in
@@ -122,19 +125,22 @@ lemma agree_refl {X Y : Finset S} (h : X ≤ Y) (c : Cfg Ω Y) : Agree h c c := 
 omit [DecidableEq S] in
 omit [∀ s, Fintype (Ω s)] in
 omit [∀ s, DecidableEq (Ω s)] in
-lemma Agree.symm {X Y : Finset S} {h : X ≤ Y} {c c' : Cfg Ω Y} (hc : Agree h c c') :
-    Agree h c' c := fun y hy => (hc y hy).symm
+lemma Agree.symm {X Y : Finset S} {h : X ≤ Y} {c c' : Cfg Ω Y} (hc : Agree h c c') : Agree h c' c :=
+  fun y hy => (hc y hy).symm
 
 omit [DecidableEq S] in
 omit [∀ s, Fintype (Ω s)] in
 omit [∀ s, DecidableEq (Ω s)] in
-lemma Agree.trans {X Y : Finset S} {h : X ≤ Y} {c c' c'' : Cfg Ω Y} (hc : Agree h c c')
-    (hc' : Agree h c' c'') : Agree h c c'' := fun y hy => (hc y hy).trans (hc' y hy)
+lemma Agree.trans
+    {X Y : Finset S} {h : X ≤ Y} {c c' c'' : Cfg Ω Y} (hc : Agree h c c') (hc' : Agree h c' c'')
+    : Agree h c c'' := fun y hy =>
+  (hc y hy).trans (hc' y hy)
 
 omit [∀ s, Fintype (Ω s)] in
 omit [∀ s, DecidableEq (Ω s)] in
-lemma eq_of_agree_of_restr_eq {X Y : Finset S} {h : X ≤ Y} {c c' : Cfg Ω Y} (hc : Agree h c c')
-    (hr : restr h c = restr h c') : c = c' := by
+lemma eq_of_agree_of_restr_eq
+    {X Y : Finset S} {h : X ≤ Y} {c c' : Cfg Ω Y} (hc : Agree h c c') (hr : restr h c = restr h c')
+    : c = c' := by
   funext y
   by_cases hy : y.1 ∈ X
   · exact congrFun hr ⟨y.1, hy⟩
@@ -150,14 +156,17 @@ variable (Ω) in
 /-- The operators on the sites of a region: matrices indexed by configurations. -/
 abbrev Alg (X : Finset S) : Type _ := Matrix (Cfg Ω X) (Cfg Ω X) ℂ
 
-/-- The operator `M ⊗ 1` on a larger region: `M` on the sites of `X` and the identity on the other
-sites. -/
+/--
+The operator `M ⊗ 1` on a larger region: `M` on the sites of `X` and the identity on the other
+sites.
+-/
 def inclMat {X Y : Finset S} (h : X ≤ Y) (M : Alg Ω X) : Alg Ω Y :=
   Matrix.of fun c c' => if Agree h c c' then M (restr h c) (restr h c') else 0
 
 omit [∀ s, Fintype (Ω s)] in
-lemma inclMat_apply {X Y : Finset S} (h : X ≤ Y) (M : Alg Ω X) (c c' : Cfg Ω Y) :
-    inclMat h M c c' = if Agree h c c' then M (restr h c) (restr h c') else 0 := rfl
+lemma inclMat_apply {X Y : Finset S} (h : X ≤ Y) (M : Alg Ω X) (c c' : Cfg Ω Y)
+    : inclMat h M c c' = if Agree h c c' then M (restr h c) (restr h c') else 0 :=
+  rfl
 
 omit [∀ s, Fintype (Ω s)] in
 lemma inclMat_one {X Y : Finset S} (h : X ≤ Y) : inclMat h (1 : Alg Ω X) = 1 := by
@@ -173,56 +182,53 @@ lemma inclMat_one {X Y : Finset S} (h : X ≤ Y) : inclMat h (1 : Alg Ω X) = 1 
     simp [hc, this]
 
 omit [∀ s, Fintype (Ω s)] in
-lemma inclMat_add {X Y : Finset S} (h : X ≤ Y) (M N : Alg Ω X) :
-    inclMat h (M + N) = inclMat h M + inclMat h N := by
+lemma inclMat_add {X Y : Finset S} (h : X ≤ Y) (M N : Alg Ω X)
+    : inclMat h (M + N) = inclMat h M + inclMat h N := by
   ext c c'; simp only [inclMat_apply, Matrix.add_apply]; split_ifs <;> simp
 
 omit [∀ s, Fintype (Ω s)] in
-lemma inclMat_smul {X Y : Finset S} (h : X ≤ Y) (r : ℂ) (M : Alg Ω X) :
-    inclMat h (r • M) = r • inclMat h M := by
+lemma inclMat_smul {X Y : Finset S} (h : X ≤ Y) (r : ℂ) (M : Alg Ω X)
+    : inclMat h (r • M) = r • inclMat h M := by
   ext c c'; simp only [inclMat_apply, Matrix.smul_apply]; split_ifs <;> simp
 
 omit [∀ s, Fintype (Ω s)] in
-lemma inclMat_conjTranspose {X Y : Finset S} (h : X ≤ Y) (M : Alg Ω X) :
-    inclMat h Mᴴ = (inclMat h M)ᴴ := by
+lemma inclMat_conjTranspose {X Y : Finset S} (h : X ≤ Y) (M : Alg Ω X)
+    : inclMat h Mᴴ = (inclMat h M)ᴴ := by
   ext c c'
   simp only [inclMat_apply, Matrix.conjTranspose_apply]
   by_cases hc : Agree h c c'
   · simp [hc, hc.symm]
-  · have h2 : ¬Agree h c' c := fun h' => hc h'.symm
+  · have h2 : ¬ Agree h c' c := fun h' => hc h'.symm
     simp [hc, h2]
 
-lemma inclMat_mul {X Y : Finset S} (h : X ≤ Y) (M N : Alg Ω X) :
-    inclMat h (M * N) = inclMat h M * inclMat h N := by
+lemma inclMat_mul {X Y : Finset S} (h : X ≤ Y) (M N : Alg Ω X)
+    : inclMat h (M * N) = inclMat h M * inclMat h N := by
   ext c c''
   rw [Matrix.mul_apply]
   -- the terms of the sum vanish unless the intermediate configuration agrees with `c`
   set f : Cfg Ω Y → ℂ := fun c' => inclMat h M c c' * inclMat h N c' c'' with hf
   have hsum : ∑ c', f c' = ∑ a : Cfg Ω X, f (glue h c a) := by
-    refine Finset.sum_bij_ne_zero (fun c' _ _ => restr h c') (fun _ _ _ => Finset.mem_univ _)
-      ?_ ?_ ?_
+    refine
+      Finset.sum_bij_ne_zero (fun c' _ _ => restr h c') (fun _ _ _ => Finset.mem_univ _) ?_ ?_ ?_
     · intro c₁ _ h₁ c₂ _ h₂ hr
-      have a₁ : Agree h c c₁ := by
-        by_contra hc; apply h₁; simp [hf, inclMat_apply, hc]
-      have a₂ : Agree h c c₂ := by
-        by_contra hc; apply h₂; simp [hf, inclMat_apply, hc]
+      have a₁ : Agree h c c₁ := by by_contra hc; apply h₁; simp [hf, inclMat_apply, hc]
+      have a₂ : Agree h c c₂ := by by_contra hc; apply h₂; simp [hf, inclMat_apply, hc]
       exact eq_of_agree_of_restr_eq (a₁.symm.trans a₂) hr
     · intro a _ ha
       exact ⟨glue h c a, Finset.mem_univ _, ha, restr_glue h c a⟩
     · intro c' _ h'
-      have hc : Agree h c c' := by
-        by_contra hc; apply h'; simp [hf, inclMat_apply, hc]
+      have hc : Agree h c c' := by by_contra hc; apply h'; simp [hf, inclMat_apply, hc]
       rw [(agree_iff_glue h).1 hc]
   rw [hsum]
-  have hterm : ∀ a, f (glue h c a)
-      = if Agree h c c'' then M (restr h c) a * N a (restr h c'') else 0 := by
+  have hterm
+      : ∀ a, f (glue h c a) = if Agree h c c'' then M (restr h c) a * N a (restr h c'') else 0 := by
     intro a
     have hag : Agree h c (glue h c a) := agree_glue h c a
-    simp only [hf, inclMat_apply, hag, ↓reduceIte, restr_glue]
+    simp only [hf, inclMat_apply, hag, ↓ reduceIte, restr_glue]
     by_cases hc : Agree h c c''
     · have : Agree h (glue h c a) c'' := hag.symm.trans hc
       simp [hc, this]
-    · have : ¬Agree h (glue h c a) c'' := fun h' => hc (hag.trans h')
+    · have : ¬ Agree h (glue h c a) c'' := fun h' => hc (hag.trans h')
       simp [hc, this]
   simp only [hterm, inclMat_apply, Matrix.mul_apply]
   split_ifs <;> simp
@@ -235,8 +241,8 @@ lemma inclMat_refl {X : Finset S} (M : Alg Ω X) : inclMat (le_refl X) M = M := 
 
 omit [∀ s, Fintype (Ω s)] in
 omit [∀ s, DecidableEq (Ω s)] in
-lemma agree_trans_iff {X Y Z : Finset S} (h₁ : X ≤ Y) (h₂ : Y ≤ Z) (c c' : Cfg Ω Z) :
-    Agree (h₁.trans h₂) c c' ↔ Agree h₂ c c' ∧ Agree h₁ (restr h₂ c) (restr h₂ c') := by
+lemma agree_trans_iff {X Y Z : Finset S} (h₁ : X ≤ Y) (h₂ : Y ≤ Z) (c c' : Cfg Ω Z)
+    : Agree (h₁.trans h₂) c c' ↔ Agree h₂ c c' ∧ Agree h₁ (restr h₂ c) (restr h₂ c') := by
   constructor
   · intro hc
     exact ⟨fun z hz => hc z (fun hx => hz (h₁ hx)), fun y hy => hc ⟨y.1, h₂ y.2⟩ hy⟩
@@ -246,16 +252,16 @@ lemma agree_trans_iff {X Y Z : Finset S} (h₁ : X ≤ Y) (h₂ : Y ≤ Z) (c c'
     · exact hc z hy
 
 omit [∀ s, Fintype (Ω s)] in
-lemma inclMat_trans {X Y Z : Finset S} (h₁ : X ≤ Y) (h₂ : Y ≤ Z) (M : Alg Ω X) :
-    inclMat (h₁.trans h₂) M = inclMat h₂ (inclMat h₁ M) := by
+lemma inclMat_trans {X Y Z : Finset S} (h₁ : X ≤ Y) (h₂ : Y ≤ Z) (M : Alg Ω X)
+    : inclMat (h₁.trans h₂) M = inclMat h₂ (inclMat h₁ M) := by
   ext c c'
   by_cases h2 : Agree h₂ c c'
   · by_cases h1 : Agree h₁ (restr h₂ c) (restr h₂ c')
     · have h : Agree (h₁.trans h₂) c c' := (agree_trans_iff h₁ h₂ c c').2 ⟨h2, h1⟩
       simp [inclMat_apply, h, h1, h2]
-    · have h : ¬Agree (h₁.trans h₂) c c' := fun h => h1 ((agree_trans_iff h₁ h₂ c c').1 h).2
+    · have h : ¬ Agree (h₁.trans h₂) c c' := fun h => h1 ((agree_trans_iff h₁ h₂ c c').1 h).2
       simp [inclMat_apply, h, h1, h2]
-  · have h : ¬Agree (h₁.trans h₂) c c' := fun h => h2 ((agree_trans_iff h₁ h₂ c c').1 h).1
+  · have h : ¬ Agree (h₁.trans h₂) c c' := fun h => h2 ((agree_trans_iff h₁ h₂ c c').1 h).1
     simp [inclMat_apply, h, h2]
 
 /-- The operator `M ⊗ 1` as a unital `*`-homomorphism. -/
@@ -267,9 +273,9 @@ def inclStarAlg {X Y : Finset S} (h : X ≤ Y) : Alg Ω X →⋆ₐ[ℂ] Alg Ω 
   map_add' := inclMat_add h
   commutes' r := by
     rw [Algebra.algebraMap_eq_smul_one, Algebra.algebraMap_eq_smul_one]
-    rw [← inclMat_one h]; exact inclMat_smul h r 1
+    rw [← inclMat_one h]
+    exact inclMat_smul h r 1
   map_star' := inclMat_conjTranspose h
-
 
 end QuasiLocal
 

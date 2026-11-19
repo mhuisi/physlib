@@ -62,8 +62,8 @@ lemma ball_mono {m n : ℕ} (h : m ≤ n) (x : C.Site) : g.ball m x ⊆ g.ball n
   | step _ ih => exact ih.trans Finset.subset_union_left
 
 /-- Following `m` bonds and then `n` bonds stays within `m + n` bonds. -/
-lemma mem_ball_add {m n : ℕ} {a b c : C.Site} (hb : b ∈ g.ball n a) (hc : c ∈ g.ball m b) :
-    c ∈ g.ball (m + n) a := by
+lemma mem_ball_add {m n : ℕ} {a b c : C.Site} (hb : b ∈ g.ball n a) (hc : c ∈ g.ball m b)
+    : c ∈ g.ball (m + n) a := by
   induction m generalizing c with
   | zero =>
     simp only [ball, Finset.mem_singleton] at hc
@@ -79,17 +79,21 @@ lemma mem_ball_add {m n : ℕ} {a b c : C.Site} (hb : b ∈ g.ball n a) (hc : c 
 variable {H : Type*} [Group H] [MulAction H C.Site]
 
 omit [DecidableEq C.Site] in
-/-- A group action preserving the bonds carries the neighbours of a site to the neighbours of
-its image. -/
-lemma mem_neighbors_smul_iff (hH : ∀ (h : H) (x y : C.Site),
-    g.toSimpleGraph.Adj (h • x) (h • y) ↔ g.toSimpleGraph.Adj x y) (h : H) (x y : C.Site) :
-    h • y ∈ g.neighbors (h • x) ↔ y ∈ g.neighbors x := by
+/--
+A group action preserving the bonds carries the neighbours of a site to the neighbours of
+its image.
+-/
+lemma mem_neighbors_smul_iff
+    (hH : ∀ (h : H) (x y : C.Site), g.toSimpleGraph.Adj (h • x) (h • y) ↔ g.toSimpleGraph.Adj x y)
+    (h : H) (x y : C.Site)
+    : h • y ∈ g.neighbors (h • x) ↔ y ∈ g.neighbors x := by
   rw [mem_neighbors, mem_neighbors, hH]
 
 /-- A group action preserving the bonds carries balls to balls. -/
-lemma mem_ball_smul_iff (hH : ∀ (h : H) (x y : C.Site),
-    g.toSimpleGraph.Adj (h • x) (h • y) ↔ g.toSimpleGraph.Adj x y) (h : H) (n : ℕ)
-    (x y : C.Site) : h • y ∈ g.ball n (h • x) ↔ y ∈ g.ball n x := by
+lemma mem_ball_smul_iff
+    (hH : ∀ (h : H) (x y : C.Site), g.toSimpleGraph.Adj (h • x) (h • y) ↔ g.toSimpleGraph.Adj x y)
+    (h : H) (n : ℕ) (x y : C.Site)
+    : h • y ∈ g.ball n (h • x) ↔ y ∈ g.ball n x := by
   induction n generalizing y with
   | zero => simp [ball]
   | succ n ih =>

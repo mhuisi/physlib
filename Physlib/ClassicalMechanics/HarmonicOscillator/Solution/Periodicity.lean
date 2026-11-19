@@ -40,9 +40,7 @@ References for the classical harmonic oscillator include:
 
 -/
 
-@[expose] public
-
-noncomputable section
+@[expose] public noncomputable section
 
 namespace ClassicalMechanics.HarmonicOscillator
 
@@ -58,9 +56,7 @@ The period `T = 2π / ω` is the time for one complete oscillation; it is positi
 
 -/
 
-/--
-The period of a harmonic oscillator is `2 * π / ω`.
--/
+/-- The period of a harmonic oscillator is `2 * π / ω`. -/
 noncomputable def period (S : HarmonicOscillator) : ℝ := 2 * π / S.ω
 
 @[inherit_doc period]
@@ -79,14 +75,13 @@ by `2π`, leaving `cos` and `sin` unchanged.
 
 -/
 
-/--
-The trajectory of the harmonic oscillator is periodic with period of `2 * π / ω`.
--/
-lemma trajectory_periodic (IC : InitialConditions) :
-    Function.Periodic (IC.trajectory S) (T S) := fun t ↦ by
+/-- The trajectory of the harmonic oscillator is periodic with period of `2 * π / ω`. -/
+lemma trajectory_periodic (IC : InitialConditions)
+    : Function.Periodic (IC.trajectory S) (T S) := fun t ↦ by
   have h : S.ω * (t.val + 2 * π / S.ω) = S.ω * t.val + 2 * π := by
     have := S.ω_ne_zero
-    ring_nf; field_simp
+    ring_nf
+    field_simp
   rw [InitialConditions.trajectory, add_val, period_eq, h, cos_add_two_pi, sin_add_two_pi]
   rfl
 
@@ -104,9 +99,10 @@ Assuming that the initial coordinate and velocity are not simultaneously zero,
 the time stamps when the harmonic oscillator returns to its initial coordinate and velocity is
 a multiple of its period
 -/
-lemma return_time (IC : InitialConditions) (non_trivial : IC.x₀ ≠ 0 ∨ IC.v₀ ≠ 0)
-    (t : Time) (ht : IC.trajectory S t = IC.x₀ ∧ ∂ₜ (IC.trajectory S) t = IC.v₀) :
-    ∃ n : ℤ,  (n : ℝ) * (T S) = t := by
+lemma return_time
+    (IC : InitialConditions) (non_trivial : IC.x₀ ≠ 0 ∨ IC.v₀ ≠ 0)
+    (t : Time) (ht : IC.trajectory S t = IC.x₀ ∧ ∂ₜ (IC.trajectory S) t = IC.v₀)
+    : ∃ n : ℤ, (n : ℝ) * (T S) = t := by
   have htx := ht.left
   have htv := ht.right
   rw [InitialConditions.trajectory_eq] at htx
@@ -131,22 +127,22 @@ lemma return_time (IC : InitialConditions) (non_trivial : IC.x₀ ≠ 0 ∨ IC.v
   have hxx : c * xx + (s / S.ω) * xv = xx := by
     have h := congrArg (inner ℝ IC.x₀) htx
     simpa only [inner_add_right, real_inner_smul_right] using h
-  have hvv : - S.ω * s * xv + c * vv = vv := by
+  have hvv : -S.ω * s * xv + c * vv = vv := by
     have h := congrArg (fun w => inner ℝ w IC.v₀) htv
     simpa only [inner_add_left, inner_neg_left, real_inner_smul_left, neg_mul, mul_assoc] using h
   have hcos : 1 = cos (S.ω * t) := by
     calc
-    1 =  det / det := by simp only [ne_eq, det_ne_zero, not_false_eq_true, div_self]
-    _ = (vv + xx * S.ω^2 ) / det := by rfl
-    _ = c * ((vv + xx * S.ω^2) / det) + s * xv *S.ω* (S.ω/S.ω-1 ) / det := by
-      nth_rewrite 1 [← hvv, ← hxx]
-      ring_nf
-    _ = c * ((vv + xx * S.ω^2) / det ) := by
-      simp only [ne_eq, S.ω_ne_zero, not_false_eq_true,
-        div_self, sub_self, mul_zero, zero_div, add_zero]
-    _ = c * (det / det) := by rfl
-    _ = c := by simp only [ne_eq, det_ne_zero, not_false_eq_true, div_self, mul_one]
-    _ = _ := by rfl
+      1 = det / det := by simp only [ne_eq, det_ne_zero, not_false_eq_true, div_self]
+      _ = (vv + xx * S.ω ^ 2) / det := by rfl
+      _ = c * ((vv + xx * S.ω ^ 2) / det) + s * xv * S.ω * (S.ω / S.ω - 1) / det := by
+        nth_rewrite 1 [← hvv, ← hxx]
+        ring_nf
+      _ = c * ((vv + xx * S.ω ^ 2) / det) := by
+        simp only [ne_eq, S.ω_ne_zero, not_false_eq_true, div_self, sub_self, mul_zero, zero_div,
+          add_zero]
+      _ = c * (det / det) := by rfl
+      _ = c := by simp only [ne_eq, det_ne_zero, not_false_eq_true, div_self, mul_one]
+      _ = _ := by rfl
   obtain ⟨n, hn⟩ := (Real.cos_eq_one_iff (S.ω * t)).mp hcos.symm
   refine ⟨n, ?_⟩
   rw [period_eq]

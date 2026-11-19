@@ -61,9 +61,9 @@ attribute [-simp] Nat.succ_eq_add_one
 -/
 
 /-- The vector potential from the electromagnetic potential. -/
-noncomputable def vectorPotential {d} (c : SpeedOfLight := 1) (A : ElectromagneticPotential d) :
-    Time → Space d → EuclideanSpace ℝ (Fin d) := timeSlice c <|
-  fun x => WithLp.toLp 2 fun i => A x (Sum.inr i)
+noncomputable def vectorPotential {d} (c : SpeedOfLight := 1) (A : ElectromagneticPotential d)
+    : Time → Space d → EuclideanSpace ℝ (Fin d) :=
+  timeSlice c <| fun x => WithLp.toLp 2 fun i => A x (Sum.inr i)
 
 /-!
 
@@ -72,40 +72,40 @@ noncomputable def vectorPotential {d} (c : SpeedOfLight := 1) (A : Electromagnet
 -/
 
 @[simp]
-lemma ofScalarPotential_vectorPotential {d} (c : SpeedOfLight)
-    (φ : Time → Space d → ℝ) : (ofScalarPotential c φ).vectorPotential c = 0 := by
+lemma ofScalarPotential_vectorPotential {d} (c : SpeedOfLight) (φ : Time → Space d → ℝ)
+    : (ofScalarPotential c φ).vectorPotential c = 0 := by
   simp only [vectorPotential, ofScalarPotential]
   rfl
 
 @[simp]
-lemma ofStaticScalarPotential_vectorPotential {d} (c : SpeedOfLight)
-    (φ : Space d → ℝ) : (ofStaticScalarPotential c φ).vectorPotential c = 0 := by
+lemma ofStaticScalarPotential_vectorPotential {d} (c : SpeedOfLight) (φ : Space d → ℝ)
+    : (ofStaticScalarPotential c φ).vectorPotential c = 0 := by
   simp [ofStaticScalarPotential]
 
 @[simp]
-lemma ofVectorPotential_vectorPotential {d} (c : SpeedOfLight)
-    (A : Time → Space d → EuclideanSpace ℝ (Fin d)) :
-    (ofVectorPotential c A).vectorPotential c = A := by
+lemma ofVectorPotential_vectorPotential
+    {d} (c : SpeedOfLight) (A : Time → Space d → EuclideanSpace ℝ (Fin d))
+    : (ofVectorPotential c A).vectorPotential c = A := by
   ext i
   simp [vectorPotential, ofVectorPotential]
 
 @[simp]
-lemma ofStaticVectorPotential_vectorPotential {d} (c : SpeedOfLight)
-    (A : Space d → EuclideanSpace ℝ (Fin d)) :
-    (ofStaticVectorPotential c A).vectorPotential c = fun _ => A := by
+lemma ofStaticVectorPotential_vectorPotential
+    {d} (c : SpeedOfLight) (A : Space d → EuclideanSpace ℝ (Fin d))
+    : (ofStaticVectorPotential c A).vectorPotential c = fun _ => A := by
   simp [ofStaticVectorPotential]
 
 @[simp]
-lemma ofPotentials_vectorPotential {d} (c : SpeedOfLight) (φ : Time → Space d → ℝ)
-    (A : Time → Space d → EuclideanSpace ℝ (Fin d)) :
-    (ofPotentials c φ A).vectorPotential c = A := by
+lemma ofPotentials_vectorPotential
+    {d} (c : SpeedOfLight) (φ : Time → Space d → ℝ) (A : Time → Space d → EuclideanSpace ℝ (Fin d))
+    : (ofPotentials c φ A).vectorPotential c = A := by
   ext i
   simp [vectorPotential, ofPotentials]
 
 @[simp]
-lemma ofStaticPotentials_vectorPotential {d} (c : SpeedOfLight) (φ : Space d → ℝ)
-    (A : Space d → EuclideanSpace ℝ (Fin d)) :
-    (ofStaticPotentials c φ A).vectorPotential c = fun _ => A := by
+lemma ofStaticPotentials_vectorPotential
+    {d} (c : SpeedOfLight) (φ : Space d → ℝ) (A : Space d → EuclideanSpace ℝ (Fin d))
+    : (ofStaticPotentials c φ A).vectorPotential c = fun _ => A := by
   simp [ofStaticPotentials_eq_ofPotentials]
 
 /-!
@@ -115,19 +115,21 @@ lemma ofStaticPotentials_vectorPotential {d} (c : SpeedOfLight) (φ : Space d �
 -/
 
 open MeasureTheory Matrix Space InnerProductSpace Time in
-lemma ofElectromagneticField_vectorPotential (c : SpeedOfLight)
-    (E : Time → Space 3 → EuclideanSpace ℝ (Fin 3))
-    (B : Time → Space 3 → EuclideanSpace ℝ (Fin 3)) :
-    (ofElectromagneticField c E B).vectorPotential c =
-    fun t x => - ∫ u in 0..(1 : ℝ), (u • Space.basis.repr x) ⨯ₑ₃ B t (u • x) ∂volume := by
+lemma ofElectromagneticField_vectorPotential
+    (c : SpeedOfLight) (E : Time → Space 3 → EuclideanSpace ℝ (Fin 3))
+    (B : Time → Space 3 → EuclideanSpace ℝ (Fin 3))
+    : (ofElectromagneticField c E B).vectorPotential c
+      = fun t x => - ∫ u in 0..(1 : ℝ), (u • Space.basis.repr x) ⨯ₑ₃ B t (u • x) ∂volume := by
   simp [ofElectromagneticField]
 
 open MeasureTheory Matrix Space InnerProductSpace Time in
-lemma ofElectromagneticField_vectorPotential_apply {t x} (c : SpeedOfLight)
-    (E : Time → Space 3 → EuclideanSpace ℝ (Fin 3))
-    (B : Time → Space 3 → EuclideanSpace ℝ (Fin 3)) (i : Fin 3) (hB : Continuous ↿B) :
-    (ofElectromagneticField c E B).vectorPotential c t x i =
-    - ∫ u in 0..(1 : ℝ), ((u • Space.basis.repr x) ⨯ₑ₃ B t (u • x)) i ∂volume := by
+lemma ofElectromagneticField_vectorPotential_apply
+    {t x}
+    (c : SpeedOfLight)
+    (E : Time → Space 3 → EuclideanSpace ℝ (Fin 3)) (B : Time → Space 3 → EuclideanSpace ℝ (Fin 3))
+    (i : Fin 3) (hB : Continuous ↿B)
+    : (ofElectromagneticField c E B).vectorPotential c t x i
+      = - ∫ u in 0..(1 : ℝ), ((u • Space.basis.repr x) ⨯ₑ₃ B t (u • x)) i ∂volume := by
   simp [ofElectromagneticField_vectorPotential]
   rw [intervalIntegral.integral_of_le (by simp), intervalIntegral.integral_of_le (by simp)]
   rw [MeasureTheory.eval_integral_piLp]
@@ -140,36 +142,38 @@ lemma ofElectromagneticField_vectorPotential_apply {t x} (c : SpeedOfLight)
   simp
 
 open MeasureTheory Matrix Space InnerProductSpace Time in
-lemma ofElectromagneticField_vectorPotential_apply_eq_expand {t x} {c : SpeedOfLight}
-    {E : Time → Space 3 → EuclideanSpace ℝ (Fin 3)}
-    {B : Time → Space 3 → EuclideanSpace ℝ (Fin 3)} (hB : Continuous ↿B) (i : Fin 3) :
-    (ofElectromagneticField c E B).vectorPotential c t x i =
-    x (i + 2) * ∫ u in 0..(1 : ℝ), u * B t (u • x) (i + 1) ∂volume -
-    x (i + 1) * ∫ u in 0..(1 : ℝ), u * B t (u • x) (i + 2) ∂volume := by
+lemma ofElectromagneticField_vectorPotential_apply_eq_expand
+    {t x} {c : SpeedOfLight} {E : Time → Space 3 → EuclideanSpace ℝ (Fin 3)}
+    {B : Time → Space 3 → EuclideanSpace ℝ (Fin 3)} (hB : Continuous ↿B)
+    (i : Fin 3)
+    : (ofElectromagneticField c E B).vectorPotential c t x i
+      = x (i + 2) * ∫ u in 0..(1 : ℝ), u * B t (u • x) (i + 1) ∂volume
+        - x (i + 1) * ∫ u in 0..(1 : ℝ), u * B t (u • x) (i + 2) ∂volume := by
   fin_cases i
   all_goals
-  · rw [ofElectromagneticField_vectorPotential_apply _ _ _ _ hB]
-    simp [crossProduct]
-    ring_nf
-    rw [intervalIntegral.integral_sub, ← intervalIntegral.integral_const_mul,
-      ← intervalIntegral.integral_const_mul]
-    ring_nf
-    congr
-    · ext u
-      ring
-    · ext u
-      ring
-    · apply Continuous.intervalIntegrable
-      fun_prop
-    · apply Continuous.intervalIntegrable
-      fun_prop
+    · rw [ofElectromagneticField_vectorPotential_apply _ _ _ _ hB]
+      simp [crossProduct]
+      ring_nf
+      rw [intervalIntegral.integral_sub, ← intervalIntegral.integral_const_mul,
+        ← intervalIntegral.integral_const_mul]
+      ring_nf
+      congr
+      · ext u
+        ring
+      · ext u
+        ring
+      · apply Continuous.intervalIntegrable
+        fun_prop
+      · apply Continuous.intervalIntegrable
+        fun_prop
 
 open MeasureTheory Matrix Space InnerProductSpace Time in
 @[fun_prop]
-lemma contDiff_vectorPotential_ofElectromagneticField {n : ℕ} (c : SpeedOfLight)
-    (E : Time → Space 3 → EuclideanSpace ℝ (Fin 3))
-    (B : Time → Space 3 → EuclideanSpace ℝ (Fin 3))
-    (hB : ContDiff ℝ n ↿B) : ContDiff ℝ n ↿((ofElectromagneticField c E B).vectorPotential c) := by
+lemma contDiff_vectorPotential_ofElectromagneticField
+    {n : ℕ}
+    (c : SpeedOfLight) (E : Time → Space 3 → EuclideanSpace ℝ (Fin 3))
+    (B : Time → Space 3 → EuclideanSpace ℝ (Fin 3)) (hB : ContDiff ℝ n ↿B)
+    : ContDiff ℝ n ↿((ofElectromagneticField c E B).vectorPotential c) := by
   let A : Time → Space → EuclideanSpace ℝ (Fin 3) := fun t x =>
     - ∫ u in 0..(1 : ℝ), (u • basis.repr x) ⨯ₑ₃ B t (u • x) ∂(volume)
   have h1 : ContDiff ℝ n ↿A := by
@@ -185,20 +189,23 @@ lemma contDiff_vectorPotential_ofElectromagneticField {n : ℕ} (c : SpeedOfLigh
     change ContDiff ℝ n (fun x => C x i)
     fin_cases i
     all_goals
-    · simp [C, crossProduct]
-      fun_prop
+      · simp [C, crossProduct]
+        fun_prop
   suffices h : ContDiff ℝ n ↿A by
     convert h
     simp [ofElectromagneticField_vectorPotential, A]
   fun_prop
 
-/-- At a fixed time, the vector potential of `ofElectromagneticField` is `C^n` in space if the
-  magnetic field is `C^n` in space at that time. -/
+/--
+At a fixed time, the vector potential of `ofElectromagneticField` is `C^n` in space if the
+magnetic field is `C^n` in space at that time.
+-/
 @[fun_prop]
-lemma contDiff_vectorPotential_ofElectromagneticField_space {n : ℕ} (c : SpeedOfLight)
-    (E : Time → Space 3 → EuclideanSpace ℝ (Fin 3))
-    (B : Time → Space 3 → EuclideanSpace ℝ (Fin 3)) (t : Time) (hB : ContDiff ℝ n (B t)) :
-    ContDiff ℝ n ((ofElectromagneticField c E B).vectorPotential c t) := by
+lemma contDiff_vectorPotential_ofElectromagneticField_space
+    {n : ℕ}
+    (c : SpeedOfLight) (E : Time → Space 3 → EuclideanSpace ℝ (Fin 3))
+    (B : Time → Space 3 → EuclideanSpace ℝ (Fin 3)) (t : Time) (hB : ContDiff ℝ n (B t))
+    : ContDiff ℝ n ((ofElectromagneticField c E B).vectorPotential c t) := by
   rw [ofElectromagneticField_vectorPotential]
   apply ContDiff.neg
   apply contDiff_parametric_intervalIntegral_of_contDiff
@@ -206,17 +213,17 @@ lemma contDiff_vectorPotential_ofElectromagneticField_space {n : ℕ} (c : Speed
   intro i
   fin_cases i
   all_goals
-  · simp [Function.HasUncurry.uncurry, crossProduct]
-    fun_prop
+    · simp [Function.HasUncurry.uncurry, crossProduct]
+      fun_prop
 
 open InnerProductSpace
 lemma vectorPotential_inner_radial_eq_zero_ofElectromagneticField
-    {c : SpeedOfLight} {E B : Time → Space 3 → EuclideanSpace ℝ (Fin 3)}
-    {t : Time} {x : Space 3} {a : ℝ} (hB : Continuous ↿B) :
-    ⟪(ofElectromagneticField c E B).vectorPotential c t (a • x), Space.basis.repr x⟫_ℝ = 0 := by
+    {c : SpeedOfLight} {E B : Time → Space 3 → EuclideanSpace ℝ (Fin 3)} {t : Time} {x : Space 3}
+    {a : ℝ} (hB : Continuous ↿B)
+    : ⟪(ofElectromagneticField c E B).vectorPotential c t (a • x), Space.basis.repr x⟫_ℝ = 0 := by
   rw [real_inner_comm]
   rw [PiLp.inner_apply]
-  have h1 (a b : ℝ) : ⟪a, b⟫_ℝ = b * a:= by rfl
+  have h1 (a b : ℝ) : ⟪a, b⟫_ℝ = b * a := by rfl
   simp only [Space.basis_repr_apply, ofElectromagneticField_vectorPotential_apply_eq_expand hB,
     Fin.isValue, Space.smul_apply, h1, Fin.sum_univ_three, zero_add, Fin.reduceAdd]
   ring
@@ -224,16 +231,16 @@ lemma vectorPotential_inner_radial_eq_zero_ofElectromagneticField
 open Time
 @[simp]
 lemma time_deriv_vectorPotential_inner_radial_eq_zero_ofElectromagneticField
-    {c : SpeedOfLight} {E B : Time → Space 3 → EuclideanSpace ℝ (Fin 3)}
-    {t : Time} {x : Space 3} {a : ℝ} (hB : ContDiff ℝ 1 ↿B) :
-    ⟪∂ₜ ((ofElectromagneticField c E B).vectorPotential c · (a • x)) t,
-      Space.basis.repr x⟫_ℝ = 0 := by
+    {c : SpeedOfLight} {E B : Time → Space 3 → EuclideanSpace ℝ (Fin 3)} {t : Time} {x : Space 3}
+    {a : ℝ} (hB : ContDiff ℝ 1 ↿B)
+    : ⟪∂ₜ ((ofElectromagneticField c E B).vectorPotential c · (a • x)) t,
+        Space.basis.repr x⟫_ℝ
+      = 0 := by
   trans ∂ₜ (fun t => ⟪(ofElectromagneticField c E B).vectorPotential c t (a • x),
     Space.basis.repr x⟫_ℝ) t
   · rw [Time.deriv, Time.deriv]
     rw [fderiv_inner_apply]
-    simp only [fderiv_fun_const, Pi.zero_apply, _root_.zero_apply, inner_zero_right,
-      zero_add]
+    simp only [fderiv_fun_const, Pi.zero_apply, _root_.zero_apply, inner_zero_right, zero_add]
     apply Differentiable.differentiableAt
     fun_prop
     fun_prop
@@ -252,8 +259,9 @@ the smoothness of the electromagnetic potential.
 -/
 
 @[fun_prop]
-lemma vectorPotential_contDiff {n} {d} {c : SpeedOfLight} (A : ElectromagneticPotential d)
-    (hA : ContDiff ℝ n A) : ContDiff ℝ n ↿(A.vectorPotential c) := by
+lemma vectorPotential_contDiff
+    {n} {d} {c : SpeedOfLight} (A : ElectromagneticPotential d) (hA : ContDiff ℝ n A)
+    : ContDiff ℝ n ↿(A.vectorPotential c) := by
   simp [vectorPotential]
   apply timeSlice_contDiff
   refine contDiff_euclidean.mpr ?_
@@ -264,15 +272,16 @@ lemma vectorPotential_contDiff {n} {d} {c : SpeedOfLight} (A : ElectromagneticPo
 
 open ContDiff
 @[fun_prop]
-lemma vectorPotential_contDiff_of_smooth {n : ℕ} {d} {c : SpeedOfLight}
-    (A : ElectromagneticPotential d) (hA : ContDiff ℝ ∞ A) :
-    ContDiff ℝ n ↿(A.vectorPotential c) := by
+lemma vectorPotential_contDiff_of_smooth
+    {n : ℕ} {d} {c : SpeedOfLight} (A : ElectromagneticPotential d) (hA : ContDiff ℝ ∞ A)
+    : ContDiff ℝ n ↿(A.vectorPotential c) := by
   apply vectorPotential_contDiff
   exact hA.of_le (ENat.LEInfty.out)
 
 @[fun_prop]
-lemma vectorPotential_apply_contDiff {n} {d} {c : SpeedOfLight} (A : ElectromagneticPotential d)
-    (hA : ContDiff ℝ n A) (i : Fin d) : ContDiff ℝ n ↿(fun t x => A.vectorPotential c t x i) := by
+lemma vectorPotential_apply_contDiff
+    {n} {d} {c : SpeedOfLight} (A : ElectromagneticPotential d) (hA : ContDiff ℝ n A) (i : Fin d)
+    : ContDiff ℝ n ↿(fun t x => A.vectorPotential c t x i) := by
   change ContDiff ℝ n (EuclideanSpace.proj i ∘ ↿(A.vectorPotential c))
   refine ContDiff.comp ?_ ?_
   · exact ContinuousLinearMap.contDiff (𝕜 := ℝ) (n := n) (EuclideanSpace.proj i)
@@ -288,8 +297,9 @@ the differentiablity of the electromagnetic potential.
 -/
 
 @[fun_prop]
-lemma vectorPotential_differentiable {d} {c : SpeedOfLight} (A : ElectromagneticPotential d)
-    (hA : Differentiable ℝ A) : Differentiable ℝ ↿(A.vectorPotential c) := by
+lemma vectorPotential_differentiable
+    {d} {c : SpeedOfLight} (A : ElectromagneticPotential d) (hA : Differentiable ℝ A)
+    : Differentiable ℝ ↿(A.vectorPotential c) := by
   simp [vectorPotential]
   apply timeSlice_differentiable
   refine differentiable_euclidean.mpr ?_
@@ -299,8 +309,9 @@ lemma vectorPotential_differentiable {d} {c : SpeedOfLight} (A : Electromagnetic
   exact fun i => h1 (Sum.inr i)
 
 @[fun_prop]
-lemma vectorPotential_differentiable_time {d} {c : SpeedOfLight} (A : ElectromagneticPotential d)
-    (hA : Differentiable ℝ A) (x : Space d) : Differentiable ℝ (A.vectorPotential c · x) := by
+lemma vectorPotential_differentiable_time
+    {d} {c : SpeedOfLight} (A : ElectromagneticPotential d) (hA : Differentiable ℝ A) (x : Space d)
+    : Differentiable ℝ (A.vectorPotential c · x) := by
   fun_prop
 
 end ElectromagneticPotential

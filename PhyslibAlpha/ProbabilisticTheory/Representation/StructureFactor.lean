@@ -73,21 +73,25 @@ def correlation (a : B) (g : G) : ℂ := ω (star a * α (Multiplicative.ofAdd g
 /-! ## A. Positive definiteness of the correlation function -/
 
 /-- **The correlation function of an invariant positive functional is positive definite.** -/
-lemma isPositiveDefiniteSub_correlation (hpos : ∀ b : B, 0 ≤ ω (star b * b))
-    (hinv : ∀ g b, ω (α g b) = ω b) (a : B) :
-    TauCeti.IsPositiveDefiniteSub (correlation ω α a) := by
+lemma isPositiveDefiniteSub_correlation
+    (hpos : ∀ b : B, 0 ≤ ω (star b * b)) (hinv : ∀ g b, ω (α g b) = ω b) (a : B)
+    : TauCeti.IsPositiveDefiniteSub (correlation ω α a) := by
   rw [TauCeti.isPositiveDefiniteSub_iff_forall_sum_nonneg]
   intro n c v
   set b : B := ∑ i, c i • α (Multiplicative.ofAdd (v i)) a with hb
-  have key : ∀ i j, ω (star (α (Multiplicative.ofAdd (v j)) a) *
-      α (Multiplicative.ofAdd (v i)) a) = correlation ω α a (v i - v j) := by
+  have key
+      : ∀ i j,
+        ω (star (α (Multiplicative.ofAdd (v j)) a) * α (Multiplicative.ofAdd (v i)) a)
+          = correlation ω α a (v i - v j) := by
     intro i j
-    have h1 : star (α (Multiplicative.ofAdd (v j)) a) * α (Multiplicative.ofAdd (v i)) a =
-        α (Multiplicative.ofAdd (v j)) (star a * α (Multiplicative.ofAdd (v i - v j)) a) := by
-      have hcomp : α (Multiplicative.ofAdd (v j)) (α (Multiplicative.ofAdd (v i - v j)) a) =
-          α (Multiplicative.ofAdd (v i)) a := by
-        have : α (Multiplicative.ofAdd (v j)) (α (Multiplicative.ofAdd (v i - v j)) a) =
-            α (Multiplicative.ofAdd (v j) * Multiplicative.ofAdd (v i - v j)) a := by
+    have h1
+        : star (α (Multiplicative.ofAdd (v j)) a) * α (Multiplicative.ofAdd (v i)) a
+          = α (Multiplicative.ofAdd (v j)) (star a * α (Multiplicative.ofAdd (v i - v j)) a) := by
+      have hcomp
+          : α (Multiplicative.ofAdd (v j)) (α (Multiplicative.ofAdd (v i - v j)) a)
+            = α (Multiplicative.ofAdd (v i)) a := by
+        have : α (Multiplicative.ofAdd (v j)) (α (Multiplicative.ofAdd (v i - v j)) a)
+            = α (Multiplicative.ofAdd (v j) * Multiplicative.ofAdd (v i - v j)) a := by
           rw [map_mul]; rfl
         rw [this, ← ofAdd_add]
         congr 2
@@ -95,8 +99,10 @@ lemma isPositiveDefiniteSub_correlation (hpos : ∀ b : B, 0 ≤ ω (star b * b)
       rw [map_mul, map_star, hcomp]
     rw [h1, hinv]
     rfl
-  have hsum : ω (star b * b) = ∑ i, ∑ j, c i * (starRingEnd ℂ) (c j) *
-      correlation ω α a (v i - v j) := by
+  have hsum
+      : ω (star b * b)
+        = ∑ i, ∑ j, c i * (starRingEnd ℂ) (c j) *
+          correlation ω α a (v i - v j) := by
     rw [hb, star_sum, Finset.sum_mul, map_sum, Finset.sum_comm]
     refine Finset.sum_congr rfl fun i _ => ?_
     rw [Finset.mul_sum]
@@ -112,29 +118,31 @@ lemma isPositiveDefiniteSub_correlation (hpos : ∀ b : B, 0 ≤ ω (star b * b)
 
 section Bochner
 
-variable [TopologicalSpace G] [DiscreteTopology G]
-  [MeasurableSpace (PontryaginDual (Multiplicative G))]
+variable
+  [TopologicalSpace G] [DiscreteTopology G] [MeasurableSpace (PontryaginDual (Multiplicative G))]
   [BorelSpace (PontryaginDual (Multiplicative G))]
 
-/-- **The structure factor exists.** The correlation function of an observable in an invariant
+/--
+**The structure factor exists.** The correlation function of an observable in an invariant
 positive functional is the Fourier transform of a finite positive measure on the momenta:
-`ω(a⋆ α_g(a)) = ∫ χ(g) dμ_a(χ)`. -/
-lemma exists_measure (hpos : ∀ b : B, 0 ≤ ω (star b * b)) (hinv : ∀ g b, ω (α g b) = ω b)
-    (a : B) :
-    ∃ μ : Measure (PontryaginDual (Multiplicative G)), IsFiniteMeasure μ ∧ μ.InnerRegular ∧
-      ∀ g : G, ∫ χ, ((χ (Multiplicative.ofAdd g) : Circle) : ℂ) ∂μ = correlation ω α a g := by
-  obtain ⟨μ, hreg, hμ⟩ := (TauCeti.isPositiveDefiniteSub_iff_exists_pontryaginMeasureTransform_eq
-    (correlation ω α a)).mp (isPositiveDefiniteSub_correlation ω α hpos hinv a)
+`ω(a⋆ α_g(a)) = ∫ χ(g) dμ_a(χ)`.
+-/
+lemma exists_measure (hpos : ∀ b : B, 0 ≤ ω (star b * b)) (hinv : ∀ g b, ω (α g b) = ω b) (a : B)
+    : ∃ μ : Measure (PontryaginDual (Multiplicative G)),
+      IsFiniteMeasure μ ∧ μ.InnerRegular
+        ∧ ∀ g : G, ∫ χ, ((χ (Multiplicative.ofAdd g) : Circle) : ℂ) ∂μ = correlation ω α a g := by
+  obtain ⟨μ, hreg, hμ⟩ :=
+    (TauCeti.isPositiveDefiniteSub_iff_exists_pontryaginMeasureTransform_eq (correlation ω α a)).mp
+      (isPositiveDefiniteSub_correlation ω α hpos hinv a)
   refine ⟨μ.toMeasure, inferInstance, hreg, fun g => ?_⟩
   rw [← hμ, FiniteMeasure.pontryaginMeasureTransform_apply]
 
-omit [StarModule ℂ B] [DiscreteTopology G]
-  [BorelSpace (PontryaginDual (Multiplicative G))] in
+omit [StarModule ℂ B] [DiscreteTopology G] [BorelSpace (PontryaginDual (Multiplicative G))] in
 /-- The total mass of the structure factor is the expectation of `a⋆ a`. -/
-lemma integral_one_eq {μ : Measure (PontryaginDual (Multiplicative G))}
-    (a : B) (h : ∀ g : G, ∫ χ, ((χ (Multiplicative.ofAdd g) : Circle) : ℂ) ∂μ =
-      correlation ω α a g) :
-    (μ.real univ : ℂ) = ω (star a * a) := by
+lemma integral_one_eq
+    {μ : Measure (PontryaginDual (Multiplicative G))}
+    (a : B) (h : ∀ g : G, ∫ χ, ((χ (Multiplicative.ofAdd g) : Circle) : ℂ) ∂μ = correlation ω α a g)
+    : (μ.real univ : ℂ) = ω (star a * a) := by
   have h0 := h 0
   simp only [ofAdd_zero, map_one, Circle.coe_one, integral_const] at h0
   simpa [correlation] using h0
@@ -143,40 +151,52 @@ section Countable
 
 variable [Countable G]
 
-/-- **The structure factor is unique.** For a countable group a finite measure on the momenta is
-determined by its Fourier transform. -/
-lemma eq_of_transform_eq {μ ν : Measure (PontryaginDual (Multiplicative G))}
-    [IsFiniteMeasure μ] [IsFiniteMeasure ν]
-    (h : ∀ g : G, ∫ χ, ((χ (Multiplicative.ofAdd g) : Circle) : ℂ) ∂μ =
-      ∫ χ, ((χ (Multiplicative.ofAdd g) : Circle) : ℂ) ∂ν) : μ = ν := by
+/--
+**The structure factor is unique.** For a countable group a finite measure on the momenta is
+determined by its Fourier transform.
+-/
+lemma eq_of_transform_eq
+    {μ ν : Measure (PontryaginDual (Multiplicative G))} [IsFiniteMeasure μ] [IsFiniteMeasure ν]
+    (h : ∀ g : G,
+      ∫ χ, ((χ (Multiplicative.ofAdd g) : Circle) : ℂ) ∂μ
+        = ∫ χ, ((χ (Multiplicative.ofAdd g) : Circle) : ℂ) ∂ν)
+    : μ = ν := by
   have : Countable (Multiplicative G) := inferInstanceAs (Countable G)
   have : SecondCountableTopology (Multiplicative G) :=
     DiscreteTopology.secondCountableTopology_of_countable
   have : PolishSpace (PontryaginDual (Multiplicative G)) := TauCeti.instPolishSpacePontryaginDual
   let Pμ : FiniteMeasure (PontryaginDual (Multiplicative G)) := ⟨μ, inferInstance⟩
   let Pν : FiniteMeasure (PontryaginDual (Multiplicative G)) := ⟨ν, inferInstance⟩
-  have key : Pμ = Pν := FiniteMeasure.ext_of_forall_pontryaginMeasureTransform_eq (fun g => by
-    rw [FiniteMeasure.pontryaginMeasureTransform_apply Pμ g,
-      FiniteMeasure.pontryaginMeasureTransform_apply Pν g]
-    exact h g)
+  have key : Pμ = Pν :=
+    FiniteMeasure.ext_of_forall_pontryaginMeasureTransform_eq (fun g => by
+      rw [FiniteMeasure.pontryaginMeasureTransform_apply Pμ g,
+        FiniteMeasure.pontryaginMeasureTransform_apply Pν g]
+      exact h g)
   exact congrArg FiniteMeasure.toMeasure key
 
 end Countable
 
-/-- **Positive semidefinite translation-invariant couplings are Fourier transforms of positive
+/--
+**Positive semidefinite translation-invariant couplings are Fourier transforms of positive
 measures.** A coupling `J(r)` depending only on the displacement `r` is positive semidefinite, in
 the sense that every finite quadratic form `∑ c_i c̄_j J(r_i - r_j)` is nonnegative, if and only if
 it is the Fourier transform of a finite positive measure on the momenta, whose density is the
-dispersion of the coupling. -/
-lemma isPositiveDefiniteSub_iff_exists_measure (J : G → ℂ) :
-    TauCeti.IsPositiveDefiniteSub J ↔
-      ∃ μ : Measure (PontryaginDual (Multiplicative G)), IsFiniteMeasure μ ∧ μ.InnerRegular ∧
-        ∀ r : G, J r = ∫ χ, ((χ (Multiplicative.ofAdd r) : Circle) : ℂ) ∂μ := by
+dispersion of the coupling.
+-/
+lemma isPositiveDefiniteSub_iff_exists_measure (J : G → ℂ)
+    : TauCeti.IsPositiveDefiniteSub J
+      ↔ ∃ μ : Measure (PontryaginDual (Multiplicative G)),
+        IsFiniteMeasure μ ∧ μ.InnerRegular
+          ∧ ∀ r : G, J r = ∫ χ, ((χ (Multiplicative.ofAdd r) : Circle) : ℂ) ∂μ := by
   rw [TauCeti.isPositiveDefiniteSub_iff_exists_pontryaginMeasureTransform_eq]
   constructor
   · rintro ⟨μ, hreg, hμ⟩
-    exact ⟨μ.toMeasure, inferInstance, hreg, fun r => by
-      rw [← hμ, FiniteMeasure.pontryaginMeasureTransform_apply]⟩
+    exact ⟨
+      μ.toMeasure,
+      inferInstance,
+      hreg,
+      fun r => by rw [← hμ, FiniteMeasure.pontryaginMeasureTransform_apply]
+    ⟩
   · rintro ⟨μ, hfin, hreg, hμ⟩
     let Pμ : FiniteMeasure (PontryaginDual (Multiplicative G)) := ⟨μ, hfin⟩
     refine ⟨Pμ, hreg, funext fun r => ?_⟩

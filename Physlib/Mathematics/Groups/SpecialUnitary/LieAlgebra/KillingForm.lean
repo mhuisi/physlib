@@ -55,25 +55,29 @@ namespace SULieAlgebra
 
 -/
 
-/-- The Killing form of the complexification is the trace form of the matrices,
-  `K(A, B) = -2n tr (A B)`. The sign comes from the factor `i` in the bracket, which makes
-  `ad A ∘ ad B` the map `M ↦ -[A, [B, M]]`. -/
-lemma killingForm_eq_trace {n : ℕ} (A B : Complexification n) :
-    killingForm ℂ (Complexification n) A B = - (2 * n) * (toMatrixℂ A * toMatrixℂ B).trace := by
+/--
+The Killing form of the complexification is the trace form of the matrices,
+`K(A, B) = -2n tr (A B)`. The sign comes from the factor `i` in the bracket, which makes
+`ad A ∘ ad B` the map `M ↦ -[A, [B, M]]`.
+-/
+lemma killingForm_eq_trace {n : ℕ} (A B : Complexification n)
+    : killingForm ℂ (Complexification n) A B = -(2 * n) * (toMatrixℂ A * toMatrixℂ B).trace := by
   let e : Matrix (Fin n) (Fin n) ℂ ≃ₗ[ℂ] (Fin n × Fin n → ℂ) :=
     .ofBijective ⟨⟨vec, vec_add⟩, vec_smul⟩ vec_bijective
-  let F := e.symm.conj <| toLin' <| -(1 ⊗ₖ (toMatrixℂ A * toMatrixℂ B)
-    - (toMatrixℂ B)ᵀ ⊗ₖ toMatrixℂ A - (toMatrixℂ A)ᵀ ⊗ₖ toMatrixℂ B
-    + (toMatrixℂ B * toMatrixℂ A)ᵀ ⊗ₖ 1)
-  have hF (M) : F M = -(toMatrixℂ A * (toMatrixℂ B * M - M * toMatrixℂ B)
-      - (toMatrixℂ B * M - M * toMatrixℂ B) * toMatrixℂ A) := e.symm_apply_eq.2 <| by
-    simp [e, kronecker_mulVec_vec, ← vec_sub, ← vec_add, ← vec_neg, vec_inj]
-    noncomm_ring
+  let F :=
+    e.symm.conj <| toLin' <| -(1 ⊗ₖ (toMatrixℂ A * toMatrixℂ B) - (toMatrixℂ B)ᵀ ⊗ₖ toMatrixℂ A
+      - (toMatrixℂ A)ᵀ ⊗ₖ toMatrixℂ B + (toMatrixℂ B * toMatrixℂ A)ᵀ ⊗ₖ 1)
+  have hF (M)
+      : F M
+        = -(toMatrixℂ A * (toMatrixℂ B * M - M * toMatrixℂ B)
+          - (toMatrixℂ B * M - M * toMatrixℂ B) * toMatrixℂ A) :=
+    e.symm_apply_eq.2 <| by
+      simp [e, kronecker_mulVec_vec, ← vec_sub, ← vec_add, ← vec_neg, vec_inj]
+      noncomm_ring
   have hF' (M) : F M ∈ LinearMap.ker (traceLinearMap (Fin n) ℂ ℂ) := by
     simp [hF, trace_mul_comm (toMatrixℂ A)]
   have h1 : equivTraceKer.conj (ad ℂ _ A ∘ₗ ad ℂ _ B) = F.restrict fun M _ => hF' M :=
-    LinearMap.ext fun M => Subtype.ext <| by
-      simp [hF, toMatrixℂ_lie, ← smul_sub, smul_smul]
+    LinearMap.ext fun M => Subtype.ext <| by simp [hF, toMatrixℂ_lie, ← smul_sub, smul_smul]
   rw [killingForm_apply_apply, ← LinearMap.trace_conj' _ equivTraceKer, h1,
     LinearMap.trace_restrict_eq_of_forall_mem _ _ hF']
   simp [F, trace_kronecker, -transpose_mul, trace_mul_comm (toMatrixℂ B), trace_toMatrixℂ]
@@ -85,10 +89,12 @@ lemma killingForm_eq_trace {n : ℕ} (A B : Complexification n) :
 
 -/
 
-/-- The contraction is the Killing form on the complexified Lie
-  algebra, up to a factor of `-1/(2n)`. -/
-lemma adjointℂContr_eq_killingForm {n : ℕ} (A B : Complexification n) :
-    adjointℂContr (A ⊗ₜ B) = -(1 / (2 * (n : ℂ))) * killingForm ℂ (Complexification n) A B := by
+/--
+The contraction is the Killing form on the complexified Lie
+algebra, up to a factor of `-1/(2n)`.
+-/
+lemma adjointℂContr_eq_killingForm {n : ℕ} (A B : Complexification n)
+    : adjointℂContr (A ⊗ₜ B) = -(1 / (2 * (n : ℂ))) * killingForm ℂ (Complexification n) A B := by
   rw [killingForm_eq_trace, adjointℂContr_tmul]
   rcases Nat.eq_zero_or_pos n with rfl | hn
   · simp [Matrix.trace]
@@ -96,11 +102,12 @@ lemma adjointℂContr_eq_killingForm {n : ℕ} (A B : Complexification n) :
     field_simp
 
 /-- The contraction is the Killing form on the Lie algebra, up to a factor of `-1/(2n)`. -/
-lemma adjointContr_eq_killingForm {n : ℕ} (x y : SULieAlgebra n ℂ) :
-    adjointContr (x ⊗ₜ y) = -(1 / (2 * (n : ℝ))) * killingForm ℝ (SULieAlgebra n ℂ) x y := by
+lemma adjointContr_eq_killingForm {n : ℕ} (x y : SULieAlgebra n ℂ)
+    : adjointContr (x ⊗ₜ y) = -(1 / (2 * (n : ℝ))) * killingForm ℝ (SULieAlgebra n ℂ) x y := by
   have h := adjointℂContr_eq_killingForm (1 ⊗ₜ x) (1 ⊗ₜ y)
   rw [adjointℂContr_one_tmul, killingForm, LieModule.traceForm_baseChange,
-    LinearMap.BilinForm.baseChange_tmul, mul_one, Complex.real_smul, mul_one] at h
+      LinearMap.BilinForm.baseChange_tmul, mul_one, Complex.real_smul, mul_one]
+    at h
   apply Complex.ofReal_injective
   push_cast
   exact h

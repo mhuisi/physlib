@@ -44,17 +44,18 @@ open TensorSpecies Tensor
 
 -/
 
-/-- For real Lorentz tensors, the component formula for `crossToEnd` collapses to one sum because
-the standard contravariant and covariant bases are dual under contraction. -/
-lemma crossToEnd_basis_repr_apply_eq_fin {d nA nB : ℕ} {cA : Fin (nA + 1) → Color}
-    {cB : Fin (nB + 1) → Color} (i : Fin (nA + 1)) (j : Fin (nB + 1))
-    (hc : (realLorentzTensor d).τ (cA i) = cB j) (t : ℝT(d, cA)) (M : ℝT(d, cB))
-    (φ : ComponentIdx (S := realLorentzTensor d)
-      (Fin.append (cA ∘ i.succAbove) (cB ∘ j.succAbove))) :
-    (Tensor.basis _).repr (crossToEnd i j hc t M) φ =
-      ∑ x : Fin 1 ⊕ Fin d,
-        (Tensor.basis cA).repr t (i.insertNth x (fun m => φ (Fin.castAdd nB m))) *
-          (Tensor.basis cB).repr M (j.insertNth x (fun m => φ (Fin.natAdd nA m))) := by
+/--
+For real Lorentz tensors, the component formula for `crossToEnd` collapses to one sum because
+the standard contravariant and covariant bases are dual under contraction.
+-/
+lemma crossToEnd_basis_repr_apply_eq_fin
+    {d nA nB : ℕ} {cA : Fin (nA + 1) → Color} {cB : Fin (nB + 1) → Color} (i : Fin (nA + 1))
+    (j : Fin (nB + 1)) (hc : (realLorentzTensor d).τ (cA i) = cB j) (t : ℝT(d, cA)) (M : ℝT(d, cB))
+    (φ : ComponentIdx (S := realLorentzTensor d) (Fin.append (cA ∘ i.succAbove) (cB ∘ j.succAbove)))
+    : (Tensor.basis _).repr (crossToEnd i j hc t M) φ
+      = ∑ x : Fin 1 ⊕ Fin d,
+          (Tensor.basis cA).repr t (i.insertNth x (fun m => φ (Fin.castAdd nB m))) *
+            (Tensor.basis cB).repr M (j.insertNth x (fun m => φ (Fin.natAdd nA m))) := by
   rw [crossToEnd]
   simp only [LinearMap.compr₂_apply, LinearMap.comp_apply]
   rw [permT_basis_repr_symm_apply, contrT_basis_repr_apply_eq_fin]

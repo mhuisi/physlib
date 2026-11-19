@@ -42,19 +42,21 @@ open InnerProductSpace
 
 namespace Finsupp
 
-variable {𝕜 α E F : Type*} [RCLike 𝕜]
-  [SeminormedAddCommGroup E] [InnerProductSpace 𝕜 E]
+variable
+  {𝕜 α E F : Type*} [RCLike 𝕜] [SeminormedAddCommGroup E] [InnerProductSpace 𝕜 E]
   [SeminormedAddCommGroup F] [InnerProductSpace 𝕜 F]
 
-/-- Families with equal pairwise inner products give linear combinations of equal norm
-for the same finitely supported coefficients. -/
-lemma norm_linearCombination_eq_of_inner_eq (f : α →₀ 𝕜) {φ : α → E} {ψ : α → F}
-    (h : ∀ a b, ⟪φ a, φ b⟫_𝕜 = ⟪ψ a, ψ b⟫_𝕜) :
-    ‖linearCombination 𝕜 φ f‖ = ‖linearCombination 𝕜 ψ f‖ := by
+/--
+Families with equal pairwise inner products give linear combinations of equal norm
+for the same finitely supported coefficients.
+-/
+lemma norm_linearCombination_eq_of_inner_eq
+    (f : α →₀ 𝕜) {φ : α → E} {ψ : α → F} (h : ∀ a b, ⟪φ a, φ b⟫_𝕜 = ⟪ψ a, ψ b⟫_𝕜)
+    : ‖linearCombination 𝕜 φ f‖ = ‖linearCombination 𝕜 ψ f‖ := by
   apply (sq_eq_sq₀ (norm_nonneg _) (norm_nonneg _)).mp
   rw [← inner_self_eq_norm_sq (𝕜 := 𝕜), ← inner_self_eq_norm_sq (𝕜 := 𝕜)]
   congr 1
-  simp only [linearCombination_apply, Finsupp.sum_inner, Finsupp.inner_sum,
-    inner_smul_left, inner_smul_right, h]
+  simp only [linearCombination_apply, Finsupp.sum_inner, Finsupp.inner_sum, inner_smul_left,
+    inner_smul_right, h]
 
 end Finsupp

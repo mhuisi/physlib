@@ -51,20 +51,28 @@ namespace CosmicFluid
 
 variable (F : CosmicFluid) (c : ℝ) (t : Time)
 
-/-- The null energy condition at time `t`, `0 ≤ ρ + p / c²`, for the total energy density `ρ`
-  and the pressure `p` of the cosmic fluid, `c` being the speed of light. -/
+/--
+The null energy condition at time `t`, `0 ≤ ρ + p / c²`, for the total energy density `ρ`
+and the pressure `p` of the cosmic fluid, `c` being the speed of light.
+-/
 def NullEnergyCondition : Prop := 0 ≤ F.ρ t + F.p t / c ^ 2
 
-/-- The weak energy condition at time `t`, `0 ≤ ρ ∧ 0 ≤ ρ + p / c²`, for the total energy density
-  `ρ` and the pressure `p` of the cosmic fluid, `c` being the speed of light. -/
+/--
+The weak energy condition at time `t`, `0 ≤ ρ ∧ 0 ≤ ρ + p / c²`, for the total energy density
+`ρ` and the pressure `p` of the cosmic fluid, `c` being the speed of light.
+-/
 def WeakEnergyCondition : Prop := 0 ≤ F.ρ t ∧ 0 ≤ F.ρ t + F.p t / c ^ 2
 
-/-- The strong energy condition at time `t`, `0 ≤ ρ + p / c² ∧ 0 ≤ ρ + 3 p / c²`, for the total
-  energy density `ρ` and the pressure `p` of the cosmic fluid, `c` being the speed of light. -/
+/--
+The strong energy condition at time `t`, `0 ≤ ρ + p / c² ∧ 0 ≤ ρ + 3 p / c²`, for the total
+energy density `ρ` and the pressure `p` of the cosmic fluid, `c` being the speed of light.
+-/
 def StrongEnergyCondition : Prop := 0 ≤ F.ρ t + F.p t / c ^ 2 ∧ 0 ≤ F.ρ t + 3 * F.p t / c ^ 2
 
-/-- The dominant energy condition at time `t`, `0 ≤ ρ ∧ |p| ≤ ρ c²`, for the total energy density
-  `ρ` and the pressure `p` of the cosmic fluid, `c` being the speed of light. -/
+/--
+The dominant energy condition at time `t`, `0 ≤ ρ ∧ |p| ≤ ρ c²`, for the total energy density
+`ρ` and the pressure `p` of the cosmic fluid, `c` being the speed of light.
+-/
 def DominantEnergyCondition : Prop := 0 ≤ F.ρ t ∧ |F.p t| ≤ F.ρ t * c ^ 2
 
 /-!
@@ -76,8 +84,8 @@ def DominantEnergyCondition : Prop := 0 ≤ F.ρ t ∧ |F.p t| ≤ F.ρ t * c ^ 
 variable {F c t}
 
 /-- For `c ≠ 0`, the dominant energy condition implies the weak energy condition. -/
-lemma DominantEnergyCondition.weakEnergyCondition (hc : c ≠ 0)
-    (h : F.DominantEnergyCondition c t) : F.WeakEnergyCondition c t := by
+lemma DominantEnergyCondition.weakEnergyCondition (hc : c ≠ 0) (h : F.DominantEnergyCondition c t)
+    : F.WeakEnergyCondition c t := by
   obtain ⟨h0, h1⟩ := h
   have hc2 : 0 < c ^ 2 := by positivity
   have h2 : -(F.ρ t * c ^ 2) ≤ F.p t := (abs_le.mp h1).1
@@ -88,13 +96,13 @@ lemma DominantEnergyCondition.weakEnergyCondition (hc : c ≠ 0)
   linarith
 
 /-- The weak energy condition implies the null energy condition. -/
-lemma WeakEnergyCondition.nullEnergyCondition (h : F.WeakEnergyCondition c t) :
-    F.NullEnergyCondition c t :=
+lemma WeakEnergyCondition.nullEnergyCondition (h : F.WeakEnergyCondition c t)
+    : F.NullEnergyCondition c t :=
   h.2
 
 /-- The strong energy condition implies the null energy condition. -/
-lemma StrongEnergyCondition.nullEnergyCondition (h : F.StrongEnergyCondition c t) :
-    F.NullEnergyCondition c t :=
+lemma StrongEnergyCondition.nullEnergyCondition (h : F.StrongEnergyCondition c t)
+    : F.NullEnergyCondition c t :=
   h.1
 
 end CosmicFluid

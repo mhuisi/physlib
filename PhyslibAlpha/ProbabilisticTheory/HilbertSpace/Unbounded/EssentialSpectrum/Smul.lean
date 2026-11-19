@@ -52,16 +52,19 @@ variable {H : Type*} [NormedAddCommGroup H] [InnerProductSpace ℂ H] [CompleteS
 
 omit [CompleteSpace H] in
 /-- For a real scalar `c`, `c • A` is formally self-adjoint when `A` is. -/
-lemma isFormalAdjoint_smul_real {A : H →ₗ.[ℂ] H} (hsym : A.IsFormalAdjoint A)
-    (c : ℝ) : (((c : ℂ)) • A).IsFormalAdjoint (((c : ℂ)) • A) := by
+lemma isFormalAdjoint_smul_real {A : H →ₗ.[ℂ] H} (hsym : A.IsFormalAdjoint A) (c : ℝ)
+    : (((c : ℂ)) • A).IsFormalAdjoint (((c : ℂ)) • A) := by
   intro x y
   rw [LinearPMap.smul_apply, LinearPMap.smul_apply, inner_smul_left, inner_smul_right,
     Complex.conj_ofReal, hsym x y]
 
-/-- For self-adjoint `A` and `z` off the real axis, every vector is `A ψ - z ψ` for some `ψ` in the
-domain of `A`. -/
-lemma exists_apply_sub_smul_eq {A : H →ₗ.[ℂ] H} (hA : IsSelfAdjoint A) {z : ℂ} (hz : z.im ≠ 0)
-    (φ : H) : ∃ ψ : A.domain, A ψ - z • (ψ : H) = φ := by
+/--
+For self-adjoint `A` and `z` off the real axis, every vector is `A ψ - z ψ` for some `ψ` in the
+domain of `A`.
+-/
+lemma exists_apply_sub_smul_eq
+    {A : H →ₗ.[ℂ] H} (hA : IsSelfAdjoint A) {z : ℂ} (hz : z.im ≠ 0) (φ : H)
+    : ∃ ψ : A.domain, A ψ - z • (ψ : H) = φ := by
   have hdom : (A - z • (1 : H →ₗ.[ℂ] H)).domain = A.domain := by
     simp [LinearPMap.sub_domain, LinearPMap.smul_domain]
   obtain ⟨x, hx⟩ := LinearPMap.IsSelfAdjoint.sub_smul_surjective hA hz φ
@@ -70,9 +73,9 @@ lemma exists_apply_sub_smul_eq {A : H →ₗ.[ℂ] H} (hA : IsSelfAdjoint A) {z 
   simpa using hx
 
 /-- Surjectivity of `c•A - w` reduces to surjectivity of `A - w/c` (real `c ≠ 0`). -/
-lemma smul_surjective_sub_smul {A : H →ₗ.[ℂ] H} (hA : IsSelfAdjoint A)
-    (c : ℝ) (hc : c ≠ 0) (w : ℂ) (hw : w.im ≠ 0) :
-    ∀ φ : H, ∃ ψ : ((c : ℂ) • A).domain, ((c : ℂ) • A) ψ - w • (ψ : H) = φ := by
+lemma smul_surjective_sub_smul
+    {A : H →ₗ.[ℂ] H} (hA : IsSelfAdjoint A) (c : ℝ) (hc : c ≠ 0) (w : ℂ) (hw : w.im ≠ 0)
+    : ∀ φ : H, ∃ ψ : ((c : ℂ) • A).domain, ((c : ℂ) • A) ψ - w • (ψ : H) = φ := by
   intro φ
   have hcℂ : (c : ℂ) ≠ 0 := by exact_mod_cast hc
   have hwc : (w / (c : ℂ)).im ≠ 0 := by
@@ -92,8 +95,8 @@ lemma smul_surjective_sub_smul {A : H →ₗ.[ℂ] H} (hA : IsSelfAdjoint A)
   exact hkey
 
 /-- **L1.** If `A` is self-adjoint and `c : ℝ` is nonzero, then `(c : ℂ) • A` is self-adjoint. -/
-lemma isSelfAdjoint_smul_real {A : H →ₗ.[ℂ] H} (hA : IsSelfAdjoint A)
-    (c : ℝ) (hc : c ≠ 0) : IsSelfAdjoint ((c : ℂ) • A) := by
+lemma isSelfAdjoint_smul_real {A : H →ₗ.[ℂ] H} (hA : IsSelfAdjoint A) (c : ℝ) (hc : c ≠ 0)
+    : IsSelfAdjoint ((c : ℂ) • A) := by
   have hsymA : A.IsFormalAdjoint A := LinearPMap.IsSelfAdjoint.isSymmetric hA
   have hsym : ((c : ℂ) • A).IsFormalAdjoint ((c : ℂ) • A) := isFormalAdjoint_smul_real hsymA c
   have hdense : Dense (((c : ℂ) • A).domain : Set H) := by
@@ -122,23 +125,28 @@ lemma isSelfAdjoint_smul_real {A : H →ₗ.[ℂ] H} (hA : IsSelfAdjoint A)
 /-! ## B. L2: essential spectrum under real scaling -/
 
 /-- A Weyl sequence for `A` at `λ` is a Weyl sequence for `c • A` at `c·λ` (real `c`). -/
-lemma mem_essSpectrum_smul_real {A : H →ₗ.[ℂ] H} (hA : IsSelfAdjoint A)
-    (c : ℝ) (hc : c ≠ 0) {lam : ℝ} (hlam : lam ∈ essSpectrum hA) :
-    c * lam ∈ essSpectrum (isSelfAdjoint_smul_real hA c hc) := by
+lemma mem_essSpectrum_smul_real
+    {A : H →ₗ.[ℂ] H} (hA : IsSelfAdjoint A)
+    (c : ℝ) (hc : c ≠ 0)
+    {lam : ℝ} (hlam : lam ∈ essSpectrum hA)
+    : c * lam ∈ essSpectrum (isSelfAdjoint_smul_real hA c hc) := by
   obtain ⟨ψ, hnorm, hweak, heig⟩ := hlam
   have hmem : ∀ n, (ψ n : H) ∈ ((c : ℂ) • A).domain := by
     intro n; rw [LinearPMap.smul_domain]; exact (ψ n).2
   refine mem_essSpectrum_of_seq (isSelfAdjoint_smul_real hA c hc) (c * lam)
-    (fun n => (ψ n : H)) hmem hnorm hweak ?_
-  have hrw : ∀ n,
-      ‖((c : ℂ) • A) ⟨(ψ n : H), hmem n⟩ - ((c * lam : ℝ) : ℂ) • (ψ n : H)‖
-        = |c| * ‖A (ψ n) - (lam : ℂ) • (ψ n : H)‖ := by
+    (fun n => (ψ n : H))
+    hmem hnorm hweak ?_
+  have hrw
+      : ∀ n,
+        ‖((c : ℂ) • A) ⟨(ψ n : H), hmem n⟩ - ((c * lam : ℝ) : ℂ) • (ψ n : H)‖
+          = |c| * ‖A (ψ n) - (lam : ℂ) • (ψ n : H)‖ := by
     intro n
     rw [LinearPMap.smul_apply]
     have hAeq : A ⟨(ψ n : H), hmem n⟩ = A (ψ n) := by congr
     rw [hAeq]
-    have hsm : (c : ℂ) • A (ψ n) - ((c * lam : ℝ) : ℂ) • (ψ n : H)
-        = (c : ℂ) • (A (ψ n) - (lam : ℂ) • (ψ n : H)) := by
+    have hsm
+        : (c : ℂ) • A (ψ n) - ((c * lam : ℝ) : ℂ) • (ψ n : H)
+          = (c : ℂ) • (A (ψ n) - (lam : ℂ) • (ψ n : H)) := by
       rw [smul_sub, smul_smul]; push_cast; ring_nf
     rw [hsm, norm_smul]
     congr 1
@@ -148,24 +156,26 @@ lemma mem_essSpectrum_smul_real {A : H →ₗ.[ℂ] H} (hA : IsSelfAdjoint A)
   exact heig.const_mul |c|
 
 /-- `essSpectrum` depends only on the operator, not on the self-adjointness witness. -/
-lemma essSpectrum_congr_op {A B : H →ₗ.[ℂ] H} (hA : IsSelfAdjoint A) (hB : IsSelfAdjoint B)
-    (h : A = B) : essSpectrum hA = essSpectrum hB := by
+lemma essSpectrum_congr_op
+    {A B : H →ₗ.[ℂ] H} (hA : IsSelfAdjoint A) (hB : IsSelfAdjoint B) (h : A = B)
+    : essSpectrum hA = essSpectrum hB := by
   subst h; rfl
 
 omit [CompleteSpace H] in
 /-- Scaling by `c` then by `c⁻¹` is the identity operator (real `c ≠ 0`). -/
-lemma smul_inv_smul_pmap {A : H →ₗ.[ℂ] H} (c : ℝ) (hc : c ≠ 0) :
-    ((c⁻¹ : ℝ) : ℂ) • (((c : ℂ)) • A) = A := by
+lemma smul_inv_smul_pmap {A : H →ₗ.[ℂ] H} (c : ℝ) (hc : c ≠ 0)
+    : ((c⁻¹ : ℝ) : ℂ) • (((c : ℂ)) • A) = A := by
   have hcℂ : (c : ℂ) ≠ 0 := by exact_mod_cast hc
   rw [smul_smul]
   rw [show (((c⁻¹ : ℝ) : ℂ)) * (c : ℂ) = 1 by push_cast; field_simp]
   exact one_smul _ A
 
-/-- **L2.** The essential spectrum scales by a real nonzero `c`:
-`essSpectrum (c • A) = (· * c) '' essSpectrum A`. -/
-lemma essSpectrum_smul_real {A : H →ₗ.[ℂ] H} (hA : IsSelfAdjoint A)
-    (c : ℝ) (hc : c ≠ 0) :
-    essSpectrum (isSelfAdjoint_smul_real hA c hc) = (fun μ => c * μ) '' essSpectrum hA := by
+/--
+**L2.** The essential spectrum scales by a real nonzero `c`:
+`essSpectrum (c • A) = (· * c) '' essSpectrum A`.
+-/
+lemma essSpectrum_smul_real {A : H →ₗ.[ℂ] H} (hA : IsSelfAdjoint A) (c : ℝ) (hc : c ≠ 0)
+    : essSpectrum (isSelfAdjoint_smul_real hA c hc) = (fun μ => c * μ) '' essSpectrum hA := by
   apply Set.eq_of_subset_of_subset
   · intro μ hμ
     have _hcℂ : (c : ℂ) ≠ 0 := by exact_mod_cast hc
@@ -173,8 +183,8 @@ lemma essSpectrum_smul_real {A : H →ₗ.[ℂ] H} (hA : IsSelfAdjoint A)
     have hstep := mem_essSpectrum_smul_real hcA_SA c⁻¹ (inv_ne_zero hc) hμ
     have hop : ((c⁻¹ : ℝ) : ℂ) • (((c : ℂ)) • A) = A := smul_inv_smul_pmap c hc
     refine ⟨c⁻¹ * μ, ?_, by field_simp⟩
-    have hess : essSpectrum (isSelfAdjoint_smul_real hcA_SA c⁻¹ (inv_ne_zero hc))
-        = essSpectrum hA :=
+    have hess
+        : essSpectrum (isSelfAdjoint_smul_real hcA_SA c⁻¹ (inv_ne_zero hc)) = essSpectrum hA :=
       essSpectrum_congr_op _ hA hop
     rw [hess] at hstep
     exact hstep

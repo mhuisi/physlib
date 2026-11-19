@@ -42,56 +42,51 @@ namespace Space
 
 open MeasureTheory SchwartzMap
 
-private lemma npow_indicator_rpow_eq {n : ℕ} {s : Set ℝ} (hs : 0 ∉ s) (p : ℝ) :
-    (fun r ↦ r ^ n • s.indicator (fun r ↦ r ^ p) r) = s.indicator (fun r ↦ r ^ (n + p)) := by
+private lemma npow_indicator_rpow_eq {n : ℕ} {s : Set ℝ} (hs : 0 ∉ s) (p : ℝ)
+    : (fun r ↦ r ^ n • s.indicator (fun r ↦ r ^ p) r) = s.indicator (fun r ↦ r ^ (n + p)) := by
   ext r
   by_cases hr : r ∈ s
   · grind [Set.indicator_of_mem, smul_eq_mul, add_comm, Real.rpow_add_natCast]
   · simp [hr]
 
 lemma radial_jacobian_zpow_mul_self
-    {d p : ℕ} [NeZero d] {q : ℤ} (hp_int : (p : ℤ) = q + (d : ℤ))
-    {r : ℝ} (hr : 0 < r) :
-    r ^ (d - 1) * (r ^ q * r) = r ^ p := by
+    {d p : ℕ} [NeZero d] {q : ℤ} (hp_int : (p : ℤ) = q + (d : ℤ)) {r : ℝ} (hr : 0 < r)
+    : r ^ (d - 1) * (r ^ q * r) = r ^ p := by
   have hz : r ≠ 0 := ne_of_gt hr
   calc
-    r ^ (d - 1) * (r ^ q * r)
-        = r ^ (d - 1: ℤ) * (r ^ q * r ^ (1 : ℤ)) := by
-            rw [← zpow_natCast, zpow_one, ← Nat.cast_pred (Nat.pos_of_neZero d)]
-    _ = r ^ ((d - 1: ℤ) + (q + 1)) := by
-            rw [← zpow_add₀ hz q 1, ← zpow_add₀ hz (d - 1: ℤ) (q + 1)]
-    _ = r ^ (p : ℤ) := by
-            congr 1; omega
-    _ = r ^ p := by
-            rw [zpow_natCast]
+    r ^ (d - 1) * (r ^ q * r) = r ^ (d - 1 : ℤ) * (r ^ q * r ^ (1 : ℤ)) := by
+      rw [← zpow_natCast, zpow_one, ← Nat.cast_pred (Nat.pos_of_neZero d)]
+    _ = r ^ ((d - 1 : ℤ) + (q + 1)) := by
+      rw [← zpow_add₀ hz q 1, ← zpow_add₀ hz (d - 1 : ℤ) (q + 1)]
+    _ = r ^ (p : ℤ) := by congr 1; omega
+    _ = r ^ p := by rw [zpow_natCast]
 
 private lemma radial_jacobian_zpow
-    {d p : ℕ} [NeZero d] {q : ℤ} (hp_int : (p : ℤ) = q + (d : ℤ))
-    (hp_pos : 0 < p) {r : ℝ} (hr : 0 < r) :
-    r ^ (d - 1) * r ^ q = r ^ (p - 1) := by
+    {d p : ℕ} [NeZero d]
+    {q : ℤ} (hp_int : (p : ℤ) = q + (d : ℤ))
+    (hp_pos : 0 < p)
+    {r : ℝ} (hr : 0 < r)
+    : r ^ (d - 1) * r ^ q = r ^ (p - 1) := by
   have hz : r ≠ 0 := ne_of_gt hr
   calc
-    r ^ (d - 1) * r ^ q
-        = r ^ ((d - 1 : ℤ) + q) := by
-            rw [← Nat.cast_pred (Nat.pos_of_neZero d), ← zpow_natCast, ← zpow_add₀ hz]
-    _ = r ^ ((p - 1 : ℕ) : ℤ) := by
-            congr 1; omega
-    _ = r ^ (p - 1) := by
-            rw [zpow_natCast]
+    r ^ (d - 1) * r ^ q = r ^ ((d - 1 : ℤ) + q) := by
+      rw [← Nat.cast_pred (Nat.pos_of_neZero d), ← zpow_natCast, ← zpow_add₀ hz]
+    _ = r ^ ((p - 1 : ℕ) : ℤ) := by congr 1; omega
+    _ = r ^ (p - 1) := by rw [zpow_natCast]
 
 lemma radial_norm_power_spherical_integral_eq_space_integral
-    {d p : ℕ} [NeZero d] {q : ℤ} (hp_int : (p : ℤ) = q + (d : ℤ))
-    (hp_pos : 0 < p) (η : 𝓢(Space d, ℝ)) :
-    ∫ x : Space d, η x * ‖x‖ ^ q =
-      ∫ (n : ↑(Metric.sphere (0 : Space d) 1)),
-        ∫ (r : Set.Ioi (0 : ℝ)),
-          r.1 ^ (p - 1) * η (r.1 • n.1)
-          ∂(.comap Subtype.val volume)
-        ∂(volume (α := Space d).toSphere) := by
+    {d p : ℕ} [NeZero d]
+    {q : ℤ} (hp_int : (p : ℤ) = q + (d : ℤ))
+    (hp_pos : 0 < p) (η : 𝓢(Space d, ℝ))
+    : ∫ x : Space d, η x * ‖x‖ ^ q
+      = ∫ (n : ↑(Metric.sphere (0 : Space d) 1)),
+          ∫ (r : Set.Ioi (0 : ℝ)),
+            r.1 ^ (p - 1) * η (r.1 • n.1)
+            ∂(.comap Subtype.val volume)
+          ∂(volume (α := Space d).toSphere) := by
   have hf : Integrable (fun x : Space d => η x * ‖x‖ ^ q) volume :=
     IsDistBounded.integrable_space_mul (IsDistBounded.pow q (by omega)) η
-  rw [integral_volume_eq_spherical_integral
-    (d := d) (fun x : Space d => η x * ‖x‖ ^ q) hf]
+  rw [integral_volume_eq_spherical_integral (d := d) (fun x : Space d => η x * ‖x‖ ^ q) hf]
   congr
   funext n
   congr
@@ -103,8 +98,8 @@ lemma radial_norm_power_spherical_integral_eq_space_integral
   ring
 
 /-- The function `x ↦ ‖x‖ᵖ` is integrable on `{x : Space d | 0 ≤ ‖x‖ < b}` iff `0 < d + p`. -/
-lemma integrableOn_norm_rpow_ball_iff {d : ℕ} [NeZero d] {b : ℝ} (hb : 0 < b) (p : ℝ) :
-    IntegrableOn (fun x : Space d ↦ ‖x‖ ^ p) (Metric.ball 0 b) ↔ 0 < d + p := by
+lemma integrableOn_norm_rpow_ball_iff {d : ℕ} [NeZero d] {b : ℝ} (hb : 0 < b) (p : ℝ)
+    : IntegrableOn (fun x : Space d ↦ ‖x‖ ^ p) (Metric.ball 0 b) ↔ 0 < d + p := by
   let f : Space d → ENNReal := (Metric.ball 0 b).indicator (fun x ↦ ‖‖x‖ ^ p‖ₑ)
   let g : ℝ → ℝ := (Set.Ioo 0 b).indicator (fun r ↦ r ^ p)
   have hfg : f =ᵐ[volume] fun x ↦ ‖g ‖x‖‖ₑ := by
@@ -130,8 +125,8 @@ lemma integrableOn_norm_rpow_ball_iff {d : ℕ} [NeZero d] {b : ℝ} (hb : 0 < b
   ring_nf
 
 /-- The function `x ↦ ‖x‖ᵖ` is integrable on `{x : Space d | 0 < a ≤ ‖x‖}` iff `d + p < 0`. -/
-lemma integrableOn_norm_rpow_ball_compl_iff {d : ℕ} [NeZero d] {a : ℝ} (ha : 0 < a) (p : ℝ) :
-    IntegrableOn (fun x : Space d ↦ ‖x‖ ^ p) (Metric.ball 0 a)ᶜ ↔ d + p < 0 := by
+lemma integrableOn_norm_rpow_ball_compl_iff {d : ℕ} [NeZero d] {a : ℝ} (ha : 0 < a) (p : ℝ)
+    : IntegrableOn (fun x : Space d ↦ ‖x‖ ^ p) (Metric.ball 0 a)ᶜ ↔ d + p < 0 := by
   let f : Space d → ENNReal := (Metric.ball 0 a)ᶜ.indicator (fun x ↦ ‖‖x‖ ^ p‖ₑ)
   let g : ℝ → ℝ := (Set.Ici a).indicator (fun r ↦ r ^ p)
   have hfg : f = fun x ↦ ‖g ‖x‖‖ₑ := by ext x; by_cases ‖x‖ ∈ Set.Ici a <;> simp_all [f, g]
@@ -151,8 +146,8 @@ lemma integrableOn_norm_rpow_ball_compl_iff {d : ℕ} [NeZero d] {a : ℝ} (ha :
   ring_nf
 
 /-- The function `x ↦ ‖x‖ᵖ` is integrable on the shell `{x : Space d | 0 < a ≤ ‖x‖ ∧ ‖x‖ < b}`. -/
-lemma integrableOn_norm_rpow_shell {d : ℕ} {a : ℝ} (ha : 0 < a) (b p : ℝ) :
-    IntegrableOn (fun x : Space d ↦ ‖x‖ ^ p) ((Metric.ball 0 b) ∩ (Metric.ball 0 a)ᶜ) := by
+lemma integrableOn_norm_rpow_shell {d : ℕ} {a : ℝ} (ha : 0 < a) (b p : ℝ)
+    : IntegrableOn (fun x : Space d ↦ ‖x‖ ^ p) ((Metric.ball 0 b) ∩ (Metric.ball 0 a)ᶜ) := by
   refine ⟨StronglyMeasurable.aestronglyMeasurable (by measurability), ?_⟩
   by_cases hab : a < b
   · refine setLIntegral_lt_top_of_le_nnreal ?_ ?_
@@ -171,11 +166,13 @@ lemma integrableOn_norm_rpow_shell {d : ℕ} {a : ℝ} (ha : 0 < a) (b p : ℝ) 
     have : ‖x‖ < b → ‖x‖ < a := fun _ ↦ by linarith
     simpa
 
-/-- The function `x ↦ ‖x‖ᵖ` is integrable on a bounded neighborhood of the origin
-  iff `0 < d + p`. -/
-lemma integrableOn_norm_rpow_iff_of_isBounded_nhds {d : ℕ} [NeZero d] {s : Set (Space d)}
-    (hs : Bornology.IsBounded s) (hs' : s ∈ nhds 0) (p : ℝ) :
-    IntegrableOn (fun x : Space d ↦ ‖x‖ ^ p) s ↔ 0 < d + p := by
+/--
+The function `x ↦ ‖x‖ᵖ` is integrable on a bounded neighborhood of the origin
+iff `0 < d + p`.
+-/
+lemma integrableOn_norm_rpow_iff_of_isBounded_nhds
+    {d : ℕ} [NeZero d] {s : Set (Space d)} (hs : Bornology.IsBounded s) (hs' : s ∈ nhds 0) (p : ℝ)
+    : IntegrableOn (fun x : Space d ↦ ‖x‖ ^ p) s ↔ 0 < d + p := by
   obtain ⟨a, ha, ha'⟩ := Metric.eventually_nhds_iff_ball.mp hs'
   obtain ⟨b, hb, hb'⟩ := Bornology.IsBounded.subset_ball_lt hs 0 0
   constructor <;> intro h
@@ -183,18 +180,21 @@ lemma integrableOn_norm_rpow_iff_of_isBounded_nhds {d : ℕ} [NeZero d] {s : Set
   · exact IntegrableOn.mono_set ((integrableOn_norm_rpow_ball_iff hb p).mpr h) hb'
 
 /-- The function `x ↦ ‖x‖ᵖ` is integrable on a bounded subset with the origin in its exterior. -/
-lemma integrableOn_norm_rpow_of_isBounded_compl_nhds {d : ℕ} {s : Set (Space d)}
-    (hs : Bornology.IsBounded s) (hs' : sᶜ ∈ nhds 0) (p : ℝ) :
-    IntegrableOn (fun x : Space d ↦ ‖x‖ ^ p) s := by
+lemma integrableOn_norm_rpow_of_isBounded_compl_nhds
+    {d : ℕ} {s : Set (Space d)} (hs : Bornology.IsBounded s) (hs' : sᶜ ∈ nhds 0) (p : ℝ)
+    : IntegrableOn (fun x : Space d ↦ ‖x‖ ^ p) s := by
   obtain ⟨a, ha, ha'⟩ := Metric.eventually_nhds_iff_ball.mp hs'
   obtain ⟨b, hb, hb'⟩ := Bornology.IsBounded.subset_ball_lt hs 0 0
   have hsc : s ⊆ (Metric.ball 0 a)ᶜ := Set.subset_compl_comm.mp ha'
   exact IntegrableOn.mono_set (integrableOn_norm_rpow_shell ha b p) (Set.subset_inter hb' hsc)
 
-/-- The function `x ↦ ‖x‖ᵖ` is integrable on a subset with the origin in its exterior provided
-  the decay at infinity is fast enough. -/
-lemma integrableOn_norm_rpow_of_compl_nhds {d : ℕ} [NeZero d] {s : Set (Space d)}
-    (hs : sᶜ ∈ nhds 0) {p : ℝ} (h : d + p < 0) : IntegrableOn (fun x : Space d ↦ ‖x‖ ^ p) s := by
+/--
+The function `x ↦ ‖x‖ᵖ` is integrable on a subset with the origin in its exterior provided
+the decay at infinity is fast enough.
+-/
+lemma integrableOn_norm_rpow_of_compl_nhds
+    {d : ℕ} [NeZero d] {s : Set (Space d)} (hs : sᶜ ∈ nhds 0) {p : ℝ} (h : d + p < 0)
+    : IntegrableOn (fun x : Space d ↦ ‖x‖ ^ p) s := by
   obtain ⟨a, ha, ha'⟩ := Metric.eventually_nhds_iff_ball.mp hs
   have hs' : s ⊆ (Metric.ball 0 a)ᶜ := Set.subset_compl_comm.mp ha'
   exact IntegrableOn.mono_set ((integrableOn_norm_rpow_ball_compl_iff ha p).mpr h) hs'

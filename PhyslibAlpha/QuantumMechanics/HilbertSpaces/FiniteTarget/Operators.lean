@@ -58,11 +58,9 @@ variable {d : Type*} [Fintype d] [DecidableEq d]
 
 -/
 
-instance : IsScalarTower ℝ (𝓗[d] →L[ℂ] 𝓗[d]) (𝓗[d] →L[ℂ] 𝓗[d]) :=
-  ⟨fun _ _ _ => by ext; simp⟩
+instance : IsScalarTower ℝ (𝓗[d] →L[ℂ] 𝓗[d]) (𝓗[d] →L[ℂ] 𝓗[d]) := ⟨fun _ _ _ => by ext; simp⟩
 
-instance : SMulCommClass ℝ (𝓗[d] →L[ℂ] 𝓗[d]) (𝓗[d] →L[ℂ] 𝓗[d]) :=
-  ⟨fun _ _ _ => by ext; simp⟩
+instance : SMulCommClass ℝ (𝓗[d] →L[ℂ] 𝓗[d]) (𝓗[d] →L[ℂ] 𝓗[d]) := ⟨fun _ _ _ => by ext; simp⟩
 
 /-!
 

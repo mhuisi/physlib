@@ -9,7 +9,6 @@ public import Mathlib.Analysis.Distribution.Distribution
 public import Physlib.SpaceAndTime.TimeAndSpace.ConstantTimeDist
 public import Physlib.SpaceAndTime.SpaceTime.TimeSlice
 
-
 /-!
 
 # The Electromagnetic Potential
@@ -70,9 +69,9 @@ namespace DistElectromagneticPotential
 -/
 
 /-- The equivalence between an electromagnetic potential and its underlying distribution. -/
-def valEquiv {d : ℕ} :
-    DistElectromagneticPotential d ≃
-      𝓓'(⟨Set.univ (α := SpaceTime d), isOpen_univ⟩, Lorentz.Vector d) where
+def valEquiv {d : ℕ}
+    : DistElectromagneticPotential d
+      ≃ 𝓓'(⟨Set.univ (α := SpaceTime d), isOpen_univ⟩, Lorentz.Vector d) where
   toFun := DistElectromagneticPotential.val
   invFun := fun T => ⟨T⟩
   left_inv := by
@@ -89,9 +88,9 @@ noncomputable instance {d : ℕ} : Module ℝ (DistElectromagneticPotential d) :
   AddEquiv.module ℝ { valEquiv with map_add' _ _ := rfl }
 
 /-- The linear equivalence between an electromagnetic potential and its underlying distribution. -/
-noncomputable def valLinearEquiv {d : ℕ} :
-    DistElectromagneticPotential d ≃ₗ[ℝ]
-      𝓓'(⟨Set.univ (α := SpaceTime d), isOpen_univ⟩, Lorentz.Vector d) :=
+noncomputable def valLinearEquiv {d : ℕ}
+    : DistElectromagneticPotential d ≃ₗ[ℝ]
+        𝓓'(⟨Set.univ (α := SpaceTime d), isOpen_univ⟩, Lorentz.Vector d) :=
   AddEquiv.linearEquiv ℝ { valEquiv with map_add' _ _ := rfl }
 
 /-!
@@ -101,10 +100,9 @@ noncomputable def valLinearEquiv {d : ℕ} :
 -/
 
 /-- The distribution induced by a spacetime function. -/
-noncomputable def ofFunction {d} (f : SpaceTime d → Lorentz.Vector d) :
-    DistElectromagneticPotential d where
-  val := Distribution.ofFun
-    ⟨Set.univ (α := SpaceTime d), isOpen_univ⟩ f (n := ⊤)
+noncomputable def ofFunction {d} (f : SpaceTime d → Lorentz.Vector d)
+    : DistElectromagneticPotential d where
+  val := Distribution.ofFun ⟨Set.univ (α := SpaceTime d), isOpen_univ⟩ f (n := ⊤)
 
 end DistElectromagneticPotential
 

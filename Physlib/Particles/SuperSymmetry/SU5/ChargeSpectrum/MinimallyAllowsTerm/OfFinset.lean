@@ -95,8 +95,8 @@ def toMultisetsOne (s : Finset 𝓩) : Multiset (Multiset 𝓩) :=
   X1
 
 @[simp]
-lemma mem_toMultisetsOne_iff [DecidableEq 𝓩] {s : Finset 𝓩} (X : Multiset 𝓩) :
-    X ∈ toMultisetsOne s ↔ X.toFinset ⊆ s ∧ X.card = 1 := by
+lemma mem_toMultisetsOne_iff [DecidableEq 𝓩] {s : Finset 𝓩} (X : Multiset 𝓩)
+    : X ∈ toMultisetsOne s ↔ X.toFinset ⊆ s ∧ X.card = 1 := by
   simp +contextual [toMultisetsOne, Multiset.card_eq_one]
 
 /-!
@@ -112,8 +112,8 @@ def toMultisetsTwo (s : Finset 𝓩) : Multiset (Multiset 𝓩) :=
   X1 + X2
 
 @[simp]
-lemma mem_toMultisetsTwo_iff [DecidableEq 𝓩] {s : Finset 𝓩} (X : Multiset 𝓩) :
-    X ∈ toMultisetsTwo s ↔ X.toFinset ⊆ s ∧ X.card = 2 := by
+lemma mem_toMultisetsTwo_iff [DecidableEq 𝓩] {s : Finset 𝓩} (X : Multiset 𝓩)
+    : X ∈ toMultisetsTwo s ↔ X.toFinset ⊆ s ∧ X.card = 2 := by
   simp [toMultisetsTwo]
   constructor
   · intro h
@@ -149,8 +149,8 @@ def toMultisetsThree [DecidableEq 𝓩] (s : Finset 𝓩) : Multiset (Multiset �
   X1 + X2 + X3
 
 @[simp]
-lemma mem_toMultisetsThree_iff [DecidableEq 𝓩] {s : Finset 𝓩} (X : Multiset 𝓩) :
-    X ∈ toMultisetsThree s ↔ X.toFinset ⊆ s ∧ X.card = 3 := by
+lemma mem_toMultisetsThree_iff [DecidableEq 𝓩] {s : Finset 𝓩} (X : Multiset 𝓩)
+    : X ∈ toMultisetsThree s ↔ X.toFinset ⊆ s ∧ X.card = 3 := by
   simp [toMultisetsThree]
   constructor
   · intro h
@@ -208,15 +208,17 @@ open PotentialTerm
 
 variable {𝓩 : Type} [DecidableEq 𝓩] [AddCommGroup 𝓩]
 
-/-- The multiset of all charges within `ofFinset S5 S10` which minimally allow the
-  potential term `T`. -/
-def minimallyAllowsTermsOfFinset (S5 S10 : Finset 𝓩) :
-    (T : PotentialTerm) → Multiset (ChargeSpectrum 𝓩)
+/--
+The multiset of all charges within `ofFinset S5 S10` which minimally allow the
+potential term `T`.
+-/
+def minimallyAllowsTermsOfFinset (S5 S10 : Finset 𝓩)
+    : (T : PotentialTerm) → Multiset (ChargeSpectrum 𝓩)
   | μ =>
     let SqHd := S5.val
     let SqHu := S5.val
     let prod := SqHd ×ˢ (SqHu)
-    let Filt := prod.filter (fun x => - x.1 + x.2 = 0)
+    let Filt := prod.filter (fun x => -x.1 + x.2 = 0)
     (Filt.map (fun x => ⟨x.1, x.2, ∅, ∅⟩))
   | K2 =>
     let SqHd := S5.val
@@ -229,7 +231,7 @@ def minimallyAllowsTermsOfFinset (S5 S10 : Finset 𝓩) :
     let Q5 := toMultisetsOne S5
     let Q10 := toMultisetsTwo S10
     let Prod := Q5 ×ˢ Q10
-    let Filt := Prod.filter (fun x => - x.1.sum + x.2.sum = 0)
+    let Filt := Prod.filter (fun x => -x.1.sum + x.2.sum = 0)
     (Filt.map (fun x => ⟨none, none, x.1.toFinset, x.2.toFinset⟩))
   | W4 =>
     let SqHd := S5.val
@@ -242,7 +244,7 @@ def minimallyAllowsTermsOfFinset (S5 S10 : Finset 𝓩) :
     let SqHu := S5.val
     let Q5 := toMultisetsTwo S5
     let prod := SqHu ×ˢ Q5
-    let Filt := prod.filter (fun x => - 2 • x.1 + x.2.sum = 0)
+    let Filt := prod.filter (fun x => -2 • x.1 + x.2.sum = 0)
     (Filt.map (fun x => ⟨none, x.1, x.2.toFinset, ∅⟩))
   | W2 =>
     let SqHd := S5.val
@@ -255,8 +257,8 @@ def minimallyAllowsTermsOfFinset (S5 S10 : Finset 𝓩) :
     let Q10 := toMultisetsThree S10
     let Prod := Q5 ×ˢ Q10
     let Filt := Prod.filter (fun x => x.1.sum + x.2.sum = 0)
-    (Filt.map (fun x =>
-      ⟨none, none, x.1.toFinset, x.2.toFinset⟩)).filter fun x => MinimallyAllowsTerm x W1
+    (Filt.map (fun x => ⟨none, none, x.1.toFinset, x.2.toFinset⟩)).filter fun x =>
+      MinimallyAllowsTerm x W1
   | Λ =>
     let Q5 := toMultisetsTwo S5
     let Q10 := toMultisetsOne S10
@@ -267,13 +269,13 @@ def minimallyAllowsTermsOfFinset (S5 S10 : Finset 𝓩) :
     let SqHu := S5.val
     let Q5 := toMultisetsOne S5
     let prod := SqHu ×ˢ Q5
-    let Filt := prod.filter (fun x => - x.1 + x.2.sum = 0)
+    let Filt := prod.filter (fun x => -x.1 + x.2.sum = 0)
     (Filt.map (fun x => ⟨none, x.1, x.2.toFinset, ∅⟩))
   | topYukawa =>
     let SqHu := S5.val
     let Q10 := toMultisetsTwo S10
     let prod := SqHu ×ˢ Q10
-    let Filt := prod.filter (fun x => - x.1 + x.2.sum = 0)
+    let Filt := prod.filter (fun x => -x.1 + x.2.sum = 0)
     (Filt.map (fun x => ⟨none, x.1, ∅, x.2.toFinset⟩))
   | bottomYukawa =>
     let SqHd := S5.val
@@ -281,7 +283,7 @@ def minimallyAllowsTermsOfFinset (S5 S10 : Finset 𝓩) :
     let Q10 := toMultisetsOne S10
     let prod := SqHd ×ˢ (Q5 ×ˢ Q10)
     let Filt := prod.filter (fun x => x.1 + x.2.1.sum + x.2.2.sum = 0)
-    (Filt.map (fun x => ⟨x.1, none,x.2.1.toFinset, x.2.2.toFinset⟩))
+    (Filt.map (fun x => ⟨x.1, none, x.2.1.toFinset, x.2.2.toFinset⟩))
 
 /-!
 
@@ -293,12 +295,12 @@ in the sets `S5` and `S10`.
 
 -/
 
-lemma mem_ofFinset_of_mem_minimallyAllowsTermOfFinset {S5 S10 : Finset 𝓩} {T : PotentialTerm}
-    {x : ChargeSpectrum 𝓩} (hx : x ∈ minimallyAllowsTermsOfFinset S5 S10 T) :
-    x ∈ ofFinset S5 S10 := by
+lemma mem_ofFinset_of_mem_minimallyAllowsTermOfFinset
+    {S5 S10 : Finset 𝓩} {T : PotentialTerm} {x : ChargeSpectrum 𝓩}
+    (hx : x ∈ minimallyAllowsTermsOfFinset S5 S10 T)
+    : x ∈ ofFinset S5 S10 := by
   cases T
-  all_goals
-    simp [minimallyAllowsTermsOfFinset] at hx
+  all_goals simp [minimallyAllowsTermsOfFinset] at hx
   case' W1 | W2 => have hx := hx.1
   case' μ | β | W1 | W2 | W3 | K1 | topYukawa | Λ => obtain ⟨a, b, h, rfl⟩ := hx
   case' bottomYukawa | K2 | W4 => obtain ⟨a, b, c, h, rfl⟩ := hx
@@ -309,19 +311,14 @@ lemma mem_ofFinset_of_mem_minimallyAllowsTermOfFinset {S5 S10 : Finset 𝓩} {T 
   case' W1 =>
     obtain ⟨q51, rfl⟩ := h.1.1.2
     obtain ⟨q101, q102, q103, rfl⟩ := h.1.2.2
-  case' W2 =>
-    obtain ⟨q101, q102, q103, rfl⟩ := h.1.2.2
-  case' W3 =>
-    obtain ⟨q51, q52, rfl⟩ := h.1.2.2
-  case' W4 =>
-    obtain ⟨q51, rfl⟩ := h.1.2.2.2
+  case' W2 => obtain ⟨q101, q102, q103, rfl⟩ := h.1.2.2
+  case' W3 => obtain ⟨q51, q52, rfl⟩ := h.1.2.2
+  case' W4 => obtain ⟨q51, rfl⟩ := h.1.2.2.2
   case' K1 =>
     obtain ⟨q51, rfl⟩ := h.1.1.2
     obtain ⟨q101, q102, rfl⟩ := h.1.2.2
-  case' K2 =>
-    obtain ⟨q101, rfl⟩ := h.1.2.2.2
-  case' topYukawa =>
-    obtain ⟨q101, q102, rfl⟩ := h.1.2.2
+  case' K2 => obtain ⟨q101, rfl⟩ := h.1.2.2.2
+  case' topYukawa => obtain ⟨q101, q102, rfl⟩ := h.1.2.2
   case' bottomYukawa =>
     obtain ⟨q51, rfl⟩ := h.1.2.1.2
     rw [Multiset.card_eq_one] at h
@@ -329,15 +326,14 @@ lemma mem_ofFinset_of_mem_minimallyAllowsTermOfFinset {S5 S10 : Finset 𝓩} {T 
   case' Λ =>
     obtain ⟨q101, rfl⟩ := h.1.2.2
     obtain ⟨q51, q52, rfl⟩ := h.1.1.2
-  case' β =>
-    obtain ⟨q51, rfl⟩ := h.1.2.2
+  case' β => obtain ⟨q51, rfl⟩ := h.1.2.2
   all_goals
     rw [mem_ofFinset_iff]
     simp_all
 
-lemma minimallyAllowsTermOfFinset_subset_ofFinset {S5 S10 : Finset 𝓩} {T : PotentialTerm} :
-    minimallyAllowsTermsOfFinset S5 S10 T ⊆ (ofFinset S5 S10).val :=
-  fun _ hx => Finset.mem_val.mpr (mem_ofFinset_of_mem_minimallyAllowsTermOfFinset hx)
+lemma minimallyAllowsTermOfFinset_subset_ofFinset {S5 S10 : Finset 𝓩} {T : PotentialTerm}
+    : minimallyAllowsTermsOfFinset S5 S10 T ⊆ (ofFinset S5 S10).val := fun _ hx =>
+  Finset.mem_val.mpr (mem_ofFinset_of_mem_minimallyAllowsTermOfFinset hx)
 
 /-!
 
@@ -358,12 +354,12 @@ We show that every element of `minimallyAllowsTermsOfFinset S5 S10 T` is of the 
 `allowsTermForm a b c T` for some `a`, `b` and `c`.
 
 -/
-lemma eq_allowsTermForm_of_mem_minimallyAllowsTermOfFinset {S5 S10 : Finset 𝓩} {T : PotentialTerm}
-    {x : ChargeSpectrum 𝓩} (hx : x ∈ minimallyAllowsTermsOfFinset S5 S10 T) :
-    ∃ a b c, x = allowsTermForm a b c T := by
+lemma eq_allowsTermForm_of_mem_minimallyAllowsTermOfFinset
+    {S5 S10 : Finset 𝓩} {T : PotentialTerm} {x : ChargeSpectrum 𝓩}
+    (hx : x ∈ minimallyAllowsTermsOfFinset S5 S10 T)
+    : ∃ a b c, x = allowsTermForm a b c T := by
   cases T
-  all_goals
-    simp [minimallyAllowsTermsOfFinset] at hx
+  all_goals simp [minimallyAllowsTermsOfFinset] at hx
   case μ =>
     obtain ⟨a, b, ⟨⟨ha, hb⟩, hsum⟩, rfl⟩ := hx
     simp_all [allowsTermForm]
@@ -431,9 +427,10 @@ We show that every element of `minimallyAllowsTermsOfFinset S5 S10 T` allows the
 
 -/
 
-lemma allowsTerm_of_mem_minimallyAllowsTermOfFinset {S5 S10 : Finset 𝓩} {T : PotentialTerm}
-    {x : ChargeSpectrum 𝓩} (hx : x ∈ minimallyAllowsTermsOfFinset S5 S10 T) :
-    x.AllowsTerm T := by
+lemma allowsTerm_of_mem_minimallyAllowsTermOfFinset
+    {S5 S10 : Finset 𝓩} {T : PotentialTerm} {x : ChargeSpectrum 𝓩}
+    (hx : x ∈ minimallyAllowsTermsOfFinset S5 S10 T)
+    : x.AllowsTerm T := by
   obtain ⟨a, b, c, rfl⟩ := eq_allowsTermForm_of_mem_minimallyAllowsTermOfFinset hx
   exact allowsTermForm_allowsTerm
 
@@ -446,10 +443,10 @@ We make the above condition stronger, showing that every element of
 
 -/
 
-lemma minimallyAllowsTerm_of_mem_minimallyAllowsTermOfFinset {S5 S10 : Finset 𝓩}
-    {T : PotentialTerm} {x : ChargeSpectrum 𝓩}
-    (hx : x ∈ minimallyAllowsTermsOfFinset S5 S10 T) :
-    x.MinimallyAllowsTerm T := by
+lemma minimallyAllowsTerm_of_mem_minimallyAllowsTermOfFinset
+    {S5 S10 : Finset 𝓩} {T : PotentialTerm} {x : ChargeSpectrum 𝓩}
+    (hx : x ∈ minimallyAllowsTermsOfFinset S5 S10 T)
+    : x.MinimallyAllowsTerm T := by
   by_cases hT : T ≠ W1 ∧ T ≠ W2
   · obtain ⟨a, b, c, rfl⟩ := eq_allowsTermForm_of_mem_minimallyAllowsTermOfFinset hx
     exact allowsTermForm_minimallyAllowsTerm hT
@@ -466,23 +463,20 @@ We show that every charge spectra which minimally allows term `T` and has charge
 in the sets `S5` and `S10` is in `minimallyAllowsTermsOfFinset S5 S10 T`.
 
 -/
-lemma mem_minimallyAllowsTermOfFinset_of_minimallyAllowsTerm {S5 S10 : Finset 𝓩}
-    {T : PotentialTerm} (x : ChargeSpectrum 𝓩) (h : x.MinimallyAllowsTerm T)
-    (hx : x ∈ ofFinset S5 S10) :
-    x ∈ minimallyAllowsTermsOfFinset S5 S10 T := by
+lemma mem_minimallyAllowsTermOfFinset_of_minimallyAllowsTerm
+    {S5 S10 : Finset 𝓩} {T : PotentialTerm}
+    (x : ChargeSpectrum 𝓩) (h : x.MinimallyAllowsTerm T) (hx : x ∈ ofFinset S5 S10)
+    : x ∈ minimallyAllowsTermsOfFinset S5 S10 T := by
   obtain ⟨a, b, c, rfl⟩ := eq_allowsTermForm_of_minimallyAllowsTerm h
   cases T
   all_goals
     simp [allowsTermForm, minimallyAllowsTermsOfFinset]
     rw [mem_ofFinset_iff] at hx
-  case μ =>
-    simp_all [allowsTermForm]
-  case β =>
-    exact ⟨{a}, by simp_all [allowsTermForm]⟩
-  case Λ =>
-    exact ⟨{a, b}, {- a - b}, by simp_all [allowsTermForm]⟩
+  case μ => simp_all [allowsTermForm]
+  case β => exact ⟨{a}, by simp_all [allowsTermForm]⟩
+  case Λ => exact ⟨{a, b}, {-a - b}, by simp_all [allowsTermForm]⟩
   case W1 =>
-    refine ⟨⟨{- a - b - c}, {a, b, c}, ?_⟩, h⟩
+    refine ⟨⟨{-a - b - c}, {a, b, c}, ?_⟩, h⟩
     simp_all [allowsTermForm]
     abel
   case W2 =>
@@ -493,16 +487,11 @@ lemma mem_minimallyAllowsTermOfFinset_of_minimallyAllowsTerm {S5 S10 : Finset �
     use {b, - b - 2 • a}
     simp_all [allowsTermForm]
     abel
-  case W4 =>
-    exact ⟨{c}, by simp_all [allowsTermForm]⟩
-  case K1 =>
-    exact ⟨{-a}, {b, - a - b}, by simp_all [allowsTermForm]⟩
-  case K2 =>
-    exact ⟨{- a - b}, by simp_all [allowsTermForm]⟩
-  case topYukawa =>
-    exact ⟨{b, - a - b}, by simp_all [allowsTermForm]⟩
-  case bottomYukawa =>
-    exact ⟨{b}, {- a - b}, by simp_all [allowsTermForm]⟩
+  case W4 => exact ⟨{c}, by simp_all [allowsTermForm]⟩
+  case K1 => exact ⟨{-a}, {b, -a - b}, by simp_all [allowsTermForm]⟩
+  case K2 => exact ⟨{-a - b}, by simp_all [allowsTermForm]⟩
+  case topYukawa => exact ⟨{b, -a - b}, by simp_all [allowsTermForm]⟩
+  case bottomYukawa => exact ⟨{b}, {-a - b}, by simp_all [allowsTermForm]⟩
 
 /-!
 
@@ -515,11 +504,11 @@ it minimally allows the term `T`, provided it is in `ofFinset S5 S10`.
 -/
 
 lemma minimallyAllowsTerm_iff_mem_minimallyAllowsTermOfFinset
-    {S5 S10 : Finset 𝓩} {T : PotentialTerm}
-    {x : ChargeSpectrum 𝓩} (hx : x ∈ ofFinset S5 S10) :
-    x.MinimallyAllowsTerm T ↔ x ∈ minimallyAllowsTermsOfFinset S5 S10 T :=
-  ⟨fun h => mem_minimallyAllowsTermOfFinset_of_minimallyAllowsTerm x h hx,
-    minimallyAllowsTerm_of_mem_minimallyAllowsTermOfFinset⟩
+    {S5 S10 : Finset 𝓩} {T : PotentialTerm} {x : ChargeSpectrum 𝓩} (hx : x ∈ ofFinset S5 S10)
+    : x.MinimallyAllowsTerm T ↔ x ∈ minimallyAllowsTermsOfFinset S5 S10 T := ⟨
+  fun h => mem_minimallyAllowsTermOfFinset_of_minimallyAllowsTerm x h hx,
+  minimallyAllowsTerm_of_mem_minimallyAllowsTermOfFinset
+⟩
 
 /-!
 
@@ -535,13 +524,13 @@ We show two other properties of `minimallyAllowsTermsOfFinset`.
 
 -/
 
-lemma minimallyAllowsTermOfFinset_subset_of_subset {S5 S5' S10 S10' : Finset 𝓩} {T : PotentialTerm}
-    (h5 : S5' ⊆ S5) (h10 : S10' ⊆ S10) :
-    minimallyAllowsTermsOfFinset S5' S10' T ⊆ minimallyAllowsTermsOfFinset S5 S10 T := by
+lemma minimallyAllowsTermOfFinset_subset_of_subset
+    {S5 S5' S10 S10' : Finset 𝓩} {T : PotentialTerm} (h5 : S5' ⊆ S5) (h10 : S10' ⊆ S10)
+    : minimallyAllowsTermsOfFinset S5' S10' T ⊆ minimallyAllowsTermsOfFinset S5 S10 T := by
   intro x hx
   have h1 : x ∈ ofFinset S5' S10' := mem_ofFinset_of_mem_minimallyAllowsTermOfFinset hx
-  rw [← minimallyAllowsTerm_iff_mem_minimallyAllowsTermOfFinset
-    (ofFinset_subset_of_subset h5 h10 h1)]
+  rw [← minimallyAllowsTerm_iff_mem_minimallyAllowsTermOfFinset (ofFinset_subset_of_subset h5 h10
+    h1)]
   exact (minimallyAllowsTerm_iff_mem_minimallyAllowsTermOfFinset h1).mpr hx
 
 /-!
@@ -555,8 +544,8 @@ phenomenologically constrained.
 
 lemma not_isPhenoConstrained_of_minimallyAllowsTermsOfFinset_topYukawa
     {S5 S10 : Finset 𝓩} {x : ChargeSpectrum 𝓩}
-    (hx : x ∈ minimallyAllowsTermsOfFinset S5 S10 topYukawa) :
-    ¬ x.IsPhenoConstrained := by
+    (hx : x ∈ minimallyAllowsTermsOfFinset S5 S10 topYukawa)
+    : ¬x.IsPhenoConstrained := by
   simp [minimallyAllowsTermsOfFinset] at hx
   obtain ⟨qHu, Q10, h1, rfl⟩ := hx
   simp [IsPhenoConstrained, AllowsTerm, mem_ofPotentialTerm_iff_mem_ofPotentialTerm,

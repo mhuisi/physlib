@@ -30,9 +30,11 @@ constitute a choice being made.
 
 @[expose] public section
 
-/-- The type `TimeMan` represents the time manifold.
-  Mathematically `TimeMan` is a manifold diffeomorphic to `ℝ` with an orientation but no additional
-  structure. -/
+/--
+The type `TimeMan` represents the time manifold.
+Mathematically `TimeMan` is a manifold diffeomorphic to `ℝ` with an orientation but no additional
+structure.
+-/
 structure TimeMan where
   /-- The choice of a map from `TimeMan` to `ℝ`. -/
   val : ℝ
@@ -48,17 +50,16 @@ of map `TimeMan.val`.
 
 -/
 
-/-- The instance of a topological space on `TimeMan` induced by the map `TimeMan.val`. s-/
-instance : TopologicalSpace TimeMan := TopologicalSpace.induced TimeMan.val
-  PseudoMetricSpace.toUniformSpace.toTopologicalSpace
+/-- The instance of a topological space on `TimeMan` induced by the map `TimeMan.val`. s -/
+instance : TopologicalSpace TimeMan :=
+  TopologicalSpace.induced TimeMan.val PseudoMetricSpace.toUniformSpace.toTopologicalSpace
 
 lemma val_surjective : Function.Surjective TimeMan.val := by
   intro t
   use { val := t }
 
 @[simp]
-lemma val_range : Set.range val = Set.univ := by
-  refine Set.range_eq_univ.mpr val_surjective
+lemma val_range : Set.range val = Set.univ := by refine Set.range_eq_univ.mpr val_surjective
 
 lemma val_inducing : Topology.IsInducing TimeMan.val where
   eq_induced := rfl
@@ -71,12 +72,10 @@ lemma val_injective : Function.Injective TimeMan.val := by
 
 lemma val_isOpenEmbedding : Topology.IsOpenEmbedding TimeMan.val where
   eq_induced := rfl
-  isOpen_range := by
-    simp
+  isOpen_range := by simp
   injective := val_injective
 
-lemma isOpen_iff {s : Set TimeMan} :
-    IsOpen s ↔ IsOpen (TimeMan.val '' s) :=
+lemma isOpen_iff {s : Set TimeMan} : IsOpen s ↔ IsOpen (TimeMan.val '' s) :=
   Topology.IsOpenEmbedding.isOpen_iff_image_isOpen val_isOpenEmbedding
 
 /-- The choice of map `Time.val` from `TimeMan` to `ℝ` as a homeomorphism. -/
@@ -110,10 +109,9 @@ def valHomeomorphism : TimeMan ≃ₜ ℝ where
 
 /-- The structure of a charted space on `TimeMan` -/
 instance : ChartedSpace ℝ TimeMan where
-  atlas := { valHomeomorphism.toOpenPartialHomeomorph }
+  atlas := {valHomeomorphism.toOpenPartialHomeomorph}
   chartAt _ := valHomeomorphism.toOpenPartialHomeomorph
-  mem_chart_source := by
-    simp
+  mem_chart_source := by simp
   chart_mem_atlas := by
     intro x
     simp

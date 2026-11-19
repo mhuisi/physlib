@@ -84,8 +84,10 @@ motion and solutions are by definition those of `NortonDome.Basic`.
 
 -/
 
-/-- The Norton dome as a conservative Newtonian system on the Euclidean lift of the arc
-  length. -/
+/--
+The Norton dome as a conservative Newtonian system on the Euclidean lift of the arc
+length.
+-/
 noncomputable def toNewtonianSystem : NewtonianSystem (EuclideanSpace ℝ (Fin 1)) where
   m := S.m
   potential := S.potentialEnergy
@@ -96,12 +98,14 @@ noncomputable def toNewtonianSystem : NewtonianSystem (EuclideanSpace ℝ (Fin 1
 lemma toNewtonianSystem_force : S.toNewtonianSystem.force = S.force := rfl
 
 /-- The equation of motion of the dome as a Newtonian system is its equation of motion. -/
-lemma toNewtonianSystem_equationOfMotion_iff (r : Time → EuclideanSpace ℝ (Fin 1)) :
-    S.toNewtonianSystem.EquationOfMotion r ↔ S.EquationOfMotion r := Iff.rfl
+lemma toNewtonianSystem_equationOfMotion_iff (r : Time → EuclideanSpace ℝ (Fin 1))
+    : S.toNewtonianSystem.EquationOfMotion r ↔ S.EquationOfMotion r :=
+  Iff.rfl
 
 /-- The solutions of the dome as a Newtonian system are its solutions. -/
-lemma toNewtonianSystem_isSolution_iff (r : Time → EuclideanSpace ℝ (Fin 1)) :
-    S.toNewtonianSystem.IsSolution r ↔ S.IsSolution r := Iff.rfl
+lemma toNewtonianSystem_isSolution_iff (r : Time → EuclideanSpace ℝ (Fin 1))
+    : S.toNewtonianSystem.IsSolution r ↔ S.IsSolution r :=
+  Iff.rfl
 
 /-!
 
@@ -120,18 +124,21 @@ apex, where the force vanishes, and at the instant `2` it is off the apex.
 -/
 
 /-- The Norton dome is not deterministic. -/
-lemma not_isDeterministic : ¬ S.toNewtonianSystem.IsDeterministic := by
+lemma not_isDeterministic : ¬S.toNewtonianSystem.IsDeterministic := by
   intro h
   obtain ⟨x, y, hx, hy, h0, hv, hne⟩ := S.exists_isSolution_ne
   exact hne (h x y hx hy 0 h0 hv)
 
-/-- The Norton dome violates Newton's first law, read as a statement about intervals of time:
-  a particle at rest at the apex, where the force vanishes, need not stay there. -/
-lemma not_satisfiesFirstLaw : ¬ S.toNewtonianSystem.SatisfiesFirstLaw := by
+/--
+The Norton dome violates Newton's first law, read as a statement about intervals of time:
+a particle at rest at the apex, where the force vanishes, need not stay there.
+-/
+lemma not_satisfiesFirstLaw : ¬S.toNewtonianSystem.SatisfiesFirstLaw := by
   intro h
-  have h2 := h (solution 1) (S.solution_isSolution 1) 0
-    (by rw [toNewtonianSystem_force, solution_zero zero_le_one, force_zero])
-    (deriv_solution_zero zero_le_one) ((2 : ℝ) : Time)
+  have h2 :=
+    h (solution 1) (S.solution_isSolution 1) 0
+      (by rw [toNewtonianSystem_force, solution_zero zero_le_one, force_zero])
+      (deriv_solution_zero zero_le_one) ((2 : ℝ) : Time)
   have hpos := solution_apply_pos 1 (t := ((2 : ℝ) : Time)) (by rw [Time.realCast_val]; norm_num)
   rw [h2, solution_zero zero_le_one] at hpos
   simp at hpos
@@ -146,9 +153,11 @@ they fail too.
 
 -/
 
-/-- The force of the Norton dome is not locally Lipschitz: it is not Lipschitz on any
-  neighbourhood of the apex. -/
-lemma not_hasLocallyLipschitzForce : ¬ S.toNewtonianSystem.HasLocallyLipschitzForce := by
+/--
+The force of the Norton dome is not locally Lipschitz: it is not Lipschitz on any
+neighbourhood of the apex.
+-/
+lemma not_hasLocallyLipschitzForce : ¬S.toNewtonianSystem.HasLocallyLipschitzForce := by
   intro h
   obtain ⟨K, t, ht, hKt⟩ := h 0
   obtain ⟨ε, hε, hball⟩ := Metric.mem_nhds_iff.mp ht
@@ -156,12 +165,12 @@ lemma not_hasLocallyLipschitzForce : ¬ S.toNewtonianSystem.HasLocallyLipschitzF
     (hKt.mono ((Metric.closedBall_subset_ball (by linarith)).trans hball))
 
 /-- The force of the Norton dome is not Lipschitz. -/
-lemma not_hasLipschitzForce : ¬ S.toNewtonianSystem.HasLipschitzForce :=
-  fun h => S.not_hasLocallyLipschitzForce h.hasLocallyLipschitzForce
+lemma not_hasLipschitzForce : ¬S.toNewtonianSystem.HasLipschitzForce := fun h =>
+  S.not_hasLocallyLipschitzForce h.hasLocallyLipschitzForce
 
 /-- The potential of the Norton dome is not `C²`. -/
-lemma not_hasC2Potential : ¬ S.toNewtonianSystem.HasC2Potential :=
-  fun h => S.not_hasLocallyLipschitzForce h.hasLocallyLipschitzForce
+lemma not_hasC2Potential : ¬S.toNewtonianSystem.HasC2Potential := fun h =>
+  S.not_hasLocallyLipschitzForce h.hasLocallyLipschitzForce
 
 /-!
 
@@ -169,13 +178,17 @@ lemma not_hasC2Potential : ¬ S.toNewtonianSystem.HasC2Potential :=
 
 -/
 
-/-- Norton's claim: there is a conservative Newtonian system, with a continuous force,
-  which is not deterministic. The witness is the dome with unit mass and unit gravitational
-  acceleration. -/
-lemma exists_continuous_force_not_isDeterministic :
-    ∃ N : NewtonianSystem (EuclideanSpace ℝ (Fin 1)), Continuous N.force ∧ ¬ N.IsDeterministic :=
-  ⟨(⟨1, 1, one_pos, one_pos⟩ : NortonDome).toNewtonianSystem, force_continuous _,
-    not_isDeterministic _⟩
+/--
+Norton's claim: there is a conservative Newtonian system, with a continuous force,
+which is not deterministic. The witness is the dome with unit mass and unit gravitational
+acceleration.
+-/
+lemma exists_continuous_force_not_isDeterministic
+    : ∃ N : NewtonianSystem (EuclideanSpace ℝ (Fin 1)), Continuous N.force ∧ ¬N.IsDeterministic := ⟨
+  (⟨1, 1, one_pos, one_pos⟩ : NortonDome).toNewtonianSystem,
+  force_continuous _,
+  not_isDeterministic _
+⟩
 
 /-!
 

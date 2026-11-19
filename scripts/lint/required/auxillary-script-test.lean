@@ -48,7 +48,9 @@ abbrev Check := ExceptT (Array String) IO
 def fail {α} (msg : String) : Check α := throw #[msg]
 
 /-- Fails the check with the given message unless `b` holds. -/
-def ensure (b : Bool) (msg : String) : Check Unit := unless b do fail msg
+def ensure (b : Bool) (msg : String) : Check Unit :=
+  unless b do
+    fail msg
 
 /-- The last `n` lines of a string, indented, used to show the output of a failing script. -/
 def tailLines (s : String) (n : Nat := 30) : String :=
@@ -58,46 +60,65 @@ def tailLines (s : String) (n : Nat := 30) : String :=
   let header := if dropped > 0 then s!"    ... ({dropped} lines omitted)\n" else ""
   header ++ "\n".intercalate (lines.map ("    " ++ ·))
 
-/-- The context in which scripts are run: the root of the repository, and the Lean toolchain
+/--
+The context in which scripts are run: the root of the repository, and the Lean toolchain
 of the repository. The toolchain must be passed explicitly, since `elan` otherwise chooses
-the toolchain from the (temporary) working directory. -/
+the toolchain from the (temporary) working directory.
+-/
 structure Ctx where
   /-- The root of the repository. -/
   root : FilePath
   /-- The contents of `lean-toolchain`. -/
   toolchain : String
 
-/-- Runs `lake exe <exe> <args>` for the repository at `ctx.root`, with working directory `cwd`.
-Fails if the script exits with a non-zero exit code or panics. -/
-def runLakeExe (ctx : Ctx) (cwd : FilePath) (exe : String) (args : Array String) :
-    Check IO.Process.Output := do
+/--
+Runs `lake exe <exe> <args>` for the repository at `ctx.root`, with working directory `cwd`.
+Fails if the script exits with a non-zero exit code or panics.
+-/
+def runLakeExe (ctx : Ctx) (cwd : FilePath) (exe : String) (args : Array String)
+    : Check IO.Process.Output := do
   let cmdStr := " ".intercalate ("lake exe" :: exe :: args.toList)
-  let out ← IO.Process.output {
-    cmd := "lake"
-    args := #["-d", ctx.root.toString, "exe", exe] ++ args
-    cwd := cwd
-    env := #[("ELAN_TOOLCHAIN", some ctx.toolchain)] }
+  let out ←
+    IO.Process.output {
+      cmd := "lake"
+      args := #["-d", ctx.root.toString, "exe", exe] ++ args
+      cwd := cwd
+      env := #[("ELAN_TOOLCHAIN", some ctx.toolchain)]
+    }
   if out.exitCode ≠ 0 then
-    fail s!"`{cmdStr}` exited with code {out.exitCode}.\n  stderr:\n{tailLines out.stderr}\n  \
-      stdout:\n{tailLines out.stdout}"
+    fail s!"`{cmdStr}` exited with code {out.exitCode}.\
+      \n  stderr:\
+      \n{tailLines out.stderr}\n  \
+      stdout:\
+      \n{tailLines out.stdout}"
   if (out.stderr.splitOn "PANIC").length > 1 then
-    fail s!"`{cmdStr}` panicked.\n  stderr:\n{tailLines out.stderr}"
+    fail s!"`{cmdStr}` panicked.\
+      \n  stderr:\
+      \n{tailLines out.stderr}"
   return out
 
-/-- The source folders, which some scripts read through paths relative to the working
-directory (e.g. `stats` counts the lines of `./Physlib/...`). -/
+/--
+The source folders, which some scripts read through paths relative to the working
+directory (e.g. `stats` counts the lines of `./Physlib/...`).
+-/
 def sourceDirs : List String := ["Physlib", "PhyslibAlpha", "QuantumInfo"]
 
-/-- Prepares the working directory `cwd` to look like the repository to the scripts: it makes
+/--
+Prepares the working directory `cwd` to look like the repository to the scripts: it makes
 `docs/`, which `stats` and `informal` expect to exist, and symlinks the source folders.
-`IO.FS.removeDirAll` does not follow symlinks, so deleting `cwd` leaves the sources intact. -/
+`IO.FS.removeDirAll` does not follow symlinks, so deleting `cwd` leaves the sources intact.
+-/
 def setUpWorkingDir (ctx : Ctx) (cwd : FilePath) : Check Unit := do
   IO.FS.createDirAll (cwd / "docs")
   for dir in sourceDirs do
-    let out ← IO.Process.output {
-      cmd := "ln", args := #["-s", (ctx.root / dir).toString, (cwd / dir).toString] }
+    let out ←
+      IO.Process.output {
+        cmd := "ln"
+        args := #["-s", (ctx.root / dir).toString, (cwd / dir).toString]
+      }
     if out.exitCode ≠ 0 then
-      fail s!"Could not symlink `{dir}` into the temporary directory:\n{tailLines out.stderr}"
+      fail s!"Could not symlink `{dir}` into the temporary directory:\
+        \n{tailLines out.stderr}"
 
 /-- Reads the file `dir / path`, failing with a useful message if it was not made. -/
 def readOutput (dir : FilePath) (path : String) : Check String := do
@@ -119,8 +140,10 @@ def String.countStr (s sub : String) : Nat := (s.splitOn sub).length - 1
 
 -/
 
-/-- Checks `lake exe make_tag`: it should print a single non-empty tag in the RFC 4648
-Base32 alphabet. -/
+/--
+Checks `lake exe make_tag`: it should print a single non-empty tag in the RFC 4648
+Base32 alphabet.
+-/
 def checkMakeTag (ctx : Ctx) (cwd : FilePath) : Check Unit := do
   let out ← runLakeExe ctx cwd "make_tag" #[]
   let tag := out.stdout.trimAscii.toString
@@ -128,8 +151,10 @@ def checkMakeTag (ctx : Ctx) (cwd : FilePath) : Check Unit := do
   ensure (tag.all fun c => ('A' ≤ c ∧ c ≤ 'Z') ∨ ('2' ≤ c ∧ c ≤ '7'))
     s!"`lake exe make_tag` printed `{tag}`, which is not a Base32 tag (characters `A-Z2-7`)."
 
-/-- Checks `lake exe TODO_to_yml mkFile`: it should make `docs/_data/TODO.yml`, with a
-category section and a non-empty list of TODO items each carrying a tag. -/
+/--
+Checks `lake exe TODO_to_yml mkFile`: it should make `docs/_data/TODO.yml`, with a
+category section and a non-empty list of TODO items each carrying a tag.
+-/
 def checkTODOToYml (ctx : Ctx) (cwd : FilePath) : Check Unit := do
   let out ← runLakeExe ctx cwd "TODO_to_yml" #["mkFile"]
   ensure (out.stdout.containsStr "TODOList file made.")
@@ -140,8 +165,7 @@ def checkTODOToYml (ctx : Ctx) (cwd : FilePath) : Check Unit := do
   let items := yml.countStr "\n  - file: "
   ensure (items > 0) "`docs/_data/TODO.yml` contains no TODO items."
   let tags := yml.countStr "\n    tag: "
-  ensure (tags = items)
-    s!"`docs/_data/TODO.yml` has {items} TODO items but {tags} tags."
+  ensure (tags = items) s!"`docs/_data/TODO.yml` has {items} TODO items but {tags} tags."
 
 /-- Checks `lake exe stats mkHTML`: it should print the statistics and make `docs/Stats.html`. -/
 def checkStats (ctx : Ctx) (cwd : FilePath) : Check Unit := do
@@ -153,11 +177,12 @@ def checkStats (ctx : Ctx) (cwd : FilePath) : Check Unit := do
   let html ← readOutput cwd "docs/Stats.html"
   ensure (html.containsStr "<html" && html.containsStr "</html>")
     "`docs/Stats.html` is not a complete HTML document."
-  ensure (html.containsStr "Number of Files")
-    "`docs/Stats.html` does not contain the statistics."
+  ensure (html.containsStr "Number of Files") "`docs/Stats.html` does not contain the statistics."
 
-/-- Checks `lake exe informal mkFile mkDot mkHTML`: it should make the Markdown file, the
-DOT file and the HTML page of the informal dependency graph. -/
+/--
+Checks `lake exe informal mkFile mkDot mkHTML`: it should make the Markdown file, the
+DOT file and the HTML page of the informal dependency graph.
+-/
 def checkInformal (ctx : Ctx) (cwd : FilePath) : Check Unit := do
   let out ← runLakeExe ctx cwd "informal" #["mkFile", "mkDot", "mkHTML"]
   for msg in ["Markdown file made.", "DOT file made.", "HTML file made."] do
@@ -173,13 +198,17 @@ def checkInformal (ctx : Ctx) (cwd : FilePath) : Check Unit := do
     "`docs/InformalDot.dot` is not a complete `strict digraph G { ... }`."
   ensure (dot.containsStr " -> ") "`docs/InformalDot.dot` contains no dependency edges."
   let html ← readOutput cwd "docs/InformalGraph.html"
-  ensure (html.startsWith "---\nlayout: default")
+  ensure
+    (html.startsWith "---\
+      \nlayout: default")
     "`docs/InformalGraph.html` is missing its Jekyll front matter."
   ensure (html.containsStr "InformalDot.dot")
     "`docs/InformalGraph.html` does not load `InformalDot.dot`."
 
-/-- Checks `lake exe api_map_index mkFile`: it should make `docs/_data/APIMap.yml`, with a
-`Total:` section whose map count matches the non-zero number of maps listed under `APIMap:`. -/
+/--
+Checks `lake exe api_map_index mkFile`: it should make `docs/_data/APIMap.yml`, with a
+`Total:` section whose map count matches the non-zero number of maps listed under `APIMap:`.
+-/
 def checkAPIMapIndex (ctx : Ctx) (cwd : FilePath) : Check Unit := do
   let out ← runLakeExe ctx cwd "api_map_index" #["mkFile"]
   ensure (out.stdout.containsStr "APIMap file made for")
@@ -204,7 +233,8 @@ def tests : List (String × (Ctx → FilePath → Check Unit)) := [
   ("lake exe TODO_to_yml mkFile", checkTODOToYml),
   ("lake exe stats mkHTML", checkStats),
   ("lake exe informal mkFile mkDot mkHTML", checkInformal),
-  ("lake exe api_map_index mkFile", checkAPIMapIndex)]
+  ("lake exe api_map_index mkFile", checkAPIMapIndex)
+]
 
 def main (_ : List String) : IO UInt32 := do
   let root ← IO.currentDir
@@ -212,7 +242,7 @@ def main (_ : List String) : IO UInt32 := do
     IO.eprintln "Error: run `lake exe auxillary_script_test` from the root of the repository."
     return 1
   let toolchain := (← IO.FS.readFile (root / "lean-toolchain")).trimAscii.toString
-  let ctx : Ctx := {root, toolchain}
+  let ctx : Ctx := { root, toolchain }
   let mut failures : Array String := #[]
   for ((name, check), i) in tests.zipIdx 1 do
     println! "\x1b[36m({i}/{tests.length}) {name}\x1b[0m"
